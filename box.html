@@ -1,0 +1,634 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <title>Stable Grid - 6x3 YT Gallery</title>
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      background: linear-gradient(to bottom right, #1e2023, #3c3f41);
+      font-family: Arial, sans-serif;
+      overflow: hidden; /* הכל מוצג ב-canvas */
+    }
+    #canvas {
+      display: block;
+    }
+    #eventInfo, #eventLog {
+      position: absolute;
+      top: 10px;
+      left: 10px;
+      color: #fff;
+      background: rgba(0,0,0,0.5);
+      padding: 5px 10px;
+      font-size: 14px;
+      border-radius: 5px;
+      font-family: Arial, sans-serif;
+    }
+    #eventInfo {
+      display: none;
+    }
+    #eventLog {
+      top: 50px;
+      width: 220px;
+      max-height: 300px;
+      overflow-y: auto;
+      display: none; /* H toggles it */
+    }
+  </style>
+</head>
+<body>
+
+<canvas id="canvas"></canvas>
+<div id="eventInfo"></div>
+<div id="eventLog"></div>
+
+<script>
+/***********************************************************
+ * 1) הגדרות כלליות
+ ***********************************************************/
+const canvas = document.getElementById('canvas');
+const ctx    = canvas.getContext('2d');
+canvas.width  = window.innerWidth;
+canvas.height = window.innerHeight;
+
+window.addEventListener("resize", onResize);
+function onResize() {
+  canvas.width  = window.innerWidth;
+  canvas.height = window.innerHeight;
+  groundBase    = canvas.height - 150; // נחדש
+  // נשמור מיקום קיים
+}
+
+let eventInfoDiv = document.getElementById('eventInfo');
+let eventLogDiv  = document.getElementById('eventLog');
+let logVisible   = false;
+window.addEventListener("keydown",(e)=>{
+  if(e.key.toLowerCase() === 'h'){
+    logVisible = !logVisible;
+    eventLogDiv.style.display = logVisible? 'block':'none';
+  }
+});
+const eventsList = [];
+function logEvent(msg){
+  eventsList.unshift(new Date().toLocaleTimeString() + " - " + msg);
+  if(eventsList.length>50) eventsList.pop();
+  eventLogDiv.innerHTML = eventsList.map(e=>`<div>${e}</div>`).join('');
+}
+function setCurrentEvent(e){
+  if(e==="None"){
+    eventInfoDiv.style.display="none";
+  } else {
+    eventInfoDiv.style.display="block";
+    eventInfoDiv.textContent= "אירוע: "+ e;
+    logEvent(e);
+  }
+}
+
+/***********************************************************
+ * 2) פרמטרים לפיזיקה
+ ***********************************************************/
+let cubes    = [];
+let springs  = [];
+let currentCube=null;
+let shiftX=0, shiftY=0;
+let isCompressing=false;
+
+var groundMode='flat';
+var groundBase = canvas.height - 150; 
+var waveArray=[];
+var waveDuration=4000;
+var waveStartTime=0;
+
+// אפס גרביטציה ברגיל
+var gravityVector={x:0,y:0};
+var gravityTarget={x:0,y:0};
+// רוח גלובלית
+var globalWindX=0;
+var globalWindY=0;
+
+// התנגשות
+const collisionFriction=0.8; // דחיפה בהתנגשות
+const ROWS=3; 
+const COLS=6;
+const GRID_COUNT= ROWS*COLS;
+
+/***********************************************************
+ * 3) YouTube API
+ ***********************************************************/
+const API_KEY = "AIzaSyAE49A5E6GNK8sgnCMyk9o-1W-mxJtflTI";
+let videoIds = [
+  "5Gsyh6wfl88","A-fGNkkMt6k","AI2wI_jcfyM","AJKJeldq6hs",
+  "qth1c4NUydY","scIz8HQwfGg","t4m4BzIAx5Y","6fJD9FOloKE",
+  "9YczxPgiW5M","AHfP1JhgaEY","D-tSW7tFYDM","jnhTwDfTKgo"
+];
+// אם יש פחות מ-18, אפשר להשלים עם מזהים כפולים, או להפך
+// (אתה יכול להאריך/לקצר לפי הצורך)
+
+let videoItems=[];
+
+async function fetchYouTubeData() {
+  let arr = videoIds.slice(0, GRID_COUNT); // עד 18
+  const idsParam= arr.join(",");
+  const url=`https://www.googleapis.com/youtube/v3/videos?key=${API_KEY}&id=${idsParam}&part=snippet`;
+  try{
+    let res= await fetch(url);
+    if(!res.ok) throw new Error("Network error");
+    let data= await res.json();
+    return data.items || [];
+  }catch(err){
+    console.error("שגיאה ב-YT fetch:", err);
+    return [];
+  }
+}
+
+/***********************************************************
+ * 4) מחלקות: Cube + Spring
+ ***********************************************************/
+class Cube {
+  constructor(ytObj, x, y){
+    // ממידע ה-API
+    this.ytid  = ytObj.id;
+    this.title = ytObj.snippet.title || "Video";
+    let thumbs = ytObj.snippet.thumbnails || {};
+    let best = thumbs.medium?.url || thumbs.high?.url || thumbs.default?.url || "";
+    this.thumbUrl = best;
+
+    let desc = ytObj.snippet.description || "";
+    if(desc.length>60) desc= desc.substring(0,60)+"...";
+    this.desc = desc;
+
+    // מיקום / מהירות
+    this.x=x; this.y=y;
+    this.vx= (Math.random()-0.5)*0.1; // מהירות ראשונית נמוכה
+    this.vy= (Math.random()-0.5)*0.1; 
+    this.ax=0; this.ay=0;
+
+    // מימדי כרטיס
+    this.width = 180;
+    this.height= 130;
+    this.originalWidth= this.width;
+    this.originalHeight=this.height;
+
+    // מסה
+    this.mass= 1 + Math.random()*0.5;
+    this.originalMass= this.mass;
+
+    // מצבים
+    this.isDragging=false;
+    this.isFixed=false;
+    this.isBig=false;
+
+    // איבוד אנרגיה
+    this.friction=0.9;
+    this.airResistance=0.0001;
+
+    this.color= getRandomColor();
+  }
+  applyForce(fx, fy){
+    if(!this.isFixed){
+      this.ax+= fx/ this.mass;
+      this.ay+= fy/ this.mass;
+    }
+  }
+  update(){
+    if(!this.isDragging && !this.isFixed){
+      let airX= -this.airResistance* this.vx* Math.abs(this.vx);
+      let airY= -this.airResistance* this.vy* Math.abs(this.vy);
+
+      this.vx+= this.ax + airX + globalWindX;
+      this.vy+= this.ay + airY + globalWindY;
+      this.x += this.vx;
+      this.y += this.vy;
+
+      // קרקע אם תרצה
+      let gY= getGroundY(this.x+ this.width/2);
+      if(this.y+ this.height> gY){
+        this.y= gY- this.height;
+        this.vy*= -this.friction;
+      }
+      if(this.x<0){ this.x=0; this.vx*=-this.friction;}
+      if(this.x+this.width> canvas.width){
+        this.x= canvas.width- this.width;
+        this.vx*=-this.friction;
+      }
+      if(this.y<0){ this.y=0; this.vy*=-this.friction;}
+    }
+    this.ax=0; this.ay=0;
+    // צבע לפי מהירות
+    let speed= Math.sqrt(this.vx*this.vx + this.vy*this.vy);
+    this.color= interpolateColor(speed,[100,255,100],[255,100,200]);
+  }
+  draw(){
+    ctx.fillStyle=this.color;
+    ctx.fillRect(this.x,this.y,this.width,this.height);
+
+    if(this.thumbUrl){
+      let img=new Image();
+      img.src= this.thumbUrl;
+      ctx.drawImage(img, this.x+5, this.y+5, this.width-10, this.height-30);
+    }
+    ctx.fillStyle='white';
+    ctx.font='13px Arial';
+    ctx.textAlign='left';
+    ctx.fillText(this.title, this.x+5, this.y+ this.height-10);
+  }
+  toggleFixed(){
+    this.isFixed=!this.isFixed;
+    this.mass= this.isFixed? this.mass*2 : ( this.originalMass*(this.isBig?4:1));
+  }
+  toggleSize(){
+    let cx= this.x+ this.width/2;
+    let cy= this.y+ this.height/2;
+    if(!this.isBig){
+      this.width= this.originalWidth*1.5;
+      this.height=this.originalHeight*1.5;
+      this.x= cx- this.width/2;
+      this.y= cy- this.height/2;
+      this.isBig=true;
+      this.mass= this.isFixed? this.originalMass*6 : this.originalMass*4;
+    } else {
+      this.width= this.originalWidth;
+      this.height=this.originalHeight;
+      this.x= cx- this.width/2;
+      this.y= cy- this.height/2;
+      this.isBig=false;
+      this.mass= this.isFixed? this.originalMass*2 : this.originalMass;
+    }
+  }
+}
+
+class Spring {
+  constructor(cube1, cube2, length, k, damping){
+    this.cube1= cube1;
+    this.cube2= cube2;
+    this.originalLength= length;
+    this.k= k;
+    this.damping= damping;
+    this.updateSpringParams();
+  }
+  updateSpringParams(){
+    let sf1= this.cube1.isBig?1.5:1;
+    let sf2= this.cube2.isBig?1.5:1;
+    this.length= this.originalLength* ((sf1+sf2)/2);
+
+    let avg= (this.cube1.mass+ this.cube2.mass)/2;
+    this.k= this.k/(avg*0.8); // התאמה קטנה
+    if(this.k<0.01) this.k=0.01;
+  }
+  update(){
+    let x1= this.cube1.x+ this.cube1.width/2;
+    let y1= this.cube1.y+ this.cube1.height/2;
+    let x2= this.cube2.x+ this.cube2.width/2;
+    let y2= this.cube2.y+ this.cube2.height/2;
+
+    let dx= x2- x1;
+    let dy= y2- y1;
+    let dist= Math.sqrt(dx*dx + dy*dy);
+    if(dist===0) dist=0.001;
+
+    let forceMag= (dist- this.length)* this.k;
+    let fx= (dx/dist)* forceMag;
+    let fy= (dy/dist)* forceMag;
+    fx*= (this.cube1.mass+ this.cube2.mass)/2;
+    fy*= (this.cube1.mass+ this.cube2.mass)/2;
+
+    fx-= this.damping* this.cube1.vx;
+    fy-= this.damping* this.cube1.vy;
+
+    this.cube1.applyForce(fx, fy);
+    this.cube2.applyForce(-fx, -fy);
+  }
+  draw(){
+    ctx.beginPath();
+    ctx.strokeStyle='rgba(255,255,255,0.2)';
+    ctx.moveTo(this.cube1.x+ this.cube1.width/2, this.cube1.y+ this.cube1.height/2);
+    ctx.lineTo(this.cube2.x+ this.cube2.width/2, this.cube2.y+ this.cube2.height/2);
+    ctx.stroke();
+  }
+}
+
+/***********************************************************
+ * 5) יצירת הגריד (3x6) + קפיצים לשכנים
+ ***********************************************************/
+async function initGrid() {
+  cubes=[];
+  springs=[];
+  let data = await fetchYouTubeData();
+  if(data.length>0) videoItems=data;
+  else {
+    // fallback
+    videoItems= videoIds.map(id=> ({id, snippet:{title:id}}));
+  }
+  // נגדיר (3x6)=18 מקומות. נמלא מה-API
+  // אם יש פחות: נמלא עד שיש. אם יותר, ניקח 18 ראשונים
+  let usedCount= Math.min(videoItems.length, GRID_COUNT);
+
+  // פערים אופקיים/אנכיים
+  const gapX= 220;
+  const gapY= 180;
+  // נקודת התחלה
+  const startX= (canvas.width - (COLS-1)*gapX )/2; 
+  const startY= (canvas.height- (ROWS-1)*gapY )/2;
+
+  // בונים את הקוביות
+  let idx=0;
+  for(let r=0; r<ROWS; r++){
+    for(let c=0; c<COLS; c++){
+      if(idx>=usedCount) break;
+      let vx= videoItems[idx];
+      let x= startX + c* gapX;
+      let y= startY + r* gapY;
+      // נזיז קצת רנדומלי כדי למנוע התנגשויות ראשוניות
+      x+= (Math.random()*10-5);
+      y+= (Math.random()*10-5);
+      let cube= new Cube(vx, x, y);
+      cubes.push(cube);
+      idx++;
+    }
+  }
+
+  // כעת נחבר בקפיצים שכנים (ימינה + למטה)
+  for(let r=0; r<ROWS; r++){
+    for(let c=0; c<COLS; c++){
+      let i= r*COLS+c;
+      if(i>= cubes.length) break;
+      let cA= cubes[i];
+
+      // שכן ימינה?
+      if(c< COLS-1){
+        let iR= r*COLS + (c+1);
+        if(iR< cubes.length){
+          let cB= cubes[iR];
+          // אורך= gapX
+          // k, damping, etc
+          let sp= new Spring(cA,cB, gapX, 0.05, 0.02);
+          springs.push(sp);
+        }
+      }
+      // שכן למטה?
+      if(r<ROWS-1){
+        let iD= (r+1)*COLS + c;
+        if(iD< cubes.length){
+          let cB= cubes[iD];
+          let sp= new Spring(cA,cB, gapY, 0.05, 0.02);
+          springs.push(sp);
+        }
+      }
+    }
+  }
+}
+
+/***********************************************************
+ * 6) אירועי עכבר
+ ***********************************************************/
+canvas.onmousedown=(ev)=>{
+  for(const c of cubes){
+    if(ev.clientX> c.x && ev.clientX< c.x+ c.width &&
+       ev.clientY> c.y && ev.clientY< c.y+ c.height){
+      currentCube=c;
+      shiftX= ev.clientX- c.x;
+      shiftY= ev.clientY- c.y;
+      c.isDragging=true;
+      break;
+    }
+  }
+};
+canvas.onmousemove=(ev)=>{
+  if(currentCube){
+    currentCube.x= ev.clientX- shiftX;
+    currentCube.y= ev.clientY- shiftY;
+  }
+};
+canvas.onmouseup=()=>{
+  if(currentCube){
+    currentCube.isDragging=false;
+    currentCube=null;
+  }
+};
+// דאבל-קליק -> קיבוע
+canvas.ondblclick=(ev)=>{
+  for(const c of cubes){
+    if(ev.clientX> c.x && ev.clientX< c.x+ c.width &&
+       ev.clientY> c.y && ev.clientY< c.y+ c.height){
+      c.toggleFixed();
+      break;
+    }
+  }
+};
+// קליק ימני -> שינוי גודל
+canvas.oncontextmenu=(ev)=>{
+  ev.preventDefault();
+  for(const c of cubes){
+    if(ev.clientX> c.x && ev.clientX< c.x+ c.width &&
+       ev.clientY> c.y && ev.clientY< c.y+ c.height){
+      c.toggleSize();
+      break;
+    }
+  }
+};
+
+/***********************************************************
+ * 7) שליטת מקלדת (0-G)
+ ***********************************************************/
+window.onkeydown=(ev)=>{
+  if(ev.key==="ArrowLeft"){
+    cubes.forEach(c=> c.applyForce(-5,0));
+  }
+  if(ev.key==="ArrowRight"){
+    cubes.forEach(c=> c.applyForce(5,0));
+  }
+  if(ev.key==="ArrowUp"){
+    cubes.forEach(c=> c.applyForce(0,-5));
+  }
+  if(ev.key==="ArrowDown"){
+    if(!isCompressing){
+      isCompressing=true;
+      cubes.forEach(c=> c.applyForce(0,20));
+      setTimeout(()=>{ isCompressing=false;},0);
+    }
+  }
+  // wasd
+  if(ev.key==='w'){ cubes.forEach(c=> c.applyForce(10,0)); }
+  if(ev.key==='a'){ cubes.forEach(c=> c.applyForce(0,-10)); }
+  if(ev.key==='s'){ cubes.forEach(c=> c.applyForce(-10,0)); }
+  if(ev.key==='d'){ cubes.forEach(c=> c.applyForce(0,10)); }
+};
+
+/***********************************************************
+ * 8) אירועים רנדומליים עדינים
+ ***********************************************************/
+function randomEvent(){
+  let r=Math.random();
+  if(r<0.33)   triggerWaveEvent();
+  else if(r<0.66) triggerWindEvent();
+  else          triggerGravityEvent();
+}
+function triggerWaveEvent(){
+  setCurrentEvent("גלי אדמה עדינים");
+  groundMode='wave';
+  if(waveStartTime) clearTimeout(waveStartTime);
+  waveStartTime= setTimeout(()=>{
+    groundMode='flat';
+    if(currentEvent==="גלי אדמה עדינים") setCurrentEvent("None");
+  }, waveDuration);
+}
+function triggerWindEvent(){
+  setCurrentEvent("משב רוח קל");
+  let gustCount= Math.floor(Math.random()*2)+1;
+  let duration= Math.random()*3000+1000;
+  let interval= duration/gustCount;
+  let i=0;
+  let windInt= setInterval(()=>{
+    let angle= Math.random()* Math.PI*2;
+    let mag= Math.random()*15; // רוח קלה
+    let fx= Math.cos(angle)* mag;
+    let fy= Math.sin(angle)* mag;
+    cubes.forEach(c=> c.applyForce(fx,fy));
+    i++;
+    if(i>=gustCount){
+      clearInterval(windInt);
+      setTimeout(()=>{
+        if(currentEvent==="משב רוח קל") setCurrentEvent("None");
+      },500);
+    }
+  }, interval);
+}
+function triggerGravityEvent(){
+  setCurrentEvent("משיכת כבידה קצרה");
+  let angle= Math.random()* Math.PI*2;
+  let mag= Math.random()*2+1;
+  gravityTarget.x= Math.cos(angle)* mag;
+  gravityTarget.y= Math.sin(angle)* mag;
+  setTimeout(()=>{
+    gravityTarget.x=0; 
+    gravityTarget.y=0;
+    if(currentEvent==="משיכת כבידה קצרה") setCurrentEvent("None");
+  }, 3000);
+}
+
+/***********************************************************
+ * 9) לולאת אנימציה
+ ***********************************************************/
+function animate(){
+  ctx.clearRect(0,0, canvas.width,canvas.height);
+
+  // lerp gravity
+  gravityVector.x+= (gravityTarget.x- gravityVector.x)*0.02;
+  gravityVector.y+= (gravityTarget.y- gravityVector.y)*0.02;
+
+  // apply gravity
+  cubes.forEach(c=>{
+    if(!c.isDragging && !c.isFixed && !isCompressing){
+      c.applyForce(gravityVector.x, gravityVector.y);
+    }
+  });
+
+  // update springs
+  springs.forEach(s=> s.update());
+
+  // התנגשות בסיסית
+  for(let i=0; i<cubes.length; i++){
+    for(let j=i+1; j<cubes.length; j++){
+      let A= cubes[i], B= cubes[j];
+      let rA= Math.sqrt(A.width*A.width + A.height*A.height)/2;
+      let rB= Math.sqrt(B.width*B.width + B.height*B.height)/2;
+      let Ax= A.x+ A.width/2, Ay= A.y+ A.height/2;
+      let Bx= B.x+ B.width/2, By= B.y+ B.height/2;
+      let dx= Bx- Ax, dy= By- Ay;
+      let dist= Math.sqrt(dx*dx+ dy*dy);
+      let minDist= rA+rB;
+      if(dist< minDist){
+        let overlap= minDist-dist;
+        let px= (dx/dist)* overlap* collisionFriction;
+        let py= (dy/dist)* overlap* collisionFriction;
+        if(!A.isFixed){
+          A.x-= px/2; 
+          A.y-= py/2;
+        }
+        if(!B.isFixed){
+          B.x+= px/2; 
+          B.y+= py/2;
+        }
+      }
+    }
+  }
+
+  // update cubes
+  cubes.forEach(c=> c.update());
+
+  // wave?
+  if(groundMode==='wave'){
+    waveArray=[];
+    let amp= Math.min(canvas.width, canvas.height)*0.05; 
+    for(let i=0; i< canvas.width/12; i++){
+      waveArray.push(Math.random()* amp);
+    }
+  }
+  drawGround();
+
+  // draw
+  springs.forEach(s=> s.draw());
+  cubes.forEach(c=> c.draw());
+
+  requestAnimationFrame(animate);
+}
+
+/***********************************************************
+ * 10) ground
+ ***********************************************************/
+function getGroundY(x){
+  if(groundMode==='flat') {
+    return groundBase;
+  } else {
+    let idx= Math.floor(x/6);
+    if(idx<0) idx=0;
+    if(idx>= waveArray.length) idx= waveArray.length-1;
+    return groundBase- waveArray[idx];
+  }
+}
+function drawGround(){
+  ctx.beginPath();
+  ctx.strokeStyle= (groundMode==='flat')?'rgba(0,255,0,0.4)':'rgba(255,0,0,0.4)';
+  if(groundMode==='flat'){
+    ctx.moveTo(0, groundBase);
+    ctx.lineTo(canvas.width, groundBase);
+  } else {
+    for(let i=0; i<waveArray.length; i++){
+      let px= i*6;
+      let py= groundBase- waveArray[i];
+      if(i===0) ctx.moveTo(px, py);
+      else      ctx.lineTo(px, py);
+    }
+  }
+  ctx.stroke();
+}
+
+/***********************************************************
+ * 11) עזר: Interpolate color, random color
+ ***********************************************************/
+function interpolateColor(val,c1,c2){
+  let ratio= val/10;
+  ratio= Math.max(0, Math.min(1, ratio));
+  let r= Math.round(c1[0]+ ratio*(c2[0]- c1[0]));
+  let g= Math.round(c1[1]+ ratio*(c2[1]- c1[1]));
+  let b= Math.round(c1[2]+ ratio*(c2[2]- c1[2]));
+  return `rgb(${r},${g},${b})`;
+}
+function getRandomColor(){
+  return '#'+(Math.random().toString(16)+'000000').slice(2,8);
+}
+
+/***********************************************************
+ * 12) start
+ ***********************************************************/
+async function start(){
+  await initGrid();
+  // כל 10 שניות אירוע
+  setInterval(randomEvent,10000);
+  animate();
+}
+start();
+</script>
+</body>
+</html>
