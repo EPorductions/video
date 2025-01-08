@@ -1,0 +1,450 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <title>Classical Music Gallery + Engine</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    /* -- RESET & BASIC -- */
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    /* BODY - בהשראת העיצוב */
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #f9f9f9; /* רקע בהיר */
+      margin: 0;
+      padding: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      position: relative; /* כדי שנוכל למקם דברים יחסית */
+    }
+
+    /* HEADER */
+    header {
+      background-color: #4CAF50;
+      color: white;
+      padding: 1rem;
+      text-align: center;
+      width: 100%;
+      z-index: 10; /* מעל הקנבס */
+    }
+    header h1 {
+      margin: 0;
+    }
+
+    /* CANVAS ברקע */
+    #canvas {
+      position: fixed; 
+      top: 0; 
+      left: 0; 
+      z-index: 0; 
+    }
+
+    /* גלריה */
+    .gallery {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 20px;
+      width: 90%;
+      max-width: 1200px;
+      margin: 20px auto;
+      z-index: 100; 
+    }
+    .gallery-item {
+      background: white;
+      border: 1px solid #ddd;
+      border-radius: 8px;
+      overflow: hidden;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+      transition: transform 0.2s;
+    }
+    .gallery-item:hover {
+      transform: scale(1.03);
+    }
+    .gallery-item iframe {
+      width: 100%;
+      height: 200px;
+      border: none;
+      display: block;
+    }
+    .gallery-item .title {
+      padding: 10px;
+      text-align: center;
+      font-weight: bold;
+      font-size: 1rem;
+    }
+
+    /* תיבת האירוע (eventInfo) של המנוע */
+    #eventInfo {
+      position: absolute;
+      top: 10px;
+      left: 10px;
+      color: #fff;
+      background: rgba(0, 0, 0, 0.5);
+      padding: 5px 10px;
+      font-size: 14px;
+      border-radius: 5px;
+      font-family: Arial, sans-serif;
+      display: none;
+      z-index: 999; /* לפני הקנבס */
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Classical Music Gallery</h1>
+  </header>
+
+  <!-- Canvas של המנוע (ברקע) -->
+  <canvas id="canvas"></canvas>
+  <div id="eventInfo"></div>
+
+  <!-- גלריית הסרטונים כ־Grid -->
+  <div class="gallery">
+    <div class="gallery-item">
+      <iframe src="https://www.youtube.com/embed/5Gsyh6wfl88" allowfullscreen></iframe>
+      <div class="title">Video 1</div>
+    </div>
+    <div class="gallery-item">
+      <iframe src="https://www.youtube.com/embed/A-fGNkkMt6k" allowfullscreen></iframe>
+      <div class="title">Video 2</div>
+    </div>
+    <div class="gallery-item">
+      <iframe src="https://www.youtube.com/embed/AI2wI_jcfyM" allowfullscreen></iframe>
+      <div class="title">Video 3</div>
+    </div>
+    <div class="gallery-item">
+      <iframe src="https://www.youtube.com/embed/AJKJeldq6hs" allowfullscreen></iframe>
+      <div class="title">Video 4</div>
+    </div>
+    <div class="gallery-item">
+      <iframe src="https://www.youtube.com/embed/qth1c4NUydY" allowfullscreen></iframe>
+      <div class="title">Video 5</div>
+    </div>
+    <div class="gallery-item">
+      <iframe src="https://www.youtube.com/embed/scIz8HQwfGg" allowfullscreen></iframe>
+      <div class="title">Video 6</div>
+    </div>
+    <div class="gallery-item">
+      <iframe src="https://www.youtube.com/embed/t4m4BzIAx5Y" allowfullscreen></iframe>
+      <div class="title">Video 7</div>
+    </div>
+    <div class="gallery-item">
+      <iframe src="https://www.youtube.com/embed/6fJD9FOloKE" allowfullscreen></iframe>
+      <div class="title">Video 8</div>
+    </div>
+    <div class="gallery-item">
+      <iframe src="https://www.youtube.com/embed/9YczxPgiW5M" allowfullscreen></iframe>
+      <div class="title">Video 9</div>
+    </div>
+    <div class="gallery-item">
+      <iframe src="https://www.youtube.com/embed/AHfP1JhgaEY" allowfullscreen></iframe>
+      <div class="title">Video 10</div>
+    </div>
+    <div class="gallery-item">
+      <iframe src="https://www.youtube.com/embed/D-tSW7tFYDM" allowfullscreen></iframe>
+      <div class="title">Video 11</div>
+    </div>
+    <div class="gallery-item">
+      <iframe src="https://www.youtube.com/embed/jnhTwDfTKgo" allowfullscreen></iframe>
+      <div class="title">Video 12</div>
+    </div>
+  </div>
+
+<script>
+// ------------------------------------------------------
+// קוד "המנוע" (מוזער) - הגרסה המקוצרת לתצוגה ברקע.
+// ------------------------------------------------------
+
+var canvas = document.getElementById('canvas');
+var ctx = canvas.getContext('2d');
+canvas.width = window.innerWidth;
+canvas.height = window.innerHeight;
+
+var eventInfoDiv = document.getElementById('eventInfo');
+
+var cubes = [];
+var springs = [];
+var gravityVector = {x:0, y:0};
+var gravityTarget = {x:0, y:0};
+var globalWindX = 0;
+var globalWindY = 0;
+var groundMode = 'flat';
+var groundBase = canvas.height - 50; // קצת פחות גבוה
+var waveArray = [];
+var waveDuration = 5000;
+var waveStartTime = 0;
+var currentEvent = "None";
+var isCompressing = false;
+var currentCube = null;
+var shiftX = 0;
+var shiftY = 0;
+setInterval(randomEvent, 10000);
+
+// מייצר קומץ קוביות "דקורטיביות" ברקע
+for (let i=0; i<5; i++){
+  let c = new Cube(
+    Math.random()*(canvas.width-50),
+    Math.random()*(canvas.height-200),
+    20+Math.random()*30,
+    20+Math.random()*30
+  );
+  cubes.push(c);
+}
+
+// יוצר קשרים (קפיצים) בין הקוביות
+for (let i=0; i<cubes.length; i++){
+  for(let j=i+1; j<cubes.length; j++){
+    let s = new Spring(cubes[i], cubes[j], 150, 0.1, 0.02);
+    springs.push(s);
+  }
+}
+
+function setCurrentEvent(e) {
+  currentEvent = e;
+  if (e === "None") {
+    eventInfoDiv.style.display = "none";
+  } else {
+    eventInfoDiv.style.display = "block";
+    eventInfoDiv.textContent = "אירוע: " + e;
+  }
+}
+
+// -- מחלקת קובייה --
+class Cube {
+  constructor(x,y,w,h){
+    this.x = x; this.y = y;
+    this.width = w; this.height = h;
+    this.vx = (Math.random()-0.5)*2;
+    this.vy = (Math.random()-0.5)*2;
+    this.ax = 0; this.ay = 0;
+    this.mass = 1;
+    this.isFixed = false;
+    this.isDragging = false;
+    this.friction = 0.92;
+    this.airResistance = 0.0003;
+    this.color = getRandomColor();
+  }
+  applyForce(fx,fy){
+    if(!this.isFixed){
+      this.ax += fx/this.mass;
+      this.ay += fy/this.mass;
+    }
+  }
+  update(){
+    if(!this.isFixed && !this.isDragging){
+      let airX = -this.airResistance*this.vx*Math.abs(this.vx);
+      let airY = -this.airResistance*this.vy*Math.abs(this.vy);
+      this.vx += this.ax+airX+globalWindX;
+      this.vy += this.ay+airY+globalWindY;
+      this.x += this.vx; this.y += this.vy;
+      // אדמה
+      let gy = getGroundY(this.x+this.width/2);
+      if(this.y+this.height>gy){
+        this.y=gy-this.height;
+        this.vy*=-this.friction;
+      }
+      // גבולות צד
+      if(this.x<0 || this.x+this.width>canvas.width){
+        this.vx*=-this.friction;
+        this.x=this.x<0 ? 0:canvas.width-this.width;
+      }
+      if(this.y<0){
+        this.vy*=-this.friction;
+        this.y=0;
+      }
+    }
+    this.ax=0; this.ay=0;
+  }
+  draw(){
+    ctx.fillStyle=this.color;
+    ctx.fillRect(this.x, this.y, this.width, this.height);
+  }
+}
+
+// -- מחלקת קפיץ --
+class Spring {
+  constructor(c1,c2,len,k,damping){
+    this.c1=c1;this.c2=c2;
+    this.len=len; this.k=k; this.damp=damping;
+  }
+  update(){
+    let x1=this.c1.x+this.c1.width/2, y1=this.c1.y+this.c1.height/2;
+    let x2=this.c2.x+this.c2.width/2, y2=this.c2.y+this.c2.height/2;
+    let dx=x2-x1, dy=y2-y1;
+    let dist=Math.sqrt(dx*dx+dy*dy);
+    if(dist===0)dist=0.0001;
+    let force=(dist-this.len)*this.k;
+    let fx=(dx/dist)*force, fy=(dy/dist)*force;
+    fx*=(this.c1.mass+this.c2.mass)/2;
+    fy*=(this.c1.mass+this.c2.mass)/2;
+    fx-=this.damp*this.c1.vx;
+    fy-=this.damp*this.c1.vy;
+    this.c1.applyForce(fx,fy);
+    this.c2.applyForce(-fx,-fy);
+  }
+  draw(){
+    ctx.beginPath();
+    ctx.strokeStyle='rgba(255,255,255,0.3)';
+    ctx.moveTo(this.c1.x+this.c1.width/2, this.c1.y+this.c1.height/2);
+    ctx.lineTo(this.c2.x+this.c2.width/2, this.c2.y+this.c2.height/2);
+    ctx.stroke();
+  }
+}
+
+// אירועי עכבר (אם רוצים להזיז את הקוביות)
+canvas.onmousedown=function(e){
+  cubes.forEach(c=>{
+    if(e.clientX>c.x && e.clientX<c.x+c.width && e.clientY>c.y && e.clientY<c.y+c.height){
+      currentCube=c;
+      shiftX=e.clientX-c.x; shiftY=e.clientY-c.y;
+      c.isDragging=true;
+    }
+  });
+};
+canvas.onmousemove=function(e){
+  if(currentCube){
+    currentCube.x=e.clientX-shiftX;
+    currentCube.y=e.clientY-shiftY;
+  }
+};
+canvas.onmouseup=function(){
+  if(currentCube){
+    currentCube.isDragging=false;
+    currentCube=null;
+  }
+};
+// דאבל-קליק => קיבוע
+canvas.ondblclick=function(e){
+  cubes.forEach(c=>{
+    if(e.clientX>c.x && e.clientX<c.x+c.width && e.clientY>c.y && e.clientY<c.y+c.height){
+      c.isFixed=!c.isFixed;
+    }
+  });
+};
+
+// אנימציה
+function animate(){
+  ctx.clearRect(0,0,canvas.width,canvas.height);
+  // lerp לגרביטציה
+  gravityVector.x+=(gravityTarget.x-gravityVector.x)*0.02;
+  gravityVector.y+=(gravityTarget.y-gravityVector.y)*0.02;
+  // מפעילים גרביטציה
+  cubes.forEach(c=>{
+    if(!c.isFixed&&!c.isDragging) c.applyForce(gravityVector.x, gravityVector.y);
+  });
+  springs.forEach(s=>s.update());
+  cubes.forEach(c=>c.update());
+
+  // groundMode
+  if(groundMode==='wave'){
+    waveArray=[];
+    let maxAmp=150;
+    for(let i=0;i<canvas.width/9;i++){
+      waveArray.push(Math.random()*maxAmp);
+    }
+  }
+
+  drawGround();
+  springs.forEach(s=>s.draw());
+  cubes.forEach(c=>c.draw());
+  requestAnimationFrame(animate);
+}
+animate();
+
+function getGroundY(x){
+  if(groundMode==='flat'){
+    return groundBase;
+  } else {
+    let idx=Math.floor(x/3);
+    if(idx<0)idx=0; if(idx>=waveArray.length)idx=waveArray.length-1;
+    return groundBase-waveArray[idx];
+  }
+}
+
+function drawGround(){
+  ctx.beginPath();
+  ctx.strokeStyle=groundMode==='flat'?'rgba(0,255,0,0.8)':'rgba(255,0,0,0.8)';
+  if(groundMode==='flat'){
+    ctx.moveTo(0,groundBase);
+    ctx.lineTo(canvas.width, groundBase);
+  } else {
+    for(let i=0;i<waveArray.length;i++){
+      let x=i*50;
+      let y=groundBase-waveArray[i];
+      if(i===0)ctx.moveTo(x,y); else ctx.lineTo(x,y);
+    }
+  }
+  ctx.stroke();
+}
+
+function randomEvent(){
+  let r=Math.random();
+  if(r<0.33){
+    triggerGravityEvent();
+    triggerWaveEvent();
+  } else if(r<0.66){
+    triggerWindEvent();
+    triggerWaveEvent();
+  } else {
+    triggerWaveEvent();
+  }
+}
+
+function triggerGravityEvent(){
+  setCurrentEvent("שינוי גרביטציה");
+  let angle=Math.random()*Math.PI*2;
+  let mag=Math.random()*9.8+0.1;
+  gravityTarget.x=Math.cos(angle)*mag;
+  gravityTarget.y=Math.sin(angle)*mag;
+  setTimeout(()=>{
+    gravityTarget.x=0;gravityTarget.y=0;
+    if(currentEvent==="שינוי גרביטציה") setCurrentEvent("None");
+  },8000);
+}
+
+function triggerWindEvent(){
+  setCurrentEvent("משבי רוח משתנים");
+  let gustCount=Math.floor(Math.random()*3)+Math.random()*3+1;
+  let duration=Math.random()*7500;
+  let interval=duration/gustCount;
+  let i=0;
+  let windInt=setInterval(()=>{
+    let angle=Math.random()*Math.PI*2;
+    let mag=Math.random()*80;
+    let fx=Math.cos(angle)*mag;
+    let fy=Math.sin(angle)*mag;
+    cubes.forEach(c=>c.applyForce(fx,fy));
+    i++;
+    if(i>=gustCount){
+      clearInterval(windInt);
+      setTimeout(()=>{
+        if(currentEvent==="משבי רוח משתנים") setCurrentEvent("None");
+      },500);
+    }
+  },interval);
+}
+
+function triggerWaveEvent(){
+  setCurrentEvent("גלי אדמה רועשים");
+  groundMode='wave';
+  if(waveStartTime) clearTimeout(waveStartTime);
+  waveStartTime=setTimeout(()=>{
+    groundMode='flat';
+    if(currentEvent==="גלי אדמה רועשים") setCurrentEvent("None");
+  },waveDuration);
+}
+
+function getRandomColor(){
+  return '#'+(Math.random().toString(16)+'000000').slice(2,8);
+}
+setCurrentEvent("None");
+</script>
+
+</body>
+</html>
