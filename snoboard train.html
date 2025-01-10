@@ -599,7 +599,7 @@ class SnowFlake {
     this.x = randomRange(0, canvasBack.width);
     this.y = randomRange(-canvasBack.height, 0);
     this.radius = randomRange(front ? 1 : 2, front ? 3 : 5);
-    this.speedY = randomRange(0.5, front ? 2.0 : 1.0);
+    this.speedY = randomRange(0.1, front ? 2.0 : 1.0);
     this.speedX = randomRange(-0.3, 0.3);
     this.settled = false;
     this.settledOnCard = null; // לשמור אם הוא נח על כרטיסייה
