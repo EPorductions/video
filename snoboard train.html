@@ -52,7 +52,40 @@
       background-color: #ffdd57;
       color: #333;
     }
+header nav a {
+  font-size: 18px; /* גודל הטקסט בתפריט למחשבים */
+}
 
+/* עיצוב מותאם לפלאפון (רוחב מסך קטן מ-768px) */
+@media screen and (max-width: 768px) {
+  .category-content {
+    max-width: 90%; /* כרטיסיות תופסות 90% מהרוחב */
+    margin: 10px auto; /* ריווח קטן יותר */
+    padding: 15px; /* ריווח פנימי קטן יותר */
+  }
+
+  header nav a {
+    font-size: 16px; /* גודל טקסט קטן יותר בתפריט */
+    padding: 8px 10px; /* התאמת ריווח לתפריט */
+  }
+
+  header nav {
+    flex-wrap: wrap; /* אם יש יותר מדי פריטים, הם יגלשו לשורה חדשה */
+    gap: 10px; /* ריווח קטן יותר בין הפריטים */
+  }
+
+  h2 {
+    font-size: 18px; /* כותרות קטנות יותר בפלאפון */
+  }
+
+  p, ul, li {
+    font-size: 14px; /* גודל טקסט כללי קטן יותר */
+  }
+
+  body {
+    padding: 0 10px; /* ריווח מסביב לתוכן */
+  }
+}
     /* שני ה־Canvas לשלג (רקע + קדמי) */
     #snow-canvas-back,
     #snow-canvas-front {
@@ -102,16 +135,13 @@
 
     /* תוכן פנימי (כרטיסיות) */
     .category-content {
-      max-width: 900px;
-      margin: 0 auto;
-      position: relative;
-      padding: 20px;
-      background-color: rgba(255,255,255,0.85);
-      border-radius: 8px;
-      box-shadow: 0 2px 5px rgba(0,0,0,0.3);
-      margin-bottom: 20px;
-    }
-
+  max-width: 800px;
+  margin: 20px auto; /* מרכז הכרטיסיות */
+  padding: 20px;
+  background: rgba(255, 255, 255, 0.9);
+  border-radius: 8px;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
+}
     .category-content h2 {
       margin-bottom: 10px;
       color: #333;
