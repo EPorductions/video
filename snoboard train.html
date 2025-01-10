@@ -583,7 +583,7 @@ function randomWind() {
   globalWind.y = Math.sin(angle) * strength * 0.2; 
   // y נמוך יותר כדי שהרוח לא תעיף יותר מדי כלפי מעלה
 }
-setInterval(randomWind, 10000); // כל 10 שניות
+setInterval(randomWind,  randomRange(2750,18000)); // כל 10 שניות
 
 /* מיפוי כרטיסיות למטרת קוליזיית שלג */
 let cardBoxes = []; // כאן נשמור BoundingBox ותוספת "גובה שלג" לכל כרטיסייה
