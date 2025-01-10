@@ -546,189 +546,189 @@ function resizeCanvas() {
 window.addEventListener('resize', resizeCanvas);
 resizeCanvas();
 
-// מערכים לפתיתים
-let backFlakes = [];
-let frontFlakes = [];
-// נמשיך "לייצר" פתיתים חדשים כל הזמן
-const spawnInterval = 500; // כל 0.5 שניות נייצר פתיתים חדשים
+/* נתונים עבור הפתיתים */
+let flakesBack = [];
+let flakesFront = [];
+let globalWind = { x: 0, y: 0 }; // כיוון ועוצמת רוח עולמית (מתעדכן מדי ~10 שניות)
 
-// פיזיקה בסיסית
+/* פונקציית רוח רנדומלית */
+function randomWind() {
+  const angle = Math.random() * 2 * Math.PI; // כיוון אקראי
+  const strength = Math.random() * 0.5; // עוצמה עד 0.5px/frame (להדגמה)
+  globalWind.x = Math.cos(angle) * strength;
+  globalWind.y = Math.sin(angle) * strength * 0.2; 
+  // y נמוך יותר כדי שהרוח לא תעיף יותר מדי כלפי מעלה
+}
+setInterval(randomWind, 10000); // כל 10 שניות
+
+/* מיפוי כרטיסיות למטרת קוליזיית שלג */
+let cardBoxes = []; // כאן נשמור BoundingBox ותוספת "גובה שלג" לכל כרטיסייה
+function updateCardBoxes() {
+  cardBoxes = [];
+  const cards = document.querySelectorAll('.category-content');
+  cards.forEach(card => {
+    const rect = card.getBoundingClientRect();
+    // נשמור מידע על מיקום במסמך (נשתמש בscrollY וכו')
+    // או נשתמש ב-rect.left, rect.top ונתקן ביחס לגלילה.
+    const top = rect.top + window.scrollY;
+    const left = rect.left + window.scrollX;
+    const width = rect.width;
+    const height = rect.height;
+    cardBoxes.push({
+      cardElement: card,
+      x: left,
+      y: top,
+      width: width,
+      height: height,
+      // מטריצה פשוטה לרוחב הכרטיסייה, כדי לאפשר הצטברות
+      // (בדומה לתחתית המסך)
+      snowCols: 20,
+      snowHeights: new Array(20).fill(0) // גובה שלג על הכרטיסייה
+    });
+  });
+}
+
+/* מחלקה לפתית שלג */
+function randomRange(min, max) {
+  return Math.random() * (max - min) + min;
+}
+
 class SnowFlake {
   constructor(front = false) {
     this.front = front;
-    this.x = Math.random() * canvasBack.width;
-    this.y = -20; // מופיע טיפה מעל המסך
-    this.radius = front ? (1 + Math.random()*2) : (2 + Math.random()*3);
-    this.vy = front ? (1 + Math.random()*2.5) : (0.5 + Math.random()*1.5);
-    this.vx = (Math.random()-0.5) * 0.5;
-    this.isSettled = false;       // האם נחת סופית (לא יזוז?)
-    this.settledOn = null;        // על איזה "משטח" (card או floor)
-    this.settledOffset = 0;       // מרחק הצטברות (עבור ערימה על כרטיסיה)
+    this.x = randomRange(0, canvasBack.width);
+    this.y = randomRange(-canvasBack.height, 0);
+    this.radius = randomRange(front ? 1 : 2, front ? 3 : 5);
+    this.speedY = randomRange(0.5, front ? 2.0 : 1.0);
+    this.speedX = randomRange(-0.3, 0.3);
+    this.settled = false;
+    this.settledOnCard = null; // לשמור אם הוא נח על כרטיסייה
   }
 
-  update(cardsData) {
-    if(this.isSettled) return;
+  update() {
+    if(this.settled) {
+      // אם הפתית נח על כרטיסייה או בתחתית, הוא לא יזוז
+      // אבל אם עברנו בין קטגוריות -> ננער
+      if(this.settledOnCard && this.settledOnCard.classList.contains('active') === false) {
+        // אם הקטגוריה שלו כבר לא פעילה, נשחרר אותו
+        this.settled = false;
+        this.settledOnCard = null;
+      }
+      return;
+    }
+    // החלת רוח גלובלית
+    this.speedX += globalWind.x * 0.01; 
+    this.speedY += globalWind.y * 0.01;
 
-    // השפעת רוח גלובלית
-    this.vx += windGlobalX * 0.001; // ככל שנוסיף, יותר השפעה לרוח
+    // תנועה
+    this.x += this.speedX;
+    this.y += this.speedY;
 
-    // עדכון מיקום
-    this.x += this.vx;
-    this.y += this.vy;
-
-    // גלישה לצדדים
+    // גבולות רוחב המסך
     if(this.x < 0) this.x = canvasBack.width;
     if(this.x > canvasBack.width) this.x = 0;
 
-    // בדיקה: האם פגע בכרטיסיה / תחתית העמוד
-    // 1) כרטיסיות
-    for(let cd of cardsData) {
-      // בודקים אם (x,y) נמצאים בתוך תחום רוחב הכרטיס וגבוה מעליו
+    // עדכון כרטיסיות bounding
+    // כל frame, נזהה אם הגובה השתנה ונבדוק התנגשויות
+    // (כדי לייעל, אפשר לעדכן cardBoxes פעם בכמה פריימים או בעת גלילה)
+    // כאן – נעשה לצורך הדגמה פשוטה
+    updateCardBoxes();
+
+    // בדיקת התנגשות עם כרטיסייה
+    for(let cbox of cardBoxes) {
+      const colLeft = cbox.x;
+      const colRight = cbox.x + cbox.width;
+      const colTop = cbox.y;
+      const colBottom = cbox.y + cbox.height;
+
       if(
-        this.x >= cd.left && 
-        this.x <= cd.right &&
-        this.y + this.radius >= cd.top && 
-        this.y < cd.bottom // בערך בתוך הכרטיס
-      ){
-        // נבדוק ערימת שלג שייתכן שכבר הצטברה מעל כרטיסיה זו
-        let localStackHeight = cd.snowStack; 
-        let topSurface = cd.top - localStackHeight; 
-        if(this.y + this.radius >= topSurface){
-          // נוחת
-          this.isSettled = true;
-          this.settledOn = cd;   // מצביע לאובייקט הכרטיסיה
-          // "מוסיף" גובה לערימה
-          cd.snowStack += this.radius*2;
-          this.settledOffset = cd.snowStack; 
-          // נתלה שם
-          return;
+        this.x >= colLeft && 
+        this.x <= colRight &&
+        this.y + this.radius >= colTop && 
+        this.y <= colBottom
+      ) {
+        // נמצא מעל הכרטיסייה, נבדוק אם נגע ב"שלג" המצטבר
+        const relativeX = this.x - colLeft;
+        const colIndex = Math.floor((relativeX / cbox.width) * cbox.snowCols);
+        if(colIndex < 0) continue;
+        if(colIndex >= cbox.snowCols) continue;
+
+        const curSnowHeight = cbox.snowHeights[colIndex];
+        // מיקום Y אמיתי של השלג בכרטיסייה (ה"פנים" שלה)
+        const realSnowY = colTop + cbox.height - curSnowHeight;
+        if(this.y + this.radius >= realSnowY) {
+          // נחת
+          this.y = realSnowY - this.radius;
+          this.settle();
+          this.settledOnCard = cbox.cardElement.closest('.category-page');
+          // עדכון גובה השלג באותה עמודה
+          cbox.snowHeights[colIndex] += (this.radius * 2);
+          return; 
         }
       }
     }
 
-    // 2) תחתית המסך
-    if(this.y >= canvasBack.height - this.radius){
-      this.isSettled = true;
-      this.settledOn = 'floor';
+    // בדיקת תחתית המסך (אם אין כרטיסייה רלוונטית) 
+    if(this.y >= canvasBack.height - this.radius) {
+      // נחת בתחתית
+      this.y = canvasBack.height - this.radius;
+      this.settle();
     }
+  }
+
+  settle() {
+    this.settled = true;
+    // מפסיק לזוז
+    this.speedX = 0;
+    this.speedY = 0;
   }
 
   draw(ctx) {
     ctx.beginPath();
-    ctx.arc(this.x, this.y, this.radius, 0, 2*Math.PI);
-    ctx.fillStyle = '#fff';
+    ctx.arc(this.x, this.y, this.radius, 0, 2 * Math.PI);
+    ctx.fillStyle = "#fff";
     ctx.fill();
-  }
-
-  shakeOff() {
-    // אם הפתית נח על כרטיסיה, נשחרר אותו להמשך נפילה
-    if(this.isSettled && this.settledOn && this.settledOn !== 'floor'){
-      // ניתן לו דחיפה קטנה
-      this.isSettled = false;
-      this.vy = 2 + Math.random()*2;
-      this.vx = (Math.random()-0.5)*1;
-      // נוריד גם את הערימה מהכרטיסיה
-      if(typeof this.settledOn.snowStack === 'number'){
-        this.settledOn.snowStack -= this.radius*2;
-        if(this.settledOn.snowStack < 0) this.settledOn.snowStack = 0;
-      }
-      this.settledOn = null;
-    }
+    ctx.closePath();
   }
 }
 
-// ננהל "רוח" גלובלית:
-let windGlobalX = 0; // מהירות הרוח ב-X. ערך חיובי – ימינה, שלילי – שמאלה
-function randomWind(){
-  // כל 10 שניות נכנסת רוח, נשמרת לכמה שניות ונרגעת
-  let angle = Math.random()*2*Math.PI; 
-  let speed = Math.random()*0.5 + 0.2; // עוצמה רנדומלית
-  windGlobalX = Math.cos(angle)*speed;
-  setTimeout(() => {
-    windGlobalX = 0;
-  }, 3000); // אחרי 3 שניות הרוח נרגעת
-}
-setInterval(randomWind, 10000); // כל 10 שניות – רוח רנדומלית
-
-// הכרטיסיות - כדי שהשלג יצטבר עליהן, צריך לזהות את boundingRect
-// נשמור מערך אובייקטים {top, bottom, left, right, snowStack}
-function getCardsData(){
-  const cards = document.querySelectorAll('.card');
-  let arr = [];
-  cards.forEach(card => {
-    let rect = card.getBoundingClientRect();
-    // מאחר והכרטיסייה ביחס ל-viewport, נוסיף scroll offset:
-    let top = rect.top + window.scrollY;
-    let left = rect.left + window.scrollX;
-    let bottom = rect.bottom + window.scrollY;
-    let right = rect.right + window.scrollX;
-    // נוסיף גם סופר ערימת שלג
-    // אם כבר יש שמור, לא נדרוס
-    if(!card.__snowStack) card.__snowStack = 0;
-
-    arr.push({
-      element: card,
-      top, left, bottom, right,
-      snowStack: card.__snowStack
-    });
-  });
-  return arr;
-}
-function updateCardsStack(cardsData){
-  // נעדכן חזרה ל-element
-  cardsData.forEach(cd => {
-    cd.element.__snowStack = cd.snowStack;
-  });
-}
-
-
-// ליצור פתיתים חדשים כל הזמן
-function spawnFlakes() {
-  // נניח כל פעם 10 פתיתים אחוריים + 6 פתיתי חזית
-  for(let i=0; i<10; i++){
-    backFlakes.push(new SnowFlake(false));
+/* אתחול הפתיתים (ממש הרבה!) */
+function initFlakes() {
+  flakesBack = [];
+  flakesFront = [];
+  // נוסיף, נגיד, 300 פתיתים אחוריים ו-200 קדמיים
+  for(let i=0; i<300; i++) {
+    flakesBack.push(new SnowFlake(false));
   }
-  for(let i=0; i<6; i++){
-    frontFlakes.push(new SnowFlake(true));
+  for(let i=0; i<200; i++) {
+    flakesFront.push(new SnowFlake(true));
   }
 }
-setInterval(spawnFlakes, spawnInterval);
 
+/* לולאת אנימציה */
 function animate() {
-  // נקה כל canvas
   ctxBack.clearRect(0,0,canvasBack.width, canvasBack.height);
   ctxFront.clearRect(0,0,canvasFront.width, canvasFront.height);
 
-  // שלב 1: קבלת מידע עדכני על כרטיסיות
-  let cardsData = getCardsData();
-
-  // שלב 2: עדכון פתיתים (אחורי + קדמי)
-  backFlakes.forEach(fl => fl.update(cardsData));
-  frontFlakes.forEach(fl => fl.update(cardsData));
-
-  // שלב 3: ציור פתיתים
-  backFlakes.forEach(fl => fl.draw(ctxBack));
-  frontFlakes.forEach(fl => fl.draw(ctxFront));
-
-  // שלב 4: עדכן ערימות בכרטיסיות
-  updateCardsStack(cardsData);
+  // שכבה אחורית
+  flakesBack.forEach(f => {
+    f.update();
+    f.draw(ctxBack);
+  });
+  // שכבה קדמית
+  flakesFront.forEach(f => {
+    f.update();
+    f.draw(ctxFront);
+  });
 
   requestAnimationFrame(animate);
 }
+
+/* התחל */
+initFlakes();
 animate();
+randomWind(); // נקרא פעם ראשונה, אחר כך יקרא כל 10 שניות
 
-// כשמחליפים קטגוריה - מנערים שלג מהכרטיסיות
-function shakeOffAll() {
-  backFlakes.forEach(fl => fl.shakeOff());
-  frontFlakes.forEach(fl => fl.shakeOff());
-}
-navLinks.forEach(link => {
-  link.addEventListener('click', () => {
-    // בנקודת המעבר - "נער" את כל הפתיתים שיושבים על כרטיסיות
-    shakeOffAll();
-  });
-});
 </script>
-
 </body>
 </html>
