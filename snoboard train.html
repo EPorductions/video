@@ -52,40 +52,44 @@
       background-color: #ffdd57;
       color: #333;
     }
-header nav a {
-  font-size: 18px; /* גודל הטקסט בתפריט למחשבים */
-}
+ header nav a {
+      font-size: 18px;
+      padding: 10px 15px;
+    }
 
-/* עיצוב מותאם לפלאפון (רוחב מסך קטן מ-768px) */
-@media screen and (max-width: 768px) {
-  .category-content {
-    max-width: 90%; /* כרטיסיות תופסות 90% מהרוחב */
-    margin: 10px auto; /* ריווח קטן יותר */
-    padding: 15px; /* ריווח פנימי קטן יותר */
-  }
+    h2 {
+      font-size: 20px;
+    }
 
-  header nav a {
-    font-size: 16px; /* גודל טקסט קטן יותר בתפריט */
-    padding: 8px 10px; /* התאמת ריווח לתפריט */
-  }
+    p, ul, li {
+      font-size: 16px;
+    }
 
-  header nav {
-    flex-wrap: wrap; /* אם יש יותר מדי פריטים, הם יגלשו לשורה חדשה */
-    gap: 10px; /* ריווח קטן יותר בין הפריטים */
-  }
+    /* מדיה קווריז לפלאפון */
+    @media screen and (max-width: 768px) {
+      .category-content {
+        max-width: 95%; /* כמעט רוחב מלא */
+        margin: 10px auto; /* ריווח קטן יותר */
+        padding: 15px;
+      }
 
-  h2 {
-    font-size: 18px; /* כותרות קטנות יותר בפלאפון */
-  }
+      header nav a {
+        font-size: 14px; /* טקסט קטן יותר */
+        padding: 8px 10px;
+      }
 
-  p, ul, li {
-    font-size: 14px; /* גודל טקסט כללי קטן יותר */
-  }
+      h2 {
+        font-size: 18px; /* כותרות קטנות יותר */
+      }
 
-  body {
-    padding: 0 10px; /* ריווח מסביב לתוכן */
-  }
-}
+      p, ul, li {
+        font-size: 14px; /* טקסט קטן יותר */
+      }
+
+      body {
+        padding: 0 10px; /* ריווח פנימי מסביב לעמוד */
+      }
+    }
     /* שני ה־Canvas לשלג (רקע + קדמי) */
     #snow-canvas-back,
     #snow-canvas-front {
