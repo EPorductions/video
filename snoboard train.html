@@ -288,7 +288,29 @@
           גולשי גלים וסקייטבורדיסטים חיפשו דרך לגלוש על שלג, וכך המציאו את ה־Snurfer, 
           שהפך לבסיס לסנובורד המודרני.
         </div>
-      </div>
+		 
+		</div>
+		<br>
+	<div class="category-content">
+      <span class="anchor" id="cat1-sub1"></span>
+      <h2>לינקים לסרטונים</h2>
+      <p>
+		  <li><strong>לימוד טכניקות בסיסיות:</strong>
+            <ul>
+                <li><a href="https://www.skiprofessor.co.il/post/%D7%9E%D7%93%D7%A8%D7%99%D7%9A-%D7%A1%D7%A0%D7%95%D7%91%D7%95%D7%A8%D7%93-%D7%9C%D7%9E%D7%AA%D7%97%D7%99%D7%9C%D7%99%D7%9D" target="_blank">מדריך על חלקי הסנובורד</a>: לוח (Board), קלמרות (Bindings) ונעליים.</li>
+				       <li><a href="https://www.youtube.com/watch?v=Aidr7tyi7Ks" target="_blank">מדריך סנובורד למתחילים</a>: לוח (Board), קלמרות (Bindings) ונעליים.</li>
+                <li><a href="https://www.youtube.com/watch?v=h0VVEVcAZOI" target="_blank">איך לצאת מהרכבל עם הסנובורד</a>: לוח (Board), קלמרות (Bindings) ונעליים.</li>
+            </ul>
+        </li>
+		<li><strong>לימוד טכניקות בסיסיות:</strong>
+            <ul>
+                <li><a href="https://www.getx.co.il/snow/%D7%A1%D7%A0%D7%95%D7%91%D7%95%D7%A8%D7%93/snowboard-for-beginners" target="_blank">עצירה עם הגב למדרון</a>: משקל על העקבים.</li>
+                <li><a href="https://www.getx.co.il/snow/%D7%A1%D7%A0%D7%95%D7%91%D7%95%D7%A8%D7%93/snowboard-for-beginners" target="_blank">עצירה עם הפנים למדרון</a>: משקל על האצבעות.</li>
+            </ul>
+        </li>
+		</p>
+		</div>
+		
     </div>
 
     <!-- כרטיסייה 2 -->
@@ -497,14 +519,16 @@ function rotateBackgrounds() {
   });
   bgIndex = (bgIndex + 1) % bgImages.length;
 }
-
+function randomRange(min, max) {
+  return Math.random() * (max - min) + min;
+}
 // כל הקטגוריות יסומנו כ-fade-bg כדי לאפשר transition ב-css
 pages.forEach(page => page.classList.add('fade-bg'));
 
 // הפעלת הרוטציה – כל 25 שניות (ניתן לגוון בין 20 ל-30)
 setInterval(() => {
   rotateBackgrounds();
-}, 25000);
+}, randomRange(10000,25000));
 
 // אתחול רקע ראשוני
 rotateBackgrounds();
@@ -589,9 +613,7 @@ function updateCardBoxes() {
 }
 
 /* מחלקה לפתית שלג */
-function randomRange(min, max) {
-  return Math.random() * (max - min) + min;
-}
+
 
 class SnowFlake {
   constructor(front = false) {
