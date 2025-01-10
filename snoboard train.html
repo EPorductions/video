@@ -1,0 +1,424 @@
+<!DOCTYPE html>
+<html lang="he">
+<head>
+  <meta charset="UTF-8">
+  <title>מדריך גלישת סנובורד עם שלג יורד</title>
+  <style>
+    /* איפוס בסיסי (Reset) */
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    html, body {
+      width: 100%;
+      height: 100%;
+      scroll-behavior: smooth; /* גלילה חלקה ברמת CSS */
+      font-family: Arial, sans-serif;
+      direction: rtl;
+      background-color: #000; /* רקע כללי */
+      overflow-x: hidden; /* למניעת גלילה רוחבית */
+    }
+
+    /* מיכל ראשי של כל התוכן, ממקם אותו מעל שתי שכבות ה-canvas של השלג */
+    .main-container {
+      position: relative;
+      z-index: 1; /* נעלה אותו מעל ה-canvas הראשון של השלג (רקע) */
+      /* נשאיר מקום ל-canvas העליון עם ערך זינדקס גדול יותר */
+    }
+
+    /* סרגל תפריט עליון (קבוע) */
+    header {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      background-color: rgba(0, 0, 0, 0.8);
+      color: #fff;
+      z-index: 9999; /* שיהיה תמיד מעל כל דבר */
+      height: 90px; /* מוגדל כך שיופיע ברור בנייד */
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.3);
+    }
+
+    nav {
+      display: flex;
+      gap: 30px;
+    }
+
+    nav a {
+      color: #fff;
+      text-decoration: none;
+      font-weight: bold;
+      padding: 10px 15px;
+      border-radius: 4px;
+      font-size: 18px; /* מוגדל לטלפון */
+      transition: background-color 0.3s, color 0.3s;
+    }
+
+    nav a:hover {
+      background-color: #ffdd57;
+      color: #333;
+    }
+
+    /* ריווח מתחת לסרגל התפריט הקבוע */
+    .content {
+      padding-top: 120px; /* קצת יותר מגובה ה-Header */
+      max-width: 900px;
+      margin: 0 auto;
+      padding-bottom: 60px; /* מרווח תחתון */
+      position: relative;
+    }
+
+    /* כרטיסיות (Sections) */
+    .section {
+      background-color: rgba(255, 255, 255, 0.8);
+      border-radius: 8px;
+      padding: 20px;
+      margin-bottom: 20px;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.3);
+      position: relative;
+    }
+
+    h2 {
+      margin-bottom: 10px;
+      color: #333;
+    }
+
+    p {
+      margin-bottom: 15px;
+      line-height: 1.6;
+      color: #444;
+    }
+
+    ul {
+      list-style-type: disc;
+      list-style-position: inside;
+      margin-bottom: 20px;
+      color: #444;
+    }
+
+    li {
+      margin-bottom: 8px;
+    }
+
+    .highlight {
+      font-weight: bold;
+      color: #333;
+    }
+
+    /* עוגנים פנימיים */
+    .anchor {
+      display: block;
+      height: 60px; /* פיצוי לגובה התפריט */
+      margin-top: -60px;
+      visibility: hidden;
+    }
+
+    /* חלוקה לקטגוריות עם רקעים שונים: 
+       נשתמש בשלושה סקשנים גדולים, כל אחד עם רקע שונה (sbBG1, sbBG2, sbBG3) */
+    .category-1 {
+      background: url('sbBG1.webp') no-repeat center center;
+      background-size: cover;
+      padding: 40px 20px;
+    }
+    .category-2 {
+      background: url('sbBG2.webp') no-repeat center center;
+      background-size: cover;
+      padding: 40px 20px;
+    }
+    .category-3 {
+      background: url('sbBG3.webp') no-repeat center center;
+      background-size: cover;
+      padding: 40px 20px;
+    }
+
+    /* שיהיו "שקופים" כדי שנראה את טקסטורת הרקע מאחורי הכרטיסיות */
+    .category-1 .section,
+    .category-2 .section,
+    .category-3 .section {
+      background-color: rgba(255,255,255, 0.85);
+    }
+
+    /* שתי שכבות Canvas (אחת ברקע, אחת מקדימה) */
+    #snow-canvas-back,
+    #snow-canvas-front {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none; /* שלא יפריע לקליקים */
+    }
+
+    /* שכבת השלג הקדמית מעל התוכן */
+    #snow-canvas-front {
+      z-index: 10000; /* מעל התפריט והכל. אפשר קצת פחות אם רוצים שהתפריט יהיה גם מעל השלג הקדמי */
+    }
+
+  </style>
+</head>
+<body>
+
+<!-- שני ה-Canvas לשלג: אחד מאחורי התוכן ואחד מעל התוכן -->
+<canvas id="snow-canvas-back"></canvas>
+<canvas id="snow-canvas-front"></canvas>
+
+<!-- תפריט עליון קבוע -->
+<header>
+  <nav>
+    <!-- 3 קטגוריות עיקריות -->
+    <a href="#category1">הכרה</a>
+    <a href="#category2">אימונים לפני</a>
+    <a href="#category3">יום גלישה</a>
+  </nav>
+</header>
+
+<!-- מיכל ראשי של התוכן (מעל ה-canvas האחורי, מתחת ל-canvas הקדמי) -->
+<div class="main-container">
+
+  <!-- קטגוריה 1: הכרה (מבוא, ציוד, הסברים בסיסיים) -->
+  <div id="category1" class="category-1 content">
+    <div class="section">
+      <span class="anchor"></span>
+      <h2>מבוא לגלישת סנובורד</h2>
+      <p>
+        ברוך הבא למדריך בסיסי לגלישת סנובורד. בחלק זה נלמד על הציוד הבסיסי,
+        כיצד הוא משפיע על חוויית הגלישה, ומה חשוב לדעת לפני שעולים למדרון.
+      </p>
+    </div>
+
+    <div class="section">
+      <span class="anchor"></span>
+      <h2>הכרת הציוד</h2>
+      <ul>
+        <li><span class="highlight">נעלי סנובורד (Boots):</span> ודא שהן מהודקות בנוחות, אך לא לוחצות.</li>
+        <li><span class="highlight">ביינדינגס (Bindings):</span> למד איך לחבר ולשחרר את הנעליים.</li>
+        <li><span class="highlight">סנובורד (Snowboard):</span> בחר בקרש מתאים (אורך/סגנון) למתחילים.</li>
+        <li><span class="highlight">קסדה ומשקפיים:</span> התאמה נכונה חשובה להגנה ונוחות.</li>
+        <li><span class="highlight">ביגוד:</span> בגדים חמים, עמידים למים, כפפות וגרבי סקי.</li>
+      </ul>
+      <p>ציוד טוב ומותאם יעזור לך לשלוט טוב יותר ולהנות מהגלישה בביטחון.</p>
+    </div>
+  </div>
+
+  <!-- קטגוריה 2: אימונים לפני (כושר, חיזוק, יציבות) -->
+  <div id="category2" class="category-2 content">
+    <div class="section">
+      <span class="anchor"></span>
+      <h2>חיזוק ותרגול טרום-גלישה</h2>
+      <p>
+        לפני שעולים על השלג, אפשר להפיק הרבה תועלת מאימונים בסיסיים לחיזוק רגליים,
+        שרירי ליבה (Core) ושיווי משקל. זה יקטין סיכון לפציעות וישפר את ההנאה.
+      </p>
+      <ul>
+        <li><span class="highlight">סקוואטים:</span> מחזקים ירכיים וברכיים.</li>
+        <li><span class="highlight">פלאנק:</span> תרגיל לשרירי בטן וליבה.</li>
+        <li><span class="highlight">תרגילי שיווי משקל:</span> עמידה על רגל אחת, שימוש בכדור פיזיו.</li>
+        <li><span class="highlight">מתיחות:</span> חשוב למנוע כיווצים ולשמור על גמישות.</li>
+      </ul>
+    </div>
+
+    <div class="section">
+      <span class="anchor"></span>
+      <h2>תרגולים משלימים</h2>
+      <p>
+        במקביל, מומלץ לצפות בסרטונים מקוונים על טכניקות בסיסיות: כיצד לעמוד,
+        כיצד ליפול נכון, ואיך לבצע עצירות ראשוניות. כך המוח כבר "יכיר" את התנועות
+        לפני שתפגשו אותן במציאות.
+      </p>
+    </div>
+  </div>
+
+  <!-- קטגוריה 3: יום גלישה (איך לעמוד, עצירה, טכניקה בסיסית) -->
+  <div id="category3" class="category-3 content">
+    <div class="section">
+      <span class="anchor"></span>
+      <h2>עמידה ויציבה</h2>
+      <ul>
+        <li><span class="highlight">ברכיים כפופות מעט:</span> שומרות על גמישות להפתעות בשלג.</li>
+        <li><span class="highlight">משקל במרכז הקרש:</span> שיווי משקל טוב מאפשר שליטה.</li>
+        <li><span class="highlight">התנועה באה מהברכיים והקרסוליים:</span> לא מהמותניים.</li>
+      </ul>
+    </div>
+
+    <div class="section">
+      <span class="anchor"></span>
+      <h2>טכניקות עצירה וגלישה</h2>
+      <ul>
+        <li><span class="highlight">Heel Edge:</span> הטה את הקרש לעקבים כדי לעצור או להאט.</li>
+        <li><span class="highlight">Toe Edge:</span> הטה את הקרש לבהונות לעצירה/האטה בכיוון השני.</li>
+        <li><span class="highlight">"עלה" (Falling Leaf):</span> תרגול של תנועה מצד לצד עם שינוי משקל בין עקבים לבהונות.</li>
+      </ul>
+      <p>במהלך היום, השתדל לעצור לעתים קרובות לתרגול ולהפחתת מהירות, כך שלא תצבור פחד או איבוד שליטה.</p>
+    </div>
+
+    <div class="section">
+      <span class="anchor"></span>
+      <h2>לסיכום</h2>
+      <p>
+        עם הזמן והתרגול, תרגישו שיפור משמעותי ביציבות ובביטחון. זכרו להקשיב לגוף,
+        לצאת להפסקות שתייה ואוכל, ותמיד לשמור על בטיחות עם קסדה. בהצלחה!
+      </p>
+    </div>
+  </div>
+
+</div><!-- .main-container -->
+
+<!-- סקריפטים ליצירת פתיתי שלג ושכבת צבירה -->
+<script>
+/**
+ * שכבה 1: פתיתי שלג ברקע (canvas#snow-canvas-back)
+ * שכבה 2: פתיתי שלג מלפנים (canvas#snow-canvas-front)
+ * נייצר אובייקטים פתית שלג בכל לולאה, ניתן להם מהירות, גודל, ונעדכן frame by frame.
+ * לצבירה (accumulation) נעשה מודל פשוט:
+ *   - אם פתית מגיע לקו תחתון או נוגע בפתית אחר “שהתיישב”, הוא ייעצר.
+ *   - נשמור מערך דו-ממדי (grid) של ערימות שלג בגובה הרצפה, באופן גס.
+ * זה דמו פשוט – לא מנוע פיזיקלי מלא.
+ */
+
+const canvasBack = document.getElementById('snow-canvas-back');
+const ctxBack = canvasBack.getContext('2d');
+
+const canvasFront = document.getElementById('snow-canvas-front');
+const ctxFront = canvasFront.getContext('2d');
+
+// התאמת הגודל למסך
+function resizeCanvas() {
+  canvasBack.width = window.innerWidth;
+  canvasBack.height = window.innerHeight;
+  canvasFront.width = window.innerWidth;
+  canvasFront.height = window.innerHeight;
+}
+window.addEventListener('resize', resizeCanvas);
+resizeCanvas();
+
+// מערכים עבור הפתיתים בשכבה אחורית ובשכבה קדמית
+let flakesBack = [];
+let flakesFront = [];
+
+// נתונים עבור 'ערימת השלג' (צבירה) – grid בסיסי מאוד
+// נניח שהיינו רוצים לייצג את תחתית המסך במערך של עמודות (קוארדינטת X).
+// לצורך הפשטות בלבד – הרזולוציה תהיה נמוכה.
+const COLS = 120; // כמות עמודות גסה
+let snowGround = new Array(COLS).fill(0); 
+// snowGround[i] ייצג את גובה השלג בעמודה i
+
+// פונקציות עזר
+function random(min, max) {
+  return Math.random() * (max - min) + min;
+}
+
+// מחלקה לפתית שלג
+class SnowFlake {
+  constructor(front = false) {
+    this.x = random(0, window.innerWidth);
+    this.y = random(-window.innerHeight, 0);
+    this.radius = random(1, front ? 3 : 5);
+    this.speedY = random(0.5, front ? 2 : 1); // הקדמי מהיר קצת יותר
+    this.speedX = random(-0.5, 0.5);
+    this.front = front;
+    this.settled = false; // האם הפתית "התיישב" על השלג
+  }
+
+  update() {
+    if(this.settled) return;
+
+    this.x += this.speedX;
+    this.y += this.speedY;
+
+    // מעט תנודה
+    this.speedX += random(-0.01, 0.01);
+
+    // בדיקת גבולות מסך (צידי המסך)
+    if(this.x < 0) {
+      this.x = window.innerWidth;
+    } else if(this.x > window.innerWidth) {
+      this.x = 0;
+    }
+
+    // בדוק "התנגשות" עם "רצפה" השלג
+    if(this.y >= window.innerHeight - this.radius) {
+      // נניח שהגענו לרצפה
+      this.settle();
+    } else {
+      // בדיקת התנגשות עם פתיתים שהצטברו (מודל גריד פשוט)
+      // נמצא את עמודת ה-X המתאימה
+      const colIndex = Math.floor((this.x / window.innerWidth) * COLS);
+      if(colIndex >= 0 && colIndex < COLS) {
+        // גובה השלג בעמודה זו
+        const currentColSnowHeight = snowGround[colIndex];
+        // נחשב מיקום פיקסל אמיתי של השלג שערם
+        const realSnowY = window.innerHeight - currentColSnowHeight;
+
+        if(this.y + this.radius >= realSnowY) {
+          // משמעות הדבר שהגענו לראש הערימה
+          this.settle();
+          // הגדל את הערימה במקום הזה
+          snowGround[colIndex] += this.radius * 2;
+        }
+      }
+    }
+  }
+
+  settle() {
+    this.settled = true;
+    this.y = this.y; // הוא נשאר איפה שהוא
+    this.speedX = 0;
+    this.speedY = 0;
+  }
+
+  draw(ctx) {
+    ctx.beginPath();
+    ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
+    ctx.fillStyle = "#ffffff";
+    ctx.fill();
+    ctx.closePath();
+  }
+}
+
+// אתחול פתיתי שלג
+function initFlakes() {
+  const totalBack = 100;  // כמות פתיתים בשכבה אחורית
+  const totalFront = 80;  // כמות פתיתים בשכבה קדמית
+
+  flakesBack = [];
+  flakesFront = [];
+  for(let i=0; i<totalBack; i++) {
+    flakesBack.push(new SnowFlake(false));
+  }
+  for(let i=0; i<totalFront; i++) {
+    flakesFront.push(new SnowFlake(true));
+  }
+}
+
+function animate() {
+  // נקה כל canvas
+  ctxBack.clearRect(0,0,canvasBack.width, canvasBack.height);
+  ctxFront.clearRect(0,0,canvasFront.width, canvasFront.height);
+
+  // ציור שיכבה אחורית
+  flakesBack.forEach(flake => {
+    flake.update();
+    flake.draw(ctxBack);
+  });
+
+  // ציור שכבה קדמית
+  flakesFront.forEach(flake => {
+    flake.update();
+    flake.draw(ctxFront);
+  });
+
+  requestAnimationFrame(animate);
+}
+
+// התחל
+initFlakes();
+animate();
+</script>
+
+</body>
+</html>
