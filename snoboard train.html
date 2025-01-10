@@ -576,30 +576,32 @@ class SnowFlake {
 }
 
 function initFlakes() {
-  const totalBack = 80;  
-  const totalFront = 60; 
-  flakesBack = [];
-  flakesFront = [];
-  for(let i=0; i<totalBack; i++) {
-    flakesBack.push(new SnowFlake(false));
-  }
-  for(let i=0; i<totalFront; i++) {
-    flakesFront.push(new SnowFlake(true));
-  }
+  const spawnInterval = 100; // כל 100 מילי-שניות יתווספו פתיתים חדשים (ניתן לשנות את הערך)
+  
+  setInterval(() => {
+    // מוסיפים פתיתים חדשים כל פעם
+    for (let i = 0; i < 5; i++) { // מספר הפתיתים החדשים בכל פעם
+      flakesBack.push(new SnowFlake(false)); // פתיתי רקע
+      flakesFront.push(new SnowFlake(true)); // פתיתי חזית
+    }
+  }, spawnInterval);
+}
+function cleanUpFlakes() {
+  flakesBack = flakesBack.filter(flake => flake.y < canvasBack.height);
+  flakesFront = flakesFront.filter(flake => flake.y < canvasFront.height);
 }
 
 function animate() {
-  ctxBack.clearRect(0,0,canvasBack.width,canvasBack.height);
-  ctxFront.clearRect(0,0,canvasFront.width,canvasFront.height);
+  ctxBack.clearRect(0, 0, canvasBack.width, canvasBack.height);
+  ctxFront.clearRect(0, 0, canvasFront.width, canvasFront.height);
 
-  flakesBack.forEach(f => {
-    f.update();
-    f.draw(ctxBack);
-  });
-  flakesFront.forEach(f => {
-    f.update();
-    f.draw(ctxFront);
-  });
+  flakesBack.forEach(flake => flake.update());
+  flakesFront.forEach(flake => flake.update());
+
+  flakesBack.forEach(flake => flake.draw(ctxBack));
+  flakesFront.forEach(flake => flake.draw(ctxFront));
+
+  cleanUpFlakes(); // לנקות פתיתים שהתמקמו
 
   requestAnimationFrame(animate);
 }
