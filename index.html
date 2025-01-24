@@ -2,74 +2,920 @@
 <html lang="he">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>דף ראשי</title>
+  <title>שירותי שידור חי - גרסה עם Fade וחמש סוגי כרטיסיות</title>
   <style>
-    body {
-      font-family: Arial, sans-serif;
-      background-color: #f0f0f0;
+    /* איפוס בסיסי */
+    * {
       margin: 0;
       padding: 0;
+      box-sizing: border-box;
+    }
+
+    html, body {
+      width: 100%;
+      min-height: 100%;
+      font-family: Arial, sans-serif;
+      direction: rtl;
+      overflow-x: hidden; /* מניעת גלילה לרוחב */
+    }
+
+    /* תפריט עליון (Header) */
+    header {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      background-color: rgba(0, 0, 0, 0.8);
+      color: #fff;
+      z-index: 9999;
+      height: 90px; 
       display: flex;
-      flex-direction: column;
       align-items: center;
       justify-content: center;
-      height: 100vh;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.3);
     }
-
-    header {
-      background-color: #333;
-      color: white;
-      padding: 20px;
-      text-align: center;
-      width: 100%;
-      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
+    header nav {
+      display: flex;
+      gap: 40px;
     }
-
-    h1 {
-      margin: 0;
-    }
-
-    nav {
-      margin: 20px 0;
-    }
-
-    ul {
-      list-style-type: none;
-      padding: 0;
-    }
-
-    li {
-      margin: 10px 0;
-    }
-
-    a {
+    header nav a {
+      color: #fff;
       text-decoration: none;
-      color: #0077cc;
-      font-size: 18px;
       font-weight: bold;
-      transition: color 0.3s;
+      padding: 10px 15px;
+      border-radius: 4px;
+      font-size: 18px;
+      transition: background-color 0.3s, color 0.3s;
+      cursor: pointer;
+    }
+    header nav a:hover {
+      background-color: #ffdd57;
+      color: #333;
+    }
+    header nav a.active {
+      background-color: #ffdd57;
+      color: #333;
     }
 
-    a:hover {
-      color: #ff5722;
+    /* תפריט משנה (Sub-nav) מקובע מתחת ל־Header */
+    .sub-nav {
+      position: fixed;
+      top: 90px;   /* מתחת לכותרת */
+      left: 0;
+      right: 0;
+      background: #333;
+      padding: 10px;
+      display: flex;
+      gap: 20px;
+      justify-content: center;
+      z-index: 9998;
+    }
+    .sub-nav a {
+      text-decoration: none;
+      background: #222;
+      color: #fff;
+      padding: 5px 10px;
+      border-radius: 4px;
+      font-size: 14px;
+      cursor: pointer;
+      transition: background-color 0.3s;
+    }
+    .sub-nav a:hover {
+      background-color: #ffdd57;
+      color: #333;
+    }
+    .sub-nav a.active-sub {
+      background-color: #ffdd57;
+      color: #333;
+    }
+
+    /* מעטפת עמוד (Page-wrap) עבור הקאנבס והתוכן */
+    .page-wrap {
+      position: relative;
+      width: 100%;
+    }
+
+    /* הקאנבס של הכדורים הזוהרים (נצנצים), באותו מישור כדי שיגלול עם התוכן */
+    .orb-canvas {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      pointer-events: none; 
+    }
+
+    /* תוכן ראשי, מרחיק כדי שלא ייכנס מתחת ל-Header וה-Sub-nav */
+    .main-container {
+      margin-top: 140px; /* 90px ל-Header + 50px בערך ל-Sub-nav */
+      /* ניתן לכוונן בהתאם לגובה ה-Sub-nav בפועל */
+      min-height: 100vh;
+      /* padding וכד' ניתן להוסיף לפי הצורך */
+    }
+
+    /* כל קטגוריה (דף פנימי) - מוסתרת בברירת מחדל */
+    .category-page {
+      display: none;      /* לא תופס מקום כלל */
+      opacity: 0;         /* לצורך Fade-in */
+      transition: opacity 0.25s ease-in-out; /* Fade מהיר */
+    }
+    .category-page.active {
+      display: block;     /* מופיעה */
+      opacity: 1;         /* מעבר ל-1 ב-0.25 שניות */
+    }
+
+    /* רקע מתחלף */
+    .category-page.fade-bg {
+      background-size: cover;
+      background-position: center center;
+      background-repeat: no-repeat;
+      /* transition: background-image 0.25s; (אפשרי) */
+    }
+
+    /* תוכן קטגוריה */
+    .category-content {
+      max-width: 800px;
+      margin: 20px auto;
+      padding: 20px;
+      background: rgba(255, 255, 255, 0.9);
+      border-radius: 8px;
+      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
+      margin-bottom: 40px;
+    }
+    .category-content h2 {
+      margin-bottom: 10px;
+      color: #333;
+    }
+    .category-content p {
+      margin-bottom: 15px;
+      line-height: 1.6;
+      color: #444;
+    }
+    .category-content ul {
+      list-style-type: disc;
+      list-style-position: inside;
+      margin-bottom: 20px;
+      color: #444;
+    }
+    .category-content li {
+      margin-bottom: 8px;
+    }
+    .highlight {
+      font-weight: bold;
+      color: #333;
+    }
+
+    /* עוגן לשימוש בסאב-קטגוריה */
+    .anchor {
+      display: block;
+      height: 60px; /* כדי לפנות מקום מתחת ל-sub-nav */
+      margin-top: -60px;
+      visibility: hidden;
+    }
+
+    /* כרטיסיות בדף הראשון (category-cards) */
+    .category-cards {
+      display: flex;
+      justify-content: space-around;
+      flex-wrap: wrap;
+      padding: 20px;
+      gap: 20px;
+    }
+    .card {
+      position: relative;
+      width: 30%;
+      min-width: 250px;
+      height: 200px;
+      background: rgba(255, 255, 255, 0.9);
+      border-radius: 8px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+      overflow: hidden;
+      cursor: pointer;
+      transition: transform 0.3s;
+    }
+    .card:hover {
+      transform: scale(1.05);
+    }
+    .card-content {
+      padding: 20px;
+    }
+    .card-overlay {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0,0,0,0.8);
+      color: #fff;
+      opacity: 0;
+      transition: opacity 0.5s ease;
+      padding: 20px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+    }
+    .card:hover .card-overlay {
+      opacity: 1;
+    }
+
+    /* טיפ נפתח/נסגר */
+    .tip-box {
+      margin-top: 10px;
+    }
+    .tip-header {
+      background-color: #d7e7f7;
+      padding: 8px 12px;
+      border-radius: 4px;
+      cursor: pointer;
+      font-weight: bold;
+      color: #333;
+      display: inline-block;
+    }
+    .tip-content {
+      background-color: #f4f4f4;
+      border-radius: 4px;
+      margin-top: 5px;
+      padding: 10px 12px;
+      display: none;
+    }
+
+    /* דוגמה קיימת: כרטיסיות תעריפים (pricing-cards) */
+    .pricing-cards {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 20px;
+      justify-content: center;
+    }
+    .price-card {
+      flex: 0 0 250px;
+      background: #fff;
+      border: 2px solid #ccc;
+      border-radius: 6px;
+      text-align: center;
+      padding: 20px;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+    }
+    .price-card img {
+      max-width: 80px;
+      margin-bottom: 10px;
+    }
+    .price-card h3 {
+      margin-bottom: 10px;
+      font-size: 20px;
+      color: #333;
+    }
+    .price-card p {
+      margin-bottom: 10px;
+      color: #555;
+    }
+    .price-card .price {
+      font-weight: bold;
+      color: #d9534f;
+      font-size: 24px;
+      margin-bottom: 10px;
+    }
+
+    /* --- כרטיסיות חדשות לדוגמה (שונות מהסגנון הקיים) --- */
+
+    /* 1) info-cards: כרטיסיות מידע (טקסט מפורט) */
+    .info-cards {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 20px;
+      justify-content: center;
+      margin-bottom: 40px; /* ריווח כללי */
+    }
+    .info-card {
+      flex: 0 0 300px;
+      background: #fafafa;
+      border: 1px solid #ddd;
+      border-radius: 6px;
+      padding: 15px;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+      transition: transform 0.2s;
+    }
+    .info-card:hover {
+      transform: scale(1.02);
+    }
+    .info-card h4 {
+      margin-bottom: 8px;
+      color: #333;
+      font-size: 18px;
+    }
+    .info-card p {
+      color: #555;
+      line-height: 1.4;
+    }
+
+    /* 2) icon-cards: כרטיסיות עם אייקון גדול בראש */
+    .icon-cards {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 20px;
+      justify-content: space-around;
+      margin-bottom: 40px;
+    }
+    .icon-card {
+      width: 200px;
+      background: #fff;
+      border: 1px solid #ccc;
+      border-radius: 8px;
+      text-align: center;
+      padding: 20px;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.15);
+      transition: background-color 0.3s;
+    }
+    .icon-card:hover {
+      background-color: #f2f2f2;
+    }
+    .icon-card img {
+      max-width: 64px;
+      margin-bottom: 10px;
+    }
+    .icon-card h4 {
+      margin-bottom: 8px;
+      color: #333;
+      font-size: 18px;
+    }
+    .icon-card p {
+      color: #555;
+      font-size: 14px;
+    }
+
+    /* 3) gallery-cards: כרטיסיות "גלריה" עם תמונה רחבה וכותרת */
+    .gallery-cards {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 20px;
+      justify-content: center;
+      margin-bottom: 40px;
+    }
+    .gallery-card {
+      width: 300px;
+      border: 1px solid #ddd;
+      border-radius: 6px;
+      overflow: hidden;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+      background: #fff;
+      text-align: center;
+    }
+    .gallery-card img {
+      width: 100%;
+      height: 180px;
+      object-fit: cover;
+      display: block;
+    }
+    .gallery-card h4 {
+      margin: 10px 0;
+      color: #333;
+      font-size: 18px;
+    }
+    .gallery-card p {
+      color: #555;
+      padding: 0 10px 10px;
+      font-size: 14px;
+    }
+
+    /* גלישה בפלאפון וכו' */
+    @media screen and (max-width: 768px) {
+      header nav a {
+        font-size: 14px;
+        padding: 8px 10px;
+      }
+      .card {
+        width: 100%;
+        height: auto;
+      }
+      .info-card, .icon-card, .price-card, .gallery-card {
+        width: 100%;
+        flex: none;
+      }
+      .main-container {
+        margin-top: 140px; /* אפשר לשנות לפי הצורך */
+      }
     }
   </style>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
 </head>
 <body>
 
+<!-- כותרת עליונה -->
 <header>
-  <h1>דף ראשי - קישורים לדפים</h1>
+  <nav>
+    <a data-category="cat1">מבוא ושירותים</a>
+    <a data-category="cat2">הקמת אולפנים</a>
+    <a data-category="cat3">הפעלת שידור חי</a>
+  </nav>
 </header>
 
-<nav>
-  <ul>
-    <li><a href="box.html">Box</a></li>
-    <li><a href="snoboard%20train.html">Snoboard Train</a></li>
-    <li><a href="test.html">Test</a></li>
-    <li><a href="גלריה.html">גלריה</a></li>
-  </ul>
-</nav>
+<div class="page-wrap">
+  <!-- שכבות הנצנצים (כדורים זוהרים), גוללים ביחד עם התוכן -->
+  <canvas id="orb-canvas-back" class="orb-canvas"></canvas>
+  <canvas id="orb-canvas-front" class="orb-canvas"></canvas>
 
+  <!-- תוכן ראשי -->
+  <div class="main-container">
+
+    <!-- קטגוריה 1 -->
+    <div id="cat1" class="category-page fade-bg">
+      <!-- תפריט משנה -->
+      <div class="sub-nav">
+        <a href="#cat1-sub1">סקירה כללית</a>
+        <a href="#cat1-sub2">צילום ועריכה</a>
+        <a href="#cat1-sub3">שידור לפלטפורמות</a>
+        <a href="#cat1-sub4">תעריפים</a>
+      </div>
+
+      <!-- כרטיסיות ראשיות (category-cards) -->
+      <div class="category-cards">
+        <div class="card" data-category="cat1">
+          <div class="card-content">
+            <h3>מבוא ושירותים</h3>
+            <p>תמונה כללית על הפקת שידור חי.</p>
+          </div>
+          <div class="card-overlay">
+            <p>כל מה שצריך לדעת על הצילום, העריכה והזרמת התוכן.</p>
+          </div>
+        </div>
+        <div class="card" data-category="cat2">
+          <div class="card-content">
+            <h3>הקמת אולפנים</h3>
+            <p>תשתיות וציוד מקצועי.</p>
+          </div>
+          <div class="card-overlay">
+            <p>הקמה נכונה של אולפן, חשמל, אינטרנט ומיתוג.</p>
+          </div>
+        </div>
+        <div class="card" data-category="cat3">
+          <div class="card-content">
+            <h3>הפעלת שידור חי</h3>
+            <p>בימוי, גרפיקות ופנייה לעתיד.</p>
+          </div>
+          <div class="card-overlay">
+            <p>הוספת אפקטים, תזמון מצלמות ותקשורת צוות.</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- סקירה כללית -->
+      <div class="category-content" id="cat1-sub1">
+        <h2>סקירה כללית</h2>
+        <p>
+          אנו מציעים שירותים מקיפים בתחום השידור החי, החל בתכנון האירוע ועד ניתוח התוצאות.
+          יש לנו ניסיון בהפקות מקצועיות, ציוד מתקדם וצוות המתמחה בכל היבטי הלייב.
+        </p>
+        <div class="tip-box">
+          <div class="tip-header">טיפ: בניית קונספט</div>
+          <div class="tip-content">
+            כדאי להגדיר מראש את הקונספט של השידור, לדוגמה אירוע הופעה או כנס, כך ניתן להתאים את הגרפיקות והמעברים.
+          </div>
+        </div>
+      </div>
+
+      <!-- צילום ועריכה -->
+      <div class="category-content" id="cat1-sub2">
+        <h2>צילום ועריכה</h2>
+        <p>
+          צוות הצלמים שלנו פועל עם ציוד 4K/HD ומספק עריכה בזמן אמת. ניתן לשלב גרפיקות, כתוביות ומעברים תוך כדי האירוע.
+          שימוש ב-Multi Camera מאפשר פריסת זוויות שונות, והמעבר ביניהן מבוצע דרך ניתוב מקצועי.
+        </p>
+      </div>
+
+      <!-- שידור לפלטפורמות -->
+      <div class="category-content" id="cat1-sub3">
+        <h2>שידור לפלטפורמות</h2>
+        <ul>
+          <li><span class="highlight">YouTube Live</span>: תשתית מעולה לחשיפה רחבה.</li>
+          <li><span class="highlight">Facebook Live</span>: אינטראקציה מהירה עם הקהל.</li>
+          <li><span class="highlight">Zoom Webinar</span>: נהדר לכנסים והדרכות.</li>
+          <li><span class="highlight">אתר פרטי</span>: שליטה מלאה במיתוג ובפרטיות.</li>
+        </ul>
+        <p>מומלץ לשלב כמה פלטפורמות במקביל כדי להגיע למקסימום צופים.</p>
+      </div>
+
+      <!-- תעריפים (pricing-cards) -->
+      <div class="category-content" id="cat1-sub4">
+        <h2>תעריפים</h2>
+        <div class="pricing-cards">
+          <div class="price-card">
+            <img src="icon-basic.png" alt="Basic Icon">
+            <h3>חבילת בסיס</h3>
+            <p>צילום מצלמה אחת, עריכת לייב פשוטה.</p>
+            <p class="price">₪1,200</p>
+          </div>
+          <div class="price-card">
+            <img src="icon-pro.png" alt="Pro Icon">
+            <h3>חבילת מקצוענים</h3>
+            <p>שתי מצלמות, צוות מקצועי לעריכה וגרפיקות.</p>
+            <p class="price">₪2,800</p>
+          </div>
+          <div class="price-card">
+            <img src="icon-premium.png" alt="Premium Icon">
+            <h3>חבילת פרימיום</h3>
+            <p>שלוש מצלמות, ניתוב מתקדם, אפקטים ואינטרקום צוות.</p>
+            <p class="price">₪4,500</p>
+          </div>
+        </div>
+      </div>
+
+    </div><!-- cat1 -->
+
+    <!-- קטגוריה 2: הקמת אולפנים -->
+    <div id="cat2" class="category-page fade-bg">
+      <div class="sub-nav">
+        <a href="#cat2-sub1">תשתיות</a>
+        <a href="#cat2-sub2">ציוד והקמה</a>
+        <a href="#cat2-sub3">עיצוב סביבה</a>
+      </div>
+
+      <div class="category-content" id="cat2-sub1">
+        <h2>תשתיות</h2>
+        <p>בחלק זה נדון בחשמל, אינטרנט וחיווט נכון.</p>
+        <div class="columns">
+          <div class="column">
+            <h3>חשמל</h3>
+            <p>תשתית חזקה למניעת נפילות עומס.</p>
+          </div>
+          <div class="column">
+            <h3>אינטרנט</h3>
+            <p>חיבור יציב ורחב פס כדי למנוע לאגים.</p>
+          </div>
+          <div class="column">
+            <h3>כבלים וחיווט</h3>
+            <p>סידור נקי ותיעוד לנוחות הצוות והתחזוקה.</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="category-content" id="cat2-sub2">
+        <h2>ציוד והקמה</h2>
+        <ul>
+          <li><span class="highlight">מצלמות מקצועיות:</span> עם חיבור SDI/HDMI.</li>
+          <li><span class="highlight">מיקרופונים:</span> חוטיים או אלחוטיים.</li>
+          <li><span class="highlight">מחשב או חומרת Encoder:</span> לשידור חלק.</li>
+        </ul>
+        <p>האלמנטים הללו משתלבים להפקה ברמה גבוהה.</p>
+      </div>
+
+      <div class="category-content" id="cat2-sub3">
+        <h2>עיצוב סביבה</h2>
+        <p>
+          באולפן או בשטח, חשוב לשלב רקעים מותאמים, תאורה נכונה ואלמנטים מיתוגיים.
+          לדוגמה, שימוש בצבעי המותג או בלוגו מובחן תורמים לחוויית צפייה עקבית.
+        </p>
+        <div class="tip-box">
+          <div class="tip-header">טיפ: אקוסטיקה</div>
+          <div class="tip-content">
+            מומלץ למקם חומרים בולעי קול בקירות ובתקרה, כדי למנוע הד ולהבטיח סאונד איכותי.
+          </div>
+        </div>
+      </div>
+
+      <!-- כרטיסיות חדשות 1: info-cards -->
+      <div class="category-content">
+        <h2>כרטיסיות מידע (info-cards)</h2>
+        <div class="info-cards">
+          <div class="info-card">
+            <h4>טיפ טכני</h4>
+            <p>ודאו שיש מספיק שקעים להטענת כל המכשירים, ותמיד החזיקו כבל מאריך נוסף.</p>
+          </div>
+          <div class="info-card">
+            <h4>ניהול כבלים</h4>
+            <p>כדאי לתייג כבלים לפי סוג או מיקום, כדי למצוא במהירות ולמנוע בלגן.</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- כרטיסיות חדשות 2: icon-cards -->
+      <div class="category-content">
+        <h2>כרטיסיות אייקונים (icon-cards)</h2>
+        <div class="icon-cards">
+          <div class="icon-card">
+            <img src="icon-camera.png" alt="Camera Icon">
+            <h4>מצלמה</h4>
+            <p>חשיבות בחירת מצלמות מתאימות בהתאם לסוג האירוע.</p>
+          </div>
+          <div class="icon-card">
+            <img src="icon-light.png" alt="Lighting Icon">
+            <h4>תאורה</h4>
+            <p>פנסים חכמים ו־LED מעניקים גמישות מקסימלית ושליטה מלאה.</p>
+          </div>
+          <div class="icon-card">
+            <img src="icon-sound.png" alt="Sound Icon">
+            <h4>סאונד</h4>
+            <p>מערכות מיקרופון אלחוטיות לתנועה חופשית ומיקסר דיגיטלי.</p>
+          </div>
+        </div>
+      </div>
+
+    </div><!-- cat2 -->
+
+    <!-- קטגוריה 3: הפעלת שידור חי -->
+    <div id="cat3" class="category-page fade-bg">
+      <div class="sub-nav">
+        <a href="#cat3-sub1">ניתוב ובימוי</a>
+        <a href="#cat3-sub2">גרפיקות בזמן אמת</a>
+        <a href="#cat3-sub3">השלב הבא</a>
+      </div>
+
+      <div class="category-content" id="cat3-sub1">
+        <h2>ניתוב ובימוי</h2>
+        <ul>
+          <li><span class="highlight">Multi-Cam Switcher</span>: מעבר חלק בין מצלמות.</li>
+          <li><span class="highlight">תזמון עם הצלמים</span>: הבמאי מקבל תמונה מכל מצלמה ומחליט מתי לעבור.</li>
+          <li><span class="highlight">אינטרקום רציף</span>: מאפשר תקשורת בזמן אמת לכל הצוות.</li>
+        </ul>
+      </div>
+
+      <div class="category-content" id="cat3-sub2">
+        <h2>גרפיקות בזמן אמת</h2>
+        <ul>
+          <li>Lower Thirds להצגת שמות וכותרות.</li>
+          <li>שקופיות ולוגואים ממותגים.</li>
+          <li>שעוני ספירה לאחור והצגת שאלות מהקהל.</li>
+        </ul>
+        <p>הגרפיקה מוסיפה בידול ויזואלי והופכת את השידור למזוהה עם המותג.</p>
+      </div>
+
+      <div class="category-content" id="cat3-sub3">
+        <h2>השלב הבא</h2>
+        <ul>
+          <li>ניתוח נתוני צפייה וקהל.</li>
+          <li>עריכת הגרסה המוקלטת להעלאה ב־VOD או לפרומו.</li>
+          <li>תכנון הפקה עתידית על סמך המשוב מהמשתתפים.</li>
+        </ul>
+      </div>
+
+      <!-- כרטיסיות חדשות 3: gallery-cards -->
+      <div class="category-content">
+        <h2>כרטיסיות גלריה (gallery-cards)</h2>
+        <div class="gallery-cards">
+          <div class="gallery-card">
+            <img src="live1.jpg" alt="Live Example 1">
+            <h4>אירוע ספורט</h4>
+            <p>דוגמה לשידור חי של תחרות ספורט במצלמות מרובות.</p>
+          </div>
+          <div class="gallery-card">
+            <img src="live2.jpg" alt="Live Example 2">
+            <h4>הופעה מוזיקלית</h4>
+            <p>איך ניגשים לבימוי הופעה בשידור עם גרפיקות בזמן אמת.</p>
+          </div>
+          <div class="gallery-card">
+            <img src="live3.jpg" alt="Live Example 3">
+            <h4>כנס מקצועי</h4>
+            <p>שימוש בחלוקת מסך, קריינות ותכני מצגות.</p>
+          </div>
+        </div>
+      </div>
+    </div><!-- cat3 -->
+
+  </div><!-- .main-container -->
+</div><!-- .page-wrap -->
+
+<script>
+/* --------------------------------------------
+   1) מעבר בין קטגוריות (Fade In)
+--------------------------------------------- */
+const pages = document.querySelectorAll('.category-page');
+const navLinks = document.querySelectorAll('header nav a');
+let currentActiveId = null;
+
+function showCategory(catId) {
+  // הסתרת הקטגוריה הקודמת (אם יש)
+  if (currentActiveId && currentActiveId !== catId) {
+    const oldPage = document.getElementById(currentActiveId);
+    if (oldPage) oldPage.classList.remove('active');
+  }
+  // הצגת הקטגוריה החדשה
+  const newPage = document.getElementById(catId);
+  if (newPage) {
+    newPage.classList.add('active');
+  }
+  // עדכון כפתור nav פעיל
+  navLinks.forEach(link => {
+    link.classList.remove('active');
+    if (link.getAttribute('data-category') === catId) {
+      link.classList.add('active');
+    }
+  });
+  currentActiveId = catId;
+}
+
+// בעת לחיצה על כפתור nav
+navLinks.forEach(link => {
+  link.addEventListener('click', () => {
+    const targetCat = link.getAttribute('data-category');
+    showCategory(targetCat);
+    // גלילה לראש
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  });
+});
+
+// ברירת מחדל: הצגת קטגוריה 1
+showCategory('cat1');
+
+
+/* --------------------------------------------
+   2) קליק על כרטיסיות בדף הראשון
+--------------------------------------------- */
+const categoryCards = document.querySelectorAll('.category-cards .card');
+categoryCards.forEach(card => {
+  card.addEventListener('click', () => {
+    const targetCat = card.getAttribute('data-category');
+    showCategory(targetCat);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  });
+});
+
+
+/* --------------------------------------------
+   3) גלילת sub-nav לסעיף הרלוונטי
+   + סימון מי נצפה כעת (IntersectionObserver)
+--------------------------------------------- */
+const subNavLinks = document.querySelectorAll('.sub-nav a');
+subNavLinks.forEach(subLink => {
+  subLink.addEventListener('click', e => {
+    e.preventDefault();
+    const targetAnchor = subLink.getAttribute('href');
+    const anchorEl = document.querySelector(targetAnchor);
+    if (anchorEl) {
+      window.scrollTo({
+        top: anchorEl.offsetTop - 150,
+        behavior: 'smooth'
+      });
+    }
+  });
+});
+
+// תצפית סעיפים כדי לסמן sub-nav פעיל
+const allSubSections = document.querySelectorAll('.category-content[id]');
+const observerOptions = {
+  root: null,
+  rootMargin: '0px',
+  threshold: 0.3
+};
+function observerCallback(entries) {
+  entries.forEach(entry => {
+    if (entry.isIntersecting) {
+      const id = entry.target.getAttribute('id');
+      // מוצאים לאיזה קטגוריה שייך הסעיף
+      const parentPage = entry.target.closest('.category-page');
+      if (!parentPage) return;
+      const subLinksInPage = parentPage.querySelectorAll('.sub-nav a');
+      subLinksInPage.forEach(link => link.classList.remove('active-sub'));
+      const activeLink = parentPage.querySelector(`.sub-nav a[href="#${id}"]`);
+      if (activeLink) {
+        activeLink.classList.add('active-sub');
+      }
+    }
+  });
+}
+const observer = new IntersectionObserver(observerCallback, observerOptions);
+allSubSections.forEach(section => observer.observe(section));
+
+
+/* --------------------------------------------
+   4) רקע מתחלף
+--------------------------------------------- */
+const bgImages = [
+  'sbBG1.webp',
+  'sbBG2.webp',
+  'sbBG3.webp',
+  'sbBG4.webp',
+  'sbBG5.webp'
+];
+let bgIndex = 0;
+function randomRange(min, max) {
+  return Math.random() * (max - min) + min;
+}
+function rotateBackgrounds() {
+  pages.forEach(page => {
+    page.style.backgroundImage = `url('${bgImages[bgIndex]}')`;
+  });
+  bgIndex = (bgIndex + 1) % bgImages.length;
+}
+pages.forEach(page => page.classList.add('fade-bg'));
+setInterval(() => {
+  rotateBackgrounds();
+}, randomRange(10000,25000));
+rotateBackgrounds();
+
+
+/* --------------------------------------------
+   5) טיפים נפתחים/נסגרים
+--------------------------------------------- */
+const tipHeaders = document.querySelectorAll('.tip-header');
+tipHeaders.forEach(header => {
+  header.addEventListener('click', () => {
+    const content = header.nextElementSibling;
+    if (content.style.display === 'block') {
+      content.style.display = 'none';
+    } else {
+      content.style.display = 'block';
+    }
+  });
+});
+
+
+/* --------------------------------------------
+   6) כדורים זוהרים (נצנצים) גוללים עם הדף
+--------------------------------------------- */
+const canvasBack = document.getElementById('orb-canvas-back');
+const ctxBack = canvasBack.getContext('2d');
+const canvasFront = document.getElementById('orb-canvas-front');
+const ctxFront = canvasFront.getContext('2d');
+
+// קובעים את גודל ה-canvas לפי גובה העמוד
+function resizeCanvas() {
+  const pageHeight = document.querySelector('.page-wrap').scrollHeight;
+  canvasBack.width = window.innerWidth;
+  canvasBack.height = pageHeight;
+  canvasFront.width = window.innerWidth;
+  canvasFront.height = pageHeight;
+}
+
+window.addEventListener('resize', resizeCanvas);
+document.addEventListener('DOMContentLoaded', resizeCanvas);
+
+class GlowingOrb {
+  constructor(front=false) {
+    this.front = front;
+    this.x = Math.random() * canvasBack.width;
+    this.y = Math.random() * canvasBack.height;
+    this.radius = randomRange(front ? 3 : 5, front ? 7 : 12);
+    this.speedX = randomRange(-0.08, 0.08);
+    this.speedY = randomRange(-0.08, 0.08);
+
+    // גוון רנדומלי (כחול-ירוק-חום)
+    const rBase = [40,100];
+    const gBase = [80,180];
+    const bBase = [40,150];
+    const r = Math.floor(randomRange(rBase[0], rBase[1]));
+    const g = Math.floor(randomRange(gBase[0], gBase[1]));
+    const b = Math.floor(randomRange(bBase[0], bBase[1]));
+    const alpha = randomRange(0.2, 0.6);
+    this.color = `rgba(${r}, ${g}, ${b}, ${alpha})`;
+  }
+  update() {
+    this.x += this.speedX;
+    this.y += this.speedY;
+    if(this.x < -this.radius) {
+      this.x = canvasBack.width + this.radius;
+    } else if(this.x > canvasBack.width + this.radius) {
+      this.x = -this.radius;
+    }
+    if(this.y < -this.radius) {
+      this.y = canvasBack.height + this.radius;
+    } else if(this.y > canvasBack.height + this.radius) {
+      this.y = -this.radius;
+    }
+  }
+  draw(ctx) {
+    ctx.save();
+    ctx.beginPath();
+    ctx.shadowBlur = 12;
+    ctx.shadowColor = this.color;
+    ctx.fillStyle = this.color;
+    ctx.arc(this.x, this.y, this.radius, 0, 2*Math.PI);
+    ctx.fill();
+    ctx.closePath();
+    ctx.restore();
+  }
+}
+
+let orbsBack = [];
+let orbsFront = [];
+
+function initOrbs() {
+  orbsBack = [];
+  orbsFront = [];
+  for(let i=0; i<30; i++){
+    orbsBack.push(new GlowingOrb(false));
+  }
+  for(let j=0; j<20; j++){
+    orbsFront.push(new GlowingOrb(true));
+  }
+}
+
+function animate() {
+  ctxBack.clearRect(0,0,canvasBack.width, canvasBack.height);
+  ctxFront.clearRect(0,0,canvasFront.width, canvasFront.height);
+
+  orbsBack.forEach(o => {
+    o.update();
+    o.draw(ctxBack);
+  });
+  orbsFront.forEach(o => {
+    o.update();
+    o.draw(ctxFront);
+  });
+  requestAnimationFrame(animate);
+}
+
+// התחול ראשוני
+initOrbs();
+animate();
+
+</script>
 </body>
 </html>
