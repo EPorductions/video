@@ -28,10 +28,28 @@ header {
   justify-content: center;
   box-shadow: 0 2px 5px rgba(0,0,0,0.3);
 }
+
 header nav {
   display: flex;
-  gap: 40px;
+  gap: 20px;
+  overflow-x: auto; /* מוסיף גלילה אופקית */
+  white-space: nowrap; /* מונע שבירת שורות */
+  padding: 0 10px;
 }
+
+header nav::-webkit-scrollbar {
+  height: 8px; /* גובה פס הגלילה */
+}
+
+header nav::-webkit-scrollbar-thumb {
+  background-color: #ffdd57; /* צבע ידית הגלילה */
+  border-radius: 4px;
+}
+
+header nav::-webkit-scrollbar-track {
+  background-color: rgba(0, 0, 0, 0.2); /* צבע רקע פס הגלילה */
+}
+
 header nav a {
   color: #fff;
   text-decoration: none;
