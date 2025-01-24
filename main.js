@@ -11,7 +11,36 @@
 const pages = document.querySelectorAll('.category-page');
 const navLinks = document.querySelectorAll('header nav a');
 let currentActiveId = null;
+const nav = document.querySelector('header nav');
 
+let isDragging = false;
+let startX, scrollLeft;
+
+nav.addEventListener('mousedown', (e) => {
+  isDragging = true;
+  nav.classList.add('dragging');
+  startX = e.pageX - nav.offsetLeft;
+  scrollLeft = nav.scrollLeft;
+});
+
+nav.addEventListener('mouseleave', () => {
+  isDragging = false;
+  nav.classList.remove('dragging');
+});
+
+nav.addEventListener('mouseup', () => {
+  isDragging = false;
+  nav.classList.remove('dragging');
+});
+
+nav.addEventListener('mousemove', (e) => {
+  if (!isDragging) return;
+  e.preventDefault();
+  const x = e.pageX - nav.offsetLeft;
+  const walk = (x - startX) * 3; // מהירות הגרירה
+  nav.scrollLeft = scrollLeft - walk;
+});
+ 
 function showCategory(catId) {
   // הסתרה של הקטגוריה הקודמת
   if (currentActiveId && currentActiveId !== catId) {

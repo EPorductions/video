@@ -32,6 +32,13 @@ header {
 header nav {
   display: flex;
   gap: 40px;
+	  overflow-x: auto; /* אפשר גלילה אופקית */
+  white-space: nowrap; /* מנע שבירת שורות */
+  -webkit-overflow-scrolling: touch; /* גלילה חלקה בטאץ' */
+}
+header nav::-webkit-scrollbar {
+  display: none; /* הסתרת פס הגלילה */
+
 }
 header nav a {
   color: #fff;
