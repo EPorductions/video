@@ -1,0 +1,323 @@
+<!DOCTYPE html>
+<html lang="he">
+<head>
+  <meta charset="UTF-8">
+  <title>מדריך גלישת סנובורד - גרסת כרטיסיות ו-Fade</title>
+  <link rel="stylesheet" href="styles.css">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+</head>
+<body>
+<!-- קנבס לנצנצים (Glowing Orbs) -->
+<canvas id="orb-canvas-back" class="orb-canvas"></canvas>
+<canvas id="orb-canvas-front" class="orb-canvas"></canvas>
+
+<!-- קנבס לשלג דו-שכבתי (רקע + קדמי) -->
+<canvas id="snow-canvas-back" class="snow-canvas"></canvas>
+<canvas id="snow-canvas-front" class="snow-canvas"></canvas>
+<!-- כותרת עליונה -->
+<header>
+  <nav>
+    <a data-category="cat1">יסודות הגלישה</a>
+    <a data-category="cat2">אימונים לפני</a>
+    <a data-category="cat3">יום הגלישה</a>
+  </nav>
+</header>
+
+<div class="page-wrap">
+  <!-- שכבות הנצנצים (כדורים זוהרים), גוללים ביחד עם התוכן -->
+  <canvas id="orb-canvas-back" class="orb-canvas"></canvas>
+  <canvas id="orb-canvas-front" class="orb-canvas"></canvas>
+
+  <!-- תוכן ראשי -->
+  <div class="main-container">
+
+    <!-- קטגוריה 1: יסודות הגלישה -->
+    <div id="cat1" class="category-page fade-bg">
+      <!-- תפריט משנה -->
+      <div class="sub-nav">
+        <a href="#cat1-sub1">סקירה כללית</a>
+        <a href="#cat1-sub2">הכרת הציוד</a>
+        <a href="#cat1-sub3">בטיחות ונפילות</a>
+        <a href="#cat1-sub4">טכניקות בסיס</a>
+      </div>
+
+      <!-- כרטיסיות ראשיות (category-cards) -->
+      <div class="category-cards">
+        <div class="card" data-category="cat1">
+          <div class="card-content">
+            <h3>יסודות הגלישה</h3>
+            <p>מידע בסיסי למתחילים (Introduction).</p>
+          </div>
+          <div class="card-overlay">
+            <p>הכרת הענף, סקירה כללית על מהות גלישת סנובורד ומה נדרש כדי להתחיל.</p>
+          </div>
+        </div>
+        <div class="card" data-category="cat2">
+          <div class="card-content">
+            <h3>אימונים לפני</h3>
+            <p>כושר, חימום וריכוז.</p>
+          </div>
+          <div class="card-overlay">
+            <p>תוכנית כושר, תרגילי שיווי משקל, הכנה מנטלית וניהול פחדים.</p>
+          </div>
+        </div>
+        <div class="card" data-category="cat3">
+          <div class="card-content">
+            <h3>יום הגלישה</h3>
+            <p>טכניקות והתקדמות.</p>
+          </div>
+          <div class="card-overlay">
+            <p>טכניקות עצירה, סיבובים, מעבר למסלולים מתקדמים ופארקים.</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- cat1-sub1: סקירה כללית -->
+      <div class="category-content" id="cat1-sub1">
+        <h2>סקירה כללית</h2>
+        <p>
+          גלישת סנובורד (Snowboard) היא אחת הפעילויות המלהיבות ביותר לחובבי שלג. 
+          היא משלבת מהירות, זרימה וחופש על המדרונות. בקטע זה נלמד מה הופך את הסנובורד לכל כך ייחודי 
+          ואיך להתחיל בדרך הנכונה.
+        </p>
+        <p>
+          באזורים רבים בעולם יש עונת חורף שבה ניתן לגלוש, ובאתרי סקי תמצאו מסלולים לכל הרמות.  
+          חשוב לבחור אתר המותאם גם למתחילים, כך שהחוויה תהיה בטוחה ומהנה.
+        </p>
+        <div class="tip-box">
+          <div class="tip-header">טיפ: מוטיבציה</div>
+          <div class="tip-content">
+            גלישה דורשת סבלנות ותרגול חוזר. מומלץ להציב מטרות קטנות (למשל, להתייצב ולגלוש כמה מטרים בלי ליפול) 
+            וליהנות מהדרך.
+          </div>
+        </div>
+      </div>
+
+      <!-- cat1-sub2: הכרת הציוד -->
+      <div class="category-content" id="cat1-sub2">
+        <h2>הכרת הציוד</h2>
+        <ul>
+          <li><span class="highlight">נעלי סנובורד (Boots):</span> דאגו שנעלי הגלישה יהיו במידה המדויקת ועם תמיכה טובה.</li>
+          <li><span class="highlight">ביינדינגס (Bindings):</span> מחברים את הנעליים לקרש, התאימו את הזוויות והגמישות לצרכים שלכם.</li>
+          <li><span class="highlight">קרש (Snowboard):</span> בחרו אורך וגמישות בהתאם לגובה ולמשקל, וכן לסגנון הגלישה הרצוי.</li>
+          <li><span class="highlight">ציוד בטיחות:</span> קסדה, מגני ידיים/ברכיים ומשקפי סקי מומלצים מאוד.</li>
+        </ul>
+        <p>ציוד איכותי משפר את החוויה ומפחית את הסיכוי לפציעות.</p>
+      </div>
+
+      <!-- cat1-sub3: בטיחות ונפילות -->
+      <div class="category-content" id="cat1-sub3">
+        <h2>בטיחות וטכניקות נפילה</h2>
+        <p>
+          נפילות הן חלק טבעי מתהליך הלמידה. כדי להימנע מפציעות:
+        </p>
+        <ul>
+          <li>ליפול קדימה עם כיפוף מרפקים וריכוך הנפילה.</li>
+          <li>ליפול אחורה תוך הצמדת הסנטר לחזה ולהימנע מתנועה חדה בעורף.</li>
+          <li>להימנע משליחת ידיים ישרות לאחור – יש סיכון גבוה לשברים בפרק כף היד.</li>
+        </ul>
+        <div class="tip-box">
+          <div class="tip-header">טיפ: תרגול נפילה</div>
+          <div class="tip-content">
+            אפשר להתאמן על "נפילות רכות" בבית או על מזרן. כך מפתחים רפלקסים נכונים שיקלו על הנפילות בשלג.
+          </div>
+        </div>
+      </div>
+
+      <!-- cat1-sub4: טכניקות בסיס -->
+      <div class="category-content" id="cat1-sub4">
+        <h2>טכניקות בסיס</h2>
+        <p>
+          לפני שעוברים למסלולים מתקדמים, כדאי להכיר עצירות בסיסיות וגלישה ראשונית.
+        </p>
+        <div class="pricing-cards">
+          <div class="price-card">
+            <img src="https://publicdomainvectors.org/photos/snowboard-boot-icon.png" alt="Basic Icon">
+            <h3>עצירה על עקבים (Heel Edge)</h3>
+            <p>משמשת לעצירה פשוטה ע"י לחיצה על העקבים והטיית הקרש.</p>
+            <p class="price">"ירוק" (קל)</p>
+          </div>
+          <div class="price-card">
+            <img src="https://publicdomainvectors.org/photos/snowboard-stance-icon.png" alt="Pro Icon">
+            <h3>עצירה על בהונות (Toe Edge)</h3>
+            <p>טכניקה מעט יותר מתקדמת למתחילים, דורשת איזון משופר.</p>
+            <p class="price">"כחול" (בינוני)</p>
+          </div>
+          <div class="price-card">
+            <img src="https://publicdomainvectors.org/photos/snowboard-rider.png" alt="Premium Icon">
+            <h3>שיטת "עלה נופל"</h3>
+            <p>מעבר מצד לצד לסירוגין, מחליפים בין עקבים לבהונות לשליטה במהירות.</p>
+            <p class="price">"אדום" (מתקדם)</p>
+          </div>
+        </div>
+      </div>
+    </div><!-- סוף קטגוריה 1 -->
+
+    <!-- קטגוריה 2: אימונים לפני -->
+    <div id="cat2" class="category-page fade-bg">
+      <div class="sub-nav">
+        <a href="#cat2-sub1">כושר בסיסי</a>
+        <a href="#cat2-sub2">שיווי משקל</a>
+        <a href="#cat2-sub3">הכנה מנטלית</a>
+      </div>
+
+      <div class="category-content" id="cat2-sub1">
+        <h2>כושר בסיסי</h2>
+        <p>
+          חיזוק הגוף יעזור לכם לשלוט טוב יותר בתנועות המהירות ולהימנע מעייפות מוקדמת. מומלץ לתרגל:
+        </p>
+        <ul>
+          <li>סקוואטים (Squats) לחיזוק שרירי הרגליים.</li>
+          <li>לאנג'ים (Lunges) לחיזוק שרירי הירכיים והישבן.</li>
+          <li>פלאנק (Plank) לחיזוק שרירי הבטן והליבה.</li>
+        </ul>
+        <p>2–3 אימונים בשבוע, כל אחד כ־20 דקות, יכולים לשפר משמעותית את הכושר לגלישה.</p>
+      </div>
+
+      <div class="category-content" id="cat2-sub2">
+        <h2>שיווי משקל</h2>
+        <p>
+          שליטה בשיווי משקל היא מרכיב קריטי בגלישה:
+        </p>
+        <ul>
+          <li>עמידה על רגל אחת, תחילה עם עיניים פתוחות ולאחר מכן סגורות.</li>
+          <li>שימוש בכדור פיזיו (Physio Ball) או משטח בוסו (Bosu) לתרגול יציבות.</li>
+          <li>Side Plank לחיזוק שרירי הבטן האלכסוניים (Obliques).</li>
+        </ul>
+      </div>
+
+      <div class="category-content" id="cat2-sub3">
+        <h2>הכנה מנטלית</h2>
+        <p>
+          גם המוח צריך חיזוק לקראת החוויה על השלג:
+        </p>
+        <div class="info-cards">
+          <div class="info-card">
+            <h4>ניהול פחדים</h4>
+            <p>
+              תרגלו נשימות עמוקות והשתמשו בדמיון מודרך כדי לראות את עצמכם גולשים בביטחון.  
+              פחד קל הוא טבעי – הוא שומר עלינו זהירים.
+            </p>
+          </div>
+          <div class="info-card">
+            <h4>התמקדות בהנאה</h4>
+            <p>
+              אל תשכחו ליהנות מהדרך, לא רק מהתוצאה.  
+              כל נפילה היא שיעור וכל אתגר הוא הזדמנות ללמוד.
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <!-- כרטיסיות אייקונים (icon-cards) -->
+      <div class="category-content">
+        <h2>אייקונים של אימונים (icon-cards)</h2>
+        <div class="icon-cards">
+          <div class="icon-card">
+            <img src="https://publicdomainvectors.org/photos/stretch2.png" alt="Fitness Icon">
+            <h4>חימום</h4>
+            <p>מתיחות לגב, לברכיים ולרגליים לפני העלייה למסלול.</p>
+          </div>
+          <div class="icon-card">
+            <img src="https://static.vecteezy.com/system/resources/previews/006/389/904/original/yoga-icon-meditation-or-meditate-flat-icon-yoga-fitness-icon-free-vector.jpg" alt="Yoga Icon">
+            <h4>נשימות ויוגה</h4>
+            <p>תרגול קצר של יוגה תורם לגמישות ורוגע.</p>
+          </div>
+          <div class="icon-card">
+            <img src="https://publicdomainvectors.org/photos/cyberscooty-bed.png" alt="Sleep Icon">
+            <h4>שינה טובה</h4>
+            <p>לפני יום גלישה ארוך מומלץ לישון שעות מספקות.</p>
+          </div>
+        </div>
+      </div>
+
+    </div><!-- סוף קטגוריה 2 -->
+
+    <!-- קטגוריה 3: יום הגלישה -->
+    <div id="cat3" class="category-page fade-bg">
+      <div class="sub-nav">
+        <a href="#cat3-sub1">טכניקות עצירה</a>
+        <a href="#cat3-sub2">סיבובים וקימה</a>
+        <a href="#cat3-sub3">פארק ותרגולים מתקדמים</a>
+      </div>
+
+      <div class="category-content" id="cat3-sub1">
+        <h2>טכניקות עצירה</h2>
+        <ul>
+          <li><span class="highlight">Heel Edge:</span> הטיית המשקל על העקבים לעצירה בטוחה.</li>
+          <li><span class="highlight">Toe Edge:</span> עצירה ע"י הטיית בהונות, דורש איזון טוב.</li>
+          <li>"עלה נופל" – החלקה מצד לצד לשליטה במהירות וביציבות.</li>
+        </ul>
+        <p>תרגלו עצירה מרובה במסלולים הקלים כדי לבנות ביטחון מלא.</p>
+      </div>
+
+      <div class="category-content" id="cat3-sub2">
+        <h2>סיבובים וקימה</h2>
+        <p>
+          סיבובים מתבצעים על ידי העברת משקל בין עקבים לבהונות יחד עם סיבוב עדין של האגן והכתפיים.
+          לצורך קימה מישיבה על השלג, אפשר להטות את הקרש על הקצה האחורי (Heel Edge), לדחוף מעט עם הידיים ולעלות בהדרגה.
+        </p>
+        <ul>
+          <li>שמרו את הראש מורם כדי לראות את המשך המסלול.</li>
+          <li>הסתגלות לתנאי שלג שונים (שלג רך מול שלג קשה) דורשת התאמת היציבה.</li>
+        </ul>
+      </div>
+
+      <div class="category-content" id="cat3-sub3">
+        <h2>פארק ותרגולים מתקדמים</h2>
+        <p>
+          כשרמתכם משתפרת אפשר לנסות אלמנטים של פריסטייל (Freestyle) בפארקים מיוחדים:
+        </p>
+        <ul>
+          <li>Ollie – קפיצה בסיסית הכוללת דחיפה מרגל אחורית.</li>
+          <li>Grabs – אחיזת הקרש באוויר בקפיצות.</li>
+          <li>נחיתה רכה – כיפוף ברכיים לספיגת המכה.</li>
+        </ul>
+      </div>
+
+      <!-- גלריה בנושא דונובלי בסלובקיה -->
+      <div class="category-content">
+        <h2>אתר דונובלי (Donovaly) בסלובקיה</h2>
+        <p>
+          דונובלי הוא אחד מאתרי הסקי הפופולריים בסלובקיה, עם מסלולים מגוונים לרמות שונות 
+          ונוף הררי יפהפה.  
+        </p>
+        <div class="gallery-cards">
+          <div class="gallery-card">
+            <img 
+              src="https://www.donovaly.eu/files/mapa_zima/donovaly_mapa.png" 
+              alt="מפת דונובלי"
+            >
+            <h4>מפת המסלולים</h4>
+            <p>מבט כולל על המסלולים והמתקנים באתר דונובלי.</p>
+          </div>
+          <div class="gallery-card">
+            <img 
+              src="https://upload.wikimedia.org/wikipedia/commons/7/7d/ParkSnow_Donovaly.jpg" 
+              alt="תמונה מאתר דונובלי"
+            >
+            <h4>תמונה מהאתר</h4>
+            <p>נוף חורפי מרהיב ומסלולי גלישה פתוחים לכולם.</p>
+          </div>
+          <div class="gallery-card">
+            <!-- כאן דוגמה לאימג' מתעדכן ממצלמת רשת (Webcam) -->
+            <img 
+              src="https://www.holidayinfo.sk/webcams/cam_image.php?id=14"
+              alt="Webcam - דונובלי"
+            >
+            <h4>מצלמת רשת חיה</h4>
+            <p>עדכון חי של מזג האוויר ותנאי השלג באתר דונובלי.</p>
+          </div>
+        </div>
+      </div>
+    </div><!-- סוף קטגוריה 3 -->
+
+  </div><!-- .main-container -->
+</div><!-- .page-wrap -->
+
+<!-- קובץ JS חיצוני -->
+<script src="main.js"></script>  <!-- 1) JS ראשי: קטגוריות, סאב-קטגוריות, רקעים, טיפים -->
+<script src="glow.js"></script>  <!-- 2) JS של הנצנצים (Glowing Orbs) -->
+<script src="snow.js"></script>  <!-- 3) JS של השלג הדו-שכבתי -->
+</body>
+</html>

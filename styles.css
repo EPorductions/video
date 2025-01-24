@@ -1,0 +1,405 @@
+/* איפוס בסיסי */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html, body {
+  width: 100%;
+  min-height: 100%;
+  font-family: Arial, sans-serif;
+  direction: rtl;
+  overflow-x: hidden; /* מניעת גלילה לרוחב */
+}
+
+/* תפריט עליון (Header) */
+header {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  background-color: rgba(0, 0, 0, 0.8);
+  color: #fff;
+  z-index: 9999;
+  height: 90px; 
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.3);
+}
+header nav {
+  display: flex;
+  gap: 40px;
+}
+header nav a {
+  color: #fff;
+  text-decoration: none;
+  font-weight: bold;
+  padding: 10px 15px;
+  border-radius: 4px;
+  font-size: 18px;
+  transition: background-color 0.3s, color 0.3s;
+  cursor: pointer;
+}
+header nav a:hover {
+  background-color: #ffdd57;
+  color: #333;
+}
+header nav a.active {
+  background-color: #ffdd57;
+  color: #333;
+}
+
+/* תפריט משנה (Sub-nav) מקובע מתחת ל־Header */
+.sub-nav {
+  position: fixed;
+	background-color: rgba(0, 0, 0, 0.5);
+  top: 90px;   /* מתחת לכותרת */
+  left: 0;
+  right: 0;
+  background: #333;
+  padding: 10px;
+  display: flex;
+  gap: 20px;
+  justify-content: center;
+  z-index: 9998;
+}
+.sub-nav a {
+  text-decoration: none;
+  background: #222;
+  color: #fff;
+  padding: 5px 10px;
+  border-radius: 4px;
+  font-size: 14px;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+.sub-nav a:hover {
+  background-color: #ffdd57;
+  color: #333;
+}
+.sub-nav a.active-sub {
+  background-color: #ffdd57;
+  color: #333;
+}
+
+/* מעטפת עמוד (Page-wrap) */
+.page-wrap {
+  position: relative;
+  width: 100%;
+}
+
+/* הקאנבס של הכדורים הזוהרים, באותו מישור כדי שיגלול עם התוכן */
+/* קאנבס נצנצים (Glowing Orbs) */
+.orb-canvas {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  pointer-events: none; 
+}
+
+/* קאנבס לשלג דו-שכבתי */
+.snow-canvas {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 9998; /* וודא שה־z-index מתאים */
+}
+#snow-canvas-front {
+  z-index: 10000; /* מעל לכל תוכן אחר */
+}
+
+.snow-canvas {
+  border: 1px solid red; /* זמני, להסרתו אחרי הבדיקה */
+}
+
+/* תוכן ראשי, מרחיק כדי שלא ייכנס מתחת ל-Header וה-Sub-nav */
+.main-container {
+  margin-top: 140px; /* 90px ל-Header + ~50px ל-Sub-nav */
+  min-height: 100vh;
+}
+
+/* כל קטגוריה (דף פנימי) - מוסתרת בברירת מחדל */
+.category-page {
+  display: none;      /* לא תופס מקום כלל */
+  opacity: 0;         /* לצורך Fade-in */
+  transition: opacity 0.25s ease-in-out; /* Fade מהיר */
+}
+.category-page.active {
+  display: block;     
+  opacity: 1;         /* מעבר ל-1 ב-0.25 שניות */
+}
+
+/* רקע מתחלף */
+.category-page.fade-bg {
+  background-size: cover;
+  background-position: center center;
+  background-repeat: no-repeat;
+}
+
+/* תוכן קטגוריה */
+.category-content {
+  max-width: 800px;
+  margin: 20px auto;
+  padding: 20px;
+  background: rgba(255, 255, 255, 0.9);
+  border-radius: 8px;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
+  margin-bottom: 40px;
+}
+.category-content h2 {
+  margin-bottom: 10px;
+  color: #333;
+}
+.category-content p {
+  margin-bottom: 15px;
+  line-height: 1.6;
+  color: #444;
+}
+.category-content ul {
+  list-style-type: disc;
+  list-style-position: inside;
+  margin-bottom: 20px;
+  color: #444;
+}
+.category-content li {
+  margin-bottom: 8px;
+}
+.highlight {
+  font-weight: bold;
+  color: #333;
+}
+
+/* עוגן לסעיפים */
+.anchor {
+  display: block;
+  height: 60px; 
+  margin-top: -60px;
+  visibility: hidden;
+}
+
+/* כרטיסיות בדף הראשון (category-cards) */
+.category-cards {
+  display: flex;
+  justify-content: space-around;
+  flex-wrap: wrap;
+  padding: 20px;
+  gap: 20px;
+}
+.card {
+  position: relative;
+  width: 30%;
+  min-width: 250px;
+  height: 200px;
+  background: rgba(255, 255, 255, 0.9);
+  border-radius: 8px;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+  overflow: hidden;
+  cursor: pointer;
+  transition: transform 0.3s;
+}
+.card:hover {
+  transform: scale(1.05);
+}
+.card-content {
+  padding: 20px;
+}
+.card-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0,0,0,0.8);
+  color: #fff;
+  opacity: 0;
+  transition: opacity 0.5s ease;
+  padding: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+}
+.card:hover .card-overlay {
+  opacity: 1;
+}
+
+/* טיפ נפתח/נסגר */
+.tip-box {
+  margin-top: 10px;
+}
+.tip-header {
+  background-color: #d7e7f7;
+  padding: 8px 12px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-weight: bold;
+  color: #333;
+  display: inline-block;
+}
+.tip-content {
+  background-color: #f4f4f4;
+  border-radius: 4px;
+  margin-top: 5px;
+  padding: 10px 12px;
+  display: none;
+}
+
+/* כרטיסיות "pricing-cards" */
+.pricing-cards {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 20px;
+  justify-content: center;
+}
+.price-card {
+  flex: 0 0 250px;
+  background: #fff;
+  border: 2px solid #ccc;
+  border-radius: 6px;
+  text-align: center;
+  padding: 20px;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+}
+.price-card img {
+  max-width: 80px;
+  margin-bottom: 10px;
+}
+.price-card h3 {
+  margin-bottom: 10px;
+  font-size: 20px;
+  color: #333;
+}
+.price-card p {
+  margin-bottom: 10px;
+  color: #555;
+}
+.price-card .price {
+  font-weight: bold;
+  color: #d9534f;
+  font-size: 24px;
+  margin-bottom: 10px;
+}
+
+/* כרטיסיות מידע (info-cards) */
+.info-cards {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 20px;
+  justify-content: center;
+  margin-bottom: 40px;
+}
+.info-card {
+  flex: 0 0 300px;
+  background: #fafafa;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  padding: 15px;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+  transition: transform 0.2s;
+}
+.info-card:hover {
+  transform: scale(1.02);
+}
+.info-card h4 {
+  margin-bottom: 8px;
+  color: #333;
+  font-size: 18px;
+}
+.info-card p {
+  color: #555;
+  line-height: 1.4;
+}
+
+/* כרטיסיות אייקונים (icon-cards) */
+.icon-cards {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 20px;
+  justify-content: space-around;
+  margin-bottom: 40px;
+}
+.icon-card {
+  width: 200px;
+  background: #fff;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  text-align: center;
+  padding: 20px;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.15);
+  transition: background-color 0.3s;
+}
+.icon-card:hover {
+  background-color: #f2f2f2;
+}
+.icon-card img {
+  max-width: 64px;
+  margin-bottom: 10px;
+}
+.icon-card h4 {
+  margin-bottom: 8px;
+  color: #333;
+  font-size: 18px;
+}
+.icon-card p {
+  color: #555;
+  font-size: 14px;
+}
+
+/* כרטיסיות גלריה (gallery-cards) */
+.gallery-cards {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 20px;
+  justify-content: center;
+  margin-bottom: 40px;
+}
+.gallery-card {
+  width: 300px;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  overflow: hidden;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+  background: #fff;
+  text-align: center;
+}
+.gallery-card img {
+  width: 100%;
+  height: 180px;
+  object-fit: cover;
+  display: block;
+}
+.gallery-card h4 {
+  margin: 10px 0;
+  color: #333;
+  font-size: 18px;
+}
+.gallery-card p {
+  color: #555;
+  padding: 0 10px 10px;
+  font-size: 14px;
+}
+
+/* התאמה למסכים קטנים (responsive) */
+@media screen and (max-width: 768px) {
+  header nav a {
+    font-size: 14px;
+    padding: 8px 10px;
+  }
+  .card {
+    width: 100%;
+    height: auto;
+  }
+  .info-card, .icon-card, .price-card, .gallery-card {
+    width: 100%;
+    flex: none;
+  }
+  .main-container {
+    margin-top: 140px; 
+  }
+}
