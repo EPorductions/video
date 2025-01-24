@@ -2,9 +2,9 @@
 <html lang="he">
 <head>
   <meta charset="UTF-8">
-  <title>מדריך גלישת סנובורד</title>
+  <title>מדריך גלישת סנובורד - גרסת כרטיסיות ו-Fade</title>
   <style>
-    /* איפוס בסיסי (Reset) */
+    /* איפוס בסיסי */
     * {
       margin: 0;
       padding: 0;
@@ -13,10 +13,10 @@
 
     html, body {
       width: 100%;
-      height: 100%;
+      min-height: 100%;
       font-family: Arial, sans-serif;
       direction: rtl;
-      overflow-x: hidden; /* למניעת גלילה לצדדים */
+      overflow-x: hidden; /* מניעת גלילה לרוחב */
     }
 
     /* תפריט עליון (Header) */
@@ -34,13 +34,13 @@
       justify-content: center;
       box-shadow: 0 2px 5px rgba(0,0,0,0.3);
     }
-    nav {
+    header nav {
       display: flex;
       gap: 40px;
     }
-    nav a {
+    header nav a {
       color: #fff;
-      text-decoration: none;הןג
+      text-decoration: none;
       font-weight: bold;
       padding: 10px 15px;
       border-radius: 4px;
@@ -48,115 +48,105 @@
       transition: background-color 0.3s, color 0.3s;
       cursor: pointer;
     }
-    nav a:hover {
+    header nav a:hover {
       background-color: #ffdd57;
       color: #333;
     }
- header nav a {
-      font-size: 18px;
-      padding: 10px 15px;
+    header nav a.active {
+      background-color: #ffdd57;
+      color: #333;
     }
 
-    h2 {
-      font-size: 20px;
-    }
-
-    p, ul, li {
-      font-size: 16px;
-    }
-
-    /* מדיה קווריז לפלאפון */
-    @media screen and (max-width: 768px) {
-      .category-content {
-        max-width: 5%; /* כמעט רוחב מלא */
-        margin: 10px auto; /* ריווח קטן יותר */
-        padding: 15px;
-      }
-
-      header nav a {
-        font-size: 14px; /* טקסט קטן יותר */
-        padding: 8px 10px;
-      }
-
-      h2 {
-        font-size: 18px; /* כותרות קטנות יותר */
-      }
-
-      p, ul, li {
-        font-size: 14px; /* טקסט קטן יותר */
-      }
-
-      body {
-        padding: 0 10px; /* ריווח פנימי מסביב לעמוד */
-      }
-    }
-    /* שני ה־Canvas לשלג (רקע + קדמי) */
-    #snow-canvas-back,
-    #snow-canvas-front {
+    /* תפריט משנה (Sub-nav) מקובע מתחת ל־Header */
+    .sub-nav {
       position: fixed;
-      top: 0;
+      top: 90px;   /* מתחת לכותרת */
       left: 0;
-      width: 100%;
-      height: 100%;
-      pointer-events: none;
+      right: 0;
+      background: #333;
+      padding: 10px;
+      display: flex;
+      gap: 20px;
+      justify-content: center;
+      z-index: 9998;
     }
-    #snow-canvas-front {
-      z-index: 10000; /* מעל כל התוכן */
+    .sub-nav a {
+      text-decoration: none;
+      background: #222;
+      color: #fff;
+      padding: 5px 10px;
+      border-radius: 4px;
+      font-size: 14px;
+      cursor: pointer;
+      transition: background-color 0.3s;
+    }
+    .sub-nav a:hover {
+      background-color: #ffdd57;
+      color: #333;
+    }
+    .sub-nav a.active-sub {
+      background-color: #ffdd57;
+      color: #333;
     }
 
-    /* מעטפת העמוד (כוללת את שלוש הקטגוריות) */
-    .main-container {
+    /* מעטפת עמוד (Page-wrap) עבור הקאנבס והתוכן */
+    .page-wrap {
       position: relative;
-      top: 90px; /* מתחת לתפריט */
-      z-index: 1; /* מעל ה־canvas האחורי */
-      min-height: calc(100vh - 90px);
+      width: 100%;
     }
 
-    /* "דפי" הקטגוריה – כל אחד מוצג/מוסתר ב-Fade */
-    .category-page {
+    /* הקאנבס של הכדורים הזוהרים (נצנצים), באותו מישור כדי שיגלול עם התוכן */
+    .orb-canvas {
       position: absolute;
       top: 0;
       left: 0;
       width: 100%;
-      min-height: calc(100vh - 90px);
-      opacity: 0;
       pointer-events: none; 
-      transition: opacity 0.6s ease-in-out;
-    }
-    .category-page.active {
-      opacity: 1;
-      pointer-events: auto;
     }
 
-    /* "סליידר" רקע (ברוטציה) – נשתמש בעד 5 רקעים מתחלפים */
+    /* תוכן ראשי, מרחיק כדי שלא ייכנס מתחת ל-Header וה-Sub-nav */
+    .main-container {
+      margin-top: 140px; /* 90px ל-Header + ~50px ל-Sub-nav */
+      min-height: 100vh;
+    }
+
+    /* כל קטגוריה (דף פנימי) - מוסתרת בברירת מחדל */
+    .category-page {
+      display: none;      /* לא תופס מקום כלל */
+      opacity: 0;         /* לצורך Fade-in */
+      transition: opacity 0.25s ease-in-out; /* Fade מהיר */
+    }
+    .category-page.active {
+      display: block;     
+      opacity: 1;         /* מעבר ל-1 ב-0.25 שניות */
+    }
+
+    /* רקע מתחלף */
     .category-page.fade-bg {
       background-size: cover;
       background-position: center center;
       background-repeat: no-repeat;
-      /* מעבר חלק ברקע עצמו */
-      transition: background-image 1.5s ease-in-out;
     }
 
-    /* תוכן פנימי (כרטיסיות) */
+    /* תוכן קטגוריה */
     .category-content {
-  max-width: 800px;
-  margin: 20px auto; /* מרכז הכרטיסיות */
-  padding: 20px;
-  background: rgba(255, 255, 255, 0.9);
-  border-radius: 8px;
-  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
-}
+      max-width: 800px;
+      margin: 20px auto;
+      padding: 20px;
+      background: rgba(255, 255, 255, 0.9);
+      border-radius: 8px;
+      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
+      margin-bottom: 40px;
+    }
     .category-content h2 {
       margin-bottom: 10px;
       color: #333;
     }
-
     .category-content p {
       margin-bottom: 15px;
       line-height: 1.6;
       color: #444;
     }
-
     .category-content ul {
       list-style-type: disc;
       list-style-position: inside;
@@ -166,61 +156,67 @@
     .category-content li {
       margin-bottom: 8px;
     }
-
     .highlight {
       font-weight: bold;
       color: #333;
     }
 
-    /* סרגל משנה (סאב קטגוריות) */
-  .sub-nav {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 20px;
-  margin-bottom: 15px;
-  justify-content: center; /* מרכז אופקי */
-}
-/*	  .sub-nav {
- display: flex;
-  flex-wrap: wrap;
-  gap: 20px;
-  margin-bottom: 15px;
-  justify-content: center; 
-  align-items: center; 
-  height: 100%; 
-}
-	  */
-    .sub-nav a {
-		  display: flex;
-  flex-wrap: wrap;
-      display: inline-block;
-      text-decoration: none;
-      background: #333;
-      color: #fff;
-      padding: 5px 10px;
-      border-radius: 4px;
-      font-size: 14px;
-      cursor: pointer;
-		margin-bottom: 15px;
-  justify-content: center; 
-  align-items: center; 
-  height: 100%; 
-      transition: background-color 0.3s;
-    }
-    .sub-nav a:hover {
-      background-color: #ffdd57;
-      color: #333;
-    }
-
-    /* עוגנים פנימיים (עבור הסאב קטגוריות) */
+    /* עוגן לשימוש בסאב-קטגוריה */
     .anchor {
       display: block;
-      height: 60px; /* לפצות על התפריט העליון */
+      height: 60px; 
       margin-top: -60px;
       visibility: hidden;
     }
 
-    /* טיפים נפתחים / נסגרים */
+    /* כרטיסיות בדף הראשון (category-cards) */
+    .category-cards {
+      display: flex;
+
+      justify-content: space-around;
+      flex-wrap: wrap;
+      padding: 20px;
+      gap: 20px;
+    }
+    .card {
+      position: relative;
+      width: 30%;
+      min-width: 250px;
+      height: 200px;
+      background: rgba(255, 255, 255, 0.9);
+      border-radius: 8px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+      overflow: hidden;
+      cursor: pointer;
+      transition: transform 0.3s;
+    }
+    .card:hover {
+      transform: scale(1.05);
+    }
+    .card-content {
+      padding: 20px;
+    }
+    .card-overlay {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0,0,0,0.8);
+      color: #fff;
+      opacity: 0;
+      transition: opacity 0.5s ease;
+      padding: 20px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+    }
+    .card:hover .card-overlay {
+      opacity: 1;
+    }
+
+    /* טיפ נפתח/נסגר */
     .tip-box {
       margin-top: 10px;
     }
@@ -238,297 +234,562 @@
       border-radius: 4px;
       margin-top: 5px;
       padding: 10px 12px;
-      display: none; /* מוסתר כברירת מחדל */
+      display: none;
+    }
+
+    /* כרטיסיות "pricing-cards" (במקור לתעריפים), נשתמש בהן לסוגי מסלולים/רמות גלישה */
+    .pricing-cards {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 20px;
+      justify-content: center;
+    }
+    .price-card {
+      flex: 0 0 250px;
+      background: #fff;
+      border: 2px solid #ccc;
+      border-radius: 6px;
+      text-align: center;
+      padding: 20px;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+    }
+    .price-card img {
+      max-width: 80px;
+      margin-bottom: 10px;
+    }
+    .price-card h3 {
+      margin-bottom: 10px;
+      font-size: 20px;
+      color: #333;
+    }
+    .price-card p {
+      margin-bottom: 10px;
+      color: #555;
+    }
+    .price-card .price {
+      font-weight: bold;
+      color: #d9534f;
+      font-size: 24px;
+      margin-bottom: 10px;
+    }
+
+    /* כרטיסיות מידע (info-cards) */
+    .info-cards {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 20px;
+      justify-content: center;
+      margin-bottom: 40px;
+    }
+    .info-card {
+      flex: 0 0 300px;
+      background: #fafafa;
+      border: 1px solid #ddd;
+      border-radius: 6px;
+      padding: 15px;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+      transition: transform 0.2s;
+    }
+    .info-card:hover {
+      transform: scale(1.02);
+    }
+    .info-card h4 {
+      margin-bottom: 8px;
+      color: #333;
+      font-size: 18px;
+    }
+    .info-card p {
+      color: #555;
+      line-height: 1.4;
+    }
+
+    /* כרטיסיות אייקונים (icon-cards) */
+    .icon-cards {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 20px;
+      justify-content: space-around;
+      margin-bottom: 40px;
+    }
+    .icon-card {
+      width: 200px;
+      background: #fff;
+      border: 1px solid #ccc;
+      border-radius: 8px;
+      text-align: center;
+      padding: 20px;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.15);
+      transition: background-color 0.3s;
+    }
+    .icon-card:hover {
+      background-color: #f2f2f2;
+    }
+    .icon-card img {
+      max-width: 64px;
+      margin-bottom: 10px;
+    }
+    .icon-card h4 {
+      margin-bottom: 8px;
+      color: #333;
+      font-size: 18px;
+    }
+    .icon-card p {
+      color: #555;
+      font-size: 14px;
+    }
+
+    /* כרטיסיות גלריה (gallery-cards) */
+    .gallery-cards {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 20px;
+      justify-content: center;
+      margin-bottom: 40px;
+    }
+    .gallery-card {
+      width: 300px;
+      border: 1px solid #ddd;
+      border-radius: 6px;
+      overflow: hidden;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+      background: #fff;
+      text-align: center;
+    }
+    .gallery-card img {
+      width: 100%;
+      height: 180px;
+      object-fit: cover;
+      display: block;
+    }
+    .gallery-card h4 {
+      margin: 10px 0;
+      color: #333;
+      font-size: 18px;
+    }
+    .gallery-card p {
+      color: #555;
+      padding: 0 10px 10px;
+      font-size: 14px;
+    }
+
+    /* גלישה בפלאפון וכו' */
+    @media screen and (max-width: 768px) {
+      header nav a {
+        font-size: 14px;
+        padding: 8px 10px;
+      }
+      .card {
+        width: 100%;
+        height: auto;
+      }
+      .info-card, .icon-card, .price-card, .gallery-card {
+        width: 100%;
+        flex: none;
+      }
+      .main-container {
+        margin-top: 140px; 
+      }
     }
   </style>
-	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
 </head>
 <body>
 
-<!-- שכבות השלג -->
-<canvas id="snow-canvas-back"></canvas>
-<canvas id="snow-canvas-front"></canvas>
-
-<!-- תפריט עליון קבוע (3 קטגוריות אב) -->
+<!-- כותרת עליונה -->
 <header>
   <nav>
-    <a data-category="cat1">הכרה</a>
+    <a data-category="cat1">יסודות הגלישה</a>
     <a data-category="cat2">אימונים לפני</a>
-    <a data-category="cat3">יום גלישה</a>
+    <a data-category="cat3">יום הגלישה</a>
   </nav>
 </header>
 
-<!-- מעטפת העמוד (מכילה את דפי הקטגוריות) -->
-<div class="main-container">
+<div class="page-wrap">
+  <!-- שכבות הנצנצים (כדורים זוהרים), גוללים ביחד עם התוכן -->
+  <canvas id="orb-canvas-back" class="orb-canvas"></canvas>
+  <canvas id="orb-canvas-front" class="orb-canvas"></canvas>
 
-  <!-- קטגוריה 1: הכרה -->
-  <div id="cat1" class="category-page fade-bg">
-    
-    <!-- סרגל משנה (סאב-קטגוריות) -->
-    <div class="sub-nav">
-      <a href="#cat1-sub1">מבוא וסקירה כללית</a>
-      <a href="#cat1-sub2">הכרת הציוד</a>
-      <a href="#cat1-sub3">בטיחות וטכניקות נפילה</a>
-    </div>
+  <!-- תוכן ראשי -->
+  <div class="main-container">
 
-    <!-- כרטיסייה 1 -->
-    <div class="category-content">
-      <span class="anchor" id="cat1-sub1"></span>
-      <h2>מבוא וסקירה כללית</h2>
-      <p>
-        גלישת סנובורד הפכה לאחד מענפי ספורט החורף הפופולריים ביותר. 
-        היא משלבת מהירות, זרימה ושליטה, עם תחושת חופש אדירה על השלג. 
-        בחלק זה, נלמד מהי גלישת סנובורד, מה ההיסטוריה שלה, וכיצד התפתחה לתרבות שלמה.
-      </p>
-      <!-- טיפ נפתח/נסגר -->
-      <div class="tip-box">
-        <div class="tip-header">טיפ: מהיכן הגיע הסנובורד?</div>
-        <div class="tip-content">
-          תחילת הסנובורד משויכת לשנות ה-60 של המאה הקודמת. 
-          גולשי גלים וסקייטבורדיסטים חיפשו דרך לגלוש על שלג, וכך המציאו את ה־Snurfer, 
-          שהפך לבסיס לסנובורד המודרני.
+    <!-- קטגוריה 1: יסודות הגלישה -->
+    <div id="cat1" class="category-page fade-bg">
+      <!-- תפריט משנה -->
+      <div class="sub-nav">
+        <a href="#cat1-sub1">סקירה כללית</a>
+        <a href="#cat1-sub2">הכרת הציוד</a>
+        <a href="#cat1-sub3">בטיחות ונפילות</a>
+        <a href="#cat1-sub4">טכניקות בסיס</a>
+      </div>
+
+      <!-- כרטיסיות ראשיות (category-cards) -->
+      <div class="category-cards">
+        <div class="card" data-category="cat1">
+          <div class="card-content">
+            <h3>יסודות הגלישה</h3>
+            <p>מידע בסיסי למתחילים (Bevezetés).</p>
+          </div>
+          <div class="card-overlay">
+            <p>הכרת הענף, סקירה כללית על מהות גלישת סנובורד ומה נדרש כדי להתחיל.</p>
+          </div>
         </div>
-		 
-		</div>
-		<br>
-	
-		סנובורד בתרבות הפופולרית:
-כיום סנובורד הוא ענף אולימפי פופולרי, ונחשב לתחום אמנותי בזכות סגנון אישי ותחרויות פריסטייל.
-			
-		<br>
-		 <div class="tip-box">
-        <div class="tip-header">הטיפ של אורי</div>
-        <div class="tip-content">
-		  <ul><strong>	מוטיבציה ותכנון נכון:</strong>
-			
-				      <li>זכרו שגלישת סנובורד דורשת סבלנות ותרגול. אל תוותרו אם תיפלו ביום הראשון – נפילות הן חלק מהלמידה    .
-						      <li>
-								      <li>
-										      <li>
-			</ul>
-												 
-			<ul>
-						 <strong>  הכנת ציוד נוסף    :</strong>   
-						      <li>תמיד כדאי להביא זוג גרביים נוסף וכפפות נוספות, למקרה שהן יירטבו.
-								      <li>
-										      <li>
-				         </ul>
+        <div class="card" data-category="cat2">
+          <div class="card-content">
+            <h3>אימונים לפני</h3>
+            <p>כושר, חימום וריכוז.</p>
+          </div>
+          <div class="card-overlay">
+            <p>תוכנית כושר, תרגילי שיווי משקל, הכנה מנטלית וניהול פחדים.</p>
+          </div>
         </div>
-		 
-		</div>
-		<br>
-	<div class="category-content">
-      <span class="anchor" id="cat1-sub1"></span>
-      <h2>לינקים לסרטונים</h2>
-      <p>
-		  <li><strong>לימוד טכניקות בסיסיות:</strong>
-            <ul>
-                <li><a href="https://www.skiprofessor.co.il/post/%D7%9E%D7%93%D7%A8%D7%99%D7%9A-%D7%A1%D7%A0%D7%95%D7%91%D7%95%D7%A8%D7%93-%D7%9C%D7%9E%D7%AA%D7%97%D7%99%D7%9C%D7%99%D7%9D" target="_blank">מדריך על חלקי הסנובורד</a>: לוח (Board), קלמרות (Bindings) ונעליים.</li>
-				       <li><a href="https://www.youtube.com/watch?v=Aidr7tyi7Ks" target="_blank">מדריך סנובורד למתחילים</a>מדריך מקיף שיסביר על טכניקות בסיסיות, שמירה על שיווי משקל ונפילות בטוחות.</li>
-                <li><a href="https://www.youtube.com/watch?v=h0VVEVcAZOI" target="_blank">איך לצאת מהרכבל עם הסנובורד</a>סרטון המדגים כיצד לעלות ולרדת מהרכבל בצורה בטוחה.</li>
-            </ul>
-        </li>
-		<li><strong>לימוד טכניקות בסיסיות:</strong>
-            <ul>
-                <li><a href="https://www.getx.co.il/snow/%D7%A1%D7%A0%D7%95%D7%91%D7%95%D7%A8%D7%93/snowboard-for-beginners" target="_blank">עצירה עם הגב למדרון</a>: משקל על העקבים.</li>
-                <li><a href="https://www.getx.co.il/snow/%D7%A1%D7%A0%D7%95%D7%91%D7%95%D7%A8%D7%93/snowboard-for-beginners" target="_blank">עצירה עם הפנים למדרון</a>: משקל על האצבעות.</li>
-            </ul>
-        </li>
-		</p>
-		</div>
-		
-    </div>
-
-    <!-- כרטיסייה 2 -->
-    <div class="category-content">
-      <span class="anchor" id="cat1-sub2"></span>
-      <h2>הכרת הציוד</h2>
-      <ul>
-        <li><span class="highlight">נעלי סנובורד (Boots):</span> חשיבות הנוחות והידוק ברגל.</li>
-        <li><span class="highlight">ביינדינגס (Bindings):</span> הגדרת זוויות, חיבור יציב.</li>
-        <li><span class="highlight">סנובורד (Snowboard):</span> התאמת אורך / גמישות לרמה שלך.</li>
-        <li><span class="highlight">קסדה ומשקפיים (Helmet & Goggles):</span> להגנה ומניעת סינוור.</li>
-        <li><span class="highlight">ביגוד:</span> שכבות חמות, גרבי סקי, כפפות.</li>
-      </ul>
-      <p>ציוד מותאם מקל על הלמידה ומוריד את הסיכון לפציעות וחוסר נוחות.</p>
-    </div>
-
-    <!-- כרטיסייה 3 -->
-    <div class="category-content">
-      <span class="anchor" id="cat1-sub3"></span>
-      <h2>בטיחות וטכניקות נפילה</h2>
-      <ul>
-        <li><span class="highlight">מגני ידיים וברכיים:</span> מומלצים מאוד בתחילת הדרך.</li>
-        <li>ליפול נכון: לכופף מרפקים קדימה או להצמיד סנטר לחזה כשנופלים אחורה.</li>
-        <li>מודעות סביבתית: לשים לב לגולשים אחרים, לעצור בשולי המסלול.</li>
-      </ul>
-      <p>שמירה על בטיחות תבטיח שתוכל/י להמשיך לגלוש בכיף וללא חששות מיותרים.</p>
-    </div>
-  </div>
-
-  <!-- קטגוריה 2: אימונים לפני -->
-  <div id="cat2" class="category-page fade-bg">
-    
-    <!-- סרגל משנה (סאב-קטגוריות) -->
-    <div class="sub-nav">
-      <a href="#cat2-sub1">תוכנית כושר בסיסית</a>
-      <a href="#cat2-sub2">שיווי משקל ויציבה</a>
-      <a href="#cat2-sub3">הכנה מנטלית</a>
-    </div>
-
-    <!-- כרטיסייה 1 -->
-    <div class="category-content">
-      <span class="anchor" id="cat2-sub1"></span>
-      <h2>תוכנית כושר בסיסית</h2>
-      <ul>
-        <li><span class="highlight">סקוואטים:</span> לחיזוק הרגליים והברכיים.</li>
-        <li><span class="highlight">לאנג'ים:</span> ליציבות ולבניית שרירי ירך.</li>
-        <li><span class="highlight">פלאנק (Plank):</span> לחיזוק שרירי ליבה.</li>
-      </ul>
-      <p>אימונים פעמיים-שלוש בשבוע לשבועיים-שלושה יכולים מאוד לעזור לפני העלייה על השלג.</p>
-    </div>
-
-    <!-- כרטיסייה 2 -->
-    <div class="category-content">
-      <span class="anchor" id="cat2-sub2"></span>
-      <h2>שיווי משקל ויציבה</h2>
-      <ul>
-        <li>עמידה על רגל אחת עם עיניים עצומות/פתוחות.</li>
-        <li>שימוש בכדור פיזיו/בוסו (Bosu) לתרגול תנודות.</li>
-        <li><span class="highlight">Side Plank:</span> לתמיכה בשרירי הצדדים של הבטן.</li>
-      </ul>
-      <p>שיווי משקל טוב הוא המפתח לשליטה בקרש ולפניות חלקות.</p>
-    </div>
-
-    <!-- כרטיסייה 3 -->
-    <div class="category-content">
-      <span class="anchor" id="cat2-sub3"></span>
-      <h2>הכנה מנטלית</h2>
-      <p>
-        הפחתת פחד ושיפור הביטחון חשובים כדי ליהנות מהגלישה:
-      </p>
-      <ul>
-        <li>צפייה בסרטוני הדרכה ביוטיוב: לראות מראש איך נראית הטכניקה.</li>
-        <li>דמיון מודרך: דמיין את עצמך גולש/ת בביטחון.</li>
-        <li>דיבור עצמי חיובי: “אני מצליח/ה, אני שולט/ת במהירות.”</li>
-      </ul>
-      <!-- טיפ נפתח/נסגר -->
-      <div class="tip-box">
-        <div class="tip-header">טיפ: הגדרת מטרות מנטליות</div>
-        <div class="tip-content">
-          במקום לשאוף “להיות תותח/ית ביום הראשון”, הגדר/י יעד ריאלי: 
-          “אלמד לעצור בשליטה ולהחליק מצד לצד בביטחון.” 
-          כך תבנה/י ביטחון ותשמור/י על מוטיבציה.
+        <div class="card" data-category="cat3">
+          <div class="card-content">
+            <h3>יום הגלישה</h3>
+            <p>טכניקות והתקדמות.</p>
+          </div>
+          <div class="card-overlay">
+            <p>טכניקות עצירה, סיבובים, מעבר למסלולים מתקדמים ופארקים.</p>
+          </div>
         </div>
       </div>
-    </div>
-  </div>
 
-  <!-- קטגוריה 3: יום גלישה -->
-  <div id="cat3" class="category-page fade-bg">
-    
-    <!-- סרגל משנה (סאב-קטגוריות) -->
-    <div class="sub-nav">
-      <a href="#cat3-sub1">טכניקות עצירה בסיסיות</a>
-      <a href="#cat3-sub2">קימה ושינוי כיוון</a>
-      <a href="#cat3-sub3">התקדמות לשלב הבא</a>
-    </div>
+      <!-- cat1-sub1: סקירה כללית -->
+      <div class="category-content" id="cat1-sub1">
+        <h2>סקירה כללית</h2>
+        <p>
+          גלישת סנובורד (Snowboard) היא אחת החוויות המרגשות והאהובות על חובבי השלג. 
+          היא משלבת מהירות, זרימה וחופש על המדרונות. בקטע זה נלמד מה הופך את הסנובורד לכל כך ייחודי 
+          ואיך להתחיל בדרך הנכונה.
+        </p>
+        <p>
+          באזורים רבים בעולם יש עונות חורף שבהן ניתן לגלוש, ובאתרי סקי מודרניים תמצאו מסלולים המתאימים לכל הרמות.  
+          (Ez nagyon jó!) 
+        </p>
+        <div class="tip-box">
+          <div class="tip-header">טיפ: מוטיבציה</div>
+          <div class="tip-content">
+            גלישה דורשת סבלנות ותרגול חוזר. מומלץ להציב מטרות קטנות (כמו הצלחה לעמוד בלי ליפול במשך 10 שניות) 
+            וליהנות מהדרך.
+          </div>
+        </div>
+      </div>
 
-    <!-- כרטיסייה 1 -->
-    <div class="category-content">
-      <span class="anchor" id="cat3-sub1"></span>
-      <h2>טכניקות עצירה בסיסיות</h2>
-      <ul>
-        <li><span class="highlight">Heel Edge:</span> האטה/עצירה ע"י הטיית עקבים.</li>
-        <li><span class="highlight">Toe Edge:</span> האטה/עצירה ע"י הטיית בהונות.</li>
-        <li>"עלה" (Falling Leaf): החלקה מצד לצד תוך שליטה במהירות.</li>
-      </ul>
-      <p>תרגל את העצירות תכופות כדי לא לצבור מהירות מסוכנת.</p>
-    </div>
+      <!-- cat1-sub2: הכרת הציוד -->
+      <div class="category-content" id="cat1-sub2">
+        <h2>הכרת הציוד</h2>
+        <ul>
+          <li><span class="highlight">נעלי סנובורד (Boots):</span> הקפידו על נעליים במידה נכונה והידוק טוב.</li>
+          <li><span class="highlight">ביינדינגס (Bindings):</span> מחברים את הנעליים לקרש, התאימו את הזוויות לנוחות האישית.</li>
+          <li><span class="highlight">קרש (Snowboard):</span> בחרו אורך וגמישות בהתאם לגובה ולמשקל.</li>
+          <li><span class="highlight">ציוד בטיחות:</span> קסדה, מגני ידיים וברכיים, וכמובן משקפי סקי.</li>
+        </ul>
+        <p>ציוד איכותי ומשתלם משפר את החוויה ומפחית סיכוי לפציעות.</p>
+      </div>
 
-    <!-- כרטיסייה 2 -->
-    <div class="category-content">
-      <span class="anchor" id="cat3-sub2"></span>
-      <h2>קימה ושינוי כיוון</h2>
-      <ul>
-        <li>קימה מישיבה: הטיית הקרש על Heel Edge או Toe Edge ודחיפת הגוף מעלה.</li>
-        <li>שינוי כיוון: העברת משקל בין עקבים לבהונות + סיבוב מתון של האגן והכתפיים.</li>
-        <li>מודעות לתנאי השלג: אם השלג רך או קשה, השיטה יכולה לדרוש התאמה.</li>
-      </ul>
-    </div>
+      <!-- cat1-sub3: בטיחות ונפילות -->
+      <div class="category-content" id="cat1-sub3">
+        <h2>בטיחות וטכניקות נפילה</h2>
+        <p>
+          חשוב להבין שנפילות הן חלק טבעי מתהליך הלמידה. כדי להימנע מפציעות כואבות מדי:
+        </p>
+        <ul>
+          <li>ליפול "קדימה" כשאתם מוכנים לכופף את המרפקים ולבלום.</li>
+          <li>ליפול "אחורה" תוך הצמדת הסנטר לחזה כדי להגן על הצוואר.</li>
+          <li>להימנע משליחת ידיים אחורה ישרות – סכנת שבר בפרק כף היד.</li>
+        </ul>
+        <div class="tip-box">
+          <div class="tip-header">טיפ: תרגול נפילה</div>
+          <div class="tip-content">
+            נסו אפילו בבית, בתרגול יבש (Dry-run), ללמוד "לרכך" את הנפילה בעזרת הידיים או הברכיים. 
+            כך הגוף מפתח רפלקסים טובים יותר לשלג האמיתי.
+          </div>
+        </div>
+      </div>
 
-    <!-- כרטיסייה 3 -->
-    <div class="category-content">
-      <span class="anchor" id="cat3-sub3"></span>
-      <h2>התקדמות לשלב הבא</h2>
-      <ul>
-        <li><span class="highlight">פניות מקושרות (Linked Turns):</span> מעבר רציף בין Heel ל-Toe.</li>
-        <li><span class="highlight">Carving בסיסי:</span> הטיית הקרש בזווית חדה יותר לחיתוך השלג.</li>
-        <li>ניסיונות ראשונים בקפיצות קטנות (Ollie), עלייה למדרונות מעט תלולים יותר.</li>
-      </ul>
-      <p>
-        עם הזמן והתרגול תוכל/י לגלוש בביטחון גבוה יותר, ולנסות פארקים או מסלולים 
-        מאתגרים. תמיד לזכור לשמור על בטיחות ועל קצב התקדמות אישי.
-      </p>
-    </div>
-  </div>
+      <!-- cat1-sub4: טכניקות בסיס (במקום "תעריפים") -->
+      <div class="category-content" id="cat1-sub4">
+        <h2>טכניקות בסיס</h2>
+        <p>
+          לפני שיוצאים למסלולים מורכבים, חשוב להכיר טכניקות עצירה וגלישה ראשונית.
+        </p>
+        <div class="pricing-cards">
+          <div class="price-card">
+            <img src="icon-basic.png" alt="Basic Icon">
+            <h3>עצירה עם עקבים (Heel Edge)</h3>
+            <p>שימוש בעקבים כדי ללחוץ על השלג ולעצור.</p>
+            <p class="price">"ירוק"</p>
+          </div>
+          <div class="price-card">
+            <img src="icon-pro.png" alt="Pro Icon">
+            <h3>עצירה עם בהונות (Toe Edge)</h3>
+            <p>טכניקה שנחשבת קצת יותר מאתגרת למתחילים.</p>
+            <p class="price">"כחול"</p>
+          </div>
+          <div class="price-card">
+            <img src="icon-premium.png" alt="Premium Icon">
+            <h3>שיטת "עלה נופל"</h3>
+            <p>החלקה מצד לצד, המעבר בין עקבים לבהונות.</p>
+            <p class="price">"אדום"</p>
+          </div>
+        </div>
+      </div>
 
-</div><!-- .main-container -->
+    </div><!-- סוף קטגוריה 1 -->
 
-<!-- סקריפטים: מעבר בין קטגוריות + רקע מתחלף + סאב קטגוריות + פתיתי שלג -->
+    <!-- קטגוריה 2: אימונים לפני -->
+    <div id="cat2" class="category-page fade-bg">
+      <div class="sub-nav">
+        <a href="#cat2-sub1">כושר בסיסי</a>
+        <a href="#cat2-sub2">שיווי משקל</a>
+        <a href="#cat2-sub3">הכנה מנטלית</a>
+      </div>
+
+      <div class="category-content" id="cat2-sub1">
+        <h2>כושר בסיסי</h2>
+        <p>
+          חיזוק הגוף יקל עליכם לשלוט בקרש ובתנועות המהירות. מומלץ לתרגל:
+        </p>
+        <ul>
+          <li>סקוואטים וסקוואטים עם משקולות קלות.</li>
+          <li>לאנג'ים לחיזוק שרירי הירך.</li>
+          <li>פלאנק (Plank) לתרגול שרירי הליבה.</li>
+        </ul>
+        <p>אפשר להקדיש 2-3 פעמים בשבוע לכ־20 דקות אימון, ותראו שיפור גדול.  
+        (Ez nagyon fontos!)</p>
+      </div>
+
+      <div class="category-content" id="cat2-sub2">
+        <h2>שיווי משקל</h2>
+        <p>
+          שליטה בשיווי משקל היא מפתח להצלחה בגלישה:
+        </p>
+        <ul>
+          <li>לעמוד על רגל אחת (Eyes closed test), לחילופין עם עיניים פקוחות.</li>
+          <li>שימוש בכדור פיזיו/בוסו (Bosu) ללימוד רגישות לתנודות.</li>
+          <li>Side Plank לחיזוק שרירי הצד (Obliques).</li>
+        </ul>
+      </div>
+
+      <div class="category-content" id="cat2-sub3">
+        <h2>הכנה מנטלית</h2>
+        <p>
+          המוח הוא השריר החזק ביותר (The strongest muscle), וכדאי לאמן גם אותו:
+        </p>
+        <div class="info-cards">
+          <div class="info-card">
+            <h4>ניהול פחדים</h4>
+            <p>
+              אפשר לתרגל נשימות עמוקות ודמיון מודרך, ולדמיין את עצמכם גולשים בביטחון.  
+              זכרו שפחד קטן הוא נורמלי ועוזר לשמור על זהירות.
+            </p>
+          </div>
+          <div class="info-card">
+            <h4>חשיבות ההנאה</h4>
+            <p>
+              נסו ליהנות מהתהליך ולא רק לחתור לשלמות טכנית.  
+              כל נפילה היא הזדמנות ללמוד ולצחוק קצת עם החברים.
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <!-- כרטיסיות אייקונים (icon-cards) -->
+      <div class="category-content">
+        <h2>אייקונים של אימונים (icon-cards)</h2>
+        <div class="icon-cards">
+          <div class="icon-card">
+            <img src="https://publicdomainvectors.org/photos/stretch2.png" alt="Fitness Icon" size=10>
+            <h4>חימום</h4>
+            <p>מתיחות לגב, לברכיים ולרגליים לפני העלייה למסלול.</p>
+          </div>
+          <div class="icon-card">
+            <img src="https://static.vecteezy.com/system/resources/previews/006/389/904/original/yoga-icon-meditation-or-meditate-flat-icon-yoga-fitness-icon-free-vector.jpg" alt="Yoga Icon">
+            <h4>נשימות ויוגה</h4>
+            <p>תרגול קצר של יוגה יכול לשפר גמישות ורוגע.</p>
+          </div>
+          <div class="icon-card">
+            <img src="https://publicdomainvectors.org/photos/cyberscooty-bed.png" alt="Sleep Icon">
+            <h4>שינה טובה</h4>
+            <p>לפני יום גלישה ארוך, מומלץ לישון מספיק שעות.</p>
+          </div>
+        </div>
+      </div>
+
+    </div><!-- סוף קטגוריה 2 -->
+
+    <!-- קטגוריה 3: יום הגלישה -->
+    <div id="cat3" class="category-page fade-bg">
+      <div class="sub-nav">
+        <a href="#cat3-sub1">טכניקות עצירה</a>
+        <a href="#cat3-sub2">סיבובים וקימה</a>
+        <a href="#cat3-sub3">התקדמות לפארקים</a>
+      </div>
+
+      <div class="category-content" id="cat3-sub1">
+        <h2>טכניקות עצירה</h2>
+        <ul>
+          <li><span class="highlight">Heel Edge:</span> הטיית המשקל על העקבים לעצירה.</li>
+          <li><span class="highlight">Toe Edge:</span> עצירה ע"י הטיית בהונות.</li>
+          <li>"עלה נופל" – החלקה מצד לצד לשליטה במהירות.</li>
+        </ul>
+        <p>תרגלו את העצירה כל כמה מטרים כדי לבנות ביטחון מלא.</p>
+      </div>
+
+      <div class="category-content" id="cat3-sub2">
+        <h2>סיבובים וקימה</h2>
+        <p>
+          החלפת משקל בין עקבים לבהונות מאפשרת לשנות כיוון.  
+          כדי לקום ממצב ישיבה, אפשר להטות את הקרש אל Heel Edge, לדחוף עם הידיים, ולעלות לאט.
+        </p>
+        <ul>
+          <li>סיבוב האגן והכתפיים בעדינות.</li>
+          <li>שמירת ראש מורם כדי לראות את המסלול.</li>
+          <li>הסתגלות לשלג רך (Powder) מול שלג קשה (Ice) – דרוש מעט שינוי בטכניקה.</li>
+        </ul>
+      </div>
+
+      <div class="category-content" id="cat3-sub3">
+        <h2>התקדמות לפארקים</h2>
+        <p>
+          בשלב מתקדם (Haladó szint), אפשר לנסות קפיצות קטנות, רמפות ואלמנטים של Freestyle:
+        </p>
+        <ul>
+          <li>Ollie – קפיצה בסיסית מרגל אחורית להרמת הקרש.</li>
+          <li>Grabs שונים – אחיזת הקרש באוויר.</li>
+          <li>נחיתה רכה וכיפוף ברכיים לספיגת המכה.</li>
+        </ul>
+      </div>
+
+      <!-- כרטיסיות גלריה (gallery-cards) -->
+      <div class="category-content">
+        <h2>גלריה (gallery-cards)</h2>
+        <div class="gallery-cards">
+          <div class="gallery-card">
+            <img src="snow1.jpg" alt="Snowboarding Example 1">
+            <h4>מסלול ירוק</h4>
+            <p>מתאים למתחילים, עם שיפוע עדין ונוף שלג יפה.</p>
+          </div>
+          <div class="gallery-card">
+            <img src="snow2.jpg" alt="Snowboarding Example 2">
+            <h4>מסלול כחול</h4>
+            <p>שיפוע מתון-בינוני, טוב לתרגול סיבובים ויציבות.</p>
+          </div>
+          <div class="gallery-card">
+            <img src="snow3.jpg" alt="Snowboarding Example 3">
+            <h4>פארק קפיצות</h4>
+            <p>לחובבי האדרנלין: רמפות קטנות וקיקרים לגלישה פריסטייל.</p>
+          </div>
+        </div>
+      </div>
+    </div><!-- סוף קטגוריה 3 -->
+
+  </div><!-- .main-container -->
+</div><!-- .page-wrap -->
+
 <script>
-/* -------------------------------------------------
-   1) מעבר בין קטגוריות (Fade) + ניווט ראשי
--------------------------------------------------- */
+/* --------------------------------------------
+   1) מעבר בין קטגוריות (Fade In)
+--------------------------------------------- */
 const pages = document.querySelectorAll('.category-page');
 const navLinks = document.querySelectorAll('header nav a');
+let currentActiveId = null;
 
 function showCategory(catId) {
-  pages.forEach(page => {
-    if(page.id === catId) {
-      page.classList.add('active');
-    } else {
-      page.classList.remove('active');
+  // הסתרה של הקטגוריה הקודמת
+  if (currentActiveId && currentActiveId !== catId) {
+    const oldPage = document.getElementById(currentActiveId);
+    if (oldPage) oldPage.classList.remove('active');
+  }
+  // הצגת הקטגוריה החדשה
+  const newPage = document.getElementById(catId);
+  if (newPage) {
+    newPage.classList.add('active');
+  }
+  // עדכון כפתור nav פעיל
+  navLinks.forEach(link => {
+    link.classList.remove('active');
+    if (link.getAttribute('data-category') === catId) {
+      link.classList.add('active');
     }
   });
+  currentActiveId = catId;
 }
 
-// בעת לחיצה על קישור בתפריט הראשי
+// קליק על כפתור nav
 navLinks.forEach(link => {
   link.addEventListener('click', () => {
-    const targetCat = link.getAttribute('data-category'); 
+    const targetCat = link.getAttribute('data-category');
     showCategory(targetCat);
+    // גלילה לראש העמוד
+    window.scrollTo({ top: 0, behavior: 'smooth' });
   });
 });
 
 // ברירת מחדל: הצגת קטגוריה 1
 showCategory('cat1');
 
-/* -------------------------------------------------
-   2) סאב-קטגוריות (anchor links) בתוך הקטגוריה
-      מאפשר גלילה חלקה למקטע המתאים
--------------------------------------------------- */
-	
-const subLinks = document.querySelectorAll('.sub-nav a');
-subLinks.forEach(slink => {
-  slink.addEventListener('click', e => {
+
+/* --------------------------------------------
+   2) קליק על כרטיסיות בדף הראשון
+--------------------------------------------- */
+const categoryCards = document.querySelectorAll('.category-cards .card');
+categoryCards.forEach(card => {
+  card.addEventListener('click', () => {
+    const targetCat = card.getAttribute('data-category');
+    showCategory(targetCat);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  });
+});
+
+
+/* --------------------------------------------
+   3) גלילת sub-nav לסעיף הרלוונטי
+   + סימון מי נצפה כעת (IntersectionObserver)
+--------------------------------------------- */
+const subNavLinks = document.querySelectorAll('.sub-nav a');
+subNavLinks.forEach(subLink => {
+  subLink.addEventListener('click', e => {
     e.preventDefault();
-    const targetAnchor = slink.getAttribute('href'); 
+    const targetAnchor = subLink.getAttribute('href');
     const anchorEl = document.querySelector(targetAnchor);
-    if(anchorEl) {
-      // גלילה חלקה
+    if (anchorEl) {
       window.scrollTo({
-        top: anchorEl.offsetTop - 80, 
+        top: anchorEl.offsetTop - 150,
         behavior: 'smooth'
       });
     }
   });
 });
 
-/* -------------------------------------------------
-   3) רוטציית רקעים (5 רקעים) כל 20-30 שניות
-      עם Transition Fade ברקע
--------------------------------------------------- */
+// תצפית סעיפים כדי לסמן sub-nav פעיל
+const allSubSections = document.querySelectorAll('.category-content[id]');
+const observerOptions = {
+  root: null,
+  rootMargin: '0px',
+  threshold: 0.3
+};
+function observerCallback(entries) {
+  entries.forEach(entry => {
+    if (entry.isIntersecting) {
+      const id = entry.target.getAttribute('id');
+      const parentPage = entry.target.closest('.category-page');
+      if (!parentPage) return;
+      const subLinksInPage = parentPage.querySelectorAll('.sub-nav a');
+      subLinksInPage.forEach(link => link.classList.remove('active-sub'));
+      const activeLink = parentPage.querySelector(`.sub-nav a[href="#${id}"]`);
+      if (activeLink) {
+        activeLink.classList.add('active-sub');
+      }
+    }
+  });
+}
+const observer = new IntersectionObserver(observerCallback, observerOptions);
+allSubSections.forEach(section => observer.observe(section));
+
+
+/* --------------------------------------------
+   4) רקע מתחלף
+--------------------------------------------- */
 const bgImages = [
   'sbBG1.webp',
   'sbBG2.webp',
@@ -537,36 +798,30 @@ const bgImages = [
   'sbBG5.webp'
 ];
 let bgIndex = 0;
-
+function randomRange(min, max) {
+  return Math.random() * (max - min) + min;
+}
 function rotateBackgrounds() {
   pages.forEach(page => {
-    // הגדר רקע חדש לכל קטגוריה פעילה
     page.style.backgroundImage = `url('${bgImages[bgIndex]}')`;
   });
   bgIndex = (bgIndex + 1) % bgImages.length;
 }
-function randomRange(min, max) {
-  return Math.random() * (max - min) + min;
-}
-// כל הקטגוריות יסומנו כ-fade-bg כדי לאפשר transition ב-css
 pages.forEach(page => page.classList.add('fade-bg'));
-
-// הפעלת הרוטציה – כל 25 שניות (ניתן לגוון בין 20 ל-30)
 setInterval(() => {
   rotateBackgrounds();
 }, randomRange(10000,25000));
-
-// אתחול רקע ראשוני
 rotateBackgrounds();
 
-/* -------------------------------------------------
-   4) טיפים (Snippets) נפתחים/נסגרים
--------------------------------------------------- */
+
+/* --------------------------------------------
+   5) טיפים נפתחים/נסגרים
+--------------------------------------------- */
 const tipHeaders = document.querySelectorAll('.tip-header');
 tipHeaders.forEach(header => {
   header.addEventListener('click', () => {
     const content = header.nextElementSibling;
-    if(content.style.display === 'block') {
+    if (content.style.display === 'block') {
       content.style.display = 'none';
     } else {
       content.style.display = 'block';
@@ -574,209 +829,105 @@ tipHeaders.forEach(header => {
   });
 });
 
-/* -------------------------------------------------
-   5) אפקט שלג דו-שכבתי (רקע + קדמי) + מנגנון צבירה
-      (כרגע: צבירה בתחתית המסך בלבד)
-      "להערים" שלג על הכרטיסיות מצריך זיהוי מיקום
-      הכרטיסיות והטלת פתיתים קוליזיית-מלאה, וזה מורכב
-      יותר. אז משאירים כדוגמה בסיסית.
--------------------------------------------------- */
-const canvasBack = document.getElementById('snow-canvas-back');
-const ctxBack = canvasBack.getContext('2d');
 
-const canvasFront = document.getElementById('snow-canvas-front');
+/* --------------------------------------------
+   6) כדורים זוהרים (נצנצים) גוללים עם הדף
+--------------------------------------------- */
+const canvasBack = document.getElementById('orb-canvas-back');
+const ctxBack = canvasBack.getContext('2d');
+const canvasFront = document.getElementById('orb-canvas-front');
 const ctxFront = canvasFront.getContext('2d');
 
+// קובעים את גודל ה-canvas לפי גובה העמוד
 function resizeCanvas() {
+  const pageHeight = document.querySelector('.page-wrap').scrollHeight;
   canvasBack.width = window.innerWidth;
-  canvasBack.height = window.innerHeight;
+  canvasBack.height = pageHeight;
   canvasFront.width = window.innerWidth;
-  canvasFront.height = window.innerHeight;
+  canvasFront.height = pageHeight;
 }
+
 window.addEventListener('resize', resizeCanvas);
-resizeCanvas();
+document.addEventListener('DOMContentLoaded', resizeCanvas);
 
-/* נתונים עבור הפתיתים */
-let flakesBack = [];
-let flakesFront = [];
-let globalWind = { x: 0, y: 0 }; // כיוון ועוצמת רוח עולמית (מתעדכן מדי ~10 שניות)
-
-/* פונקציית רוח רנדומלית */
-function randomWind() {
-  const angle = Math.random() * 2 * Math.PI; // כיוון אקראי
-  const strength = Math.random() * 0.5; // עוצמה עד 0.5px/frame (להדגמה)
-  globalWind.x = Math.cos(angle) * strength;
-  globalWind.y = Math.sin(angle) * strength * 0.2; 
-  // y נמוך יותר כדי שהרוח לא תעיף יותר מדי כלפי מעלה
-}
-setInterval(randomWind,  randomRange(2750,18000)); // כל 10 שניות
-
-/* מיפוי כרטיסיות למטרת קוליזיית שלג */
-let cardBoxes = []; // כאן נשמור BoundingBox ותוספת "גובה שלג" לכל כרטיסייה
-function updateCardBoxes() {
-  cardBoxes = [];
-  const cards = document.querySelectorAll('.category-content');
-  cards.forEach(card => {
-    const rect = card.getBoundingClientRect();
-    // נשמור מידע על מיקום במסמך (נשתמש בscrollY וכו')
-    // או נשתמש ב-rect.left, rect.top ונתקן ביחס לגלילה.
-    const top = rect.top + window.scrollY;
-    const left = rect.left + window.scrollX;
-    const width = rect.width;
-    const height = rect.height;
-    cardBoxes.push({
-      cardElement: card,
-      x: left,
-      y: top,
-      width: width,
-      height: height,
-      // מטריצה פשוטה לרוחב הכרטיסייה, כדי לאפשר הצטברות
-      // (בדומה לתחתית המסך)
-      snowCols: 20,
-      snowHeights: new Array(20).fill(0) // גובה שלג על הכרטיסייה
-    });
-  });
-}
-
-/* מחלקה לפתית שלג */
-
-
-class SnowFlake {
-  constructor(front = false) {
+class GlowingOrb {
+  constructor(front=false) {
     this.front = front;
-    this.x = randomRange(0, canvasBack.width);
-    this.y = randomRange(-canvasBack.height, 0);
-    this.radius = randomRange(front ? 1 : 2, front ? 3 : 5);
-    this.speedY = randomRange(0.1, front ? 2.0 : 1.0);
-    this.speedX = randomRange(-0.3, 0.3);
-    this.settled = false;
-    this.settledOnCard = null; // לשמור אם הוא נח על כרטיסייה
+    this.x = Math.random() * canvasBack.width;
+    this.y = Math.random() * canvasBack.height;
+    this.radius = randomRange(front ? 3 : 5, front ? 7 : 12);
+    this.speedX = randomRange(-0.08, 0.08);
+    this.speedY = randomRange(-0.08, 0.08);
+
+    // גוון רנדומלי
+    const rBase = [40,100];
+    const gBase = [80,180];
+    const bBase = [40,150];
+    const r = Math.floor(randomRange(rBase[0], rBase[1]));
+    const g = Math.floor(randomRange(gBase[0], gBase[1]));
+    const b = Math.floor(randomRange(bBase[0], bBase[1]));
+    const alpha = randomRange(0.2, 0.6);
+    this.color = `rgba(${r}, ${g}, ${b}, ${alpha})`;
   }
-
   update() {
-    if(this.settled) {
-      // אם הפתית נח על כרטיסייה או בתחתית, הוא לא יזוז
-      // אבל אם עברנו בין קטגוריות -> ננער
-      if(this.settledOnCard && this.settledOnCard.classList.contains('active') === false) {
-        // אם הקטגוריה שלו כבר לא פעילה, נשחרר אותו
-        this.settled = false;
-        this.settledOnCard = null;
-      }
-      return;
-    }
-    // החלת רוח גלובלית
-    this.speedX += globalWind.x * 0.01; 
-    this.speedY += globalWind.y * 0.01;
-
-    // תנועה
     this.x += this.speedX;
     this.y += this.speedY;
-
-    // גבולות רוחב המסך
-    if(this.x < 0) this.x = canvasBack.width;
-    if(this.x > canvasBack.width) this.x = 0;
-
-    // עדכון כרטיסיות bounding
-    // כל frame, נזהה אם הגובה השתנה ונבדוק התנגשויות
-    // (כדי לייעל, אפשר לעדכן cardBoxes פעם בכמה פריימים או בעת גלילה)
-    // כאן – נעשה לצורך הדגמה פשוטה
-    updateCardBoxes();
-
-    // בדיקת התנגשות עם כרטיסייה
-    for(let cbox of cardBoxes) {
-      const colLeft = cbox.x;
-      const colRight = cbox.x + cbox.width;
-      const colTop = cbox.y;
-      const colBottom = cbox.y + cbox.height;
-
-      if(
-        this.x >= colLeft && 
-        this.x <= colRight &&
-        this.y + this.radius >= colTop && 
-        this.y <= colBottom
-      ) {
-        // נמצא מעל הכרטיסייה, נבדוק אם נגע ב"שלג" המצטבר
-        const relativeX = this.x - colLeft;
-        const colIndex = Math.floor((relativeX / cbox.width) * cbox.snowCols);
-        if(colIndex < 0) continue;
-        if(colIndex >= cbox.snowCols) continue;
-
-        const curSnowHeight = cbox.snowHeights[colIndex];
-        // מיקום Y אמיתי של השלג בכרטיסייה (ה"פנים" שלה)
-        const realSnowY = colTop + cbox.height - curSnowHeight;
-        if(this.y + this.radius >= realSnowY) {
-          // נחת
-          this.y = realSnowY - this.radius;
-          this.settle();
-          this.settledOnCard = cbox.cardElement.closest('.category-page');
-          // עדכון גובה השלג באותה עמודה
-          cbox.snowHeights[colIndex] += (this.radius * 2);
-          return; 
-        }
-      }
+    if(this.x < -this.radius) {
+      this.x = canvasBack.width + this.radius;
+    } else if(this.x > canvasBack.width + this.radius) {
+      this.x = -this.radius;
     }
-
-    // בדיקת תחתית המסך (אם אין כרטיסייה רלוונטית) 
-    if(this.y >= canvasBack.height - this.radius) {
-      // נחת בתחתית
-      this.y = canvasBack.height - this.radius;
-      this.settle();
+    if(this.y < -this.radius) {
+      this.y = canvasBack.height + this.radius;
+    } else if(this.y > canvasBack.height + this.radius) {
+      this.y = -this.radius;
     }
   }
-
-  settle() {
-    this.settled = true;
-    // מפסיק לזוז
-    this.speedX = 0;
-    this.speedY = 0;
-  }
-
   draw(ctx) {
+    ctx.save();
     ctx.beginPath();
-    ctx.arc(this.x, this.y, this.radius, 0, 2 * Math.PI);
-    ctx.fillStyle = "#fff";
+    ctx.shadowBlur = 12;
+    ctx.shadowColor = this.color;
+    ctx.fillStyle = this.color;
+    ctx.arc(this.x, this.y, this.radius, 0, 2*Math.PI);
     ctx.fill();
     ctx.closePath();
+    ctx.restore();
   }
 }
 
-/* אתחול הפתיתים (ממש הרבה!) */
-function initFlakes() {
-  flakesBack = [];
-  flakesFront = [];
-  // נוסיף, נגיד, 300 פתיתים אחוריים ו-200 קדמיים
-  for(let i=0; i<300; i++) {
-    flakesBack.push(new SnowFlake(false));
+let orbsBack = [];
+let orbsFront = [];
+
+function initOrbs() {
+  orbsBack = [];
+  orbsFront = [];
+  for(let i=0; i<30; i++){
+    orbsBack.push(new GlowingOrb(false));
   }
-  for(let i=0; i<200; i++) {
-    flakesFront.push(new SnowFlake(true));
+  for(let j=0; j<20; j++){
+    orbsFront.push(new GlowingOrb(true));
   }
 }
 
-/* לולאת אנימציה */
 function animate() {
   ctxBack.clearRect(0,0,canvasBack.width, canvasBack.height);
   ctxFront.clearRect(0,0,canvasFront.width, canvasFront.height);
 
-  // שכבה אחורית
-  flakesBack.forEach(f => {
-    f.update();
-    f.draw(ctxBack);
+  orbsBack.forEach(o => {
+    o.update();
+    o.draw(ctxBack);
   });
-  // שכבה קדמית
-  flakesFront.forEach(f => {
-    f.update();
-    f.draw(ctxFront);
+  orbsFront.forEach(o => {
+    o.update();
+    o.draw(ctxFront);
   });
-
   requestAnimationFrame(animate);
 }
 
-/* התחל */
-initFlakes();
+// התחלה
+initOrbs();
 animate();
-randomWind(); // נקרא פעם ראשונה, אחר כך יקרא כל 10 שניות
-
 </script>
 </body>
 </html>
