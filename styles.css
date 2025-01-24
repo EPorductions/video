@@ -8,12 +8,12 @@
 html, body {
   width: 100%;
   min-height: 100%;
-  font-family: Arial, sans-serif;
+  font-family: "Arial", sans-serif;
   direction: rtl;
   overflow-x: hidden; /* מניעת גלילה לרוחב */
 }
 
-/* תפריט עליון (Header) */
+/* כותרת עליונה (Header) */
 header {
   position: fixed;
   top: 0;
@@ -51,14 +51,13 @@ header nav a.active {
   color: #333;
 }
 
-/* תפריט משנה (Sub-nav) מקובע מתחת ל־Header */
+/* תפריט משנה (Sub-nav) */
 .sub-nav {
   position: fixed;
-	background-color: rgba(0, 0, 0, 0.5);
-  top: 90px;   /* מתחת לכותרת */
+  top: 90px; /* מתחת לכותרת */
   left: 0;
   right: 0;
-  background: #333;
+  background-color: rgba(0, 0, 0, 0.6);
   padding: 10px;
   display: flex;
   gap: 20px;
@@ -84,13 +83,12 @@ header nav a.active {
   color: #333;
 }
 
-/* מעטפת עמוד (Page-wrap) */
+/* מעטפת עמוד */
 .page-wrap {
   position: relative;
   width: 100%;
 }
 
-/* הקאנבס של הכדורים הזוהרים, באותו מישור כדי שיגלול עם התוכן */
 /* קאנבס נצנצים (Glowing Orbs) */
 .orb-canvas {
   position: absolute;
@@ -108,51 +106,51 @@ header nav a.active {
   width: 100%;
   height: 100%;
   pointer-events: none;
-  z-index: 9998; /* וודא שה־z-index מתאים */
+  z-index: 9998;
 }
 #snow-canvas-front {
-  z-index: 10000; /* מעל לכל תוכן אחר */
+  z-index: 10000; /* מעל כל התוכן */
 }
-
-
 
 /* תוכן ראשי, מרחיק כדי שלא ייכנס מתחת ל-Header וה-Sub-nav */
 .main-container {
-  margin-top: 140px; /* 90px ל-Header + ~50px ל-Sub-nav */
+  margin-top: 140px; /* ~90px + ~50px */
   min-height: 100vh;
 }
 
-/* כל קטגוריה (דף פנימי) - מוסתרת בברירת מחדל */
+/* קטגוריה (דף פנימי) - מוסתרת בברירת מחדל */
 .category-page {
-  display: none;      /* לא תופס מקום כלל */
-  opacity: 0;         /* לצורך Fade-in */
-  transition: opacity 0.25s ease-in-out; /* Fade מהיר */
+  display: none;
+  opacity: 0;
+  transition: opacity 0.25s ease-in-out;
 }
 .category-page.active {
-  display: block;     
-  opacity: 1;         /* מעבר ל-1 ב-0.25 שניות */
+  display: block;
+  opacity: 1;
 }
 
 /* רקע מתחלף */
 .category-page.fade-bg {
   background-size: cover;
-  background-position: center center;
+  background-position: center;
   background-repeat: no-repeat;
 }
 
 /* תוכן קטגוריה */
 .category-content {
-  max-width: 800px;
+  max-width: 1000px;
   margin: 20px auto;
   padding: 20px;
-  background: rgba(255, 255, 255, 0.9);
+  background: rgba(255, 255, 255, 0.92);
   border-radius: 8px;
-  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
+  box-shadow: 0 2px 5px rgba(0,0,0,0.2);
   margin-bottom: 40px;
 }
 .category-content h2 {
   margin-bottom: 10px;
   color: #333;
+  font-size: 24px;
+  line-height: 1.3;
 }
 .category-content p {
   margin-bottom: 15px;
@@ -181,7 +179,7 @@ header nav a.active {
   visibility: hidden;
 }
 
-/* כרטיסיות בדף הראשון (category-cards) */
+/* כרטיסיות */
 .category-cards {
   display: flex;
   justify-content: space-around;
@@ -248,7 +246,7 @@ header nav a.active {
   display: none;
 }
 
-/* כרטיסיות "pricing-cards" */
+/* כרטיסיות מחירים (pricing-cards) */
 .pricing-cards {
   display: flex;
   flex-wrap: wrap;
@@ -256,7 +254,7 @@ header nav a.active {
   justify-content: center;
 }
 .price-card {
-  flex: 0 0 250px;
+  flex: 0 0 260px;
   background: #fff;
   border: 2px solid #ccc;
   border-radius: 6px;
@@ -280,7 +278,7 @@ header nav a.active {
 .price-card .price {
   font-weight: bold;
   color: #d9534f;
-  font-size: 24px;
+  font-size: 28px;
   margin-bottom: 10px;
 }
 
@@ -358,7 +356,7 @@ header nav a.active {
   margin-bottom: 40px;
 }
 .gallery-card {
-  width: 300px;
+  width: 280px;
   border: 1px solid #ddd;
   border-radius: 6px;
   overflow: hidden;
@@ -383,11 +381,74 @@ header nav a.active {
   font-size: 14px;
 }
 
+/* --- [New design hints / updated for the "Gamma style" images] --- */
+
+/* טקסט גדול יותר בכותרות */
+.category-content h2.section-title-big {
+  font-size: 36px;
+  font-weight: bold;
+  margin-bottom: 30px;
+  text-align: center;
+  color: #333;
+}
+
+/* אזורים כהים (רקע אפור כהה / שחור בהיר) */
+.dark-section {
+  background: #2f2f2f;
+  color: #fff;
+  border: none;
+  box-shadow: none;
+}
+
+/* כותרות גדולות לבנות */
+.dark-section h2,
+.dark-section h3 {
+  color: #fff;
+}
+
+/* בלוקים בהירים על רקע כהה */
+.dark-block {
+  background: #3d3d3d;
+  padding: 20px;
+  border-radius: 6px;
+}
+.dark-block ul {
+  line-height: 1.8;
+  margin-left: 15px;
+}
+
+/* מספרים גדולים */
+.big-number {
+  font-size: 42px;
+  color: #444;
+  margin-bottom: 10px;
+  font-weight: 700;
+}
+
+/* שלושה טורים של מחירים גדולים (בהשראה) */
+.large-price-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 40px;
+  justify-content: center;
+}
+
+/* גריד חלוקה ל- 1fr 1fr (טבלה משמאל, מחירים מימין) */
+.two-column-split {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+}
+
 /* התאמה למסכים קטנים (responsive) */
 @media screen and (max-width: 768px) {
   header nav a {
     font-size: 14px;
     padding: 8px 10px;
+  }
+  .main-container {
+    margin-top: 140px;
   }
   .card {
     width: 100%;
@@ -397,7 +458,7 @@ header nav a.active {
     width: 100%;
     flex: none;
   }
-  .main-container {
-    margin-top: 140px; 
+  .two-column-split {
+    grid-template-columns: 1fr;
   }
 }
