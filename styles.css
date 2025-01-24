@@ -114,9 +114,7 @@ header nav a.active {
   z-index: 10000; /* מעל לכל תוכן אחר */
 }
 
-.snow-canvas {
-  border: 1px solid red; /* זמני, להסרתו אחרי הבדיקה */
-}
+
 
 /* תוכן ראשי, מרחיק כדי שלא ייכנס מתחת ל-Header וה-Sub-nav */
 .main-container {
