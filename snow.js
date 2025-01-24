@@ -1,3 +1,4 @@
+
 /* ==============================================
    SNOW.JS - אפקט שלג דו-שכבתי עם Easing לרוח
    משתמש ב-2 קנבסים: #snow-canvas-back, #snow-canvas-front
@@ -160,12 +161,3 @@ function animateSnow() {
   // עדכון וציור פתיתים בשכבה קדמית
   flakesFront.forEach(flake => {
     flake.update();
-    flake.draw(snowCtxFront);
-  });
-
-  requestAnimationFrame(animateSnow);
-}
-
-/* 11) הפעלה */
-initSnow();
-animateSnow();

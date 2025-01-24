@@ -1,3 +1,4 @@
+
 /* ==============================================
    GLOW.JS - Glowing Orbs (נצנצים)
    משתמש ב-2 קנבסים: #orb-canvas-back, #orb-canvas-front
@@ -52,7 +53,7 @@ class GlowingOrb {
     const g = Math.floor(randomRange(gBase[0], gBase[1]));
     const b = Math.floor(randomRange(bBase[0], bBase[1]));
     const alpha = randomRange(0.2, 0.6);
-    this.color = `rgba(${r}, ${g}, ${b}, ${alpha})`;
+    this.color = rgba(${r}, ${g}, ${b}, ${alpha});
   }
 
   update() {

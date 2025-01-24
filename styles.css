@@ -1,3 +1,4 @@
+
 /* איפוס בסיסי */
 * {
   margin: 0;
@@ -28,28 +29,10 @@ header {
   justify-content: center;
   box-shadow: 0 2px 5px rgba(0,0,0,0.3);
 }
-
 header nav {
   display: flex;
-  gap: 20px;
-  overflow-x: auto; /* מוסיף גלילה אופקית */
-  white-space: nowrap; /* מונע שבירת שורות */
-  padding: 0 10px;
+  gap: 40px;
 }
-
-header nav::-webkit-scrollbar {
-  height: 8px; /* גובה פס הגלילה */
-}
-
-header nav::-webkit-scrollbar-thumb {
-  background-color: #ffdd57; /* צבע ידית הגלילה */
-  border-radius: 4px;
-}
-
-header nav::-webkit-scrollbar-track {
-  background-color: rgba(0, 0, 0, 0.2); /* צבע רקע פס הגלילה */
-}
-
 header nav a {
   color: #fff;
   text-decoration: none;
@@ -479,4 +462,57 @@ header nav a.active {
   .two-column-split {
     grid-template-columns: 1fr;
   }
+}
+.scrollable-nav {
+  display: flex;
+  gap: 20px;
+  overflow-x: auto;
+  white-space: nowrap;
+  cursor: grab;
+  padding: 10px 15px;
+  background-color: rgba(0, 0, 0, 0.8);
+  color: #fff;
+  height: 60px;
+  align-items: center;
+}
+.scrollable-nav::-webkit-scrollbar {
+  height: 6px;
+}
+.scrollable-nav::-webkit-scrollbar-thumb {
+  background: #ffdd57;
+  border-radius: 3px;
+}
+.scrollable-nav a {
+  padding: 8px 12px;
+  color: #fff;
+  background: rgba(255,255,255,0.1);
+  border-radius: 4px;
+  text-decoration: none;
+  transition: background-color 0.3s;
+}
+.scrollable-nav a:hover {
+  background-color: #ffdd57;
+  color: #333;
+}
+
+/* Dropdown */
+.nav-item {
+  position: relative;
+}
+.nav-item .dropdown {
+  display: none; /* נסתר כברירת מחדל */
+  position: absolute;
+  top: 60px; /* מתחת לשורת הניווט */
+  background: rgba(0,0,0,0.9);
+  padding: 8px 0;
+  border-radius: 4px;
+  white-space: nowrap;
+}
+.nav-item .dropdown a {
+  display: block;
+  padding: 6px 12px;
+  color: #fff;
+}
+.nav-item:hover .dropdown {
+  display: block; /* מציג בתנועה (on hover) */
 }

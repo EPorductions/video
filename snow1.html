@@ -1,0 +1,328 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <title>מדריך גלישה - דוגמה מסודרת</title>
+  <!-- התאמה לאקספלורר, למרות שכמעט ולא בשימוש -->
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+
+  <!-- תגיות רספונסיביות -->
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <!-- קישור ל-Bootstrap 4.6 (RTL) -->
+  <link
+    rel="stylesheet"
+    href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/css/bootstrap-rtl.min.css"
+    integrity="sha384-x2bD2RAhPS0YqQcwpl8pN9hZHIHb4YztTfeLA8N9X2oE0TbrdKyMeRD1WJkG87bN"
+    crossorigin="anonymous"
+  >
+
+  <!-- גיליון סגנונות מותאם אישית -->
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+  <!-- קנבס לנצנצים (שתי שכבות) -->
+  <canvas id="orb-canvas-back" class="orb-canvas"></canvas>
+  <canvas id="orb-canvas-front" class="orb-canvas"></canvas>
+
+  <!-- קנבס לשלג דו-שכבתי (רקע + קדמי) -->
+  <canvas id="snow-canvas-back" class="snow-canvas"></canvas>
+  <canvas id="snow-canvas-front" class="snow-canvas"></canvas>
+
+  <!-- תפריט ניווט עליון (NavBar) -->
+  <nav class="navbar navbar-expand-lg navbar-dark bg-dark sticky-top scrollable-nav" dir="rtl">
+    <!-- כפתור וציון מותג (אפשר לשנות) -->
+    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#mainNavbar" aria-controls="mainNavbar" aria-expanded="false" aria-label="Toggle navigation">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+
+    <div class="collapse navbar-collapse" id="mainNavbar">
+      <ul class="navbar-nav">
+        <!-- קטגוריה 1: יש לה תתי־קטגוריות 4,5,6 -->
+        <li class="nav-item dropdown">
+          <a 
+            class="nav-link dropdown-toggle" 
+            href="#"
+            id="cat1Dropdown"
+            role="button" 
+            data-toggle="dropdown"
+            aria-haspopup="true"
+            aria-expanded="false"
+          >
+            קטגוריה ראשית 1
+          </a>
+          <div class="dropdown-menu" aria-labelledby="cat1Dropdown">
+            <a class="dropdown-item" data-category="cat4" href="#">תת־קטגוריה 4</a>
+            <a class="dropdown-item" data-category="cat5" href="#">תת־קטגוריה 5</a>
+            <a class="dropdown-item" data-category="cat6" href="#">תת־קטגוריה 6</a>
+          </div>
+        </li>
+
+        <!-- קטגוריה 2: יש לה תתי־קטגוריות 7,8,9,10,11 -->
+        <li class="nav-item dropdown">
+          <a 
+            class="nav-link dropdown-toggle"
+            href="#"
+            id="cat2Dropdown"
+            role="button"
+            data-toggle="dropdown"
+            aria-haspopup="true"
+            aria-expanded="false"
+          >
+            קטגוריה ראשית 2
+          </a>
+          <div class="dropdown-menu" aria-labelledby="cat2Dropdown">
+            <a class="dropdown-item" data-category="cat7" href="#">תת־קטגוריה 7</a>
+            <a class="dropdown-item" data-category="cat8" href="#">תת־קטגוריה 8</a>
+            <a class="dropdown-item" data-category="cat9" href="#">תת־קטגוריה 9</a>
+            <a class="dropdown-item" data-category="cat10" href="#">תת־קטגוריה 10</a>
+            <a class="dropdown-item" data-category="cat11" href="#">תת־קטגוריה 11</a>
+          </div>
+        </li>
+
+        <!-- קטגוריה 3: יש לה תתי־קטגוריות 12,13,14,15 -->
+        <li class="nav-item dropdown">
+          <a
+            class="nav-link dropdown-toggle"
+            href="#"
+            id="cat3Dropdown"
+            role="button"
+            data-toggle="dropdown"
+            aria-haspopup="true"
+            aria-expanded="false"
+          >
+            קטגוריה ראשית 3
+          </a>
+          <div class="dropdown-menu" aria-labelledby="cat3Dropdown">
+            <a class="dropdown-item" data-category="cat12" href="#">תת־קטגוריה 12</a>
+            <a class="dropdown-item" data-category="cat13" href="#">תת־קטגוריה 13</a>
+            <a class="dropdown-item" data-category="cat14" href="#">תת־קטגוריה 14</a>
+            <a class="dropdown-item" data-category="cat15" href="#">תת־קטגוריה 15</a>
+          </div>
+        </li>
+      </ul>
+    </div>
+  </nav>
+
+  <!-- מעטפת העמוד -->
+  <div class="page-wrap">
+    <!-- תוכן ראשי, נגלל מתחת לניווט -->
+    <div class="main-container">
+
+      <!-- Cat4 -->
+      <section id="cat4" class="category-page fade-bg">
+        <div class="category-content">
+          <h2>קטגוריה 4: סקירה</h2>
+          <p>
+            כאן אפשר למקם טקסט רלוונטי לקטגוריה 4, למשל:  
+            מידע בסיסי על יסודות הגלישה, טיפים, סקירת ציוד הכרחי.
+          </p>
+
+          <!-- דוגמה לשימוש בכרטיסיות Bootstrap (row + col) -->
+          <div class="row">
+            <!-- כרטיסיה 1 -->
+            <div class="col-md-4 mb-3">
+              <div class="card">
+                <img class="card-img-top" src="https://via.placeholder.com/350x200/ccc/000?text=Card+Image+1" alt="Placeholder">
+                <div class="card-body">
+                  <h5 class="card-title">כרטיס 1</h5>
+                  <p class="card-text">תיאור כרטיס מספר 1, עם פירוט קצר.</p>
+                  <button class="btn btn-primary">פרטים נוספים</button>
+                </div>
+              </div>
+            </div>
+            <!-- כרטיסיה 2 -->
+            <div class="col-md-4 mb-3">
+              <div class="card">
+                <img class="card-img-top" src="https://via.placeholder.com/350x200/ddd/000?text=Card+Image+2" alt="Placeholder">
+                <div class="card-body">
+                  <h5 class="card-title">כרטיס 2</h5>
+                  <p class="card-text">תיאור כרטיס מספר 2, אפשרי להרחיב כאן טקסט.</p>
+                  <button class="btn btn-success">קרא עוד</button>
+                </div>
+              </div>
+            </div>
+            <!-- כרטיסיה 3 -->
+            <div class="col-md-4 mb-3">
+              <div class="card">
+                <img class="card-img-top" src="https://via.placeholder.com/350x200/999/fff?text=Card+Image+3" alt="Placeholder">
+                <div class="card-body">
+                  <h5 class="card-title">כרטיס 3</h5>
+                  <p class="card-text">עוד מידע קצר על הכרטיס השלישי.</p>
+                  <button class="btn btn-warning">למידע נוסף</button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Cat5 -->
+      <section id="cat5" class="category-page fade-bg">
+        <div class="category-content">
+          <h2>קטגוריה 5: הכנות לפני גלישה</h2>
+          <p>Placeholder טקסט: מה להכין, איזה ציוד ללבוש, מתי להגיע להר.</p>
+          <div class="alert alert-info" role="alert">
+            טיפ: מומלץ להגיע מוקדם כדי להספיק לבדוק ציוד ולהימנע מתורים.
+          </div>
+        </div>
+      </section>
+
+      <!-- Cat6 -->
+      <section id="cat6" class="category-page fade-bg">
+        <div class="category-content">
+          <h2>קטגוריה 6: טכניקות בסיס</h2>
+          <p>Placeholder: עצירה על עקבים או על בהונות, נפילות נכונות ועוד.</p>
+          <!-- דוגמה לטיפ נפתח/נסגר -->
+          <div class="tip-box">
+            <div class="tip-header">לחץ כדי לראות טיפ בטיחות</div>
+            <div class="tip-content">
+              הקפידו ללבוש קסדה, מגני מפרקים ולהקפיד על מנוחות שתייה באמצע הגלישה.
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Cat7 -->
+      <section id="cat7" class="category-page fade-bg">
+        <div class="category-content">
+          <h2>קטגוריה 7: אימון מקדים - כושר בסיסי</h2>
+          <ul>
+            <li>סקוואטים ותרגילי חיזוק לרגליים</li>
+            <li>פלאנק לחיזוק הליבה</li>
+            <li>לאנג'ים (Lunges) לשיפור יציבות</li>
+          </ul>
+        </div>
+      </section>
+
+      <!-- Cat8 -->
+      <section id="cat8" class="category-page fade-bg">
+        <div class="category-content">
+          <h2>קטגוריה 8: אימון מקדים - שיווי משקל</h2>
+          <p>עמידה על רגל אחת, שימוש בכדור פיזיו, ועוד.</p>
+          <!-- כרטיסיות אייקונים לדוגמה -->
+          <div class="icon-cards">
+            <div class="icon-card">
+              <img src="https://publicdomainvectors.org/photos/stretch2.png" alt="Fitness Icon">
+              <h4>חימום</h4>
+              <p>מתיחות לגוף לפני התחלה.</p>
+            </div>
+            <div class="icon-card">
+              <img src="https://static.vecteezy.com/system/resources/previews/006/389/904/original/yoga-icon-meditation-or-meditate-flat-icon-yoga-fitness-icon-free-vector.jpg" alt="Yoga Icon">
+              <h4>יוגה ונשימות</h4>
+              <p>הכנה מנטלית ותרגול נשימות.</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Cat9 -->
+      <section id="cat9" class="category-page fade-bg">
+        <div class="category-content">
+          <h2>קטגוריה 9: תרגול נפילות ושמירה על הגוף</h2>
+          <p>Placeholder לטיפים ולתרגול נפילות בטוחות.</p>
+        </div>
+      </section>
+
+      <!-- Cat10 -->
+      <section id="cat10" class="category-page fade-bg">
+        <div class="category-content">
+          <h2>קטגוריה 10: הצטיידות והיערכות</h2>
+          <p>Placeholder - איך לארוז תיקים, מה חשוב להביא לאתר הגלישה.</p>
+        </div>
+      </section>
+
+      <!-- Cat11 -->
+      <section id="cat11" class="category-page fade-bg">
+        <div class="category-content">
+          <h2>קטגוריה 11: סקירה אחרונה לפני העלייה להר</h2>
+          <p>Placeholder - תדריך סופי, בדיקת מסלולים, תחזית מזג האוויר.</p>
+        </div>
+      </section>
+
+      <!-- Cat12 -->
+      <section id="cat12" class="category-page fade-bg">
+        <div class="category-content">
+          <h2>קטגוריה 12: גלישה בפועל - טכניקות מתקדמות</h2>
+          <p>Placeholder: סיבובים, עלה נופל, מעבר למסלולים כחולים ואדומים.</p>
+        </div>
+      </section>
+
+      <!-- Cat13 -->
+      <section id="cat13" class="category-page fade-bg">
+        <div class="category-content">
+          <h2>קטגוריה 13: פארק וקפיצות</h2>
+          <p>Placeholder: יסודות פריסטייל, קפיצות בסיסיות ותרגולים בטוחים בפארק.</p>
+          <!-- כרטיסיות מחירים לדוגמה -->
+          <div class="pricing-cards">
+            <div class="price-card">
+              <h3>חבילת בסיס</h3>
+              <p>הדרכה קבוצתית + ציוד סטנדרטי</p>
+              <div class="price">€60</div>
+            </div>
+            <div class="price-card">
+              <h3>חבילת מתקדמים</h3>
+              <p>הדרכה פרטית + ציוד משודרג</p>
+              <div class="price">€110</div>
+            </div>
+            <div class="price-card">
+              <h3>חבילת פרימיום</h3>
+              <p>מדריך צמוד + ציוד פרימיום</p>
+              <div class="price">€180</div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Cat14 -->
+      <section id="cat14" class="category-page fade-bg">
+        <div class="category-content">
+          <h2>קטגוריה 14: ניהול פחדים וטעויות נפוצות</h2>
+          <p>Placeholder: התמודדות עם נפילות ואיך לומדים מהן.</p>
+          <!-- גלריה לדוגמה -->
+          <div class="gallery-cards">
+            <div class="gallery-card">
+              <img src="https://via.placeholder.com/400x200/000/fff?text=Image+1" alt="Placeholder 1">
+              <h4>תמונה 1</h4>
+              <p>טקסט קצר</p>
+            </div>
+            <div class="gallery-card">
+              <img src="https://via.placeholder.com/400x200/111/fff?text=Image+2" alt="Placeholder 2">
+              <h4>תמונה 2</h4>
+              <p>טקסט קצר</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Cat15 -->
+      <section id="cat15" class="category-page fade-bg">
+        <div class="category-content">
+          <h2>קטגוריה 15: סיכום והשלבים הבאים</h2>
+          <p>Placeholder: לשמר חוויות, תכנון נסיעות נוספות, שדרוג ציוד.</p>
+        </div>
+      </section>
+
+    </div> <!-- /.main-container -->
+  </div> <!-- /.page-wrap -->
+
+  <!-- קבצי JS של פרויקט: jQuery, Popper, Bootstrap, ואז הקבצים שלנו -->
+  <script
+    src="https://code.jquery.com/jquery-3.6.0.min.js"
+    integrity="sha256-/xUj+3OJ+5Sc/k6cACG3nq4vDX98cRB+z34bq1xBoOE="
+    crossorigin="anonymous">
+  </script>
+  <script
+    src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/js/bootstrap.bundle.min.js"
+    integrity="sha384-Fy6S3B9q64WdZWQUiU+q4/2Lc2Nq8BY4FE0C6VVpGxTZyE9+w8P8atBGUVcJNsXa"
+    crossorigin="anonymous">
+  </script>
+
+  <!-- קבצי JS מותאמים אישית (יש לשמור אותם כקבצים נפרדים בפרויקט) -->
+  <script src="glow.js"></script>  <!-- נצנצים (Glowing Orbs) -->
+  <script src="snow.js"></script>  <!-- שלג דו-שכבתי -->
+  <script src="main.js"></script>  <!-- סקריפט ניווט, קטגוריות, טיפ וכו' -->
+
+</body>
+</html>
