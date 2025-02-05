@@ -1,0 +1,1040 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>שם החברה – מסע בין כוכבים</title>
+  <!-- Bootstrap RTL & Google Fonts -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.rtl.min.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/css/bootstrap-rtl.min.css" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Alef:wght@400;700&display=swap" rel="stylesheet">
+  
+  <style>
+    /* ========= איפוס בסיסי וסגנונות כללים ========= */
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    html, body {
+      font-family: 'Alef', sans-serif;
+      direction: rtl;
+      overflow-x: hidden;
+      min-height: 100%;
+    }
+    /* ========= קנבסים לאפקטי רקע ========= */
+    .orb-canvas,
+    .snow-canvas {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      z-index: 1;
+    }
+    /* ========= מסך פתיחה ========= */
+    #splash-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: #000;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 3000;
+      transition: opacity 1s ease-out;
+    }
+    #splash-overlay.fade-out {
+      opacity: 0;
+      pointer-events: none;
+    }
+    #splash-video {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+    /* ========= Header וניווט ראשי ========= */
+    header {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      background-color: rgba(0,0,0,0.8);
+      color: #fff;
+      z-index: 2500;
+      height: 90px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 20px;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.3);
+    }
+    .header-title {
+      font-size: 24px;
+    }
+    /* ניווט עיקרי למעבר בין "מצבים" */
+    .main-nav {
+      display: flex;
+      gap: 20px;
+    }
+    .main-nav a {
+      color: #fff;
+      text-decoration: none;
+      padding: 10px 15px;
+      border-radius: 4px;
+      font-weight: bold;
+      transition: background-color 0.3s;
+      cursor: pointer;
+    }
+    .main-nav a.active,
+    .main-nav a:hover {
+      background-color: #ffdd57;
+      color: #333;
+    }
+    /* Hamburger לנייד */
+    .hamburger {
+      display: none;
+      background: none;
+      border: none;
+      cursor: pointer;
+      z-index: 2600;
+    }
+    .hamburger span {
+      display: block;
+      width: 25px;
+      height: 3px;
+      background: #fff;
+      margin: 4px 0;
+      transition: 0.4s;
+    }
+    @media (max-width: 768px) {
+      .main-nav {
+        display: none;
+      }
+      .hamburger {
+        display: block;
+      }
+    }
+    /* ========= תפריט צדדי לנייד ========= */
+    #side-menu {
+      position: fixed;
+      top: 0;
+      right: -250px;
+      width: 250px;
+      height: 100%;
+      background: #222;
+      color: #fff;
+      padding: 20px;
+      transition: right 0.3s ease;
+      z-index: 2600;
+    }
+    #side-menu.active {
+      right: 0;
+    }
+    #side-menu ul {
+      list-style: none;
+      padding: 0;
+    }
+    #side-menu ul li {
+      margin-bottom: 20px;
+    }
+    #side-menu ul li a {
+      color: #fff;
+      text-decoration: none;
+      font-size: 18px;
+      cursor: pointer;
+    }
+    /* ========= Main Content ========= */
+    #main-content {
+      padding-top: 110px; /* Header + מרווח */
+      position: relative;
+      z-index: 2;
+    }
+    /* כל "מצב" (section) מופיע כחלק נפרד – למשל: שירותים או מסע בין כוכבים */
+    .section-mode {
+      display: none;
+    }
+    .section-mode.active {
+      display: block;
+    }
+    /* ========= קטגוריות ותוכן ========= */
+    .category-page {
+      display: none;
+      opacity: 0;
+      transition: opacity 0.25s ease-in-out;
+      background-size: cover;
+      background-position: center;
+      background-repeat: no-repeat;
+      padding: 20px;
+      margin-bottom: 40px;
+      border-radius: 8px;
+    }
+    .category-page.active {
+      display: block;
+      opacity: 1;
+    }
+    .fade-bg {
+      /* ניתן להוסיף אפקט מעבר רקע */
+    }
+    .category-content {
+      max-width: 1000px;
+      margin: 20px auto;
+      padding: 20px;
+      background: rgba(255,255,255,0.92);
+      border-radius: 8px;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+      color: #333;
+    }
+    .category-content h2 {
+      margin-bottom: 10px;
+      font-size: 24px;
+    }
+    .category-content p,
+    .category-content ul,
+    .category-content li {
+      color: #444;
+    }
+    .category-content ul {
+      list-style-type: disc;
+      list-style-position: inside;
+      margin-bottom: 20px;
+    }
+    .tip-box {
+      margin-top: 10px;
+    }
+    .tip-header {
+      background-color: #d7e7f7;
+      padding: 8px 12px;
+      border-radius: 4px;
+      cursor: pointer;
+      font-weight: bold;
+      color: #333;
+      display: inline-block;
+    }
+    .tip-content {
+      background-color: #f4f4f4;
+      border-radius: 4px;
+      margin-top: 5px;
+      padding: 10px 12px;
+      display: none;
+    }
+    /* תת-ניווט בתוך כל קטגוריה */
+    .sub-nav {
+      margin-bottom: 20px;
+      display: flex;
+      gap: 20px;
+      justify-content: center;
+    }
+    .sub-nav a {
+      text-decoration: none;
+      background: #222;
+      color: #fff;
+      padding: 5px 10px;
+      border-radius: 4px;
+      font-size: 14px;
+      cursor: pointer;
+      transition: background-color 0.3s;
+    }
+    .sub-nav a.active-sub,
+    .sub-nav a:hover {
+      background-color: #ffdd57;
+      color: #333;
+    }
+    /* רכיבי תצוגה נוספים (כרטיסים, מחירים, גלריות וכו') */
+    .pricing-cards, .info-cards, .icon-cards, .gallery-cards, .category-cards {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 20px;
+      justify-content: center;
+      margin-bottom: 40px;
+    }
+    .price-card, .info-card, .icon-card, .gallery-card, .card {
+      background: #fff;
+      border-radius: 6px;
+      padding: 15px;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    }
+    /* עבור "מסע בין כוכבים" */
+    .star-journey {
+      text-align: center;
+      padding: 40px 20px;
+      background: #000;
+      color: #fff;
+      font-size: 24px;
+      font-weight: bold;
+      margin-bottom: 20px;
+    }
+    /* ========= Footer ========= */
+    footer {
+      text-align: center;
+      padding: 20px;
+      background: #222;
+      color: #fff;
+      margin-top: 40px;
+    }
+    /* ========= Responsive ========= */
+    @media screen and (max-width: 768px) {
+      .category-content, .pricing-cards, .info-cards, .icon-cards, .gallery-cards {
+        margin: 10px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <!-- אפקטי רקע: נצנצים ושלג -->
+  <canvas id="orb-canvas-back" class="orb-canvas"></canvas>
+  <canvas id="orb-canvas-front" class="orb-canvas"></canvas>
+  <canvas id="snow-canvas-back" class="snow-canvas"></canvas>
+  <canvas id="snow-canvas-front" class="snow-canvas"></canvas>
+  
+  <!-- מסך פתיחה עם וידאו -->
+  <div id="splash-overlay">
+    <video id="splash-video" autoplay muted playsinline>
+      <source src="video/splash.mp4" type="video/mp4">
+      הדפדפן שלך אינו תומך בווידאו.
+    </video>
+  </div>
+  
+  <!-- Header וניווט ראשי -->
+  <header>
+    <div class="header-title">שם החברה</div>
+    <nav class="main-nav">
+      <a href="#" data-mode="services" class="active">שירותי וידאו ושידורים חיים</a>
+      <a href="#" data-mode="journey">מסע בין כוכבים</a>
+    </nav>
+    <button class="hamburger" id="hamburger-btn" aria-label="תפריט">
+      <span></span>
+      <span></span>
+      <span></span>
+    </button>
+  </header>
+  
+  <!-- תפריט צדדי לנייד -->
+  <nav id="side-menu">
+    <ul id="side-menu-list">
+      <!-- ימולא דינאמית לפי המצב הפעיל -->
+    </ul>
+  </nav>
+  
+  <!-- Main Content -->
+  <div id="main-content">
+    <!-- Section: שירותי וידאו ושידורים חיים (גרסה 1) -->
+    <div id="services" class="section-mode active">
+      <div class="page-wrap">
+        <!-- קטגוריה 1: שירותים -->
+        <div id="cat1" class="category-page fade-bg active">
+          <div class="sub-nav">
+            <a href="#cat1-sub1">סקירה כללית</a>
+            <a href="#cat1-sub2">צילום וידאו</a>
+            <a href="#cat1-sub3">שידורים חיים</a>
+            <a href="#cat1-sub4">עריכה</a>
+          </div>
+          <div class="category-content" id="cat1-sub1">
+            <h2>סקירה כללית</h2>
+            <p>אנו מציעים שירותי הפקת וידאו ושידורים חיים ברמה מקצועית, עם תכנון מותאם אישית לכל לקוח.</p>
+            <div class="tip-box">
+              <div class="tip-header">טיפ: יצירתיות</div>
+              <div class="tip-content">
+                חשוב תמיד לשלב רעיונות חדשניים ואסתטיקה ייחודית בכל הפקה.
+              </div>
+            </div>
+          </div>
+          <div class="category-content" id="cat1-sub2">
+            <h2>צילום וידאו מקצועי</h2>
+            <p>הפקות צילום איכותיות, עם ציוד מתקדם וצוות מקצועי, המתאימים לכל סוגי האירועים.</p>
+          </div>
+          <div class="category-content" id="cat1-sub3">
+            <h2>שידורים חיים</h2>
+            <p>שידור חי בזמן אמת, עם טכנולוגיה מתקדמת ותמיכה טכנית מלאה לכל אירוע.</p>
+          </div>
+          <div class="category-content" id="cat1-sub4">
+            <h2>עריכת וידאו</h2>
+            <p>עריכה מקצועית, אפקטים מיוחדים והפקת סיפור ויזואלי שמשדר את המסר בצורה מרשימה.</p>
+          </div>
+        </div>
+        
+        <!-- קטגוריה 2: פיתוח והפקות -->
+        <div id="cat2" class="category-page fade-bg">
+          <div class="sub-nav">
+            <a href="#cat2-sub1">תכנון והפקה</a>
+            <a href="#cat2-sub2">אחזקה ולוגיסטיקה</a>
+            <a href="#cat2-sub3">תיאום מקצועי</a>
+          </div>
+          <div class="category-content" id="cat2-sub1">
+            <h2>תכנון והפקה</h2>
+            <p>ייעוץ ותכנון קונספטואלי להפקה, כולל בניית תסריט וקונספט מותאם אישית.</p>
+          </div>
+          <div class="category-content" id="cat2-sub2">
+            <h2>אחזקה ולוגיסטיקה</h2>
+            <p>ניהול לוגיסטי מלא, כולל תחבורה, ציוד והכנת האתר להפקה.</p>
+          </div>
+          <div class="category-content" id="cat2-sub3">
+            <h2>תיאום מקצועי</h2>
+            <p>ליווי מלא לאורך כל תהליך ההפקה, מהתכנון ועד למימוש.</p>
+          </div>
+        </div>
+        
+        <!-- קטגוריה 3: שידורים חיים -->
+        <div id="cat3" class="category-page fade-bg">
+          <div class="sub-nav">
+            <a href="#cat3-sub1">הגדרות טכניות</a>
+            <a href="#cat3-sub2">ניהול אירוע</a>
+            <a href="#cat3-sub3">תמיכה טכנית</a>
+          </div>
+          <div class="category-content" id="cat3-sub1">
+            <h2>הגדרות טכניות</h2>
+            <p>שידורים חיים באיכות גבוהה, עם מערכות מתקדמות והגדרות מקצועיות.</p>
+          </div>
+          <div class="category-content" id="cat3-sub2">
+            <h2>ניהול אירוע</h2>
+            <p>תפעול אירועים בשידור חי, עם צוות מיומן לניהול ותפעול בזמן אמת.</p>
+          </div>
+          <div class="category-content" id="cat3-sub3">
+            <h2>תמיכה טכנית</h2>
+            <p>צוות טכני זמין 24/7 למענה מהיר ולפתרון בעיות.</p>
+          </div>
+        </div>
+        
+        <!-- קטגוריה 4: תעריפים -->
+        <div id="cat4" class="category-page fade-bg">
+          <div class="sub-nav">
+            <a href="#cat4-sub1">תעריפים וחבילות</a>
+          </div>
+          <div class="category-content" id="cat4-sub1">
+            <h2 style="text-align:center; margin-bottom: 30px;">תעריפים לחבילות הפקה</h2>
+            <p style="text-align:center;">בחרו את החבילה המתאימה לצרכיכם – פתרונות לכל תקציב.</p>
+            <div class="pricing-cards" style="max-width:960px; margin:20px auto;">
+              <div class="price-card">
+                <h3>חבילת בסיס</h3>
+                <p>צילום ושידור חי לאירוע קצר.</p>
+                <div class="price">€500</div>
+              </div>
+              <div class="price-card">
+                <h3>חבילת מקצוענים</h3>
+                <p>הפקה מלאה עם עריכה ושידור חי איכותי.</p>
+                <div class="price">€1200</div>
+              </div>
+              <div class="price-card">
+                <h3>חבילת פרימיום</h3>
+                <p>פתרון כולל – הפקה, עריכה, שידור חי, וייעוץ שיווקי.</p>
+                <div class="price">€2000</div>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <!-- קטגוריה 5: ייעוץ והפקות נוספות -->
+        <div id="cat5" class="category-page fade-bg">
+          <div class="sub-nav">
+            <a href="#cat5-sub1">ייעוץ והכוונה</a>
+          </div>
+          <div class="category-content" id="cat5-sub1">
+            <h2 style="text-align:center; margin-bottom:30px;">ייעוץ והכוונה מקצועית</h2>
+            <div class="info-cards">
+              <div class="info-card">
+                <h4>אסטרטגיית תוכן</h4>
+                <p>בניית קונספט ותכנון מסר שיווקי בצורה יצירתית.</p>
+              </div>
+              <div class="info-card">
+                <h4>ניהול פרויקטים</h4>
+                <p>ליווי מלא בתכנון, ביצוע וניהול הפקות מתקדמות.</p>
+              </div>
+              <div class="info-card">
+                <h4>חדשנות טכנולוגית</h4>
+                <p>המלצות והכוונה בתחום הציוד והטכנולוגיות העדכניות.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <!-- קטגוריה 6: פרויקטים מיוחדים -->
+        <div id="cat6" class="category-page fade-bg">
+          <div class="sub-nav">
+            <a href="#cat6-sub1">התחלה</a>
+            <a href="#cat6-sub2">במהלך</a>
+            <a href="#cat6-sub3">סיום</a>
+          </div>
+          <div class="category-content" id="cat6-sub1">
+            <h2>התחלה</h2>
+            <p>תכנון ראשוני, בחירת קונספט והכנת הציוד להפקה.</p>
+          </div>
+          <div class="category-content" id="cat6-sub2">
+            <h2>במהלך</h2>
+            <p>הפקה בשטח – צילום, שידור חי ועבודה עם צוות מקצועי.</p>
+          </div>
+          <div class="category-content" id="cat6-sub3">
+            <h2>סיום</h2>
+            <p>עריכה, הפקת התוצר הסופי והצגתו ללקוח.</p>
+          </div>
+        </div>
+        
+        <!-- קטגוריה 7: עדכונים ומידע מקצועי -->
+        <div id="cat7" class="category-page fade-bg">
+          <div class="sub-nav">
+            <a href="#cat7-sub1">חדשות</a>
+            <a href="#cat7-sub2">עדכונים טכנולוגיים</a>
+            <a href="#cat7-sub3">סיקורים מקצועיים</a>
+          </div>
+          <div class="category-content" id="cat7-sub1">
+            <h2>חדשות</h2>
+            <p>עדכונים שוטפים מעולם ההפקות והשידורים חיים.</p>
+          </div>
+          <div class="category-content" id="cat7-sub2">
+            <h2>עדכונים טכנולוגיים</h2>
+            <p>סקירה של ציוד וטכנולוגיות חדשות המאפשרות הפקה ושידור מתקדמים.</p>
+          </div>
+          <div class="category-content" id="cat7-sub3">
+            <h2>סיקורים מקצועיים</h2>
+            <p>ראיונות, כתבות והמלצות מעולם הווידאו והשידורים החיים.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <!-- Section: מסע בין כוכבים (גרסה 2) -->
+    <!-- הקפדנו לשנות את מזהי הקטגוריות על ידי הוספת "journey-" כדי למנוע התנגשות -->
+    <div id="journey" class="section-mode">
+      <div class="page-wrap">
+        <div class="star-journey">
+          כל דף הוא כוכב, כל עולם הוא חוויה. כאן תרגישו את תדרי הרדיו, תתפרשו את החלומות – בלי מילים, רק ברגשות ובכמייה.
+        </div>
+        
+        <!-- קטגוריה 1: יסודות הגלישה -->
+        <div id="journey-cat1" class="category-page fade-bg active">
+          <div class="sub-nav">
+            <a href="#journey-cat1-sub1">סקירה כללית</a>
+            <a href="#journey-cat1-sub2">הכרת הציוד</a>
+            <a href="#journey-cat1-sub3">בטיחות ונפילות</a>
+            <a href="#journey-cat1-sub4">טכניקות בסיס</a>
+          </div>
+          <!-- דוגמת קרוסלה -->
+          <div id="carouselExampleIndicators1" class="carousel slide" data-ride="carousel" style="background-color: grey">
+            <ol class="carousel-indicators">
+              <li data-target="#carouselExampleIndicators1" data-slide-to="0" class="active"></li>
+              <li data-target="#carouselExampleIndicators1" data-slide-to="1"></li>
+              <li data-target="#carouselExampleIndicators1" data-slide-to="2"></li>
+            </ol>
+            <div class="carousel-inner" role="listbox">
+              <div class="carousel-item active">
+                <img class="d-block mx-auto" src="images/Carousel_Placeholder.png" alt="First slide">
+                <div class="carousel-caption">
+                  <h5>First slide Heading</h5>
+                  <p>First slide Caption</p>
+                </div>
+              </div>
+              <div class="carousel-item">
+                <img class="d-block mx-auto" src="images/Carousel_Placeholder.png" alt="Second slide">
+                <div class="carousel-caption">
+                  <h5>Second slide Heading</h5>
+                  <p>Second slide Caption</p>
+                </div>
+              </div>
+              <div class="carousel-item">
+                <img class="d-block mx-auto" src="images/Carousel_Placeholder.png" alt="Third slide">
+                <div class="carousel-caption">
+                  <h5>Third slide Heading</h5>
+                  <p>Third slide Caption</p>
+                </div>
+              </div>
+            </div>
+            <a class="carousel-control-prev" href="#carouselExampleIndicators1" role="button" data-slide="prev">
+              <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+              <span class="sr-only">Previous</span>
+            </a>
+            <a class="carousel-control-next" href="#carouselExampleIndicators1" role="button" data-slide="next">
+              <span class="carousel-control-next-icon" aria-hidden="true"></span>
+              <span class="sr-only">Next</span>
+            </a>
+          </div>
+          <div class="d-flex justify-content-center align-items-center" style="height: calc(40vh - 50px);">
+            <div class="card text-center col-md-4 my-2">
+              <div class="card-header">Header</div>
+              <div class="card-body">
+                <h5 class="card-title">Card Title</h5>
+                <p class="card-text">Card with header and footer.</p>
+                <a href="#" class="btn btn-primary">Go somewhere</a>
+              </div>
+              <div class="card-footer text-muted" style="height: 3px; line-height: 3px; text-align: center;">Footer</div>
+            </div>
+            <div class="card col-md-4 my-2 mx-3">
+              <div class="card-header">Featured</div>
+              <ul class="list-group list-group-flush">
+                <li class="list-group-item">List Item 1</li>
+                <li class="list-group-item">List Item 2</li>
+                <li class="list-group-item">List Item 3</li>
+              </ul>
+            </div>
+          </div>
+          <div class="category-cards">
+            <div class="card" data-category="journey-cat1">
+              <div class="card-content">
+                <h3>יסודות הגלישה</h3>
+                <p>מידע בסיסי למתחילים (Introduction).</p>
+              </div>
+              <div class="card-overlay">
+                <p>הכרת הענף, סקירה כללית על מהות גלישת סנובורד ומה נדרש כדי להתחיל.</p>
+              </div>
+            </div>
+            <div class="card" data-category="journey-cat2">
+              <div class="card-content">
+                <h3>אימונים לפני</h3>
+                <p>כושר, חימום וריכוז.</p>
+              </div>
+              <div class="card-overlay">
+                <p>תוכנית כושר, תרגילי שיווי משקל, הכנה מנטלית וניהול פחדים.</p>
+              </div>
+            </div>
+            <div class="card" data-category="journey-cat3">
+              <div class="card-content">
+                <h3>יום הגלישה</h3>
+                <p>טכניקות והתקדמות.</p>
+              </div>
+              <div class="card-overlay">
+                <p>טכניקות עצירה, סיבובים, מעבר למסלולים מתקדמים ופארקים.</p>
+              </div>
+            </div>
+          </div>
+          <!-- Subpages עבור journey-cat1 -->
+          <div class="category-content" id="journey-cat1-sub1">
+            <h2>סקירה כללית</h2>
+            <p>גלישת סנובורד היא פעילות מרתקת, וכל אחד חווה את התדרים הפנימיים שלו – כמו קריאת תחילת מסע בין כוכבים.</p>
+            <p>באזורים קסומים, כל תנועה היא יצירת אמנות וכל נפילה היא שיעור בדרך אל האור.</p>
+            <div class="tip-box">
+              <div class="tip-header">טיפ: מוטיבציה</div>
+              <div class="tip-content">
+                גלישה דורשת סבלנות ותרגול. כל נפילה היא קריאה להתחלה חדשה במסע.
+              </div>
+            </div>
+          </div>
+          <div class="category-content" id="journey-cat1-sub2">
+            <h2>הכרת הציוד</h2>
+            <ul>
+              <li><span class="highlight">נעלי סנובורד:</span> דאגו לנעליים המתאימות למסע אל העולמות.</li>
+              <li><span class="highlight">ביינדינגס:</span> חיבור הקרש אל הנעל – כמו חיבור בין תדרים.</li>
+              <li><span class="highlight">קרש:</span> הבחירה הנכונה מעבירה את התדרים בין העולמות.</li>
+              <li><span class="highlight">ציוד בטיחות:</span> קסדה, מגני ידיים ומשקפי סקי – להגן על החלום.</li>
+            </ul>
+            <p>ציוד איכותי מחזק את הביטחון במסע בין כוכבים.</p>
+          </div>
+          <div class="category-content" id="journey-cat1-sub3">
+            <h2>בטיחות וטכניקות נפילה</h2>
+            <p>כדי להימנע מפציעות, יש ללמוד:</p>
+            <ul>
+              <li>ליפול קדימה עם כיפוף מרפקים.</li>
+              <li>ליפול אחורה תוך שמירה על מרכז הכובד.</li>
+              <li>להימנע משליחת ידיים – להקשיב לתדר הפנימי.</li>
+            </ul>
+            <div class="tip-box">
+              <div class="tip-header">טיפ: תרגול נפילה</div>
+              <div class="tip-content">
+                תרגול "נפילות רכות" עוזר לפתח איזון ולהכין את הגוף למסע אל האור.
+              </div>
+            </div>
+          </div>
+          <div class="d-flex justify-content-center align-items-center" style="height: calc(60vh - 50px);">
+            <div class="category-content" id="journey-cat1-sub4">
+              <h2>טכניקות בסיס</h2>
+              <p>כל תנועה היא סימפוניה – הקרש מוביל את המשתמש לתדרים חדשים.</p>
+              <div class="pricing-cards">
+                <div class="price-card">
+                  <img src="https://publicdomainvectors.org/photos/snowboard-boot-icon.png" alt="Basic Icon">
+                  <h3>עצירה על עקבים</h3>
+                  <p>טכניקה להורדת מהירות בצורה עדינה.</p>
+                  <p class="price">"ירוק" (קל)</p>
+                </div>
+                <div class="price-card">
+                  <img src="https://publicdomainvectors.org/photos/snowboard-stance-icon.png" alt="Pro Icon">
+                  <h3>עצירה על בהונות</h3>
+                  <p>טכניקה מתקדמת יותר למתחילים עם איזון משופר.</p>
+                  <p class="price">"כחול" (בינוני)</p>
+                </div>
+                <div class="price-card">
+                  <img src="https://publicdomainvectors.org/photos/snowboard-rider.png" alt="Premium Icon">
+                  <h3>שיטת "עלה נופל"</h3>
+                  <p>מעבר מצד לצד לשליטה מלאה במהירות.</p>
+                  <p class="price">"אדום" (מתקדם)</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <!-- עבור שאר הקטגוריות (journey-cat2 עד journey-cat15) – דוגמה עם תוכן placeholder -->
+        <!-- קטגוריה 2: אימונים לפני -->
+        <div id="journey-cat2" class="category-page fade-bg">
+          <div class="sub-nav">
+            <a href="#journey-cat2-sub1">כושר בסיסי</a>
+            <a href="#journey-cat2-sub2">שיווי משקל</a>
+            <a href="#journey-cat2-sub3">הכנה מנטלית</a>
+          </div>
+          <div class="category-content" id="journey-cat2-sub1">
+            <h2>כושר בסיסי</h2>
+            <p>חיזוק הגוף והנפש לקראת מסע בין כוכבים.</p>
+            <ul>
+              <li>סקוואטים לחיזוק השרירים.</li>
+              <li>לאנג'ים לשיפור היציבות.</li>
+              <li>פלאנק לחיזוק מרכז הכוח.</li>
+            </ul>
+          </div>
+          <div class="category-content" id="journey-cat2-sub2">
+            <h2>שיווי משקל</h2>
+            <p>שמירה על איזון היא המפתח לעבור את המעברים בין התדרים.</p>
+            <ul>
+              <li>עמידה על רגל אחת.</li>
+              <li>תרגול עם כדור פיזיו.</li>
+              <li>Side Plank לחיזוק השרירים האלכסוניים.</li>
+            </ul>
+          </div>
+          <div class="category-content" id="journey-cat2-sub3">
+            <h2>הכנה מנטלית</h2>
+            <div class="info-cards">
+              <div class="info-card">
+                <h4>ניהול פחדים</h4>
+                <p>תרגול נשימות ודמיון מודרך להפחתת פחדים.</p>
+              </div>
+              <div class="info-card">
+                <h4>התמקדות בהנאה</h4>
+                <p>כל נפילה היא הזדמנות לגלות עולמות חדשים.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+        <!-- המשך – ניתן להוסיף קטגוריות נוספות (journey-cat3 עד journey-cat15) בהתאם לדוגמה -->
+        <!-- ... -->
+        <!-- לדוגמה, הנה קטגוריה placeholder נוספת: תעריפים מתקדמים -->
+        <div id="journey-cat8" class="category-page fade-bg">
+          <div class="category-content" style="display:flex; flex-wrap:wrap; background:#2f2f2f; color:#fff; padding:40px; gap:20px;">
+            <div style="flex:1; min-width:300px; background-color:#3d3d3d; padding:20px;">
+              <h2 style="font-size:24px; margin-bottom:10px;">תעריפונים / חבילות</h2>
+              <p style="opacity:0.7; margin-bottom:20px;">(Placeholder לטבלה/רשימת features)</p>
+              <ul style="line-height:1.8;">
+                <li>Feature 1</li>
+                <li>Feature 2</li>
+                <li>Feature 3</li>
+                <li>Feature 4</li>
+                <li>Feature 5</li>
+                <li>Feature 6</li>
+              </ul>
+              <button style="margin-top:20px; padding:10px 20px; font-size:14px; border:none; border-radius:4px; background:#fff; color:#333; cursor:pointer;">
+                Price a Moay (Placeholder)
+              </button>
+            </div>
+            <div style="flex:1; min-width:300px; display:flex; flex-direction:column; justify-content:center; align-items:center; gap:40px;">
+              <div>
+                <h2 style="font-size:40px; margin-bottom:10px;">1,200</h2>
+                <p style="font-size:18px;">חבילת בסיס Placeholder</p>
+              </div>
+              <div>
+                <h2 style="font-size:40px; margin-bottom:10px;">2,800</h2>
+                <p style="font-size:18px;">חבילת מקצוענים Placeholder</p>
+              </div>
+              <div>
+                <h2 style="font-size:40px; margin-bottom:10px;">4,500</h2>
+                <p style="font-size:18px;">חבילת פרימיום Placeholder</p>
+              </div>
+            </div>
+          </div>
+        </div>
+        <!-- ניתן להוסיף כאן את שאר הקטגוריות (journey-cat9 עד journey-cat15) בצורה דומה -->
+      </div>
+    </div>
+  </div>
+  
+  <!-- Footer -->
+  <footer>
+    <p>&copy; 2025 שם החברה. כל הזכויות שמורות.</p>
+  </footer>
+  
+  <!-- ================== External JS Libraries ================== -->
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/js/bootstrap.bundle.min.js"></script>
+  
+  <script>
+    /* ===== טיפול במסך פתיחה ===== */
+    document.addEventListener("DOMContentLoaded", function() {
+      const splashVideo = document.getElementById('splash-video');
+      const splashOverlay = document.getElementById('splash-overlay');
+      function hideSplash() {
+        splashOverlay.classList.add('fade-out');
+        setTimeout(() => splashOverlay.style.display = 'none', 1000);
+      }
+      splashVideo.addEventListener('ended', hideSplash);
+      setTimeout(hideSplash, 5000);
+    });
+    
+    /* ===== ניווט בין המצבים (sections) ===== */
+    const modeLinks = document.querySelectorAll('.main-nav a');
+    const sections = document.querySelectorAll('.section-mode');
+    modeLinks.forEach(link => {
+      link.addEventListener('click', (e) => {
+        e.preventDefault();
+        const mode = link.getAttribute('data-mode');
+        sections.forEach(sec => {
+          if(sec.id === mode) {
+            sec.classList.add('active');
+          } else {
+            sec.classList.remove('active');
+          }
+        });
+        modeLinks.forEach(l => l.classList.remove('active'));
+        link.classList.add('active');
+        populateSideMenu(mode);
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      });
+    });
+    
+    /* ===== מילוי תפריט הצד עבור המצב הפעיל ===== */
+    function populateSideMenu(mode) {
+      const sideMenuList = document.getElementById('side-menu-list');
+      sideMenuList.innerHTML = '';
+      let activeSection = document.getElementById(mode);
+      if(!activeSection) return;
+      const categoryPages = activeSection.querySelectorAll('.category-page');
+      categoryPages.forEach(page => {
+        let title = page.querySelector('.sub-nav a') ? page.querySelector('.sub-nav a').textContent : page.id;
+        let li = document.createElement('li');
+        let a = document.createElement('a');
+        a.textContent = title;
+        a.setAttribute('data-category', page.id);
+        a.href = "#";
+        a.addEventListener('click', () => {
+          showCategory(page.id, activeSection);
+          document.getElementById('side-menu').classList.remove('active');
+        });
+        li.appendChild(a);
+        sideMenuList.appendChild(li);
+      });
+    }
+    
+    /* ===== Hamburger Menu ===== */
+    const hamburgerBtn = document.getElementById('hamburger-btn');
+    const sideMenu = document.getElementById('side-menu');
+    hamburgerBtn.addEventListener('click', () => {
+      sideMenu.classList.toggle('active');
+    });
+    
+    /* ===== מעבר בין קטגוריות ===== */
+    function showCategory(catId, section) {
+      const pages = section.querySelectorAll('.category-page');
+      pages.forEach(page => {
+        if(page.id === catId) {
+          page.classList.add('active');
+        } else {
+          page.classList.remove('active');
+        }
+      });
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+    
+    /* ===== גלילה חלקה בתת-ניווט ===== */
+    const subNavLinks = document.querySelectorAll('.sub-nav a');
+    subNavLinks.forEach(link => {
+      link.addEventListener('click', function(e) {
+        e.preventDefault();
+        const targetAnchor = this.getAttribute('href');
+        const targetEl = document.querySelector(targetAnchor);
+        if(targetEl) {
+          window.scrollTo({ top: targetEl.offsetTop - 100, behavior: 'smooth' });
+        }
+      });
+    });
+    
+    /* ===== טיפול ב"טיפים" ===== */
+    const tipHeaders = document.querySelectorAll('.tip-header');
+    tipHeaders.forEach(header => {
+      header.addEventListener('click', () => {
+        let content = header.nextElementSibling;
+        content.style.display = (content.style.display === 'block') ? 'none' : 'block';
+      });
+    });
+    
+    /* ===== רקע מתחלף עבור הקטגוריות ===== */
+    function rotateBackgrounds(section) {
+      const bgImages = ['images/sbBG1.webp', 'images/sbBG2.webp', 'images/sbBG3.webp', 'images/sbBG4.webp', 'images/sbBG5.webp'];
+      let bgIndex = 0;
+      const pages = section.querySelectorAll('.category-page');
+      function changeBg() {
+        pages.forEach(page => {
+          page.style.backgroundImage = `url('${bgImages[bgIndex]}')`;
+        });
+        bgIndex = (bgIndex + 1) % bgImages.length;
+      }
+      setInterval(changeBg, Math.random() * (25000 - 10000) + 10000);
+      changeBg();
+    }
+    document.addEventListener('DOMContentLoaded', () => {
+      rotateBackgrounds(document.getElementById('services'));
+      rotateBackgrounds(document.getElementById('journey'));
+      populateSideMenu('services');
+    });
+    
+    /* ===== אפקטי נצנצים (Glowing Orbs) ===== */
+    const orbCanvasBack = document.getElementById('orb-canvas-back');
+    const orbCtxBack = orbCanvasBack.getContext('2d');
+    const orbCanvasFront = document.getElementById('orb-canvas-front');
+    const orbCtxFront = orbCanvasFront.getContext('2d');
+    function resizeOrbCanvas() {
+      orbCanvasBack.width = window.innerWidth;
+      orbCanvasBack.height = window.innerHeight;
+      orbCanvasFront.width = window.innerWidth;
+      orbCanvasFront.height = window.innerHeight;
+    }
+    window.addEventListener('resize', resizeOrbCanvas);
+    function randomRange(min, max) {
+      return Math.random() * (max - min) + min;
+    }
+    class GlowingOrb {
+      constructor(front = false) {
+        this.front = front;
+        const cW = front ? orbCanvasFront.width : orbCanvasBack.width;
+        const cH = front ? orbCanvasFront.height : orbCanvasBack.height;
+        this.x = randomRange(0, cW);
+        this.y = randomRange(0, cH);
+        this.radius = randomRange(front ? 3 : 5, front ? 7 : 12);
+        this.speedX = randomRange(-0.08, 0.08);
+        this.speedY = randomRange(-0.08, 0.08);
+        const r = Math.floor(randomRange(40, 100));
+        const g = Math.floor(randomRange(80, 180));
+        const b = Math.floor(randomRange(40, 150));
+        const alpha = randomRange(0.2, 0.6);
+        this.color = `rgba(${r}, ${g}, ${b}, ${alpha})`;
+      }
+      update() {
+        this.x += this.speedX;
+        this.y += this.speedY;
+        const cW = this.front ? orbCanvasFront.width : orbCanvasBack.width;
+        const cH = this.front ? orbCanvasFront.height : orbCanvasBack.height;
+        if(this.x < -this.radius) this.x = cW + this.radius;
+        if(this.x > cW + this.radius) this.x = -this.radius;
+        if(this.y < -this.radius) this.y = cH + this.radius;
+        if(this.y > cH + this.radius) this.y = -this.radius;
+      }
+      draw(ctx) {
+        ctx.save();
+        ctx.beginPath();
+        ctx.shadowBlur = 12;
+        ctx.shadowColor = this.color;
+        ctx.fillStyle = this.color;
+        ctx.arc(this.x, this.y, this.radius, 0, 2 * Math.PI);
+        ctx.fill();
+        ctx.restore();
+      }
+    }
+    let orbsBack = [], orbsFront = [];
+    function initOrbs() {
+      orbsBack = [];
+      orbsFront = [];
+      for(let i = 0; i < 30; i++) {
+        orbsBack.push(new GlowingOrb(false));
+      }
+      for(let j = 0; j < 20; j++) {
+        orbsFront.push(new GlowingOrb(true));
+      }
+    }
+    function animateOrbs() {
+      orbCtxBack.clearRect(0, 0, orbCanvasBack.width, orbCanvasBack.height);
+      orbCtxFront.clearRect(0, 0, orbCanvasFront.width, orbCanvasFront.height);
+      orbsBack.forEach(orb => { orb.update(); orb.draw(orbCtxBack); });
+      orbsFront.forEach(orb => { orb.update(); orb.draw(orbCtxFront); });
+      requestAnimationFrame(animateOrbs);
+    }
+    document.addEventListener('DOMContentLoaded', () => {
+      resizeOrbCanvas();
+      initOrbs();
+      animateOrbs();
+    });
+    
+    /* ===== אפקטי שלג ===== */
+    const snowCanvasBack = document.getElementById('snow-canvas-back');
+    const snowCtxBack = snowCanvasBack.getContext('2d');
+    const snowCanvasFront = document.getElementById('snow-canvas-front');
+    const snowCtxFront = snowCanvasFront.getContext('2d');
+    function resizeSnowCanvas() {
+      snowCanvasBack.width = window.innerWidth;
+      snowCanvasBack.height = window.innerHeight;
+      snowCanvasFront.width = window.innerWidth;
+      snowCanvasFront.height = window.innerHeight;
+    }
+    window.addEventListener('resize', resizeSnowCanvas);
+    resizeSnowCanvas();
+    let flakesBack = [], flakesFront = [];
+    let globalWind = { x: 0, y: 0 }, targetWind = { x: 0, y: 0 };
+    function pickNewWind() {
+      const noWindChance = 0.8;
+      if(Math.random() < noWindChance) {
+        targetWind.x = 0; targetWind.y = 0;
+      } else {
+        const angle = randomRange(-60, 60) * Math.PI / 180;
+        let strength = -Math.log(Math.random()) * 0.1;
+        if(strength > 0.3) strength = 0.3;
+        targetWind.x = Math.cos(angle) * strength;
+        targetWind.y = Math.sin(angle) * strength * 0.1;
+      }
+    }
+    function scheduleWindChange() {
+      pickNewWind();
+      setTimeout(scheduleWindChange, randomRange(4000,6000));
+    }
+    scheduleWindChange();
+    function updateWind() {
+      const easeFactor = 0.02;
+      globalWind.x += (targetWind.x - globalWind.x) * easeFactor;
+      globalWind.y += (targetWind.y - globalWind.y) * easeFactor;
+    }
+    class SnowFlake {
+      constructor(front = false) {
+        this.front = front;
+        const canvasW = front ? snowCanvasFront.width : snowCanvasBack.width;
+        const canvasH = front ? snowCanvasFront.height : snowCanvasBack.height;
+        this.x = randomRange(0, canvasW);
+        this.y = randomRange(-canvasH, 0);
+        this.radius = randomRange(front ? 1 : 2, front ? 3 : 5);
+        this.speedY = randomRange(0.3, front ? 0.7 : 0.4);
+        this.speedX = randomRange(-0.3, 0.3);
+      }
+      update() {
+        updateWind();
+        this.x += this.speedX + globalWind.x;
+        this.y += this.speedY + globalWind.y;
+        const canvasW = this.front ? snowCanvasFront.width : snowCanvasBack.width;
+        const canvasH = this.front ? snowCanvasFront.height : snowCanvasBack.height;
+        if(this.x < 0) this.x = canvasW;
+        if(this.x > canvasW) this.x = 0;
+        if(this.y > canvasH) {
+          this.y = randomRange(-50, 0);
+          this.x = randomRange(0, canvasW);
+        }
+      }
+      draw(ctx) {
+        ctx.beginPath();
+        ctx.arc(this.x, this.y, this.radius, 0, 2 * Math.PI);
+        ctx.fillStyle = "#FFF";
+        ctx.fill();
+        ctx.closePath();
+      }
+    }
+    function initSnow() {
+      flakesBack = [];
+      flakesFront = [];
+      for(let i = 0; i < 200; i++) {
+        flakesBack.push(new SnowFlake(false));
+      }
+      for(let j = 0; j < 100; j++) {
+        flakesFront.push(new SnowFlake(true));
+      }
+    }
+    function animateSnow() {
+      snowCtxBack.clearRect(0, 0, snowCanvasBack.width, snowCanvasBack.height);
+      snowCtxFront.clearRect(0, 0, snowCanvasFront.width, snowCanvasFront.height);
+      flakesBack.forEach(flake => { flake.update(); flake.draw(snowCtxBack); });
+      flakesFront.forEach(flake => { flake.update(); flake.draw(snowCtxFront); });
+      requestAnimationFrame(animateSnow);
+    }
+    initSnow();
+    animateSnow();
+  </script>
+</body>
+</html>
