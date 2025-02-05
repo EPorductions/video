@@ -1,0 +1,1527 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>שם החברה – מסע בין כוכבים: חווית וידאו, שידורים חיים ועולמות</title>
+  <!-- Bootstrap RTL -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.rtl.min.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/css/bootstrap-rtl.min.css" rel="stylesheet">
+  <!-- Google Fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=Alef:wght@400;700&display=swap" rel="stylesheet">
+  
+  <style>
+    /* =============================
+       איפוס וסגנונות כלליים
+    ============================= */
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    html, body {
+      width: 100%;
+      min-height: 100%;
+      font-family: 'Alef', sans-serif;
+      direction: rtl;
+      overflow-x: hidden;
+    }
+    
+    /* =============================
+       מסך פתיחה (Splash) עם וידאו
+    ============================= */
+    #splash-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: #000;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 3000;
+      transition: opacity 1s ease-out;
+    }
+    #splash-overlay.fade-out {
+      opacity: 0;
+      pointer-events: none;
+    }
+    #splash-video {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+    
+    /* =============================
+       קנבסים לאפקטים – נצנצים ושלג
+    ============================= */
+    .orb-canvas {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      z-index: 1;
+    }
+    .snow-canvas {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      z-index: 9998;
+    }
+    #snow-canvas-front {
+      z-index: 10000;
+    }
+    
+    /* =============================
+       Header & Navigation
+    ============================= */
+    header {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      background-color: rgba(0,0,0,0.8);
+      color: #fff;
+      z-index: 2500;
+      height: 90px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.3);
+    }
+    .header-container {
+      display: flex;
+      align-items: center;
+      width: 100%;
+      padding: 0 20px;
+      justify-content: space-between;
+    }
+    .site-title {
+      font-size: 24px;
+    }
+    /* כפתור תפריט (Hamburger) */
+    #hamburger-menu,
+    .hamburger {
+      background: none;
+      border: none;
+      cursor: pointer;
+      padding: 10px;
+      z-index: 2600;
+    }
+    /* סגנון Hamburger (מספר רצועות) */
+    .hamburger span,
+    #hamburger-menu .bar {
+      display: block;
+      width: 25px;
+      height: 3px;
+      margin: 4px 0;
+      background-color: #fff;
+      transition: 0.4s;
+    }
+    /* תפריט צדדי (Offcanvas / Side Menu) */
+    .offcanvas-menu,
+    #side-menu {
+      position: fixed;
+      top: 0;
+      right: -300px; /* ניתן לשנות לגודל הרצוי */
+      width: 300px;
+      height: 100%;
+      background: #222;
+      color: #fff;
+      z-index: 2600;
+      padding: 20px;
+      transition: right 0.3s ease;
+    }
+    .offcanvas-menu.active,
+    #side-menu.active {
+      right: 0;
+    }
+    .offcanvas-menu a,
+    #side-menu a {
+      display: block;
+      margin-bottom: 15px;
+      color: #fff;
+      text-decoration: none;
+      font-size: 18px;
+    }
+    /* תפריט צדדי עם רשימה */
+    #side-menu ul {
+      list-style: none;
+      padding: 0;
+    }
+    #side-menu ul li {
+      margin-bottom: 15px;
+    }
+    
+    /* =============================
+       תוכן ראשי ודפי קטגוריות
+    ============================= */
+    .page-wrap {
+      position: relative;
+      width: 100%;
+    }
+    .main-container {
+      margin-top: 140px; /* מתחת ל-header ותפריט משנה */
+      padding: 20px;
+    }
+    .category-page {
+      display: none;
+      opacity: 0;
+      transition: opacity 0.25s ease-in-out;
+      background-size: cover;
+      background-position: center;
+      background-repeat: no-repeat;
+      padding: 20px 0;
+    }
+    .category-page.active {
+      display: block;
+      opacity: 1;
+    }
+    .fade-bg { /* מאפשר אפקט רקע מתחלף */
+    }
+    .category-content {
+      max-width: 1000px;
+      margin: 20px auto;
+      padding: 20px;
+      background: rgba(255,255,255,0.92);
+      border-radius: 8px;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+      margin-bottom: 40px;
+      color: #333;
+    }
+    .category-content h2 {
+      margin-bottom: 10px;
+      font-size: 24px;
+      line-height: 1.3;
+    }
+    .category-content p,
+    .category-content ul,
+    .category-content li {
+      color: #444;
+    }
+    .category-content ul {
+      list-style-type: disc;
+      list-style-position: inside;
+      margin-bottom: 20px;
+    }
+    .category-content li {
+      margin-bottom: 8px;
+    }
+    
+    /* =============================
+       תפריט משנה (Sub-nav) בתוך דפי קטגוריות
+    ============================= */
+    .sub-nav {
+      position: sticky;
+      top: 90px;
+      background-color: rgba(0, 0, 0, 0.6);
+      padding: 10px;
+      display: flex;
+      gap: 20px;
+      justify-content: center;
+      z-index: 9999;
+    }
+    .sub-nav a {
+      text-decoration: none;
+      background: #222;
+      color: #fff;
+      padding: 5px 10px;
+      border-radius: 4px;
+      font-size: 14px;
+      transition: background-color 0.3s;
+    }
+    .sub-nav a:hover,
+    .sub-nav a.active-sub {
+      background-color: #ffdd57;
+      color: #333;
+    }
+    
+    /* =============================
+       כרטיסיות, מחירים, גלריות, טיפונים ועוד
+    ============================= */
+    .category-cards {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 20px;
+      justify-content: center;
+      padding: 20px;
+    }
+    .card {
+      position: relative;
+      width: 30%;
+      min-width: 250px;
+      height: 200px;
+      background: rgba(255,255,255,0.9);
+      border-radius: 8px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+      overflow: hidden;
+      cursor: pointer;
+      transition: transform 0.3s;
+    }
+    .card:hover {
+      transform: scale(1.05);
+    }
+    .card-content {
+      padding: 20px;
+    }
+    .card-overlay {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0,0,0,0.8);
+      color: #fff;
+      opacity: 0;
+      transition: opacity 0.5s ease;
+      padding: 20px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+    }
+    .card:hover .card-overlay {
+      opacity: 1;
+    }
+    .pricing-cards {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 20px;
+      justify-content: center;
+    }
+    .price-card {
+      flex: 0 0 260px;
+      background: #fff;
+      border: 2px solid #ccc;
+      border-radius: 6px;
+      text-align: center;
+      padding: 20px;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+    }
+    .price-card img {
+      max-width: 80px;
+      margin-bottom: 10px;
+    }
+    .price-card h3 {
+      margin-bottom: 10px;
+      font-size: 20px;
+    }
+    .price-card p {
+      margin-bottom: 10px;
+    }
+    .price-card .price {
+      font-weight: bold;
+      color: #d9534f;
+      font-size: 28px;
+      margin-bottom: 10px;
+    }
+    .info-cards {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 20px;
+      justify-content: center;
+      margin-bottom: 40px;
+    }
+    .info-card {
+      flex: 0 0 300px;
+      background: #fafafa;
+      border: 1px solid #ddd;
+      border-radius: 6px;
+      padding: 15px;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+      transition: transform 0.2s;
+    }
+    .info-card:hover {
+      transform: scale(1.02);
+    }
+    .info-card h4 {
+      margin-bottom: 8px;
+      font-size: 18px;
+    }
+    .info-card p {
+      line-height: 1.4;
+    }
+    .icon-cards {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 20px;
+      justify-content: space-around;
+      margin-bottom: 40px;
+    }
+    .icon-card {
+      width: 200px;
+      background: #fff;
+      border: 1px solid #ccc;
+      border-radius: 8px;
+      text-align: center;
+      padding: 20px;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.15);
+      transition: background-color 0.3s;
+    }
+    .icon-card:hover {
+      background-color: #f2f2f2;
+    }
+    .icon-card img {
+      max-width: 64px;
+      margin-bottom: 10px;
+    }
+    .icon-card h4 {
+      margin-bottom: 8px;
+      font-size: 18px;
+    }
+    .icon-card p {
+      font-size: 14px;
+    }
+    .gallery-cards {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 20px;
+      justify-content: center;
+      margin-bottom: 40px;
+    }
+    .gallery-card {
+      width: 280px;
+      border: 1px solid #ddd;
+      border-radius: 6px;
+      overflow: hidden;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+      background: #fff;
+      text-align: center;
+    }
+    .gallery-card img {
+      width: 100%;
+      height: 180px;
+      object-fit: cover;
+      cursor: pointer;
+    }
+    
+    /* =============================
+       טיפונים (Tips)
+    ============================= */
+    .tip-box {
+      margin-top: 10px;
+    }
+    .tip-header {
+      background-color: #d7e7f7;
+      padding: 8px 12px;
+      border-radius: 4px;
+      cursor: pointer;
+      font-weight: bold;
+      color: #333;
+      display: inline-block;
+    }
+    .tip-content {
+      background-color: #f4f4f4;
+      border-radius: 4px;
+      margin-top: 5px;
+      padding: 10px 12px;
+      display: none;
+    }
+    
+    /* =============================
+       אלמנטים מתקדמים – גדלים, חלוקות
+    ============================= */
+    .section-title-big {
+      font-size: 36px;
+      font-weight: bold;
+      margin-bottom: 30px;
+      text-align: center;
+      color: #333;
+    }
+    .dark-section {
+      background: #2f2f2f;
+      color: #fff;
+    }
+    .dark-block {
+      background: #3d3d3d;
+      padding: 20px;
+      border-radius: 6px;
+    }
+    .big-number {
+      font-size: 42px;
+      color: #444;
+      margin-bottom: 10px;
+      font-weight: 700;
+    }
+    .large-price-container {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 40px;
+      justify-content: center;
+    }
+    .two-column-split {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 20px;
+    }
+    
+    /* =============================
+       Scrollable Navigation (אם נדרש)
+    ============================= */
+    .scrollable-nav {
+      display: flex;
+      gap: 20px;
+      overflow-x: auto;
+      white-space: nowrap;
+      cursor: grab;
+      padding: 10px 15px;
+      background-color: rgba(0, 0, 0, 0.8);
+      color: #fff;
+      height: 60px;
+      align-items: center;
+    }
+    .scrollable-nav::-webkit-scrollbar {
+      height: 6px;
+    }
+    .scrollable-nav::-webkit-scrollbar-thumb {
+      background: #ffdd57;
+      border-radius: 3px;
+    }
+    .scrollable-nav a {
+      padding: 8px 12px;
+      color: #fff;
+      background: rgba(255,255,255,0.1);
+      border-radius: 4px;
+      text-decoration: none;
+      transition: background-color 0.3s;
+    }
+    .scrollable-nav a:hover {
+      background-color: #ffdd57;
+      color: #333;
+    }
+    
+    /* =============================
+       מצב Fullscreen לתמונות
+    ============================= */
+    .fullscreen {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      object-fit: contain;
+      z-index: 9999;
+      background-color: rgba(0, 0, 0, 0.9);
+      cursor: zoom-out;
+    }
+    body.no-scroll {
+      overflow: hidden;
+    }
+  </style>
+</head>
+<body>
+  <!-- אפקטי רקע: נצנצים ושלג -->
+  <canvas id="orb-canvas-back" class="orb-canvas"></canvas>
+  <canvas id="orb-canvas-front" class="orb-canvas"></canvas>
+  <canvas id="snow-canvas-back" class="snow-canvas"></canvas>
+  <canvas id="snow-canvas-front" class="snow-canvas"></canvas>
+  
+  <!-- מסך פתיחה עם וידאו מלא מסך -->
+  <div id="splash-overlay">
+    <video id="splash-video" autoplay muted playsinline>
+      <source src="videos/intro.mp4" type="video/mp4">
+      הדפדפן שלך אינו תומך בווידאו.
+    </video>
+  </div>
+  
+  <!-- Header עם תפריט והצגת שם החברה -->
+  <header>
+    <div class="header-container">
+      <button id="hamburger-menu" aria-label="תפריט">
+        <span class="bar"></span>
+        <span class="bar"></span>
+        <span class="bar"></span>
+      </button>
+      <h1 class="site-title">שם החברה – מסע בין כוכבים</h1>
+    </div>
+  </header>
+  
+  <!-- תפריט צדדי (Side Menu / Offcanvas) -->
+  <nav id="side-menu">
+    <ul>
+      <li><a data-category="cat1">כוכב 1: יסודות הגלישה / שירותים</a></li>
+      <li><a data-category="cat2">כוכב 2: פיתוח / אימונים לפני</a></li>
+      <li><a data-category="cat3">כוכב 3: שידורים חיים / יום הגלישה</a></li>
+      <li><a data-category="cat4">כוכב 4: תעריפים</a></li>
+      <li><a data-category="cat5">כוכב 5: ייעוץ / היערכות ליום גלישה</a></li>
+      <li><a data-category="cat6">כוכב 6: פרויקטים / הפעלה על ההר</a></li>
+      <li><a data-category="cat7">כוכב 7: עדכונים / סקירה כללית</a></li>
+      <li><a data-category="cat8">כוכב 8: תעריפים מתקדמים</a></li>
+      <li><a data-category="cat9">כוכב 9: תשתיות, ציוד ועיצוב</a></li>
+      <li><a data-category="cat10">כוכב 10: ניתוב, גרפיקה והשלב הבא</a></li>
+      <li><a data-category="cat11">כוכב 11: הקמת אולפנים</a></li>
+      <li><a data-category="cat12">כוכב 12: תעריפונים</a></li>
+      <li><a data-category="cat13">כוכב 13: תשתיות, ציוד ועיצוב</a></li>
+      <li><a data-category="cat14">כוכב 14: ניתוב, גרפיקה והשלב הבא</a></li>
+      <li><a data-category="cat15">כוכב 15: הקמת אולפנים</a></li>
+    </ul>
+  </nav>
+  
+  <!-- הקדמה – "מסע בין כוכבים" -->
+  <div class="star-journey" style="text-align:center; padding:40px 20px; background:#000; color:#fff; font-size:24px; font-weight:bold;">
+    כל דף הוא כוכב, כל עולם הוא חוויה. כאן תרגישו את התדרים, את החלומות – חוויה בלתי נשכחת.
+  </div>
+  
+  <!-- Main Content: דפי קטגוריות -->
+  <div class="page-wrap">
+    <div class="main-container">
+      <!-- ================================
+           קטגוריה 1: יסודות הגלישה / שירותים
+      ================================ -->
+      <div id="cat1" class="category-page fade-bg active">
+        <div class="sub-nav">
+          <a href="#cat1-sub1">סקירה כללית</a>
+          <a href="#cat1-sub2">הכרת הציוד</a>
+          <a href="#cat1-sub3">בטיחות ונפילות</a>
+          <a href="#cat1-sub4">טכניקות בסיס</a>
+        </div>
+        <!-- קרוסלה (Carousel) -->
+        <div id="carouselExampleIndicators1" class="carousel slide" data-ride="carousel" style="background-color: grey; margin:20px auto; max-width:960px;">
+          <ol class="carousel-indicators">
+            <li data-target="#carouselExampleIndicators1" data-slide-to="0" class="active"></li>
+            <li data-target="#carouselExampleIndicators1" data-slide-to="1"></li>
+            <li data-target="#carouselExampleIndicators1" data-slide-to="2"></li>
+          </ol>
+          <div class="carousel-inner" role="listbox">
+            <div class="carousel-item active">
+              <img class="d-block mx-auto" src="images/Carousel_Placeholder.png" alt="שקופית 1">
+              <div class="carousel-caption">
+                <h5>כותרת 1</h5>
+                <p>תיאור השקופית הראשונה</p>
+              </div>
+            </div>
+            <div class="carousel-item">
+              <img class="d-block mx-auto" src="images/Carousel_Placeholder.png" alt="שקופית 2">
+              <div class="carousel-caption">
+                <h5>כותרת 2</h5>
+                <p>תיאור השקופית השנייה</p>
+              </div>
+            </div>
+            <div class="carousel-item">
+              <img class="d-block mx-auto" src="images/Carousel_Placeholder.png" alt="שקופית 3">
+              <div class="carousel-caption">
+                <h5>כותרת 3</h5>
+                <p>תיאור השקופית השלישית</p>
+              </div>
+            </div>
+          </div>
+          <a class="carousel-control-prev" href="#carouselExampleIndicators1" role="button" data-slide="prev">
+            <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+            <span class="sr-only">קודם</span>
+          </a>
+          <a class="carousel-control-next" href="#carouselExampleIndicators1" role="button" data-slide="next">
+            <span class="carousel-control-next-icon" aria-hidden="true"></span>
+            <span class="sr-only">הבא</span>
+          </a>
+        </div>
+        <!-- כרטיסיות -->
+        <div class="category-cards">
+          <div class="card" data-category="cat1">
+            <div class="card-content">
+              <h3>יסודות הגלישה</h3>
+              <p>מידע בסיסי למתחילים.</p>
+            </div>
+            <div class="card-overlay">
+              <p>סקירה כללית על מהות הגלישה והתחלת המסע.</p>
+            </div>
+          </div>
+          <div class="card" data-category="cat2">
+            <div class="card-content">
+              <h3>אימונים לפני</h3>
+              <p>כושר, חימום וריכוז.</p>
+            </div>
+            <div class="card-overlay">
+              <p>תוכנית אימונים והכנה מנטלית.</p>
+            </div>
+          </div>
+          <div class="card" data-category="cat3">
+            <div class="card-content">
+              <h3>יום הגלישה</h3>
+              <p>טכניקות והתקדמות.</p>
+            </div>
+            <div class="card-overlay">
+              <p>טכניקות מתקדמות ותרגולים מיוחדים.</p>
+            </div>
+          </div>
+        </div>
+        <!-- תתי-עמודים בתוך קטגוריה 1 -->
+        <div class="category-content" id="cat1-sub1">
+          <h2>סקירה כללית</h2>
+          <p>מידע כללי על הגלישה וחוויות ראשוניות במסע בין כוכבים.</p>
+          <div class="tip-box">
+            <div class="tip-header">טיפ: מוטיבציה</div>
+            <div class="tip-content">
+              הגלישה דורשת סבלנות ותרגול – כל נפילה היא התחלה חדשה.
+            </div>
+          </div>
+        </div>
+        <div class="category-content" id="cat1-sub2">
+          <h2>הכרת הציוד</h2>
+          <ul>
+            <li><span class="highlight">נעליים:</span> התאמה מושלמת לגלישה.</li>
+            <li><span class="highlight">ביינדינגס:</span> חיבור אמין בין הקרש לנעליים.</li>
+            <li><span class="highlight">קרש:</span> בחירה נכונה לשיפור החוויה.</li>
+            <li><span class="highlight">ציוד בטיחות:</span> קסדה, מגני ידיים, ומשקפי סקי.</li>
+          </ul>
+        </div>
+        <div class="category-content" id="cat1-sub3">
+          <h2>בטיחות ונפילות</h2>
+          <p>הנחיות לבטיחות והוראות להתמודדות עם נפילות.</p>
+          <ul>
+            <li>ליפול בצורה מבוקרת עם כיפוף מתואם.</li>
+            <li>תרגולים לשיפור המודעות הגופנית.</li>
+          </ul>
+        </div>
+        <div class="category-content" id="cat1-sub4">
+          <h2>טכניקות בסיס</h2>
+          <p>הכרת טכניקות בסיסיות לגלישה בטוחה ויעילה.</p>
+          <div class="pricing-cards">
+            <div class="price-card">
+              <img src="https://publicdomainvectors.org/photos/snowboard-boot-icon.png" alt="Basic Icon">
+              <h3>טכניקה 1</h3>
+              <p>הורדת מהירות בצורה עדינה.</p>
+              <p class="price">€500</p>
+            </div>
+            <div class="price-card">
+              <img src="https://publicdomainvectors.org/photos/snowboard-stance-icon.png" alt="Pro Icon">
+              <h3>טכניקה 2</h3>
+              <p>טכניקה מתקדמת לאיזון משופר.</p>
+              <p class="price">€1200</p>
+            </div>
+            <div class="price-card">
+              <img src="https://publicdomainvectors.org/photos/snowboard-rider.png" alt="Premium Icon">
+              <h3>טכניקה 3</h3>
+              <p>מעבר לצדדים לשליטה מלאה במהירות.</p>
+              <p class="price">€2000</p>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <!-- ================================
+           קטגוריה 2: אימונים לפני / פיתוח
+      ================================ -->
+      <div id="cat2" class="category-page fade-bg">
+        <div class="sub-nav">
+          <a href="#cat2-sub1">כושר בסיסי</a>
+          <a href="#cat2-sub2">שיווי משקל</a>
+          <a href="#cat2-sub3">הכנה מנטלית</a>
+        </div>
+        <div class="category-content" id="cat2-sub1">
+          <h2>כושר בסיסי</h2>
+          <p>תרגילים לחיזוק הגוף והנפש לקראת המסע.</p>
+          <ul>
+            <li>סקוואטים לחיזוק השרירים.</li>
+            <li>לאנג'ים לשיפור היציבות.</li>
+            <li>פלאנק לחיזוק מרכז הכוח.</li>
+          </ul>
+        </div>
+        <div class="category-content" id="cat2-sub2">
+          <h2>שיווי משקל</h2>
+          <p>תרגילים לשיפור האיזון והיציבות.</p>
+          <ul>
+            <li>עמידה על רגל אחת (תחילה עם עיניים פתוחות ואז סגורות).</li>
+            <li>תרגול עם כדור פיזיו.</li>
+            <li>Side Plank.</li>
+          </ul>
+        </div>
+        <div class="category-content" id="cat2-sub3">
+          <h2>הכנה מנטלית</h2>
+          <p>תרגול נשימות ודמיון מודרך להפחתת מתחים.</p>
+          <div class="info-cards">
+            <div class="info-card">
+              <h4>ניהול פחדים</h4>
+              <p>תרגול נשימות עמוקות ומדיטציה להפחתת חרדה.</p>
+            </div>
+            <div class="info-card">
+              <h4>התמקדות בהנאה</h4>
+              <p>כל אתגר הוא הזדמנות ללמוד ולהתפתח.</p>
+            </div>
+          </div>
+        </div>
+        <div class="category-content">
+          <h2>אייקונים לאימונים</h2>
+          <div class="icon-cards">
+            <div class="icon-card">
+              <img src="https://publicdomainvectors.org/photos/stretch2.png" alt="Fitness Icon">
+              <h4>חימום</h4>
+              <p>מתיחות מחממות את הגוף.</p>
+            </div>
+            <div class="icon-card">
+              <img src="https://static.vecteezy.com/system/resources/previews/006/389/904/original/yoga-icon-meditation-or-meditate-flat-icon-yoga-fitness-icon-free-vector.jpg" alt="Yoga Icon">
+              <h4>נשימות ויוגה</h4>
+              <p>תרגול קצר לעירון התדרים.</p>
+            </div>
+            <div class="icon-card">
+              <img src="https://publicdomainvectors.org/photos/cyberscooty-bed.png" alt="Sleep Icon">
+              <h4>שינה טובה</h4>
+              <p>שינה איכותית לבסיס חזק.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <!-- ================================
+           קטגוריה 3: שידורים חיים / יום הגלישה
+      ================================ -->
+      <div id="cat3" class="category-page fade-bg">
+        <div class="sub-nav">
+          <a href="#cat3-sub1">טכניקות עצירה</a>
+          <a href="#cat3-sub2">סיבובים וקימה</a>
+          <a href="#cat3-sub3">פארק ותרגולים מתקדמים</a>
+        </div>
+        <div class="category-content" id="cat3-sub1">
+          <h2>טכניקות עצירה</h2>
+          <ul>
+            <li><span class="highlight">Heel Edge:</span> עצירה בטוחה על העקבים.</li>
+            <li><span class="highlight">Toe Edge:</span> עצירה מדויקת עם הטיית בהונות.</li>
+          </ul>
+        </div>
+        <div class="category-content" id="cat3-sub2">
+          <h2>סיבובים וקימה</h2>
+          <p>תנועות המעבירות את המשתמש בין תדרים בצורה חלקה.</p>
+          <ul>
+            <li>הסתגלות לתנאים משתנים.</li>
+            <li>שמירה על ראש מורם.</li>
+          </ul>
+        </div>
+        <div class="category-content" id="cat3-sub3">
+          <h2>פארק ותרגולים מתקדמים</h2>
+          <p>תרגולים מתקדמים להוספת ייחוד למסלול.</p>
+          <ul>
+            <li>Ollie – קפיצה המייצגת עלייה לתדר גבוה.</li>
+            <li>Grabs – אחיזות באוויר.</li>
+            <li>נחיתה רכה – ספיגת התדרים בנפילה עדינה.</li>
+          </ul>
+          <div class="gallery-cards">
+            <div class="gallery-card">
+              <img id="map-image" src="https://www.parksnow.sk/assets/img/pages/resort/skimapa_donovaly_new.jpg" alt="מפת דונובלי" onclick="toggleFullscreen(this)">
+              <h4>מפת המסלולים</h4>
+              <p>מבט כולל על המסלולים באתר.</p>
+            </div>
+            <div class="gallery-card">
+              <img src="https://www.snow-forecast.com/system/images/34732/thumb_col_640/Donovaly.jpg" alt="תמונה מהאתר">
+              <h4>נוף חורפי</h4>
+              <p>נוף ומסלולים פתוחים.</p>
+            </div>
+            <div class="gallery-card">
+              <video width="100%" muted autoplay playsinline id="fer_video">
+                <source src="https://sts051.feratel.co.at/streams/stsstore051/1/01001_6795fe91-130dVid.mp4" type="video/mp4">
+                הדפדפן שלך אינו תומך בווידאו.
+              </video>
+              <h4>מצלמת רשת חיה</h4>
+              <p>עדכון חי של מזג האוויר ותנאי השלג.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <!-- ================================
+           קטגוריה 4: תעריפים
+      ================================ -->
+      <div id="cat4" class="category-page fade-bg">
+        <div class="sub-nav">
+          <a href="#cat4-sub1">חבילות ליום גלישה</a>
+        </div>
+        <div class="category-content" id="cat4-sub1">
+          <h2 style="text-align:center; margin-bottom:30px;">תעריפים ליום גלישה</h2>
+          <p style="text-align:center;">בחרו את החבילה המתאימה – פתרונות לכל תקציב.</p>
+          <div class="pricing-cards" style="max-width:960px; margin:20px auto;">
+            <div class="price-card">
+              <h3>חבילת בסיס</h3>
+              <p>השכרת ציוד בסיסי ומדריך לקבוצה קטנה.</p>
+              <div class="price">€60</div>
+            </div>
+            <div class="price-card">
+              <h3>חבילת מתקדמים</h3>
+              <p>ציוד איכותי + שיעור פרטי של שעתיים.</p>
+              <div class="price">€110</div>
+            </div>
+            <div class="price-card">
+              <h3>חבילת פרימיום</h3>
+              <p>ציוד פרימיום, מדריך צמוד, כניסה חופשית לספא.</p>
+              <div class="price">€180</div>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <!-- ================================
+           קטגוריה 5: ייעוץ / היערכות ליום גלישה
+      ================================ -->
+      <div id="cat5" class="category-page fade-bg">
+        <div class="sub-nav">
+          <a href="#cat5-sub1">היערכות כללית</a>
+        </div>
+        <div class="category-content" id="cat5-sub1">
+          <h2 style="text-align:center; margin-bottom:30px;">היערכות ליום גלישה</h2>
+          <div class="info-cards">
+            <div class="info-card">
+              <h4>ביגוד וציוד</h4>
+              <p>לבוש בשכבות, קסדה, כפפות ומגני ידיים.</p>
+            </div>
+            <div class="info-card">
+              <h4>תשתיות ונסיעה</h4>
+              <p>בדיקת מזג האוויר ותכנון נסיעה מוקדם.</p>
+            </div>
+            <div class="info-card">
+              <h4>תיאום מדריך</h4>
+              <p>הזמנת מדריך מראש להבטחת חוויה אישית.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <!-- ================================
+           קטגוריה 6: פרויקטים / הפעלה על ההר
+      ================================ -->
+      <div id="cat6" class="category-page fade-bg">
+        <div class="sub-nav">
+          <a href="#cat6-sub1">התחלה</a>
+          <a href="#cat6-sub2">במהלך</a>
+          <a href="#cat6-sub3">סיום</a>
+        </div>
+        <div class="category-content" id="cat6-sub1">
+          <h2>התחלה</h2>
+          <p>תכנון ראשוני והכנת הציוד להפקה.</p>
+        </div>
+        <div class="category-content" id="cat6-sub2">
+          <h2>במהלך</h2>
+          <p>הפקה בשטח – צילום, שידור חי ועבודה עם צוות מקצועי.</p>
+        </div>
+        <div class="category-content" id="cat6-sub3">
+          <h2>סיום</h2>
+          <p>עריכה, הפקת התוצר הסופי והצגתו ללקוח.</p>
+        </div>
+      </div>
+      
+      <!-- ================================
+           קטגוריה 7: עדכונים / סקירה כללית
+      ================================ -->
+      <div id="cat7" class="category-page fade-bg">
+        <div class="sub-nav">
+          <a href="#cat7-sub1">חדשות</a>
+          <a href="#cat7-sub2">עדכונים טכנולוגיים</a>
+          <a href="#cat7-sub3">סיקורים מקצועיים</a>
+        </div>
+        <div class="category-content" id="cat7-sub1">
+          <h2>חדשות</h2>
+          <p>עדכונים שוטפים מעולם ההפקות והשידורים חיים.</p>
+        </div>
+        <div class="category-content" id="cat7-sub2">
+          <h2>עדכונים טכנולוגיים</h2>
+          <p>סקירה של ציוד וטכנולוגיות חדשות.</p>
+        </div>
+        <div class="category-content" id="cat7-sub3">
+          <h2>סיקורים מקצועיים</h2>
+          <p>ראיונות, כתבות והמלצות מעולם הווידאו והשידורים חיים.</p>
+        </div>
+      </div>
+      
+      <!-- ================================
+           קטגוריה 8: תעריפים מתקדמים
+      ================================ -->
+      <div id="cat8" class="category-page fade-bg">
+        <div class="category-content" style="display:flex; flex-wrap:wrap; background:#2f2f2f; color:#fff; padding:40px; gap:20px;">
+          <div style="flex:1; min-width:300px; background:#3d3d3d; padding:20px;">
+            <h2 style="font-size:24px; margin-bottom:10px;">תעריפונים / חבילות</h2>
+            <p style="opacity:0.7; margin-bottom:20px;">(Placeholder לטבלה/רשימת features)</p>
+            <ul style="line-height:1.8;">
+              <li>Feature 1</li>
+              <li>Feature 2</li>
+              <li>Feature 3</li>
+              <li>Feature 4</li>
+              <li>Feature 5</li>
+              <li>Feature 6</li>
+            </ul>
+            <button style="margin-top:20px; padding:10px 20px; font-size:14px; border:none; border-radius:4px; background:#fff; color:#333; cursor:pointer;">
+              Price a Moay (Placeholder)
+            </button>
+          </div>
+          <div style="flex:1; min-width:300px; display:flex; flex-direction:column; justify-content:center; align-items:center; gap:40px;">
+            <div>
+              <h2 style="font-size:40px; margin-bottom:10px;">1,200</h2>
+              <p style="font-size:18px;">חבילת בסיס Placeholder</p>
+            </div>
+            <div>
+              <h2 style="font-size:40px; margin-bottom:10px;">2,800</h2>
+              <p style="font-size:18px;">חבילת מקצוענים Placeholder</p>
+            </div>
+            <div>
+              <h2 style="font-size:40px; margin-bottom:10px;">4,500</h2>
+              <p style="font-size:18px;">חבילת פרימיום Placeholder</p>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <!-- ================================
+           קטגוריה 9: תשתיות, ציוד ועיצוב
+      ================================ -->
+      <div id="cat9" class="category-page fade-bg">
+        <div class="category-content" style="padding:40px;">
+          <h2 style="font-size:32px; margin-bottom:20px;">תשתיות, ציוד ועיצוב (Placeholder)</h2>
+          <p style="margin-bottom:30px; font-size:16px;">כאן מוצג מבנה כללי – כל עולם הוא סצנה בפני עצמו.</p>
+          <div style="display:flex; flex-direction:column; gap:20px;">
+            <div style="background:#f8f8f8; padding:20px; border-radius:6px; display:flex; align-items:center; justify-content:space-between;">
+              <div>
+                <h3 style="margin-bottom:8px;">תשתיות</h3>
+                <p style="color:#777;">(Placeholder) חשמל, אינטרנט, כבלים וכו'.</p>
+              </div>
+              <div style="font-size:24px; color:#999; font-weight:bold;">1</div>
+            </div>
+            <div style="background:#f0f0f0; padding:20px; border-radius:6px; display:flex; align-items:center; justify-content:space-between;">
+              <div>
+                <h3 style="margin-bottom:8px;">ציוד</h3>
+                <p style="color:#777;">(Placeholder) מצלמות, מיקרופונים...</p>
+              </div>
+              <div style="font-size:24px; color:#999; font-weight:bold;">2</div>
+            </div>
+            <div style="background:#eee; padding:20px; border-radius:6px; display:flex; align-items:center; justify-content:space-between;">
+              <div>
+                <h3 style="margin-bottom:8px;">עיצוב</h3>
+                <p style="color:#777;">(Placeholder) רקע מותאם, תאורה נכונה וכו'.</p>
+              </div>
+              <div style="font-size:24px; color:#999; font-weight:bold;">3</div>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <!-- ================================
+           קטגוריה 10: ניתוב, גרפיקה והשלב הבא
+      ================================ -->
+      <div id="cat10" class="category-page fade-bg">
+        <div class="category-content" style="background:#333; color:#fff; padding:40px;">
+          <h2 style="font-size:28px; margin-bottom:20px; text-align:center;">ניתוב, גרפיקה והשלב הבא (Placeholder)</h2>
+          <div class="gallery-cards" style="margin:0 auto;">
+            <div class="gallery-card" style="width:200px; background:#444;">
+              <img src="https://via.placeholder.com/400x300/000/fff?text=Image+1" alt="Placeholder 1">
+            </div>
+            <div class="gallery-card" style="width:200px; background:#444;">
+              <img src="https://via.placeholder.com/400x300/111/fff?text=Image+2" alt="Placeholder 2">
+            </div>
+            <div class="gallery-card" style="width:200px; background:#444;">
+              <img src="https://via.placeholder.com/400x300/222/fff?text=Image+3" alt="Placeholder 3">
+            </div>
+            <div class="gallery-card" style="width:200px; background:#444;">
+              <img src="https://via.placeholder.com/400x300/333/fff?text=Image+4" alt="Placeholder 4">
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <!-- ================================
+           קטגוריה 11: הקמת אולפנים
+      ================================ -->
+      <div id="cat11" class="category-page fade-bg">
+        <div class="category-content" style="padding:40px;">
+          <h2 style="font-size:30px; margin-bottom:20px;">הקמת אולפנים (Placeholder)</h2>
+          <div style="display:flex; flex-wrap:wrap; gap:20px;">
+            <div style="flex:1; min-width:300px;">
+              <div style="background:#fafafa; padding:20px; border-radius:6px; margin-bottom:20px;">
+                <h4>פרמטר 1</h4>
+                <p style="color:#777;">Placeholder text...</p>
+              </div>
+              <div style="background:#f7f7f7; padding:20px; border-radius:6px; margin-bottom:20px;">
+                <h4>פרמטר 2</h4>
+                <p style="color:#777;">Placeholder text...</p>
+              </div>
+              <div style="background:#f0f0f0; padding:20px; border-radius:6px;">
+                <h4>פרמטר 3</h4>
+                <p style="color:#777;">Placeholder text...</p>
+              </div>
+            </div>
+            <div style="flex:1; min-width:300px; display:flex; align-items:center; justify-content:center;">
+              <img src="https://via.placeholder.com/600x400/ccc/000?text=Studio+Placeholder" alt="Placeholder" style="max-width:100%; border-radius:6px;">
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <!-- ================================
+           קטגוריה 12: תעריפונים
+      ================================ -->
+      <div id="cat12" class="category-page fade-bg">
+        <div class="category-content dark-section" style="padding:40px;">
+          <div class="two-column-split">
+            <div class="dark-block">
+              <h2>טבלת תכונות</h2>
+              <p style="opacity:0.8;">(Placeholder לטבלה מפורטת)</p>
+              <ul>
+                <li>פיצ’ר 1</li>
+                <li>פיצ’ר 2</li>
+                <li>פיצ’ר 3</li>
+                <li>פיצ’ר 4</li>
+                <li>פיצ’ר 5</li>
+              </ul>
+              <button style="margin-top:20px; padding:8px 16px; font-size:14px; border:none; border-radius:4px; background:#fff; color:#333; cursor:pointer;">
+                Price a Moay
+              </button>
+            </div>
+            <div class="large-price-container">
+              <div>
+                <div class="big-number">1,200</div>
+                <p style="font-size:18px;">חבילת בסיס Placeholder</p>
+              </div>
+              <div>
+                <div class="big-number">2,800</div>
+                <p style="font-size:18px;">חבילת מקצוענים Placeholder</p>
+              </div>
+              <div>
+                <div class="big-number">4,500</div>
+                <p style="font-size:18px;">חבילת פרימיום Placeholder</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <!-- ================================
+           קטגוריה 13: תשתיות, ציוד ועיצוב (גרסה נוספת)
+      ================================ -->
+      <div id="cat13" class="category-page fade-bg">
+        <div class="category-content" style="padding:40px;">
+          <h2 class="section-title-big">תשתיות, ציוד ועיצוב (Placeholder)</h2>
+          <p style="margin-bottom:30px; font-size:16px;">טקסט דמה המציג את המבנה הכללי – כל עולם הוא סצנה ייחודית.</p>
+          <div style="display:flex; flex-direction:column; gap:20px;">
+            <div style="background:#f8f8f8; padding:20px; border-radius:6px; display:flex; align-items:center; justify-content:space-between;">
+              <div>
+                <h3 style="margin-bottom:8px;">תשתיות</h3>
+                <p style="color:#777;">(Placeholder) חשמל, אינטרנט, כבלים וכו'.</p>
+              </div>
+              <div style="font-size:24px; color:#999; font-weight:bold;">1</div>
+            </div>
+            <div style="background:#f0f0f0; padding:20px; border-radius:6px; display:flex; align-items:center; justify-content:space-between;">
+              <div>
+                <h3 style="margin-bottom:8px;">ציוד</h3>
+                <p style="color:#777;">(Placeholder) מצלמות, מיקרופונים...</p>
+              </div>
+              <div style="font-size:24px; color:#999; font-weight:bold;">2</div>
+            </div>
+            <div style="background:#eee; padding:20px; border-radius:6px; display:flex; align-items:center; justify-content:space-between;">
+              <div>
+                <h3 style="margin-bottom:8px;">עיצוב</h3>
+                <p style="color:#777;">(Placeholder) רקע מותאם, תאורה נכונה וכו'.</p>
+              </div>
+              <div style="font-size:24px; color:#999; font-weight:bold;">3</div>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <!-- ================================
+           קטגוריה 14: ניתוב, גרפיקה והשלב הבא
+      ================================ -->
+      <div id="cat14" class="category-page fade-bg">
+        <div class="category-content" style="background:#333; color:#fff; padding:40px;">
+          <h2 class="section-title-big" style="color:#fff;">ניתוב, גרפיקה והשלב הבא</h2>
+          <p style="margin-bottom:30px; font-size:16px; opacity:0.8;">(Placeholder) – חוויה ויזואלית המסמלת את המעבר בין עולמות.</p>
+          <div class="gallery-cards" style="margin:0 auto;">
+            <div class="gallery-card" style="width:200px; background:#444;">
+              <img src="https://via.placeholder.com/400x300/000/fff?text=Image+1" alt="Placeholder 1">
+            </div>
+            <div class="gallery-card" style="width:200px; background:#444;">
+              <img src="https://via.placeholder.com/400x300/111/fff?text=Image+2" alt="Placeholder 2">
+            </div>
+            <div class="gallery-card" style="width:200px; background:#444;">
+              <img src="https://via.placeholder.com/400x300/222/fff?text=Image+3" alt="Placeholder 3">
+            </div>
+            <div class="gallery-card" style="width:200px; background:#444;">
+              <img src="https://via.placeholder.com/400x300/333/fff?text=Image+4" alt="Placeholder 4">
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <!-- ================================
+           קטגוריה 15: הקמת אולפנים
+      ================================ -->
+      <div id="cat15" class="category-page fade-bg">
+        <div class="category-content" style="padding:40px;">
+          <h2 class="section-title-big">הקמת אולפנים (Placeholder)</h2>
+          <div style="display:flex; flex-wrap:wrap; gap:20px;">
+            <div style="flex:1; min-width:300px;">
+              <div style="background:#fafafa; padding:20px; border-radius:6px; margin-bottom:20px;">
+                <h4>פרמטר 1</h4>
+                <p style="color:#777;">Placeholder...</p>
+              </div>
+              <div style="background:#f7f7f7; padding:20px; border-radius:6px; margin-bottom:20px;">
+                <h4>פרמטר 2</h4>
+                <p style="color:#777;">Placeholder...</p>
+              </div>
+              <div style="background:#f0f0f0; padding:20px; border-radius:6px;">
+                <h4>פרמטר 3</h4>
+                <p style="color:#777;">Placeholder...</p>
+              </div>
+            </div>
+            <div style="flex:1; min-width:300px; display:flex; align-items:center; justify-content:center;">
+              <img src="https://via.placeholder.com/600x400/ccc/000?text=Studio+Placeholder" alt="Placeholder" style="max-width:100%; border-radius:6px;">
+            </div>
+          </div>
+        </div>
+      </div>
+      
+    </div> <!-- סוף main-container -->
+  </div> <!-- סוף page-wrap -->
+  
+  <!-- =============================
+       Footer
+  ============================= -->
+  <footer style="text-align:center; padding:20px; background:#222; color:#fff;">
+    <p>&copy; 2025 שם החברה. כל הזכויות שמורות.</p>
+  </footer>
+  
+  <!-- =============================
+       External JS Libraries
+  ============================= -->
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/js/bootstrap.bundle.min.js"></script>
+  
+  <!-- =============================
+       Main JS – ניווט, אפקטי רקע, טיפונים ועוד
+  ============================= -->
+  <script>
+    // ניווט בין דפי קטגוריות (מסע/כוכבים)
+    const pages = document.querySelectorAll('.category-page');
+    const navLinks = document.querySelectorAll('#side-menu a');
+    let currentActiveId = null;
+    function showCategory(catId) {
+      if (currentActiveId && currentActiveId !== catId) {
+        const oldPage = document.getElementById(currentActiveId);
+        if (oldPage) oldPage.classList.remove('active');
+      }
+      const newPage = document.getElementById(catId);
+      if (newPage) {
+        newPage.classList.add('active');
+      }
+      navLinks.forEach(link => {
+        link.classList.remove('active');
+        if (link.getAttribute('data-category') === catId) {
+          link.classList.add('active');
+        }
+      });
+      currentActiveId = catId;
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+    navLinks.forEach(link => {
+      link.addEventListener('click', () => {
+        const targetCat = link.getAttribute('data-category');
+        showCategory(targetCat);
+        // סגירת התפריט הנייד לאחר בחירה
+        document.getElementById('side-menu').classList.remove('active');
+      });
+    });
+    // ברירת מחדל: הצגת קטגוריה 1
+    showCategory('cat1');
+    
+    // ניווט חלק (Smooth scrolling) לתתי-קטגוריות
+    const subLinks = document.querySelectorAll('.sub-nav a');
+    subLinks.forEach(slink => {
+      slink.addEventListener('click', e => {
+        e.preventDefault();
+        const targetAnchor = slink.getAttribute('href');
+        const anchorEl = document.querySelector(targetAnchor);
+        if (anchorEl) {
+          window.scrollTo({
+            top: anchorEl.offsetTop - 100,
+            behavior: 'smooth'
+          });
+        }
+      });
+    });
+    
+    // IntersectionObserver לסימון תתי-קטגוריות פעילים
+    const allSubSections = document.querySelectorAll('.category-content[id]');
+    const observerOptions = {
+      root: null,
+      rootMargin: '0px',
+      threshold: 0.3
+    };
+    function observerCallback(entries) {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          const id = entry.target.getAttribute('id');
+          const parentPage = entry.target.closest('.category-page');
+          if (!parentPage) return;
+          const subLinksInPage = parentPage.querySelectorAll('.sub-nav a');
+          subLinksInPage.forEach(link => link.classList.remove('active-sub'));
+          const activeLink = parentPage.querySelector('.sub-nav a[href="#' + id + '"]');
+          if (activeLink) {
+            activeLink.classList.add('active-sub');
+          }
+        }
+      });
+    }
+    const observer = new IntersectionObserver(observerCallback, observerOptions);
+    allSubSections.forEach(section => observer.observe(section));
+    
+    // מסך פתיחה – fade-out והסתרה לאחר סיום הווידאו
+    const splashVideo = document.getElementById('splash-video');
+    const splashOverlay = document.getElementById('splash-overlay');
+    splashVideo.addEventListener('ended', function() {
+      splashOverlay.classList.add('fade-out');
+      setTimeout(() => {
+        splashOverlay.style.display = 'none';
+      }, 1000);
+    });
+    
+    // Hamburger Menu – הפעלת תפריט צדדי
+    const hamburger = document.getElementById('hamburger-menu');
+    hamburger.addEventListener('click', () => {
+      document.getElementById('side-menu').classList.toggle('active');
+    });
+    
+    // פונקציה להחלפת מצב Fullscreen לתמונות בגלריה
+    function toggleFullscreen(image) {
+      const body = document.body;
+      if (!image.classList.contains('fullscreen')) {
+        image.classList.add('fullscreen');
+        body.classList.add('no-scroll');
+      } else {
+        image.classList.remove('fullscreen');
+        body.classList.remove('no-scroll');
+      }
+    }
+    
+    // רקע מתחלף – החלפת רקע לדפי קטגוריות
+    const bgImages = [
+      'images/sbBG1.webp',
+      'images/sbBG2.webp',
+      'images/sbBG3.webp',
+      'images/sbBG4.webp',
+      'images/sbBG5.webp'
+    ];
+    let bgIndex = 0;
+    function rotateBackgrounds() {
+      pages.forEach(page => {
+        page.style.backgroundImage = 'url(' + bgImages[bgIndex] + ')';
+      });
+      bgIndex = (bgIndex + 1) % bgImages.length;
+    }
+    setInterval(() => {
+      rotateBackgrounds();
+    }, Math.random() * (25000 - 10000) + 10000);
+    rotateBackgrounds();
+    
+    // טיפונים – פתיחה/סגירה
+    const tipHeaders = document.querySelectorAll('.tip-header');
+    tipHeaders.forEach(header => {
+      header.addEventListener('click', () => {
+        const content = header.nextElementSibling;
+        if (content.style.display === 'block') {
+          content.style.display = 'none';
+        } else {
+          content.style.display = 'block';
+        }
+      });
+    });
+  </script>
+  
+  <!-- =============================
+       אפקטי נצנצים (Glowing Orbs)
+  ============================= -->
+  <script>
+    const canvasBack = document.getElementById('orb-canvas-back');
+    const ctxBack = canvasBack.getContext('2d');
+    const canvasFront = document.getElementById('orb-canvas-front');
+    const ctxFront = canvasFront.getContext('2d');
+    function resizeOrbCanvas() {
+      canvasBack.width = window.innerWidth;
+      canvasBack.height = window.innerHeight;
+      canvasFront.width = window.innerWidth;
+      canvasFront.height = window.innerHeight;
+    }
+    window.addEventListener('resize', resizeOrbCanvas);
+    function randomRange(min, max) {
+      return Math.random() * (max - min) + min;
+    }
+    class GlowingOrb {
+      constructor(front = false) {
+        this.front = front;
+        const cW = this.front ? canvasFront.width : canvasBack.width;
+        const cH = this.front ? canvasFront.height : canvasBack.height;
+        this.x = randomRange(0, cW);
+        this.y = randomRange(0, cH);
+        this.radius = randomRange(front ? 3 : 5, front ? 7 : 12);
+        this.speedX = randomRange(-0.08, 0.08);
+        this.speedY = randomRange(-0.08, 0.08);
+        const r = Math.floor(randomRange(40, 100));
+        const g = Math.floor(randomRange(80, 180));
+        const b = Math.floor(randomRange(40, 150));
+        const alpha = randomRange(0.2, 0.6);
+        this.color = 'rgba(' + r + ', ' + g + ', ' + b + ', ' + alpha + ')';
+      }
+      update() {
+        this.x += this.speedX;
+        this.y += this.speedY;
+        const cW = this.front ? canvasFront.width : canvasBack.width;
+        const cH = this.front ? canvasFront.height : canvasBack.height;
+        if (this.x < -this.radius) {
+          this.x = cW + this.radius;
+        } else if (this.x > cW + this.radius) {
+          this.x = -this.radius;
+        }
+        if (this.y < -this.radius) {
+          this.y = cH + this.radius;
+        } else if (this.y > cH + this.radius) {
+          this.y = -this.radius;
+        }
+      }
+      draw(ctx) {
+        ctx.save();
+        ctx.beginPath();
+        ctx.shadowBlur = 12;
+        ctx.shadowColor = this.color;
+        ctx.fillStyle = this.color;
+        ctx.arc(this.x, this.y, this.radius, 0, 2 * Math.PI);
+        ctx.fill();
+        ctx.restore();
+      }
+    }
+    let orbsBack = [];
+    let orbsFront = [];
+    function initOrbs() {
+      orbsBack = [];
+      orbsFront = [];
+      for (let i = 0; i < 30; i++) {
+        orbsBack.push(new GlowingOrb(false));
+      }
+      for (let j = 0; j < 20; j++) {
+        orbsFront.push(new GlowingOrb(true));
+      }
+    }
+    function animateOrbs() {
+      ctxBack.clearRect(0, 0, canvasBack.width, canvasBack.height);
+      ctxFront.clearRect(0, 0, canvasFront.width, canvasFront.height);
+      orbsBack.forEach(orb => {
+        orb.update();
+        orb.draw(ctxBack);
+      });
+      orbsFront.forEach(orb => {
+        orb.update();
+        orb.draw(ctxFront);
+      });
+      requestAnimationFrame(animateOrbs);
+    }
+    document.addEventListener('DOMContentLoaded', () => {
+      resizeOrbCanvas();
+      initOrbs();
+      animateOrbs();
+    });
+  </script>
+  
+  <!-- =============================
+       אפקטי שלג (Snow)
+  ============================= -->
+  <script>
+    const snowBack = document.getElementById('snow-canvas-back');
+    const snowCtxBack = snowBack.getContext('2d');
+    const snowFront = document.getElementById('snow-canvas-front');
+    const snowCtxFront = snowFront.getContext('2d');
+    function resizeSnowCanvas() {
+      snowBack.width = window.innerWidth;
+      snowBack.height = window.innerHeight;
+      snowFront.width = window.innerWidth;
+      snowFront.height = window.innerHeight;
+    }
+    window.addEventListener('resize', resizeSnowCanvas);
+    resizeSnowCanvas();
+    function randomRange(min, max) {
+      return Math.random() * (max - min) + min;
+    }
+    let flakesBack = [];
+    let flakesFront = [];
+    let globalWind = { x: 0, y: 0 };
+    let targetWind = { x: 0, y: 0 };
+    function pickNewWind() {
+      const noWindChance = 0.8;
+      if (Math.random() < noWindChance) {
+        targetWind.x = 0;
+        targetWind.y = 0;
+      } else {
+        const angle = randomRange(-60, 60) * Math.PI / 180;
+        let strength = -Math.log(Math.random()) * 0.1;
+        if (strength > 0.3) strength = 0.3;
+        targetWind.x = Math.cos(angle) * strength;
+        targetWind.y = Math.sin(angle) * strength * 0.1;
+      }
+    }
+    function scheduleWindChange() {
+      pickNewWind();
+      setTimeout(scheduleWindChange, randomRange(4000,6000));
+    }
+    scheduleWindChange();
+    function updateWind() {
+      const easeFactor = 0.02;
+      globalWind.x += (targetWind.x - globalWind.x) * easeFactor;
+      globalWind.y += (targetWind.y - globalWind.y) * easeFactor;
+    }
+    class SnowFlake {
+      constructor(front = false) {
+        this.front = front;
+        const canvasW = front ? snowFront.width : snowBack.width;
+        const canvasH = front ? snowFront.height : snowBack.height;
+        this.x = randomRange(0, canvasW);
+        this.y = randomRange(-canvasH, 0);
+        this.radius = randomRange(front ? 1 : 2, front ? 3 : 5);
+        this.speedY = randomRange(0.3, front ? 0.7 : 0.4);
+        this.speedX = randomRange(-0.3, 0.3);
+      }
+      update() {
+        updateWind();
+        this.x += this.speedX + globalWind.x;
+        this.y += this.speedY + globalWind.y;
+        const canvasW = this.front ? snowFront.width : snowBack.width;
+        const canvasH = this.front ? snowFront.height : snowBack.height;
+        if (this.x < 0) this.x = canvasW;
+        if (this.x > canvasW) this.x = 0;
+        if (this.y > canvasH) {
+          this.y = randomRange(-50, 0);
+          this.x = randomRange(0, canvasW);
+        }
+      }
+      draw(ctx) {
+        ctx.beginPath();
+        ctx.arc(this.x, this.y, this.radius, 0, 2 * Math.PI);
+        ctx.fillStyle = "#FFF";
+        ctx.fill();
+        ctx.closePath();
+      }
+    }
+    function initSnow() {
+      flakesBack = [];
+      flakesFront = [];
+      for (let i = 0; i < 200; i++) {
+        flakesBack.push(new SnowFlake(false));
+      }
+      for (let j = 0; j < 100; j++) {
+        flakesFront.push(new SnowFlake(true));
+      }
+    }
+    function animateSnow() {
+      snowCtxBack.clearRect(0, 0, snowBack.width, snowBack.height);
+      snowCtxFront.clearRect(0, 0, snowFront.width, snowFront.height);
+      flakesBack.forEach(flake => {
+        flake.update();
+        flake.draw(snowCtxBack);
+      });
+      flakesFront.forEach(flake => {
+        flake.update();
+        flake.draw(snowCtxFront);
+      });
+      requestAnimationFrame(animateSnow);
+    }
+    initSnow();
+    animateSnow();
+  </script>
+</body>
+</html>
