@@ -1,0 +1,1188 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <title>שם החברה – שירותי וידאו ושידורים חיים</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <!-- Bootstrap RTL (גרסאות שונות למען תאימות) -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.rtl.min.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/css/bootstrap-rtl.min.css" rel="stylesheet">
+  <!-- Google Fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=Alef:wght@400;700&display=swap" rel="stylesheet">
+  
+  <!-- CSS מותאם אישית -->
+  <style>
+    /* ================================
+       איפוס בסיסי וסגנונות כלליים
+    ================================ */
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    html, body {
+      font-family: 'Alef', sans-serif;
+      direction: rtl;
+      overflow-x: hidden;
+      min-height: 100%;
+    }
+    
+    /* ================================
+       קנבסים לאפקטי רקע – נצנצים ושלג
+    ================================ */
+    .orb-canvas, .snow-canvas {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      z-index: 1;
+    }
+    
+    /* ================================
+       מסך פתיחה (Splash) עם וידאו מלא מסך
+    ================================ */
+    #splash-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: #000;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 9999;
+      transition: opacity 1s ease-out;
+    }
+    #splash-overlay.fade-out {
+      opacity: 0;
+      pointer-events: none;
+    }
+    #splash-video {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+    
+    /* ================================
+       Header וניווט ראשי
+    ================================ */
+    header {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      background-color: rgba(0,0,0,0.8);
+      color: #fff;
+      z-index: 10000;
+      height: 90px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 1rem;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.3);
+    }
+    header h1 {
+      font-size: 1.8rem;
+    }
+    header nav {
+      display: flex;
+      gap: 40px;
+      overflow-x: auto;
+      white-space: nowrap;
+      -webkit-overflow-scrolling: touch;
+    }
+    header nav::-webkit-scrollbar {
+      display: none;
+    }
+    header nav a {
+      color: #fff;
+      text-decoration: none;
+      font-weight: bold;
+      padding: 10px 15px;
+      border-radius: 4px;
+      font-size: 18px;
+      transition: background-color 0.3s, color 0.3s;
+      cursor: pointer;
+    }
+    header nav a:hover,
+    header nav a.active {
+      background-color: #ffdd57;
+      color: #333;
+    }
+    
+    /* Hamburger לנייד */
+    .hamburger {
+      display: none;
+      background: none;
+      border: none;
+      cursor: pointer;
+      z-index: 11000;
+    }
+    .hamburger span {
+      display: block;
+      width: 25px;
+      height: 3px;
+      background: #fff;
+      margin: 4px 0;
+      transition: all 0.3s;
+    }
+    
+    @media (max-width: 768px) {
+      header nav {
+        display: none;
+      }
+      .hamburger {
+        display: block;
+      }
+    }
+    
+    /* תפריט צדדי לנייד (Offcanvas) */
+    .offcanvas-menu {
+      position: fixed;
+      top: 0;
+      right: -300px;
+      width: 300px;
+      height: 100%;
+      background: #222;
+      color: #fff;
+      z-index: 11000;
+      padding: 1rem;
+      transition: right 0.3s ease;
+    }
+    .offcanvas-menu.active {
+      right: 0;
+    }
+    .offcanvas-menu a {
+      color: #fff;
+      text-decoration: none;
+      display: block;
+      margin-bottom: 1rem;
+    }
+    
+
+    /* ================================
+       תפריט משנה (Sub-nav)
+    ================================ */
+    .sub-nav {
+      position: fixed;
+      top: 90px;
+      left: 0;
+      right: 0;
+      background-color: rgba(0, 0, 0, 0.6);
+      padding: 10px;
+      display: flex;
+      gap: 20px;
+      justify-content: center;
+      z-index: 9998;
+    }
+    .sub-nav a {
+      text-decoration: none;
+      background: #222;
+      color: #fff;
+      padding: 5px 10px;
+      border-radius: 4px;
+      font-size: 14px;
+      cursor: pointer;
+      transition: background-color 0.3s;
+    }
+    .sub-nav a:hover,
+    .sub-nav a.active-sub {
+      background-color: #ffdd57;
+      color: #333;
+    }
+    
+    /* ================================
+       מעטפת עמוד ותוכן ראשי
+    ================================ */
+    .page-wrap {
+      position: relative;
+      width: 100%;
+    }
+    #main-content {
+      opacity: 0;
+      transition: opacity 0.5s ease-in;
+      padding-top: 140px; /* Header + Sub-nav */
+      position: relative;
+      z-index: 2;
+    }
+    
+    /* ================================
+       קטגוריות (דפים פנימיים)
+    ================================ */
+    .category-page {
+      display: none;
+      opacity: 0;
+      transition: opacity 0.25s ease-in-out;
+    }
+    .category-page.active {
+      display: block;
+      opacity: 1;
+    }
+    .category-page.fade-bg {
+      background-size: cover;
+      background-position: center;
+      background-repeat: no-repeat;
+    }
+    .category-content {
+      max-width: 1000px;
+      margin: 20px auto;
+      padding: 20px;
+      background: rgba(255, 255, 255, 0.92);
+      border-radius: 8px;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+      margin-bottom: 40px;
+      color: #333;
+    }
+    .category-content h2 {
+      margin-bottom: 10px;
+      font-size: 24px;
+      line-height: 1.3;
+    }
+    .category-content p,
+    .category-content ul,
+    .category-content li {
+      color: #444;
+    }
+    .category-content ul {
+      list-style-type: disc;
+      list-style-position: inside;
+      margin-bottom: 20px;
+    }
+    .category-content li {
+      margin-bottom: 8px;
+    }
+    .highlight {
+      font-weight: bold;
+      color: #333;
+    }
+    
+    /* ================================
+       כרטיסיות (Cards, Pricing, Info, Gallery)
+    ================================ */
+    .category-cards {
+      display: flex;
+      justify-content: space-around;
+      flex-wrap: wrap;
+      padding: 20px;
+      gap: 20px;
+    }
+    .card {
+      position: relative;
+      width: 30%;
+      min-width: 250px;
+      height: 200px;
+      background: rgba(255, 255, 255, 0.9);
+      border-radius: 8px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+      overflow: hidden;
+      cursor: pointer;
+      transition: transform 0.3s;
+    }
+    .card:hover {
+      transform: scale(1.05);
+    }
+    .card-content {
+      padding: 20px;
+    }
+    .card-overlay {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0,0,0,0.8);
+      color: #fff;
+      opacity: 0;
+      transition: opacity 0.5s ease;
+      padding: 20px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+    }
+    .card:hover .card-overlay {
+      opacity: 1;
+    }
+    .pricing-cards {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 20px;
+      justify-content: center;
+    }
+    .price-card {
+      flex: 0 0 260px;
+      background: #fff;
+      border: 2px solid #ccc;
+      border-radius: 6px;
+      text-align: center;
+      padding: 20px;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+    }
+    .price-card img {
+      max-width: 80px;
+      margin-bottom: 10px;
+    }
+    .price-card h3 {
+      margin-bottom: 10px;
+      font-size: 20px;
+    }
+    .price-card p {
+      margin-bottom: 10px;
+    }
+    .price-card .price {
+      font-weight: bold;
+      color: #d9534f;
+      font-size: 28px;
+      margin-bottom: 10px;
+    }
+    .info-cards {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 20px;
+      justify-content: center;
+      margin-bottom: 40px;
+    }
+    .info-card {
+      flex: 0 0 300px;
+      background: #fafafa;
+      border: 1px solid #ddd;
+      border-radius: 6px;
+      padding: 15px;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+      transition: transform 0.2s;
+    }
+    .info-card:hover {
+      transform: scale(1.02);
+    }
+    .info-card h4 {
+      margin-bottom: 8px;
+      font-size: 18px;
+    }
+    .info-card p {
+      line-height: 1.4;
+    }
+    .icon-cards {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 20px;
+      justify-content: space-around;
+      margin-bottom: 40px;
+    }
+    .icon-card {
+      width: 200px;
+      background: #fff;
+      border: 1px solid #ccc;
+      border-radius: 8px;
+      text-align: center;
+      padding: 20px;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.15);
+      transition: background-color 0.3s;
+    }
+    .icon-card:hover {
+      background-color: #f2f2f2;
+    }
+    .icon-card img {
+      max-width: 64px;
+      margin-bottom: 10px;
+    }
+    .icon-card h4 {
+      margin-bottom: 8px;
+      font-size: 18px;
+    }
+    .icon-card p {
+      font-size: 14px;
+    }
+    .gallery-cards {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 20px;
+      justify-content: center;
+      margin-bottom: 40px;
+    }
+    .gallery-card {
+      width: 280px;
+      border: 1px solid #ddd;
+      border-radius: 6px;
+      overflow: hidden;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+      background: #fff;
+      text-align: center;
+    }
+    .gallery-card img {
+      width: 100%;
+      height: 180px;
+      object-fit: cover;
+      display: block;
+    }
+    .gallery-card h4 {
+      margin: 10px 0;
+      font-size: 18px;
+    }
+    .gallery-card p {
+      padding: 0 10px 10px;
+      font-size: 14px;
+    }
+    
+    /* ================================
+       טיפונים – פתיחה/סגירה
+    ================================ */
+    .tip-box {
+      margin-top: 10px;
+    }
+    .tip-header {
+      background-color: #d7e7f7;
+      padding: 8px 12px;
+      border-radius: 4px;
+      cursor: pointer;
+      font-weight: bold;
+      color: #333;
+      display: inline-block;
+    }
+    .tip-content {
+      background-color: #f4f4f4;
+      border-radius: 4px;
+      margin-top: 5px;
+      padding: 10px 12px;
+      display: none;
+    }
+    
+    /* ================================
+       אלמנטים מתקדמים – גדלים, חלוקות
+    ================================ */
+    .section-title-big {
+      font-size: 36px;
+      font-weight: bold;
+      margin-bottom: 30px;
+      text-align: center;
+      color: #333;
+    }
+    .dark-section {
+      background: #2f2f2f;
+      color: #fff;
+      border: none;
+      box-shadow: none;
+    }
+    .dark-section h2,
+    .dark-section h3 {
+      color: #fff;
+    }
+    .dark-block {
+      background: #3d3d3d;
+      padding: 20px;
+      border-radius: 6px;
+    }
+    .dark-block ul {
+      line-height: 1.8;
+      margin-left: 15px;
+    }
+    .big-number {
+      font-size: 42px;
+      color: #444;
+      margin-bottom: 10px;
+      font-weight: 700;
+    }
+    .large-price-container {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 40px;
+      justify-content: center;
+    }
+    .two-column-split {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 20px;
+    }
+    
+    /* ================================
+       Scrollable nav (לניווט נוסף)
+    ================================ */
+    .scrollable-nav {
+      display: flex;
+      gap: 20px;
+      overflow-x: auto;
+      white-space: nowrap;
+      cursor: grab;
+      padding: 10px 15px;
+      background-color: rgba(0, 0, 0, 0.8);
+      color: #fff;
+      height: 60px;
+      align-items: center;
+    }
+    .scrollable-nav::-webkit-scrollbar {
+      height: 6px;
+    }
+    .scrollable-nav::-webkit-scrollbar-thumb {
+      background: #ffdd57;
+      border-radius: 3px;
+    }
+    .scrollable-nav a {
+      padding: 8px 12px;
+      color: #fff;
+      background: rgba(255,255,255,0.1);
+      border-radius: 4px;
+      text-decoration: none;
+      transition: background-color 0.3s;
+    }
+    .scrollable-nav a:hover {
+      background-color: #ffdd57;
+      color: #333;
+    }
+    .nav-item {
+      position: relative;
+    }
+    .nav-item .dropdown {
+      display: none;
+      position: absolute;
+      top: 60px;
+      background: rgba(0,0,0,0.9);
+      padding: 8px 0;
+      border-radius: 4px;
+      white-space: nowrap;
+    }
+    .nav-item .dropdown a {
+      display: block;
+      padding: 6px 12px;
+      color: #fff;
+    }
+    .nav-item:hover .dropdown {
+      display: block;
+    }
+    
+    /* ================================
+       Fullscreen תמונות
+    ================================ */
+    .fullscreen {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      object-fit: contain;
+      z-index: 9999;
+      background-color: rgba(0, 0, 0, 0.9);
+      cursor: zoom-out;
+    }
+    body.no-scroll {
+      overflow: hidden;
+    }
+  </style>
+</head>
+<body>
+  <!-- אפקטי רקע: נצנצים ושלג -->
+  <canvas id="orb-canvas-back" class="orb-canvas"></canvas>
+  <canvas id="orb-canvas-front" class="orb-canvas"></canvas>
+  <canvas id="snow-canvas-back" class="snow-canvas"></canvas>
+  <canvas id="snow-canvas-front" class="snow-canvas"></canvas>
+  
+  <!-- מסך פתיחה עם וידאו מלא מסך -->
+  <div id="splash-overlay">
+    <video id="splash-video" autoplay muted playsinline>
+      <source src="videos/intro.mp4" type="video/mp4">
+      הדפדפן שלך אינו תומך בווידאו.
+    </video>
+  </div>
+  
+  <!-- Header עם ניווט לדסקטופ ונייד -->
+  <header>
+    <h1>שם החברה</h1>
+    <nav>
+      <a data-category="cat1">שירותים</a>
+      <a data-category="cat2">פיתוח</a>
+      <a data-category="cat3">שידורים חיים</a>
+      <a data-category="cat4">תעריפים</a>
+      <a data-category="cat5">ייעוץ</a>
+      <a data-category="cat6">פרויקטים</a>
+      <a data-category="cat7">עדכונים</a>
+    </nav>
+    <button class="hamburger" id="hamburger-btn" aria-label="תפריט">
+      <span></span>
+      <span></span>
+      <span></span>
+    </button>
+  </header>
+  
+  <!-- תפריט צדדי לנייד -->
+  <div class="offcanvas-menu" id="offcanvas-menu">
+    <a href="#" data-category="cat1" class="offcanvas-link">שירותים</a>
+    <a href="#" data-category="cat2" class="offcanvas-link">פיתוח</a>
+    <a href="#" data-category="cat3" class="offcanvas-link">שידורים חיים</a>
+    <a href="#" data-category="cat4" class="offcanvas-link">תעריפים</a>
+    <a href="#" data-category="cat5" class="offcanvas-link">ייעוץ</a>
+    <a href="#" data-category="cat6" class="offcanvas-link">פרויקטים</a>
+    <a href="#" data-category="cat7" class="offcanvas-link">עדכונים</a>
+  </div>
+  
+  <!-- Main Content -->
+  <div id="main-content">
+    <div class="page-wrap">
+      <!-- קטגוריה 1: שירותים -->
+      <div id="cat1" class="category-page fade-bg">
+        <!-- תפריט משנה -->
+        <div class="sub-nav">
+          <a href="#cat1-sub1">סקירה כללית</a>
+          <a href="#cat1-sub2">צילום וידאו</a>
+          <a href="#cat1-sub3">שידורים חיים</a>
+          <a href="#cat1-sub4">עריכה</a>
+        </div>
+        <div class="category-content" id="cat1-sub1">
+          <h2>סקירה כללית</h2>
+          <p>אנו מציעים שירותי הפקת וידאו ושידורים חיים ברמה מקצועית, עם תכנון מותאם אישית לכל לקוח.</p>
+          <div class="tip-box">
+            <div class="tip-header">טיפ: יצירתיות</div>
+            <div class="tip-content">
+              חשוב תמיד לשלב רעיונות חדשניים ואסתטיקה ייחודית בכל הפקה.
+            </div>
+          </div>
+        </div>
+        <div class="category-content" id="cat1-sub2">
+          <h2>צילום וידאו מקצועי</h2>
+          <p>הפקות צילום איכותיות, עם ציוד מתקדמים וצוות מקצועי, המתאימים לכל סוגי האירועים.</p>
+        </div>
+        <div class="category-content" id="cat1-sub3">
+          <h2>שידורים חיים</h2>
+          <p>שידור חי בזמן אמת, עם טכנולוגיה מתקדמת ותמיכה טכנית מלאה לכל אירוע.</p>
+        </div>
+        <div class="category-content" id="cat1-sub4">
+          <h2>עריכת וידאו</h2>
+          <p>עריכה מקצועית, אפקטים מיוחדים והפקת סיפור ויזואלי שמשדר את המסר בצורה מרשימה.</p>
+        </div>
+      </div>
+      
+      <!-- קטגוריה 2: פיתוח והפקות -->
+      <div id="cat2" class="category-page fade-bg">
+        <div class="sub-nav">
+          <a href="#cat2-sub1">תכנון והפקה</a>
+          <a href="#cat2-sub2">אחזקה ולוגיסטיקה</a>
+          <a href="#cat2-sub3">תיאום מקצועי</a>
+        </div>
+        <div class="category-content" id="cat2-sub1">
+          <h2>תכנון והפקה</h2>
+          <p>ייעוץ ותכנון קונספטואלי להפקה, כולל בניית תסריט וקונספט מותאם אישית.</p>
+        </div>
+        <div class="category-content" id="cat2-sub2">
+          <h2>אחזקה ולוגיסטיקה</h2>
+          <p>ניהול לוגיסטי מלא, כולל תחבורה, ציוד והכנת האתר להפקה.</p>
+        </div>
+        <div class="category-content" id="cat2-sub3">
+          <h2>תיאום מקצועי</h2>
+          <p>ליווי מלא לאורך כל תהליך ההפקה, מהתכנון ועד למימוש.</p>
+        </div>
+      </div>
+      
+      <!-- קטגוריה 3: שידורים חיים -->
+      <div id="cat3" class="category-page fade-bg">
+        <div class="sub-nav">
+          <a href="#cat3-sub1">הגדרות טכניות</a>
+          <a href="#cat3-sub2">ניהול אירוע</a>
+          <a href="#cat3-sub3">תמיכה טכנית</a>
+        </div>
+        <div class="category-content" id="cat3-sub1">
+          <h2>הגדרות טכניות</h2>
+          <p>שידורים חיים באיכות גבוהה, עם מערכות מתקדמות והגדרות מקצועיות.</p>
+        </div>
+        <div class="category-content" id="cat3-sub2">
+          <h2>ניהול אירוע</h2>
+          <p>תפעול אירועים בשידור חי, עם צוות מיומן לניהול ותפעול בזמן אמת.</p>
+        </div>
+        <div class="category-content" id="cat3-sub3">
+          <h2>תמיכה טכנית</h2>
+          <p>צוות טכני זמין 24/7 למענה מהיר ולפתרון בעיות.</p>
+        </div>
+      </div>
+      
+      <!-- קטגוריה 4: תעריפים -->
+      <div id="cat4" class="category-page fade-bg">
+        <div class="sub-nav">
+          <a href="#cat4-sub1">תעריפים וחבילות</a>
+        </div>
+        <div class="category-content" id="cat4-sub1">
+          <h2 style="text-align:center; margin-bottom: 30px;">תעריפים לחבילות הפקה</h2>
+          <p style="text-align:center;">
+            בחרו את החבילה המתאימה לצרכיכם – פתרונות לכל תקציב.
+          </p>
+          <div class="pricing-cards" style="max-width:960px; margin:20px auto;">
+            <div class="price-card">
+              <h3>חבילת בסיס</h3>
+              <p>צילום ושידור חי לאירוע קצר.</p>
+              <div class="price">€500</div>
+            </div>
+            <div class="price-card">
+              <h3>חבילת מקצוענים</h3>
+              <p>הפקה מלאה עם עריכה ושידור חי איכותי.</p>
+              <div class="price">€1200</div>
+            </div>
+            <div class="price-card">
+              <h3>חבילת פרימיום</h3>
+              <p>פתרון כולל – הפקה, עריכה, שידור חי, וייעוץ שיווקי.</p>
+              <div class="price">€2000</div>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <!-- קטגוריה 5: ייעוץ והפקות נוספות -->
+      <div id="cat5" class="category-page fade-bg">
+        <div class="sub-nav">
+          <a href="#cat5-sub1">ייעוץ והכוונה</a>
+        </div>
+        <div class="category-content" id="cat5-sub1">
+          <h2 style="text-align:center; margin-bottom:30px;">ייעוץ והכוונה מקצועית</h2>
+          <div class="info-cards">
+            <div class="info-card">
+              <h4>אסטרטגיית תוכן</h4>
+              <p>בניית קונספט ותכנון מסר שיווקי בצורה יצירתית.</p>
+            </div>
+            <div class="info-card">
+              <h4>ניהול פרויקטים</h4>
+              <p>ליווי מלא בתכנון, ביצוע וניהול הפקות מתקדמות.</p>
+            </div>
+            <div class="info-card">
+              <h4>חדשנות טכנולוגית</h4>
+              <p>המלצות והכוונה בתחום הציוד והטכנולוגיות העדכניות.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <!-- קטגוריה 6: פרויקטים מיוחדים -->
+      <div id="cat6" class="category-page fade-bg">
+        <div class="sub-nav">
+          <a href="#cat6-sub1">התחלה</a>
+          <a href="#cat6-sub2">במהלך</a>
+          <a href="#cat6-sub3">סיום</a>
+        </div>
+        <div class="category-content" id="cat6-sub1">
+          <h2>התחלה</h2>
+          <p>תכנון ראשוני, בחירת קונספט והכנת הציוד להפקה.</p>
+        </div>
+        <div class="category-content" id="cat6-sub2">
+          <h2>במהלך</h2>
+          <p>הפקה בשטח – צילום, שידור חי ועבודה עם צוות מקצועי.</p>
+        </div>
+        <div class="category-content" id="cat6-sub3">
+          <h2>סיום</h2>
+          <p>עריכה, הפקת התוצר הסופי והצגתו ללקוח.</p>
+        </div>
+      </div>
+      
+      <!-- קטגוריה 7: עדכונים ומידע מקצועי -->
+      <div id="cat7" class="category-page fade-bg">
+        <div class="sub-nav">
+          <a href="#cat7-sub1">חדשות</a>
+          <a href="#cat7-sub2">עדכונים טכנולוגיים</a>
+          <a href="#cat7-sub3">סיקורים מקצועיים</a>
+        </div>
+        <div class="category-content" id="cat7-sub1">
+          <h2>חדשות</h2>
+          <p>עדכונים שוטפים מעולם ההפקות והשידורים חיים.</p>
+        </div>
+        <div class="category-content" id="cat7-sub2">
+          <h2>עדכונים טכנולוגיים</h2>
+          <p>סקירה של ציוד וטכנולוגיות חדשות המאפשרות הפקה ושידור מתקדמים.</p>
+        </div>
+        <div class="category-content" id="cat7-sub3">
+          <h2>סיקורים מקצועיים</h2>
+          <p>ראיונות, כתבות והמלצות מעולם הווידאו והשידורים החיים.</p>
+        </div>
+      </div>
+      
+      <!-- ניתן להוסיף קטגוריות נוספות (כמו cat8, cat9, ... cat15) לפי הצורך -->
+      <!-- לדוגמה, ניתן להוסיף קטגוריה עם טבלת תעריפים מתקדמת, גלריה, מידע מפורט ועוד -->
+      
+    </div> <!-- סוף page-wrap -->
+  </div> <!-- סוף main-content -->
+  
+  <!-- Footer -->
+  <footer>
+    <p>&copy; 2025 שם החברה. כל הזכויות שמורות.</p>
+  </footer>
+  
+  <!-- ================================
+       External JS Libraries
+  ================================ -->
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/js/bootstrap.bundle.min.js"></script>
+  
+  <!-- ================================
+       MAIN.JS – מעבר בין קטגוריות, סאב-קטגוריות, רקעים, טיפים, ועוד
+  ================================ -->
+  <script>
+    // 1) מעבר בין קטגוריות
+    const pages = document.querySelectorAll('.category-page');
+    const navLinks = document.querySelectorAll('header nav a');
+    let currentActiveId = null;
+    const nav = document.querySelector('header nav');
+
+    // גרירת ניווט (למחשבים)
+    let isDragging = false;
+    let startX, scrollLeft;
+    nav.addEventListener('mousedown', (e) => {
+      isDragging = true;
+      nav.classList.add('dragging');
+      startX = e.pageX - nav.offsetLeft;
+      scrollLeft = nav.scrollLeft;
+    });
+    nav.addEventListener('mouseleave', () => {
+      isDragging = false;
+      nav.classList.remove('dragging');
+    });
+    nav.addEventListener('mouseup', () => {
+      isDragging = false;
+      nav.classList.remove('dragging');
+    });
+    nav.addEventListener('mousemove', (e) => {
+      if (!isDragging) return;
+      e.preventDefault();
+      const x = e.pageX - nav.offsetLeft;
+      const walk = (x - startX) * 3; // מהירות הגרירה
+      nav.scrollLeft = scrollLeft - walk;
+    });
+    
+    function toggleFullscreen(image) {
+      const body = document.body;
+      if (!image.classList.contains('fullscreen')) {
+        image.classList.add('fullscreen');
+        body.classList.add('no-scroll');
+      } else {
+        image.classList.remove('fullscreen');
+        body.classList.remove('no-scroll');
+      }
+    }
+    
+    function showCategory(catId) {
+      if (currentActiveId && currentActiveId !== catId) {
+        const oldPage = document.getElementById(currentActiveId);
+        if (oldPage) oldPage.classList.remove('active');
+      }
+      const newPage = document.getElementById(catId);
+      if (newPage) {
+        newPage.classList.add('active');
+      }
+      navLinks.forEach(link => {
+        link.classList.remove('active');
+        if (link.getAttribute('data-category') === catId) {
+          link.classList.add('active');
+        }
+      });
+      currentActiveId = catId;
+    }
+    
+    navLinks.forEach(link => {
+      link.addEventListener('click', () => {
+        const targetCat = link.getAttribute('data-category');
+        showCategory(targetCat);
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      });
+    });
+    
+    // ברירת מחדל: הצגת קטגוריה 1
+    showCategory('cat1');
+    
+    // 2) סאב-קטגוריות וגלילה חלקה
+    const subLinks = document.querySelectorAll('.sub-nav a');
+    subLinks.forEach(slink => {
+      slink.addEventListener('click', e => {
+        e.preventDefault();
+        const targetAnchor = slink.getAttribute('href');
+        const anchorEl = document.querySelector(targetAnchor);
+        if (anchorEl) {
+          window.scrollTo({
+            top: anchorEl.offsetTop - 100,
+            behavior: 'smooth'
+          });
+        }
+      });
+    });
+    
+    // IntersectionObserver לסימון סאב-קטגוריות פעיל
+    const allSubSections = document.querySelectorAll('.category-content[id]');
+    const observerOptions = {
+      root: null,
+      rootMargin: '0px',
+      threshold: 0.3
+    };
+    function observerCallback(entries) {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          const id = entry.target.getAttribute('id');
+          const parentPage = entry.target.closest('.category-page');
+          if (!parentPage) return;
+          const subLinksInPage = parentPage.querySelectorAll('.sub-nav a');
+          subLinksInPage.forEach(link => link.classList.remove('active-sub'));
+          const activeLink = parentPage.querySelector(`.sub-nav a[href="#${id}"]`);
+          if (activeLink) {
+            activeLink.classList.add('active-sub');
+          }
+        }
+      });
+    }
+    const observer = new IntersectionObserver(observerCallback, observerOptions);
+    allSubSections.forEach(section => observer.observe(section));
+    
+    // 3) רקע מתחלף בקטגוריות
+    const bgImages = [
+      'images/sbBG1.webp',
+      'images/sbBG2.webp',
+      'images/sbBG3.webp',
+      'images/sbBG4.webp',
+      'images/sbBG5.webp'
+    ];
+    let bgIndex = 0;
+    function randomRange(min, max) {
+      return Math.random() * (max - min) + min;
+    }
+    function rotateBackgrounds() {
+      pages.forEach(page => {
+        page.style.backgroundImage = `url('${bgImages[bgIndex]}')`;
+      });
+      bgIndex = (bgIndex + 1) % bgImages.length;
+    }
+    pages.forEach(page => page.classList.add('fade-bg'));
+    setInterval(() => {
+      rotateBackgrounds();
+    }, randomRange(10000,25000));
+    rotateBackgrounds();
+    
+    // 4) טיפים נפתחים/נסגרים
+    const tipHeaders = document.querySelectorAll('.tip-header');
+    tipHeaders.forEach(header => {
+      header.addEventListener('click', () => {
+        const content = header.nextElementSibling;
+        if (content.style.display === 'block') {
+          content.style.display = 'none';
+        } else {
+          content.style.display = 'block';
+        }
+      });
+    });
+    
+    /* ================================
+       מסך פתיחה – הסתרה והצגת תוכן ראשי
+    ================================ */
+    document.addEventListener("DOMContentLoaded", function() {
+      const splashVideo = document.getElementById('splash-video');
+      const splashOverlay = document.getElementById('splash-overlay');
+      const mainContent = document.getElementById('main-content');
+      function showMainContent() {
+        splashOverlay.classList.add('fade-out');
+        setTimeout(() => {
+          splashOverlay.style.display = 'none';
+          mainContent.style.opacity = 1;
+        }, 1000);
+      }
+      splashVideo.addEventListener('ended', showMainContent);
+      setTimeout(showMainContent, 5000);
+    });
+    
+    /* ================================
+       Hamburger menu – ניהול תפריט נייד
+    ================================ */
+    const hamburgerBtn = document.getElementById('hamburger-btn');
+    const offcanvasMenu = document.getElementById('offcanvas-menu');
+    hamburgerBtn.addEventListener('click', () => {
+      offcanvasMenu.classList.toggle('active');
+    });
+    document.querySelectorAll('.offcanvas-link').forEach(link => {
+      link.addEventListener('click', () => {
+        offcanvasMenu.classList.remove('active');
+      });
+    });
+  </script>
+  
+  <!-- ================================
+       אפקטי נצנצים (Glowing Orbs)
+  ================================ -->
+  <script>
+    const canvasBack = document.getElementById('orb-canvas-back');
+    const ctxBack = canvasBack.getContext('2d');
+    const canvasFront = document.getElementById('orb-canvas-front');
+    const ctxFront = canvasFront.getContext('2d');
+    function resizeOrbCanvas() {
+      canvasBack.width = window.innerWidth;
+      canvasBack.height = window.innerHeight;
+      canvasFront.width = window.innerWidth;
+      canvasFront.height = window.innerHeight;
+    }
+    window.addEventListener('resize', resizeOrbCanvas);
+    function randomRange(min, max) {
+      return Math.random() * (max - min) + min;
+    }
+    class GlowingOrb {
+      constructor(front = false) {
+        this.front = front;
+        const width = this.front ? canvasFront.width : canvasBack.width;
+        const height = this.front ? canvasFront.height : canvasBack.height;
+        this.x = randomRange(0, width);
+        this.y = randomRange(0, height);
+        this.radius = randomRange(front ? 3 : 5, front ? 7 : 12);
+        this.speedX = randomRange(-0.08, 0.08);
+        this.speedY = randomRange(-0.08, 0.08);
+        const r = Math.floor(randomRange(40, 100));
+        const g = Math.floor(randomRange(80, 180));
+        const b = Math.floor(randomRange(40, 150));
+        const alpha = randomRange(0.2, 0.6);
+        this.color = `rgba(${r}, ${g}, ${b}, ${alpha})`;
+      }
+      update() {
+        this.x += this.speedX;
+        this.y += this.speedY;
+        const width = this.front ? canvasFront.width : canvasBack.width;
+        const height = this.front ? canvasFront.height : canvasBack.height;
+        if (this.x < -this.radius) this.x = width + this.radius;
+        if (this.x > width + this.radius) this.x = -this.radius;
+        if (this.y < -this.radius) this.y = height + this.radius;
+        if (this.y > height + this.radius) this.y = -this.radius;
+      }
+      draw(ctx) {
+        ctx.save();
+        ctx.beginPath();
+        ctx.shadowBlur = 12;
+        ctx.shadowColor = this.color;
+        ctx.fillStyle = this.color;
+        ctx.arc(this.x, this.y, this.radius, 0, 2 * Math.PI);
+        ctx.fill();
+        ctx.restore();
+      }
+    }
+    let orbsBack = [];
+    let orbsFront = [];
+    function initOrbs() {
+      orbsBack = [];
+      orbsFront = [];
+      for (let i = 0; i < 30; i++) {
+        orbsBack.push(new GlowingOrb(false));
+      }
+      for (let j = 0; j < 20; j++) {
+        orbsFront.push(new GlowingOrb(true));
+      }
+    }
+    function animateOrbs() {
+      ctxBack.clearRect(0, 0, canvasBack.width, canvasBack.height);
+      ctxFront.clearRect(0, 0, canvasFront.width, canvasFront.height);
+      orbsBack.forEach(orb => {
+        orb.update();
+        orb.draw(ctxBack);
+      });
+      orbsFront.forEach(orb => {
+        orb.update();
+        orb.draw(ctxFront);
+      });
+      requestAnimationFrame(animateOrbs);
+    }
+    document.addEventListener('DOMContentLoaded', () => {
+      resizeOrbCanvas();
+      initOrbs();
+      animateOrbs();
+    });
+  </script>
+  
+  <!-- ================================
+       אפקטי שלג דו-שכבתי
+  ================================ -->
+  <script>
+    const snowBack = document.getElementById('snow-canvas-back');
+    const snowCtxBack = snowBack.getContext('2d');
+    const snowFront = document.getElementById('snow-canvas-front');
+    const snowCtxFront = snowFront.getContext('2d');
+    function resizeSnowCanvas() {
+      snowBack.width = window.innerWidth;
+      snowBack.height = window.innerHeight;
+      snowFront.width = window.innerWidth;
+      snowFront.height = window.innerHeight;
+    }
+    window.addEventListener('resize', resizeSnowCanvas);
+    resizeSnowCanvas();
+    let flakesBack = [];
+    let flakesFront = [];
+    let globalWind = { x: 0, y: 0 };
+    let targetWind = { x: 0, y: 0 };
+    function pickNewWind() {
+      const noWindChance = 0.8;
+      if (Math.random() < noWindChance) {
+        targetWind.x = 0;
+        targetWind.y = 0;
+      } else {
+        const angle = randomRange(-60, 60) * Math.PI / 180;
+        let strength = -Math.log(Math.random()) * 0.1;
+        if (strength > 0.3) strength = 0.3;
+        targetWind.x = Math.cos(angle) * strength;
+        targetWind.y = Math.sin(angle) * strength * 0.1;
+      }
+    }
+    function scheduleWindChange() {
+      pickNewWind();
+      setTimeout(scheduleWindChange, randomRange(4000, 6000));
+    }
+    scheduleWindChange();
+    function updateWind() {
+      const easeFactor = 0.02;
+      globalWind.x += (targetWind.x - globalWind.x) * easeFactor;
+      globalWind.y += (targetWind.y - globalWind.y) * easeFactor;
+    }
+    class SnowFlake {
+      constructor(front = false) {
+        this.front = front;
+        const canvasW = front ? snowFront.width : snowBack.width;
+        const canvasH = front ? snowFront.height : snowBack.height;
+        this.x = randomRange(0, canvasW);
+        this.y = randomRange(-canvasH, 0);
+        this.radius = randomRange(front ? 1 : 2, front ? 3 : 5);
+        this.speedY = randomRange(0.3, front ? 0.7 : 0.4);
+        this.speedX = randomRange(-0.3, 0.3);
+      }
+      update() {
+        updateWind();
+        this.x += this.speedX + globalWind.x;
+        this.y += this.speedY + globalWind.y;
+        const canvasW = this.front ? snowFront.width : snowBack.width;
+        const canvasH = this.front ? snowFront.height : snowBack.height;
+        if (this.x < 0) this.x = canvasW;
+        if (this.x > canvasW) this.x = 0;
+        if (this.y > canvasH) {
+          this.y = randomRange(-50, 0);
+          this.x = randomRange(0, canvasW);
+        }
+      }
+      draw(ctx) {
+        ctx.beginPath();
+        ctx.arc(this.x, this.y, this.radius, 0, 2 * Math.PI);
+        ctx.fillStyle = "#FFF";
+        ctx.fill();
+        ctx.closePath();
+      }
+    }
+    function initSnow() {
+      flakesBack = [];
+      flakesFront = [];
+      for (let i = 0; i < 200; i++) {
+        flakesBack.push(new SnowFlake(false));
+      }
+      for (let j = 0; j < 100; j++) {
+        flakesFront.push(new SnowFlake(true));
+      }
+    }
+    function animateSnow() {
+      snowCtxBack.clearRect(0, 0, snowBack.width, snowBack.height);
+      snowCtxFront.clearRect(0, 0, snowFront.width, snowFront.height);
+      flakesBack.forEach(flake => {
+        flake.update();
+        flake.draw(snowCtxBack);
+      });
+      flakesFront.forEach(flake => {
+        flake.update();
+        flake.draw(snowCtxFront);
+      });
+      requestAnimationFrame(animateSnow);
+    }
+    initSnow();
+    animateSnow();
+  </script>
+  
+  <!-- ניתן להוסיף ספריות נוספות או קטעי JS נוספים לפי הצורך -->
+</body>
+</html>
