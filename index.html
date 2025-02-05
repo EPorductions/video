@@ -1,0 +1,1396 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <title>שם החברה – שירותי וידאו ושידורים חיים</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <!-- Bootstrap RTL (גרסאות שונות למען תאימות) -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.rtl.min.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/css/bootstrap-rtl.min.css" rel="stylesheet">
+  <!-- Google Fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=Alef:wght@400;700&display=swap" rel="stylesheet">
+  
+  <!-- CSS מותאם אישית -->
+  <style>
+    /* ================================
+       Reset וסגנונות בסיסיים
+    ================================ */
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    html, body {
+      font-family: 'Alef', sans-serif;
+      overflow-x: hidden;
+      min-height: 100%;
+    }
+    
+    /* ================================
+       קנבסים לאפקטי רקע – נצנצים ושלג
+    ================================ */
+    .orb-canvas,
+    .snow-canvas {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      z-index: 1;
+    }
+    
+    /* ================================
+       מערכת שפות
+       - נציג שתי מעטפות תוכן: עברית (ברירת מחדל) ואנגלית
+    ================================ */
+    #content-he {
+      display: block; /* בהתחלה מוצג */
+    }
+    #content-en {
+      display: none; /* מוסתר בהתחלה */
+    }
+    /* כפתור החלפת שפה */
+    #language-toggle {
+      position: fixed;
+      top: 10px;
+      right: 10px;
+      z-index: 12000;
+    }
+    #language-toggle button {
+      margin: 0 5px;
+      padding: 5px 10px;
+      font-size: 14px;
+      cursor: pointer;
+    }
+    
+    /* ================================
+       Header וניווט ראשי
+    ================================ */
+    header {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      background-color: rgba(0,0,0,0.8);
+      color: #fff;
+      z-index: 10000;
+      height: 90px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 1rem;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.3);
+    }
+    header h1 {
+      font-size: 1.8rem;
+      margin: 0;
+      white-space: nowrap;
+    }
+    header nav {
+      display: flex;
+      gap: 40px;
+      overflow-x: auto;
+      white-space: nowrap;
+      -webkit-overflow-scrolling: touch;
+    }
+    header nav::-webkit-scrollbar {
+      display: none;
+    }
+    header nav a {
+      color: #fff;
+      text-decoration: none;
+      font-weight: bold;
+      padding: 10px 15px;
+      border-radius: 4px;
+      font-size: 18px;
+      transition: background-color 0.3s, color 0.3s;
+      cursor: pointer;
+    }
+    header nav a:hover,
+    header nav a.active {
+      background-color: #ffdd57;
+      color: #333;
+    }
+    
+    /* Hamburger (לתפריט צדדי בנייד) */
+    .hamburger {
+      display: none;
+      background: none;
+      border: none;
+      cursor: pointer;
+      z-index: 11000;
+    }
+    .hamburger span {
+      display: block;
+      width: 25px;
+      height: 3px;
+      background: #fff;
+      margin: 4px 0;
+      transition: all 0.3s;
+    }
+    @media (max-width: 768px) {
+      header nav {
+        display: none;
+      }
+      .hamburger {
+        display: block;
+      }
+    }
+    
+    /* תפריט צדדי לנייד (Offcanvas) */
+    .offcanvas-menu {
+      position: fixed;
+      top: 0;
+      right: -300px; /* יחליק מימין */
+      width: 300px;
+      height: 100%;
+      background: #222;
+      color: #fff;
+      z-index: 11000;
+      padding: 1rem;
+      transition: right 0.3s ease;
+    }
+    .offcanvas-menu.active {
+      right: 0;
+    }
+    .offcanvas-menu a {
+      color: #fff;
+      text-decoration: none;
+      display: block;
+      margin-bottom: 1rem;
+    }
+    
+    /* ================================
+       תפריט משנה (Sub-nav)
+    ================================ */
+    .sub-nav {
+      position: fixed;
+      top: 90px;
+      left: 0;
+      right: 0;
+      background-color: rgba(0, 0, 0, 0.6);
+      padding: 10px;
+      display: flex;
+      gap: 20px;
+      justify-content: center;
+      z-index: 9998;
+    }
+    .sub-nav a {
+      text-decoration: none;
+      background: #222;
+      color: #fff;
+      padding: 5px 10px;
+      border-radius: 4px;
+      font-size: 14px;
+      cursor: pointer;
+      transition: background-color 0.3s;
+    }
+    .sub-nav a:hover,
+    .sub-nav a.active-sub {
+      background-color: #ffdd57;
+      color: #333;
+    }
+    
+    /* ================================
+       תוכן ראשי
+    ================================ */
+    #main-content {
+      padding-top: 140px; /* מרווח עבור ה-Header + Sub-nav */
+      position: relative;
+      z-index: 2;
+    }
+    /* עמוד קטגוריה (דף פנימי) */
+    .category-page {
+      display: none;
+      opacity: 0;
+      transition: opacity 0.25s ease-in-out;
+    }
+    .category-page.active {
+      display: block;
+      opacity: 1;
+    }
+    .category-page.fade-bg {
+      background-size: cover;
+      background-position: center;
+      background-repeat: no-repeat;
+    }
+    .category-content {
+      max-width: 1000px;
+      margin: 20px auto;
+      padding: 20px;
+      background: rgba(255, 255, 255, 0.92);
+      border-radius: 8px;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+      margin-bottom: 40px;
+      color: #333;
+    }
+    .category-content h2 {
+      margin-bottom: 10px;
+      font-size: 24px;
+      line-height: 1.3;
+    }
+    .category-content p,
+    .category-content ul,
+    .category-content li {
+      color: #444;
+    }
+    .category-content ul {
+      list-style-type: disc;
+      list-style-position: inside;
+      margin-bottom: 20px;
+    }
+    .category-content li {
+      margin-bottom: 8px;
+    }
+    
+    /* ================================
+       כרטיסיות (Cards, Pricing, Info, Gallery וכו')
+    ================================ */
+    .category-cards {
+      display: flex;
+      justify-content: space-around;
+      flex-wrap: wrap;
+      padding: 20px;
+      gap: 20px;
+    }
+    .card {
+      position: relative;
+      width: 30%;
+      min-width: 250px;
+      height: 200px;
+      background: rgba(255, 255, 255, 0.9);
+      border-radius: 8px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+      overflow: hidden;
+      cursor: pointer;
+      transition: transform 0.3s;
+    }
+    .card:hover {
+      transform: scale(1.05);
+    }
+    .card-content {
+      padding: 20px;
+    }
+    .card-overlay {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0,0,0,0.8);
+      color: #fff;
+      opacity: 0;
+      transition: opacity 0.5s ease;
+      padding: 20px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+    }
+    .card:hover .card-overlay {
+      opacity: 1;
+    }
+    
+    /* כרטיסיות תעריפים / מחירים */
+    .pricing-cards {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 20px;
+      justify-content: center;
+    }
+    .price-card {
+      flex: 0 0 260px;
+      background: #fff;
+      border: 2px solid #ccc;
+      border-radius: 6px;
+      text-align: center;
+      padding: 20px;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+    }
+    .price-card h3 {
+      margin-bottom: 10px;
+      font-size: 20px;
+    }
+    .price-card p {
+      margin-bottom: 10px;
+    }
+    .price-card .price {
+      font-weight: bold;
+      color: #d9534f;
+      font-size: 28px;
+      margin-bottom: 10px;
+    }
+    
+    /* כרטיסיות מידע (info-cards) */
+    .info-cards {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 20px;
+      justify-content: center;
+      margin-bottom: 40px;
+    }
+    .info-card {
+      flex: 0 0 300px;
+      background: #fafafa;
+      border: 1px solid #ddd;
+      border-radius: 6px;
+      padding: 15px;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+      transition: transform 0.2s;
+    }
+    .info-card:hover {
+      transform: scale(1.02);
+    }
+    .info-card h4 {
+      margin-bottom: 8px;
+      font-size: 18px;
+    }
+    .info-card p {
+      line-height: 1.4;
+    }
+    
+    /* גלריה */
+    .gallery-cards {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 20px;
+      justify-content: center;
+      margin-bottom: 40px;
+    }
+    .gallery-card {
+      width: 280px;
+      border: 1px solid #ddd;
+      border-radius: 6px;
+      overflow: hidden;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+      background: #fff;
+      text-align: center;
+    }
+    .gallery-card img {
+      width: 100%;
+      height: 180px;
+      object-fit: cover;
+      display: block;
+    }
+    .gallery-card h4 {
+      margin: 10px 0;
+      font-size: 18px;
+    }
+    .gallery-card p {
+      padding: 0 10px 10px;
+      font-size: 14px;
+    }
+    
+    /* ================================
+       טיפים (Tip Boxes) – נפתח/נסגר
+    ================================ */
+    .tip-box {
+      margin-top: 10px;
+    }
+    .tip-header {
+      background-color: #d7e7f7;
+      padding: 8px 12px;
+      border-radius: 4px;
+      cursor: pointer;
+      font-weight: bold;
+      color: #333;
+      display: inline-block;
+    }
+    .tip-content {
+      background-color: #f4f4f4;
+      border-radius: 4px;
+      margin-top: 5px;
+      padding: 10px 12px;
+      display: none;
+    }
+    
+    /* ================================
+       Footer
+    ================================ */
+    footer {
+      background: #111;
+      color: #ccc;
+      text-align: center;
+      padding: 20px;
+      font-size: 0.9rem;
+    }
+    
+    /* ================================
+       אלמנטים נוספים
+    ================================ */
+    .section-title-big {
+      font-size: 36px;
+      font-weight: bold;
+      margin-bottom: 30px;
+      text-align: center;
+      color: #333;
+    }
+    .dark-section {
+      background: #2f2f2f;
+      color: #fff;
+      border: none;
+      box-shadow: none;
+    }
+    .dark-section h2,
+    .dark-section h3 {
+      color: #fff;
+    }
+    .dark-block {
+      background: #3d3d3d;
+      padding: 20px;
+      border-radius: 6px;
+    }
+    .dark-block ul {
+      line-height: 1.8;
+      margin-left: 15px;
+    }
+    .big-number {
+      font-size: 42px;
+      color: #444;
+      margin-bottom: 10px;
+      font-weight: 700;
+    }
+    
+    /* גלילה אופקית בעזרת גרירה (לניווט הראשי) */
+    .dragging {
+      cursor: grabbing !important;
+    }
+  </style>
+</head>
+<body>
+  <!-- אפקטי רקע: נצנצים ושלג (4 קנבסים דו-שכבתיים) -->
+  <canvas id="orb-canvas-back" class="orb-canvas"></canvas>
+  <canvas id="orb-canvas-front" class="orb-canvas"></canvas>
+  <canvas id="snow-canvas-back" class="snow-canvas"></canvas>
+  <canvas id="snow-canvas-front" class="snow-canvas"></canvas>
+  
+  <!-- כפתורי החלפת שפה -->
+  <div id="language-toggle">
+    <button id="btn-he">עברית</button>
+    <button id="btn-en">English</button>
+  </div>
+  
+  <!-- ==========  תכולת האתר בעברית  ========== -->
+  <div id="content-he" dir="rtl">
+    <!-- Header עברית -->
+    <header>
+      <h1>שם החברה</h1>
+      <nav>
+        <a data-category="he-cat1">שירותים</a>
+        <a data-category="he-cat2">הפקות</a>
+        <a data-category="he-cat3">שידורים חיים</a>
+        <a data-category="he-cat4">תעריפים</a>
+        <a data-category="he-cat5">ייעוץ</a>
+        <a data-category="he-cat6">פרויקטים</a>
+        <a data-category="he-cat7">עדכונים</a>
+      </nav>
+      <button class="hamburger" id="hamburger-btn-he" aria-label="תפריט">
+        <span></span>
+        <span></span>
+        <span></span>
+      </button>
+    </header>
+    
+    <!-- תפריט צדדי לנייד (Offcanvas) בעברית -->
+    <div class="offcanvas-menu" id="offcanvas-menu-he">
+      <a href="#" data-category="he-cat1" class="offcanvas-link">שירותים</a>
+      <a href="#" data-category="he-cat2" class="offcanvas-link">הפקות</a>
+      <a href="#" data-category="he-cat3" class="offcanvas-link">שידורים חיים</a>
+      <a href="#" data-category="he-cat4" class="offcanvas-link">תעריפים</a>
+      <a href="#" data-category="he-cat5" class="offcanvas-link">ייעוץ</a>
+      <a href="#" data-category="he-cat6" class="offcanvas-link">פרויקטים</a>
+      <a href="#" data-category="he-cat7" class="offcanvas-link">עדכונים</a>
+    </div>
+    
+    <!-- תוכן ראשי (עברית) -->
+    <div id="main-content">
+      <!-- קטגוריה 1: שירותים -->
+      <div id="he-cat1" class="category-page fade-bg">
+        <!-- תפריט משנה -->
+        <div class="sub-nav">
+          <a href="#he-cat1-sub-video">וידאו הדגמה</a>
+          <a href="#he-cat1-sub1">סקירה כללית</a>
+          <a href="#he-cat1-sub2">צילום וידאו</a>
+          <a href="#he-cat1-sub3">שידורים חיים</a>
+          <a href="#he-cat1-sub4">עריכה</a>
+        </div>
+        
+        <!-- כרטיס וידאו ראשון – ייעלם בסיום ניגון -->
+        <div class="category-content" id="he-cat1-sub-video">
+          <h2>וידאו הדגמה</h2>
+          <video id="he-video-card" width="100%" controls playsinline>
+            <source src="videos/demo.mp4" type="video/mp4">
+            הדפדפן שלך אינו תומך בווידאו.
+          </video>
+          <p>בסיום הווידאו כרטיס זה ייעלם.</p>
+        </div>
+        
+        <div class="category-content" id="he-cat1-sub1">
+          <h2>סקירה כללית</h2>
+          <p>אנו מציעים שירותי הפקת וידאו ושידורים חיים ברמה מקצועית, עם תכנון מותאם אישית לכל לקוח.</p>
+          <div class="tip-box">
+            <div class="tip-header">טיפ: יצירתיות</div>
+            <div class="tip-content">
+              תמיד מומלץ לשלב רעיונות חדשניים ואסתטיקה ייחודית בכל הפקה כדי לבלוט בשוק.
+            </div>
+          </div>
+        </div>
+        
+        <div class="category-content" id="he-cat1-sub2">
+          <h2>צילום וידאו מקצועי</h2>
+          <p>הפקות צילום איכותיות, עם ציוד מתקדם וצוות מקצועי לכל סוג אירוע.</p>
+        </div>
+        
+        <div class="category-content" id="he-cat1-sub3">
+          <h2>שידורים חיים</h2>
+          <p>שידור חי בזמן אמת, עם טכנולוגיה מתקדמת ותמיכה טכנית מלאה לכל אירוע.</p>
+        </div>
+        
+        <div class="category-content" id="he-cat1-sub4">
+          <h2>עריכת וידאו</h2>
+          <p>עריכה מקצועית, אפקטים מיוחדים והפקת סיפור ויזואלי שמשדר את המסר בצורה מרשימה.</p>
+        </div>
+        
+        <!-- כרטיסיות נוספות לדוגמה -->
+        <div class="category-cards">
+          <div class="card">
+            <div class="card-content">
+              <h3>שירות פרימיום</h3>
+              <p>הכולל צילום, עריכה ואפטר אפקטים.</p>
+            </div>
+            <div class="card-overlay">
+              <p>מושלם עבור הפקות מורכבות, עם תמיכה מלאה של צוות מקצועי.</p>
+            </div>
+          </div>
+          <div class="card">
+            <div class="card-content">
+              <h3>שירות בסיסי</h3>
+              <p>צילום וידאו לאירועים קטנים.</p>
+            </div>
+            <div class="card-overlay">
+              <p>אידיאלי לאירועי חברה קצרים או סדנאות.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <!-- קטגוריה 2: הפקות -->
+      <div id="he-cat2" class="category-page fade-bg">
+        <div class="sub-nav">
+          <a href="#he-cat2-sub1">תכנון והפקה</a>
+          <a href="#he-cat2-sub2">אחזקה ולוגיסטיקה</a>
+          <a href="#he-cat2-sub3">תיאום מקצועי</a>
+        </div>
+        <div class="category-content" id="he-cat2-sub1">
+          <h2>תכנון והפקה</h2>
+          <p>ייעוץ ותכנון קונספטואלי להפקה, כולל בניית תסריט וקונספט מותאם אישית.</p>
+        </div>
+        <div class="category-content" id="he-cat2-sub2">
+          <h2>אחזקה ולוגיסטיקה</h2>
+          <p>ניהול לוגיסטי מלא, כולל תחבורה, ציוד והכנת האתר להפקה.</p>
+        </div>
+        <div class="category-content" id="he-cat2-sub3">
+          <h2>תיאום מקצועי</h2>
+          <p>ליווי מלא לאורך כל תהליך ההפקה, מהתכנון ועד למימוש בשטח.</p>
+        </div>
+      </div>
+      
+      <!-- קטגוריה 3: שידורים חיים -->
+      <div id="he-cat3" class="category-page fade-bg">
+        <div class="sub-nav">
+          <a href="#he-cat3-sub1">הגדרות טכניות</a>
+          <a href="#he-cat3-sub2">ניהול אירוע</a>
+          <a href="#he-cat3-sub3">תמיכה טכנית</a>
+        </div>
+        <div class="category-content" id="he-cat3-sub1">
+          <h2>הגדרות טכניות</h2>
+          <p>שידורים חיים באיכות גבוהה, עם מערכות מתקדמות והגדרות מקצועיות.</p>
+        </div>
+        <div class="category-content" id="he-cat3-sub2">
+          <h2>ניהול אירוע</h2>
+          <p>תפעול אירועים בשידור חי, עם צוות מיומן לתפעול בזמן אמת.</p>
+        </div>
+        <div class="category-content" id="he-cat3-sub3">
+          <h2>תמיכה טכנית</h2>
+          <p>צוות טכני זמין 24/7 למענה מהיר ולפתרון בעיות.</p>
+        </div>
+      </div>
+      
+      <!-- קטגוריה 4: תעריפים -->
+      <div id="he-cat4" class="category-page fade-bg">
+        <div class="sub-nav">
+          <a href="#he-cat4-sub1">תעריפים וחבילות</a>
+        </div>
+        <div class="category-content" id="he-cat4-sub1">
+          <h2 style="text-align:center; margin-bottom: 30px;">תעריפים לחבילות הפקה</h2>
+          <p style="text-align:center;">
+            בחרו את החבילה המתאימה לצרכיכם – פתרונות לכל תקציב.
+          </p>
+          <div class="pricing-cards" style="max-width:960px; margin:20px auto;">
+            <div class="price-card">
+              <h3>חבילת בסיס</h3>
+              <p>צילום ושידור חי לאירוע קצר.</p>
+              <div class="price">€500</div>
+            </div>
+            <div class="price-card">
+              <h3>חבילת מקצוענים</h3>
+              <p>הפקה מלאה עם עריכה ושידור חי איכותי.</p>
+              <div class="price">€1200</div>
+            </div>
+            <div class="price-card">
+              <h3>חבילת פרימיום</h3>
+              <p>פתרון כולל – הפקה, עריכה, שידור חי, וייעוץ שיווקי.</p>
+              <div class="price">€2000</div>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <!-- קטגוריה 5: ייעוץ והכוונה -->
+      <div id="he-cat5" class="category-page fade-bg">
+        <div class="sub-nav">
+          <a href="#he-cat5-sub1">ייעוץ והכוונה</a>
+        </div>
+        <div class="category-content" id="he-cat5-sub1">
+          <h2 style="text-align:center; margin-bottom:30px;">ייעוץ והכוונה מקצועית</h2>
+          <div class="info-cards">
+            <div class="info-card">
+              <h4>אסטרטגיית תוכן</h4>
+              <p>בניית קונספט ותכנון מסר שיווקי בצורה יצירתית.</p>
+            </div>
+            <div class="info-card">
+              <h4>ניהול פרויקטים</h4>
+              <p>ליווי מלא בתכנון, ביצוע וניהול הפקות מורכבות.</p>
+            </div>
+            <div class="info-card">
+              <h4>חדשנות טכנולוגית</h4>
+              <p>המלצות והכוונה בתחום הציוד והטכנולוגיות העדכניות ביותר.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <!-- קטגוריה 6: פרויקטים -->
+      <div id="he-cat6" class="category-page fade-bg">
+        <div class="sub-nav">
+          <a href="#he-cat6-sub1">התחלה</a>
+          <a href="#he-cat6-sub2">במהלך</a>
+          <a href="#he-cat6-sub3">סיום</a>
+        </div>
+        <div class="category-content" id="he-cat6-sub1">
+          <h2>התחלה</h2>
+          <p>תכנון ראשוני, בחירת קונספט והכנת הציוד להפקה.</p>
+        </div>
+        <div class="category-content" id="he-cat6-sub2">
+          <h2>במהלך</h2>
+          <p>הפקה בשטח – צילום, שידור חי ועבודה עם צוות מקצועי.</p>
+        </div>
+        <div class="category-content" id="he-cat6-sub3">
+          <h2>סיום</h2>
+          <p>עריכה, הפקת התוצר הסופי והצגתו ללקוח.</p>
+        </div>
+      </div>
+      
+      <!-- קטגוריה 7: עדכונים -->
+      <div id="he-cat7" class="category-page fade-bg">
+        <div class="sub-nav">
+          <a href="#he-cat7-sub1">חדשות</a>
+          <a href="#he-cat7-sub2">עדכונים טכנולוגיים</a>
+          <a href="#he-cat7-sub3">סיקורים מקצועיים</a>
+        </div>
+        <div class="category-content" id="he-cat7-sub1">
+          <h2>חדשות</h2>
+          <p>עדכונים מעולם ההפקות והשידורים החיים.</p>
+        </div>
+        <div class="category-content" id="he-cat7-sub2">
+          <h2>עדכונים טכנולוגיים</h2>
+          <p>סקירה של ציוד וטכנולוגיות חדשות המסייעות בהפקה ושידור מתקדמים.</p>
+        </div>
+        <div class="category-content" id="he-cat7-sub3">
+          <h2>סיקורים מקצועיים</h2>
+          <p>ראיונות, כתבות והמלצות מעולם הווידאו והשידורים החיים.</p>
+        </div>
+      </div>
+      
+    </div> <!-- סוף main-content (עברית) -->
+  </div> <!-- סוף #content-he -->
+  
+  <!-- ==========  תכולת האתר באנגלית  ========== -->
+  <div id="content-en" dir="ltr">
+    <!-- Header אנגלית -->
+    <header>
+      <h1>Company Name</h1>
+      <nav>
+        <a data-category="en-cat1">Services</a>
+        <a data-category="en-cat2">Productions</a>
+        <a data-category="en-cat3">Live Streams</a>
+        <a data-category="en-cat4">Pricing</a>
+        <a data-category="en-cat5">Consulting</a>
+        <a data-category="en-cat6">Projects</a>
+        <a data-category="en-cat7">Updates</a>
+      </nav>
+      <button class="hamburger" id="hamburger-btn-en" aria-label="Menu">
+        <span></span>
+        <span></span>
+        <span></span>
+      </button>
+    </header>
+    
+    <!-- תפריט צדדי לנייד באנגלית -->
+    <div class="offcanvas-menu" id="offcanvas-menu-en">
+      <a href="#" data-category="en-cat1" class="offcanvas-link">Services</a>
+      <a href="#" data-category="en-cat2" class="offcanvas-link">Productions</a>
+      <a href="#" data-category="en-cat3" class="offcanvas-link">Live Streams</a>
+      <a href="#" data-category="en-cat4" class="offcanvas-link">Pricing</a>
+      <a href="#" data-category="en-cat5" class="offcanvas-link">Consulting</a>
+      <a href="#" data-category="en-cat6" class="offcanvas-link">Projects</a>
+      <a href="#" data-category="en-cat7" class="offcanvas-link">Updates</a>
+    </div>
+    
+    <!-- תוכן ראשי (אנגלית) -->
+    <div id="main-content">
+      <!-- Category 1: Services -->
+      <div id="en-cat1" class="category-page fade-bg">
+        <div class="sub-nav">
+          <a href="#en-cat1-sub-video">Demo Video</a>
+          <a href="#en-cat1-sub1">Overview</a>
+          <a href="#en-cat1-sub2">Video Shooting</a>
+          <a href="#en-cat1-sub3">Live Broadcasting</a>
+          <a href="#en-cat1-sub4">Editing</a>
+        </div>
+        
+        <!-- Video Card – disappears after it ends -->
+        <div class="category-content" id="en-cat1-sub-video">
+          <h2>Demo Video</h2>
+          <video id="en-video-card" width="100%" controls playsinline>
+            <source src="videos/demo.mp4" type="video/mp4">
+            Your browser does not support video.
+          </video>
+          <p>After the video ends, this card will disappear.</p>
+        </div>
+        
+        <div class="category-content" id="en-cat1-sub1">
+          <h2>Overview</h2>
+          <p>We provide professional video production and live streaming services, tailored to each client’s needs.</p>
+          <div class="tip-box">
+            <div class="tip-header">Tip: Creativity</div>
+            <div class="tip-content">
+              Innovative ideas and unique aesthetics help your production stand out in a crowded market.
+            </div>
+          </div>
+        </div>
+        
+        <div class="category-content" id="en-cat1-sub2">
+          <h2>Professional Video Shooting</h2>
+          <p>High-quality footage, advanced equipment, and an experienced team for any type of event.</p>
+        </div>
+        
+        <div class="category-content" id="en-cat1-sub3">
+          <h2>Live Broadcasting</h2>
+          <p>Real-time live streaming with advanced technology and full technical support.</p>
+        </div>
+        
+        <div class="category-content" id="en-cat1-sub4">
+          <h2>Editing</h2>
+          <p>Professional editing, special effects, and storytelling that brings your vision to life.</p>
+        </div>
+        
+        <!-- Additional cards (example) -->
+        <div class="category-cards">
+          <div class="card">
+            <div class="card-content">
+              <h3>Premium Service</h3>
+              <p>Includes shooting, editing, and post-production effects.</p>
+            </div>
+            <div class="card-overlay">
+              <p>Perfect for large-scale productions requiring a full professional crew.</p>
+            </div>
+          </div>
+          <div class="card">
+            <div class="card-content">
+              <h3>Basic Service</h3>
+              <p>Video shooting for small events.</p>
+            </div>
+            <div class="card-overlay">
+              <p>Ideal for short corporate gatherings or workshops.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Category 2: Productions -->
+      <div id="en-cat2" class="category-page fade-bg">
+        <div class="sub-nav">
+          <a href="#en-cat2-sub1">Planning & Production</a>
+          <a href="#en-cat2-sub2">Logistics</a>
+          <a href="#en-cat2-sub3">Professional Coordination</a>
+        </div>
+        <div class="category-content" id="en-cat2-sub1">
+          <h2>Planning & Production</h2>
+          <p>Conceptual planning, script building, and custom production strategies.</p>
+        </div>
+        <div class="category-content" id="en-cat2-sub2">
+          <h2>Logistics</h2>
+          <p>Full logistical management, including transportation, equipment, and site preparation.</p>
+        </div>
+        <div class="category-content" id="en-cat2-sub3">
+          <h2>Professional Coordination</h2>
+          <p>Comprehensive support from the initial concept all the way to on-site execution.</p>
+        </div>
+      </div>
+      
+      <!-- Category 3: Live Streams -->
+      <div id="en-cat3" class="category-page fade-bg">
+        <div class="sub-nav">
+          <a href="#en-cat3-sub1">Technical Setup</a>
+          <a href="#en-cat3-sub2">Event Management</a>
+          <a href="#en-cat3-sub3">Tech Support</a>
+        </div>
+        <div class="category-content" id="en-cat3-sub1">
+          <h2>Technical Setup</h2>
+          <p>High-quality broadcasts with advanced systems and professional settings.</p>
+        </div>
+        <div class="category-content" id="en-cat3-sub2">
+          <h2>Event Management</h2>
+          <p>Real-time operation with an experienced team to ensure seamless live streaming.</p>
+        </div>
+        <div class="category-content" id="en-cat3-sub3">
+          <h2>Tech Support</h2>
+          <p>24/7 technical assistance to address any issue promptly.</p>
+        </div>
+      </div>
+      
+      <!-- Category 4: Pricing -->
+      <div id="en-cat4" class="category-page fade-bg">
+        <div class="sub-nav">
+          <a href="#en-cat4-sub1">Packages & Pricing</a>
+        </div>
+        <div class="category-content" id="en-cat4-sub1">
+          <h2 style="text-align:center; margin-bottom: 30px;">Production Packages</h2>
+          <p style="text-align:center;">
+            Choose the package that best fits your needs and budget.
+          </p>
+          <div class="pricing-cards" style="max-width:960px; margin:20px auto;">
+            <div class="price-card">
+              <h3>Basic Package</h3>
+              <p>Shoot and live stream for a short event.</p>
+              <div class="price">€500</div>
+            </div>
+            <div class="price-card">
+              <h3>Professional Package</h3>
+              <p>Complete production with high-quality editing and live broadcast.</p>
+              <div class="price">€1200</div>
+            </div>
+            <div class="price-card">
+              <h3>Premium Package</h3>
+              <p>All-in-one solution – production, editing, live streaming, and marketing consulting.</p>
+              <div class="price">€2000</div>
+            </div>
+
+          </div>
+        </div>
+      </div>
+      
+      <!-- Category 5: Consulting -->
+      <div id="en-cat5" class="category-page fade-bg">
+        <div class="sub-nav">
+          <a href="#en-cat5-sub1">Consulting & Guidance</a>
+        </div>
+        <div class="category-content" id="en-cat5-sub1">
+          <h2 style="text-align:center; margin-bottom:30px;">Professional Consulting</h2>
+          <div class="info-cards">
+            <div class="info-card">
+              <h4>Content Strategy</h4>
+              <p>Developing creative concepts and planning an effective marketing message.</p>
+            </div>
+            <div class="info-card">
+              <h4>Project Management</h4>
+              <p>Full support in planning, executing, and managing complex productions.</p>
+            </div>
+            <div class="info-card">
+              <h4>Tech Innovation</h4>
+              <p>Recommendations and guidance regarding the latest cutting-edge technologies.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Category 6: Projects -->
+      <div id="en-cat6" class="category-page fade-bg">
+        <div class="sub-nav">
+          <a href="#en-cat6-sub1">Start</a>
+          <a href="#en-cat6-sub2">During</a>
+          <a href="#en-cat6-sub3">End</a>
+        </div>
+        <div class="category-content" id="en-cat6-sub1">
+          <h2>Start</h2>
+          <p>Initial planning, concept selection, and preparing equipment.</p>
+        </div>
+        <div class="category-content" id="en-cat6-sub2">
+          <h2>During</h2>
+          <p>On-site production: filming, live streaming, and teamwork with professional staff.</p>
+        </div>
+        <div class="category-content" id="en-cat6-sub3">
+          <h2>End</h2>
+          <p>Editing, final output, and delivering the finished product to the client.</p>
+        </div>
+      </div>
+      
+      <!-- Category 7: Updates -->
+      <div id="en-cat7" class="category-page fade-bg">
+        <div class="sub-nav">
+          <a href="#en-cat7-sub1">News</a>
+          <a href="#en-cat7-sub2">Tech Updates</a>
+          <a href="#en-cat7-sub3">Reviews</a>
+        </div>
+        <div class="category-content" id="en-cat7-sub1">
+          <h2>News</h2>
+          <p>Updates from the world of video productions and live broadcasts.</p>
+        </div>
+        <div class="category-content" id="en-cat7-sub2">
+          <h2>Tech Updates</h2>
+          <p>Overviews of new equipment and technologies enabling advanced production and streaming.</p>
+        </div>
+        <div class="category-content" id="en-cat7-sub3">
+          <h2>Reviews</h2>
+          <p>Interviews, articles, and recommendations from the video and live streaming industry.</p>
+        </div>
+      </div>
+      
+    </div> <!-- סוף main-content (אנגלית) -->
+  </div> <!-- סוף #content-en -->
+  
+  <!-- Footer משותף -->
+  <footer>
+    <p>&copy; 2025 Company Name. All rights reserved.</p>
+  </footer>
+  
+  <!-- ================================
+       External JS Libraries
+  ================================ -->
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/js/bootstrap.bundle.min.js"></script>
+  
+  <!-- ================================
+       MAIN.JS – ניווט קטגוריות, טיפים, רקעים, ועוד
+  ================================ -->
+  <script>
+    /* ----------------------------------------------------------------------
+       1) ניהול מעבר בין שפות (כפתורי החלפת שפה)
+    ---------------------------------------------------------------------- */
+    const btnHe = document.getElementById('btn-he');
+    const btnEn = document.getElementById('btn-en');
+    const contentHe = document.getElementById('content-he');
+    const contentEn = document.getElementById('content-en');
+    
+    btnHe.addEventListener('click', () => {
+      contentHe.style.display = 'block';
+      contentEn.style.display = 'none';
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    });
+    btnEn.addEventListener('click', () => {
+      contentHe.style.display = 'none';
+      contentEn.style.display = 'block';
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    });
+    
+    /* ----------------------------------------------------------------------
+       2) פונקציה כללית לאתחול מעבר בין קטגוריות בכל אחת מהשפות
+    ---------------------------------------------------------------------- */
+    function initCategorySwitching(containerIdPrefix) {
+      // example: containerIdPrefix = 'he' => נחפש קטגוריות עם id="he-catX"
+      const container = document.getElementById(`content-${containerIdPrefix}`);
+      if (!container) return;
+      
+      const pages = container.querySelectorAll('.category-page');
+      const navLinks = container.querySelectorAll('header nav a');
+      let currentActiveId = null;
+      const nav = container.querySelector('header nav');
+      
+      // גרירת תפריט (Desktop)
+      let isDragging = false;
+      let startX, scrollLeft;
+      if (nav) {
+        nav.addEventListener('mousedown', (e) => {
+          isDragging = true;
+          nav.classList.add('dragging');
+          startX = e.pageX - nav.offsetLeft;
+          scrollLeft = nav.scrollLeft;
+        });
+        nav.addEventListener('mouseleave', () => {
+          isDragging = false;
+          nav.classList.remove('dragging');
+        });
+        nav.addEventListener('mouseup', () => {
+          isDragging = false;
+          nav.classList.remove('dragging');
+        });
+        nav.addEventListener('mousemove', (e) => {
+          if (!isDragging) return;
+          e.preventDefault();
+          const x = e.pageX - nav.offsetLeft;
+          const walk = (x - startX) * 3; // מהירות הגרירה
+          nav.scrollLeft = scrollLeft - walk;
+        });
+      }
+      
+      function showCategory(catId) {
+        if (currentActiveId && currentActiveId !== catId) {
+          const oldPage = container.querySelector('#' + currentActiveId);
+          if (oldPage) oldPage.classList.remove('active');
+        }
+        const newPage = container.querySelector('#' + catId);
+        if (newPage) {
+          newPage.classList.add('active');
+        }
+        navLinks.forEach(link => {
+          link.classList.remove('active');
+          if (link.getAttribute('data-category') === catId) {
+            link.classList.add('active');
+          }
+        });
+        currentActiveId = catId;
+      }
+      
+      navLinks.forEach(link => {
+        link.addEventListener('click', () => {
+          const targetCat = link.getAttribute('data-category');
+          showCategory(targetCat);
+          window.scrollTo({ top: 0, behavior: 'smooth' });
+        });
+      });
+      
+      // הצגת קטגוריה ראשונה כברירת מחדל
+      if (navLinks.length > 0) {
+        const firstCat = navLinks[0].getAttribute('data-category');
+        showCategory(firstCat);
+      }
+      
+      // תפריט משנה – גלילה חלקה
+      const subLinks = container.querySelectorAll('.sub-nav a');
+      subLinks.forEach(slink => {
+        slink.addEventListener('click', e => {
+          e.preventDefault();
+          const targetAnchor = slink.getAttribute('href');
+          const anchorEl = container.querySelector(targetAnchor);
+          if (anchorEl) {
+            window.scrollTo({
+              top: anchorEl.offsetTop - 100,
+              behavior: 'smooth'
+            });
+          }
+        });
+      });
+      
+      // IntersectionObserver לסימון סאב-קטגוריה פעילה
+      const allSubSections = container.querySelectorAll('.category-content[id]');
+      const observerOptions = {
+        root: null,
+        rootMargin: '0px',
+        threshold: 0.3
+      };
+      function observerCallback(entries) {
+        entries.forEach(entry => {
+          if (entry.isIntersecting) {
+            const id = entry.target.getAttribute('id');
+            const parentPage = entry.target.closest('.category-page');
+            if (!parentPage) return;
+            // תפריט משנה מקומי
+            const subLinksInPage = parentPage.querySelectorAll('.sub-nav a');
+            subLinksInPage.forEach(link => link.classList.remove('active-sub'));
+            const activeLink = parentPage.querySelector(`.sub-nav a[href="#${id}"]`);
+            if (activeLink) {
+              activeLink.classList.add('active-sub');
+            }
+          }
+        });
+      }
+      const observer = new IntersectionObserver(observerCallback, observerOptions);
+      allSubSections.forEach(section => observer.observe(section));
+      
+      // רקעים מתחלפים
+      const bgImages = [
+        'images/sbBG1.webp',
+        'images/sbBG2.webp',
+        'images/sbBG3.webp',
+        'images/sbBG4.webp',
+        'images/sbBG5.webp'
+      ];
+      let bgIndex = 0;
+      function randomRange(min, max) {
+        return Math.random() * (max - min) + min;
+      }
+      function rotateBackgrounds() {
+        pages.forEach(page => {
+          page.style.backgroundImage = `url('${bgImages[bgIndex]}')`;
+        });
+        bgIndex = (bgIndex + 1) % bgImages.length;
+      }
+      pages.forEach(page => page.classList.add('fade-bg'));
+      setInterval(() => {
+        rotateBackgrounds();
+      }, randomRange(10000, 25000));
+      rotateBackgrounds();
+      
+      // טיפים (פתיחה/סגירה)
+      const tipHeaders = container.querySelectorAll('.tip-header');
+      tipHeaders.forEach(header => {
+        header.addEventListener('click', () => {
+          const content = header.nextElementSibling;
+          if (content.style.display === 'block') {
+            content.style.display = 'none';
+          } else {
+            content.style.display = 'block';
+          }
+        });
+      });
+      
+      // כרטיסיית וידאו: היעלמות בסיום הווידאו
+      const videoEl = container.querySelector(`#${containerIdPrefix}-video-card`);
+      if (videoEl) {
+        videoEl.addEventListener('ended', () => {
+          const videoCard = container.querySelector(`#${containerIdPrefix}-cat1-sub-video`);
+          if (videoCard) {
+            videoCard.style.display = 'none';
+          }
+        });
+      }
+      
+      // לחצן המבורגר (תפריט צד) בנייד
+      const hamburgerBtn = container.querySelector(`#hamburger-btn-${containerIdPrefix}`);
+      const offcanvasMenu = container.querySelector(`#offcanvas-menu-${containerIdPrefix}`);
+      if (hamburgerBtn && offcanvasMenu) {
+        hamburgerBtn.addEventListener('click', () => {
+          offcanvasMenu.classList.toggle('active');
+        });
+        offcanvasMenu.querySelectorAll('.offcanvas-link').forEach(link => {
+          link.addEventListener('click', () => {
+            offcanvasMenu.classList.remove('active');
+          });
+        });
+      }
+      
+      // בנוסף, מטפלים בכרטיס וידאו בדרך ספציפית (כי יש לנו ידנית IDs נפרדים בכל שפה)
+      // לדוגמה, בהמשך נאתר את הווידאו אם הוא קיים:
+      const localVideo = container.querySelector('video');
+      if (localVideo) {
+        // כאן נטפל באירוע סיום הווידאו
+        localVideo.addEventListener('ended', () => {
+          // מאתרים את האלמנט העוטף ומסתירים אותו
+          const parentEl = localVideo.closest('.category-content');
+          if (parentEl) parentEl.style.display = 'none';
+        });
+      }
+    }
+    
+    // הפעלה לשתי השפות
+    initCategorySwitching('he');
+    initCategorySwitching('en');
+  </script>
+  
+  <!-- ================================
+       אפקטי נצנצים (Glowing Orbs)
+  ================================ -->
+  <script>
+    const canvasBack = document.getElementById('orb-canvas-back');
+    const ctxBack = canvasBack.getContext('2d');
+    const canvasFront = document.getElementById('orb-canvas-front');
+    const ctxFront = canvasFront.getContext('2d');
+    
+    function resizeOrbCanvas() {
+      canvasBack.width = window.innerWidth;
+      canvasBack.height = window.innerHeight;
+      canvasFront.width = window.innerWidth;
+      canvasFront.height = window.innerHeight;
+    }
+    window.addEventListener('resize', resizeOrbCanvas);
+    
+    function randomRange(min, max) {
+      return Math.random() * (max - min) + min;
+    }
+    
+    class GlowingOrb {
+      constructor(front = false) {
+        this.front = front;
+        const width = this.front ? canvasFront.width : canvasBack.width;
+        const height = this.front ? canvasFront.height : canvasBack.height;
+        this.x = randomRange(0, width);
+        this.y = randomRange(0, height);
+        this.radius = randomRange(front ? 3 : 5, front ? 7 : 12);
+        this.speedX = randomRange(-0.08, 0.08);
+        this.speedY = randomRange(-0.08, 0.08);
+        const r = Math.floor(randomRange(40, 100));
+        const g = Math.floor(randomRange(80, 180));
+        const b = Math.floor(randomRange(40, 150));
+        const alpha = randomRange(0.2, 0.6);
+        this.color = `rgba(${r}, ${g}, ${b}, ${alpha})`;
+      }
+      update() {
+        this.x += this.speedX;
+        this.y += this.speedY;
+        const width = this.front ? canvasFront.width : canvasBack.width;
+        const height = this.front ? canvasFront.height : canvasBack.height;
+        if (this.x < -this.radius) this.x = width + this.radius;
+        if (this.x > width + this.radius) this.x = -this.radius;
+        if (this.y < -this.radius) this.y = height + this.radius;
+        if (this.y > height + this.radius) this.y = -this.radius;
+      }
+      draw(ctx) {
+        ctx.save();
+        ctx.beginPath();
+        ctx.shadowBlur = 12;
+        ctx.shadowColor = this.color;
+        ctx.fillStyle = this.color;
+        ctx.arc(this.x, this.y, this.radius, 0, 2 * Math.PI);
+        ctx.fill();
+        ctx.restore();
+      }
+    }
+    
+    let orbsBack = [];
+    let orbsFront = [];
+    
+    function initOrbs() {
+      orbsBack = [];
+      orbsFront = [];
+      for (let i = 0; i < 30; i++) {
+        orbsBack.push(new GlowingOrb(false));
+      }
+      for (let j = 0; j < 20; j++) {
+        orbsFront.push(new GlowingOrb(true));
+      }
+    }
+    function animateOrbs() {
+      ctxBack.clearRect(0, 0, canvasBack.width, canvasBack.height);
+      ctxFront.clearRect(0, 0, canvasFront.width, canvasFront.height);
+      orbsBack.forEach(orb => {
+        orb.update();
+        orb.draw(ctxBack);
+      });
+      orbsFront.forEach(orb => {
+        orb.update();
+        orb.draw(ctxFront);
+      });
+      requestAnimationFrame(animateOrbs);
+    }
+    
+    document.addEventListener('DOMContentLoaded', () => {
+      resizeOrbCanvas();
+      initOrbs();
+      animateOrbs();
+    });
+  </script>
+  
+  <!-- ================================
+       אפקטי שלג דו-שכבתי
+  ================================ -->
+  <script>
+    const snowBack = document.getElementById('snow-canvas-back');
+    const snowCtxBack = snowBack.getContext('2d');
+    const snowFront = document.getElementById('snow-canvas-front');
+    const snowCtxFront = snowFront.getContext('2d');
+    
+    function resizeSnowCanvas() {
+      snowBack.width = window.innerWidth;
+      snowBack.height = window.innerHeight;
+      snowFront.width = window.innerWidth;
+      snowFront.height = window.innerHeight;
+    }
+    window.addEventListener('resize', resizeSnowCanvas);
+    resizeSnowCanvas();
+    
+    let flakesBack = [];
+    let flakesFront = [];
+    let globalWind = { x: 0, y: 0 };
+    let targetWind = { x: 0, y: 0 };
+    
+    function pickNewWind() {
+      const noWindChance = 0.8;
+      if (Math.random() < noWindChance) {
+        targetWind.x = 0;
+        targetWind.y = 0;
+      } else {
+        const angle = randomRange(-60, 60) * Math.PI / 180;
+        let strength = -Math.log(Math.random()) * 0.1;
+        if (strength > 0.3) strength = 0.3;
+        targetWind.x = Math.cos(angle) * strength;
+        targetWind.y = Math.sin(angle) * strength * 0.1;
+      }
+    }
+    function scheduleWindChange() {
+      pickNewWind();
+      setTimeout(scheduleWindChange, randomRange(4000, 6000));
+    }
+    scheduleWindChange();
+    
+    function updateWind() {
+      const easeFactor = 0.02;
+      globalWind.x += (targetWind.x - globalWind.x) * easeFactor;
+      globalWind.y += (targetWind.y - globalWind.y) * easeFactor;
+    }
+    
+    class SnowFlake {
+      constructor(front = false) {
+        this.front = front;
+        const canvasW = front ? snowFront.width : snowBack.width;
+        const canvasH = front ? snowFront.height : snowBack.height;
+        this.x = randomRange(0, canvasW);
+        this.y = randomRange(-canvasH, 0);
+        this.radius = randomRange(front ? 1 : 2, front ? 3 : 5);
+        this.speedY = randomRange(0.3, front ? 0.7 : 0.4);
+        this.speedX = randomRange(-0.3, 0.3);
+      }
+      update() {
+        updateWind();
+        this.x += this.speedX + globalWind.x;
+        this.y += this.speedY + globalWind.y;
+        const canvasW = this.front ? snowFront.width : snowBack.width;
+        const canvasH = this.front ? snowFront.height : snowBack.height;
+        if (this.x < 0) this.x = canvasW;
+        if (this.x > canvasW) this.x = 0;
+        if (this.y > canvasH) {
+          this.y = randomRange(-50, 0);
+          this.x = randomRange(0, canvasW);
+        }
+      }
+      draw(ctx) {
+        ctx.beginPath();
+        ctx.arc(this.x, this.y, this.radius, 0, 2 * Math.PI);
+        ctx.fillStyle = "#FFF";
+        ctx.fill();
+        ctx.closePath();
+      }
+    }
+    
+    function initSnow() {
+      flakesBack = [];
+      flakesFront = [];
+      for (let i = 0; i < 200; i++) {
+        flakesBack.push(new SnowFlake(false));
+      }
+      for (let j = 0; j < 100; j++) {
+        flakesFront.push(new SnowFlake(true));
+      }
+    }
+    
+    function animateSnow() {
+      snowCtxBack.clearRect(0, 0, snowBack.width, snowBack.height);
+      snowCtxFront.clearRect(0, 0, snowFront.width, snowFront.height);
+      flakesBack.forEach(flake => {
+        flake.update();
+        flake.draw(snowCtxBack);
+      });
+      flakesFront.forEach(flake => {
+        flake.update();
+        flake.draw(snowCtxFront);
+      });
+      requestAnimationFrame(animateSnow);
+    }
+    
+    initSnow();
+    animateSnow();
+  </script>
+</body>
+</html>
