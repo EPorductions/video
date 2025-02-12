@@ -1,0 +1,611 @@
+<!DOCTYPE html>
+<html lang="he">
+<head>
+  <meta charset="UTF-8">
+  <title>Smart Flyer – עורך ופלייר</title>
+  <style>
+    /* עיצוב בסיסי ומודרני */
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: #f0f2f5;
+      margin: 0;
+      padding: 20px;
+      color: #333;
+    }
+    .section {
+      max-width: 900px;
+      margin: 0 auto 20px auto;
+      background: #fff;
+      padding: 20px;
+      border-radius: 8px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+    }
+    h1, h2, h3 {
+      color: #007bff;
+    }
+    label {
+      font-weight: bold;
+      display: block;
+      margin-top: 10px;
+    }
+    input[type="text"],
+    textarea {
+      width: 100%;
+      padding: 8px;
+      margin-top: 4px;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+      box-sizing: border-box;
+    }
+    button {
+      background: #007bff;
+      border: none;
+      color: #fff;
+      padding: 10px 15px;
+      margin: 10px 5px 0 0;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 14px;
+    }
+    button:hover {
+      background: #0056b3;
+    }
+    /* פרטי הסרטון בעורך */
+    #videoDetails img {
+      max-width: 200px;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+      margin-top: 5px;
+    }
+    /* טיימליין – מיכל ברוחב 640px, גובה 50px */
+    #timelineContainer {
+      position: relative;
+      width: 640px;
+      height: 50px;
+      background: #ddd;
+      margin-top: 10px;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+    /* סמן IN – אדום, וסמן OUT – כחול */
+    .marker {
+      position: absolute;
+      top: 0;
+      width: 10px;
+      height: 50px;
+      cursor: pointer;
+    }
+    #markerIn {
+      background: red;
+    }
+    #markerOut {
+      background: blue;
+    }
+    /* רשימת הקטעים – ניתנת לגרירה */
+    #draggableList .listItem {
+      border: 1px solid #ccc;
+      padding: 8px;
+      margin-bottom: 6px;
+      background: #fff;
+      border-radius: 4px;
+      display: flex;
+      align-items: center;
+      cursor: move;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    }
+    #draggableList .listItem img {
+      width: 60px;
+      height: auto;
+      margin-right: 10px;
+      border-radius: 4px;
+    }
+    /* פלייר – מיכל נגנים */
+    #flyerContainer {
+      position: relative;
+      width: 640px;
+      height: 360px;
+      margin: 20px auto;
+      background: #000;
+      overflow: hidden;
+      border-radius: 4px;
+    }
+    .player {
+      position: absolute;
+      top: 0;
+      width: 640px;
+      height: 360px;
+    }
+    .onscreen {
+      left: 0px;
+      opacity: 1;
+      transition: left 0.5s, opacity 0.5s;
+    }
+    .offscreen {
+      left: 640px;
+      opacity: 0;
+      transition: left 0.5s, opacity 0.5s;
+    }
+    /* רשימת תגיות בחיפוש */
+    #tagList {
+      margin-top: 10px;
+    }
+    #tagList span {
+      display: inline-block;
+      background: #e0e0e0;
+      color: #333;
+      padding: 5px 10px;
+      margin: 3px;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body>
+  
+  <!-- מצב עורך -->
+  <div class="section" id="editorSection">
+    <h1>עורך קטעים</h1>
+    <form id="segmentForm">
+      <label>Video Link או ID:</label>
+      <input type="text" id="videoLink" placeholder="לדוגמה: https://www.youtube.com/watch?v=dQw4w9WgXcQ" required>
+      <!-- פרטי הסרטון נטענים אוטומטית -->
+      <div id="videoDetails"></div>
+      
+      <!-- טיימליין לעריכת נקודות IN/OUT -->
+      <div id="timelineContainer" style="display:none;">
+        <div id="markerIn" class="marker"></div>
+        <div id="markerOut" class="marker"></div>
+      </div>
+      
+      <label>או הזן זמני כניסה/יציאה (ניתן לערוך ידנית):</label>
+      <input type="text" id="startTime" placeholder="למשל: 45 או 1:30" required>
+      <input type="text" id="endTime" placeholder="למשל: 50 או 1:35" required>
+      
+      <label>תגיות (ניתן להזין מספר מילים, הפרד באמצעות רווח):</label>
+      <input type="text" id="tags" placeholder="לדוגמה: example test">
+      
+      <!-- לחיצה מוסיפה את הקטע לרשימה – הלינק נשאר כדי לאפשר הוספת קטעים נוספים מאותו סרטון -->
+      <button type="button" id="addSegmentBtn">הוסף קטע לרשימה</button>
+    </form>
+    
+    <h2>רשימת הקטעים</h2>
+    <div id="draggableList">
+      <!-- כאן תופיע הרשימה – ניתן לגרור לשינוי סדר -->
+    </div>
+    <button type="button" id="exportJSONBtn">ייצא רשימה (JSON)</button>
+    <textarea id="exportedJSON" readonly style="height:150px;" placeholder="הרשימה תופיע כאן"></textarea>
+    
+    <h3>ייבא רשימה מוכנה</h3>
+    <textarea id="importJSON" style="height:150px;" placeholder="הדבק כאן JSON"></textarea>
+    <button type="button" id="importJSONBtn">ייבא רשימה</button>
+    
+    <br>
+    <button type="button" id="goToFlyerBtn">מעבר לפלייר</button>
+  </div>
+  
+  <!-- מצב פלייר -->
+  <div class="section" id="flyerSection" style="display:none;">
+    <h1>פלייר</h1>
+    <label>חיפוש לפי תגיות (ניתן להזין מספר תגיות, מופרדות ברווח):</label>
+    <input type="text" id="searchTag" placeholder="הכנס תגיות">
+    <div id="tagList">
+      <!-- כאן תופיע רשימת תגיות אופציונליות (מופקות מהרשימה) -->
+    </div>
+    <button type="button" id="startFlyerBtn">חפש והפעל פלייר</button>
+    <button type="button" id="stopFlyerBtn">עצור פלייר</button>
+    <div id="flyerContainer">
+      <div id="player1" class="player onscreen"></div>
+      <div id="player2" class="player offscreen"></div>
+    </div>
+    <button type="button" id="backToEditorBtn">חזרה לעורך</button>
+  </div>
+  
+  <!-- YouTube IFrame API -->
+  <script src="https://www.youtube.com/iframe_api"></script>
+  <script>
+    /**********************
+     * משתנים גלובליים
+     **********************/
+    let segmentList = []; // כל קטע: { videoId, start, end, duration, tags, thumbnail }
+    let player1, player2;
+    let currentSegmentIndex = 0;
+    let currentPlayer = 1; // 1 או 2
+    let switchTimeout;
+    window.flyerSequence = []; // הסיקוונס שייבחר (לפי חיפוש)
+    
+    // עבור טיימליין – נניח דיפולט של 300 שניות (ניתן להחליף במידה ויש API לקבלת משך)
+    let videoDuration = 300;
+    const timelineWidth = 640;
+    
+    /**********************
+     * פונקציות עזר
+     **********************/
+    function extractVideoId(input) {
+      input = input.trim();
+      if (input.indexOf("http") === 0) {
+        let match = input.match(/[?&]v=([^&]+)/);
+        if (match && match[1]) return match[1];
+        match = input.match(/youtu\.be\/([^?&]+)/);
+        return match ? match[1] : input;
+      }
+      return input;
+    }
+    
+    function parseTimeInput(str) {
+      str = str.trim();
+      if (str.indexOf(":") > -1) {
+        let parts = str.split(":").map(Number);
+        if (parts.length === 2) {
+          return parts[0] * 60 + parts[1];
+        } else if (parts.length === 3) {
+          return parts[0]*3600 + parts[1]*60 + parts[2];
+        }
+      }
+      return parseFloat(str);
+    }
+    
+    function formatTime(seconds) {
+      let mins = Math.floor(seconds / 60);
+      let secs = Math.floor(seconds % 60);
+      return mins + ":" + (secs < 10 ? "0" : "") + secs;
+    }
+    
+    /**********************
+     * טעינת פרטי הסרטון והצגת טיימליין – מופעל אוטומטית בעת שינוי הלינק
+     **********************/
+    function loadVideoDetails() {
+      let input = document.getElementById("videoLink").value;
+      let videoId = extractVideoId(input);
+      if (videoId) {
+        let thumbnailURL = "https://img.youtube.com/vi/" + videoId + "/hqdefault.jpg";
+        document.getElementById("videoDetails").innerHTML =
+          '<img src="'+ thumbnailURL +'" alt="Thumbnail"/>' +
+          '<p>Video ID: '+ videoId +'</p>';
+        document.getElementById("videoDetails").dataset.videoId = videoId;
+        // נניח שמשך הסרטון ידוע – כאן דיפולט 300 שניות (אפשר לשפר עם API)
+        videoDuration = 300;
+        showTimeline();
+      }
+    }
+    document.getElementById("videoLink").addEventListener("change", loadVideoDetails);
+    document.getElementById("videoLink").addEventListener("blur", loadVideoDetails);
+    
+    /**********************
+     * טיימליין – יצירת מיכל וטופס סימון IN/OUT
+     **********************/
+    function showTimeline() {
+      const timeline = document.getElementById("timelineContainer");
+      timeline.style.display = "block";
+      // מיקום התחלתי: IN = 10 שניות, OUT = 20 שניות (לדוגמא)
+      let inTime = 10, outTime = 20;
+      // מחשבים מיקומים פיקסליים
+      let posIn = (inTime / videoDuration) * timelineWidth;
+      let posOut = (outTime / videoDuration) * timelineWidth;
+      const markerIn = document.getElementById("markerIn");
+      const markerOut = document.getElementById("markerOut");
+      markerIn.style.left = posIn + "px";
+      markerOut.style.left = posOut + "px";
+      // עדכון שדות הזמן בהתאם
+      document.getElementById("startTime").value = inTime;
+      document.getElementById("endTime").value = outTime;
+    }
+    
+    // טיפול בגרירת הסמנים בטיימליין
+    function initMarkerDrag(markerId, isIn) {
+      const marker = document.getElementById(markerId);
+      const timeline = document.getElementById("timelineContainer");
+      let offsetX = 0;
+      marker.addEventListener("mousedown", function(e) {
+        offsetX = e.clientX - marker.getBoundingClientRect().left;
+        document.addEventListener("mousemove", onMouseMove);
+        document.addEventListener("mouseup", onMouseUp);
+      });
+      function onMouseMove(e) {
+        const timelineRect = timeline.getBoundingClientRect();
+        let pos = e.clientX - timelineRect.left - offsetX;
+        if(pos < 0) pos = 0;
+        if(pos > timelineWidth) pos = timelineWidth;
+        marker.style.left = pos + "px";
+        // עדכון שדה הזמן בהתאם למיקום
+        let time = Math.round((pos / timelineWidth) * videoDuration);
+        if(isIn) {
+          document.getElementById("startTime").value = time;
+        } else {
+          document.getElementById("endTime").value = time;
+        }
+      }
+      function onMouseUp(e) {
+        document.removeEventListener("mousemove", onMouseMove);
+        document.removeEventListener("mouseup", onMouseUp);
+      }
+    }
+    initMarkerDrag("markerIn", true);
+    initMarkerDrag("markerOut", false);
+    
+    /**********************
+     * הוספת קטע לרשימה – בלחיצה על כפתור "הוסף קטע לרשימה"
+     **********************/
+    document.getElementById("addSegmentBtn").addEventListener("click", function(){
+      let videoId = document.getElementById("videoDetails").dataset.videoId;
+      if (!videoId) {
+        alert("יש להזין לינק או מזהה תקין ולוודא שפרטי הסרטון נטענו");
+        return;
+      }
+      let startTime = parseTimeInput(document.getElementById("startTime").value);
+      let endTime = parseTimeInput(document.getElementById("endTime").value);
+      if(isNaN(startTime) || isNaN(endTime) || startTime >= endTime) {
+        alert("יש להזין זמני כניסה/יציאה תקינים");
+        return;
+      }
+      let tags = document.getElementById("tags").value.split(/\s+/).filter(t => t);
+      let duration = endTime - startTime;
+      let thumbnail = "https://img.youtube.com/vi/" + videoId + "/hqdefault.jpg";
+      let segment = { videoId, start: startTime, end: endTime, duration, tags, thumbnail };
+      segmentList.push(segment);
+      updateDraggableList();
+      updateTagList();
+      // ניקוי שדות זמן ותגיות (הלינק נשאר)
+      document.getElementById("startTime").value = "";
+      document.getElementById("endTime").value = "";
+      document.getElementById("tags").value = "";
+    });
+    
+    /**********************
+     * עדכון רשימת הקטעים (גרירה לשינוי סדר)
+     **********************/
+    function updateDraggableList() {
+      const listContainer = document.getElementById("draggableList");
+      listContainer.innerHTML = "";
+      segmentList.forEach((seg, index) => {
+        let item = document.createElement("div");
+        item.className = "listItem";
+        item.draggable = true;
+        item.dataset.index = index;
+        item.innerHTML =
+          '<img src="'+ seg.thumbnail +'" alt="Thumb"/>' +
+          '<div><strong>'+ seg.videoId +'</strong><br>' +
+          formatTime(seg.start) +" - "+ formatTime(seg.end) +"<br>" +
+          "Tags: " + seg.tags.join(" ") +'</div>';
+        item.addEventListener("dragstart", handleDragStart);
+        item.addEventListener("dragover", handleDragOver);
+        item.addEventListener("drop", handleDrop);
+        listContainer.appendChild(item);
+      });
+    }
+    
+    let dragSrcEl = null;
+    function handleDragStart(e) {
+      dragSrcEl = this;
+      e.dataTransfer.effectAllowed = "move";
+      e.dataTransfer.setData("text/html", this.innerHTML);
+    }
+    function handleDragOver(e) {
+      if(e.preventDefault) { e.preventDefault(); }
+      e.dataTransfer.dropEffect = "move";
+      return false;
+    }
+    function handleDrop(e) {
+      if(e.stopPropagation) { e.stopPropagation(); }
+      if(dragSrcEl !== this) {
+        let srcIndex = parseInt(dragSrcEl.dataset.index);
+        let targetIndex = parseInt(this.dataset.index);
+        let temp = segmentList[srcIndex];
+        segmentList[srcIndex] = segmentList[targetIndex];
+        segmentList[targetIndex] = temp;
+        updateDraggableList();
+        updateTagList();
+      }
+      return false;
+    }
+    
+    /**********************
+     * ייצוא/ייבוא רשימה
+     **********************/
+    document.getElementById("exportJSONBtn").addEventListener("click", function(){
+      document.getElementById("exportedJSON").value = JSON.stringify(segmentList, null, 2);
+    });
+    document.getElementById("importJSONBtn").addEventListener("click", function(){
+      try {
+        let imported = JSON.parse(document.getElementById("importJSON").value);
+        if(Array.isArray(imported)){
+          segmentList = imported;
+          updateDraggableList();
+          updateTagList();
+          alert("הרשימה נטענה בהצלחה.");
+        } else {
+          alert("פורמט JSON לא תקין – מצפים למערך.");
+        }
+      } catch(err){
+        alert("שגיאה בקריאת JSON: " + err);
+      }
+    });
+    
+    /**********************
+     * מעבר למצב פלייר
+     **********************/
+    document.getElementById("goToFlyerBtn").addEventListener("click", function(){
+      if(segmentList.length === 0){
+        alert("הרשימה ריקה – יש להוסיף קטעים תחילה");
+        return;
+      }
+      document.getElementById("editorSection").style.display = "none";
+      document.getElementById("flyerSection").style.display = "block";
+    });
+    
+    /**********************
+     * חזרה לעורך
+     **********************/
+    document.getElementById("backToEditorBtn").addEventListener("click", function(){
+      stopFlyer();
+      document.getElementById("flyerSection").style.display = "none";
+      document.getElementById("editorSection").style.display = "block";
+    });
+    
+    /**********************
+     * עדכון רשימת תגיות אופציונלית (לצד שורת החיפוש)
+     **********************/
+    function updateTagList(){
+      const tagSet = new Set();
+      segmentList.forEach(seg => {
+        seg.tags.forEach(t => tagSet.add(t.toLowerCase()));
+      });
+      const tagListDiv = document.getElementById("tagList");
+      tagListDiv.innerHTML = "";
+      tagSet.forEach(tag => {
+        let span = document.createElement("span");
+        span.textContent = tag;
+        span.addEventListener("click", function(){
+          let searchInput = document.getElementById("searchTag");
+          // הוספת התגית אם אינה קיימת – מופרדות ברווח
+          let current = searchInput.value.trim();
+          let tokens = current.split(/\s+/).filter(t => t);
+          if(!tokens.includes(tag)) {
+            tokens.push(tag);
+            searchInput.value = tokens.join(" ");
+          }
+        });
+        tagListDiv.appendChild(span);
+      });
+    }
+    
+    /**********************
+     * במצב פלייר – חיפוש לפי תגיות והרצת הסיקוונס
+     **********************/
+    document.getElementById("startFlyerBtn").addEventListener("click", function(){
+      let searchText = document.getElementById("searchTag").value.trim().toLowerCase();
+      let tokens = searchText ? searchText.split(/\s+/).filter(t => t) : [];
+      let sequence = [];
+      if(tokens.length === 0){
+        sequence = segmentList.slice();
+      } else {
+        sequence = segmentList.filter(seg => {
+          // נבדוק אם לכל אחת מהתגיות שבקלט קיים התאמה באחד מתגיות הקטע (ללא תלות באותיות רישיות)
+          return tokens.every(token => seg.tags.some(t => t.toLowerCase().includes(token)));
+        });
+      }
+      if(sequence.length === 0){
+        alert("לא נמצאו קטעים עם התגים: " + tokens.join(", "));
+        return;
+      }
+      currentSegmentIndex = 0;
+      currentPlayer = 1;
+      document.getElementById("player1").className = "player onscreen";
+      document.getElementById("player2").className = "player offscreen";
+      window.flyerSequence = sequence;
+      if(player1 && player2){
+        loadCurrentSegment();
+      }
+    });
+    
+    /**********************
+     * כפתור עצירה – עוצר את הפלייר (עצירת כל ההשמעה והתזמון)
+     **********************/
+    document.getElementById("stopFlyerBtn").addEventListener("click", function(){
+      stopFlyer();
+    });
+    function stopFlyer(){
+      clearTimeout(switchTimeout);
+      if(player1) player1.stopVideo();
+      if(player2) player2.stopVideo();
+    }
+    
+    /**********************
+     * YouTube IFrame API – אתחול נגנים
+     **********************/
+    function onYouTubeIframeAPIReady(){
+      player1 = new YT.Player('player1', {
+        height: '360',
+        width: '640',
+        events: {
+          'onReady': onPlayerReady,
+          'onStateChange': onPlayerStateChange
+        }
+      });
+      player2 = new YT.Player('player2', {
+        height: '360',
+        width: '640',
+        events: {
+          'onReady': onPlayerReady,
+          'onStateChange': onPlayerStateChange
+        }
+      });
+    }
+    
+    function onPlayerReady(event){
+      if(document.getElementById("flyerSection").style.display !== "none" && currentSegmentIndex === 0){
+        loadCurrentSegment();
+      }
+    }
+    
+    function onPlayerStateChange(event){
+      // אפשר להוסיף לוגיקה מתקדמת כאן במידת הצורך
+    }
+    
+    /**********************
+     * הפעלת הקטע הנוכחי והכנה מראש של הקטע הבא
+     **********************/
+    function loadCurrentSegment(){
+      let sequence = window.flyerSequence;
+      if(currentSegmentIndex >= sequence.length){
+        // במקום הודעת סיום – נעצור את הפלייר
+        stopFlyer();
+        return;
+      }
+      let seg = sequence[currentSegmentIndex];
+      if(currentPlayer === 1){
+        player1.loadVideoById({
+          videoId: seg.videoId,
+          startSeconds: seg.start,
+          endSeconds: seg.end,
+          suggestedQuality: 'small'
+        });
+        player1.playVideo();
+        if(currentSegmentIndex + 1 < sequence.length){
+          let nextSeg = sequence[currentSegmentIndex+1];
+          player2.cueVideoById({
+            videoId: nextSeg.videoId,
+            startSeconds: nextSeg.start,
+            endSeconds: nextSeg.end,
+            suggestedQuality: 'small'
+          });
+        }
+      } else {
+        player2.loadVideoById({
+          videoId: seg.videoId,
+          startSeconds: seg.start,
+          endSeconds: seg.end,
+          suggestedQuality: 'small'
+        });
+        player2.playVideo();
+        if(currentSegmentIndex + 1 < sequence.length){
+          let nextSeg = sequence[currentSegmentIndex+1];
+          player1.cueVideoById({
+            videoId: nextSeg.videoId,
+            startSeconds: nextSeg.start,
+            endSeconds: nextSeg.end,
+            suggestedQuality: 'small'
+          });
+        }
+      }
+      switchTimeout = setTimeout(switchPlayer, seg.duration * 1000);
+    }
+    
+    /**********************
+     * מעבר בין נגנים – מעבר פשוט על ידי החלפת מחלקות onscreen/offscreen
+     **********************/
+    function switchPlayer(){
+      if(currentPlayer === 1){
+        document.getElementById("player1").className = "player offscreen";
+        document.getElementById("player2").className = "player onscreen";
+        currentPlayer = 2;
+      } else {
+        document.getElementById("player2").className = "player offscreen";
+        document.getElementById("player1").className = "player onscreen";
+        currentPlayer = 1;
+      }
+      currentSegmentIndex++;
+      loadCurrentSegment();
+    }
+  </script>
+</body>
+</html>
