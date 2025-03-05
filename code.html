@@ -2,7 +2,7 @@
 <html lang="he">
 <head>
   <meta charset="UTF-8" />
-  <title>מסע בין נוירונים וטיפות – מודולים, כל כוכב הוא נוירון</title>
+  <title>מסע בין נוירונים וטיפות - מודולים</title>
   <link href="https://fonts.googleapis.com/css2?family=Exo:wght@400;700&display=swap" rel="stylesheet">
   <style>
     body {
@@ -11,10 +11,7 @@
       background-color: #000; 
       font-family: 'Exo', sans-serif;
     }
-    canvas {
-      display: block;
-    }
-    /* כפתור התחל מסע */
+    canvas { display: block; }
     #startButton {
       position: absolute; 
       top: 50%; 
@@ -29,10 +26,9 @@
       border-radius: 10px; 
       z-index: 5;
     }
-    #startButton:hover {
-      background-color: rgba(0,170,255,1);
+    #startButton:hover { 
+      background-color: rgba(0,170,255,1); 
     }
-    /* HUD */
     #hud {
       position: absolute; 
       top: 20px; 
@@ -41,315 +37,208 @@
       font-size: 16px; 
       z-index: 3;
     }
-    #hud p {
-      margin: 5px 0;
-    }
-    /* ממשק שליטה */
+    #hud p { margin: 5px 0; }
     #controlsOverlay {
       position: absolute; 
       bottom: 20px; 
       right: 20px; 
       color: #fff; 
       font-size: 14px; 
-      background-color: rgba(0, 0, 0, 0.5);
+      background-color: rgba(0,0,0,0.5);
       padding: 10px; 
       border-radius: 8px; 
       z-index: 3;
     }
-    #controlsOverlay p {
-      margin: 5px 0;
-    }
+    #controlsOverlay p { margin: 5px 0; }
   </style>
 </head>
 <body>
   <canvas id="scene"></canvas>
   <button id="startButton">התחל מסע</button>
-  
   <div id="hud">
     <p>מצערת: <span id="throttleValue">1</span></p>
     <p>טייס אוטומטי: <span id="autopilotStatus">OFF</span></p>
   </div>
-  
   <div id="controlsOverlay">
     <p>שליטה:</p>
     <p>W, A, S, D: תנועה</p>
     <p>חיצים: סיבוב</p>
-    <p>גלגלת עכבר: טיפה (נוירון) הבאה/קודמת</p>
+    <p>גלגלת עכבר: ניווט בין נוירונים</p>
     <p>SHIFT + גלגלת: שינוי FOV</p>
     <p>+/-: הגברת/הפחתת מצערת</p>
     <p>T: טייס אוטומטי</p>
     <p>H: הצגת/הסתרת HUD</p>
-    <p>Home: Zoom Out</p>
+    <p>Home: זום החוצה</p>
   </div>
 
-  <!-- טעינה כ־type="module" למניעת שגיאות import/export -->
   <script type="module">
     import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.128/build/three.module.js';
-    import { EffectComposer } from 'https://cdn.jsdelivr.net/npm/three@0.128/examples/jsm/postprocessing/EffectComposer.js';
-    import { RenderPass } from 'https://cdn.jsdelivr.net/npm/three@0.128/examples/jsm/postprocessing/RenderPass.js';
-    import { ShaderPass } from 'https://cdn.jsdelivr.net/npm/three@0.128/examples/jsm/postprocessing/ShaderPass.js';
-    import { RGBShiftShader } from 'https://cdn.jsdelivr.net/npm/three@0.128/examples/jsm/shaders/RGBShiftShader.js';
-    import { TWEEN } from 'https://cdn.jsdelivr.net/npm/tween.js@18.6.4/dist/tween.esm.js';
+  import { TWEEN } from 'https://cdn.jsdelivr.net/npm/@tweenjs/tween.js@18.6.4/dist/tween.esm.js';
+
     
-    let scene, camera, renderer, composer;
-    let canvas = document.getElementById('scene');
+    let scene, camera, renderer;
     let startButton = document.getElementById('startButton');
-    
     let hudVisible = true;
-    let throttle = 1, speed = 1, autopilot = false;
-    let velocity = new THREE.Vector3();
-    let rotation = new THREE.Vector3();
-    const dampingFactor = 0.95;
+    let throttle = 1;
+    let autopilot = false;
+    let autopilotTimer;
     let clock = new THREE.Clock();
     let animateRunning = false;
     
-    let points = []; // כאן יאוחסנו ה"נוירונים" (כוכבים)
-    let currentIndex = -1;
-    let autopilotTimer;
+    // רשימת הנוירונים
+    let neurons = [];
     
-    let userPath = [];
-    let userPathLine;
-    let keyStates = {};
-    
-    // "כבידה", לא בהכרח בשימוש אבל אפשרי
-    let gravity = 0.1;
-    
-    // פונקציה עזר לצבעים (לא בהכרח בשימוש)
-    function interpolateColor(stress, c1, c2){
-      let ratio = stress/10;
-      ratio = Math.min(Math.max(ratio,0),1);
-      let r = Math.round(c1[0] + ratio*(c2[0]-c1[0]));
-      let g = Math.round(c1[1] + ratio*(c2[1]-c1[1]));
-      let b = Math.round(c1[2] + ratio*(c2[2]-c1[2]));
-      return `rgb(${r},${g},${b})`;
-    }
-
-    // אתחול הסצנה
-    function init(){
+    // יצירת הסצנה, המצלמה וה-renderer
+    function init() {
       scene = new THREE.Scene();
-      camera = new THREE.PerspectiveCamera(75, window.innerWidth/window.innerHeight, 0.1, 500000);
-      camera.position.set(0, 5, 5000);
-
-      renderer = new THREE.WebGLRenderer({canvas: canvas, antialias: true});
+      camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 1, 10000);
+      camera.position.set(0, 0, 2000);
+      renderer = new THREE.WebGLRenderer({ canvas: document.getElementById('scene'), antialias: true });
       renderer.setSize(window.innerWidth, window.innerHeight);
-      renderer.setPixelRatio(window.devicePixelRatio);
       
-      // תאורה
+      // הוספת תאורה
       const ambientLight = new THREE.AmbientLight(0xffffff, 0.5);
       scene.add(ambientLight);
-      const directionalLight = new THREE.DirectionalLight(0xffffff, 0.5);
-      directionalLight.position.set(1, 1, 1);
+      const directionalLight = new THREE.DirectionalLight(0xffffff, 1);
+      directionalLight.position.set(0, 1, 1);
       scene.add(directionalLight);
       
-      // נטען טקסטורה חלופית לרקע
-      const loader = new THREE.TextureLoader();
-      loader.load('https://raw.githubusercontent.com/mrdoob/three.js/r128/examples/textures/2294472375_24a3b8ef46_o.jpg',(texture)=>{
-        scene.background = texture;
-      });
-      
-      // נייצר "נוירונים" – כדורים אדומים
+      // יצירת נוירונים (כדורים)
       createNeurons();
-      connectNeurons();
-      createUserPathLine();
       
-      // יצירת אפקט פוסט-פרוססינג
-      const renderPass = new RenderPass(scene, camera);
-      composer = new EffectComposer(renderer);
-      composer.addPass(renderPass);
-      const rgbShift = new ShaderPass(RGBShiftShader);
-      rgbShift.uniforms['amount'].value = 0.001;
-      composer.addPass(rgbShift);
-
-      // האזנה לאירועים
-      window.addEventListener('resize', onWindowResize, false);
-      window.addEventListener('keydown', onKeyDown, false);
-      window.addEventListener('wheel', onWheel, false);
+      // חיבור נוירונים – יצירת "סינפסות" בין הנוירונים
+      connectNeurons();
+      
+      window.addEventListener('resize', onWindowResize);
+      window.addEventListener('wheel', onWheel);
+      window.addEventListener('keydown', onKeyDown);
     }
     
-    function createNeurons(){
-      // מייצרים ~10 "כוכבים" (נוירונים)
-      for (let i=0; i<10; i++){
-        let geo = new THREE.SphereGeometry(100, 32, 32);
-        let mat = new THREE.MeshBasicMaterial({color: 0xff0000});
-        let sphere = new THREE.Mesh(geo, mat);
-        // מיקום אקראי, כמו כוכבים רחוקים
-        sphere.position.set(
-          (Math.random()-0.5)*10000,
-          (Math.random()-0.5)*10000,
-          (Math.random()-0.5)*10000
+    // פונקציה ליצירת נוירונים אקראיים
+    function createNeurons() {
+      const neuronCount = 10;
+      for (let i = 0; i < neuronCount; i++) {
+        const geometry = new THREE.SphereGeometry(100, 32, 32);
+        const material = new THREE.MeshBasicMaterial({ color: 0xff0000 });
+        const neuron = new THREE.Mesh(geometry, material);
+        neuron.position.set(
+          (Math.random() - 0.5) * 8000,
+          (Math.random() - 0.5) * 8000,
+          (Math.random() - 0.5) * 8000
         );
-        sphere.userData.name = `Neuron ${i+1}`;
-        scene.add(sphere);
-        points.push(sphere);
+        neuron.userData.name = "Neuron " + (i + 1);
+        scene.add(neuron);
+        neurons.push(neuron);
       }
     }
     
-    function connectNeurons(){
-      // מחברים כל נוירון לכולם בעזרת עקומות
-      for (let i=0; i<points.length; i++){
-        for (let j=i+1; j<points.length; j++){
-          let curve = new THREE.CatmullRomCurve3([
-            points[i].position,
-            new THREE.Vector3(
-              (points[i].position.x + points[j].position.x)/2 + (Math.random()-0.5)*1000,
-              (points[i].position.y + points[j].position.y)/2 + (Math.random()-0.5)*1000,
-              (points[i].position.z + points[j].position.z)/2 + (Math.random()-0.5)*1000
-            ),
-            points[j].position
-          ]);
-          let pts = curve.getPoints(20);
-          let geo = new THREE.BufferGeometry().setFromPoints(pts);
-          let mat = new THREE.LineBasicMaterial({color:0xaaaaaa, transparent:true, opacity:0.1});
-          let line = new THREE.Line(geo, mat);
+    // פונקציה לחיבור נוירונים עם קווים דקים המדמים סינפסות
+    function connectNeurons() {
+      for (let i = 0; i < neurons.length; i++) {
+        for (let j = i + 1; j < neurons.length; j++) {
+          const material = new THREE.LineBasicMaterial({ color: 0xaaaaaa, transparent: true, opacity: 0.1 });
+          const points = [];
+          // יצירת נקודת ביניים עם סטייה אקראית
+          const midPoint = new THREE.Vector3().addVectors(neurons[i].position, neurons[j].position).multiplyScalar(0.5);
+          midPoint.x += (Math.random() - 0.5) * 1000;
+          midPoint.y += (Math.random() - 0.5) * 1000;
+          midPoint.z += (Math.random() - 0.5) * 1000;
+          points.push(neurons[i].position, midPoint, neurons[j].position);
+          const geometry = new THREE.BufferGeometry().setFromPoints(points);
+          const line = new THREE.Line(geometry, material);
           scene.add(line);
         }
       }
     }
     
-    function createUserPathLine(){
-      userPathLine = new THREE.Line(
-        new THREE.BufferGeometry(),
-        new THREE.LineBasicMaterial({color:0xffff00, transparent:true, opacity:0.15})
-      );
-      scene.add(userPathLine);
-    }
-    
-    function updateUserPath(){
-      const positions = [];
-      userPath.forEach(p=>{
-        positions.push(p.x, p.y, p.z);
-      });
-      userPathLine.geometry.setAttribute('position', new THREE.Float32BufferAttribute(positions, 3));
-      userPathLine.geometry.needsUpdate = true;
-    }
-    
-    function animate(){
-      if(!animateRunning) return;
+    // פונקציה לאנימציה – עדכון סצנה, סיבוב הנוירונים ועדכון TWEEN
+    function animate() {
+      if (!animateRunning) return;
       requestAnimationFrame(animate);
-      let delta = clock.getDelta();
-      
-      velocity.multiplyScalar(dampingFactor);
-      rotation.multiplyScalar(dampingFactor);
-      
-      camera.position.add(velocity);
-      camera.rotation.x += rotation.x*delta;
-      camera.rotation.y += rotation.y*delta;
-      camera.rotation.z += rotation.z*delta;
-      
+      const delta = clock.getDelta();
       TWEEN.update();
-      composer.render();
+      
+      // סיבוב איטי של כל נוירון
+      neurons.forEach(neuron => {
+        neuron.rotation.y += delta * 0.5;
+      });
+      
+      renderer.render(scene, camera);
     }
     
-    function startJourney(){
-      if(!animateRunning){
+    // התחלת המסע: אתחול הסצנה והפעלת האנימציה
+    function startJourney() {
+      if (!animateRunning) {
         animateRunning = true;
-        startButton.style.display='none';
+        startButton.style.display = 'none';
         animate();
       }
     }
-    startButton.addEventListener('click', startJourney);
     
-    function navigateToNeuron(index){
-      currentIndex = index;
-      let target = points[index].position.clone();
-      userPath.push(camera.position.clone());
-      new TWEEN.Tween(camera.position)
-        .to({x: target.x, y: target.y, z: target.z + 2000}, 2000)
-        .easing(TWEEN.Easing.Quadratic.InOut)
-        .onUpdate(updateUserPath)
-        .start();
-    }
+    startButton.addEventListener('click', () => {
+      init();
+      startJourney();
+    });
     
-    function zoomOutToFit(){
-      userPath.push(camera.position.clone());
-      new TWEEN.Tween(camera.position)
-        .to({x:0, y:5, z:5000}, 2000)
-        .easing(TWEEN.Easing.Quadratic.InOut)
-        .onUpdate(updateUserPath)
-        .start();
-      currentIndex=-1;
-    }
-    
-    let autopilotInterval;
-    function toggleAutopilot(){
-      autopilot = !autopilot;
-      document.getElementById('autopilotStatus').innerText = autopilot?'ON':'OFF';
-      if(autopilot){
-        autopilotNavigate();
-      } else {
-        clearTimeout(autopilotInterval);
-      }
-    }
-    
-    function autopilotNavigate(){
-      if(autopilot){
-        clearTimeout(autopilotInterval);
-        let index = Math.floor(Math.random()*points.length);
-        navigateToNeuron(index);
-        autopilotInterval = setTimeout(autopilotNavigate, 4000);
-      }
-    }
-    
-    function toggleHUD(){
-      hudVisible=!hudVisible;
-      document.getElementById('hud').style.display = hudVisible?'block':'none';
-      document.getElementById('controlsOverlay').style.display = hudVisible?'block':'none';
-    }
-    
-    function onWindowResize(){
-      camera.aspect = window.innerWidth/window.innerHeight;
+    // עדכון גודל חלון
+    function onWindowResize() {
+      camera.aspect = window.innerWidth / window.innerHeight;
       camera.updateProjectionMatrix();
-      renderer.setSize(window.innerWidth,window.innerHeight);
-      composer.setSize(window.innerWidth,window.innerHeight);
+      renderer.setSize(window.innerWidth, window.innerHeight);
     }
     
-    function onWheel(event){
-      if(event.shiftKey){
-        camera.fov += event.deltaY*0.05;
-        camera.updateProjectionMatrix();
+    // ניווט בין הנוירונים באמצעות גלגל העכבר
+    let currentNeuronIndex = 0;
+    function onWheel(event) {
+      if (event.deltaY > 0) {
+        currentNeuronIndex = (currentNeuronIndex + 1) % neurons.length;
       } else {
-        // גלילה בין נוירונים
-        if(event.deltaY>0){
-          currentIndex = (currentIndex+1)%points.length;
-        } else {
-          currentIndex = (currentIndex-1+points.length)%points.length;
-        }
-        navigateToNeuron(currentIndex);
+        currentNeuronIndex = (currentNeuronIndex - 1 + neurons.length) % neurons.length;
       }
+      navigateToNeuron(currentNeuronIndex);
     }
     
-    function onKeyDown(event){
-      switch(event.key){
-        case 'w': velocity.z -= 10*throttle; break;
-        case 's': velocity.z += 10*throttle; break;
-        case 'a': velocity.x -= 10*throttle; break;
-        case 'd': velocity.x += 10*throttle; break;
-        case 'ArrowUp': rotation.x += 0.01*throttle; break;
-        case 'ArrowDown': rotation.x -= 0.01*throttle; break;
-        case 'ArrowLeft': rotation.y += 0.01*throttle; break;
-        case 'ArrowRight': rotation.y -= 0.01*throttle; break;
-        case '+':
-          throttle = Math.min(throttle+0.1, 10);
-          document.getElementById('throttleValue').innerText = throttle.toFixed(1);
-          break;
-        case '-':
-          throttle = Math.max(throttle-0.1, 0.1);
-          document.getElementById('throttleValue').innerText = throttle.toFixed(1);
-          break;
+    // מעבר חלק למיקום הנוירון הנבחר באמצעות TWEEN
+    function navigateToNeuron(index) {
+      const target = neurons[index].position.clone();
+      new TWEEN.Tween(camera.position)
+        .to({ x: target.x, y: target.y, z: target.z + 2000 }, 2000)
+        .easing(TWEEN.Easing.Quadratic.InOut)
+        .start();
+    }
+    
+    // שליטה באמצעות מקלדת
+    function onKeyDown(event) {
+      switch (event.key) {
         case 't':
-          toggleAutopilot(); 
+          autopilot = !autopilot;
+          document.getElementById('autopilotStatus').innerText = autopilot ? 'ON' : 'OFF';
+          if (autopilot) autopilotNavigate();
+          else clearTimeout(autopilotTimer);
           break;
         case 'h':
-          toggleHUD(); 
+          hudVisible = !hudVisible;
+          document.getElementById('hud').style.display = hudVisible ? 'block' : 'none';
+          document.getElementById('controlsOverlay').style.display = hudVisible ? 'block' : 'none';
           break;
         case 'Home':
-          zoomOutToFit(); 
+          new TWEEN.Tween(camera.position)
+            .to({ x: 0, y: 0, z: 5000 }, 2000)
+            .easing(TWEEN.Easing.Quadratic.InOut)
+            .start();
           break;
       }
     }
     
-    // הפעלת הסצנה
-    init();
+    // ניווט אוטומטי – מעבר אקראי בין הנוירונים
+    function autopilotNavigate() {
+      if (autopilot) {
+        clearTimeout(autopilotTimer);
+        let index = Math.floor(Math.random() * neurons.length);
+        navigateToNeuron(index);
+        autopilotTimer = setTimeout(autopilotNavigate, 5000);
+      }
+    }
   </script>
 </body>
 </html>
