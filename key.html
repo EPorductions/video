@@ -1,0 +1,331 @@
+<!DOCTYPE html>
+<html lang="he">
+<head>
+  <meta charset="UTF-8">
+  <title>מקלדת לומדת עם "מיגנוט" למיקום בסיסי</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      background: linear-gradient(135deg, #1e2023, #3c3f41);
+      font-family: Arial, sans-serif;
+      color: #fff;
+      height: 100vh; width: 100vw;
+      overflow: hidden; 
+      display: flex; flex-direction: column;
+    }
+    #toolbar {
+      background: rgba(0,0,0,0.3);
+      padding: 0.5rem 1rem;
+      display: flex; justify-content: space-between; align-items: center;
+    }
+    #keyboardContainer {
+      position: relative; flex: 1; overflow: hidden;
+    }
+    .key {
+      position: absolute;
+      border: 1px solid #222; border-radius: 8px;
+      color: #fff; font-size: 1rem;
+      display: flex; align-items: center; justify-content: center;
+      cursor: pointer; user-select: none;
+      transition: background 0.2s ease;
+    }
+    .key:hover { background: #555; }
+  </style>
+</head>
+<body>
+  <div id="toolbar">
+    <div>מקלדת QWERTY עם מיגנוט ותזוזה לפי לחיצות</div>
+    <button id="resetBtn">איפוס</button>
+    <!-- לחיצה על מקש H במקלדת תציג/תסתיר Overlay לחיצות -->
+  </div>
+  <div id="keyboardContainer"></div>
+
+  <script>
+    /***************************************************************
+     * הגדרת פריסת QWERTY (אפשר להחליף בעברית וכו')
+     ***************************************************************/
+    const keyboardRows = [
+      ["Q","W","E","R","T","Y","U","I","O","P"],
+      ["A","S","D","F","G","H","J","K","L"],
+      ["Z","X","C","V","B","N","M"]
+    ];
+    const keyboardHeightRatio = 0.4;
+    const container = document.getElementById('keyboardContainer');
+
+    let keys = [];         // מערך של אובייקטי המקש
+    let showPressOverlay = true;  // אפשר לכבות/להדליק עם מקש H
+
+    // האזן למקש H
+    window.addEventListener('keydown', (e) => {
+      if (e.key.toLowerCase() === 'h') {
+        showPressOverlay = !showPressOverlay;
+      }
+    });
+
+    /***************************************************************
+     * מחלקה / פונקציה יוצרת אובייקט מקש
+     ***************************************************************/
+    function createKey(letter, row, col) {
+      return {
+        letter,
+        row,
+        col,
+        element: null,
+
+        // ערכי בסיס
+        baseX: 0,
+        baseY: 0,
+        baseSize: 50,
+
+        // כמה לחיצות (לצורך Heatmap או הגדלה)
+        pressCount: 0,
+
+        // "למידה" – היסט מצטבר
+        learnedOffsetX: 0,
+        learnedOffsetY: 0,
+
+        // רשימת נקודות ללחיצות אחרונות (למפת Overlay)
+        pressPoints: [], // כל איבר: {x, y} ביחס למפתח (0..1)
+
+        // מיקום וגדול בפועל
+        currentX: 0,
+        currentY: 0,
+        currentSize: 50,
+
+        // חישוב "יעד" (עם AI או בלי)
+        // כרגע נעשה ידנית: targetX = baseX + learnedOffsetX
+        get targetX() {
+          return this.baseX + this.learnedOffsetX;
+        },
+        get targetY() {
+          return this.baseY + this.learnedOffsetY;
+        },
+        get targetSize() {
+          // נקבע גדילה קטנה לפי pressCount
+          const factor = 1 + this.pressCount * 0.02;
+          return this.baseSize * Math.min(factor, 1.6);
+        },
+
+        // עדכון מיקום בכל frame
+        update(dt) {
+          // שלב 1: "מיגנוט" (משיכה נוספת לעבר baseX/baseY) כדי לשמור צורה
+          // למשל נוסיף כוח שמקטין את learnedOffset ב-20% לשניה
+          const magnetForce = 0.2; // גדול יותר => חזרה חזקה יותר
+          this.learnedOffsetX -= this.learnedOffsetX * magnetForce * dt;
+          this.learnedOffsetY -= this.learnedOffsetY * magnetForce * dt;
+
+          // שלב 2: lerp לעבר היעד
+          const speed = 0.1;
+          const tx = this.targetX;
+          const ty = this.targetY;
+          this.currentX += (tx - this.currentX) * speed;
+          this.currentY += (ty - this.currentY) * speed;
+          this.currentSize += (this.targetSize - this.currentSize) * speed;
+
+          // שלב 3: עדכון DOM
+          this.element.style.width = this.currentSize + "px";
+          this.element.style.height = this.currentSize + "px";
+          this.element.style.left = (this.currentX - this.currentSize/2) + "px";
+          this.element.style.top  = (this.currentY - this.currentSize/2) + "px";
+        },
+
+        // משמש לפתרון התנגשויות
+        getCollisionCircle() {
+          return {
+            cx: this.currentX,
+            cy: this.currentY,
+            r:  this.currentSize / 2
+          };
+        },
+
+        // נעדכן בפונקציית heatmap
+        heatColor1: "#444",
+        heatColor2: "#555"
+      };
+    }
+
+    /***************************************************************
+     * בניית המקלדת ב-DOM
+     ***************************************************************/
+    function buildKeyboard() {
+      container.innerHTML = '';
+      keys = [];
+
+      for (let r=0; r<keyboardRows.length; r++) {
+        let row = keyboardRows[r];
+        for (let c=0; c<row.length; c++) {
+          let letter = row[c];
+          let keyObj = createKey(letter, r, c);
+
+          const divKey = document.createElement('div');
+          divKey.className = 'key';
+          divKey.textContent = letter;
+          container.appendChild(divKey);
+          keyObj.element = divKey;
+          keys.push(keyObj);
+
+          // מאזין קליק
+          divKey.addEventListener('click', (ev) => {
+            const rect = container.getBoundingClientRect();
+            const clickX = ev.clientX - rect.left;
+            const clickY = ev.clientY - rect.top;
+
+            // בדיקה אם באמת לחצו בתוך גבולות המקש
+            const dx = clickX - keyObj.currentX;
+            const dy = clickY - keyObj.currentY;
+            const dist = Math.sqrt(dx*dx + dy*dy);
+            if (dist <= keyObj.currentSize/2) {
+              // לחיצה מוצלחת
+              keyObj.pressCount++;
+
+              // חישוב offset ביחס למיקום הנוכחי
+              // כדי לקרב אותו למקום שבו המשתמש לחץ
+              // כאן נכפיל ב-0.3 שלא יקפוץ יותר מדי
+              keyObj.learnedOffsetX += dx * 0.3;
+              keyObj.learnedOffsetY += dy * 0.3;
+
+              // שמירת מיקום לחיצה לצורך overlay
+              const fracX = 0.5 + (dx / keyObj.currentSize);
+              const fracY = 0.5 + (dy / keyObj.currentSize);
+              keyObj.pressPoints.push({ x: fracX, y: fracY });
+              if (keyObj.pressPoints.length>5) {
+                keyObj.pressPoints.shift();
+              }
+            }
+          });
+        }
+      }
+
+      updateLayout();
+    }
+
+    /***************************************************************
+     * עדכון baseX, baseY לכל מקש
+     ***************************************************************/
+    function updateLayout() {
+      const w = container.clientWidth;
+      const h = container.clientHeight;
+      const kbHeight = h * keyboardHeightRatio;
+      const numRows = keyboardRows.length;
+      const rowHeight = kbHeight / numRows;
+
+      keys.forEach(k => {
+        const row = k.row;
+        const col = k.col;
+        const rowArray = keyboardRows[row];
+        const numCols = rowArray.length;
+
+        const colWidth = w / numCols;
+        k.baseX = colWidth*(col+0.5);
+        k.baseY = h - kbHeight + rowHeight*(row+0.5);
+        k.baseSize = Math.min(colWidth*0.8, rowHeight*0.8);
+      });
+    }
+
+    /***************************************************************
+     * מניעת חפיפה - "Collision Resolution"
+     ***************************************************************/
+    function resolveCollisions() {
+      const iterations = 4;
+      for (let iter = 0; iter<iterations; iter++) {
+        let changed = false;
+        for (let i=0; i<keys.length; i++) {
+          for (let j=i+1; j<keys.length; j++) {
+            const kA = keys[i];
+            const kB = keys[j];
+            const dx = kB.currentX - kA.currentX;
+            const dy = kB.currentY - kA.currentY;
+            const dist = Math.sqrt(dx*dx + dy*dy);
+            const minDist = (kA.currentSize/2 + kB.currentSize/2);
+
+            if (dist<minDist && dist>0) {
+              const overlap = (minDist-dist)*0.5;
+              const nx = dx/dist;
+              const ny = dy/dist;
+              kA.currentX -= nx*overlap;
+              kA.currentY -= ny*overlap;
+              kB.currentX += nx*overlap;
+              kB.currentY += ny*overlap;
+              changed = true;
+            }
+          }
+        }
+        if (!changed) break;
+      }
+    }
+
+    /***************************************************************
+     * Heatmap + Overlay
+     ***************************************************************/
+    function updateHeatmap() {
+      // מוצאים maxPress כדי לדעת איך למפות צבע
+      let maxPress = 0;
+      keys.forEach(k => {
+        if (k.pressCount>maxPress) maxPress = k.pressCount;
+      });
+
+      keys.forEach(k => {
+        const ratio = (maxPress===0)? 0 : k.pressCount/maxPress;
+        const hue = 240 - 240*ratio; // כחול->אדום
+        k.heatColor1 = `hsl(${hue},80%,60%)`;
+        k.heatColor2 = `hsl(${hue},80%,70%)`;
+      });
+    }
+    function updateKeyBackground(k) {
+      const baseBG = `linear-gradient(135deg, ${k.heatColor1}, ${k.heatColor2})`;
+      if (!showPressOverlay || k.pressPoints.length===0) {
+        k.element.style.background = baseBG;
+        return;
+      }
+      // בונים radial-grads לפי pressPoints
+      const radials = k.pressPoints.map((pt, idx) => {
+        const cx = (pt.x*100).toFixed(1);
+        const cy = (pt.y*100).toFixed(1);
+        const alpha = 0.5 - idx*0.07;
+        return `radial-gradient(circle at ${cx}% ${cy}%, rgba(255,0,0,${alpha}), transparent 50%)`;
+      });
+      k.element.style.background = radials.join(', ')+', '+baseBG;
+    }
+
+    /***************************************************************
+     * לולאת האנימציה
+     ***************************************************************/
+    let lastTime = performance.now();
+    function animate(time) {
+      const dt = (time-lastTime)*0.001;
+      lastTime = time;
+
+      // שלב א: עדכון מיקומים
+      keys.forEach(k => k.update(dt));
+
+      // שלב ב: מניעת חפיפה
+      resolveCollisions();
+
+      // שלב ג: עדכון Heatmap וצבע רקע
+      updateHeatmap();
+      keys.forEach(k => updateKeyBackground(k));
+
+      requestAnimationFrame(animate);
+    }
+
+    /***************************************************************
+     * איפוס
+     ***************************************************************/
+    document.getElementById('resetBtn').addEventListener('click', () => {
+      keys.forEach(k => {
+        k.learnedOffsetX = 0; 
+        k.learnedOffsetY = 0; 
+        k.pressCount = 0; 
+        k.pressPoints = [];
+      });
+    });
+
+    /***************************************************************
+     * הפעלה ראשונית
+     ***************************************************************/
+    buildKeyboard();
+    requestAnimationFrame(animate);
+    window.addEventListener('resize', updateLayout);
+  </script>
+</body>
+</html>
