@@ -1,0 +1,360 @@
+<!DOCTYPE html>
+<html lang="he">
+<head>
+  <meta charset="UTF-8">
+  <title>מקלדת לומדת – Gradient לחיצות, איפוס מתון</title>
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      overflow: hidden;
+      background: linear-gradient(135deg, #1e2023, #3c3f41);
+      font-family: Arial, sans-serif;
+    }
+    #resetBtn {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      z-index: 10;
+      padding: 10px 15px;
+      background: rgba(0,0,0,0.5);
+      color: #fff;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body>
+  <button id="resetBtn">איפוס</button>
+  <canvas id="canvas"></canvas>
+  
+  <script>
+    /***************************************************************
+     * הגדרות בסיסיות וקנבס
+     ***************************************************************/
+    const canvas = document.getElementById('canvas');
+    const ctx = canvas.getContext('2d');
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+    
+    // פריסת מקשים לפי QWERTY – 3 שורות
+    const keyboardRows = [
+      ["Q","W","E","R","T","Y","U","I","O","P"],
+      ["A","S","D","F","G","H","J","K","L"],
+      ["Z","X","C","V","B","N","M"]
+    ];
+    const keyboardHeightRatio = 0.4; // יחס לגובה הקנבס
+    
+    let keyCubes = []; // מערך הקוביות (המפתחות)
+    const gravity = 0.5; // כוח כבידה
+    
+    /***************************************************************
+     * מחלקת KeyCube
+     * - מיקום בסיסי (baseX, baseY) לפי פריסת המקלדת.
+     * - learnedOffset ו־pressCount נאגרו בעת לחיצות.
+     * - בנוסף, נשמרות עד 10 נקודות לחיצה (pressPoints) עבור שכבת overlay.
+     * - הפיזיקה (גרביטציה, דחייה, "קפיציות") מעדכנת את מיקומו.
+     * - הגרדיאנט מחשב צבע בין ירוק (ללא לחיצות, hue=120) לאדום (לחיצות רבות, hue=0).
+     * - אם הקוביה קרובה לעוגן (offset קטן), אז pressCount מתחיל להתאפס בהדרגה.
+     ***************************************************************/
+    class KeyCube {
+      constructor(letter, row, col) {
+        this.letter = letter;
+        this.row = row;
+        this.col = col;
+        this.baseX = 0;
+        this.baseY = 0;
+        this.baseSize = 50;
+        
+        this.x = 0;
+        this.y = 0;
+        this.vx = 0;
+        this.vy = 0;
+        this.ax = 0;
+        this.ay = 0;
+        this.mass = 1;
+        this.friction = 0.98;
+        
+        // learnedOffset ו־pressCount לאגירת "למידה" מהלחיצות
+        this.learnedOffsetX = 0;
+        this.learnedOffsetY = 0;
+        this.pressCount = 0;
+        this.pressPoints = []; // נשמור עד 10 נקודות לחיצה
+        
+        this.isDragging = false;
+        this.dragOffsetX = 0;
+        this.dragOffsetY = 0;
+        
+        this.currentSize = this.baseSize;
+      }
+      
+      // מיקום יעד = base + learnedOffset
+      get targetX() { return this.baseX + this.learnedOffsetX; }
+      get targetY() { return this.baseY + this.learnedOffsetY; }
+      // גודל יעד – גדילה עד 1.6× בהתאם ל־pressCount
+      get targetSize() {
+        const factor = 1 + this.pressCount * 0.02;
+        return this.baseSize * Math.min(factor, 1.6);
+      }
+      
+      update(dt) {
+        // אם לא גוררים – משיכה לקוביה על ידי "כוח קפיץ"
+        if (!this.isDragging) {
+          const stiffness = 0.1;
+          const fx = (this.targetX - this.x) * stiffness;
+          const fy = (this.targetY - this.y) * stiffness;
+          this.applyForce(fx, fy);
+        }
+        
+        // הוספת כוח כבידה
+        this.applyForce(0, gravity * this.mass);
+        
+        // עדכון מהירות ומיקום
+        this.vx += this.ax * dt;
+        this.vy += this.ay * dt;
+        this.x += this.vx;
+        this.y += this.vy;
+        this.vx *= this.friction;
+        this.vy *= this.friction;
+        this.ax = 0;
+        this.ay = 0;
+        
+        // עדכון גודל בהדרגה לגודל היעד
+        this.currentSize += (this.targetSize - this.currentSize) * 0.1;
+        
+        // דהייה של learnedOffset (אפקט מיגנוט)
+        const magnetForce = 0.2;
+        this.learnedOffsetX -= this.learnedOffsetX * magnetForce * dt;
+        this.learnedOffsetY -= this.learnedOffsetY * magnetForce * dt;
+        
+        // אם הקוביה מתקרבת לעוגן (offset קטן), אז נאתחל בהדרגה את pressCount
+        let offsetMag = Math.sqrt(this.learnedOffsetX * this.learnedOffsetX + this.learnedOffsetY * this.learnedOffsetY);
+        if (offsetMag < 5) {
+          this.pressCount -= dt * 2; // קצב איפוס איטי
+          if (this.pressCount < 0) this.pressCount = 0;
+          // אפשר גם לנקות את pressPoints אם אין לחיצות
+          if (this.pressCount === 0) this.pressPoints = [];
+        }
+      }
+      
+      applyForce(fx, fy) {
+        this.ax += fx / this.mass;
+        this.ay += fy / this.mass;
+      }
+      
+      // בדיקת לחיצה: האם נקודה (mx, my) בתוך הקוביה?
+      isPointInside(mx, my) {
+        const half = this.currentSize / 2;
+        return (mx >= this.x - half && mx <= this.x + half &&
+                my >= this.y - half && my <= this.y + half);
+      }
+      
+      // בעת לחיצה: עדכון learnedOffset, ספירת לחיצות, ושמירת נקודת לחיצה יחסית (עד 10 נקודות)
+      onPress(mx, my) {
+        const dx = mx - this.x;
+        const dy = my - this.y;
+        this.pressCount++;
+        this.learnedOffsetX += dx * 0.3;
+        this.learnedOffsetY += dy * 0.3;
+        const fracX = 0.5 + (dx / this.currentSize);
+        const fracY = 0.5 + (dy / this.currentSize);
+        this.pressPoints.push({ x: fracX, y: fracY });
+        if (this.pressPoints.length > 10) this.pressPoints.shift();
+      }
+      
+      // ציור הקוביה:
+      // 1. רקע עם Gradient לינארי – צבע משתנה מגרין (ללא לחיצות, hue=120) לאדום (לחיצות רבות, hue=0)
+      // 2. שכבת overlay של לחיצות – ציור Radial Gradients בנקודות הלחיצה
+      // 3. ציור האות במרכז
+      draw(ctx, maxPress) {
+        const half = this.currentSize / 2;
+        // חישוב יחס לחיצות לצורך הגרדיאנט:
+        let ratio = maxPress ? this.pressCount / maxPress : 0;
+        // עבור 0 לחיצות: hue = 120 (ירוק), עבור לחיצות רבות: hue = 0 (אדום)
+        let hue = 120 - (120 * ratio);
+        let baseColor1 = `hsl(${hue},80%,60%)`;
+        let baseColor2 = `hsl(${hue},80%,70%)`;
+        let baseGrad = ctx.createLinearGradient(this.x - half, this.y - half, this.x + half, this.y + half);
+        baseGrad.addColorStop(0, baseColor1);
+        baseGrad.addColorStop(1, baseColor2);
+        
+        ctx.fillStyle = baseGrad;
+        ctx.fillRect(this.x - half, this.y - half, this.currentSize, this.currentSize);
+        
+        // ציור שכבת הלחיצות: עבור כל נקודת לחיצה, מציירים Radial Gradient
+        for (let i = 0; i < this.pressPoints.length; i++) {
+          let pt = this.pressPoints[i];
+          let px = this.x - half + pt.x * this.currentSize;
+          let py = this.y - half + pt.y * this.currentSize;
+          let alpha = Math.max(0, 0.5 - i * 0.07);
+          let radGrad = ctx.createRadialGradient(px, py, 0, px, py, this.currentSize * 0.5);
+          radGrad.addColorStop(0, `rgba(255, 0, 0, ${alpha})`);
+          radGrad.addColorStop(1, "rgba(255, 0, 0, 0)");
+          ctx.fillStyle = radGrad;
+          ctx.beginPath();
+          ctx.arc(px, py, this.currentSize * 0.5, 0, Math.PI * 2);
+          ctx.fill();
+        }
+        
+        // ציור האות במרכז הקוביה
+        ctx.fillStyle = "white";
+        ctx.font = `${Math.floor(this.currentSize / 2)}px Arial`;
+        ctx.textAlign = "center";
+        ctx.textBaseline = "middle";
+        ctx.fillText(this.letter, this.x, this.y);
+      }
+    }
+    
+    /***************************************************************
+     * עדכון פריסת הקוביות לפי גודל הקנבס ופריסת QWERTY
+     ***************************************************************/
+    function updateLayout() {
+      const w = canvas.width;
+      const h = canvas.height;
+      const kbHeight = h * keyboardHeightRatio;
+      const numRows = keyboardRows.length;
+      const rowHeight = kbHeight / numRows;
+      
+      keyCubes.forEach(cube => {
+        const row = cube.row;
+
+        const col = cube.col;
+        const numCols = keyboardRows[row].length;
+        const colWidth = w / numCols;
+        cube.baseX = colWidth * (col + 0.5);
+        cube.baseY = h - kbHeight + rowHeight * (row + 0.5);
+        cube.baseSize = Math.min(colWidth * 0.8, rowHeight * 0.8);
+        if (cube.x === 0 && cube.y === 0) {
+          cube.x = cube.baseX;
+          cube.y = cube.baseY;
+        }
+      });
+    }
+    
+    /***************************************************************
+     * בניית מערך הקוביות לפי פריסת QWERTY
+     ***************************************************************/
+    function buildKeyCubes() {
+      keyCubes = [];
+      for (let r = 0; r < keyboardRows.length; r++) {
+        for (let c = 0; c < keyboardRows[r].length; c++) {
+          let letter = keyboardRows[r][c];
+          let cube = new KeyCube(letter, r, c);
+          keyCubes.push(cube);
+        }
+      }
+      updateLayout();
+    }
+    buildKeyCubes();
+    
+    /***************************************************************
+     * פתרון התנגשויות בין הקוביות
+     ***************************************************************/
+    function resolveCollisions() {
+      const iterations = 4;
+      for (let iter = 0; iter < iterations; iter++) {
+        let changed = false;
+        for (let i = 0; i < keyCubes.length; i++) {
+          for (let j = i + 1; j < keyCubes.length; j++) {
+            let a = keyCubes[i], b = keyCubes[j];
+            let dx = b.x - a.x;
+            let dy = b.y - a.y;
+            let dist = Math.sqrt(dx*dx + dy*dy);
+            let minDist = (a.currentSize + b.currentSize) / 2;
+            if (dist < minDist && dist > 0) {
+              let overlap = (minDist - dist) / 2;
+              let nx = dx / dist;
+              let ny = dy / dist;
+              a.x -= nx * overlap;
+              a.y -= ny * overlap;
+              b.x += nx * overlap;
+              b.y += ny * overlap;
+              changed = true;
+            }
+          }
+        }
+        if (!changed) break;
+      }
+    }
+    
+    /***************************************************************
+     * טיפול באירועי עכבר – לחיצה וגרירה על קוביה
+     ***************************************************************/
+    let draggingCube = null;
+    canvas.addEventListener('mousedown', function(e) {
+      const rect = canvas.getBoundingClientRect();
+      const mx = e.clientX - rect.left;
+      const my = e.clientY - rect.top;
+      for (let i = keyCubes.length - 1; i >= 0; i--) {
+        let cube = keyCubes[i];
+        if (cube.isPointInside(mx, my)) {
+          draggingCube = cube;
+          cube.isDragging = true;
+          cube.dragOffsetX = mx - cube.x;
+          cube.dragOffsetY = my - cube.y;
+          cube.onPress(mx, my);
+          break;
+        }
+      }
+    });
+    canvas.addEventListener('mousemove', function(e) {
+      if (draggingCube && draggingCube.isDragging) {
+        const rect = canvas.getBoundingClientRect();
+        const mx = e.clientX - rect.left;
+        const my = e.clientY - rect.top;
+        draggingCube.x = mx - draggingCube.dragOffsetX;
+        draggingCube.y = my - draggingCube.dragOffsetY;
+      }
+    });
+    canvas.addEventListener('mouseup', function() {
+      if (draggingCube) {
+        draggingCube.isDragging = false;
+        draggingCube = null;
+      }
+    });
+    
+    /***************************************************************
+     * עדכון גודל הקנבס והתאמת הפריסה בעת שינוי חלון
+     ***************************************************************/
+    window.addEventListener('resize', function() {
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+      updateLayout();
+    });
+    
+    /***************************************************************
+     * כפתור איפוס – איפוס learnedOffset, pressCount ו-pressPoints
+     ***************************************************************/
+    document.getElementById('resetBtn').addEventListener('click', function() {
+      keyCubes.forEach(cube => {
+        cube.learnedOffsetX = 0;
+        cube.learnedOffsetY = 0;
+        cube.pressCount = 0;
+        cube.pressPoints = [];
+      });
+    });
+    
+    /***************************************************************
+     * לולאת האנימציה – עדכון הפיזיקה, פתרון התנגשויות וציור הקוביות
+     ***************************************************************/
+    let lastTime = performance.now();
+    function animate(time) {
+      const dt = (time - lastTime) * 0.001;
+      lastTime = time;
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      keyCubes.forEach(cube => cube.update(dt));
+      resolveCollisions();
+      
+      let maxPress = 0;
+      keyCubes.forEach(cube => {
+        if (cube.pressCount > maxPress) maxPress = cube.pressCount;
+      });
+      
+      keyCubes.forEach(cube => cube.draw(ctx, maxPress));
+      requestAnimationFrame(animate);
+    }
+    animate(performance.now());
+  </script>
+</body>
+</html>

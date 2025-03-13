@@ -1,0 +1,536 @@
+<!DOCTYPE html>
+<html lang="he">
+<head>
+  <meta charset="UTF-8">
+  <title>מקלדת לומדת – גבולות דינאמיים + BOXES2 + שכנים בזמן אמת</title>
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      overflow: hidden;
+      background: linear-gradient(135deg, #1e2023, #3c3f41);
+      font-family: Arial, sans-serif;
+      user-select: none; /* מניעת סימון טקסט */
+    }
+    #resetBtn {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      z-index: 100;
+      padding: 10px 15px;
+      background: rgba(0,0,0,0.6);
+      color: #fff;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body>
+
+<button id="resetBtn">איפוס</button>
+<canvas id="canvas"></canvas>
+
+<script>
+/****************************************************************
+ * הגדרות בסיס וקנבס
+ ****************************************************************/
+const canvas = document.getElementById('canvas');
+const ctx = canvas.getContext('2d');
+canvas.width  = window.innerWidth;
+canvas.height = window.innerHeight;
+
+// פריסת מקשים (QWERTY)
+const keyboardRows = [
+  ["Q","W","E","R","T","Y","U","I","O","P"],
+  ["A","S","D","F","G","H","J","K","L"],
+  ["Z","X","C","V","B","N","M"]
+];
+const keyboardHeightRatio = 0.4;
+
+// מערכי אובייקטים
+let keyCubes = []; // מערך המקשים
+let springs = [];  // קפיצים בין מקשים שכנים
+
+// פרמטרים פיזיקליים / למידה
+const gravity = 0.5;
+const frictionGlobal = 0.98; 
+const magnetForce = 0.2;  // קצב חזרה של learnedOffset
+const maxFactor = 1.6;    // גבול עליון להתרחבות גבולות
+const minFactor = 0.5;    // גבול תחתון להקטנת גבולות
+const neighborThreshold = 1.5; // מרחק בסיסי להשפעה על שכנים (יכוון בפונקציה)
+
+// ****************************************************************
+// מחלקת KeyCube: כל מקש עם גבולות לא אחידים
+// ****************************************************************
+class KeyCube {
+  constructor(letter, row, col) {
+    this.letter = letter;
+    this.row = row;
+    this.col = col;
+
+    // מיקום בסיס
+    this.baseX = 0;
+    this.baseY = 0;
+    this.baseSize = 50;   // משפיע על הגודל ה"רגיל" של המקש
+
+    // גורמי גבולות (לא אחידים)
+    this.leftFactor   = 1;
+    this.rightFactor  = 1;
+    this.topFactor    = 1;
+    this.bottomFactor = 1;
+
+    // למידה
+    this.learnedOffsetX = 0;
+    this.learnedOffsetY = 0;
+    this.pressCount = 0;
+    this.pressPoints = [];
+
+    // מיקום פיזיקלי (BOXES2)
+    this.x = 0;
+    this.y = 0;
+    this.vx = 0; 
+    this.vy = 0;
+    this.ax = 0; 
+    this.ay = 0;
+    this.mass = 1;
+    this.isDragging = false;
+    this.dragOffsetX = 0;
+    this.dragOffsetY = 0;
+  }
+
+  // גודל "עצמי" לפי pressCount
+  get growthFactor() {
+    return Math.min(1 + this.pressCount*0.02, 1.6);
+  }
+
+  // חישוב גבולות (דינאמיים) בפועל
+  // center = (this.x, this.y)
+  // halfWidth  = baseSize * growthFactor * left/rightFactor / 2
+  get targetLeft() {
+    return this.x - (this.baseSize*this.growthFactor*this.leftFactor)/2;
+  }
+  get targetRight() {
+    return this.x + (this.baseSize*this.growthFactor*this.rightFactor)/2;
+  }
+  get targetTop() {
+    return this.y - (this.baseSize*this.growthFactor*this.topFactor)/2;
+  }
+  get targetBottom() {
+    return this.y + (this.baseSize*this.growthFactor*this.bottomFactor)/2;
+  }
+  get targetWidth() {
+    return this.targetRight - this.targetLeft;
+  }
+  get targetHeight() {
+    return this.targetBottom - this.targetTop;
+  }
+
+  // עדכון בכל frame
+  update(dt) {
+    // אם לא גוררים, משיכה קלה לעבר (baseX+learnedOffset, baseY+learnedOffset)
+    if (!this.isDragging) {
+      const stiffness = 0.1;
+      let fx = ((this.baseX+this.learnedOffsetX) - this.x)*stiffness;
+      let fy = ((this.baseY+this.learnedOffsetY) - this.y)*stiffness;
+      this.applyForce(fx, fy);
+    }
+    // הוספת כבידה
+    this.applyForce(0, gravity*this.mass);
+
+    // אינטגרציה
+    this.vx += this.ax*dt;
+    this.vy += this.ay*dt;
+    this.x  += this.vx;
+    this.y  += this.vy;
+    this.vx *= frictionGlobal;
+    this.vy *= frictionGlobal;
+    this.ax = 0; 
+    this.ay = 0;
+
+    // התאוששות הדרגתית של גורמי הגבולות (leftFactor וכו')
+    const recFast = 0.05, recSlow=0.01;
+    this.leftFactor   += (1-this.leftFactor)*   (Math.abs(this.leftFactor-1)>0.1? recFast : recSlow);
+    this.rightFactor  += (1-this.rightFactor)*  (Math.abs(this.rightFactor-1)>0.1? recFast : recSlow);
+    this.topFactor    += (1-this.topFactor)*    (Math.abs(this.topFactor-1)>0.1? recFast : recSlow);
+    this.bottomFactor += (1-this.bottomFactor)* (Math.abs(this.bottomFactor-1)>0.1? recFast : recSlow);
+
+    // נגביל בין minFactor לבין maxFactor
+    this.leftFactor   = clamp(this.leftFactor,   minFactor, maxFactor);
+    this.rightFactor  = clamp(this.rightFactor,  minFactor, maxFactor);
+    this.topFactor    = clamp(this.topFactor,    minFactor, maxFactor);
+    this.bottomFactor = clamp(this.bottomFactor, minFactor, maxFactor);
+
+    // דהייה של learnedOffset
+    this.learnedOffsetX -= this.learnedOffsetX*magnetForce*dt;
+    this.learnedOffsetY -= this.learnedOffsetY*magnetForce*dt;
+
+    // אם קרוב לעוגן => מפחיתים pressCount בהדרגה
+    let offsetMag = Math.hypot(this.learnedOffsetX, this.learnedOffsetY);
+    if (offsetMag < 5 && !this.isDragging) {
+      this.pressCount -= dt*2;
+      if (this.pressCount<0){
+        this.pressCount=0;
+        this.pressPoints=[];
+      }
+    }
+  }
+
+  applyForce(fx, fy) {
+    this.ax += fx/this.mass;
+    this.ay += fy/this.mass;
+  }
+
+  isPointInside(mx, my) {
+    return (mx>=this.targetLeft && mx<=this.targetRight &&
+            my>=this.targetTop  && my<=this.targetBottom);
+  }
+
+  onPress(mx, my) {
+    // העלאת pressCount
+    this.pressCount++;
+    let dx=mx - this.x, dy=my - this.y;
+    this.learnedOffsetX += dx*0.3;
+    this.learnedOffsetY += dy*0.3;
+    let fracX = 0.5 + (dx/this.baseSize);
+    let fracY = 0.5 + (dy/this.baseSize);
+    this.pressPoints.push({x: fracX, y: fracY});
+    if (this.pressPoints.length>10) {
+      this.pressPoints.shift();
+    }
+
+    // שינוי גורמי הגבולות לפי כיוון הלחיצה (אופקי/אנכי)
+    if (Math.abs(dx)>Math.abs(dy)) {
+      // אופקי
+      if (dx>0) {
+        // לחיצה בצד ימין
+        this.rightFactor  = clamp(this.rightFactor + (Math.abs(dx)/this.baseSize)*0.2, minFactor, maxFactor);
+        this.leftFactor   = clamp(this.leftFactor  - (Math.abs(dx)/this.baseSize)*0.2, minFactor, maxFactor);
+      } else {
+        // לחיצה בצד שמאל
+        this.leftFactor   = clamp(this.leftFactor  + (Math.abs(dx)/this.baseSize)*0.2, minFactor, maxFactor);
+        this.rightFactor  = clamp(this.rightFactor - (Math.abs(dx)/this.baseSize)*0.2, minFactor, maxFactor);
+      }
+    } else {
+      // אנכי
+      if (dy>0) {
+        // לחיצה בתחתית
+        this.bottomFactor = clamp(this.bottomFactor + (Math.abs(dy)/this.baseSize)*0.2, minFactor, maxFactor);
+        this.topFactor    = clamp(this.topFactor    - (Math.abs(dy)/this.baseSize)*0.2, minFactor, maxFactor);
+      } else {
+        // לחיצה בעליון
+        this.topFactor    = clamp(this.topFactor    + (Math.abs(dy)/this.baseSize)*0.2, minFactor, maxFactor);
+        this.bottomFactor = clamp(this.bottomFactor - (Math.abs(dy)/this.baseSize)*0.2, minFactor, maxFactor);
+      }
+    }
+
+    // השפעה על שכנים
+    affectNeighbors(this);
+  }
+
+  // ציור
+  draw(ctx, maxPress) {
+    let ratio = maxPress ? this.pressCount / maxPress : 0;
+    if (ratio>1) ratio=1;
+    let hue = 240 - 240*ratio; // 240=כחול, 0=אדום
+    let c1 = `hsl(${hue},80%,60%)`;
+    let c2 = `hsl(${hue},80%,70%)`;
+    let grad = ctx.createLinearGradient(this.targetLeft, this.targetTop, this.targetRight, this.targetBottom);
+    grad.addColorStop(0, c1);
+    grad.addColorStop(1, c2);
+
+    // מלבן גבולות
+    ctx.fillStyle = grad;
+    ctx.fillRect(this.targetLeft, this.targetTop, this.targetWidth, this.targetHeight);
+
+    // שכבת overlay (נקודות לחיצה)
+    for (let i=0; i<this.pressPoints.length; i++){
+      let pt=this.pressPoints[i];
+      let px = this.targetLeft + pt.x*this.targetWidth;
+      let py = this.targetTop  + pt.y*this.targetHeight;
+      let alpha = Math.max(0, 0.5 - i*0.07);
+      let rad = Math.min(this.targetWidth, this.targetHeight)*0.5;
+      let rg=ctx.createRadialGradient(px, py, 0, px, py, rad);
+      rg.addColorStop(0, `rgba(255,0,0,${alpha})`);
+      rg.addColorStop(1, `rgba(255,0,0,0)`);
+      ctx.fillStyle=rg;
+      ctx.beginPath();
+      ctx.arc(px, py, rad, 0, Math.PI*2);
+      ctx.fill();
+    }
+
+    // אות במרכז
+    ctx.fillStyle='white';
+    ctx.textAlign='center';
+    ctx.textBaseline='middle';
+    let fontSize = Math.floor(Math.min(this.targetWidth, this.targetHeight)*0.5);
+    ctx.font = `${fontSize}px Arial`;
+    let cx = (this.targetLeft + this.targetRight)/2;
+    let cy = (this.targetTop  + this.targetBottom)/2;
+    ctx.fillText(this.letter, cx, cy);
+  }
+}
+
+/****************************************************************
+ * פונקציית affectNeighbors – משפיעה על שכנים בזמן אמת
+ * (כאן דוגמה – אם השכן במרחק קטן מ(baseSize * neighborThreshold),
+ * נוריד את factor שלו מעט)
+ ****************************************************************/
+function affectNeighbors(pressedKey) {
+  const thresholdDist = pressedKey.baseSize*neighborThreshold;
+  keyCubes.forEach(other=>{
+    if (other!==pressedKey){
+      let dx=other.x-pressedKey.x, dy=other.y-pressedKey.y;
+      let dist=Math.sqrt(dx*dx + dy*dy);
+      // אם קרובים מספיק
+      if (dist<thresholdDist){
+        // נקטין קצת את ה־factor בצדדים (רק אם הם מעל 1 למשל)
+        // או פשוט נצמצם ל0.8
+        other.leftFactor   = Math.min(other.leftFactor,   0.8);
+        other.rightFactor  = Math.min(other.rightFactor,  0.8);
+        other.topFactor    = Math.min(other.topFactor,    0.8);
+        other.bottomFactor = Math.min(other.bottomFactor, 0.8);
+      }
+    }
+  });
+}
+
+/****************************************************************
+ * BOXES2 – מחלקת Spring
+ ****************************************************************/
+class Spring {
+  constructor(keyA, keyB, restLength, k){
+    this.keyA = keyA;
+    this.keyB = keyB;
+    this.restLength = restLength;
+    this.k = k;
+  }
+  update() {
+    let dx=this.keyB.x - this.keyA.x;
+    let dy=this.keyB.y - this.keyA.y;
+    let dist=Math.sqrt(dx*dx+dy*dy);
+    if(dist===0) dist=0.0001;
+    let forceMag=(dist - this.restLength)*this.k;
+    let fx=(dx/dist)*forceMag;
+    let fy=(dy/dist)*forceMag;
+    this.keyA.applyForce(fx,fy);
+    this.keyB.applyForce(-fx,-fy);
+  }
+}
+
+/****************************************************************
+ * בניית keyCubes
+ ****************************************************************/
+function buildKeyCubes() {
+  keyCubes=[];
+  for (let r=0; r<keyboardRows.length; r++){
+    let rowArr=keyboardRows[r];
+    for (let c=0; c<rowArr.length; c++){
+      let letter = rowArr[c];
+      let kc = new KeyCube(letter, r, c);
+      keyCubes.push(kc);
+    }
+  }
+  updateLayout();
+  buildSprings();
+}
+
+/****************************************************************
+ * עדכון פריסה (baseX, baseY, baseSize)
+ ****************************************************************/
+function updateLayout() {
+  const w=canvas.width, h=canvas.height;
+  const kbHeight = h*keyboardHeightRatio;
+  let index=0;
+  for(let r=0; r<keyboardRows.length; r++){
+    let rowArr=keyboardRows[r];
+    let rowHeight= kbHeight/keyboardRows.length;
+    for(let c=0; c<rowArr.length; c++){
+      let colWidth = w/(rowArr.length);
+      let baseX= colWidth*(c+0.5);
+      let baseY= h - kbHeight + rowHeight*(r+0.5);
+      let kc = keyCubes[index++];
+      kc.baseX=baseX;
+      kc.baseY=baseY;
+      kc.baseSize = Math.min(colWidth*0.8, rowHeight*0.8);
+      // אתחול ראשוני
+      if(kc.x===0 && kc.y===0){
+        kc.x=baseX;
+        kc.y=baseY;
+      }
+    }
+  }
+}
+
+/****************************************************************
+ * בניית קפיצים בין מקשים שכנים
+ ****************************************************************/
+function buildSprings() {
+  springs=[];
+  // נניח: שכנים באותה שורה col+1, וגם row+1 col, row+1 col+1
+  keyCubes.forEach(k1=>{
+    keyCubes.forEach(k2=>{
+      if(k1!==k2){
+        // אם ההבדל בשורה <=1 ובטור <=1 => שכנים
+        if(Math.abs(k1.row-k2.row)<=1 && Math.abs(k1.col-k2.col)<=1){
+          // למנוע יצירת Spring כפול (k1->k2 , k2->k1)
+          if(k1.row<k2.row || (k1.row===k2.row && k1.col<k2.col)){
+            let dx = k2.baseX - k1.baseX;
+            let dy = k2.baseY - k1.baseY;
+            let distBase = Math.sqrt(dx*dx + dy*dy);
+            // אפשר לשנות k
+            let sp = new Spring(k1,k2, distBase, 0.05);
+            springs.push(sp);
+          }
+        }
+      }
+    });
+  });
+}
+
+/****************************************************************
+ * טיפול בקוליזיות – מניעת חפיפה
+ * (נניח collision radius ~ baseSize/2)
+ ****************************************************************/
+function resolveCollisions() {
+  let iterations=4;
+  for(let iter=0; iter<iterations; iter++){
+    let changed=false;
+    for (let i=0; i<keyCubes.length; i++){
+      for(let j=i+1; j<keyCubes.length; j++){
+        let A=keyCubes[i], B=keyCubes[j];
+        let dx=B.x - A.x, dy=B.y - A.y;
+        let dist=Math.sqrt(dx*dx + dy*dy);
+        let minDist = (A.baseSize + B.baseSize)*0.5; 
+        // אפשר גם לשקלל growthFactor
+        if(dist<minDist && dist>0){
+          let overlap=(minDist-dist)*0.5;
+          let nx=dx/dist, ny=dy/dist;
+          A.x-=nx*overlap; A.y-=ny*overlap;
+          B.x+=nx*overlap; B.y+=ny*overlap;
+          changed=true;
+        }
+      }
+    }
+    if(!changed) break;
+  }
+}
+
+/****************************************************************
+ * עדכון הקפיצים
+ ****************************************************************/
+function updateSprings() {
+  springs.forEach(sp=>sp.update());
+}
+
+/****************************************************************
+ * אירועי עכבר (mousedown/mousemove/mouseup)
+ ****************************************************************/
+let draggingCube=null;
+canvas.addEventListener('mousedown',(e)=>{
+  let rect=canvas.getBoundingClientRect();
+  let mx=e.clientX - rect.left;
+  let my=e.clientY - rect.top;
+  for(let i=keyCubes.length-1; i>=0; i--){
+    let kc=keyCubes[i];
+    if(kc.isPointInside(mx,my)){
+      draggingCube=kc;
+      kc.isDragging=true;
+      kc.dragOffsetX=mx - kc.x;
+      kc.dragOffsetY=my - kc.y;
+      kc.onPress(mx,my);
+      break;
+    }
+  }
+});
+canvas.addEventListener('mousemove',(e)=>{
+  if(draggingCube && draggingCube.isDragging){
+    let rect=canvas.getBoundingClientRect();
+    let mx=e.clientX - rect.left;
+    let my=e.clientY - rect.top;
+    draggingCube.x=mx - draggingCube.dragOffsetX;
+    draggingCube.y=my - draggingCube.dragOffsetY;
+  }
+});
+canvas.addEventListener('mouseup',()=>{
+  if(draggingCube){
+    draggingCube.isDragging=false;
+    draggingCube=null;
+  }
+});
+
+/****************************************************************
+ * Resize
+ ****************************************************************/
+window.addEventListener('resize',()=>{
+  canvas.width=window.innerWidth;
+  canvas.height=window.innerHeight;
+  updateLayout();
+});
+
+/****************************************************************
+ * כפתור איפוס
+ ****************************************************************/
+document.getElementById('resetBtn').addEventListener('click',()=>{
+  keyCubes.forEach(k=>{
+    k.learnedOffsetX=0;
+    k.learnedOffsetY=0;
+    k.pressCount=0;
+    k.pressPoints=[];
+    k.leftFactor=1;
+    k.rightFactor=1;
+    k.topFactor=1;
+    k.bottomFactor=1;
+    k.x=k.baseX; 
+    k.y=k.baseY;
+    k.vx=0; 
+    k.vy=0;
+  });
+});
+
+/****************************************************************
+ * עזר: clamp
+ ****************************************************************/
+function clamp(v, minv, maxv) {
+  return Math.max(minv, Math.min(maxv, v));
+}
+
+/****************************************************************
+ * לולאת אנימציה
+ ****************************************************************/
+let lastTime=performance.now();
+function animate(t){
+  let dt=(t-lastTime)*0.001;
+  if(dt>0.05) dt=0.05; // הגבלת dt
+  lastTime=t;
+
+  ctx.clearRect(0,0,canvas.width,canvas.height);
+
+  // עדכון הקפיצים (BOXES2)
+  updateSprings();
+
+  // עדכון keyCubes
+  keyCubes.forEach(k=>k.update(dt));
+
+  // מניעת חפיפה
+  resolveCollisions();
+
+  // ציור
+  let maxPress=0;
+  keyCubes.forEach(k=>{
+    if(k.pressCount>maxPress) maxPress=k.pressCount;
+  });
+  keyCubes.forEach(k=>k.draw(ctx,maxPress));
+
+  requestAnimationFrame(animate);
+}
+
+/****************************************************************
+ * הפעלה
+ ****************************************************************/
+buildKeyCubes();
+requestAnimationFrame(animate);
+
+</script>
+</body>
+</html>
