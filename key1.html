@@ -1,0 +1,394 @@
+<!DOCTYPE html>
+<html lang="he">
+<head>
+  <meta charset="UTF-8">
+  <title>מקלדת לומדת – חזרה הדרגתית למיקום המקורי (עם "מיגנוט")</title>
+  <!-- אפשר להשאיר את טעינת TensorFlow.js אם תרצה, אבל כאן לא נעשה בה שימוש אמיתי -->
+  <!-- <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs"></script> -->
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      background: linear-gradient(135deg, #1e2023, #3c3f41);
+      font-family: Arial, sans-serif;
+      color: #fff;
+      height: 100vh;
+      width: 100vw;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+    }
+    #toolbar {
+      background: rgba(0,0,0,0.3);
+      padding: 0.5rem 1rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    #toolbar .title {
+      font-size: 1.1rem;
+      font-weight: bold;
+    }
+    #toolbar button {
+      padding: 0.5rem 1rem;
+      border: none;
+      border-radius: 4px;
+      background: #ddd;
+      color: #333;
+      cursor: pointer;
+      margin-left: 1rem;
+    }
+    #keyboardContainer {
+      position: relative;
+      flex: 1;
+      overflow: hidden;
+    }
+    .key {
+      position: absolute;
+      border: 1px solid #222;
+      border-radius: 8px;
+      color: #fff;
+      font-size: 1rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      user-select: none;
+      transition: background 0.2s ease;
+    }
+    .key:hover {
+      background: #555;
+    }
+  </style>
+</head>
+<body>
+  <div id="toolbar">
+    <div class="title">מקלדת לומדת – עם "מיגנוט" ומפת לחיצות</div>
+    <div>
+      <button id="resetBtn">איפוס</button>
+      <!-- מקש H (במקלדת) יסתיר/יחזיר את ה-Overlay של נקודות הלחיצה -->
+    </div>
+  </div>
+
+  <div id="keyboardContainer"></div>
+
+  <script>
+    /********************************************************
+     * 0) פונקציית "AI" דמה שמחזירה תזוזה ישירה בכיוון הלחיצה
+     ********************************************************/
+    function predictAdjustment(offsetX, offsetY, pressCount) {
+      // fraction: כמה אחוז מהמרחק להוסיף להיסט בכל לחיצה
+      const fraction = 0.3; 
+      return {
+        deltaX: fraction * offsetX,
+        deltaY: fraction * offsetY
+      };
+    }
+
+    /********************************************************
+     * 1) הגדרת פריסת המקלדת
+     ********************************************************/
+    const keyboardRows = [
+      ["Q","W","E","R","T","Y","U","I","O","P"],
+      ["A","S","D","F","G","H","J","K","L"],
+      ["Z","X","C","V","B","N","M"]
+    ];
+    const keyboardHeightRatio = 0.4;
+    let keys = [];
+
+    // שליטה בתצוגת נקודות הלחיצה
+    let showPressOverlay = true;
+    // לחיצה על מקש H תחליף מצב
+    window.addEventListener('keydown', (ev) => {
+      if (ev.key.toLowerCase() === 'h') {
+        showPressOverlay = !showPressOverlay;
+      }
+    });
+
+    /********************************************************
+     * 2) יצירת אובייקט מקש
+     ********************************************************/
+    function createKey(letter, row, col) {
+      return {
+        letter,
+        row,
+        col,
+        element: null,
+
+        // ערכי בסיס
+        baseX: 0,
+        baseY: 0,
+        baseSize: 50,
+
+        // למידה
+        learnedOffsetX: 0,
+        learnedOffsetY: 0,
+        pressCount: 0,
+        pressPoints: [], // נקודות לחיצה (ל-Overlay)
+
+        // מצב נוכחי
+        currentX: 0,
+        currentY: 0,
+        currentSize: 50,
+
+        // יעד
+        targetX: 0,
+        targetY: 0,
+        targetSize: 50,
+
+        // צבעי Heatmap
+        heatColor1: '#444',
+        heatColor2: '#555',
+
+        updateTargets() {
+          this.targetX = this.baseX + this.learnedOffsetX;
+          this.targetY = this.baseY + this.learnedOffsetY;
+          const sizeFactor = 1 + this.pressCount * 0.02;
+          this.targetSize = this.baseSize * Math.min(sizeFactor, 1.5);
+        },
+
+        animatePosition(dt) {
+          const speedFactor = 0.1;
+          this.currentX += (this.targetX - this.currentX) * speedFactor;
+          this.currentY += (this.targetY - this.currentY) * speedFactor;
+          this.currentSize += (this.targetSize - this.currentSize) * speedFactor;
+
+          // עדכון DOM
+          this.element.style.width  = this.currentSize + "px";
+          this.element.style.height = this.currentSize + "px";
+          this.element.style.left   = (this.currentX - this.currentSize / 2) + "px";
+          this.element.style.top    = (this.currentY - this.currentSize / 2) + "px";
+        },
+
+        getCollisionCircle() {
+          return {
+            cx: this.currentX,
+            cy: this.currentY,
+            r:  this.currentSize / 2
+          };
+        }
+      };
+    }
+
+    /********************************************************
+     * 3) בניית המקלדת והצבת מאזיני לחיצה
+     ********************************************************/
+    function buildKeyboard() {
+      const container = document.getElementById('keyboardContainer');
+      container.innerHTML = '';
+      keys = [];
+
+      for (let r = 0; r < keyboardRows.length; r++) {
+        const row = keyboardRows[r];
+        for (let c = 0; c < row.length; c++) {
+          const letter = row[c];
+          const keyObj = createKey(letter, r, c);
+
+          const div = document.createElement('div');
+          div.className = 'key';
+          div.textContent = letter;
+          container.appendChild(div);
+
+          keyObj.element = div;
+          keys.push(keyObj);
+
+          // מאזין לחיצה
+          div.addEventListener('click', (ev) => {
+            const rect = container.getBoundingClientRect();
+            const clickX = ev.clientX - rect.left;
+            const clickY = ev.clientY - rect.top;
+
+            // חישוב המרחק מהמרכז הנוכחי
+            const dx = clickX - keyObj.currentX;
+            const dy = clickY - keyObj.currentY;
+            const dist = Math.sqrt(dx * dx + dy * dy);
+
+            if (dist <= keyObj.currentSize / 2) {
+              keyObj.pressCount++;
+
+              // "מודל AI": מוסיף חלק מהמרחק להיסט
+              const adjustment = predictAdjustment(dx, dy, keyObj.pressCount);
+              keyObj.learnedOffsetX += adjustment.deltaX;
+              keyObj.learnedOffsetY += adjustment.deltaY;
+
+              // שמירת נקודת לחיצה ל-Overlay
+              const fractionX = 0.5 + (dx / keyObj.currentSize);
+              const fractionY = 0.5 + (dy / keyObj.currentSize);
+              keyObj.pressPoints.push({ x: fractionX, y: fractionY });
+              if (keyObj.pressPoints.length > 5) {
+                keyObj.pressPoints.shift();
+              }
+
+              keyObj.updateTargets();
+            }
+          });
+        }
+      }
+
+      updateLayout();
+    }
+
+    /********************************************************
+     * 4) עדכון מיקומים בסיסיים לכל מקש
+     ********************************************************/
+    function updateLayout() {
+      const container = document.getElementById('keyboardContainer');
+      const w = container.clientWidth;
+      const h = container.clientHeight;
+
+      const kbHeight = h * keyboardHeightRatio;
+      const numRows = keyboardRows.length;
+      const rowHeight = kbHeight / numRows;
+
+      keys.forEach(key => {
+        const row = key.row;
+        const col = key.col;
+        const numCols = keyboardRows[row].length;
+        const colWidth = w / numCols;
+
+        key.baseX = colWidth * (col + 0.5);
+        key.baseY = h - kbHeight + rowHeight * (row + 0.5);
+        key.baseSize = Math.min(colWidth * 0.8, rowHeight * 0.8);
+
+        key.updateTargets();
+      });
+    }
+
+    /********************************************************
+     * 5) שכחה (מיגנוט חזק יותר)
+     ********************************************************/
+    function forgetOffsets(key, dt) {
+      // נניח "קפיץ" שמחזיר את key.learnedOffset ל-0
+      // ככל שהקבוע גדול יותר, כך ה"מיגנוט" חזק יותר.
+      const k = 5.0; 
+      // הכיוון תמיד חזרה ל-0, לכן:
+      key.learnedOffsetX += -k * key.learnedOffsetX * dt;
+      key.learnedOffsetY += -k * key.learnedOffsetY * dt;
+    }
+
+    /********************************************************
+     * 6) פתרון התנגשויות בין מקשים
+     ********************************************************/
+    function resolveCollisions() {
+      const iterations = 4;
+      for (let iter = 0; iter < iterations; iter++) {
+        let changed = false;
+        for (let i = 0; i < keys.length; i++) {
+          for (let j = i + 1; j < keys.length; j++) {
+            const kA = keys[i];
+            const kB = keys[j];
+            const cA = kA.getCollisionCircle();
+            const cB = kB.getCollisionCircle();
+
+            const dx = cB.cx - cA.cx;
+            const dy = cB.cy - cA.cy;
+            const dist = Math.sqrt(dx * dx + dy * dy);
+            const minDist = cA.r + cB.r;
+
+            if (dist < minDist && dist > 0) {
+              const overlap = (minDist - dist) * 0.5;
+              const nx = dx / dist;
+              const ny = dy / dist;
+              kA.currentX -= nx * overlap;
+              kA.currentY -= ny * overlap;
+              kB.currentX += nx * overlap;
+              kB.currentY += ny * overlap;
+              changed = true;
+            }
+          }
+        }
+        if (!changed) break;
+      }
+    }
+
+    /********************************************************
+     * 7) Heatmap לפי pressCount
+     ********************************************************/
+    function updateColors() {
+      let maxPress = 0;
+      keys.forEach(k => {
+        if (k.pressCount > maxPress) maxPress = k.pressCount;
+      });
+
+      keys.forEach(k => {
+        let ratio = maxPress === 0 ? 0 : (k.pressCount / maxPress);
+        let hue = 240 - 240 * ratio; // כחול (240) עד אדום (0)
+        k.heatColor1 = `hsl(${hue}, 80%, 60%)`;
+        k.heatColor2 = `hsl(${hue}, 80%, 70%)`;
+      });
+    }
+
+    /********************************************************
+     * 7.1) רקע (Heatmap + נקודות לחיצה)
+     ********************************************************/
+    function updateKeyBackground(k) {
+      const linearGrad = `linear-gradient(135deg, ${k.heatColor1}, ${k.heatColor2})`;
+
+      if (!showPressOverlay || k.pressPoints.length === 0) {
+        k.element.style.background = linearGrad;
+        return;
+      }
+
+      const radialGrads = k.pressPoints.map((pt, i) => {
+        const cx = pt.x * 100;
+        const cy = pt.y * 100;
+        const alpha = 0.5 - i * 0.07;
+        return `radial-gradient(circle at ${cx}% ${cy}%, rgba(255,0,0,${alpha}), transparent 50%)`;
+      });
+
+      const finalBG = radialGrads.join(', ') + ', ' + linearGrad;
+      k.element.style.background = finalBG;
+    }
+
+    /********************************************************
+     * 8) לולאת אנימציה
+     ********************************************************/
+    let lastTime = performance.now();
+    function animate(time) {
+      const dt = (time - lastTime) * 0.001;
+      lastTime = time;
+
+      // שכחה (מיגנוט) לכל מקש
+      keys.forEach(k => {
+        forgetOffsets(k, dt);
+        k.updateTargets();
+      });
+
+      // אנימציה למיקום/גודל
+      keys.forEach(k => k.animatePosition(dt));
+
+      // פתרון התנגשויות
+      resolveCollisions();
+
+      // עדכון Heatmap
+      updateColors();
+
+      // רקע משולב
+      keys.forEach(k => {
+        updateKeyBackground(k);
+      });
+
+      requestAnimationFrame(animate);
+    }
+
+    /********************************************************
+     * 9) איפוס
+     ********************************************************/
+    document.getElementById('resetBtn').addEventListener('click', () => {
+      keys.forEach(k => {
+        k.learnedOffsetX = 0;
+        k.learnedOffsetY = 0;
+        k.pressCount = 0;
+        k.pressPoints = [];
+        k.updateTargets();
+      });
+    });
+
+    /********************************************************
+     * 10) הפעלה ראשונית
+     ********************************************************/
+    buildKeyboard();
+    requestAnimationFrame(animate);
+    window.addEventListener('resize', updateLayout);
+  </script>
+</body>
+</html>
