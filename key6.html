@@ -1,0 +1,525 @@
+<!DOCTYPE html>
+<html lang="he">
+<head>
+  <meta charset="UTF-8">
+  <title>מקלדת לומדת – Flow, מלבנים לא סימטריים בלי חפיפה</title>
+  <style>
+    body {
+      margin: 0; padding: 0; overflow: hidden;
+      background: linear-gradient(135deg, #1e2023, #3c3f41);
+      font-family: Arial, sans-serif;
+    }
+    #resetBtn {
+      position: absolute; top: 10px; right: 10px;
+      z-index: 10;
+      padding: 10px 15px;
+      background: rgba(0,0,0,0.5);
+      color: #fff;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body>
+
+<button id="resetBtn">איפוס</button>
+<canvas id="canvas"></canvas>
+
+<script>
+/**************************************************************
+ * הגדרות קנבס, מקלדת QWERTY, ערכים גלובליים
+ **************************************************************/
+const canvas = document.getElementById('canvas');
+const ctx = canvas.getContext('2d');
+canvas.width = window.innerWidth;
+canvas.height = window.innerHeight;
+
+const keyboardRows = [
+  ["Q","W","E","R","T","Y","U","I","O","P"],
+  ["A","S","D","F","G","H","J","K","L"],
+  ["Z","X","C","V","B","N","M"]
+];
+const keyboardHeightRatio = 0.4;
+
+let keyCubes = [];
+let springs  = [];
+let draggingCube = null;
+let lastTime = performance.now();
+
+const gravity = 0.5; // כוח כבידה
+/**************************************************************
+ * מחלקת KeyCube - מקש/קובייה עם צורה דינאמית
+ **************************************************************/
+class KeyCube {
+  constructor(letter,row,col){
+    this.letter= letter;
+    this.row= row;
+    this.col= col;
+    // ערכי בסיס
+    this.baseX=0; 
+    this.baseY=0; 
+    this.baseSize=50;
+
+    // מיקום פיזי
+    this.x=0; 
+    this.y=0;
+    this.vx=0; 
+    this.vy=0; 
+    this.ax=0; 
+    this.ay=0;
+    this.mass=1;
+    this.friction=0.98;
+
+    // גורמי מלבן לא אחיד
+    this.leftFactor=1;   
+    this.rightFactor=1;
+    this.topFactor=1;
+    this.bottomFactor=1;
+
+    // למידה
+    this.learnedOffsetX=0;
+    this.learnedOffsetY=0;
+    this.pressCount=0;
+    this.pressPoints=[];
+
+    // גרירה
+    this.isDragging=false;
+    this.dragOffsetX=0; 
+    this.dragOffsetY=0;
+
+    // לחיצה ממושכת
+    this.holding= false;
+    this.mouseDownTime=0;
+  }
+
+  // biasFactor = ממוצע x של נקודות לחיצה
+  get biasFactor(){
+    if(this.pressPoints.length===0) return 0.5;
+    let sum=0;
+    for(let p of this.pressPoints){
+      sum += (p.x - 0.5);
+    }
+    let avg= sum/this.pressPoints.length; // [-0.5..0.5]
+    let val= avg+0.5; 
+    return Math.min(Math.max(val,0),1);
+  }
+  
+  // גדילה טבעית
+  get targetGrowth(){
+    return Math.min(1 + this.pressCount*0.02 + 0.5*Math.abs(this.biasFactor-0.5), 1.6);
+  }
+
+  // פונקציות לקבלת גבולות המלבן
+  get targetLeft(){
+    return this.x - (this.baseSize*this.targetGrowth*this.leftFactor)/2;
+  }
+  get targetRight(){
+    return this.x + (this.baseSize*this.targetGrowth*this.rightFactor)/2;
+  }
+  get targetTop(){
+    return this.y - (this.baseSize*this.targetGrowth*this.topFactor)/2;
+  }
+  get targetBottom(){
+    return this.y + (this.baseSize*this.targetGrowth*this.bottomFactor)/2;
+  }
+  get targetWidth(){
+    return this.targetRight - this.targetLeft;
+  }
+  get targetHeight(){
+    return this.targetBottom - this.targetTop;
+  }
+
+  update(dt){
+    // כוח קפיץ לעבר baseX+learnedOffset
+    if(!this.isDragging){
+      let stiff=0.1;
+      let fx= ((this.baseX+this.learnedOffsetX)- this.x)*stiff;
+      let fy= ((this.baseY+this.learnedOffsetY)- this.y)*stiff;
+      this.applyForce(fx,fy);
+    }
+    // כבידה
+    this.applyForce(0, gravity*this.mass);
+
+    // עדכון מהירות/מיקום
+    this.vx+= this.ax*dt;
+    this.vy+= this.ay*dt;
+    this.x += this.vx;
+    this.y += this.vy;
+    this.vx*= this.friction;
+    this.vy*= this.friction;
+    this.ax=0; this.ay=0;
+
+    // התאוששות צורה
+    const recFast=0.05, recSlow=0.015;
+    function recover(f){
+      let diff= Math.abs(f-1);
+      return f + (1-f)*( diff>0.1? recFast: recSlow );
+    }
+    this.leftFactor  = recover(this.leftFactor);
+    this.rightFactor = recover(this.rightFactor);
+    this.topFactor   = recover(this.topFactor);
+    this.bottomFactor= recover(this.bottomFactor);
+
+    // דהייה offset
+    const magnet=0.2;
+    this.learnedOffsetX-= this.learnedOffsetX*magnet*dt;
+    this.learnedOffsetY-= this.learnedOffsetY*magnet*dt;
+
+    // אם קרוב לעוגן => מורידים pressCount
+    let offMag= Math.sqrt(this.learnedOffsetX**2 + this.learnedOffsetY**2);
+    if(offMag<5){
+      this.pressCount -= dt*1.5;
+      if(this.pressCount<0){
+        this.pressCount=0;
+        this.pressPoints=[];
+      }
+    }
+
+    // לחיצה ממושכת => pressCount++
+    if(this.holding){
+      let holdDur= performance.now() - this.mouseDownTime;
+      if(holdDur>800){
+        this.pressCount+= dt*1; // מוסיפים לאט
+      }
+    }
+  }
+
+  applyForce(fx,fy){
+    this.ax+= fx/this.mass;
+    this.ay+= fy/this.mass;
+  }
+
+  isPointInside(mx,my){
+    return (mx>=this.targetLeft && mx<=this.targetRight &&
+            my>=this.targetTop  && my<=this.targetBottom);
+  }
+
+  onMouseDown(mx,my){
+    this.holding= true;
+    this.mouseDownTime= performance.now();
+    this.pressCount+= 0.5; // לחיצה קטנה
+
+    // offset
+    let dx= mx-this.x;
+    let dy= my-this.y;
+    this.learnedOffsetX+= dx*0.2;
+    this.learnedOffsetY+= dy*0.2;
+
+    // רישום נקודת לחיצה
+    let fracX=0.5+(dx/this.baseSize);
+    let fracY=0.5+(dy/this.baseSize);
+    this.pressPoints.push({x:fracX,y:fracY});
+    if(this.pressPoints.length>10) this.pressPoints.shift();
+
+    // השפעה על שכנים
+    affectNeighbors(this);
+  }
+  onMouseUp(){
+    this.holding=false;
+  }
+
+  // ציור
+  draw(ctx){
+    ctx.save();
+    // מגדירים Path של המלבן הלא אחיד
+    ctx.beginPath();
+    ctx.moveTo(this.targetLeft,  this.targetTop);
+    ctx.lineTo(this.targetRight, this.targetTop);
+    ctx.lineTo(this.targetRight, this.targetBottom);
+    ctx.lineTo(this.targetLeft,  this.targetBottom);
+    ctx.closePath();
+    // Clip
+    ctx.clip();
+
+    // רקע אפור
+    ctx.fillStyle="#555";
+    ctx.fillRect(this.targetLeft, this.targetTop, this.targetWidth, this.targetHeight);
+
+    // שכבת Heatmap – hue ע"פ bias
+    let bias= this.biasFactor; 
+    let hue= 240 - 240*bias; 
+    let grad= ctx.createLinearGradient(this.targetLeft,this.targetTop, this.targetRight,this.targetBottom);
+    grad.addColorStop(0, `hsl(${hue},80%,60%)`);
+    grad.addColorStop(1, `hsl(${hue},80%,70%)`);
+    ctx.globalAlpha=0.5;
+    ctx.fillStyle= grad;
+    ctx.fillRect(this.targetLeft, this.targetTop, this.targetWidth, this.targetHeight);
+    ctx.globalAlpha=1;
+
+    // ציור נקודות לחיצה כ-RadialGradient
+    for(let i=0;i<this.pressPoints.length;i++){
+      let p= this.pressPoints[i];
+      let px= this.targetLeft + p.x*this.targetWidth;
+      let py= this.targetTop + p.y*this.targetHeight;
+      let alpha= Math.max(0, 0.5 - i*0.07);
+      let rr= Math.min(this.targetWidth,this.targetHeight)*0.5;
+      let rad= ctx.createRadialGradient(px,py,0, px,py, rr);
+      rad.addColorStop(0, `rgba(255,0,0,${alpha})`);
+      rad.addColorStop(1, `rgba(255,0,0,0)`);
+      ctx.fillStyle= rad;
+      ctx.beginPath();
+      ctx.arc(px, py, rr,0, Math.PI*2);
+      ctx.fill();
+    }
+
+    // ציור האות במרכז
+    ctx.fillStyle="#fff";
+    ctx.font= `${Math.floor(Math.min(this.targetWidth,this.targetHeight)/2)}px Arial`;
+    ctx.textAlign="center";
+    ctx.textBaseline="middle";
+    ctx.fillText(this.letter, (this.targetLeft+this.targetRight)*0.5, (this.targetTop+this.targetBottom)*0.5);
+
+    ctx.restore();
+  }
+}
+
+/**************************************************************
+ * שכנים בזמן אמת
+ **************************************************************/
+function affectNeighbors(pressedKey){
+  let threshold= pressedKey.baseSize*1.5;
+  keyCubes.forEach(nb=>{
+    if(nb!==pressedKey){
+      let dx= nb.x-pressedKey.x;
+      let dy= nb.y-pressedKey.y;
+      let dist= Math.sqrt(dx*dx + dy*dy);
+      if(dist<threshold){
+        // השפעה רכה להחזרת הצורה למצב טבעי
+        let rate=0.07;
+        nb.leftFactor   += (1-nb.leftFactor)*rate;
+        nb.rightFactor  += (1-nb.rightFactor)*rate;
+        nb.topFactor    += (1-nb.topFactor)*rate;
+        nb.bottomFactor += (1-nb.bottomFactor)*rate;
+      }
+    }
+  });
+}
+
+/**************************************************************
+ * Spring – קפיץ
+ **************************************************************/
+class Spring {
+  constructor(kA,kB,restLength,k,damp=0.02){
+    this.kA= kA; 
+    this.kB= kB;
+    this.restLength= restLength;
+    this.k= k;
+    this.damp= damp;
+  }
+  update(){
+    let dx= this.kB.x - this.kA.x;
+    let dy= this.kB.y - this.kA.y;
+    let dist= Math.sqrt(dx*dx+dy*dy);
+    if(dist<0.0001) dist=0.0001;
+    let forceMag= (dist-this.restLength)*this.k;
+    let fx= (dx/dist)*forceMag;
+    let fy= (dy/dist)*forceMag;
+
+    // damping
+    fx-= this.damp*this.kA.vx;
+    fy-= this.damp*this.kA.vy;
+
+    this.kA.applyForce(fx,fy);
+    this.kB.applyForce(-fx,-fy);
+  }
+}
+
+/**************************************************************
+ * בניית המקלדת + עדכון Layout + קפיצים
+ **************************************************************/
+function buildKeyCubes(){
+  keyCubes=[];
+  for(let r=0;r<keyboardRows.length;r++){
+    for(let c=0;c<keyboardRows[r].length;c++){
+      let letter= keyboardRows[r][c];
+      let cube= new KeyCube(letter,r,c);
+      keyCubes.push(cube);
+    }
+  }
+  updateLayout();
+  buildSprings();
+}
+buildKeyCubes();
+
+function updateLayout(){
+  let w= canvas.width, h= canvas.height;
+  let kbHeight= h*keyboardHeightRatio;
+  let rowHeight= kbHeight/keyboardRows.length;
+  keyCubes.forEach(k=>{
+    let colCount= keyboardRows[k.row].length;
+    let colWidth= w/colCount;
+    k.baseX= colWidth*(k.col+0.5);
+    k.baseY= h - kbHeight + rowHeight*(k.row+0.5);
+    k.baseSize= Math.min(colWidth*0.8, rowHeight*0.8);
+    if(k.x===0 && k.y===0){
+      k.x= k.baseX; 
+      k.y= k.baseY;
+    }
+  });
+}
+
+function buildSprings(){
+  springs=[];
+  // מקשים סמוכים (row±1,col±1)
+  keyCubes.forEach(k=>{
+    keyCubes.forEach(o=>{
+      if(o!==k){
+        if(Math.abs(o.row-k.row)<=1 && Math.abs(o.col-k.col)<=1){
+          let dx= (o.baseX-k.baseX);
+          let dy= (o.baseY-k.baseY);
+          let rest= Math.sqrt(dx*dx+dy*dy);
+          springs.push(new Spring(k,o, rest,0.03,0.01));
+        }
+      }
+    });
+  });
+}
+
+/**************************************************************
+ * מניעת חפיפה – מלבנית רכה
+ **************************************************************/
+function resolveCollisions(){
+  // נשתמש במספר איטרציות + בדיקת חפיפה במלבנים
+  const iterations=6;
+  for(let iter=0;iter<iterations;iter++){
+    let changed=false;
+    for(let i=0;i<keyCubes.length;i++){
+      for(let j=i+1;j<keyCubes.length;j++){
+        let A= keyCubes[i], B= keyCubes[j];
+        // חשב left,right,top,bottom לכל אחד
+        let Aleft= A.targetLeft,   Aright= A.targetRight;
+        let Atop = A.targetTop,    Abottom= A.targetBottom;
+        let Bleft= B.targetLeft,   Bright= B.targetRight;
+        let Btop = B.targetTop,    Bbottom= B.targetBottom;
+
+        // בדיקת חפיפה בצירים
+        if(Aleft< Bright && Aright> Bleft && Atop< Bbottom && Abottom> Btop){
+          // חפיפה מלבנית
+          // חישוב overlap בציר X ובציר Y
+          let overlapX=0, overlapY=0;
+          if(Aleft< Bright && Aright> Bleft){
+            // חישוב overlap בציר X
+            let xOverlap= Math.min(Aright,Bright) - Math.max(Aleft,Bleft);
+            overlapX= xOverlap;
+          }
+          if(Atop< Bbottom && Abottom> Btop){
+            // חישוב overlap בציר Y
+            let yOverlap= Math.min(Abottom,Bbottom) - Math.max(Atop,Btop);
+            overlapY= yOverlap;
+          }
+          if(overlapX>0 && overlapY>0){
+            // נבחר ציר האחד לשחרר
+            // או נדחוף בממוצע
+            let pushX= overlapX*0.5;
+            let pushY= overlapY*0.5;
+            // נחליט דינאמית לפי מי יותר גדול
+            if(overlapX>overlapY){
+              // נדחוף בציר Y
+              let centerA= (Atop+Abottom)*0.5, centerB= (Btop+Bbottom)*0.5;
+              if(centerA<centerB){
+                A.y-= pushY*0.5;
+                B.y+= pushY*0.5;
+              } else {
+                A.y+= pushY*0.5;
+                B.y-= pushY*0.5;
+              }
+            } else {
+              // נדחוף בציר X
+              let centerA= (Aleft+Aright)*0.5, centerB= (Bleft+Bright)*0.5;
+              if(centerA<centerB){
+                A.x-= pushX*0.5;
+                B.x+= pushX*0.5;
+              } else {
+                A.x+= pushX*0.5;
+                B.x-= pushX*0.5;
+              }
+            }
+            changed=true;
+          }
+        }
+      }
+    }
+    if(!changed) break;
+  }
+}
+
+/**************************************************************
+ * לולאת האנימציה
+ **************************************************************/
+function animate(time){
+  let dt= (time - lastTime)*0.001;
+  lastTime= time;
+
+  ctx.clearRect(0,0,canvas.width,canvas.height);
+
+  keyCubes.forEach(c=> c.update(dt));
+  springs.forEach(s=> s.update());
+  resolveCollisions();
+
+  keyCubes.forEach(c=> c.draw(ctx));
+  
+  requestAnimationFrame(animate);
+}
+animate(performance.now());
+
+/**************************************************************
+ * אירועי עכבר - לחיצה וגרירה
+ **************************************************************/
+canvas.addEventListener('mousedown', e=>{
+  let mx=e.clientX, my=e.clientY;
+  for(let i=keyCubes.length-1; i>=0; i--){
+    let c= keyCubes[i];
+    if(c.isPointInside(mx,my)){
+      draggingCube=c;
+      c.isDragging=true;
+      c.dragOffsetX= mx-c.x;
+      c.dragOffsetY= my-c.y;
+      c.onMouseDown(mx,my);
+      break;
+    }
+  }
+});
+canvas.addEventListener('mousemove', e=>{
+  if(draggingCube && draggingCube.isDragging){
+    let mx=e.clientX, my=e.clientY;
+    draggingCube.x= mx-draggingCube.dragOffsetX;
+    draggingCube.y= my-draggingCube.dragOffsetY;
+  }
+});
+canvas.addEventListener('mouseup', e=>{
+  if(draggingCube){
+    draggingCube.isDragging=false;
+    draggingCube.onMouseUp();
+    draggingCube=null;
+  }
+});
+
+/**************************************************************
+ * איפוס
+ **************************************************************/
+document.getElementById('resetBtn').addEventListener('click',()=>{
+  keyCubes.forEach(k=>{
+    k.learnedOffsetX=0; 
+    k.learnedOffsetY=0; 
+    k.pressCount=0;
+    k.pressPoints=[];
+    k.leftFactor=1; 
+    k.rightFactor=1; 
+    k.topFactor=1; 
+    k.bottomFactor=1;
+  });
+});
+
+/**************************************************************
+ * התאמת גודל הקנבס
+ **************************************************************/
+window.addEventListener('resize',()=>{
+  canvas.width=window.innerWidth;
+  canvas.height=window.innerHeight;
+  updateLayout();
+});
+</script>
+
+</body>
+</html>
