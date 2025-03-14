@@ -1,0 +1,680 @@
+<!DOCTYPE html>
+<html lang="he">
+<head>
+  <meta charset="UTF-8">
+  <title>מקלדת לומדת בתלת מימד – Free Form Keys in 3D (AI Improved)</title>
+  <style>
+    body { margin: 0; overflow: hidden; background: #000; }
+    #resetBtn, #toggleHitAreaBtn {
+      position: absolute;
+      top: 10px;
+      z-index: 10;
+      padding: 10px 15px;
+      background: rgba(0,0,0,0.7);
+      color: #fff;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+    #resetBtn { right: 10px; }
+    #toggleHitAreaBtn { left: 10px; }
+  </style>
+</head>
+<body>
+  <button id="resetBtn">איפוס</button>
+  <button id="toggleHitAreaBtn">הסתר אזור לחיצה</button>
+  
+  <!-- Three.js – שימו לב, יש להשתמש בגירסה העדכנית -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+  
+  <script>
+  /**************************************************************
+   * משתנה לשליטה בהצגת אזור הלחיצה בלבד
+   **************************************************************/
+  let showHitArea = true;
+  
+  /**************************************************************
+   * הגדרות תלת־מימד: סצנה, מצלמה, renderer, תאורה
+   **************************************************************/
+  const scene = new THREE.Scene();
+  scene.background = new THREE.Color(0x000000);
+  const camera = new THREE.PerspectiveCamera(60, window.innerWidth/window.innerHeight, 0.1, 10000);
+  camera.position.set(0, 0, 800);
+  
+  const renderer = new THREE.WebGLRenderer({ antialias: true });
+  renderer.setSize(window.innerWidth, window.innerHeight);
+  document.body.appendChild(renderer.domElement);
+  
+  const ambientLight = new THREE.AmbientLight(0x404040);
+  scene.add(ambientLight);
+  const dirLight = new THREE.DirectionalLight(0xffffff, 1);
+  dirLight.position.set(0, 1, 1);
+  scene.add(dirLight);
+  
+  /**************************************************************
+   * פונקציה: יצירת גיאומטריה מותאמת (BufferGeometry) עם 8 קודקודים
+   **************************************************************/
+  function createKeyGeometry(width, height, depth) {
+    const geometry = new THREE.BufferGeometry();
+    const vertices = new Float32Array([
+      -width/2,  height/2,  depth/2,   // v0
+       width/2,  height/2,  depth/2,   // v1
+       width/2, -height/2,  depth/2,   // v2
+      -width/2, -height/2,  depth/2,   // v3
+      -width/2,  height/2, -depth/2,   // v4
+       width/2,  height/2, -depth/2,   // v5
+       width/2, -height/2, -depth/2,   // v6
+      -width/2, -height/2, -depth/2    // v7
+    ]);
+    geometry.setAttribute('position', new THREE.BufferAttribute(vertices, 3));
+    const indices = [
+      0,1,2,   0,2,3,   // front
+      5,4,7,   5,7,6,   // back
+      4,5,1,   4,1,0,   // top
+      3,2,6,   3,6,7,   // bottom
+      1,5,6,   1,6,2,   // right
+      4,0,3,   4,3,7    // left
+    ];
+    geometry.setIndex(indices);
+    geometry.computeVertexNormals();
+    return geometry;
+  }
+  
+  /**************************************************************
+   * פרמטרים כלליים
+   **************************************************************/
+  const keyboardRows = [
+    ["Q","W","E","R","T","Y","U","I","O","P"],
+    ["A","S","D","F","G","H","J","K","L"],
+    ["Z","X","C","V","B","N","M"]
+  ];
+  const gravity = 0.5;
+  
+  let keyCubes = [];
+  let springs = [];
+  let lastTime = performance.now();
+  
+  /**************************************************************
+   * מחלקת KeyCube – מקש לומד בתלת־מימד
+   **************************************************************/
+  class KeyCube {
+    constructor(letter, row, col){
+      this.letter = letter;
+      this.row = row;
+      this.col = col;
+      
+      // Base size and dimensions
+      this.baseSize = 50;
+      this.width = this.baseSize;
+      this.height = this.baseSize;
+      this.depth = this.baseSize * 0.3;
+      
+      // מיקום בסיסי רנדומלי (כמו כוכבים)
+      this.baseX = (Math.random()-0.5)*600;
+      this.baseY = (Math.random()-0.5)*600;
+      this.baseZ = (Math.random()-0.5)*600;
+      
+      // פיזיקה: מיקום, מהירות, תאוצה (וקטורים)
+      this.position = new THREE.Vector3(this.baseX, this.baseY, this.baseZ);
+      this.velocity = new THREE.Vector3();
+      this.acceleration = new THREE.Vector3();
+      this.mass = 1;
+      this.friction = 0.98;
+      
+      // גורמי צורה – עבור שינוי צורת המקש (נשמור 8 cornerOffsets עבור 8 הקודקודים)
+      this.cornerOffsets = [];
+      for(let i=0; i<8; i++){
+        this.cornerOffsets.push(new THREE.Vector3(0,0,0));
+      }
+      
+      // למידה מקומית
+      this.learnedOffset = new THREE.Vector3(0,0,0);
+      this.pressCount = 0;
+      this.pressHistory = []; // מערך 2D (local coords)
+      
+      // למידה גלובלית
+      this.pressGlobalHistory = []; // מערך של {gx,gy,gz}
+      this.globalArrangementRate = 0.01;
+      
+      // Adaptive Offset – שינוי מתמשך במיקום
+      this.adaptiveOffset = new THREE.Vector3(0,0,0);
+      
+      // Padding – להגדיל אזור לחיצה
+      this.padding = 10;
+      
+      // ניצור את הגיאומטריה המותאמת
+      this.geometry = createKeyGeometry(this.width, this.height, this.depth);
+      this.material = new THREE.MeshPhongMaterial({ color: 0xffffff });
+      this.mesh = new THREE.Mesh(this.geometry, this.material);
+      scene.add(this.mesh);
+      
+      // גרירה
+      this.isDragging = false;
+      this.dragOffset = new THREE.Vector3();
+      
+      // לחיצה ממושכת
+      this.holding = false;
+      this.mouseDownTime = 0;
+    }
+    
+    // מתודה לנרמול cornerOffsets (חזרה הדרגתית למצב אחיד)
+    normalizeShape(alpha) {
+      let sum = new THREE.Vector3(0,0,0);
+      this.cornerOffsets.forEach(off => { sum.add(off); });
+      sum.multiplyScalar(1/this.cornerOffsets.length);
+      this.cornerOffsets = this.cornerOffsets.map(off => off.lerp(sum, alpha));
+    }
+    
+    // חישוב bias מהיסטוריית לחיצות (local 2D)
+    get biasFactor(){
+      if(this.pressHistory.length === 0) return 0.5;
+      let sum = 0;
+      this.pressHistory.forEach(p => { sum += (p.x - 0.5); });
+      let avg = sum / this.pressHistory.length;
+      return Math.min(Math.max(avg+0.5, 0), 1);
+    }
+    
+    // גודל טבעי בהתאם ללחיצות והטייה
+    get targetGrowth(){
+      return Math.min(1 + this.pressCount * 0.02 + 0.5 * Math.abs(this.biasFactor - 0.5), 1.6);
+    }
+    
+    // גבולות מלבניים בסיסיים (לפני עיוות) – ישמשו כהתייחסות
+    get targetLeft(){
+      return this.position.x - (this.width * this.targetGrowth) * 0.5;
+    }
+    get targetRight(){
+      return this.position.x + (this.width * this.targetGrowth) * 0.5;
+    }
+    get targetTop(){
+      return this.position.y + (this.height * this.targetGrowth) * 0.5;
+    }
+    get targetBottom(){
+      return this.position.y - (this.height * this.targetGrowth) * 0.5;
+    }
+    get targetWidth(){
+      return this.targetRight - this.targetLeft;
+    }
+    get targetHeight(){
+      return this.targetTop - this.targetBottom;
+    }
+    
+    // מחשב פוליגון 2D (לצורך בדיקת לחיצה) – כאן נעבור למישור המסך באמצעות המרה
+    // לצורך הפשטה, נחשב את הפוליגון במישור X-Y לפי גבולות המקש, ומתוספת cornerOffsets (לצורה חופשית)
+    getPolygon2D(){
+      // נחשב 4 קודקודים (ניקח את הפנים הקדמיות בלבד)
+      const poly = [
+        new THREE.Vector2(this.targetLeft + this.cornerOffsets[0].x, this.targetTop + this.cornerOffsets[0].y),
+        new THREE.Vector2(this.targetRight + this.cornerOffsets[1].x, this.targetTop + this.cornerOffsets[1].y),
+        new THREE.Vector2(this.targetRight + this.cornerOffsets[2].x, this.targetBottom + this.cornerOffsets[2].y),
+        new THREE.Vector2(this.targetLeft + this.cornerOffsets[3].x, this.targetBottom + this.cornerOffsets[3].y)
+      ];
+      return poly;
+    }
+    
+    // מחשב את הפוליגון המורחב (עם padding) במישור 2D
+    getPaddedPolygon2D(){
+      const poly = this.getPolygon2D();
+      let cx = 0, cy = 0;
+      poly.forEach(p => { cx += p.x; cy += p.y; });
+      cx /= poly.length; cy /= poly.length;
+      return poly.map(p => {
+        const dx = p.x - cx, dy = p.y - cy;
+        const len = Math.hypot(dx, dy);
+        const newLen = len + this.padding;
+        const factor = newLen / (len || 1);
+        return new THREE.Vector2(cx + dx * factor, cy + dy * factor);
+      });
+    }
+    
+    // עבור התנגשות ב־3D – נחשב bounding box 2D במישור X-Y של אזור לחיצה
+    getPaddedBoundingBox2D(){
+      const poly = this.getPaddedPolygon2D();
+      let left = Infinity, right = -Infinity, top = -Infinity, bottom = Infinity;
+      poly.forEach(p => {
+        if(p.x < left) left = p.x;
+        if(p.x > right) right = p.x;
+        if(p.y > top) top = p.y;
+        if(p.y < bottom) bottom = p.y;
+      });
+      return { left, right, top, bottom };
+    }
+    
+    // מנוע סידור גלובלי – עדכון baseX, baseY, baseZ בהתאם לממוצע לחיצות גלובליות
+    globalArrangementUpdate(){
+      if(this.pressGlobalHistory.length === 0) return;
+      let sum = new THREE.Vector3(0,0,0);
+      this.pressGlobalHistory.forEach(g => {
+        sum.add(new THREE.Vector3(g.gx, g.gy, g.gz));
+      });
+      sum.multiplyScalar(1/this.pressGlobalHistory.length);
+      this.baseX += (sum.x - this.baseX) * this.globalArrangementRate;
+      this.baseY += (sum.y - this.baseY) * this.globalArrangementRate;
+      this.baseZ += (sum.z - this.baseZ) * this.globalArrangementRate;
+    }
+    
+    update(dt){
+      this.globalArrangementUpdate();
+      
+      // אם לא בגירור – למשוך את המקש לעבר מיקום מטרה (base + learned + adaptive)
+      if(!this.isDragging){
+        const target = new THREE.Vector3(this.baseX, this.baseY, this.baseZ)
+                          .add(this.learnedOffset)
+                          .add(this.adaptiveOffset);
+        const force = target.clone().sub(this.mesh.position).multiplyScalar(0.1);
+        this.applyForce(force);
+      }
+      // כוח כבידה (למטה במישור Y)
+      this.applyForce(new THREE.Vector3(0, -gravity * this.mass, 0));
+      
+      // עדכון פיזיקה
+      this.velocity.add(this.acceleration.clone().multiplyScalar(dt));
+      this.position.add(this.velocity.clone().multiplyScalar(dt));
+      this.velocity.multiplyScalar(this.friction);
+      this.acceleration.set(0,0,0);
+      
+      // עדכון ה-mesh בהתאם למיקום הפיזי
+      this.mesh.position.copy(this.position);
+      
+      // עדכון צבע (Heatmap) בהתאם ל-bias
+      const bias = this.biasFactor;
+      let col;
+      if(bias <= 0.5){
+        let t = bias/0.5;
+        const r = Math.round(255 * (1 - t));
+        const g = Math.round(255 * t);
+        col = (r << 16) | (g << 8);
+      } else {
+        let t = (bias - 0.5)/0.5;
+        const r = Math.round(255 * t);
+        col = (r << 16) | (255 << 8);
+      }
+      this.material.color.setHex(col);
+      
+      // דעיכת cornerOffsets – חזרה בהדרגה לצורת מלבן
+      const decayRate = 0.05;
+      this.cornerOffsets.forEach(off => { off.multiplyScalar(1 - decayRate * dt); });
+      this.normalizeShape(0.01);
+      
+      // דעיכת learnedOffset
+      this.learnedOffset.multiplyScalar(1 - 0.2 * dt);
+      
+      if(this.learnedOffset.length() < 5){
+        this.pressCount -= dt * 1.5;
+        if(this.pressCount < 0){
+          this.pressCount = 0;
+          this.pressHistory = [];
+          this.pressGlobalHistory = [];
+        }
+      }
+      if(this.holding){
+        const holdDur = performance.now() - this.mouseDownTime;
+        if(holdDur > 800) this.pressCount += dt;
+      }
+      
+      // עדכון גיאומטריה בהתאם לשינוי בצורת המקש
+      this.updateGeometry();
+    }
+    
+    applyForce(forceVec){
+      this.acceleration.add(forceVec.clone().divideScalar(this.mass));
+    }
+    
+    // עדכון הגיאומטריה – מעדכן את מיקום הקודקודים לפי בסיס, cornerOffsets, ו-scale (targetGrowth)
+    updateGeometry(){
+      const positions = this.geometry.attributes.position.array;
+      const scale = this.targetGrowth;
+      const baseVerts = [
+        new THREE.Vector3(-this.width/2,  this.height/2,  this.depth/2),   // v0
+        new THREE.Vector3( this.width/2,  this.height/2,  this.depth/2),   // v1
+        new THREE.Vector3( this.width/2, -this.height/2,  this.depth/2),   // v2
+        new THREE.Vector3(-this.width/2, -this.height/2,  this.depth/2),   // v3
+        new THREE.Vector3(-this.width/2,  this.height/2, -this.depth/2),   // v4
+        new THREE.Vector3( this.width/2,  this.height/2, -this.depth/2),   // v5
+        new THREE.Vector3( this.width/2, -this.height/2, -this.depth/2),   // v6
+        new THREE.Vector3(-this.width/2, -this.height/2, -this.depth/2)    // v7
+      ];
+      for(let i=0; i<8; i++){
+        const v = baseVerts[i].clone().add(this.cornerOffsets[i]).multiplyScalar(scale);
+        positions[i*3] = v.x;
+        positions[i*3+1] = v.y;
+        positions[i*3+2] = v.z;
+      }
+      this.geometry.attributes.position.needsUpdate = true;
+      this.geometry.computeVertexNormals();
+    }
+    
+    // בדיקת לחיצה – כאן נעשה המרה לפשטות למישור 2D
+    isPointInside(mx, my){
+      const bbox = this.getPaddedBoundingBox2D();
+      return (mx >= bbox.left && mx <= bbox.right && my >= bbox.bottom && my <= bbox.top);
+    }
+    
+    // מחשב bounding box 2D של אזור הלחיצה (מ- getPaddedPolygon2D)
+    getPaddedBoundingBox2D(){
+      const poly = this.getPaddedPolygon2D();
+      let left = Infinity, right = -Infinity, top = -Infinity, bottom = Infinity;
+      poly.forEach(p => {
+        if(p.x < left) left = p.x;
+        if(p.x > right) right = p.x;
+        if(p.y > top) top = p.y;
+        if(p.y < bottom) bottom = p.y;
+      });
+      return { left, right, top, bottom };
+    }
+    
+    // מחשב פוליגון 2D של אזור הלחיצה (מהפוליגון של 4 קודקודים – נבחר את 4 הפנים הקדמיות)
+    getPolygon2D(){
+      const poly = [
+        new THREE.Vector2(this.targetLeft + this.cornerOffsets[0].x, this.targetTop + this.cornerOffsets[0].y),
+        new THREE.Vector2(this.targetRight + this.cornerOffsets[1].x, this.targetTop + this.cornerOffsets[1].y),
+        new THREE.Vector2(this.targetRight + this.cornerOffsets[2].x, this.targetBottom + this.cornerOffsets[2].y),
+        new THREE.Vector2(this.targetLeft + this.cornerOffsets[3].x, this.targetBottom + this.cornerOffsets[3].y)
+      ];
+      return poly;
+    }
+    
+    getPaddedPolygon2D(){
+      const poly = this.getPolygon2D();
+      let cx = 0, cy = 0;
+      poly.forEach(p => { cx += p.x; cy += p.y; });
+      cx /= poly.length; cy /= poly.length;
+      return poly.map(p => {
+        const dx = p.x - cx, dy = p.y - cy;
+        const len = Math.hypot(dx, dy);
+        const newLen = len + this.padding;
+        const factor = newLen / (len || 1);
+        return new THREE.Vector2(cx + dx * factor, cy + dy * factor);
+      });
+    }
+    
+    onMouseDown(mx, my){
+      this.holding = true;
+      this.mouseDownTime = performance.now();
+      this.pressCount += 0.3;
+      const dx = mx - this.mesh.position.x;
+      const dy = my - this.mesh.position.y;
+      this.learnedOffset.add(new THREE.Vector3(dx, dy, 0).multiplyScalar(0.3));
+      const lr = 0.01;
+      this.adaptiveOffset.lerp(new THREE.Vector3(dx, dy, 0), lr);
+      const fracX = 0.5 + dx / this.width;
+      const fracY = 0.5 + dy / this.height;
+      this.pressHistory.push({x: fracX, y: fracY});
+      if(this.pressHistory.length > 50) this.pressHistory.shift();
+      this.pressGlobalHistory.push({gx: mx, gy: my, gz: this.mesh.position.z});
+      if(this.pressGlobalHistory.length > 100) this.pressGlobalHistory.shift();
+      // עדכון cornerOffsets בהתאם למיקום הלחיצה (נשתמש רק בערכי X,Y)
+      const factor = 0.1;
+      if(dx < 0 && dy < 0){
+        this.cornerOffsets[0].add(new THREE.Vector3(dx, dy, 0).multiplyScalar(factor));
+      } else if(dx >= 0 && dy < 0){
+        this.cornerOffsets[1].add(new THREE.Vector3(dx, dy, 0).multiplyScalar(factor));
+      } else if(dx >= 0 && dy >= 0){
+        this.cornerOffsets[2].add(new THREE.Vector3(dx, dy, 0).multiplyScalar(factor));
+      } else if(dx < 0 && dy >= 0){
+        this.cornerOffsets[3].add(new THREE.Vector3(dx, dy, 0).multiplyScalar(factor));
+      }
+      if(fracX < 0.5){
+        this.leftFactor *= 0.97;
+        this.rightFactor *= 1.03;
+      } else {
+        this.leftFactor *= 1.03;
+        this.rightFactor *= 0.97;
+      }
+      if(fracY < 0.5){
+        this.topFactor *= 0.97;
+        this.bottomFactor *= 1.03;
+      } else {
+        this.topFactor *= 1.03;
+        this.bottomFactor *= 0.97;
+      }
+      affectNeighbors(this);
+    }
+    
+    onMouseUp(){
+      this.holding = false;
+    }
+    
+    // שינוי צבע (Heatmap) – מחושב לפי bias, כאן מחזירים צבע כערך hex
+    interpolateColor(bias){
+      if(bias <= 0.5){
+        const t = bias / 0.5;
+        const r = Math.round(255 * (1 - t));
+        const g = Math.round(255 * t);
+        return (r << 16) | (g << 8);
+      } else {
+        const t = (bias - 0.5) / 0.5;
+        const r = Math.round(255 * t);
+        return (r << 16) | (255 << 8);
+      }
+    }
+    
+    draw(ctx){
+      // עדכון מיקום ה-mesh כבר נעשה בתוך update (this.mesh.position)
+      // אנו מעדכנים כאן את הגיאומטריה באמצעות updateGeometry (שעודכן בתוך update)
+      
+      // הצגת אזור לחיצה (Hit Area) – במישור 2D
+      if(showHitArea){
+        const poly2D = this.getPaddedPolygon2D();
+        // נשרטט את הקווים על גבי renderer 2D (נשתמש כאן ב-Canvas 2D דרך ctx)
+        ctx.save();
+        ctx.strokeStyle = "rgba(0,255,255,0.7)";
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        ctx.moveTo(poly2D[0].x, poly2D[0].y);
+        for(let i = 1; i < poly2D.length; i++){
+          ctx.lineTo(poly2D[i].x, poly2D[i].y);
+        }
+        ctx.closePath();
+        ctx.stroke();
+        ctx.restore();
+      }
+    }
+  }
+  
+  /**************************************************************
+   * עדכון שכנות – השפעה על גורמי הצורה של מקשים סמוכים
+   **************************************************************/
+  function affectNeighbors(pressedKey){
+    const threshold = pressedKey.baseSize * 1.5;
+    keyCubes.forEach(nb => {
+      if(nb !== pressedKey){
+        const d = pressedKey.position.distanceTo(nb.position);
+        if(d < threshold){
+          const rate = 0.07;
+          nb.leftFactor   += (1 - nb.leftFactor) * rate;
+          nb.rightFactor  += (1 - nb.rightFactor) * rate;
+          nb.topFactor    += (1 - nb.topFactor) * rate;
+          nb.bottomFactor += (1 - nb.bottomFactor) * rate;
+        }
+      }
+    });
+  }
+  
+  /**************************************************************
+   * מחלקת Spring – קפיצים בין מקשים (3D)
+   **************************************************************/
+  class Spring {
+    constructor(kA, kB, restLength, k, damp = 0.02){
+      this.kA = kA;
+      this.kB = kB;
+      this.restLength = restLength;
+      this.k = k;
+      this.damp = damp;
+    }
+    update(){
+      const diff = new THREE.Vector3().subVectors(this.kB.position, this.kA.position);
+      let dist = diff.length();
+      if(dist < 0.0001) dist = 0.0001;
+      const forceMag = (dist - this.restLength) * this.k;
+      const force = diff.normalize().multiplyScalar(forceMag);
+      force.sub(this.kA.velocity.clone().multiplyScalar(this.damp));
+      this.kA.applyForce(force);
+      this.kB.applyForce(force.clone().negate());
+    }
+  }
+  
+  /**************************************************************
+   * בניית המקשים ובניית הקפיצים
+   **************************************************************/
+  function buildKeyCubes(){
+    keyCubes = [];
+    for(let r = 0; r < keyboardRows.length; r++){
+      for(let c = 0; c < keyboardRows[r].length; c++){
+        const letter = keyboardRows[r][c];
+        const cube = new KeyCube(letter, r, c);
+        keyCubes.push(cube);
+      }
+    }
+  }
+  buildKeyCubes();
+  
+  function buildSprings(){
+    springs = [];
+    keyCubes.forEach(k => {
+      keyCubes.forEach(o => {
+        if(o !== k){
+          if(Math.abs(o.row - k.row) <= 1 && Math.abs(o.col - k.col) <= 1){
+            const dx = o.baseX - k.baseX;
+            const dy = o.baseY - k.baseY;
+            const dz = o.baseZ - k.baseZ;
+            const rest = Math.hypot(dx, dy, dz);
+            springs.push(new Spring(k, o, rest, 0.02, 0.02));
+          }
+        }
+      });
+    });
+  }
+  buildSprings();
+  
+  /**************************************************************
+   * מניעת חפיפה – פתרון התנגשויות באמצעות bounding box 2D של אזור הלחיצה
+   **************************************************************/
+  function resolveCollisions(){
+    const iterations = 6;
+    for(let iter = 0; iter < iterations; iter++){
+      let changed = false;
+      keyCubes.forEach(A => {
+        keyCubes.forEach(B => {
+          if(A !== B){
+            const bboxA = A.getPaddedBoundingBox2D();
+            const bboxB = B.getPaddedBoundingBox2D();
+            if(bboxA.left < bboxB.right && bboxA.right > bboxB.left &&
+               bboxA.bottom < bboxB.top && bboxA.top > bboxB.bottom){
+              const xOverlap = Math.min(bboxA.right, bboxB.right) - Math.max(bboxA.left, bboxB.left);
+              const yOverlap = Math.min(bboxA.top, bboxB.top) - Math.max(bboxA.bottom, bboxB.bottom);
+              if(xOverlap > 0 && yOverlap > 0){
+                if(xOverlap > yOverlap){
+                  const push = yOverlap * 0.5;
+                  const centerA = (bboxA.top + bboxA.bottom) * 0.5;
+                  const centerB = (bboxB.top + bboxB.bottom) * 0.5;
+                  if(centerA < centerB){
+                    A.position.y -= push * 0.5;
+                    B.position.y += push * 0.5;
+                  } else {
+                    A.position.y += push * 0.5;
+                    B.position.y -= push * 0.5;
+                  }
+                } else {
+                  const push = xOverlap * 0.5;
+                  const centerA = (bboxA.left + bboxA.right) * 0.5;
+                  const centerB = (bboxB.left + bboxB.right) * 0.5;
+                  if(centerA < centerB){
+                    A.position.x -= push * 0.5;
+                    B.position.x += push * 0.5;
+                  } else {
+                    A.position.x += push * 0.5;
+                    B.position.x -= push * 0.5;
+                  }
+                }
+                changed = true;
+              }
+            }
+          }
+        });
+      });
+      if(!changed) break;
+    }
+  }
+  
+  /**************************************************************
+   * לולאת האנימציה
+   **************************************************************/
+  let lastTimeStamp = performance.now();
+  function animate(time){
+    const dt = (time - lastTimeStamp) * 0.001;
+    lastTimeStamp = time;
+    keyCubes.forEach(k => k.update(dt));
+    springs.forEach(s => s.update());
+    resolveCollisions();
+    keyCubes.forEach(k => k.draw(ctx));
+    renderer.render(scene, camera);
+    requestAnimationFrame(animate);
+  }
+  animate(performance.now());
+  
+  /**************************************************************
+   * אירועי עכבר – המרה פשוטה בין מיקום מסך למיקום במרחב 3D
+   **************************************************************/
+  canvas.addEventListener('mousedown', e => {
+    const mx = e.clientX, my = e.clientY;
+    for(let i = keyCubes.length - 1; i >= 0; i--){
+      const key = keyCubes[i];
+      if(key.isPointInside(mx, my)){
+        draggingCube = key;
+        key.isDragging = true;
+        key.dragOffset.set(mx - key.mesh.position.x, my - key.mesh.position.y, 0);
+        key.onMouseDown(mx, my);
+        break;
+      }
+    }
+  });
+  canvas.addEventListener('mousemove', e => {
+    if(draggingCube && draggingCube.isDragging){
+      const mx = e.clientX, my = e.clientY;
+      draggingCube.mesh.position.set(
+        mx - draggingCube.dragOffset.x,
+        my - draggingCube.dragOffset.y,
+        draggingCube.mesh.position.z
+      );
+    }
+  });
+  canvas.addEventListener('mouseup', e => {
+    if(draggingCube){
+      draggingCube.isDragging = false;
+      draggingCube.onMouseUp();
+      draggingCube = null;
+    }
+  });
+  
+  /**************************************************************
+   * כפתורי שליטה: איפוס והחלפת תצוגת אזור לחיצה
+   **************************************************************/
+  document.getElementById('resetBtn').addEventListener('click', () => {
+    keyCubes.forEach(k => {
+      k.learnedOffset.set(0,0,0);
+      k.adaptiveOffset.set(0,0,0);
+      k.pressCount = 0;
+      k.pressHistory = [];
+      k.pressGlobalHistory = [];
+      k.leftFactor = 1;
+      k.rightFactor = 1;
+      k.topFactor = 1;
+      k.bottomFactor = 1;
+      k.cornerOffsets.forEach(off => { off.set(0,0,0); });
+    });
+  });
+  
+  document.getElementById('toggleHitAreaBtn').addEventListener('click', () => {
+    showHitArea = !showHitArea;
+    document.getElementById('toggleHitAreaBtn').textContent = showHitArea ? "הסתר אזור לחיצה" : "הצג אזור לחיצה";
+  });
+  
+  window.addEventListener('resize', () => {
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    camera.aspect = window.innerWidth / window.innerHeight;
+    camera.updateProjectionMatrix();
+  });
+  </script>
+</body>
+</html>
