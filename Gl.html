@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>גלריה מגנטית - אנימציית גדילה</title>
+    <title>גלריה מגנטית - פתיחה בלחיצה</title>
     <style>
         body {
             margin: 0;
@@ -15,83 +15,97 @@
         #physics-container {
             width: 320px;
             max-width: 90%;
-            height: 300vh; /* עדיין גבוה מאוד */
+            height: 300vh; /* עדיין גבוה כדי לאפשר פיזור של הקטנים */
             position: relative;
             border-left: 2px solid #7f8c8d;
             border-right: 2px solid #7f8c8d;
             margin: 0 auto;
             background-color: #34495e;
+            /* חשוב להשאיר hidden כדי לחתוך את הקטנים שלא יברחו ויזואלית מהצינור */
             overflow: hidden;
         }
 
         .work-card {
-            /* --- מצב התחלתי: קטן --- */
+            /* --- מצב התחלתי: קטן ומופעל פיזיקה --- */
             width: 120px;
             height: 150px;
-            position: absolute; /* חשוב מההתחלה */
-            background-color: #e74c3c;
+            position: absolute; /* מיקום נשלט ע"י Matter.js */
+            background-color: #3498db; /* צבע שונה לקטנים */
             color: white;
-            padding: 10px; /* פדינג קטן יותר במצב קטן */
-            border-radius: 8px; /* פינות מעוגלות במצב קטן */
+            padding: 10px;
+            border-radius: 8px;
             box-shadow: 2px 2px 5px rgba(0,0,0,0.3);
-            cursor: grab;
+            cursor: pointer; /* שינוי סמן ללחיצה */
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
             text-align: center;
             box-sizing: border-box;
-            will-change: width, height, top, left; /* подсказка для браузера */
+            will-change: width, height, top, left, transform, opacity;
             user-select: none;
             -webkit-user-select: none;
             -moz-user-select: none;
             -ms-user-select: none;
+            z-index: 1; /* קטנים ברקע */
 
             /* --- אנימציית המעבר --- */
-            transition: width 0.8s ease-in-out,
-                        height 0.8s ease-in-out,
-                        top 0.6s ease-in-out, /* אנימציה גם למיקום */
-                        left 0.6s ease-in-out,
-                        padding 0.8s ease-in-out,
-                        border-radius 0.8s ease-in-out;
+            transition: width 0.5s ease-in-out,
+                        height 0.5s ease-in-out,
+                        top 0.5s ease-in-out,
+                        left 0.5s ease-in-out,
+                        transform 0.5s ease-in-out,
+                        opacity 0.5s ease-in-out,
+                        border-radius 0.5s ease-in-out,
+                        padding 0.5s ease-in-out,
+                        background-color 0.5s ease-in-out,
+                        z-index 0s linear 0.5s; /* Z-index משתנה בסוף המעבר */
         }
 
-        /* --- מצב סופי: גדול (כאשר לקונטיינר יש קלאס 'grown') --- */
-        .grown .work-card {
-            width: 100%;
-            height: 95vh; /* כמעט גובה חלון */
-            padding: 20px; /* פדינג גדול יותר */
-            border-radius: 0; /* פינות ישרות */
-            border-bottom: 1px solid #c0392b;
-            /* המיקום הסופי ייקבע ע"י הפיזיקה, אבל נותנים ערך ברירת מחדל */
-            /* top ו- left ידרסו על ידי JavaScript אחרי שהפיזיקה תתחיל */
+        /* --- מצב סופי: גדול, מקובע במרכז --- */
+        .work-card.large {
+            width: 90vw; /* רוחב גדול, לא תלוי בקונטיינר */
+            height: 85vh; /* גובה גדול */
+            /* --- שינוי: מיקום מקובע במרכז המסך --- */
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%); /* טריק למרכוז מדויק */
+            padding: 30px;
+            border-radius: 5px;
+            background-color: #e74c3c; /* צבע שונה לגדול */
+            z-index: 100; /* מעל הכל */
+            opacity: 1;
+            transition: width 0.5s ease-in-out,
+                        height 0.5s ease-in-out,
+                        top 0.5s ease-in-out,
+                        left 0.5s ease-in-out,
+                        transform 0.5s ease-in-out,
+                        opacity 0.3s ease-in-out, /* שינוי מהיר יותר לאופסיטי */
+                        border-radius 0.5s ease-in-out,
+                        padding 0.5s ease-in-out,
+                        background-color 0.5s ease-in-out,
+                        z-index 0s linear 0s; /* Z-index משתנה מיד */
         }
 
-
-        .work-card img {
-            max-width: 80%; /* מתאים גם לגודל הקטן */
-            max-height: 60%; /* מתאים גם לגודל הקטן */
+        /* סגנונות תוכן פנימי (תמונה, טקסט) יכולים להישאר דומים */
+         .work-card img {
+            max-width: 80%;
+            max-height: 70%;
             height: auto;
             margin-bottom: 5px;
             pointer-events: none;
-             transition: max-width 0.8s ease-in-out, max-height 0.8s ease-in-out;
         }
-         .grown .work-card img {
-             max-width: 70%;
-             max-height: 60%; /* שמירה על גודל תמונה סביר */
-             margin-bottom: 15px;
-         }
-
-
         .work-card span {
-             font-size: 0.9em; /* גופן קטן במצב קטן */
+             font-size: 0.9em;
              pointer-events: none;
-             transition: font-size 0.8s ease-in-out;
         }
-        .grown .work-card span {
-            font-size: 1.2em; /* גופן גדול במצב גדול */
+        .work-card.large img{
+             margin-bottom: 15px;
         }
-
+         .work-card.large span {
+             font-size: 1.2em;
+         }
 
     </style>
 </head>
@@ -113,6 +127,11 @@
      <div class="work-card">
         <span>טקסט בלבד 4</span>
     </div>
+     <div class="work-card">
+        <img src="placeholder.png" alt="עבודה 5">
+        <span>כרטיס 5</span>
+    </div>
+
 </div>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/matter-js/0.19.0/matter.min.js"></script>
@@ -120,199 +139,206 @@
 
 <script>
     document.addEventListener('DOMContentLoaded', () => {
-        const container = document.getElementById('physics-container');
-        const cards = Array.from(container.querySelectorAll('.work-card'));
-        let engine, runner, world, mouseConstraint, cardBodies = []; // משתנים גלובליים לסקריפט
-        let physicsInitialized = false; // דגל למניעת אתחול כפול
-
-        // --- שלב 1: מיקום התחלתי (כרטיסיות קטנות) ---
-        let containerRect = container.getBoundingClientRect();
-        const initialCardWidth = 120; // רוחב התחלתי CSS
-        const initialCardHeight = 150; // גובה התחלתי CSS
-        const stackStartY = 30;
-        const cardSpacing = 5;
-
-        cards.forEach((card, index) => {
-            const initialX = containerRect.width / 2 - initialCardWidth / 2 + (Math.random() * 6 - 3);
-            const initialY = stackStartY + index * (initialCardHeight + cardSpacing);
-            card.style.left = `${initialX}px`;
-            card.style.top = `${initialY}px`;
-        });
-
-        // הפעלת אנימציית הגדילה אחרי השהייה קלה
-        setTimeout(() => {
-            container.classList.add('grown');
-        }, 100); // הפעלה כמעט מיידית
-
-        // --- שלב 2: אתחול הפיזיקה אחרי סיום האנימציה ---
-        const animationDuration = 800; // משך האנימציה ב-CSS (במילישניות)
-        setTimeout(() => {
-            initializePhysics();
-        }, animationDuration + 150); // תזמון להרצה אחרי סיום האנימציה
-
-        function initializePhysics() {
-            if (physicsInitialized) return; // מונע אתחול כפול בטעות
-            physicsInitialized = true;
-
-            console.log("Initializing Physics..."); // Debugging
-
-            if (typeof MatterAttractors === 'undefined') {
-                console.error('MatterAttractors plugin not loaded!');
-                return;
-            }
-
-            const Engine = Matter.Engine;
-            const Runner = Matter.Runner;
-            const Bodies = Matter.Bodies;
-            const Body = Matter.Body;
-            const Composite = Matter.Composite;
-            const Mouse = Matter.Mouse;
-            const MouseConstraint = Matter.MouseConstraint;
-            const Events = Matter.Events;
-
-            Matter.use('matter-attractors');
-
-            engine = Engine.create();
-            world = engine.world;
-            engine.world.gravity.x = 0;
-            engine.world.gravity.y = 0;
-
-            // יצירה/עדכון קירות (ללא רצפה/תקרה)
-            updateWalls();
-
-            // יצירת גופים פיזיקליים (גדולים!)
-            cardBodies = cards.map((card, index) => {
-                // קבל מידות *אחרי* האנימציה
-                const finalCardHeight = card.offsetHeight;
-                const finalCardWidth = card.offsetWidth;
-
-                // מיקום התחלתי לפיזור אנכי (כמו בגרסה הקודמת)
-                const targetY = (index * (finalCardHeight * 1.05)) + finalCardHeight / 2 + 50; // מרווח קטן יותר
-                const targetX = containerRect.width / 2;
-
-                // ודא שמידות לא אפס (יכול לקרות אם האלמנט מוסתר)
-                 if (finalCardWidth <= 0 || finalCardHeight <= 0) {
-                    console.warn(`Card ${index} has zero dimensions after animation. Skipping physics body.`);
-                    return null; // דלג על יצירת גוף פיזיקלי
-                 }
-
-
-                const body = Bodies.rectangle(
-                    targetX, targetY, finalCardWidth, finalCardHeight,
-                    {
-                        frictionAir: 0.04,
-                        friction: 0.01,
-                        restitution: 0.3,
-                        plugin: {
-                            attractors: [
-                                function(bodyA, bodyB) {
-                                    let forceMagnitude = 0.005;
-                                    let dx = bodyB.position.x - bodyA.position.x;
-                                    let dy = bodyB.position.y - bodyA.position.y;
-                                    let distanceSq = dx * dx + dy * dy;
-                                    let minDistanceSq = 200 * 200; // לא למשוך אם קרובים מדי
-                                    let maxDistanceSq = (window.innerHeight * 1.8) ** 2; // טווח משיכה גדול
-
-                                    if (distanceSq < maxDistanceSq && distanceSq > minDistanceSq) {
-                                       let force = (forceMagnitude * bodyA.mass * bodyB.mass) / distanceSq;
-                                       let maxForce = 0.05;
-                                       force = Math.min(force, maxForce);
-                                       return { x: dx * force, y: dy * force };
-                                    }
-                                    return { x: 0, y: 0 };
-                                }
-                            ]
-                        }
-                    }
-                );
-
-                Body.setInertia(body, Infinity); // מניעת סיבוב
-
-                body.element = card;
-                card.body = body; // קישור הפוך אם רוצים
-                return body;
-            }).filter(body => body !== null); // סנן החוצה גופים שלא נוצרו
-
-            Composite.add(world, cardBodies);
-
-            // שליטה עם העכבר
-            const mouse = Mouse.create(container);
-            mouseConstraint = MouseConstraint.create(engine, {
-                mouse: mouse,
-                constraint: { stiffness: 0.1, render: { visible: false } }
-            });
-            Composite.add(world, mouseConstraint);
-
-            // לולאת עדכון סנכרון HTML
-            Events.on(engine, 'afterUpdate', syncPositions);
-
-            // הרצת הסימולציה
-            runner = Runner.create();
-            Runner.run(runner, engine);
-             console.log("Physics Engine Started.");
+        // ודא שהפלאגין נטען
+        if (typeof MatterAttractors === 'undefined') {
+            console.error('MatterAttractors plugin not loaded!');
+            return;
         }
 
+        const container = document.getElementById('physics-container');
+        const cards = Array.from(container.querySelectorAll('.work-card'));
+        let engine, runner, world, mouseConstraint, cardBodies = [];
+        let currentlyLargeCardElement = null; // מעקב אחרי הכרטיס הגדול הנוכחי
+        const animationDuration = 500; // משך האנימציה ב-CSS
+
+        const Engine = Matter.Engine;
+        const Runner = Matter.Runner;
+        const Bodies = Matter.Bodies;
+        const Body = Matter.Body;
+        const Composite = Matter.Composite;
+        const Mouse = Matter.Mouse;
+        const MouseConstraint = Matter.MouseConstraint;
+        const Events = Matter.Events;
+
+        Matter.use('matter-attractors');
+
+        // --- אתחול הפיזיקה מיד ---
+        engine = Engine.create();
+        world = engine.world;
+        engine.world.gravity.x = 0;
+        engine.world.gravity.y = 0;
+
+        updateWalls(); // יצירת קירות צד
+
+        // גדלים התחלתיים (קטנים)
+        const initialCardWidth = 120;
+        const initialCardHeight = 150;
+
+        // יצירת גופים פיזיקליים קטנים
+        cardBodies = cards.map((card, index) => {
+            let containerRect = container.getBoundingClientRect();
+            const initialX = containerRect.width / 2 + (Math.random() * 20 - 10);
+            // פיזור אנכי התחלתי לאורך חלק מהקונטיינר
+            const initialY = (index * (initialCardHeight * 1.2)) + initialCardHeight;
+
+            // קביעת מיקום התחלתי ויזואלי (לפני שהפיזיקה משתלטת)
+            card.style.left = `${initialX - initialCardWidth / 2}px`;
+            card.style.top = `${initialY - initialCardHeight / 2}px`;
+            card.isLarge = false; // דגל התחלתי
+
+            const body = Bodies.rectangle(
+                initialX, initialY, initialCardWidth, initialCardHeight,
+                {
+                    frictionAir: 0.05, // חיכוך אוויר גבוה יותר לקטנים
+                    friction: 0.1,
+                    restitution: 0.4,
+                    plugin: {
+                        attractors: [
+                            function(bodyA, bodyB) { // משיכה רק בין גופים קטנים
+                                if (bodyA.element?.isLarge || bodyB.element?.isLarge) return {x:0, y:0};
+
+                                let forceMagnitude = 0.002; // עוצמה מופחתת לקטנים
+                                let dx = bodyB.position.x - bodyA.position.x;
+                                let dy = bodyB.position.y - bodyA.position.y;
+                                let distanceSq = dx * dx + dy * dy;
+                                let minDistanceSq = 50 * 50;
+                                let maxDistanceSq = 800 * 800; // טווח גדול לקטנים
+
+                                if (distanceSq < maxDistanceSq && distanceSq > minDistanceSq) {
+                                   let force = (forceMagnitude * bodyA.mass * bodyB.mass) / distanceSq;
+                                   let maxForce = 0.02;
+                                   force = Math.min(force, maxForce);
+                                   return { x: dx * force, y: dy * force };
+                                }
+                                return { x: 0, y: 0 };
+                            }
+                        ]
+                    }
+                }
+            );
+
+            Body.setInertia(body, Infinity); // מניעת סיבוב
+            body.element = card;
+            card.body = body;
+            return body;
+        });
+
+        Composite.add(world, cardBodies);
+
+        // שליטה עם העכבר (על הקטנים)
+        const mouse = Mouse.create(container);
+        mouseConstraint = MouseConstraint.create(engine, {
+            mouse: mouse,
+            constraint: { stiffness: 0.2, render: { visible: false } },
+            // סינון: אפשר לגרור רק גופים שאינם במצב 'גדול'
+             collisionFilter: {
+                 mask: 0x0001 // קטגוריה ברירת מחדל
+             }
+        });
+        Composite.add(world, mouseConstraint);
+
+        // לולאת עדכון סנכרון HTML (רק לקטנים)
+        Events.on(engine, 'afterUpdate', syncPositions);
+
+        // הרצת הסימולציה
+        runner = Runner.create();
+        Runner.run(runner, engine);
+
+        // --- הוספת מאזיני לחיצה לכל הכרטיסיות ---
+        cards.forEach(card => {
+            card.addEventListener('click', handleCardClick);
+        });
+
+        // --- פונקציית טיפול בלחיצה ---
+        function handleCardClick(event) {
+            const clickedCardElement = event.currentTarget;
+            // אין צורך ב-clickedBody כאן ישירות
+
+            if (clickedCardElement.isLarge) {
+                // --- סגירת הכרטיס הנוכחי ---
+                console.log('Closing card:', clickedCardElement.textContent.trim());
+                // החזרת המיקום למיקום הפיזיקלי *לפני* הסרת הקלאס
+                // כדי שהאנימציה תתחיל מהמקום הנכון (בערך)
+                if (clickedCardElement.body) {
+                     const currentBodyPos = clickedCardElement.body.position;
+                     // קביעת מיקום style לפני הסרת הקלאס
+                     clickedCardElement.style.left = `${currentBodyPos.x - clickedCardElement.offsetWidth / 2}px`;
+                     clickedCardElement.style.top = `${currentBodyPos.y - clickedCardElement.offsetHeight / 2}px`;
+                     // החזרת transform כי הוא נדרס על ידי position:fixed
+                     clickedCardElement.style.transform = 'translate(0, 0)';
+                }
+
+
+                clickedCardElement.classList.remove('large');
+                clickedCardElement.isLarge = false;
+                currentlyLargeCardElement = null;
+
+                // אפשר לתת לגוף הפיזיקלי דחיפה קטנה כדי שישתלב מחדש
+                // setTimeout(() => {
+                //     if (clickedCardElement.body) {
+                //         Body.setVelocity(clickedCardElement.body, { x: Math.random() * 2 - 1, y: Math.random() * 2 - 1 });
+                //         Body.setAngularVelocity(clickedCardElement.body, 0); // איפוס מהירות זוויתית למקרה שהיה
+                //     }
+                // }, animationDuration);
+
+
+            } else {
+                // --- פתיחת הכרטיס שנלחץ ---
+                console.log('Opening card:', clickedCardElement.textContent.trim());
+                // סגור קודם את הכרטיס הגדול הקודם (אם קיים)
+                if (currentlyLargeCardElement) {
+                    console.log('Closing previous card:', currentlyLargeCardElement.textContent.trim());
+                    // החזרת מיקום לפני הסרת הקלאס
+                     if (currentlyLargeCardElement.body) {
+                         const currentBodyPos = currentlyLargeCardElement.body.position;
+                         currentlyLargeCardElement.style.left = `${currentBodyPos.x - currentlyLargeCardElement.offsetWidth / 2}px`;
+                         currentlyLargeCardElement.style.top = `${currentBodyPos.y - currentlyLargeCardElement.offsetHeight / 2}px`;
+                         currentlyLargeCardElement.style.transform = 'translate(0, 0)';
+                     }
+
+                    currentlyLargeCardElement.classList.remove('large');
+                    currentlyLargeCardElement.isLarge = false;
+                }
+
+                // פתח את הכרטיס החדש
+                clickedCardElement.classList.add('large');
+                clickedCardElement.isLarge = true;
+                currentlyLargeCardElement = clickedCardElement;
+
+                // אין צורך לגעת בגוף הפיזיקלי שלו ישירות,
+                // לולאת העדכון פשוט תתעלם ממנו בגלל הדגל isLarge.
+            }
+        }
+
+        // --- פונקציות עזר (קירות וסנכרון) ---
         let leftWall, rightWall;
         const wallThickness = 100;
         const wallOptions = { isStatic: true, render: { visible: false } };
 
         function updateWalls() {
-             containerRect = container.getBoundingClientRect();
+             let containerRect = container.getBoundingClientRect();
              const wallHeight = containerRect.height * 1.1;
-
-             // הסר קירות קודמים מהעולם הפיזיקלי אם הוא כבר אותחל
-             if (world && leftWall) {
-                 Composite.remove(world, [leftWall, rightWall]);
-             }
-
+             if (world && leftWall) Composite.remove(world, [leftWall, rightWall]);
              leftWall = Bodies.rectangle(-wallThickness / 2, containerRect.height / 2, wallThickness, wallHeight, wallOptions);
              rightWall = Bodies.rectangle(containerRect.width + wallThickness / 2, containerRect.height / 2, wallThickness, wallHeight, wallOptions);
-
-              // הוסף קירות לעולם הפיזיקלי אם הוא כבר אותחל
-             if (world) {
-                Composite.add(world, [leftWall, rightWall]);
-             }
+             if (world) Composite.add(world, [leftWall, rightWall]);
         }
 
         function syncPositions() {
-            if (!physicsInitialized) return;
-             cardBodies.forEach(body => {
+            cardBodies.forEach(body => {
                 const element = body.element;
-                if (element) {
+                // עדכן רק אם האלמנט קיים ואינו במצב "גדול"
+                if (element && !element.isLarge) {
                     element.style.left = `${body.position.x - element.offsetWidth / 2}px`;
                     element.style.top = `${body.position.y - element.offsetHeight / 2}px`;
-                    // אין עדכון סיבוב
+                    // אין עדכון סיבוב כי מנענו אותו
                 }
             });
         }
 
+         // עדכון קירות בשינוי גודל חלון
+         window.addEventListener('resize', updateWalls);
 
-         // עדכון בשינוי גודל חלון
-         window.addEventListener('resize', () => {
-             // עדכן קירות פיזיקליים
-             updateWalls();
-
-             if (physicsInitialized) {
-                 // עדכן גודל וקנה מידה של גופים פיזיקליים קיימים
-                 cardBodies.forEach(body => {
-                     const element = body.element;
-                     const newCardHeight = window.innerHeight * 0.95;
-                     const newCardWidth = containerRect.width; // כבר עודכן מ-updateWalls
-
-                     element.style.height = `${newCardHeight}px`; // עדכן גם CSS
-
-                     const currentWidth = body.bounds.max.x - body.bounds.min.x;
-                     const currentHeight = body.bounds.max.y - body.bounds.min.y;
-
-                     // מנע חלוקה באפס אם הגוף לא נוצר כראוי
-                     if (currentWidth > 0 && currentHeight > 0) {
-                        const scaleX = newCardWidth / currentWidth;
-                        const scaleY = newCardHeight / currentHeight;
-                        Body.scale(body, scaleX, scaleY);
-                     }
-                 });
-             }
-         });
     });
 </script>
 
