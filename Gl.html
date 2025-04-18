@@ -3,11 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>גלריה פיזיקלית לעבודות</title>
+    <title>גלריה פיזיקלית - צינור כרטיסיות</title>
     <style>
         body {
             margin: 0;
-            overflow: hidden; /* מונע גלילה אם רוצים שהסימולציה תמלא את כל החלון */
+            overflow: hidden;
             background-color: #f0f0f0;
             display: flex;
             justify-content: center;
@@ -16,49 +16,51 @@
         }
 
         #physics-container {
-            width: 90%; /* רוחב אזור הסימולציה */
-            max-width: 800px; /* רוחב מקסימלי */
-            height: 80vh; /* גובה אזור הסימולציה */
-            position: relative; /* חשוב למיקום האלמנטים הפנימיים */
+             /* --- שינוי: קונטיינר צר יותר --- */
+            width: 350px; /* רוחב ה"צינור" */
+            max-width: 90%; /* מגבלה רספונסיבית */
+            height: 85vh; /* גובה מספיק לערימה */
+            position: relative;
             border: 1px solid #ccc;
-            background-color: #fff;
-            overflow: hidden; /* חשוב כדי שהאלמנטים לא "יברחו" ויזואלית */
+            background-color: #e9e9e9; /* שינוי רקע קל */
+            overflow: hidden;
         }
 
         .work-card {
-            position: absolute; /* הכרחי! המיקום ייקבע ע"י JavaScript */
-            background-color: #007bff;
+            position: absolute;
+            background-color: #3498db; /* צבע שונה לדוגמה */
             color: white;
-            padding: 15px;
-            border-radius: 8px;
-            box-shadow: 2px 2px 5px rgba(0,0,0,0.2);
+            padding: 10px; /* פדינג קטן יותר */
+            border-radius: 5px; /* עיגול פינות קטן */
+            box-shadow: 1px 1px 4px rgba(0,0,0,0.2);
             cursor: grab;
             display: flex;
             flex-direction: column;
             align-items: center;
-            justify-content: center;
+            justify-content: space-around; /* פיזור התוכן */
             text-align: center;
-            /* גודל הכרטיס - ניתן להתאים */
-            width: 100px;
-            height: 120px;
-            /* חשוב לביצועים ולחישוב מיקום מ-Matter.js */
+             /* --- שינוי: כרטיס רחב וגבוה --- */
+            width: 95%; /* כמעט מלא רוחב הקונטיינר */
+            height: 180px; /* גובה משמעותי לכרטיסיה גדולה */
             box-sizing: border-box;
             will-change: transform, top, left;
-             /* מניעת בחירת טקסט בגרירה */
             user-select: none;
             -webkit-user-select: none;
             -moz-user-select: none;
             -ms-user-select: none;
+            /* חשוב שה-HTML יקבל את הרוחב כמעט מלא */
+            left: 2.5%; /* ממקם במרכז (בערך) אם הרוחב הוא 95% */
         }
 
         .work-card img {
             max-width: 80%;
+            max-height: 70%; /* מגביל גובה תמונה */
             height: auto;
             margin-bottom: 5px;
-            pointer-events: none; /* למנוע אירועי גרירה של התמונה */
+            pointer-events: none;
         }
         .work-card span {
-             font-size: 0.9em;
+             font-size: 1em; /* גופן מעט גדול יותר */
              pointer-events: none;
         }
 
@@ -68,26 +70,19 @@
 
 <div id="physics-container">
     <div class="work-card">
-        <img src="placeholder.png" alt="עבודה 1"> <span>עבודה 1</span>
+        <img src="placeholder.png" alt="עבודה 1">
+        <span>עבודה ראשונה</span>
     </div>
     <div class="work-card">
         <img src="placeholder.png" alt="עבודה 2">
-        <span>עבודה 2</span>
+        <span>העבודה השנייה</span>
     </div>
     <div class="work-card">
         <img src="placeholder.png" alt="עבודה 3">
-        <span>עבודה 3</span>
+        <span>פרויקט גמר</span>
     </div>
     <div class="work-card">
-       <span>טקסט בלבד</span>
-    </div>
-     <div class="work-card">
-        <img src="placeholder.png" alt="עבודה 5">
-        <span>עבודה 5</span>
-    </div>
-      <div class="work-card">
-        <img src="placeholder.png" alt="עבודה 6">
-        <span>עבודה 6</span>
+       <span>כרטיס טקסט בלבד</span>
     </div>
      </div>
 
@@ -95,112 +90,118 @@
 
 <script>
     document.addEventListener('DOMContentLoaded', () => {
-        // קיצורים מ-Matter.js
         const Engine = Matter.Engine;
-        const Render = Matter.Render; // לא נשתמש ברנדר מובנה, אלא נזיז HTML
         const Runner = Matter.Runner;
         const Bodies = Matter.Bodies;
         const Composite = Matter.Composite;
-        const World = Matter.World; // שימוש ב-Composite.add במקום World.add
         const Mouse = Matter.Mouse;
         const MouseConstraint = Matter.MouseConstraint;
         const Events = Matter.Events;
 
-        // קבלת האלמנטים
         const container = document.getElementById('physics-container');
-        const containerRect = container.getBoundingClientRect();
+        // חשוב לקבל מידות אחרי שה-CSS הוחל
+        let containerRect = container.getBoundingClientRect();
         const cards = Array.from(container.querySelectorAll('.work-card'));
 
-        // יצירת מנוע פיזיקלי
         const engine = Engine.create();
         const world = engine.world;
-        engine.world.gravity.y = 0.8; // עוצמת הכבידה (ניתן לשחק עם הערך)
+         // --- שינוי: אפשר להפחית מעט כבידה לאפקט "רך" יותר ---
+        engine.world.gravity.y = 0.7;
 
-        // יצירת גבולות סטטיים (רצפה, תקרה, קירות) - חשוב שיהיו קצת מחוץ לגבולות הנראים
+        // --- שינוי: עדכון מיקום ורוחב הגבולות ---
+        const wallThickness = 60; // עובי הקירות (מחוץ למסך)
         const wallOptions = {
             isStatic: true,
-            render: { visible: false } // לא נרצה לראות את הקירות
+            render: { visible: false }
         };
-        const ground = Bodies.rectangle(containerRect.width / 2, containerRect.height + 30, containerRect.width, 60, wallOptions); // רצפה
-        const ceiling = Bodies.rectangle(containerRect.width / 2, -30, containerRect.width, 60, wallOptions); // תקרה
-        const leftWall = Bodies.rectangle(-30, containerRect.height / 2, 60, containerRect.height, wallOptions); // קיר שמאלי
-        const rightWall = Bodies.rectangle(containerRect.width + 30, containerRect.height / 2, 60, containerRect.height, wallOptions); // קיר ימני
 
-        Composite.add(world, [ground, ceiling, leftWall, rightWall]);
+        let ground, ceiling, leftWall, rightWall;
 
-        // יצירת גופים פיזיקליים עבור כל כרטיסיה
-        const cardBodies = cards.map(card => {
-            const cardRect = card.getBoundingClientRect(); // קבל מידות HTML
-            const cardWidth = card.offsetWidth; // שימוש ב-offsetWidth/Height עדיף כאן
+        function updateWalls() {
+            containerRect = container.getBoundingClientRect(); // עדכן מידות
+             // הסר קירות קודמים אם קיימים (למקרה של resize)
+            if (ground) Composite.remove(world, [ground, ceiling, leftWall, rightWall]);
+
+            ground = Bodies.rectangle(containerRect.width / 2, containerRect.height + wallThickness / 2, containerRect.width, wallThickness, wallOptions);
+            ceiling = Bodies.rectangle(containerRect.width / 2, -wallThickness / 2, containerRect.width, wallThickness, wallOptions);
+            // קירות צמודים יותר ליצירת "צינור"
+            leftWall = Bodies.rectangle(-wallThickness / 2, containerRect.height / 2, wallThickness, containerRect.height, wallOptions);
+            rightWall = Bodies.rectangle(containerRect.width + wallThickness / 2, containerRect.height / 2, wallThickness, containerRect.height, wallOptions);
+
+            Composite.add(world, [ground, ceiling, leftWall, rightWall]);
+        }
+
+        updateWalls(); // קריאה ראשונית ליצירת הקירות
+
+        // --- שינוי: מיקום התחלתי בערימה ---
+        const stackStartX = containerRect.width / 2; // מרכז אופקי
+        const stackStartY = 30; // התחל קצת מתחת לקצה העליון
+        const cardSpacing = 8; // מרווח קטן בין הכרטיסיות בערימה ההתחלתית
+
+        const cardBodies = cards.map((card, index) => {
+            // חשוב לקחת מידות אחרי שה-CSS נטען
+            const cardWidth = card.offsetWidth;
             const cardHeight = card.offsetHeight;
 
-            // מיקום התחלתי אקראי בתוך הקונטיינר
-             const initialX = Math.random() * (containerRect.width - cardWidth) + cardWidth / 2;
-             const initialY = Math.random() * (containerRect.height / 2) + cardHeight / 2; // בחצי העליון כדי שייפלו
+            // מיקום התחלתי: מרכז אופקי, ערימה אנכית מהחלק העליון
+            const initialX = stackStartX + (Math.random() * 4 - 2); // הטיה אופקית קטנה למניעת ערימה "מושלמת"
+            const initialY = stackStartY + index * (cardHeight + cardSpacing) + cardHeight / 2;
 
+            const body = Bodies.rectangle(
+                initialX,
+                initialY,
+                cardWidth * 0.98, // גוף פיזי מעט יותר צר מה-HTML למניעת הידבקות לקיר
+                cardHeight,
+                {
+                     // --- שינוי: התאמת פרמטרים לערימה ---
+                    restitution: 0.2, // פחות קפיציות
+                    friction: 0.4,    // יותר חיכוך (עוזר ליציבות ערימה)
+                    frictionAir: 0.03, // מעט יותר חיכוך אוויר
+                    density: 0.0015   // אפשר להגדיל מעט צפיפות
+                }
+            );
 
-            const body = Bodies.rectangle(initialX, initialY, cardWidth, cardHeight, {
-                restitution: 0.6, // מידת הקפיציות (0 עד 1)
-                friction: 0.1,    // חיכוך אוויר/משטח
-                frictionAir: 0.02, // חיכוך אוויר כללי
-                density: 0.001    // צפיפות (משפיע על המסה)
-            });
-
-            // קישור בין גוף הפיזיקה לאלמנט ה-HTML
             body.element = card;
-            card.body = body; // אפשר גם הפוך אם נוח
-
+            card.body = body;
             return body;
         });
 
         Composite.add(world, cardBodies);
 
-        // הוספת שליטה עם העכבר (אופציונלי - לגרירת הכרטיסיות)
-        const mouse = Mouse.create(container); // יצירת עכבר יחסית לקונטיינר
+        // הוספת שליטה עם העכבר
+        const mouse = Mouse.create(container);
         const mouseConstraint = MouseConstraint.create(engine, {
             mouse: mouse,
             constraint: {
-                stiffness: 0.2, // כמה קשיח החיבור לעכבר
-                render: {
-                    visible: false // לא להציג את הקו לעכבר
-                }
+                stiffness: 0.2,
+                render: { visible: false }
             }
         });
         Composite.add(world, mouseConstraint);
 
-
-        // לולאת עדכון לסינכרון ה-HTML עם הפיזיקה
+        // לולאת עדכון לסינכרון ה-HTML
         Events.on(engine, 'afterUpdate', () => {
             cardBodies.forEach(body => {
                 const element = body.element;
                 if (element) {
-                    // מיקום מרכז האלמנט לפי מרכז הגוף הפיזיקלי
-                    element.style.left = `${body.position.x - element.offsetWidth / 2}px`;
+                    // ה-CSS כבר ממקם את ה-left: 2.5%, אז נשלוט רק ב-top ובסיבוב
                     element.style.top = `${body.position.y - element.offsetHeight / 2}px`;
-                    // סיבוב האלמנט
+                     // עדכון ה-left חשוב כי הפיזיקה מחשבת אותו מהמרכז
+                    element.style.left = `${body.position.x - element.offsetWidth / 2}px`;
                     element.style.transform = `rotate(${body.angle}rad)`;
                 }
             });
         });
 
-
-        // יצירת והרצת ה-Runner
         const runner = Runner.create();
         Runner.run(runner, engine);
 
-         // עדכון גבולות בחלון שינוי גודל (בסיסי)
+         // עדכון גבולות בחלון שינוי גודל
          window.addEventListener('resize', () => {
-             const newRect = container.getBoundingClientRect();
-             // עדכון פשוט - מיקום מחדש של הגבולות (יכול לדרוש התאמות נוספות)
-             Matter.Body.setPosition(ground, { x: newRect.width / 2, y: newRect.height + 30 });
-             Matter.Body.setPosition(ceiling, { x: newRect.width / 2, y: -30 });
-             Matter.Body.setPosition(leftWall, { x: -30, y: newRect.height / 2 });
-             Matter.Body.setPosition(rightWall, { x: newRect.width + 30, y: newRect.height / 2 });
-
-             // ייתכן שצריך גם לעדכן את קנה המידה של ה-renderer אם משתמשים בו,
-             // או למקם מחדש גופים דינמיים אם ההתנהגות משתבשת.
+             updateWalls(); // קורא לפונקציה שמעדכנת מידות וממקמת קירות מחדש
+             // ייתכן שיהיה צורך גם לעדכן מיקומי גופים דינמיים או קנה מידה,
+             // אך לרוב עדכון הקירות מספיק להתנהגות סבירה.
          });
-
     });
 </script>
 
