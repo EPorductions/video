@@ -6,7 +6,8 @@
   <title>חוזה שירותים ומחשבון ריטיינר</title>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" />
   <style>
-    /* Global Styles & Variables */
+    @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap');
+
     :root {
       --primary-color: #4a90e2; /* MindFly Blue */
       --secondary-color: #34495e;
@@ -19,191 +20,72 @@
       --shadow-light: rgba(0,0,0,0.08);
       --shadow-medium: rgba(0,0,0,0.1);
     }
-    @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap'); /* Import Roboto font */
-    body {
-      margin: 0; padding: 15px;
-      font-family: 'Roboto', Arial, sans-serif;
-      background-color: var(--body-bg);
-      color: var(--text-color);
-      line-height: 1.6;
-    }
-    .container {
-      max-width: 800px;
-      margin: 15px auto;
-    }
-    h1, h2 {
-      text-align: center;
-      color: var(--secondary-color);
-      font-weight: 500;
-       margin-bottom: 25px;
-    }
-     h1 { font-size: 1.8em; }
-     h2 { font-size: 1.5em; margin-top: 30px; padding-bottom: 10px; border-bottom: 1px solid var(--border-color); }
-     h3 {
-        color: var(--primary-color);
-        font-size: 1.2em;
-        font-weight: 500;
-        margin-top: 20px;
-        margin-bottom: 10px;
-        padding-bottom: 5px;
-        border-bottom: 1px dotted #ccc;
-     }
+
+    body { font-family: 'Roboto', Arial, sans-serif; margin:0; padding:20px; background:var(--body-bg); color:var(--text-color); direction:rtl; line-height: 1.6; }
+    .container { max-width:800px; margin:auto; }
+    h1 { text-align:center; margin-bottom:20px; color: var(--secondary-color); font-weight: 500; font-size: 1.8em; }
+    h2 { text-align:center; color: var(--primary-color); margin-bottom:20px; font-size:1.5em; font-weight: 500; padding-bottom: 10px; border-bottom: 1px solid var(--border-color); margin-top: 30px;}
 
     /* Interactive Calculator Styles */
-    .calculator-section {
-        margin-bottom: 30px;
-    }
-    .controls {
-      background-color: var(--card-bg);
-      padding: 20px;
-      border-radius: 8px;
-      box-shadow: 0 2px 5px var(--shadow-light);
-      margin-bottom: 25px;
-      border: 1px solid var(--border-color);
-    }
-    .controls h3 {
-      margin-top: 0; margin-bottom: 15px;
-      font-size: 1.3em; color: var(--primary-color);
-      text-align: center;
-      border-bottom: 1px solid var(--border-color);
-      padding-bottom: 10px;
-    }
-    .slider-grid {
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-        gap: 20px;
-    }
-    .slider-group label {
-      display: block; font-weight: 500;
-      margin-bottom: 8px; text-align: right;
-      font-size: 0.95em; color: var(--secondary-color);
-    }
-    .slider-group input[type=range] {
-      width: 100%;
-      cursor: pointer;
-    }
-    .slider-value-display {
-      text-align: center; margin-top: 5px;
-      font-size: 0.9em; color: var(--primary-color);
-      font-weight: 500;
-      background-color: #f8f9fa;
-      padding: 3px 0;
-      border-radius: 4px;
-    }
-    .results-cards {
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); /* Adjust minmax for card size */
-        gap: 15px;
-     }
-     .result-card {
-        background: var(--card-bg); border-radius: 8px;
-        padding: 15px; text-align: center;
-        box-shadow: 0 2px 6px var(--shadow-light);
-        border: 1px solid var(--border-color);
-        transition: transform 0.2s ease;
-     }
-     .result-card:hover {
-         transform: translateY(-2px);
-     }
-     .result-card .icon {
-        font-size: 1.6em; padding: 8px; border-radius: 50%; margin-bottom: 8px; display:inline-block;
-     }
-     .result-card .title {
-        font-size: 0.90em; /* Slightly smaller title */
-        margin-bottom: 5px; font-weight: 500; color: var(--muted-color);
-        height: 2.7em; /* Ensure consistent height */
-        overflow: hidden;
-     }
-     .result-card .value {
-        font-size: 1.4em; font-weight: bold; color: var(--primary-color);
-     }
-      .icon-rate-work{background:rgba(23,162,184,0.1);color:#17a2b8;}
-      .icon-rate-travel{background:rgba(255,193,7,0.1);color:#ffc107;}
-      .icon-comp-total{background:rgba(108,117,125,0.1);color:#6c757d;}
-      .icon-ops-expense{background:rgba(220,53,69,0.1);color:#dc3545;}
-      .icon-retainer{background:rgba(0,123,255,0.1);color:#007bff;}
-      .icon-days{background:rgba(253, 126, 20, 0.1); color: #fd7e14;} /* Orange for days */
-      .warning {
-         grid-column: 1 / -1; /* Span across all columns */
-         color: #856404;
-         background-color: #fff3cd;
-         border: 1px solid #ffeeba;
-         padding: 10px;
-         border-radius: 4px;
-         font-size: 0.9em;
-         margin-top: 10px;
-         text-align: center;
-     }
+    .rtl-interactive { margin-bottom: 40px; }
+    .controls { background:#fff; border:1px solid var(--border-color); border-radius:8px; box-shadow: 0 2px 5px var(--shadow-light); padding: 15px; margin-bottom: 20px; }
+    details.slider-detail { border-bottom:1px solid var(--border-color); margin-bottom:10px; padding-bottom: 10px; background: none; box-shadow: none; border: none; border-radius: 0;}
+    details.slider-detail:last-child { border-bottom: none; margin-bottom: 0; padding-bottom: 0;}
+    summary.slider-summary { padding:10px 0; cursor:pointer; display:flex; justify-content:space-between; font-weight:bold; list-style: none; /* Remove default marker */ }
+    summary.slider-summary::after { content:'\f078'; font-family: 'Font Awesome 6 Free'; font-weight: 900; margin-right: 10px; transition: transform 0.3s ease; }
+    details.slider-detail[open] summary.slider-summary::after { transform: rotate(-180deg); }
+    .slider-group { padding:10px 0 0 0; }
+    .slider-group label { display:block; margin-bottom:8px; font-size:1.0em; color: var(--secondary-color); }
+    .slider-group input[type=range] { width:100%; height:8px; -webkit-appearance:none; background:#ddd; border-radius:4px; cursor:pointer; margin-bottom: 8px;}
+    .slider-group input[type=range]::-webkit-slider-thumb { -webkit-appearance:none; width:20px; height:20px; border-radius:50%; background:var(--primary-color); cursor:pointer; }
+    .slider-group input[type=number] { width: 100%; padding: 8px; border: 1px solid var(--border-color); border-radius: 4px; font-size: 1em; margin-bottom: 8px; box-sizing: border-box; }
+    .slider-value-display { text-align:center; font-size:1em; color:var(--primary-color); font-weight: 500; margin-bottom:8px; }
+    .slider-note { font-size:0.9em; color:var(--muted-color); margin-top: 5px; text-align: right;}
+
+    .cards { display:grid; grid-template-columns:repeat(auto-fit,minmax(180px,1fr)); gap:15px; margin:15px 0; }
+    .card { background:#fff; border-radius:8px; padding:15px; text-align:center; box-shadow:0 2px 6px var(--shadow-light); border: 1px solid var(--border-color); position:relative; }
+    .card-icon { font-size:1.6em; padding:8px; border-radius:50%; margin-bottom:8px; display:inline-block; }
+    .card-title{font-size:0.95em; margin-bottom:5px; font-weight:bold; color: var(--muted-color); height: 2.8em; overflow: hidden;}
+    .card-value{font-size:1.5em; font-weight:bold; color: var(--primary-color); }
+    .card-value[contenteditable="true"] { border-bottom:1px dashed #aaa; padding:2px 5px; background-color: #f8f9fa; cursor: text;}
+    .icon-rate-work{background:rgba(23,162,184,0.1);color:#17a2b8;} .icon-rate-travel{background:rgba(255,193,7,0.1);color:#ffc107;}
+    .icon-sum-work{background:rgba(40,167,69,0.1);color:#28a745;} .icon-sum-travel{background:rgba(0,123,255,0.1);color:#007bff;}
+    .icon-ops-expense{background:rgba(220,53,69,0.1);color:#dc3545;} .icon-comp-total{background:rgba(108,117,125,0.1);color:#6c757d;} .icon-retainer{background:rgba(0,123,255,0.1);color:#007bff;}
+    .icon-hours{background:rgba(255,87,34,0.1);color:#ff5722;}
 
     /* Collapsible Contract Section Styles */
-    details.contract-section {
-      background: var(--card-bg);
-      border-radius: 8px;
-      margin-bottom: 15px;
-      box-shadow: 0 2px 5px var(--shadow-light);
-      border: 1px solid var(--border-color);
-      overflow: hidden;
-    }
-    summary.contract-header {
-      padding: 15px 20px;
-      font-weight: 500;
-      cursor: pointer;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      background-color: var(--secondary-color); /* Darker header for contract */
-      color: white;
-      font-size: 1.2rem;
-      transition: background-color 0.2s ease;
-    }
-     summary.contract-header:hover {
-        background-color: #2c3e50;
-    }
+    details.contract-section { background: var(--card-bg); border-radius: 8px; margin-bottom: 15px; box-shadow: 0 2px 5px var(--shadow-light); border: 1px solid var(--border-color); overflow: hidden; }
+    summary.contract-header { padding: 15px 20px; font-weight: 500; cursor: pointer; display: flex; justify-content: space-between; align-items: center; background-color: var(--secondary-color); color: white; font-size: 1.2rem; list-style: none; /* Remove default marker */ }
     summary.contract-header::-webkit-details-marker { display: none; }
-    summary.contract-header::after {
-      content: '\f078'; /* FontAwesome down arrow */
-      font-family: 'Font Awesome 6 Free';
-      font-weight: 900;
-      float: left;
-      margin-left: 10px;
-      transition: transform 0.3s ease;
-      font-size: 0.9em;
-    }
-    details.contract-section[open] summary.contract-header::after {
-      transform: rotate(-180deg);
-    }
-    .contract-content {
-      padding: 25px; /* More padding for contract text */
-      border-top: 1px solid var(--border-color);
-       direction: ltr; /* Keep contract text LTR */
-       text-align: left;
-    }
+    summary.contract-header::after { content:'\f078'; font-family: 'Font Awesome 6 Free'; font-weight: 900; margin-right: auto; /* Push arrow to the left for LTR text inside */ padding-left: 10px; transition: transform 0.3s ease; font-size: 0.9em; }
+    details.contract-section[open] summary.contract-header::after { transform: rotate(-180deg); }
+    .contract-content { padding: 25px; border-top: 1px solid var(--border-color); direction: ltr; text-align: left; }
     .contract-content p { margin-bottom: 1em; }
-     .contract-content h3 { color: var(--primary-color); font-size: 1.15em; border-bottom: 1px solid #eee; padding-bottom: 5px; margin-top: 20px; }
-     .contract-content ul { padding-left: 25px; list-style: disc; }
-     .contract-content li { margin-bottom: 10px; }
-     .contract-content table { width: 100%; font-size: 0.95em; margin: 20px 0; }
-     .contract-content th, .contract-content td { border: 1px solid #ddd; padding: 10px 12px; vertical-align: top; }
-     .contract-content th { background-color: #f8f9fa; font-weight: bold; color: #555; }
-     .contract-content .totalRow td { font-weight: bold; background-color: #f8f9fa; }
-     .contract-content .highlight { background-color: #fff3cd; padding: 2px 5px; font-weight: bold; border-radius: 3px; color: #856404; }
-     .contract-content .calculationNote { font-style: italic; color: #6c757d; margin-top: 8px; font-size: 0.9em; }
-     .contract-content .expenseResponsibility { margin-top: 15px; padding: 15px; border: 1px solid #e8e8e8; background-color: #fafafa; border-radius: 5px; }
-     .contract-content .expenseResponsibility strong { display: block; margin-bottom: 8px; color: #34495e; font-weight: 500; }
-     .contract-content .expenseBreakdownTable { width: auto; max-width: 450px; margin-top: 10px; font-size: 0.9em; }
-     .contract-content .expenseBreakdownTable th, .contract-content .expenseBreakdownTable td { padding: 8px; text-align: left; }
-     .contract-content .expenseBreakdownTable td:last-child { text-align: right; font-weight: bold; }
-      .contract-content .signatureSection { margin-top: 30px; padding-top: 20px; border-top: 1px solid #eee; }
-       .contract-content .signatureSection p { margin-bottom: 15px; }
-       .contract-content .signaturePlaceholder { display: inline-block; width: 200px; border-bottom: 1px solid #555; margin: 30px 0 5px 0; }
-       .footer { text-align: center; padding: 20px; font-size: 0.85em; color: #777; }
+    .contract-content h3 { color: var(--primary-color); font-size: 1.15em; border-bottom: 1px solid #eee; padding-bottom: 5px; margin-top: 20px; }
+    .contract-content ul { padding-left: 25px; list-style: disc; }
+    .contract-content li { margin-bottom: 10px; }
+    .contract-content table { width: 100%; font-size: 0.95em; margin: 20px 0; border-collapse: collapse; }
+    .contract-content th, .contract-content td { border: 1px solid #ddd; padding: 10px 12px; vertical-align: top; }
+    .contract-content th { background-color: #f8f9fa; font-weight: bold; color: #555; }
+    .contract-content .totalRow td { font-weight: bold; background-color: #f8f9fa; }
+    .contract-content .highlight { background-color: #fff3cd; padding: 2px 5px; font-weight: bold; border-radius: 3px; color: #856404; }
+    .contract-content .calculationNote { font-style: italic; color: #6c757d; margin-top: 8px; font-size: 0.9em; }
+    .contract-content .expenseResponsibility { margin-top: 15px; padding: 15px; border: 1px solid #e8e8e8; background-color: #fafafa; border-radius: 5px; }
+    .contract-content .expenseResponsibility strong { display: block; margin-bottom: 8px; color: #34495e; font-weight: 500; }
+    .contract-content .expenseBreakdownTable { width: auto; max-width: 450px; margin-top: 10px; font-size: 0.9em; }
+    .contract-content .expenseBreakdownTable th, .contract-content .expenseBreakdownTable td { padding: 8px; text-align: left; }
+    .contract-content .expenseBreakdownTable td:last-child { text-align: right; font-weight: bold; }
+    .contract-content .signatureSection { margin-top: 30px; padding-top: 20px; border-top: 1px solid #eee; }
+    .contract-content .signaturePlaceholder { display: inline-block; width: 200px; border-bottom: 1px solid #555; margin: 30px 0 5px 0; }
+    .footer { text-align: center; padding: 20px; font-size: 0.85em; color: #777; }
 
      /* Responsive adjustments */
      @media (max-width: 600px) {
          body { padding: 10px 5px; }
          h1 { font-size: 1.5em; }
-         .controls h3 { font-size: 1.2em; }
-         .results-cards { grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 10px; } /* Smaller cards */
+         .controls h3, h2 { font-size: 1.2em; }
+         .slider-grid { grid-template-columns: 1fr; }
+         .cards { grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 10px; }
          .result-card { padding: 10px; }
          .result-card .icon { font-size: 1.4em; margin-bottom: 5px; }
          .result-card .title { font-size: 0.8em; height: 2.4em; margin-bottom: 3px;}
@@ -211,83 +93,73 @@
          summary.contract-header { font-size: 1.1rem; padding: 12px 15px; }
          .contract-content { padding: 15px; }
          .contract-content table { font-size: 0.9em; }
-          .contract-content h3 { font-size: 1.05em;}
+         .contract-content h3 { font-size: 1.05em;}
      }
-
   </style>
 </head>
 <body>
-
 <div class="container">
-  <h1><i class="fas fa-file-signature" style="color: var(--primary-color);"></i> הסכם שירותים ומחשבון ריטיינר</h1>
+  <h1><i class="fas fa-calculator" style="color: var(--primary-color);"></i> <i class="fas fa-file-contract" style="color: var(--secondary-color);"></i> הסכם שירותים ומחשבון ריטיינר</h1>
 
-  <div class="calculator-section">
-      <div class="controls">
-          <h3><i class="fas fa-sliders-h"></i> מחשבון ריטיינר (לסימולציה)</h3>
-          <div class="slider-grid">
-              <div class="slider-group">
-                <label for="targetRetainer">ריטיינר חודשי כולל ($):</label>
-                <input type="range" id="targetRetainer" min="7000" max="12000" step="10" value="8649.06" />
-                <div class="slider-value-display" id="targetRetainerDisplay">$8,649.06</div>
-              </div>
-              <div class="slider-group">
-                <label for="totalDays">סה"כ ימי פעילות בחודש:</label>
-                <input type="range" id="totalDays" min="18" max="24" step="1" value="21" />
-                <div class="slider-value-display" id="totalDaysDisplay">21 ימים</div>
-              </div>
-              <div class="slider-group">
-                <label for="workDays">מתוכם ימי עבודה (משחק/סט-אפ):</label>
-                <input type="range" id="workDays" min="8" max="12" step="1" value="10" />
-                <div class="slider-value-display" id="workDaysDisplay">10 ימים</div>
-              </div>
-              <div class="slider-group">
-                 <label for="opsExpenseRate">הוצאה יומית ממוצעת (בימי נסיעות) ($):</label>
-                 <input type="range" id="opsExpenseRate" min="180" max="250" step="5" value="205" />
-                 <div class="slider-value-display" id="opsExpenseRateDisplay">$205.00</div>
-               </div>
-           </div>
-            <p class="calculationNote" style="text-align: center; margin-top: 15px;">שנו את הערכים למעלה כדי לראות איך התעריפים והסכומים משתנים בכרטיסיות למטה.</p>
-      </div>
-
-      <div class="results-cards">
-            <div class="result-card">
-                <div class="icon icon-retainer"><i class="fas fa-wallet"></i></div>
-                <div class="title">ריטיינר חודשי כולל</div>
-                <div class="value" id="resultRetainerValue">$8,649.06</div>
-            </div>
-             <div class="result-card">
-                <div class="icon icon-comp-total"><i class="fas fa-hand-holding-usd"></i></div>
-                <div class="title">סה"כ רכיב תמורה לעבודה</div>
-                <div class="value" id="resultCompTotalValue">$6,394.06</div>
-            </div>
-             <div class="result-card">
-                <div class="icon icon-ops-expense"><i class="fas fa-file-invoice-dollar"></i></div>
-                <div class="title">סה"כ רכיב הוצאות</div>
-                <div class="value" id="resultExpenseTotalValue">$2,255.00</div>
-            </div>
-            <div class="result-card">
-                <div class="icon icon-rate-work"><i class="fas fa-tags"></i></div>
-                <div class="title">תעריף יומי (עבודה)</div>
-                <div class="value" id="resultRateWorkValue">$356.86</div>
-            </div>
-            <div class="result-card">
-                <div class="icon icon-rate-travel"><i class="fas fa-tags"></i></div>
-                <div class="title">תעריף יומי (נסיעה)</div>
-                <div class="value" id="resultRateTravelValue">$256.86</div>
-            </div>
-             <div class="result-card">
-                <div class="icon icon-days"><i class="fas fa-calendar-alt"></i></div>
-                <div class="title">ימי נסיעה/הכנה</div>
-                <div class="value" id="resultTravelDaysValue">11</div>
-            </div>
-             <div class="warning" id="warningMessage" style="display: none;"></div>
-      </div>
+  <div class="rtl-interactive">
+    <h2><i class="fas fa-sliders-h"></i> מחשבון ריטיינר (לסימולציה)</h2>
+    <p style="text-align:center; font-size: 0.9em; color: var(--muted-color); margin-bottom: 20px;">השתמשו בסליידרים או בשדות המספרים כדי לבדוק תרחישים שונים.</p>
+    <div class="controls">
+      <details class="slider-detail" open>
+        <summary class="slider-summary">ריטיינר: <span id="retainerSum">$8,649.06</span></summary>
+        <div class="slider-group">
+          <label for="retainer">ריטיינר חודשי כולל ($):</label>
+          <input id="retainer" type="range" min="7000" max="12000" step="10" value="8649.06" />
+          <div id="retainerDisplay" class="slider-value-display">$8,649.06</div>
+          <label for="retainerInput">או הזן ידנית:</label>
+          <input id="retainerInput" type="number" step="0.01" value="8649.06" />
+        </div>
+      </details>
+      <details class="slider-detail">
+        <summary class="slider-summary">ימי עבודה: <span id="workSum">10 ימים</span></summary>
+        <div class="slider-group">
+          <label for="workDays">ימי עבודה/הכנה:</label>
+          <input id="workDays" type="range" min="8" max="12" step="1" value="10" />
+          <div id="workDaysDisplay" class="slider-value-display">10 ימים</div>
+           <label for="workDaysInput">או הזן ידנית:</label>
+           <input id="workDaysInput" type="number" step="1" value="10" />
+        </div>
+      </details>
+      <details class="slider-detail">
+        <summary class="slider-summary">ימי נסיעה: <span id="travelSum">11 ימים</span></summary>
+        <div class="slider-group">
+          <label for="travelDays">ימי נסיעות/הכנה:</label>
+          <input id="travelDays" type="range" min="10" max="12" step="1" value="11" />
+          <div id="travelDaysDisplay" class="slider-value-display">11 ימים</div>
+           <label for="travelDaysInput">או הזן ידנית:</label>
+           <input id="travelDaysInput" type="number" step="1" value="11" />
+        </div>
+      </details>
+      <details class="slider-detail">
+        <summary class="slider-summary">הוצאות ליום נסיעה: <span id="opsSum">$205.00</span></summary>
+        <div class="slider-group">
+          <label for="opsRate">הוצאה יומית ממוצעת (בימי נסיעות) ($):</label>
+          <input id="opsRate" type="range" min="180" max="250" step="5" value="205" />
+          <div id="opsRateDisplay" class="slider-value-display">$205.00</div>
+          <label for="opsRateInput">או הזן ידנית:</label>
+          <input id="opsRateInput" type="number" step="0.01" value="205" />
+        </div>
+      </details>
+    </div>
+    <div class="cards results-cards">
+      <div class="card"><div class="card-icon icon-retainer"><i class="fas fa-wallet"></i></div><div class="card-title">ריטיינר חודשי כולל</div><div id="retainerValue" class="card-value"></div></div>
+      <div class="card"><div class="card-icon icon-comp-total"><i class="fas fa-hand-holding-usd"></i></div><div class="card-title">סה"כ רכיב תמורה לעבודה</div><div id="compTotalValue" class="card-value"></div></div>
+      <div class="card"><div class="card-icon icon-ops-expense"><i class="fas fa-file-invoice-dollar"></i></div><div class="card-title">סה"כ רכיב הוצאות</div><div id="opsExpenseValue" class="card-value"></div></div>
+      <div class="card"><div class="card-icon icon-rate-work"><i class="fas fa-tags"></i></div><div class="card-title">תעריף יומי (עבודה)</div><div id="rateWorkValue" class="card-value"></div></div>
+      <div class="card"><div class="card-icon icon-rate-travel"><i class="fas fa-tags"></i></div><div class="card-title">תעריף יומי (נסיעה)</div><div id="rateTravelValue" class="card-value"></div></div>
+      <div class="card"><div class="card-icon icon-days"><i class="fas fa-calendar-alt"></i></div><div class="card-title">סה"כ ימי פעילות</div><div id="totalDaysValue" class="card-value"></div></div>
+    </div>
+    <div class="warning" id="warningMessage" style="display: none;"></div>
   </div>
-
 
   <h2><i class="fas fa-file-contract"></i> טיוטת הסכם שירותים (תנאים מוסכמים)</h2>
 
-   <details class="contract-section">
+  <details class="contract-section">
        <summary class="contract-header">
             <span><span class="icon">ℹ️</span> Parties & Preamble</span>
             <span>פרטים ורקע</span>
@@ -503,40 +375,56 @@
     // --- Constants ---
     const MIN_RATE_WORK = 300;
     const MIN_RATE_TRAVEL = 200;
-    const MIN_DAY_DIFF = MIN_RATE_WORK - MIN_RATE_TRAVEL; // Minimum difference to maintain
+    const MIN_DAY_DIFF = MIN_RATE_WORK - MIN_RATE_TRAVEL;
 
     // --- Elements ---
     const sliders = {
       targetRetainer: document.getElementById('targetRetainer'),
-      totalDays: document.getElementById('totalDays'),
+      totalDays: document.getElementById('totalDays'), // This slider seems removed in user's code, calculate instead
       workDays: document.getElementById('workDays'),
-      opsExpenseRate: document.getElementById('opsExpenseRate')
+      travelDays: document.getElementById('travelDays'), // Added Travel Days Slider based on user code
+      opsExpenseRate: document.getElementById('opsRate')
     };
+
+     // Add input elements from user code
+    const inputs = {
+         retainerInput: document.getElementById('retainerInput'),
+         workDaysInput: document.getElementById('workDaysInput'),
+         travelDaysInput: document.getElementById('travelDaysInput'),
+         opsRateInput: document.getElementById('opsRateInput')
+     };
 
     const displays = {
-      targetRetainer: document.getElementById('targetRetainerDisplay'),
-      totalDays: document.getElementById('totalDaysDisplay'),
+      targetRetainer: document.getElementById('retainerDisplay'),
+      // totalDays: document.getElementById('totalDaysDisplay'), // No total days slider/display in user code
       workDays: document.getElementById('workDaysDisplay'),
-      opsExpenseRate: document.getElementById('opsExpenseRateDisplay'),
-      // travelDays: document.getElementById('travelDaysDisplay') // Not used for display in controls
+      travelDays: document.getElementById('travelDaysDisplay'),
+      opsExpenseRate: document.getElementById('opsRateDisplay')
     };
 
-    const results = {
-      retainerValue: document.getElementById('resultRetainerValue'),
-      compTotalValue: document.getElementById('resultCompTotalValue'),
-      expenseTotalValue: document.getElementById('resultExpenseTotalValue'),
-      rateWorkValue: document.getElementById('resultRateWorkValue'),
-      rateTravelValue: document.getElementById('resultRateTravelValue'),
-      // totalDaysValue: document.getElementById('resultTotalDaysValue'), // Removed card
-      // workDaysValue: document.getElementById('resultWorkDaysValue'),   // Removed card
-      travelDaysValue: document.getElementById('resultTravelDaysValue'), // Kept travel days card
-      warningMessage: document.getElementById('warningMessage')
+    const summaries = { // Summary elements in collapsible headers
+        retainerSum: document.getElementById('retainerSum'),
+        workSum: document.getElementById('workSum'),
+        travelSum: document.getElementById('travelSum'),
+        opsSum: document.getElementById('opsSum')
     };
 
-    // --- Utility Functions ---
+    const results = { // Result display cards
+      retainerValue: document.getElementById('retainerValue'),
+      compTotalValue: document.getElementById('compTotalValue'),
+      expenseTotalValue: document.getElementById('opsExpenseValue'), // Matched user ID
+      rateWorkValue: document.getElementById('rateWorkValue'),
+      rateTravelValue: document.getElementById('rateTravelValue'),
+      totalDaysValue: document.getElementById('totalDaysValue'), // ID from user code for total hours? No, need a card for total days. Add one? Or display in text. Let's add card.
+      totalWorkHoursValue: document.getElementById('totalWorkHoursValue'), // Keep hours card
+      totalTravelHoursValue: document.getElementById('totalTravelHoursValue'), // Keep hours card
+      warningMessage: document.getElementById('warningMessage') // Assuming warning div exists
+    };
+
+     // --- Utility Functions ---
     function formatUSD(value) {
-        if (isNaN(value) || !isFinite(value)) return '$---.--'; // Handle invalid numbers
-      return '$' + value.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+        if (isNaN(value) || !isFinite(value)) return '$---.--';
+        return '$' + value.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
     }
 
     function formatDays(value) {
@@ -544,32 +432,80 @@
         return value + (value === 1 ? ' יום' : ' ימים');
     }
 
-    // --- Calculation Logic ---
-    function calculateAndUpdate() {
-      // Get current values
-      const R_target = parseFloat(sliders.targetRetainer.value);
-      const D_total = parseInt(sliders.totalDays.value, 10);
-      let D_work = parseInt(sliders.workDays.value, 10);
-      const E_rate_travel = parseFloat(sliders.opsExpenseRate.value);
+    // Function to parse currency string back to number
+     function parseUSD(str) {
+         return parseFloat(String(str).replace(/[^0-9.-]+/g,""));
+     }
 
-      // Validate and calculate derived values
-      if (D_work > D_total) {
-          D_work = D_total; // Cap work days at total days
-          sliders.workDays.value = D_work; // Update slider
-      }
-      const D_travel = D_total - D_work;
+    // --- Calculation Logic ---
+    function calculateAndUpdate(sourceElementId = null) {
+      // Get current values - PRIORITIZE INPUT FIELDS if they were the source
+        let R_target = (sourceElementId === 'retainerInput' || sourceElementId === 'retainerValue') ? parseUSD(inputs.retainerInput.value || results.retainerValue.textContent) : parseFloat(sliders.targetRetainer.value);
+        let D_work = (sourceElementId === 'workDaysInput') ? parseInt(inputs.workDaysInput.value, 10) : parseInt(sliders.workDays.value, 10);
+        let D_travel = (sourceElementId === 'travelDaysInput') ? parseInt(inputs.travelDaysInput.value, 10) : parseInt(sliders.travelDays.value, 10);
+        let E_rate_travel = (sourceElementId === 'opsRateInput' || sourceElementId === 'opsExpenseValue') ? parseUSD(inputs.opsRateInput.value || results.expenseTotalValue.textContent) : parseFloat(sliders.opsExpenseRate.value);
+
+        // If rates were edited directly, adjust the retainer
+        let P_work_eff_manual = null, P_travel_eff_manual = null;
+        if (sourceElementId === 'rateWorkValue' || sourceElementId === 'rateTravelValue' || sourceElementId === 'compTotalValue' || sourceElementId === 'sumWorkValue' || sourceElementId === 'sumTravelValue') {
+             // If a rate or compensation part was changed, recalculate R_target
+             P_work_eff_manual = parseUSD(results.rateWorkValue.textContent);
+             P_travel_eff_manual = parseUSD(results.rateTravelValue.textContent);
+              if(isNaN(P_work_eff_manual)) P_work_eff_manual = 0;
+              if(isNaN(P_travel_eff_manual)) P_travel_eff_manual = 0;
+
+              // Ensure minimums are met when editing directly
+              P_work_eff_manual = Math.max(MIN_RATE_WORK, P_work_eff_manual);
+              P_travel_eff_manual = Math.max(MIN_RATE_TRAVEL, P_travel_eff_manual);
+
+              const C_compensation_manual = (D_work * P_work_eff_manual) + (D_travel * P_travel_eff_manual);
+              const C_expense_total_manual = D_travel * E_rate_travel;
+              R_target = C_compensation_manual + C_expense_total_manual;
+
+               // Update retainer slider/input
+              sliders.targetRetainer.value = R_target;
+              inputs.retainerInput.value = R_target.toFixed(2);
+              displays.targetRetainer.textContent = formatUSD(R_target);
+              summaries.retainerSum.textContent = formatUSD(R_target);
+        }
+
+
+      // Validate days
+      D_work = !isNaN(D_work) ? Math.max(0, D_work) : 0;
+      D_travel = !isNaN(D_travel) ? Math.max(0, D_travel) : 0;
+      const D_total = D_work + D_travel;
+
+       // Validate expense rate
+       E_rate_travel = !isNaN(E_rate_travel) ? Math.max(0, E_rate_travel) : 0;
+
+       // Update Sliders/Inputs based on potentially validated values (unless they were the source)
+       if (sourceElementId !== 'targetRetainer' && sourceElementId !== 'retainerInput' && sourceElementId !== 'retainerValue') {
+            sliders.targetRetainer.value = R_target;
+            inputs.retainerInput.value = R_target.toFixed(2);
+       }
+        if (sourceElementId !== 'workDays' && sourceElementId !== 'workDaysInput') sliders.workDays.value = D_work;
+        if (sourceElementId !== 'travelDays' && sourceElementId !== 'travelDaysInput') sliders.travelDays.value = D_travel;
+        if (sourceElementId !== 'opsRate' && sourceElementId !== 'opsRateInput' && sourceElementId !== 'opsExpenseValue') {
+             sliders.opsExpenseRate.value = E_rate_travel;
+             inputs.opsRateInput.value = E_rate_travel.toFixed(2);
+        }
+
 
       // Update slider displays
       displays.targetRetainer.textContent = formatUSD(R_target);
-      displays.totalDays.textContent = formatDays(D_total);
       displays.workDays.textContent = formatDays(D_work);
+      displays.travelDays.textContent = formatDays(D_travel);
       displays.opsExpenseRate.textContent = formatUSD(E_rate_travel);
-      // Update the travel days result card directly
-      results.travelDaysValue.textContent = D_travel;
+
+        // Update summaries
+        summaries.retainerSum.textContent = formatUSD(R_target);
+        summaries.workSum.textContent = formatDays(D_work);
+        summaries.travelSum.textContent = formatDays(D_travel);
+        summaries.opsSum.textContent = formatUSD(E_rate_travel);
 
 
       // Calculate main components
-      const C_expense_total = D_travel > 0 ? D_travel * E_rate_travel : 0;
+      const C_expense_total = D_travel * E_rate_travel;
       const C_compensation_req = R_target - C_expense_total;
 
       let P_work_eff = 0;
@@ -581,76 +517,94 @@
       if (C_compensation_req < 0) {
           warning = "שגיאה: רכיב ההוצאות גבוה מסך הריטיינר!";
           results.warningMessage.style.display = 'block';
-          P_work_eff = 0;
-          P_travel_eff = 0;
-      } else if (D_total === 0) {
-           warning = "אנא בחר מספר ימים גדול מאפס.";
+      } else if (D_total === 0 && C_compensation_req > 0) {
+           warning = "אנא בחר מספר ימים כדי לחשב תעריפים.";
            results.warningMessage.style.display = 'block';
-           P_work_eff = 0;
-           P_travel_eff = 0;
-      }
-       else {
-          // Check if minimum compensation is possible
-          const C_compensation_min = (D_work * MIN_RATE_WORK) + (D_travel * MIN_RATE_TRAVEL);
+      } else if (D_total > 0) {
+            // Check if minimum compensation is possible
+            const C_compensation_min = (D_work * MIN_RATE_WORK) + (D_travel * MIN_RATE_TRAVEL);
 
-          if (C_compensation_req < C_compensation_min) {
-              warning = `אזהרה: רכיב התמורה הנדרש (${formatUSD(C_compensation_req)}) נמוך מהמינימום האפשרי ($${formatUSD(C_compensation_min)}) הנדרש לפי תעריפי המינימום ($${MIN_RATE_WORK}/$${MIN_RATE_TRAVEL}). לא ניתן להגיע ליעד הריטיינר בתנאים אלו.`;
-               results.warningMessage.style.display = 'block';
-               // Calculate rates ignoring minimums, just for info, using fixed difference logic
-               const numerator = C_compensation_req - (D_work * MIN_DAY_DIFF);
-               P_travel_eff = numerator / D_total;
-               P_work_eff = P_travel_eff + MIN_DAY_DIFF;
-               // Clamp to non-negative
-                P_travel_eff = Math.max(0, P_travel_eff);
-                P_work_eff = Math.max(0, P_work_eff);
+            if (C_compensation_req < C_compensation_min) {
+                warning = `אזהרה: רכיב התמורה הנדרש (${formatUSD(C_compensation_req)}) נמוך מהמינימום האפשרי ($${formatUSD(C_compensation_min)}) הנדרש לפי תעריפי המינימום ($${MIN_RATE_WORK}/$${MIN_RATE_TRAVEL}). לא ניתן להגיע ליעד הריטיינר בתנאים אלו.`;
+                 results.warningMessage.style.display = 'block';
+                 // Calculate rates ignoring minimums, using fixed difference logic
+                 const numerator = C_compensation_req - (D_work * MIN_DAY_DIFF);
+                 P_travel_eff = numerator / D_total;
+                 P_work_eff = P_travel_eff + MIN_DAY_DIFF;
+                  // Clamp to non-negative
+                  P_travel_eff = Math.max(0, P_travel_eff);
+                  P_work_eff = Math.max(0, P_work_eff);
 
-          } else {
-               // Calculate effective rates based on required compensation using fixed difference
-               const numerator = C_compensation_req - (D_work * MIN_DAY_DIFF);
-                if (D_total > 0) {
-                   P_travel_eff = numerator / D_total;
-                } else {
-                    P_travel_eff = 0; // Avoid division by zero
-                }
-                P_work_eff = P_travel_eff + MIN_DAY_DIFF;
+            } else if (P_work_eff_manual !== null) {
+                // Rates were set manually, use those (already validated for minimums)
+                P_work_eff = P_work_eff_manual;
+                P_travel_eff = P_travel_eff_manual;
+            } else {
+                 // Calculate effective rates based on required compensation using fixed difference
+                 const numerator = C_compensation_req - (D_work * MIN_DAY_DIFF);
+                 P_travel_eff = numerator / D_total;
+                 P_work_eff = P_travel_eff + MIN_DAY_DIFF;
 
-               // Ensure minimums are met (should be guaranteed by the check above, but just in case)
-                // If check fails, rates remain as calculated (below minimum), warning already shown.
-                // More robust logic could clamp to minimum and show impossibility.
-                 if (P_travel_eff < MIN_RATE_TRAVEL || P_work_eff < MIN_RATE_WORK) {
-                    // This case means even though C_compensation_req > C_compensation_min,
-                    // the fixed difference method yields a rate below minimum.
-                    // This implies the *difference* is the issue.
-                    // Fallback: Prorate the extra amount (C_compensation_req - C_compensation_min)
-                     const extra_comp = C_compensation_req - C_compensation_min;
-                     if (D_total > 0) {
-                        const extra_per_day = extra_comp / D_total;
-                        P_work_eff = MIN_RATE_WORK + extra_per_day;
-                        P_travel_eff = MIN_RATE_TRAVEL + extra_per_day;
-                     } else {
-                         P_work_eff = MIN_RATE_WORK;
-                         P_travel_eff = MIN_RATE_TRAVEL;
-                     }
+                 // Ensure minimums are met - this method should naturally respect it if C_compensation_req >= C_compensation_min
+                 // Add a small tolerance for floating point issues
+                 if (P_travel_eff < MIN_RATE_TRAVEL - 0.01 || P_work_eff < MIN_RATE_WORK - 0.01) {
+                      // Fallback: Prorate the extra amount above minimums
+                      const extra_comp = C_compensation_req - C_compensation_min;
+                      const extra_per_day = extra_comp / D_total;
+                      P_work_eff = MIN_RATE_WORK + extra_per_day;
+                      P_travel_eff = MIN_RATE_TRAVEL + extra_per_day;
                  }
-          }
+            }
       }
 
-      // Update result displays
+      // Update result cards
       results.retainerValue.textContent = formatUSD(R_target);
       results.compTotalValue.textContent = formatUSD(C_compensation_req >= 0 ? C_compensation_req : 0);
       results.expenseTotalValue.textContent = formatUSD(C_expense_total);
       results.rateWorkValue.textContent = formatUSD(P_work_eff);
       results.rateTravelValue.textContent = formatUSD(P_travel_eff);
+      results.totalWorkHoursValue.textContent = (D_work * 8) + ' שעות'; // Assuming 8 hours/day
+      results.totalTravelHoursValue.textContent = (D_travel * 8) + ' שעות'; // Assuming 8 hours/day
        results.warningMessage.textContent = warning;
+
+
+        // Update editable values only if they were NOT the source of the change
+        if (sourceElementId !== 'retainerValue') results.retainerValue.textContent = formatUSD(R_target);
+        if (sourceElementId !== 'compTotalValue') results.compTotalValue.textContent = formatUSD(C_compensation_req >= 0 ? C_compensation_req : 0);
+        if (sourceElementId !== 'opsExpenseValue') results.expenseTotalValue.textContent = formatUSD(C_expense_total);
+        if (sourceElementId !== 'rateWorkValue') results.rateWorkValue.textContent = formatUSD(P_work_eff);
+        if (sourceElementId !== 'rateTravelValue') results.rateTravelValue.textContent = formatUSD(P_travel_eff);
+
+         // Update calculated sums based on potentially edited rates
+        const sumWork = D_work * parseUSD(results.rateWorkValue.textContent);
+        const sumTravel = D_travel * parseUSD(results.rateTravelValue.textContent);
+        document.getElementById('sumWorkValue').textContent = formatUSD(sumWork);
+        document.getElementById('sumTravelValue').textContent = formatUSD(sumTravel);
 
 
     }
 
     // --- Event Listeners ---
-    Object.values(sliders).forEach(slider => slider.addEventListener('input', calculateAndUpdate));
+    Object.values(sliders).forEach(slider => slider.addEventListener('input', (e) => calculateAndUpdate(e.target.id)));
+    Object.values(inputs).forEach(input => input.addEventListener('change', (e) => calculateAndUpdate(e.target.id)));
+
+     // Add listeners for changes in editable cards
+    Object.values(results).forEach(el => {
+        if (el.getAttribute('contenteditable') === 'true') {
+            el.addEventListener('blur', (e) => calculateAndUpdate(e.target.id));
+             // Prevent line breaks on enter
+            el.addEventListener('keypress', function(event) {
+                if (event.key === 'Enter') {
+                    event.preventDefault();
+                    el.blur(); // Trigger calculation on enter
+                }
+            });
+        }
+    });
+
 
     // --- Initial Calculation ---
-    document.addEventListener('DOMContentLoaded', calculateAndUpdate);
+    document.addEventListener('DOMContentLoaded', () => calculateAndUpdate()); // Use DOMContentLoaded
 
  </script>
 
