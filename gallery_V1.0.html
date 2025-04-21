@@ -7,124 +7,117 @@
   <!-- FontAwesome CDN -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" />
   <style>
-    * { box-sizing: border-box; }
     body {
-      margin: 0; padding: 0;
+      margin: 0; padding: 20px;
       font-family: Arial, sans-serif;
       background: #f0f2f5;
-      line-height: 1.4;
     }
     h1 {
-      text-align: center;
-      padding: 20px 10px;
-      margin: 0;
-      background: #007bff;
-      color: #fff;
-      font-size: 2rem;
+      text-align: center; margin-bottom: 20px;
     }
     .wrapper {
       display: flex;
       flex-direction: column;
-      transition: flex-direction 0.5s ease;
-      align-items: stretch;
-    }
-    .controls {
-      background: #f0f2f5;
-      padding: 15px 10px;
-      display: flex;
-      flex-direction: column;
       gap: 20px;
-      width: 100%;
-      transition: width 0.5s ease;
-      z-index: 1000;
+    }
+    /* במצב רוחבי - סליידרים מימין ותוכן משמאל */
+    @media (orientation: landscape) {
+      .wrapper {
+        flex-direction: row-reverse;
+        transition: all 0.4s ease;
+      }
+      .controls {
+        flex: 0 0 30%;
+      }
+      .cards {
+        flex: 0 0 70%;
+      }
+    }
+
+    .controls {
+      position: sticky;
+      top: 0;
+      display: flex; flex-wrap: wrap;
+      gap: 15px; width: 100%;
+      background: #f0f2f5;
+      padding-bottom: 10px;
+      z-index: 10;
     }
     .slider-group {
-      width: 100%;
+      flex: 1 1 100%;
     }
     .slider-group label {
-      display: block;
-      font-size: 1.4rem;
-      font-weight: bold;
-      margin-bottom: 8px;
-      text-align: right;
-      color: #333;
+      display: block; font-weight: bold;
+      margin-bottom: 5px; text-align: right;
+      font-size: 1.1em;
     }
     .slider-group input[type=range] {
-      width: 100%; height: 16px; border-radius: 8px;
-      background: #ddd; outline: none; -webkit-appearance: none;
-      margin-bottom: 6px;
+      width: 100%;
+      height: 12px;
+      -webkit-appearance: none;
+      background: #ddd;
+      border-radius: 6px;
+      outline: none;
     }
     .slider-group input[type=range]::-webkit-slider-thumb {
       -webkit-appearance: none;
-      width: 36px; height: 36px; border-radius: 50%;
-      background: #007bff; cursor: pointer;
-      border: 4px solid #fff; margin-top: -10px;
+      width: 24px; height: 24px;
+      border-radius: 50%;
+      background: #007bff;
+      cursor: pointer;
+      margin-top: -6px;
+      transition: background 0.2s ease;
     }
-    .slider-group input[type=range]::-moz-range-thumb {
-      width: 36px; height: 36px; border-radius: 50%;
-      background: #007bff; cursor: pointer;
-      border: 4px solid #fff;
+    .slider-group input[type=range]:active::-webkit-slider-thumb {
+      background: #0056b3;
     }
     .slider-value-display {
-      text-align: center;
-      font-size: 1.2rem;
-      color: #007bff;
-      font-weight: bold;
+      text-align: center; margin-top: 4px;
+      font-size: 1em; color: #333;
     }
+
     .cards {
       display: grid;
-      grid-template-columns: 1fr;
+      grid-template-columns: repeat(auto-fit, minmax(200px,1fr));
       gap: 15px;
-      padding: 10px;
-      transition: width 0.5s ease;
       width: 100%;
     }
-    /* Responsive grid for cards */
-    @media (min-width: 600px) {
-      .cards { grid-template-columns: repeat(2, 1fr); }
-    }
-    @media (min-width: 900px) {
-      .cards { grid-template-columns: repeat(3, 1fr); }
-    }
     .card {
-      background: #fff;
-      border-radius: 10px;
-      padding: 20px;
-      text-align: center;
+      background: #fff; border-radius: 8px;
+      padding: 20px; text-align: center;
       box-shadow: 0 2px 6px rgba(0,0,0,0.1);
-      transition: transform .2s ease, box-shadow .2s ease;
+      transition: transform .2s, box-shadow .2s;
     }
     .card:hover {
-      transform: translateY(-2px);
+      transform: translateY(-3px);
       box-shadow: 0 4px 12px rgba(0,0,0,0.15);
     }
     .card-icon {
-      font-size: 2rem;
-      margin-bottom: 10px;
-      display: inline-block;
-      padding: 10px;
+      font-size: 1.8em; margin-bottom: 10px;
+      display: inline-block; padding: 10px;
       border-radius: 50%;
     }
-    /* Restored icon background colors */
-    .icon-sum-travel    { background: rgba(23,162,184,0.1); color: #17a2b8; }
-    .icon-sum-work      { background: rgba(40,167,69,0.1); color: #28a745; }
-    .icon-rate-travel   { background: rgba(255,193,7,0.1); color: #ffc107; }
+    /* שחזירו צבעים מדויקים מהגרסה הקודמת */
     .icon-rate-work     { background: rgba(23,162,184,0.1); color: #17a2b8; }
-    .icon-retainer      { background: rgba(0,123,255,0.1); color: #007bff; }
-    .icon-ops-expense   { background: rgba(220,53,69,0.1); color: #dc3545; }
+    .icon-rate-travel   { background: rgba(255,193,7,0.1);   color: #ffc107; }
+    .icon-sum-work      { background: rgba(40,167,69,0.1);   color: #28a745; }
+    .icon-sum-travel    { background: rgba(0,123,255,0.1);   color: #007bff; }
     .icon-comp-total    { background: rgba(108,117,125,0.1); color: #6c757d; }
-    .card-title { font-size: 1.3rem; margin-bottom: 8px; font-weight: bold; color: #333; }
-    .card-value { font-size: 1.8rem; font-weight: bold; color: #007bff; }
-    /* Layout for landscape: sliders right, cards left */
-    @media (orientation: landscape) {
-      .wrapper { flex-direction: row-reverse; }
-      .controls { width: 30%; flex: 0 0 30%; padding: 20px; }
-      .cards    { width: 70%; flex: 0 0 70%; padding: 20px; }
+    .icon-ops-expense   { background: rgba(220,53,69,0.1);   color: #dc3545; }
+    .icon-retainer      { background: rgba(0,123,255,0.1);   color: #007bff; }
+
+    .card-title {
+      font-size: 1.1em; margin-bottom: 8px;
+      font-weight: bold;
+    }
+    .card-value {
+      font-size: 1.6em; font-weight: bold;
     }
   </style>
 </head>
 <body>
   <h1>טבלת פיצויים אינטראקטיבית</h1>
+
   <div class="wrapper">
     <div class="controls">
       <div class="slider-group">
@@ -148,16 +141,12 @@
         <div class="slider-value-display" id="opsRateDisplay">$205.00</div>
       </div>
     </div>
+
     <div class="cards">
       <div class="card">
-        <div class="card-icon icon-sum-travel"><i class="fas fa-plane"></i></div>
-        <div class="card-title">סכום ימי נסיעה</div>
-        <div class="card-value" id="sumTravelValue">$0.00</div>
-      </div>
-      <div class="card">
-        <div class="card-icon icon-sum-work"><i class="fas fa-calendar-check"></i></div>
-        <div class="card-title">סכום ימי עבודה</div>
-        <div class="card-value" id="sumWorkValue">$0.00</div>
+        <div class="card-icon icon-rate-work"><i class="fas fa-tags"></i></div>
+        <div class="card-title">תעריף ליום עבודה</div>
+        <div class="card-value" id="rateWorkValue">$0.00</div>
       </div>
       <div class="card">
         <div class="card-icon icon-rate-travel"><i class="fas fa-tags"></i></div>
@@ -165,14 +154,19 @@
         <div class="card-value" id="rateTravelValue">$0.00</div>
       </div>
       <div class="card">
-        <div class="card-icon icon-rate-work"><i class="fas fa-tags"></i></div>
-        <div class="card-title">תעריף ליום עבודה</div>
-        <div class="card-value" id="rateWorkValue">$0.00</div>
+        <div class="card-icon icon-sum-work"><i class="fas fa-calendar-check"></i></div>
+        <div class="card-title">סכום ימי עבודה</div>
+        <div class="card-value" id="sumWorkValue">$0.00</div>
       </div>
       <div class="card">
-        <div class="card-icon icon-retainer"><i class="fas fa-wallet"></i></div>
-        <div class="card-title">ריטיינר חודשי</div>
-        <div class="card-value" id="retainerValue">$8,650.00</div>
+        <div class="card-icon icon-sum-travel"><i class="fas fa-plane"></i></div>
+        <div class="card-title">סכום ימי נסיעה</div>
+        <div class="card-value" id="sumTravelValue">$0.00</div>
+      </div>
+      <div class="card">
+        <div class="card-icon icon-comp-total"><i class="fas fa-hand-holding-usd"></i></div>
+        <div class="card-title">סך הכל פיצוי</div>
+        <div class="card-value" id="compTotalValue">$0.00</div>
       </div>
       <div class="card">
         <div class="card-icon icon-ops-expense"><i class="fas fa-file-invoice-dollar"></i></div>
@@ -180,12 +174,13 @@
         <div class="card-value" id="opsExpenseValue">$0.00</div>
       </div>
       <div class="card">
-        <div class="card-icon icon-comp-total"><i class="fas fa-hand-holding-usd"></i></div>
-        <div class="card-title">סך הכל פיצוי</div>
-        <div class="card-value" id="compTotalValue">$0.00</div>
+        <div class="card-icon icon-retainer"><i class="fas fa-wallet"></i></div>
+        <div class="card-title">ריטיינר חודשי</div>
+        <div class="card-value" id="retainerValue">$8,650.00</div>
       </div>
     </div>
   </div>
+
   <script>
     const BASE_RATIO = 356.86 / 256.86;
     const retainerSlider = document.getElementById('retainer');
@@ -222,13 +217,13 @@
       opsDisplay.textContent      = formatUSD(or);
 
       const totalOpsExp = td * or;
-      const compPool = R - totalOpsExp;
-      const k = compPool / (wd * BASE_RATIO + td);
-      const rateTravel = isFinite(k) && k > 0 ? k : 0;
-      const rateWork   = BASE_RATIO * rateTravel;
+      const compPool    = R - totalOpsExp;
+      const k           = compPool / (wd * BASE_RATIO + td);
+      const rateTravel  = k;
+      const rateWork    = BASE_RATIO * k;
 
-      const sumWork   = rateWork * wd;
-      const sumTravel = rateTravel * td;
+      const sumWork     = rateWork * wd;
+      const sumTravel   = rateTravel * td;
 
       rateWorkEl.textContent   = formatUSD(rateWork);
       rateTravelEl.textContent = formatUSD(rateTravel);
