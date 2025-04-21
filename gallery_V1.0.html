@@ -3,242 +3,147 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>טבלת פיצויים אינטראקטיבית – ריטיינר דינמי</title>
-  <!-- FontAwesome CDN -->
+  <title>חוזה + טבלת פיצויים אינטראקטיבית</title>
+  <!-- FontAwesome & Roboto -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" />
   <style>
-    body {
-      margin: 0; padding: 20px;
-      font-family: Arial, sans-serif;
-      background: #f0f2f5;
-    }
-    h1 {
-      text-align: center; margin-bottom: 20px;
-    }
-    .wrapper {
-      display: flex;
-      flex-direction: column;
-      gap: 20px;
-    }
-    /* במצב רוחבי - סליידרים מימין ותוכן משמאל */
-    @media (orientation: landscape) {
-      .wrapper {
-        flex-direction: row-reverse;
-        transition: all 0.4s ease;
-      }
-      .controls {
-        flex: 0 0 30%;
-      }
-      .cards {
-        flex: 0 0 70%;
-      }
-    }
-
-    .controls {
-      position: sticky;
-      top: 0;
-      display: flex; flex-wrap: wrap;
-      gap: 15px; width: 100%;
-      background: #f0f2f5;
-      padding-bottom: 10px;
-      z-index: 10;
-    }
-    .slider-group {
-      flex: 1 1 100%;
-    }
-    .slider-group label {
-      display: block; font-weight: bold;
-      margin-bottom: 5px; text-align: right;
-      font-size: 1.1em;
-    }
-    .slider-group input[type=range] {
-      width: 100%;
-      height: 12px;
-      -webkit-appearance: none;
-      background: #ddd;
-      border-radius: 6px;
-      outline: none;
-    }
-    .slider-group input[type=range]::-webkit-slider-thumb {
-      -webkit-appearance: none;
-      width: 24px; height: 24px;
-      border-radius: 50%;
-      background: #007bff;
-      cursor: pointer;
-      margin-top: -6px;
-      transition: background 0.2s ease;
-    }
-    .slider-group input[type=range]:active::-webkit-slider-thumb {
-      background: #0056b3;
-    }
-    .slider-value-display {
-      text-align: center; margin-top: 4px;
-      font-size: 1em; color: #333;
-    }
-
-    .cards {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(200px,1fr));
-      gap: 15px;
-      width: 100%;
-    }
-    .card {
-      background: #fff; border-radius: 8px;
-      padding: 20px; text-align: center;
-      box-shadow: 0 2px 6px rgba(0,0,0,0.1);
-      transition: transform .2s, box-shadow .2s;
-    }
-    .card:hover {
-      transform: translateY(-3px);
-      box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-    }
-    .card-icon {
-      font-size: 1.8em; margin-bottom: 10px;
-      display: inline-block; padding: 10px;
-      border-radius: 50%;
-    }
-    /* שחזירו צבעים מדויקים מהגרסה הקודמת */
-    .icon-rate-work     { background: rgba(23,162,184,0.1); color: #17a2b8; }
-    .icon-rate-travel   { background: rgba(255,193,7,0.1);   color: #ffc107; }
-    .icon-sum-work      { background: rgba(40,167,69,0.1);   color: #28a745; }
-    .icon-sum-travel    { background: rgba(0,123,255,0.1);   color: #007bff; }
-    .icon-comp-total    { background: rgba(108,117,125,0.1); color: #6c757d; }
-    .icon-ops-expense   { background: rgba(220,53,69,0.1);   color: #dc3545; }
-    .icon-retainer      { background: rgba(0,123,255,0.1);   color: #007bff; }
-
-    .card-title {
-      font-size: 1.1em; margin-bottom: 8px;
-      font-weight: bold;
-    }
-    .card-value {
-      font-size: 1.6em; font-weight: bold;
-    }
+    @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap');
+    body { font-family: 'Roboto', Arial, sans-serif; margin:0; padding:20px; background:#f0f2f5; color:#333; direction:rtl; }
+    .container { max-width:800px; margin:auto; }
+    h1 { text-align:center; margin-bottom:20px; }
+    details.section { background:#fff; border:1px solid #ddd; border-radius:6px; margin-bottom:20px; overflow:hidden; }
+    summary.section-header { display:flex; align-items:center; justify-content:space-between; cursor:pointer; padding:15px; background:#4a90e2; color:#fff; font-weight:500; font-size:1.2rem; position:relative; }
+    summary.section-header .icon { margin-right:10px; }
+    summary.section-header::after { content:'▼'; }
+    details.section[open] summary.section-header::after { content:'▲'; }
+    .section-content { display:none; padding:15px; background:#fff; color:#333; direction:ltr; text-align:left; }
+    details.section[open] .section-content { display:block; }
+    .section-content h3 { color:#4a90e2; margin-top:15px; }
+    .section-content table { width:100%; border-collapse:collapse; margin:10px 0; }
+    .section-content th, .section-content td { border:1px solid #ddd; padding:8px; }
+    .section-content th { background:#f8f9fa; font-weight:500; }
+    .highlight { background:#fff3cd; padding:2px 4px; border-radius:3px; color:#856404; font-weight:bold; }
+    .expenseResponsibility { background:#fafafa; border:1px solid #e8e8e8; border-radius:5px; padding:15px; margin-top:15px; }
+    .expenseBreakdownTable th, .expenseBreakdownTable td { padding:8px; }
+    .totalRow td { font-weight:bold; background:#f8f9fa; }
+    /* Interactive section */
+    .rtl-interactive { margin-top:40px; }
+    .controls { position:sticky; top:0; background:#f0f2f5; padding:10px 0; z-index:10; }
+    details.slider-detail { border:1px solid #ddd; border-radius:6px; background:#fff; margin-bottom:10px; overflow:hidden; }
+    summary.slider-summary { padding:10px 15px; cursor:pointer; display:flex; justify-content:space-between; font-weight:bold; }
+    summary.slider-summary::after { content:'▼'; }
+    details.slider-detail[open] summary.slider-summary::after { content:'▲'; }
+    .slider-group { padding:0 15px 10px; }
+    .slider-group label { display:block; margin-bottom:6px; font-size:1.1em; }
+    .slider-group input[type=range] { width:100%; height:12px; -webkit-appearance:none; background:#ddd; border-radius:6px; }
+    .slider-group input[type=range]::-webkit-slider-thumb { -webkit-appearance:none; width:24px; height:24px; border-radius:50%; background:#007bff; cursor:pointer; }
+    .slider-value-display { text-align:center; margin-top:4px; font-size:1em; color:#333; }
+    .cards { display:grid; grid-template-columns:repeat(auto-fit,minmax(200px,1fr)); gap:15px; margin:15px 0; }
+    .card { background:#fff; border-radius:8px; padding:20px; text-align:center; box-shadow:0 2px 6px rgba(0,0,0,0.1); }
+    .card-icon { font-size:1.8em; margin-bottom:10px; padding:10px; border-radius:50%; display:inline-block; }
+    .icon-rate-work{background:rgba(23,162,184,0.1);color:#17a2b8;} .icon-rate-travel{background:rgba(255,193,7,0.1);color:#ffc107;}
+    .icon-sum-work{background:rgba(40,167,69,0.1);color:#28a745;} .icon-sum-travel{background:rgba(0,123,255,0.1);color:#007bff;}
+    .icon-comp-total{background:rgba(108,117,125,0.1);color:#6c757d;} .icon-ops-expense{background:rgba(220,53,69,0.1);color:#dc3545;} .icon-retainer{background:rgba(0,123,255,0.1);color:#007bff;}
+    .icon-hours{background:rgba(255,87,34,0.1);color:#ff5722;}  
+    .card-title{font-size:1.1em; margin-bottom:8px; font-weight:bold;} .card-value{font-size:1.6em; font-weight:bold;}
   </style>
 </head>
 <body>
-  <h1>טבלת פיצויים אינטראקטיבית</h1>
-
-  <div class="wrapper">
-    <div class="controls">
-      <div class="slider-group">
-        <label for="retainer">ריטיינר חודשי ($):</label>
-        <input type="range" id="retainer" min="0" max="20000" step="50" value="8650" />
-        <div class="slider-value-display" id="retainerDisplay">$8,650.00</div>
+  <div class="container">
+    <!-- Contract Sections 1-8 (omitted) -->
+    
+    <!-- Interactive Compensation Table -->
+    <div class="rtl-interactive">
+      <h1>טבלת פיצויים אינטראקטיבית</h1>
+      <div class="controls">
+        <details class="slider-detail">
+          <summary class="slider-summary">ריטיינר: <span id="retainerSum">$8,650.00</span></summary>
+          <div class="slider-group">
+            <label for="retainer">ריטיינר חודשי ($):</label>
+            <input id="retainer" type="range" min="0" max="20000" step="50" value="8650" />
+            <div id="retainerDisplay" class="slider-value-display"></div>
+          </div>
+        </details>
+        <details class="slider-detail">
+          <summary class="slider-summary">ימי עבודה: <span id="workSum">10 ימים</span></summary>
+          <div class="slider-group">
+            <label for="workDays">ימי עבודה/הכנה:</label>
+            <input id="workDays" type="range" min="0" max="30" value="10" />
+            <div id="workDaysDisplay" class="slider-value-display"></div>
+          </div>
+        </details>
+        <details class="slider-detail">
+          <summary class="slider-summary">ימי נסיעה: <span id="travelSum">11 ימים</span></summary>
+          <div class="slider-group">
+            <label for="travelDays">ימי נסיעה:</label>
+            <input id="travelDays" type="range" min="0" max="30" value="11" />
+            <div id="travelDaysDisplay" class="slider-value-display"></div>
+          </div>
+        </details>
+        <details class="slider-detail">
+          <summary class="slider-summary">הוצאות ליום נסיעה: <span id="opsSum">$205.00</span></summary>
+          <div class="slider-group">
+            <label for="opsRate">הוצאות מנהל ליום נסיעה ($):</label>
+            <input id="opsRate" type="range" min="0" max="500" step="5" value="205" />
+            <div id="opsRateDisplay" class="slider-value-display"></div>
+          </div>
+        </details>
       </div>
-      <div class="slider-group">
-        <label for="workDays">ימי עבודה/הכנה:</label>
-        <input type="range" id="workDays" min="0" max="30" value="10" />
-        <div class="slider-value-display" id="workDaysDisplay">10 ימים</div>
-      </div>
-      <div class="slider-group">
-        <label for="travelDays">ימי נסיעה:</label>
-        <input type="range" id="travelDays" min="0" max="30" value="11" />
-        <div class="slider-value-display" id="travelDaysDisplay">11 ימים</div>
-      </div>
-      <div class="slider-group">
-        <label for="opsRate">הוצאות מנהל ליום נסיעה ($):</label>
-        <input type="range" id="opsRate" min="0" max="500" step="5" value="205" />
-        <div class="slider-value-display" id="opsRateDisplay">$205.00</div>
-      </div>
-    </div>
-
-    <div class="cards">
-      <div class="card">
-        <div class="card-icon icon-rate-work"><i class="fas fa-tags"></i></div>
-        <div class="card-title">תעריף ליום עבודה</div>
-        <div class="card-value" id="rateWorkValue">$0.00</div>
-      </div>
-      <div class="card">
-        <div class="card-icon icon-rate-travel"><i class="fas fa-tags"></i></div>
-        <div class="card-title">תעריף ליום נסיעה</div>
-        <div class="card-value" id="rateTravelValue">$0.00</div>
-      </div>
-      <div class="card">
-        <div class="card-icon icon-sum-work"><i class="fas fa-calendar-check"></i></div>
-        <div class="card-title">סכום ימי עבודה</div>
-        <div class="card-value" id="sumWorkValue">$0.00</div>
-      </div>
-      <div class="card">
-        <div class="card-icon icon-sum-travel"><i class="fas fa-plane"></i></div>
-        <div class="card-title">סכום ימי נסיעה</div>
-        <div class="card-value" id="sumTravelValue">$0.00</div>
-      </div>
-      <div class="card">
-        <div class="card-icon icon-comp-total"><i class="fas fa-hand-holding-usd"></i></div>
-        <div class="card-title">סך הכל פיצוי</div>
-        <div class="card-value" id="compTotalValue">$0.00</div>
-      </div>
-      <div class="card">
-        <div class="card-icon icon-ops-expense"><i class="fas fa-file-invoice-dollar"></i></div>
-        <div class="card-title">הוצאות מנהל תפעול</div>
-        <div class="card-value" id="opsExpenseValue">$0.00</div>
-      </div>
-      <div class="card">
-        <div class="card-icon icon-retainer"><i class="fas fa-wallet"></i></div>
-        <div class="card-title">ריטיינר חודשי</div>
-        <div class="card-value" id="retainerValue">$8,650.00</div>
+      <div class="cards">
+        <div class="card"><div class="card-icon icon-rate-work"><i class="fas fa-tags"></i></div><div class="card-title">תעריף ליום עבודה</div><div id="rateWorkValue" class="card-value"></div></div>
+        <div class="card"><div class="card-icon icon-rate-travel"><i class="fas fa-tags"></i></div><div class="card-title">תעריף ליום נסיעה</div><div id="rateTravelValue" class="card-value"></div></div>
+        <div class="card"><div class="card-icon icon-sum-work"><i class="fas fa-calendar-check"></i></div><div class="card-title">סכום ימי עבודה</div><div id="sumWorkValue" class="card-value"></div></div>
+        <div class="card"><div class="card-icon icon-sum-travel"><i class="fas fa-plane"></i></div><div class="card-title">סכום ימי נסיעה</div><div id="sumTravelValue" class="card-value"></div></div>
+        <div class="card"><div class="card-icon icon-ops-expense"><i class="fas fa-file-invoice-dollar"></i></div><div class="card-title">הוצאות מנהל תפעול</div><div id="opsExpenseValue" class="card-value"></div></div>
+        <div class="card"><div class="card-icon icon-comp-total"><i class="fas fa-hand-holding-usd"></i></div><div class="card-title">סך הכל פיצוי</div><div id="compTotalValue" class="card-value"></div></div>
+        <div class="card"><div class="card-icon icon-retainer"><i class="fas fa-wallet"></i></div><div class="card-title">ריטיינר חודשי</div><div id="retainerValue" class="card-value"></div></div>
+        <div class="card"><div class="card-icon icon-hours"><i class="fas fa-clock"></i></div><div class="card-title">סה"כ שעות עבודה</div><div id="totalWorkHoursValue" class="card-value"></div></div>
+        <div class="card"><div class="card-icon icon-hours"><i class="fas fa-clock"></i></div><div class="card-title">סה"כ שעות נסיעה</div><div id="totalTravelHoursValue" class="card-value"></div></div>
       </div>
     </div>
   </div>
-
   <script>
     const BASE_RATIO = 356.86 / 256.86;
-    const retainerSlider = document.getElementById('retainer');
-    const workSlider     = document.getElementById('workDays');
-    const travelSlider   = document.getElementById('travelDays');
-    const opsSlider      = document.getElementById('opsRate');
-
-    const retainerDisplay = document.getElementById('retainerDisplay');
-    const workDisplay     = document.getElementById('workDaysDisplay');
-    const travelDisplay   = document.getElementById('travelDaysDisplay');
-    const opsDisplay      = document.getElementById('opsRateDisplay');
-
-    const rateWorkEl    = document.getElementById('rateWorkValue');
-    const rateTravelEl  = document.getElementById('rateTravelValue');
-    const sumWorkEl     = document.getElementById('sumWorkValue');
-    const sumTravelEl   = document.getElementById('sumTravelValue');
-    const compTotalEl   = document.getElementById('compTotalValue');
-    const opsExpEl      = document.getElementById('opsExpenseValue');
-    const retainerEl    = document.getElementById('retainerValue');
-
-    function formatUSD(val) {
-      return '$' + val.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    const HOURS_PER_DAY = 8;
+    const sliders = ['retainer','workDays','travelDays','opsRate'];
+    sliders.forEach(id => {
+      const slider = document.getElementById(id);
+      const display = document.getElementById(id+'Display');
+      const summary = document.getElementById(
+        id==='retainer'?'retainerSum':
+        id==='workDays'?'workSum':
+        id==='travelDays'?'travelSum':'opsSum'
+      );
+      slider.addEventListener('input', () => {
+        if(id==='retainer' || id==='opsRate') display.textContent = '$'+(+slider.value).toLocaleString(undefined,{minimumFractionDigits:2});
+        else display.textContent = +slider.value + ' ימים';
+        summary.textContent = display.textContent;
+        updateCards();
+      });
+    });
+    function updateCards(){
+      const R = +document.getElementById('retainer').value;
+      const wd = +document.getElementById('workDays').value;
+      const td = +document.getElementById('travelDays').value;
+      const or = +document.getElementById('opsRate').value;
+      const opsExp = td * or;
+      const compPool = R - opsExp;
+      const k = compPool / (wd * BASE_RATIO + td);
+      const rateTravel = k;
+      const rateWork = BASE_RATIO * k;
+      document.getElementById('rateTravelValue').textContent = '$'+rateTravel.toFixed(2);
+      document.getElementById('rateWorkValue').textContent = '$'+rateWork.toFixed(2);
+      document.getElementById('sumTravelValue').textContent = '$'+(rateTravel*td).toFixed(2);
+      document.getElementById('sumWorkValue').textContent = '$'+(rateWork*wd).toFixed(2);
+      document.getElementById('opsExpenseValue').textContent = '$'+opsExp.toFixed(2);
+      document.getElementById('compTotalValue').textContent = '$'+compPool.toFixed(2);
+      document.getElementById('retainerValue').textContent = '$'+R.toFixed(2);
+      // total hours
+      document.getElementById('totalWorkHoursValue').textContent = (wd * HOURS_PER_DAY) + ' שעות';
+      document.getElementById('totalTravelHoursValue').textContent = (td * HOURS_PER_DAY) + ' שעות';
     }
-
-    function updateAll() {
-      const R = +retainerSlider.value;
-      const wd = +workSlider.value;
-      const td = +travelSlider.value;
-      const or = +opsSlider.value;
-
-      retainerDisplay.textContent = formatUSD(R);
-      workDisplay.textContent     = wd + (wd === 1 ? ' יום' : ' ימים');
-      travelDisplay.textContent   = td + (td === 1 ? ' יום' : ' ימים');
-      opsDisplay.textContent      = formatUSD(or);
-
-      const totalOpsExp = td * or;
-      const compPool    = R - totalOpsExp;
-      const k           = compPool / (wd * BASE_RATIO + td);
-      const rateTravel  = k;
-      const rateWork    = BASE_RATIO * k;
-
-      const sumWork     = rateWork * wd;
-      const sumTravel   = rateTravel * td;
-
-      rateWorkEl.textContent   = formatUSD(rateWork);
-      rateTravelEl.textContent = formatUSD(rateTravel);
-      sumWorkEl.textContent    = formatUSD(sumWork);
-      sumTravelEl.textContent  = formatUSD(sumTravel);
-      compTotalEl.textContent  = formatUSD(compPool);
-      opsExpEl.textContent     = formatUSD(totalOpsExp);
-      retainerEl.textContent   = formatUSD(R);
-    }
-
-    [retainerSlider, workSlider, travelSlider, opsSlider].forEach(slider =>
-      slider.addEventListener('input', updateAll)
-    );
-
-    updateAll();
+    // Initialize
+    sliders.forEach(id => document.getElementById(id).dispatchEvent(new Event('input')));
   </script>
 </body>
 </html>
