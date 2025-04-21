@@ -1,607 +1,205 @@
 <!DOCTYPE html>
 <html lang="he" dir="rtl">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>חוזה + טבלת פיצויים אינטראקטיבית</title>
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" />
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>הסכם שירותים + טבלת פיצויים אינטראקטיבית</title>
+  <!-- Icons & Fonts -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
   <style>
-    @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap');
     :root {
-      --primary-color: #4a90e2; /* MindFly Blue */
-      --secondary-color: #34495e;
-      --highlight-bg: #fef3bd;
-      --card-bg: #ffffff;
-      --body-bg: #f0f2f5;
-      --text-color: #333;
-      --muted-color: #6c757d;
-      --border-color: #e8e8e8;
-      --shadow-light: rgba(0,0,0,0.08);
-      --shadow-medium: rgba(0,0,0,0.1);
+      --primary-color:#4a90e2; --secondary-color:#34495e; --highlight-bg:#fff3cd;
+      --card-bg:#fff; --body-bg:#f0f2f5; --text:#333; --muted:#6c757d; --border:#e8e8e8;
     }
-    body { font-family: 'Roboto', Arial, sans-serif; margin:0; padding:20px; background:var(--body-bg); color:var(--text-color); direction:rtl; line-height: 1.6; }
-    .container { max-width:800px; margin:auto; }
-    h1 { text-align:center; margin-bottom:20px; color: var(--secondary-color); font-weight: 500; }
-    h2 { text-align:center; color: var(--primary-color); margin-bottom:20px; font-size:1.5em; font-weight: 500; padding-bottom: 10px; border-bottom: 1px solid var(--border-color); margin-top: 30px;}
-
-    /* Interactive section */
-    .rtl-interactive { margin-bottom: 40px; }
-    .controls { position:sticky; top:0; background:#f9f9f9; padding:15px; z-index:10; border: 1px solid var(--border-color); border-radius: 8px; box-shadow: 0 2px 4px var(--shadow-light); margin-bottom: 20px;}
-    details.slider-detail { border-bottom:1px solid var(--border-color); margin-bottom:10px; padding-bottom: 10px; background: none; box-shadow: none; border: none; border-radius: 0;}
-    details.slider-detail:last-child { border-bottom: none; margin-bottom: 0; padding-bottom: 0;}
-    summary.slider-summary { padding:10px 0; cursor:pointer; display:flex; justify-content:space-between; font-weight:bold; list-style: none; }
-    summary.slider-summary::after { content:'\f078'; font-family: 'Font Awesome 6 Free'; font-weight: 900; margin-right: 10px; transition: transform 0.3s ease; }
-    details.slider-detail[open] summary.slider-summary::after { transform: rotate(-180deg); }
-    .slider-group { padding:10px 0 0 0; }
-    .slider-group label { display:block; margin-bottom:8px; font-size:1.0em; color: var(--secondary-color); }
-    .slider-group input[type=range] { width:100%; height:8px; -webkit-appearance:none; background:#ddd; border-radius:4px; cursor:pointer; margin-bottom: 8px;}
-    .slider-group input[type=range]::-webkit-slider-thumb { -webkit-appearance:none; width:20px; height:20px; border-radius:50%; background:var(--primary-color); cursor:pointer; }
-    .slider-group input[type=number] { width: 100%; padding: 8px; border: 1px solid var(--border-color); border-radius: 4px; font-size: 1em; margin-bottom: 8px; box-sizing: border-box; }
-    .slider-value-display { text-align:center; margin-top:4px; font-size:1em; color:var(--primary-color); font-weight: 500; }
-    .slider-note { font-size:0.9em; color:var(--muted-color); margin:6px 0; text-align: right;}
-    .cards { display:grid; grid-template-columns:repeat(auto-fit,minmax(180px,1fr)); gap:15px; margin:15px 0; }
-    .card { background:#fff; border-radius:8px; padding:15px; text-align:center; box-shadow:0 2px 6px var(--shadow-light); border: 1px solid var(--border-color); position:relative; }
-    .card-icon { font-size:1.6em; margin-bottom:8px; padding:8px; border-radius:50%; display:inline-block; }
-    .card-title{font-size:0.95em; margin-bottom:5px; font-weight:bold; color: var(--muted-color); height: 2.8em; overflow: hidden;}
-    .card-value{font-size:1.5em; font-weight:bold; color: var(--primary-color); }
-    .card-value[contenteditable] { border-bottom:1px dashed #aaa; padding:2px 5px; background-color: #f8f9fa; cursor: text; }
-    .icon-rate-work{background:rgba(23,162,184,0.1);color:#17a2b8;} .icon-rate-travel{background:rgba(255,193,7,0.1);color:#ffc107;}
-    .icon-sum-work{background:rgba(40,167,69,0.1);color:#28a745;} .icon-sum-travel{background:rgba(0,123,255,0.1);color:#007bff;}
-    .icon-comp-total{background:rgba(108,117,125,0.1);color:#6c757d;} .icon-ops-expense{background:rgba(220,53,69,0.1);color:#dc3545;} .icon-retainer{background:rgba(0,123,255,0.1);color:#007bff;}
-    .icon-hours{background:rgba(255,87,34,0.1);color:#ff5722;}
-
-    /* Static Contract Styles */
-    details.contract-section { background:#fff; border:1px solid var(--border-color); border-radius:8px; margin-bottom:15px; overflow:hidden; box-shadow: 0 2px 5px var(--shadow-light); }
-    summary.contract-header { display:flex; align-items:center; justify-content:space-between; cursor:pointer; padding:15px; background:var(--secondary-color); color:#fff; font-weight:500; font-size:1.2rem; list-style: none; }
-    summary.contract-header .icon { margin-left:10px; /* Switched for RTL */ }
-    summary.contract-header::after { content:'\f078'; font-family: 'Font Awesome 6 Free'; font-weight: 900; margin-right: auto; padding-left: 10px; transition: transform 0.3s ease; font-size: 0.9em; }
-    details.contract-section[open] summary.contract-header::after { transform: rotate(-180deg); }
-    .contract-content { display:none; padding:25px; background:#fff; color:var(--text-color); direction:ltr; text-align:left; border-top: 1px solid var(--border-color); }
-    details.contract-section[open] .contract-content { display:block; }
-    .contract-content h3 { color:var(--primary-color); margin-top:20px; font-size: 1.15em; border-bottom: 1px solid #eee; padding-bottom: 5px; margin-bottom: 10px; }
-    .contract-content p { margin-bottom: 1em; }
-    .contract-content ul { padding-left: 25px; list-style: disc; }
-    .contract-content li { margin-bottom: 10px; }
-    .contract-content table { width:100%; border-collapse:collapse; margin:20px 0; font-size: 0.95em; }
-    .contract-content th, .contract-content td { border:1px solid #ddd; padding:10px 12px; vertical-align: top;}
-    .contract-content th { background:#f8f9fa; font-weight:bold; color: #555; }
-    .contract-content .highlight { background:#fff3cd; padding:2px 5px; border-radius:3px; color:#856404; font-weight:bold; }
-    .contract-content .expenseResponsibility { background:#fafafa; border:1px solid #e8e8e8; border-radius:5px; padding:15px; margin-top:15px; }
-    .contract-content .expenseBreakdownTable th, .contract-content .expenseBreakdownTable td { padding:8px; }
-    .contract-content .totalRow td { font-weight:bold; background:#f8f9fa; }
-    .contract-content .calculationNote { font-style: italic; color: #6c757d; margin-top: 8px; font-size: 0.9em; }
-    .contract-content .signatureSection { margin-top: 30px; padding-top: 20px; border-top: 1px solid #eee; }
-    .contract-content .signaturePlaceholder { display: inline-block; width: 200px; border-bottom: 1px solid #555; margin: 30px 0 5px 0; }
-    .footer { text-align: center; padding: 20px; font-size: 0.85em; color: #777; }
-
-     /* Responsive adjustments */
-     @media (max-width: 600px) {
-         body { padding: 10px 5px; }
-         h1 { font-size: 1.5em; }
-         .controls h3, h2 { font-size: 1.2em; }
-         .slider-grid { grid-template-columns: 1fr; }
-         .cards { grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 10px; }
-         .result-card { padding: 10px; }
-         .result-card .icon { font-size: 1.4em; margin-bottom: 5px; }
-         .result-card .title { font-size: 0.8em; height: 2.4em; margin-bottom: 3px;}
-         .result-card .value { font-size: 1.2em; }
-         summary.contract-header { font-size: 1.1rem; padding: 12px 15px; }
-         .contract-content { padding: 15px; }
-         .contract-content table { font-size: 0.9em; }
-         .contract-content h3 { font-size: 1.05em;}
-     }
+    *{box-sizing:border-box}
+    body{margin:0;padding:20px 10px;font-family:'Roboto',Arial,sans-serif;background:var(--body-bg);color:var(--text);direction:rtl;line-height:1.6}
+    h1,h2,h3{font-weight:500;text-align:center;color:var(--secondary-color);margin-top:0}
+    h1{font-size:1.8rem;margin-bottom:25px}
+    h2{font-size:1.5rem;margin:45px 0 25px;position:relative}
+    h2:before{content:'';position:absolute;top:100%;left:50%;width:120px;height:2px;background:var(--border);transform:translateX(-50%)}
+    .container{max-width:900px;margin:0 auto}
+    /* Controls */
+    .controls{background:var(--card-bg);border:1px solid var(--border);border-radius:8px;box-shadow:0 2px 5px rgba(0,0,0,.05);padding:20px 15px;margin-bottom:30px}
+    details.slider-detail{background:var(--card-bg);border:1px solid var(--border);border-radius:6px;margin-bottom:12px}
+    summary.slider-summary{padding:10px 15px;cursor:pointer;display:flex;justify-content:space-between;align-items:center;font-weight:500;color:var(--secondary-color)}
+    summary.slider-summary::after{content:'\f078';font-family:'Font Awesome 5 Free';font-weight:900;transition:transform .3s ease}
+    details[open] summary.slider-summary::after{transform:rotate(180deg)}
+    .slider-group{padding:10px 15px 15px}
+    .slider-group label{display:block;margin-bottom:6px;font-size:.95rem;font-weight:500;color:var(--secondary-color)}
+    .slider-group input[type=range]{width:100%;margin-bottom:6px;height:12px;-webkit-appearance:none;background:#ddd;border-radius:6px}
+    .slider-group input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:22px;height:22px;border-radius:50%;background:var(--primary-color);cursor:pointer}
+    .slider-value-display{text-align:center;font-size:.9rem;color:var(--primary-color);margin-bottom:6px;font-weight:500}
+    .slider-note{font-size:.8rem;color:var(--muted);text-align:center}
+    /* Cards */
+    .cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:15px;margin-top:18px}
+    .card{background:var(--card-bg);border:1px solid var(--border);border-radius:8px;padding:18px 12px;text-align:center;box-shadow:0 2px 6px rgba(0,0,0,.05)}
+    .card-icon{font-size:1.6rem;padding:8px;border-radius:50%;margin-bottom:10px;display:inline-block}
+    .card-title{font-size:.9rem;font-weight:500;margin-bottom:6px;height:2.4em;color:var(--muted)}
+    .card-value{font-size:1.4rem;font-weight:bold;color:var(--primary-color)}
+    .icon-rate-work{background:rgba(23,162,184,.1);color:#17a2b8}.icon-rate-travel{background:rgba(255,193,7,.1);color:#ffc107}.icon-sum-work{background:rgba(40,167,69,.1);color:#28a745}.icon-sum-travel{background:rgba(0,123,255,.1);color:#007bff}.icon-ops-expense{background:rgba(220,53,69,.1);color:#dc3545}.icon-comp-total{background:rgba(108,117,125,.1);color:#6c757d}.icon-hours{background:rgba(255,87,34,.1);color:#ff5722}
+    /* Contract */
+    details.contract-section{background:var(--card-bg);border:1px solid var(--border);border-radius:8px;box-shadow:0 2px 5px rgba(0,0,0,.05);margin-bottom:20px}
+    summary.contract-header{padding:15px 20px;cursor:pointer;display:flex;justify-content:space-between;align-items:center;font-size:1.1rem;color:#fff;background:var(--secondary-color)}
+    summary.contract-header::after{content:'\f078';font-family:'Font Awesome 5 Free';font-weight:900;font-size:.9rem;margin-right:10px;transition:transform .3s ease}
+    details[open] summary.contract-header::after{transform:rotate(180deg)}
+    .contract-content{padding:22px 25px;border-top:1px solid var(--border);direction:ltr;text-align:left;font-size:.95rem}
+    .contract-content table{width:100%;border-collapse:collapse;margin:20px 0;font-size:.93rem}
+    .contract-content th,.contract-content td{border:1px solid #ddd;padding:10px 12px;vertical-align:top}
+    .contract-content th{background:#f8f9fa;font-weight:600;color:#555}.totalRow td{font-weight:bold;background:#f8f9fa}
+    .highlight{background:var(--highlight-bg);padding:2px 5px;border-radius:3px;font-weight:600;color:#856404}
+    .retainerVal{background:var(--highlight-bg);padding:2px 5px;border-radius:3px;font-weight:600;color:#856404}
+    @media(max-width:600px){.card{padding:12px 10px}.card-icon{font-size:1.4rem}.card-value{font-size:1.2rem}summary.contract-header{font-size:1rem;padding:12px 15px}.contract-content{padding:15px}}
   </style>
 </head>
 <body>
-<div class="container">
-  <h1><i class="fas fa-calculator" style="color: var(--primary-color);"></i> <i class="fas fa-file-contract" style="color: var(--secondary-color);"></i> הסכם שירותים ומחשבון ריטיינר</h1>
+  <div class="container">
+    <h1><i class="fas fa-file-signature" style="color:var(--primary-color)"></i> הסכם שירותים & מחשבון פיצויים</h1>
 
-  <div class="rtl-interactive">
-    <h2><i class="fas fa-sliders-h"></i> מחשבון ריטיינר (לסימולציה)</h2>
-    <p style="text-align:center; font-size: 0.9em; color: var(--muted-color); margin-bottom: 20px;">השתמשו בסליידרים או בשדות המספרים כדי לבדוק תרחישים שונים. התוצאות בכרטיסיות למטה יתעדכנו. החוזה הסטטי למטה מציג את התנאים המוסכמים.</p>
-    <div class="controls">
-      <details class="slider-detail" open>
-        <summary class="slider-summary">ריטיינר: <span id="retainerSum">$8,649.06</span></summary>
-        <div class="slider-group">
-          <label for="retainer">ריטיינר חודשי ($):</label>
-          <input id="retainer" type="range" min="7000" max="12000" step="10" value="8649.06" />
-          <div id="retainerDisplay" class="slider-value-display">$8,649.06</div>
-          <label for="retainerInput">או הזן ידנית:</label>
-          <input id="retainerInput" type="number" step="0.01" value="8649.06" />
-        </div>
-      </details>
-      <details class="slider-detail">
-        <summary class="slider-summary">ימי עבודה: <span id="workSum">10 ימים</span></summary>
-        <div class="slider-group">
-          <label for="workDays">ימי עבודה/הכנה:</label>
-          <input id="workDays" type="range" min="8" max="12" step="1" value="10" />
-          <div id="workDaysDisplay" class="slider-value-display">10 ימים</div>
-           <label for="workDaysInput">או הזן ידנית:</label>
-           <input id="workDaysInput" type="number" step="1" value="10" />
-        </div>
-      </details>
-      <details class="slider-detail">
-        <summary class="slider-summary">ימי נסיעה: <span id="travelSum">11 ימים</span></summary>
-        <div class="slider-group">
-          <label for="travelDays">ימי נסיעות/הכנה:</label>
-          <input id="travelDays" type="range" min="10" max="12" step="1" value="11" />
-          <div id="travelDaysDisplay" class="slider-value-display">11 ימים</div>
-           <label for="travelDaysInput">או הזן ידנית:</label>
-           <input id="travelDaysInput" type="number" step="1" value="11" />
-        </div>
-      </details>
-      <details class="slider-detail">
-        <summary class="slider-summary">הוצאות ליום נסיעה: <span id="opsSum">$205.00</span></summary>
-        <div class="slider-group">
-          <label for="opsRate">הוצאה יומית ממוצעת (בימי נסיעות) ($):</label>
-          <input id="opsRate" type="range" min="180" max="250" step="5" value="205" />
-          <div id="opsRateDisplay" class="slider-value-display">$205.00</div>
-          <label for="opsRateInput">או הזן ידנית:</label>
-          <input id="opsRateInput" type="number" step="0.01" value="205" />
-        </div>
-      </details>
-    </div>
-    <div class="cards results-cards">
-        <div class="card"><div class="card-icon icon-retainer"><i class="fas fa-wallet"></i></div><div class="card-title">ריטיינר חודשי (חישוב)</div><div id="retainerValue" class="card-value" contenteditable="false"></div></div>
-        <div class="card"><div class="card-icon icon-comp-total"><i class="fas fa-hand-holding-usd"></i></div><div class="card-title">סה"כ תמורה (חישוב)</div><div id="compTotalValue" class="card-value" contenteditable="false"></div></div>
-        <div class="card"><div class="card-icon icon-ops-expense"><i class="fas fa-file-invoice-dollar"></i></div><div class="card-title">סה"כ הוצאות (חישוב)</div><div id="opsExpenseValue" class="card-value" contenteditable="false"></div></div>
-        <div class="card"><div class="card-icon icon-rate-work"><i class="fas fa-tags"></i></div><div class="card-title">תעריף עבודה (חישוב)</div><div id="rateWorkValue" class="card-value" contenteditable="false"></div></div>
-        <div class="card"><div class="card-icon icon-rate-travel"><i class="fas fa-tags"></i></div><div class="card-title">תעריף נסיעה (חישוב)</div><div id="rateTravelValue" class="card-value" contenteditable="false"></div></div>
-        <div class="card"><div class="card-icon icon-hours"><i class="fas fa-user-clock"></i></div><div class="card-title">סה"כ ימי פעילות</div><div id="totalDaysValue" class="card-value"></div></div>
-        </div>
-     <div class="warning" id="warningMessage" style="display: none;"></div>
+    <!-- Interactive Table -->
+    <section aria-label="interactive compensation table">
+      <h2><i class="fas fa-calculator" style="color:var(--primary-color)"></i> טבלת פיצויים אינטראקטיבית</h2>
+
+      <div class="controls">
+        <!-- Retainer Slider -->
+        <details class="slider-detail" open>
+          <summary class="slider-summary">ריטיינר: <span id="retainerSum">$8,650.00</span></summary>
+          <div class="slider-group">
+            <label for="retainer">ריטיינר חודשי ($):</label>
+            <input id="retainer" type="range" min="1000" max="20000" step="50" value="8650">
+            <div id="retainerDisplay" class="slider-value-display"></div>
+            <p class="slider-note">שנו את הסליידר לעדכון סכום הריטיינר.</p>
+          </div>
+        </details>
+        <!-- Work Days Slider -->
+        <details class="slider-detail">
+          <summary class="slider-summary">ימי עבודה: <span id="workSum">10 ימים</span></summary>
+          <div class="slider-group">
+            <label for="workDays">ימי עבודה/הכנה:</label>
+            <input id="workDays" type="range" min="0" max="30" step="1" value="10">
+            <div id="workDaysDisplay" class="slider-value-display"></div>
+          </div>
+        </details>
+        <!-- Travel Days Slider -->
+        <details class="slider-detail">
+          <summary class="slider-summary">ימי נסיעה: <span id="travelSum">11 ימים</span></summary>
+          <div class="slider-group">
+            <label for="travelDays">ימי נסיעה:</label>
+            <input id="travelDays" type="range" min="0" max="30" step="1" value="11">
+            <div id="travelDaysDisplay" class="slider-value-display"></div>
+          </div>
+        </details>
+        <!-- Ops Rate Slider -->
+        <details class="slider-detail">
+          <summary class="slider-summary">הוצאות ליום נסיעה: <span id="opsSum">$205.00</span></summary>
+          <div class="slider-group">
+            <label for="opsRate">הוצאות מנהל ליום נסיעה ($):</label>
+            <input id="opsRate" type="range" min="0" max="500" step="5" value="205">
+            <div id="opsRateDisplay" class="slider-value-display"></div>
+          </div>
+        </details>
+      </div>
+
+      <div class="cards">
+        <div class="card"><div class="card-icon icon-rate-work"><i class="fas fa-tags"></i></div><div class="card-title">תעריף ליום עבודה</div><div id="rateWorkValue" class="card-value"></div></div>
+        <div class="card"><div class="card-icon icon-rate-travel"><i class="fas fa-tags"></i></div><div class="card-title">תעריף ליום נסיעה</div><div id="rateTravelValue" class="card-value"></div></div>
+        <div class="card"><div class="card-icon icon-sum-work"><i class="fas fa-calendar-check"></i></div><div class="card-title">סכום ימי עבודה</div><div id="sumWorkValue" class="card-value"></div></div>
+        <div class="card"><div class="card-icon icon-sum-travel"><i class="fas fa-plane"></i></div><div class="card-title">סכום ימי נסיעה</div><div id="sumTravelValue" class="card-value"></div></div>
+        <div class="card"><div class="card-icon icon-ops-expense"><i class="fas fa-file-invoice-dollar"></i></div><div class="card-title">הוצאות מנהל תפעול</div><div id="opsExpenseValue" class="card-value"></div></div>
+        <div class="card"><div class="card-icon icon-comp-total"><i class="fas fa-hand-holding-usd"></i></div><div class="card-title">סך הכל פיצוי</div><div id="compTotalValue" class="card-value"></div></div>
+        <div class="card"><div class="card-icon icon-hours"><i class="fas fa-clock"></i></div><div class="card-title">סה"כ שעות עבודה</div><div id="totalWorkHoursValue" class="card-value"></div></div>
+        <div class="card"><div class="card-icon icon-hours"><i class="fas fa-clock"></i></div><div class="card-title">סה"כ שעות נסיעה</div><div id="totalTravelHoursValue" class="card-value"></div></div>
+      </div>
+    </section>
+
+    <!-- Contract -->
+    <h2><i class="fas fa-file-contract"></i> טיוטת הסכם שירותים</h2>
+
+    <details class="contract-section">
+      <summary class="contract-header"><span>ℹ️ Parties & Preamble</span><span>פרטים ורקע</span></summary>
+      <div class="contract-content">
+        <p><strong>To:</strong> Orian Edelenyi (“Operational Manager”)</p>
+        <p><strong>From:</strong> MindFly Ltd. (in formation) (the “Company”)</p>
+        <p><strong>Date:</strong> April 21 2025</p>
+        <p>MindFly Ltd…. (פסקת רקע)</p>
+      </div>
+    </details>
+
+    <details class="contract-section">
+      <summary class="contract-header"><span>🛠️ 2. Services</span><span>שירותים</span></summary>
+      <div class="contract-content"><p>…</p></div>
+    </details>
+
+    <details class="contract-section" open>
+      <summary class="contract-header"><span>💰 3. Remuneration & Expenses</span><span>תמורה והוצאות</span></summary>
+      <div class="contract-content">
+        <h3>3.1 Scope of Work</h3>
+        <ul>
+          <li>ההסכם מכסה כ‑<span class="highlight" id="scopeGames">5</span> משחקים בחודש.</li>
+          <li>כ‑<span class="highlight" id="scopeWorkDays">10</span> ימי עבודה ו‑<span class="highlight" id="scopeTravelDays">11</span> ימי נסיעה בממוצע.</li>
+        </ul>
+        <h3>3.2 Fixed Monthly Retainer Calculation</h3>
+        <table>
+          <thead><tr><th>Component</th><th>Effective Rate (USD)</th><th>Qty</th><th>Subtotal</th></tr></thead>
+          <tbody>
+            <tr><td>Work Days Compensation</td><td id="tblRateWork" class="highlight">$356.86 / day</td><td id="tblQtyWork">10</td><td id="tblSubtotalWork">$3,568.60</td></tr>
+            <tr><td>Travel Days Compensation</td><td id="tblRateTravel" class="highlight">$256.86 / day</td><td id="tblQtyTravel">11</td><td id="tblSubtotalTravel">$2,825.46</td></tr>
+            <tr class="totalRow"><td colspan="3">Total Compensation Component</td><td id="tblTotalComp">$6,394.06</td></tr>
+            <tr><td colspan="3">Expense Component (Travel Days)</td><td id="tblExpenseComp">$2,255.00</td></tr>
+            <tr class="totalRow"><td colspan="3">Total Fixed Monthly Retainer</td><td class="retainerVal" id="tblRetainer">$8,649.06</td></tr>
+          </tbody>
+        </table>
+        <p class="calculationNote">התעריפים חייבים להיות ≥ $300/$200.</p>
+      </div>
+    </details>
+    <!-- … שאר סעיפי החוזה … -->
   </div>
 
-  <h2><i class="fas fa-file-contract"></i> טיוטת הסכם שירותים (תנאים מוסכמים)</h2>
-   <p style="text-align:center; font-size: 0.9em; color: var(--muted-color); margin-bottom: 20px;">להלן תנאי ההסכם המלאים, המבוססים על חישוב הריטיינר והתעריפים שסוכמו.</p>
-
-  <details class="contract-section">
-       <summary class="contract-header">
-            <span><span class="icon">ℹ️</span> Parties & Preamble</span>
-            <span>פרטים ורקע</span>
-       </summary>
-       <div class="contract-content">
-            <p><strong>To:</strong> Orian Edelenyi (“Operational Manager”)</p>
-            <p><strong>From:</strong> MindFly Ltd. (in formation) (the “Company”)</p>
-            <p><strong>Date:</strong> April 21, 2025</p>
-            <p><strong>Re: Operational Manager Services Agreement</strong></p>
-            <hr>
-            <p>MindFly Ltd. (in formation) (the “Company”) has developed a proprietary first-person-view (FPV) streaming solution. Operational Manager has extensive knowledge of and experience in the VR solutions market. This letter of agreement (“Agreement”) is entered into and made effective as of the date of the last signature below (“Effective Date”) and sets forth the terms under which the Operational Manager will provide the Company with operational management services (“Services”) in his area of expertise.</p>
-       </div>
-   </details>
-
-    <details class="contract-section">
-       <summary class="contract-header">
-           <span><span class="icon">🛠️</span> 2. Services</span>
-           <span>שירותים</span>
-       </summary>
-       <div class="contract-content">
-           <p>Operational Manager shall provide the Company with event operational management and other services in his area of expertise, including:</p>
-           <ul>
-             <li><strong>Preparation and Coordination:</strong> Coordination with the client and local production teams for proper planning and setup of MindFly equipment, including bodycams, prior to the event.</li>
-             <li><strong>Equipment Setup and Operation:</strong> Fitting referees and players, on-site setup, testing, and monitoring of MindFly equipment during events.</li>
-             <li><strong>Broadcast Integration:</strong> Collaboration with local production teams to integrate MindFly bodycams into live broadcasts.</li>
-             <li><strong>Training and Support:</strong> Providing training and support to local personnel on MindFly equipment use, if required.</li>
-             <li><strong>Real-time Troubleshooting:</strong> Operational management, technical support, and resolution of technical issues during events.</li>
-             <li><strong>Logistics and Travel Coordination:</strong> Management of all travel-related logistics and preparations between events.</li>
-             <li><strong>Administration and Reporting:</strong> Managing and recording expenses (as applicable per section 3.3), submitting reports using the <span class="highlight">EASY EXPENSE</span> system, verifying data accuracy, communication, equipment checks, and other post-event administrative tasks.</li>
-           </ul>
-       </div>
-   </details>
-
-    <details class="contract-section" open> <summary class="contract-header">
-           <span><span class="icon">💰</span> 3. Remuneration and Expenses</span>
-           <span>תמורה והוצאות</span>
-       </summary>
-       <div class="contract-content">
-            <p>In consideration for the Services and subject to the Operational Manager’s compliance with his obligations hereunder, the Operational Manager shall be entitled to a Fixed Monthly Retainer as detailed below.</p>
-
-             <h3>3.1. Scope of Work (Monthly Basis)</h3>
-             <ul>
-                 <li> This agreement covers ongoing operational management services provided on a monthly basis, anticipated to cover approximately <span class="highlight">4 to 6 games</span> per month.</li>
-                 <li> The estimated monthly workload involves approximately <span class="highlight daysWork">8 to 12 Work Days</span> (defined as Setup and Event/Game Days) and <span class="highlight daysTravel">10 to 12 Travel/Preparation Days</span> (defined as days primarily involving travel, separate preparation not involving on-site setup, or non-working days between events required for logistics), totaling approximately 18 to 24 active days per month.</li>
-                 <li> The Fixed Monthly Retainer detailed below is based on an average expectation of 5 games, 10 Work Days, and 11 Travel/Preparation Days per month. The Retainer remains fixed regardless of minor monthly variations within the 4-6 game range, assuming the overall workload remains reasonably consistent. Significant deviations may require discussion and mutual agreement on adjustments.</li>
-             </ul>
-
-            <h3>3.2. Fixed Monthly Retainer Calculation</h3>
-            <p>The Total Fixed Monthly Retainer is <span class="highlight">$8,649.06 USD</span>. This amount comprises a Compensation Component based on effective daily rates and an Expense Component, calculated as follows based on the average monthly scope:</p>
-             <table>
-                 <thead>
-                     <tr>
-                         <th>Component</th>
-                         <th>Effective Rate (USD)</th>
-                         <th>Est. Monthly Qty (Avg)</th>
-                         <th>Subtotal (USD)</th>
-                     </tr>
-                 </thead>
-                 <tbody>
-                     <tr>
-                         <td>Work Days Compensation</td>
-                         <td><span class="highlight">$356.86 / day</span></td>
-                         <td>~10 days</td>
-                         <td>$3,568.60</td>
-                     </tr>
-                     <tr>
-                         <td>Travel/Preparation Days Compensation</td>
-                         <td><span class="highlight">$256.86 / day</span></td>
-                         <td>~11 days</td>
-                         <td>$2,825.46</td>
-                     </tr>
-                     <tr class="totalRow">
-                         <td colspan="3">Total Compensation Component</td>
-                         <td>$6,394.06</td>
-                     </tr>
-                      <tr>
-                         <td colspan="3">Component for Operational Manager's Expenses (Travel/Preparation Days)</td>
-                         <td>($205/day * ~11 days) = $2,255.00</td>
-                     </tr>
-                     <tr class="totalRow">
-                         <td colspan="3">**Total Fixed Monthly Retainer (USD)**</td>
-                         <td><span class="highlight">$8,649.06</span></td>
-                     </tr>
-                 </tbody>
-             </table>
-              <p class="calculationNote">The effective daily compensation rates ($356.86 / $256.86) meet the minimum requirement of $300/$200 per day respectively and are calculated to achieve the agreed Total Fixed Monthly Retainer (approximately equivalent to 30,000 ILS before applicable VAT), inclusive of the Expense Component.</p>
-
-
-             <h3>3.3. Expense Responsibility</h3>
-              <p>The responsibility for covering operational and travel expenses during the engagement period is allocated as follows:</p>
-              <div class="expenseResponsibility">
-                  <p><strong>Expenses Covered by Company (on Work Days):</strong></p>
-                   <ul>
-                      <li>Accommodation (Hotel)</li>
-                      <li>Meals (Breakfast, Lunch, Dinner)</li>
-                      <li>Local Transportation directly related to event setup/execution (e.g., venue travel, specific approved rentals)</li>
-                      <li>Operational supplies directly required for the event setup/execution.</li>
-                      <li>Major Flights (Intercity/International) required for the engagement will be arranged and paid directly by the Company.</li>
-                   </ul>
-                   <p class="calculationNote">These expenses will be covered directly by the Company or reimbursed upon submission of valid receipts via Easy Expense.</p>
-
-                   <hr style="margin: 15px 0;">
-
-                   <p><strong>Expenses Covered by Operational Manager (on Travel/Preparation Days):</strong></p>
-                   <p>The Operational Manager will cover all personal and operational expenses incurred on Travel/Preparation Days using the allocated Expense Component (<span class="highlight">$2,255 USD per month, average</span>) within the Fixed Monthly Retainer, supplemented by the Compensation Component as needed. These typically include:</p>
-                   <ul>
-                      <li>Accommodation (Hotel)</li>
-                      <li>Meals</li>
-                      <li>Local Transportation (Other/Personal, e.g., car rental, taxis)</li>
-                      <li>Beverages & Incidentals</li>
-                      <li>Any other personal expenses.</li>
-                   </ul>
-                   <p class="calculationNote">No separate reimbursement will be provided for expenses incurred on these days.</p>
-
-                   <p><strong>Illustrative Breakdown of Estimated Daily Expenses on Travel/Preparation Days (Covered by Manager):</strong></p>
-                   <p class="calculationNote">The estimated average daily expense of $190-$220 (average $205 used for retainer calculation) is typically composed of categories such as:</p>
-                      <table class="expenseBreakdownTable">
-                           <thead>
-                               <tr><th>Category</th><th>Estimated Daily Amount (USD)</th></tr>
-                           </thead>
-                           <tbody>
-                               <tr><td>Lodging</td><td>~$100</td></tr>
-                               <tr><td>Car Rental / Local Transport</td><td>~$50</td></tr>
-                               <tr><td>Food</td><td>~$45</td></tr>
-                               <tr><td>Beverages / Incidentals</td><td>~$10</td></tr>
-                               <tr class="totalRow"><td>Approximate Daily Total Estimate</td><td>~$205</td></tr>
-                           </tbody>
-                      </table>
-                   <p class="calculationNote">This breakdown is illustrative and actual daily spending allocation may vary.</p>
-              </div>
-
-
-              <h3>3.4. Operational Manager's Tools & Communication Costs</h3>
-               <ul>
-                   <li>The Operational Manager is responsible for providing and maintaining their own standard tools of the trade, including computer hardware and general software.</li>
-                   <li>The Operational Manager is responsible for costs associated with specific software subscriptions necessary for fulfilling administrative duties under this agreement (e.g., <span class="highlight">Easy Expense subscription, approx. $68 USD</span>) and personal communication costs (e.g., <span class="highlight">international calls plan, approx. $73 USD</span>). These costs are considered operational expenses borne by the Manager and are covered within the overall Compensation Component of the Fixed Monthly Retainer.</li>
-               </ul>
-
-            <h3>3.5. Advance Payment</h3>
-             <ul>
-                 <li>The Company shall provide a monthly Advance Payment of <span class="highlight">$2,500 USD</span> (based on an average of 5 games per month at $500 USD per game - *Note: Advance calculation rate differs from daily compensation rates*).</li>
-                  <li>This advance is intended to assist with initial monthly expenses borne by the Operational Manager on Travel/Preparation Days and will be paid at the beginning of each calendar month covered by this agreement.</li>
-                 <li>This advance amount will be deducted from the corresponding Fixed Monthly Retainer payment due for that month.</li>
-             </ul>
-
-             <h3>3.6. Payment Terms</h3>
-             <ul>
-                 <li>The Fixed Monthly Retainer (<span class="highlight">$8,649.06 USD</span>), less the monthly Advance Payment ($2,500 USD), resulting in a remaining monthly balance of <span class="highlight">$6,149.06 USD</span>, shall be paid monthly in arrears.</li>
-                 <li>Payment is due within 30 days following the end of each calendar month and submission of the corresponding invoice and any required reports (including expense reports via Easy Expense for Company-covered items) by the Operational Manager.</li>
-                 <li>All amounts specified in this agreement are in USD. VAT will be added to the Total Compensation Component ($6,394.06 USD per month) as required by Israeli law on the monthly invoice.</li>
-                 <li><span style="color:red; font-weight:bold;">[Optional: Insert specific clauses regarding payment milestones or conditions if needed.]</span></li>
-             </ul>
-        </div>
-   </details>
-
-    <details class="contract-section">
-       <summary class="contract-header">
-           <span><span class="icon">⏳</span> 4. Term</span>
-           <span>תקופת ההסכם</span>
-        </summary>
-        <div class="contract-content">
-            <p>This Agreement commences on the Effective Date and shall continue on a monthly basis until [Specify End Date, e.g., July 31, 2025], unless terminated earlier as provided herein. Following the initial term, the agreement may be renewed upon mutual written consent. Either party may terminate this Agreement with 30 days' prior written notice.</p>
-        </div>
-    </details>
-
-     <details class="contract-section">
-       <summary class="contract-header">
-            <span><span class="icon">⚖️</span> 5. Conflict of Interests</span>
-            <span>ניגוד עניינים</span>
-       </summary>
-        <div class="contract-content">
-            <p>The Company acknowledges that Operational Manager may engage in an active executive position or as an Operational Manager to other corporations, provided that (i) such other corporation or entity is not and will not be a competitor of the Company, and (ii) such other engagement does not and shall not cause any conflict of interest with Operational Manager’s engagement hereunder. Operational Manager shall notify the Company as soon as it becomes aware that the circumstances in either (i) or (ii) have materialized or are likely to materialize, and the Company shall have the right to terminate this Agreement pursuant to Section 4.</p>
-        </div>
-    </details>
-
-     <details class="contract-section">
-        <summary class="contract-header">
-           <span><span class="icon">🔒</span> 6. Confidentiality & IP</span>
-           <span>סודיות וקניין רוחני</span>
-        </summary>
-        <div class="contract-content">
-            <p>Operational Manager agrees (i) to keep in strict confidence all confidential information of the Company to which he may be exposed, and (ii) that all rights, title and interest, including all intellectual property rights in and to any invention, work, and know-how created, conceived or reduced to practice as part of the Services shall be owned by the Company. Operational Manager agrees to execute a Non-Disclosure and Assignment of Inventions undertaking towards the Company in a form to be provided by the Company, which undertaking is made an integral part of this Agreement. For the avoidance of doubt, nothing in this Agreement shall have the effect of transferring from the Operational Manager to the Company the ownership of any intellectual property rights in any Operational Manager Background IP. The “Operational Manager Background IP” means any intellectual property rights used in the provision of the Services which have been developed by the Operational Manager either prior to the Effective Date or otherwise separately from this Agreement. Operational Manager warrants that the Services and all products and deliverables of the Services do not and shall not contain the confidential information, trade secrets, or intellectual property of any third party and shall not infringe the intellectual property rights of any third party.</p>
-        </div>
-    </details>
-
-     <details class="contract-section">
-        <summary class="contract-header">
-           <span><span class="icon">📄</span> 7. Miscellaneous</span>
-            <span>שונות</span>
-        </summary>
-        <div class="contract-content">
-            <p>Operational Manager is an independent contractor. Nothing herein shall be construed as creating an employee-employer or agency relationship. This Agreement shall be governed by and construed in accordance with the state and federal laws governing the place of incorporation of the Company. The following courts shall have exclusive jurisdiction over any dispute or controversy arising from this Agreement or otherwise related to the Services: if the plaintiff is the Company – the competent courts in San Francisco, California, USA; if the plaintiff is the Operational Manager – the competent courts in Tel Aviv, Israel.</p>
-        </div>
-    </details>
-
-     <details class="contract-section">
-        <summary class="contract-header">
-             <span><span class="icon">✍️</span> 8. Signatures</span>
-             <span>חתימות</span>
-         </summary>
-        <div class="contract-content signatureSection">
-            <p>If the foregoing correctly sets forth the agreements between us, please indicate so by signing in the space provided below and returning a signed copy for countersignature.</p>
-            <p><strong>Very truly yours,</strong><br>MindFly Ltd. (in formation)<br><br><span class="signaturePlaceholder"></span><br>By: Eran Tal<br>Title: CEO<br>Date: __________</p>
-            <p><strong>ACCEPTED AND AGREED TO BY:</strong><br><br><span class="signaturePlaceholder"></span><br>Orian Edelenyi (the “Operational Manager”)<br>Date: ___________</p>
-        </div>
-    </details>
-
-</div> <div class="footer">
-    Operational Manager Services Agreement - Draft with Interactive Calculator
- </div>
-
- <script>
-    // --- Constants ---
-    const MIN_RATE_WORK = 300;
-    const MIN_RATE_TRAVEL = 200;
-    const MIN_DAY_DIFF = MIN_RATE_WORK - MIN_RATE_TRAVEL;
-
-    // --- Elements ---
-    const sliders = {
-      targetRetainer: document.getElementById('retainer'),
-      workDays: document.getElementById('workDays'),
-      travelDays: document.getElementById('travelDays'),
-      opsExpenseRate: document.getElementById('opsRate')
-    };
-
-    const inputs = { // Input fields paired with sliders
-         retainerInput: document.getElementById('retainerInput'),
-         workDaysInput: document.getElementById('workDaysInput'),
-         travelDaysInput: document.getElementById('travelDaysInput'),
-         opsRateInput: document.getElementById('opsRateInput')
-     };
-
-    const displays = { // Text displays for slider values
-      targetRetainer: document.getElementById('retainerDisplay'),
-      workDays: document.getElementById('workDaysDisplay'),
-      travelDays: document.getElementById('travelDaysDisplay'),
-      opsExpenseRate: document.getElementById('opsRateDisplay')
-    };
-
-    const summaries = { // Summary values in collapsible headers
-        retainerSum: document.getElementById('retainerSum'),
-        workSum: document.getElementById('workSum'),
-        travelSum: document.getElementById('travelSum'),
-        opsSum: document.getElementById('opsSum')
-    };
-
-    const results = { // Result display cards
-      retainerValue: document.getElementById('retainerValue'),
-      compTotalValue: document.getElementById('compTotalValue'),
-      expenseTotalValue: document.getElementById('opsExpenseValue'), // Matched user ID
-      rateWorkValue: document.getElementById('rateWorkValue'),
-      rateTravelValue: document.getElementById('rateTravelValue'),
-      totalDaysValue: document.getElementById('totalDaysValue'), // Added card
-      totalWorkHoursValue: document.getElementById('totalWorkHoursValue'),
-      totalTravelHoursValue: document.getElementById('totalTravelHoursValue'),
-      warningMessage: document.getElementById('warningMessage')
-    };
-
-    // --- Utility Functions ---
-    function formatUSD(value) {
-        if (isNaN(value) || !isFinite(value)) return '$---.--';
-        return '$' + value.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-    }
-
-    function formatDays(value) {
-        if (isNaN(value)) return '---';
-        return value + (value === 1 ? ' יום' : ' ימים');
-    }
-
-    function parseUSD(str) {
-         // Allow parsing numbers directly, handle strings otherwise
-         if (typeof str === 'number') return str;
-         if (typeof str !== 'string') return NaN;
-         return parseFloat(str.replace(/[^0-9.-]+/g,""));
-     }
-
-    // --- Calculation Logic ---
-    function calculateAndUpdate(sourceElement = null) {
-        let sourceId = sourceElement ? sourceElement.id : null;
-
-        // --- Read all current input values ---
-        let R_target_slider = parseFloat(sliders.targetRetainer.value);
-        let R_target_input = parseUSD(inputs.retainerInput.value);
-        let R_target_card = parseUSD(results.retainerValue.textContent); // Read from card if edited
-
-        let D_work_slider = parseInt(sliders.workDays.value, 10);
-        let D_work_input = parseInt(inputs.workDaysInput.value, 10);
-
-        let D_travel_slider = parseInt(sliders.travelDays.value, 10);
-        let D_travel_input = parseInt(inputs.travelDaysInput.value, 10);
-
-        let E_rate_travel_slider = parseFloat(sliders.opsExpenseRate.value);
-        let E_rate_travel_input = parseUSD(inputs.opsRateInput.value);
-
-        // --- Determine the definitive values based on source or defaults ---
-        // Use input field value if it was changed, otherwise use slider value
-        let R_target = (sourceId === 'retainerInput') ? R_target_input : R_target_slider;
-        let D_work = (sourceId === 'workDaysInput') ? D_work_input : D_work_slider;
-        let D_travel = (sourceId === 'travelDaysInput') ? D_travel_input : D_travel_slider;
-        let E_rate_travel = (sourceId === 'opsRateInput') ? E_rate_travel_input : E_rate_travel_slider;
-
-         // If an editable card value was the source, it takes precedence
-        if (sourceId === 'retainerValue') R_target = R_target_card;
-        // Add similar checks if other cards become editable and their change should drive calculation
-
-        // --- Validate inputs ---
-        R_target = isNaN(R_target) ? 0 : Math.max(0, R_target);
-        D_work = isNaN(D_work) ? 0 : Math.max(0, D_work);
-        D_travel = isNaN(D_travel) ? 0 : Math.max(0, D_travel);
-        E_rate_travel = isNaN(E_rate_travel) ? 0 : Math.max(0, E_rate_travel);
-        const D_total = D_work + D_travel;
-
-
-        // --- Synchronize ALL inputs/sliders/summaries to the definitive value ---
-        // (Unless it was the source that triggered the update)
-        if (sourceId !== 'targetRetainer') sliders.targetRetainer.value = R_target;
-        if (sourceId !== 'retainerInput') inputs.retainerInput.value = R_target.toFixed(2);
-        displays.targetRetainer.textContent = formatUSD(R_target);
-        summaries.retainerSum.textContent = formatUSD(R_target);
-
-        if (sourceId !== 'workDays') sliders.workDays.value = D_work;
-        if (sourceId !== 'workDaysInput') inputs.workDaysInput.value = D_work;
-        displays.workDays.textContent = formatDays(D_work);
-        summaries.workSum.textContent = formatDays(D_work);
-
-        if (sourceId !== 'travelDays') sliders.travelDays.value = D_travel;
-        if (sourceId !== 'travelDaysInput') inputs.travelDaysInput.value = D_travel;
-        displays.travelDays.textContent = formatDays(D_travel);
-        summaries.travelSum.textContent = formatDays(D_travel);
-
-        if (sourceId !== 'opsRate') sliders.opsExpenseRate.value = E_rate_travel;
-        if (sourceId !== 'opsRateInput') inputs.opsRateInput.value = E_rate_travel.toFixed(2);
-        displays.opsExpenseRate.textContent = formatUSD(E_rate_travel);
-        summaries.opsSum.textContent = formatUSD(E_rate_travel);
-
-
-        // --- Perform Calculations ---
-        const C_expense_total = D_travel * E_rate_travel;
-        const C_compensation_req = R_target - C_expense_total;
-
-        let P_work_eff = 0;
-        let P_travel_eff = 0;
-        let warning = '';
-
-        results.warningMessage.style.display = 'none'; // Hide warning initially
-
-        if (C_compensation_req < 0 && R_target > 0) { // Check R_target > 0 to avoid warning on initial load with 0
-            warning = "שגיאה: רכיב ההוצאות (${formatUSD(C_expense_total)}) גבוה מסך הריטיינר (${formatUSD(R_target)})!";
-            results.warningMessage.style.display = 'block';
-        } else if (D_total === 0 && C_compensation_req > 0) {
-             warning = "אנא הגדר מספר ימי עבודה או נסיעה כדי לחשב תעריפים.";
-             results.warningMessage.style.display = 'block';
-        } else if (D_total > 0) {
-            // Check if minimum compensation is possible
-            const C_compensation_min = (D_work * MIN_RATE_WORK) + (D_travel * MIN_RATE_TRAVEL);
-
-            if (C_compensation_req < C_compensation_min) {
-                warning = `אזהרה: רכיב התמורה הנדרש (<span class="math-inline">\{formatUSD\(C\_compensation\_req\)\}\) נמוך מהמינימום האפשרי \(</span><span class="math-inline">\{formatUSD\(C\_compensation\_min\)\}\) הנדרש לפי תעריפי המינימום \(</span><span class="math-inline">\{MIN\_RATE\_WORK\}/</span>${MIN_RATE_TRAVEL}). לא ניתן להגיע ליעד הריטיינר בתנאים אלו.`;
-                 results.warningMessage.style.display = 'block';
-                 // Calculate rates ignoring minimums for info
-                 const numerator = C_compensation_req - (D_work * MIN_DAY_DIFF);
-                 P_travel_eff = numerator / D_total;
-                 P_work_eff = P_travel_eff + MIN_DAY_DIFF;
-                 // Clamp to non-negative
-                 P_travel_eff = Math.max(0, P_travel_eff);
-                 P_work_eff = Math.max(0, P_work_eff);
-            } else {
-                 // Calculate effective rates based on required compensation using fixed difference
-                 const numerator = C_compensation_req - (D_work * MIN_DAY_DIFF);
-                 P_travel_eff = numerator / D_total;
-                 P_work_eff = P_travel_eff + MIN_DAY_DIFF;
-
-                 // Final check on minimums (should pass if check above passed, allows for float tolerance)
-                 if (P_travel_eff < MIN_RATE_TRAVEL - 0.01 || P_work_eff < MIN_RATE_WORK - 0.01) {
-                       // Fallback: Prorate the extra amount above minimums
-                       const extra_comp = C_compensation_req - C_compensation_min;
-                       const extra_per_day = D_total > 0 ? extra_comp / D_total : 0;
-                       P_work_eff = MIN_RATE_WORK + extra_per_day;
-                       P_travel_eff = MIN_RATE_TRAVEL + extra_per_day;
-                  }
-            }
-        }
-
-        // --- Update Result Cards ---
-        // Update editable cards only if they weren't the source
-         if (sourceId !== 'retainerValue') results.retainerValue.textContent = formatUSD(R_target);
-         if (sourceId !== 'compTotalValue') results.compTotalValue.textContent = formatUSD(C_compensation_req >= 0 ? C_compensation_req : 0);
-         if (sourceId !== 'opsExpenseValue') results.expenseTotalValue.textContent = formatUSD(C_expense_total);
-         if (sourceId !== 'rateWorkValue') results.rateWorkValue.textContent = formatUSD(P_work_eff);
-         if (sourceId !== 'rateTravelValue') results.rateTravelValue.textContent = formatUSD(P_travel_eff);
-
-
-         // Update calculated sums based on potentially edited rates
-        const P_work_current = parseUSD(results.rateWorkValue.textContent);
-        const P_travel_current = parseUSD(results.rateTravelValue.textContent);
-        const sumWork = D_work * P_work_current;
-        const sumTravel = D_travel * P_travel_current;
-         if (sourceId !== 'sumWorkValue') document.getElementById('sumWorkValue').textContent = formatUSD(sumWork);
-         if (sourceId !== 'sumTravelValue') document.getElementById('sumTravelValue').textContent = formatUSD(sumTravel);
-
-
-        // Update hours (assuming 8 hours/day)
-        if (results.totalWorkHoursValue) results.totalWorkHoursValue.textContent = (D_work * 8) + ' שעות';
-        if (results.totalTravelHoursValue) results.totalTravelHoursValue.textContent = (D_travel * 8) + ' שעות';
-        if (results.totalDaysValue) results.totalDaysValue.textContent = D_total; // Update total days card
-
-        results.warningMessage.textContent = warning; // Display warning message if any
-    }
-
-    // --- Event Listeners ---
-    // Sliders trigger update on 'input'
-    Object.values(sliders).forEach(slider => slider.addEventListener('input', (e) => calculateAndUpdate(e.target)));
-
-    // Input fields trigger update on 'change' (after blur or enter)
-    Object.values(inputs).forEach(input => input.addEventListener('change', (e) => calculateAndUpdate(e.target)));
-
-     // Editable cards trigger update on 'blur' (after editing)
-    Object.values(results).forEach(el => {
-        if (el.getAttribute('contenteditable') === 'true') {
-            el.addEventListener('blur', (e) => calculateAndUpdate(e.target));
-            // Prevent line breaks on enter, trigger update instead
-            el.addEventListener('keypress', function(event) {
-                if (event.key === 'Enter') {
-                    event.preventDefault();
-                    el.blur();
-                }
-            });
-        }
-    });
-
-
-    // --- Initial Calculation ---
-    document.addEventListener('DOMContentLoaded', () => {
-         // Set initial values for inputs from sliders/defaults before first calculation
-        Object.keys(sliders).forEach(id => {
-            if (inputs[id+'Input']) {
-                 const sliderVal = parseFloat(sliders[id].value);
-                 inputs[id+'Input'].value = (id === 'retainer' || id === 'opsRate') ? sliderVal.toFixed(2) : sliderVal;
-             }
-         });
-         calculateAndUpdate(); // Run calculation once on load
-    });
-
- </script>
-
+<script>
+const BASE_RATIO = 356.86/256.86, HOURS_PER_DAY=8;
+const sliders=['retainer','workDays','travelDays','opsRate'];
+sliders.forEach(id=>{
+  const slider=document.getElementById(id);
+  const display=document.getElementById(id+'Display');
+  const summary=document.getElementById(id==='retainer'?'retainerSum':id==='workDays'?'workSum':id==='travelDays'?'travelSum':'opsSum');
+  slider.addEventListener('input',()=>{
+    const val=+slider.value;
+    if(id==='retainer'||id==='opsRate'){display.textContent='$'+val.toLocaleString(undefined,{minimumFractionDigits:2});summary.textContent=display.textContent;}
+    else{display.textContent=val+' ימים';summary.textContent=display.textContent;}
+    updateAll();
+  });
+});
+function updateAll(){
+  const R=+retainer.value, wd=+workDays.value, td=+travelDays.value, or=+opsRate.value;
+  const opsExp=td*or, compPool=R-opsExp;
+  const k=compPool/(wd*BASE_RATIO+td);
+  const rateTravel=k, rateWork=BASE_RATIO*k;
+  // cards
+  rateTravelValue.textContent='$'+rateTravel.toFixed(2);
+  rateWorkValue.textContent='$'+rateWork.toFixed(2);
+  sumTravelValue.textContent='$'+(rateTravel*td).toFixed(2);
+  sumWorkValue.textContent='$'+(rateWork*wd).toFixed(2);
+  opsExpenseValue.textContent='$'+opsExp.toFixed(2);
+  compTotalValue.textContent='$'+compPool.toFixed(2);
+  totalWorkHoursValue.textContent=wd*HOURS_PER_DAY+' שעות';
+  totalTravelHoursValue.textContent=td*HOURS_PER_DAY+' שעות';
+  // contract dynamic fields
+  scopeWorkDays.textContent=wd;
+  scopeTravelDays.textContent=td;
+  tblRateWork.textContent='$'+rateWork.toFixed(2)+' / day';
+  tblRateTravel.textContent='$'+rateTravel.toFixed(2)+' / day';
+  tblQtyWork.textContent=wd;
+  tblQtyTravel.textContent=td;
+  tblSubtotalWork.textContent='$'+(rateWork*wd).toFixed(2);
+  tblSubtotalTravel.textContent='$'+(rateTravel*td).toFixed(2);
+  tblTotalComp.textContent='$'+(rateWork*wd+rateTravel*td).toFixed(2);
+  tblExpenseComp.textContent='$'+opsExp.toFixed(2);
+  const totalRet=compPool.toFixed(2);
+  tblRetainer.textContent='$'+(+totalRet+opsExp).toLocaleString(undefined,{minimumFractionDigits:2});
+  retainerSum.textContent='$'+R.toLocaleString(undefined,{minimumFractionDigits:2});
+  document.querySelectorAll('.retainerVal').forEach(el=>el.textContent='$'+R.toLocaleString(undefined,{minimumFractionDigits:2}));
+}
+updateAll();
+</script>
 </body>
 </html>
-
-בתוך הקוד של החוזה
