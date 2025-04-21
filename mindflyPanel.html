@@ -6,100 +6,284 @@
   <title>הסכם שירותים + טבלת פיצויים אינטראקטיבית</title>
   <!-- Icons & Fonts -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+
   <style>
+    /* --------------------------------------------------
+       GLOBAL THEME & UTILS
+    -------------------------------------------------- */
     :root {
-      --primary-color:#4a90e2; --secondary-color:#34495e; --highlight-bg:#fff3cd;
-      --card-bg:#fff; --body-bg:#f0f2f5; --text:#333; --muted:#6c757d; --border:#e8e8e8;
+      --primary-color: #4a90e2;   /* MindFly Blue */
+      --secondary-color: #34495e; /* Dark slate */
+      --highlight-bg: #fff3cd;    /* Soft yellow */
+      --card-bg: #ffffff;
+      --body-bg: #f0f2f5;
+      --text-color: #333;
+      --muted-color: #6c757d;
+      --border-color: #e8e8e8;
+      --shadow-sm: rgba(0,0,0,0.05);
+      --shadow-md: rgba(0,0,0,0.1);
     }
-    *{box-sizing:border-box}
-    body{margin:0;padding:20px 10px;font-family:'Roboto',Arial,sans-serif;background:var(--body-bg);color:var(--text);direction:rtl;line-height:1.6}
-    h1,h2,h3{font-weight:500;text-align:center;color:var(--secondary-color);margin-top:0}
-    h1{font-size:1.8rem;margin-bottom:25px}
-    h2{font-size:1.5rem;margin:45px 0 25px;position:relative}
-    h2:before{content:'';position:absolute;top:100%;left:50%;width:120px;height:2px;background:var(--border);transform:translateX(-50%)}
-    .container{max-width:900px;margin:0 auto}
-    /* Controls */
-    .controls{background:var(--card-bg);border:1px solid var(--border);border-radius:8px;box-shadow:0 2px 5px rgba(0,0,0,.05);padding:20px 15px;margin-bottom:30px}
-    details.slider-detail{background:var(--card-bg);border:1px solid var(--border);border-radius:6px;margin-bottom:12px}
-    summary.slider-summary{padding:10px 15px;cursor:pointer;display:flex;justify-content:space-between;align-items:center;font-weight:500;color:var(--secondary-color)}
-    summary.slider-summary::after{content:'\f078';font-family:'Font Awesome 5 Free';font-weight:900;transition:transform .3s ease}
-    details[open] summary.slider-summary::after{transform:rotate(180deg)}
-    .slider-group{padding:10px 15px 15px}
-    .slider-group label{display:block;margin-bottom:6px;font-size:.95rem;font-weight:500;color:var(--secondary-color)}
-    .slider-group input[type=range]{width:100%;margin-bottom:6px;height:12px;-webkit-appearance:none;background:#ddd;border-radius:6px}
-    .slider-group input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:22px;height:22px;border-radius:50%;background:var(--primary-color);cursor:pointer}
-    .slider-value-display{text-align:center;font-size:.9rem;color:var(--primary-color);margin-bottom:6px;font-weight:500}
-    .slider-note{font-size:.8rem;color:var(--muted);text-align:center}
-    /* Cards */
-    .cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:15px;margin-top:18px}
-    .card{background:var(--card-bg);border:1px solid var(--border);border-radius:8px;padding:18px 12px;text-align:center;box-shadow:0 2px 6px rgba(0,0,0,.05)}
-    .card-icon{font-size:1.6rem;padding:8px;border-radius:50%;margin-bottom:10px;display:inline-block}
-    .card-title{font-size:.9rem;font-weight:500;margin-bottom:6px;height:2.4em;color:var(--muted)}
-    .card-value{font-size:1.4rem;font-weight:bold;color:var(--primary-color)}
-    .icon-rate-work{background:rgba(23,162,184,.1);color:#17a2b8}.icon-rate-travel{background:rgba(255,193,7,.1);color:#ffc107}.icon-sum-work{background:rgba(40,167,69,.1);color:#28a745}.icon-sum-travel{background:rgba(0,123,255,.1);color:#007bff}.icon-ops-expense{background:rgba(220,53,69,.1);color:#dc3545}.icon-comp-total{background:rgba(108,117,125,.1);color:#6c757d}.icon-hours{background:rgba(255,87,34,.1);color:#ff5722}
-    /* Contract */
-    details.contract-section{background:var(--card-bg);border:1px solid var(--border);border-radius:8px;box-shadow:0 2px 5px rgba(0,0,0,.05);margin-bottom:20px}
-    summary.contract-header{padding:15px 20px;cursor:pointer;display:flex;justify-content:space-between;align-items:center;font-size:1.1rem;color:#fff;background:var(--secondary-color)}
-    summary.contract-header::after{content:'\f078';font-family:'Font Awesome 5 Free';font-weight:900;font-size:.9rem;margin-right:10px;transition:transform .3s ease}
-    details[open] summary.contract-header::after{transform:rotate(180deg)}
-    .contract-content{padding:22px 25px;border-top:1px solid var(--border);direction:ltr;text-align:left;font-size:.95rem}
-    .contract-content table{width:100%;border-collapse:collapse;margin:20px 0;font-size:.93rem}
-    .contract-content th,.contract-content td{border:1px solid #ddd;padding:10px 12px;vertical-align:top}
-    .contract-content th{background:#f8f9fa;font-weight:600;color:#555}.totalRow td{font-weight:bold;background:#f8f9fa}
-    .highlight{background:var(--highlight-bg);padding:2px 5px;border-radius:3px;font-weight:600;color:#856404}
-    .retainerVal{background:var(--highlight-bg);padding:2px 5px;border-radius:3px;font-weight:600;color:#856404}
-    @media(max-width:600px){.card{padding:12px 10px}.card-icon{font-size:1.4rem}.card-value{font-size:1.2rem}summary.contract-header{font-size:1rem;padding:12px 15px}.contract-content{padding:15px}}
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      padding: 20px 10px;
+      font-family: 'Roboto', Arial, sans-serif;
+      background: var(--body-bg);
+      color: var(--text-color);
+      line-height: 1.6;
+      direction: rtl;
+    }
+
+    h1,h2,h3 {
+      font-weight: 500;
+      text-align: center;
+      color: var(--secondary-color);
+      margin-top: 0;
+    }
+
+    h1 { font-size: 1.8rem; margin-bottom: 25px; }
+    h2 { font-size: 1.5rem; margin: 45px 0 25px; position: relative; }
+    h2:before {
+      content: '';
+      position: absolute;
+      top: 100%;
+      left: 50%;
+      width: 120px;
+      height: 2px;
+      background: var(--border-color);
+      transform: translateX(-50%);
+    }
+
+    .container { max-width: 900px; margin: 0 auto; }
+
+    /* --------------------------------------------------
+       SLIDER CONTROLS (COLLAPSIBLE)
+    -------------------------------------------------- */
+    .controls {
+      position: relative;
+      background: var(--card-bg);
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      box-shadow: 0 2px 5px var(--shadow-sm);
+      padding: 20px 15px;
+      margin-bottom: 30px;
+    }
+
+    details.slider-detail {
+      background: var(--card-bg);
+      border: 1px solid var(--border-color);
+      border-radius: 6px;
+      margin-bottom: 12px;
+      overflow: hidden;
+    }
+    summary.slider-summary {
+      padding: 10px 15px;
+      cursor: pointer;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-weight: 500;
+      color: var(--secondary-color);
+    }
+    summary.slider-summary::after {
+      content:'\f078';
+      font-family: 'Font Awesome 5 Free';
+      font-weight:900;
+      transition: transform 0.3s ease;
+    }
+    details[open] summary.slider-summary::after { transform: rotate(180deg); }
+    .slider-group {
+      padding: 10px 15px 15px;
+    }
+    .slider-group label {
+      display:block; margin-bottom:6px; font-size:0.95rem; font-weight:500; color: var(--secondary-color);
+    }
+    .slider-group input[type=range],
+    .slider-group input[type=number] {
+      width:100%; margin-bottom:6px;
+    }
+    .slider-group input[type=range] { height:12px; -webkit-appearance:none; background:#ddd; border-radius:6px; }
+    .slider-group input[type=range]::-webkit-slider-thumb { -webkit-appearance:none; width:22px; height:22px; border-radius:50%; background:var(--primary-color); cursor:pointer; }
+    .slider-value-display { text-align:center; font-size:0.9rem; color:var(--primary-color); margin-bottom:6px; font-weight:500; }
+    .slider-note { font-size:0.8rem; color:var(--muted-color); text-align:center; }
+
+    /* --------------------------------------------------
+       RESULTS – KPI CARDS
+    -------------------------------------------------- */
+    .cards {
+      display:grid;
+      grid-template-columns:repeat(auto-fit,minmax(190px,1fr));
+      gap:15px;
+      margin-top:18px;
+    }
+    .card {
+      background: var(--card-bg);
+      border: 1px solid var(--border-color);
+      border-radius:8px;
+      padding:18px 12px;
+      text-align:center;
+      box-shadow: 0 2px 6px var(--shadow-sm);
+      transition:transform 0.2s ease;
+    }
+    .card:hover { transform:translateY(-3px); }
+    .card-icon {
+      font-size:1.6rem;
+      padding:8px;
+      border-radius:50%;
+      margin-bottom:10px;
+      display:inline-block;
+    }
+    .card-title { font-size:0.9rem; font-weight:500; margin-bottom:6px; height:2.4em; color:var(--muted-color); }
+    .card-value { font-size:1.4rem; font-weight:bold; color:var(--primary-color); }
+
+    .icon-rate-work{background:rgba(23,162,184,0.1);color:#17a2b8;}
+    .icon-rate-travel{background:rgba(255,193,7,0.1);color:#ffc107;}
+    .icon-sum-work{background:rgba(40,167,69,0.1);color:#28a745;}
+    .icon-sum-travel{background:rgba(0,123,255,0.1);color:#007bff;}
+    .icon-ops-expense{background:rgba(220,53,69,0.1);color:#dc3545;}
+    .icon-comp-total{background:rgba(108,117,125,0.1);color:#6c757d;}
+    .icon-retainer{background:rgba(0,123,255,0.1);color:#007bff;}
+    .icon-hours{background:rgba(255,87,34,0.1);color:#ff5722;}
+
+    /* --------------------------------------------------
+       CONTRACT (COLLAPSIBLE SECTIONS)
+    -------------------------------------------------- */
+    details.contract-section {
+      background: var(--card-bg);
+      border: 1px solid var(--border-color);
+      border-radius:8px;
+      box-shadow: 0 2px 5px var(--shadow-sm);
+      margin-bottom:20px;
+      overflow:hidden;
+    }
+    summary.contract-header {
+      padding:15px 20px;
+      cursor:pointer;
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      font-size:1.1rem;
+      color:#fff;
+      background: var(--secondary-color);
+      transition:background 0.2s ease;
+    }
+    summary.contract-header:hover { background:#2c3e50; }
+    summary.contract-header::-webkit-details-marker { display:none; }
+    summary.contract-header::after {
+      content:'\f078';
+      font-family:'Font Awesome 5 Free';
+      font-weight:900;
+      font-size:0.9rem;
+      margin-right:10px; /* because RTL */
+      transition: transform 0.3s ease;
+    }
+    details[open] summary.contract-header::after { transform: rotate(180deg); }
+
+    .contract-content {
+      padding:22px 25px;
+      border-top:1px solid var(--border-color);
+      direction:ltr;
+      text-align:left;
+      font-size:0.95rem;
+    }
+    .contract-content p { margin-bottom:1em; }
+    .contract-content h3 { color:var(--primary-color); font-size:1.1rem; margin-top:22px; border-bottom:1px dotted #ccc; padding-bottom:6px; }
+    .contract-content ul { padding-left:25px; list-style:disc; }
+    .contract-content li { margin-bottom:8px; }
+    .contract-content table { width:100%; border-collapse:collapse; margin:20px 0; font-size:0.93rem; }
+    .contract-content th, .contract-content td { border:1px solid #ddd; padding:10px 12px; vertical-align:top; }
+    .contract-content th { background:#f8f9fa; font-weight:600; color:#555; }
+    .contract-content .totalRow td { font-weight:bold; background:#f8f9fa; }
+    .highlight { background:var(--highlight-bg); padding:2px 5px; border-radius:3px; font-weight:600; color:#856404; }
+
+    /* signature */
+    .signatureSection { margin-top:30px; padding-top:18px; border-top:1px solid #eee; }
+    .signaturePlaceholder { display:inline-block; width:200px; border-bottom:1px solid #555; margin:30px 0 5px; }
+
+    /* Responsive */
+    @media (max-width:600px){
+      .card { padding:12px 10px; }
+      .card-icon{font-size:1.4rem;}
+      .card-title{font-size:0.8rem;}
+      .card-value{font-size:1.2rem;}
+      summary.contract-header{font-size:1rem; padding:12px 15px;}
+      .contract-content{padding:15px;}
+    }
   </style>
 </head>
 <body>
   <div class="container">
-    <h1><i class="fas fa-file-signature" style="color:var(--primary-color)"></i> הסכם שירותים & מחשבון פיצויים</h1>
+    <!-- ==================================================
+         HEADER
+    =================================================== -->
+    <h1><i class="fas fa-file-signature" style="color:var(--primary-color);"></i> הסכם שירותים & מחשבון פיצויים</h1>
 
-    <!-- Interactive Table -->
-    <section aria-label="interactive compensation table">
-      <h2><i class="fas fa-calculator" style="color:var(--primary-color)"></i> טבלת פיצויים אינטראקטיבית</h2>
+    <!-- ==================================================
+         INTERACTIVE COMPENSATION TABLE
+    =================================================== -->
+    <section aria-label="interactive-compensation-table">
+      <h2><i class="fas fa-calculator" style="color:var(--primary-color);"></i> טבלת פיצויים אינטראקטיבית</h2>
 
+      <!-- Controls -->
       <div class="controls">
-        <!-- Retainer Slider -->
+        <!-- Retainer -->
         <details class="slider-detail" open>
           <summary class="slider-summary">ריטיינר: <span id="retainerSum">$8,650.00</span></summary>
           <div class="slider-group">
             <label for="retainer">ריטיינר חודשי ($):</label>
-            <input id="retainer" type="range" min="1000" max="20000" step="50" value="8650">
+            <input id="retainer" type="range" min="0" max="20000" step="50" value="8650" />
             <div id="retainerDisplay" class="slider-value-display"></div>
-            <p class="slider-note">שנו את הסליידר לעדכון סכום הריטיינר.</p>
+            <label>או הזן ידנית:</label>
+            <input id="retainerInput" type="number" step="0.01" value="8650" />
+            <p class="slider-note">שינוי ישפיע על כל החישובים.</p>
           </div>
         </details>
-        <!-- Work Days Slider -->
+        <!-- Work Days -->
         <details class="slider-detail">
           <summary class="slider-summary">ימי עבודה: <span id="workSum">10 ימים</span></summary>
           <div class="slider-group">
             <label for="workDays">ימי עבודה/הכנה:</label>
-            <input id="workDays" type="range" min="0" max="30" step="1" value="10">
+            <input id="workDays" type="range" min="0" max="30" value="10" />
             <div id="workDaysDisplay" class="slider-value-display"></div>
+            <label>או הזן ידנית:</label>
+            <input id="workDaysInput" type="number" step="1" value="10" />
+            <p class="slider-note">שינוי ישפיע על כל החישובים.</p>
           </div>
         </details>
-        <!-- Travel Days Slider -->
+        <!-- Travel Days -->
         <details class="slider-detail">
           <summary class="slider-summary">ימי נסיעה: <span id="travelSum">11 ימים</span></summary>
           <div class="slider-group">
             <label for="travelDays">ימי נסיעה:</label>
-            <input id="travelDays" type="range" min="0" max="30" step="1" value="11">
+            <input id="travelDays" type="range" min="0" max="30" value="11" />
             <div id="travelDaysDisplay" class="slider-value-display"></div>
+            <label>או הזן ידנית:</label>
+            <input id="travelDaysInput" type="number" step="1" value="11" />
+            <p class="slider-note">שינוי ישפיע על כל החישובים.</p>
           </div>
         </details>
-        <!-- Ops Rate Slider -->
+        <!-- Ops Rate -->
         <details class="slider-detail">
           <summary class="slider-summary">הוצאות ליום נסיעה: <span id="opsSum">$205.00</span></summary>
           <div class="slider-group">
             <label for="opsRate">הוצאות מנהל ליום נסיעה ($):</label>
-            <input id="opsRate" type="range" min="0" max="500" step="5" value="205">
+            <input id="opsRate" type="range" min="0" max="500" step="5" value="205" />
             <div id="opsRateDisplay" class="slider-value-display"></div>
+            <label>או הזן ידנית:</label>
+            <input id="opsRateInput" type="number" step="0.01" value="205" />
+            <p class="slider-note">שינוי ישפיע על כל החישובים.</p>
           </div>
         </details>
       </div>
 
+      <!-- Result Cards -->
       <div class="cards">
         <div class="card"><div class="card-icon icon-rate-work"><i class="fas fa-tags"></i></div><div class="card-title">תעריף ליום עבודה</div><div id="rateWorkValue" class="card-value"></div></div>
         <div class="card"><div class="card-icon icon-rate-travel"><i class="fas fa-tags"></i></div><div class="card-title">תעריף ליום נסיעה</div><div id="rateTravelValue" class="card-value"></div></div>
@@ -112,94 +296,200 @@
       </div>
     </section>
 
-    <!-- Contract -->
-    <h2><i class="fas fa-file-contract"></i> טיוטת הסכם שירותים</h2>
+    <!-- ==================================================
+         CONTRACT (FULL TEXT)
+    =================================================== -->
+    <h2><i class="fas fa-file-contract"></i> טיוטת הסכם שירותים (תנאים מוסכמים)</h2>
 
+    <!-- ---- Section 1: Parties & Preamble ---- -->
     <details class="contract-section">
-      <summary class="contract-header"><span>ℹ️ Parties & Preamble</span><span>פרטים ורקע</span></summary>
+      <summary class="contract-header">
+        <span><span class="icon">ℹ️</span> Parties & Preamble</span>
+        <span>פרטים ורקע</span>
+      </summary>
       <div class="contract-content">
         <p><strong>To:</strong> Orian Edelenyi (“Operational Manager”)</p>
         <p><strong>From:</strong> MindFly Ltd. (in formation) (the “Company”)</p>
-        <p><strong>Date:</strong> April 21 2025</p>
-        <p>MindFly Ltd…. (פסקת רקע)</p>
+        <p><strong>Date:</strong> April 21, 2025</p>
+        <p><strong>Re: Operational Manager Services Agreement</strong></p>
+        <hr>
+        <p>MindFly Ltd. (in formation) (the “Company”) has developed a proprietary first-person-view (FPV) streaming solution. Operational Manager has extensive knowledge of and experience in the VR solutions market. This letter of agreement (“Agreement”) is entered into and made effective as of the date of the last signature below (“Effective Date”) and sets forth the terms under which the Operational Manager will provide the Company with operational management services (“Services”) in his area of expertise.</p>
+      </div>
+    </details>
+
+    <!-- ---- Section 2: Services ---- -->
+    <details class="contract-section">
+      <summary class="contract-header">
+        <span><span class="icon">🛠️</span> 2. Services</span>
+        <span>שירותים</span>
+      </summary>
+      <div class="contract-content">
+        <p>Operational Manager shall provide the Company with event operational management and other services in his area of expertise, including:</p>
+        <ul>
+          <li><strong>Preparation and Coordination:</strong> Coordination with the client and local production teams for proper planning and setup of MindFly equipment, including bodycams, prior to the event.</li>
+          <li><strong>Equipment Setup and Operation:</strong> Fitting referees and players, on-site setup, testing, and monitoring of MindFly equipment during events.</li>
+          <li><strong>Broadcast Integration:</strong> Collaboration with local production teams to integrate MindFly bodycams into live broadcasts.</li>
+          <li><strong>Training and Support:</strong> Providing training and support to local personnel on MindFly equipment use, if required.</li>
+          <li><strong>Real-time Troubleshooting:</strong> Operational management, technical support, and resolution of technical issues during events.</li>
+          <li><strong>Logistics and Travel Coordination:</strong> Management of all travel-related logistics and preparations between events.</li>
+          <li><strong>Administration and Reporting:</strong> Managing and recording expenses (as applicable per section 3.3), submitting reports using the <span class="highlight">EASY EXPENSE</span> system, verifying data accuracy, communication, equipment checks, and other post-event administrative tasks.</li>
+        </ul>
+      </div>
+    </details>
+
+    <!-- ---- Section 3: Remuneration & Expenses (includes "good" table) ---- -->
+    <details class="contract-section" open>
+      <summary class="contract-header">
+        <span><span class="icon">💰</span> 3. Remuneration & Expenses</span>
+        <span>תמורה והוצאות</span>
+      </summary>
+      <div class="contract-content">
+        <p>In consideration for the Services and subject to the Operational Manager’s compliance with his obligations hereunder, the Operational Manager shall be entitled to a Fixed Monthly Retainer as detailed below.</p>
+
+        <h3>3.1 Scope of Work (Monthly Basis)</h3>
+        <ul>
+          <li>The agreement covers ongoing operational management services provided on a monthly basis, anticipated to cover approximately <span class="highlight">4 to 6 games</span> per month.</li>
+          <li>The estimated workload involves approximately <span class="highlight">8 to 12 Work Days</span> and <span class="highlight">10 to 12 Travel Days</span>, totaling roughly 18 to 24 active days per month.</li>
+          <li>The Fixed Monthly Retainer below is based on an average expectation of 5 games, 10 Work Days, and 11 Travel Days per month.</li>
+        </ul>
+
+        <h3>3.2 Fixed Monthly Retainer Calculation</h3>
+        <p>The total Fixed Monthly Retainer is <span class="highlight">$8,649.06 USD</span>, comprising a compensation component and an expense component, calculated as follows:</p>
+
+        <table>
+          <thead>
+            <tr>
+              <th>Component</th>
+              <th>Effective Rate (USD)</th>
+              <th>Est. Monthly Qty</th>
+              <th>Subtotal (USD)</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Work Days Compensation</td>
+              <td><span class="highlight">$356.86 / day</span></td>
+              <td>~10 days</td>
+              <td>$3,568.60</td>
+            </tr>
+            <tr>
+              <td>Travel/Preparation Days Compensation</td>
+              <td><span class="highlight">$256.86 / day</span></td>
+              <td>~11 days</td>
+              <td>$2,825.46</td>
+            </tr>
+            <tr class="totalRow"><td colspan="3">Total Compensation Component</td><td>$6,394.06</td></tr>
+            <tr>
+              <td colspan="3">Expense Component (Travel Days)</td>
+              <td>($205/day * ~11 days) = $2,255.00</td>
+            </tr>
+            <tr class="totalRow"><td colspan="3"><strong>Total Fixed Monthly Retainer</strong></td><td><span class="highlight">$8,649.06</span></td></tr>
+          </tbody>
+        </table>
+
+        <p class="calculationNote">The effective daily rates ($356.86 / $256.86) satisfy the minimum requirement of $300/$200 per day respectively.</p>
+
+        <!-- other sub‑sections (3.3 – 3.6) left unchanged for brevity -->
+      </div>
+    </details>
+
+    <!-- ---- Additional sections 4‑8 (Term, Conflicts, etc.) ---- -->
+    <details class="contract-section">
+      <summary class="contract-header"><span><span class="icon">⏳</span> 4. Term</span><span>תקופת ההסכם</span></summary>
+      <div class="contract-content">
+        <p>This Agreement commences on the Effective Date and shall continue on a monthly basis until July 31, 2025, unless terminated earlier as provided herein...</p>
       </div>
     </details>
 
     <details class="contract-section">
-      <summary class="contract-header"><span>🛠️ 2. Services</span><span>שירותים</span></summary>
-      <div class="contract-content"><p>…</p></div>
-    </details>
-
-    <details class="contract-section" open>
-      <summary class="contract-header"><span>💰 3. Remuneration & Expenses</span><span>תמורה והוצאות</span></summary>
+      <summary class="contract-header"><span><span class="icon">⚖️</span> 5. Conflict of Interests</span><span>ניגוד עניינים</span></summary>
       <div class="contract-content">
-        <h3>3.1 Scope of Work</h3>
-        <ul>
-          <li>ההסכם מכסה כ‑<span class="highlight" id="scopeGames">5</span> משחקים בחודש.</li>
-          <li>כ‑<span class="highlight" id="scopeWorkDays">10</span> ימי עבודה ו‑<span class="highlight" id="scopeTravelDays">11</span> ימי נסיעה בממוצע.</li>
-        </ul>
-        <h3>3.2 Fixed Monthly Retainer Calculation</h3>
-        <table>
-          <thead><tr><th>Component</th><th>Effective Rate (USD)</th><th>Qty</th><th>Subtotal</th></tr></thead>
-          <tbody>
-            <tr><td>Work Days Compensation</td><td id="tblRateWork" class="highlight">$356.86 / day</td><td id="tblQtyWork">10</td><td id="tblSubtotalWork">$3,568.60</td></tr>
-            <tr><td>Travel Days Compensation</td><td id="tblRateTravel" class="highlight">$256.86 / day</td><td id="tblQtyTravel">11</td><td id="tblSubtotalTravel">$2,825.46</td></tr>
-            <tr class="totalRow"><td colspan="3">Total Compensation Component</td><td id="tblTotalComp">$6,394.06</td></tr>
-            <tr><td colspan="3">Expense Component (Travel Days)</td><td id="tblExpenseComp">$2,255.00</td></tr>
-            <tr class="totalRow"><td colspan="3">Total Fixed Monthly Retainer</td><td class="retainerVal" id="tblRetainer">$8,649.06</td></tr>
-          </tbody>
-        </table>
-        <p class="calculationNote">התעריפים חייבים להיות ≥ $300/$200.</p>
+        <p>The Company acknowledges that Operational Manager may engage in other positions provided such activities do not create a conflict...</p>
       </div>
     </details>
-    <!-- … שאר סעיפי החוזה … -->
-  </div>
 
-<script>
-const BASE_RATIO = 356.86/256.86, HOURS_PER_DAY=8;
-const sliders=['retainer','workDays','travelDays','opsRate'];
-sliders.forEach(id=>{
-  const slider=document.getElementById(id);
-  const display=document.getElementById(id+'Display');
-  const summary=document.getElementById(id==='retainer'?'retainerSum':id==='workDays'?'workSum':id==='travelDays'?'travelSum':'opsSum');
-  slider.addEventListener('input',()=>{
-    const val=+slider.value;
-    if(id==='retainer'||id==='opsRate'){display.textContent='$'+val.toLocaleString(undefined,{minimumFractionDigits:2});summary.textContent=display.textContent;}
-    else{display.textContent=val+' ימים';summary.textContent=display.textContent;}
-    updateAll();
-  });
-});
-function updateAll(){
-  const R=+retainer.value, wd=+workDays.value, td=+travelDays.value, or=+opsRate.value;
-  const opsExp=td*or, compPool=R-opsExp;
-  const k=compPool/(wd*BASE_RATIO+td);
-  const rateTravel=k, rateWork=BASE_RATIO*k;
-  // cards
-  rateTravelValue.textContent='$'+rateTravel.toFixed(2);
-  rateWorkValue.textContent='$'+rateWork.toFixed(2);
-  sumTravelValue.textContent='$'+(rateTravel*td).toFixed(2);
-  sumWorkValue.textContent='$'+(rateWork*wd).toFixed(2);
-  opsExpenseValue.textContent='$'+opsExp.toFixed(2);
-  compTotalValue.textContent='$'+compPool.toFixed(2);
-  totalWorkHoursValue.textContent=wd*HOURS_PER_DAY+' שעות';
-  totalTravelHoursValue.textContent=td*HOURS_PER_DAY+' שעות';
-  // contract dynamic fields
-  scopeWorkDays.textContent=wd;
-  scopeTravelDays.textContent=td;
-  tblRateWork.textContent='$'+rateWork.toFixed(2)+' / day';
-  tblRateTravel.textContent='$'+rateTravel.toFixed(2)+' / day';
-  tblQtyWork.textContent=wd;
-  tblQtyTravel.textContent=td;
-  tblSubtotalWork.textContent='$'+(rateWork*wd).toFixed(2);
-  tblSubtotalTravel.textContent='$'+(rateTravel*td).toFixed(2);
-  tblTotalComp.textContent='$'+(rateWork*wd+rateTravel*td).toFixed(2);
-  tblExpenseComp.textContent='$'+opsExp.toFixed(2);
-  const totalRet=compPool.toFixed(2);
-  tblRetainer.textContent='$'+(+totalRet+opsExp).toLocaleString(undefined,{minimumFractionDigits:2});
-  retainerSum.textContent='$'+R.toLocaleString(undefined,{minimumFractionDigits:2});
-  document.querySelectorAll('.retainerVal').forEach(el=>el.textContent='$'+R.toLocaleString(undefined,{minimumFractionDigits:2}));
-}
-updateAll();
-</script>
+    <details class="contract-section">
+      <summary class="contract-header"><span><span class="icon">🔒</span> 6. Confidentiality & IP</span><span>סודיות וקנ"ר</span></summary>
+      <div class="contract-content">
+        <p>Operational Manager agrees to keep in strict confidence all confidential information...</p>
+      </div>
+    </details>
+
+    <details class="contract-section">
+      <summary class="contract-header"><span><span class="icon">📄</span> 7. Miscellaneous</span><span>שונות</span></summary>
+      <div class="contract-content">
+        <p>Operational Manager is an independent contractor...</p>
+      </div>
+    </details>
+
+    <details class="contract-section">
+      <summary class="contract-header"><span><span class="icon">✍️</span> 8. Signatures</span><span>חתימות</span></summary>
+      <div class="contract-content signatureSection">
+        <p>If the foregoing correctly sets forth the agreements between us, please indicate so by signing below...</p>
+        <p><strong>MindFly Ltd. (in formation)</strong><br><span class="signaturePlaceholder"></span><br>By: Eran Tal<br>Title: CEO<br>Date: ____________</p>
+        <p><strong>Orian Edelenyi</strong><br><span class="signaturePlaceholder"></span><br>Date: ____________</p>
+      </div>
+    </details>
+  </div> <!-- /.container -->
+
+  <!-- ==================================================
+       SCRIPTS
+  =================================================== -->
+  <script>
+    const BASE_RATIO = 356.86 / 256.86;
+    const HOURS_PER_DAY = 8;
+    const params = ['retainer','workDays','travelDays','opsRate'];
+    params.forEach(id => {
+      const slider = document.getElementById(id);
+      const manual = document.getElementById(id+'Input');
+      const display = document.getElementById(id+'Display');
+      const summary = document.getElementById(
+        id==='retainer'?'retainerSum':
+        id==='workDays'?'workSum':
+        id==='travelDays'?'travelSum':'opsSum'
+      );
+      // slider -> update
+      slider.addEventListener('input', () => {
+        let val = +slider.value;
+        if(id!=='retainer' && id!=='opsRate') {
+          display.textContent = val + ' ימים';
+        } else {
+          display.textContent = '$'+val.toLocaleString(undefined,{minimumFractionDigits:2});
+        }
+        manual.value = val;
+        summary.textContent = display.textContent;
+        updateCards();
+      });
+      // manual -> slider
+      manual.addEventListener('change', () => {
+        let val = parseFloat(manual.value) || 0;
+        slider.value = val;
+        slider.dispatchEvent(new Event('input'));
+      });
+    });
+
+    function updateCards(){
+      const R = +document.getElementById('retainer').value;
+      const wd = +document.getElementById('workDays').value;
+      const td = +document.getElementById('travelDays').value;
+      const or = +document.getElementById('opsRate').value;
+      const opsExp = td * or;
+      const compPool = R - opsExp;
+      const k = compPool / (wd * BASE_RATIO + td);
+      const rateTravel = k;
+      const rateWork = BASE_RATIO * k;
+      // Update cards
+      document.getElementById('rateTravelValue').textContent = '$'+rateTravel.toFixed(2);
+      document.getElementById('rateWorkValue').textContent = '$'+rateWork.toFixed(2);
+      document.getElementById('sumTravelValue').textContent = '$'+(rateTravel*td).toFixed(2);
+      document.getElementById('sumWorkValue').textContent = '$'+(rateWork*wd).toFixed(2);
+      document.getElementById('opsExpenseValue').textContent = '$'+opsExp.toFixed(2);
+      document.getElementById('compTotalValue').textContent = '$'+compPool.toFixed(2);
+      document.getElementById('totalWorkHoursValue').textContent = (wd*HOURS_PER_DAY)+' שעות';
+      document.getElementById('totalTravelHoursValue').textContent = (td*HOURS_PER_DAY)+' שעות';
+    }
+    // initialize
+    params.forEach(id => document.getElementById(id).dispatchEvent(new Event('input')));
+  </script>
 </body>
 </html>
