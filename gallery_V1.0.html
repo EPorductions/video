@@ -1,58 +1,53 @@
 <!DOCTYPE html>
 <html lang="he" dir="rtl">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>חוזה + טבלת פיצויים אינטראקטיבית</title>
-  <!-- FontAwesome & Roboto -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" />
   <style>
     @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap');
-    body { font-family: 'Roboto', Arial, sans-serif; margin:0; padding:20px; background:#f0f2f5; color:#333; direction:rtl; }
+    body { font-family: 'Roboto', sans-serif; margin:0; padding:20px; background:#f0f2f5; color:#333; direction:rtl; }
     .container { max-width:800px; margin:auto; }
     h1 { text-align:center; margin-bottom:20px; }
     details.section { background:#fff; border:1px solid #ddd; border-radius:6px; margin-bottom:20px; overflow:hidden; }
-    summary.section-header { display:flex; align-items:center; justify-content:space-between; cursor:pointer; padding:15px; background:#4a90e2; color:#fff; font-weight:500; font-size:1.2rem; position:relative; }
-    summary.section-header .icon { margin-right:10px; }
+    summary.section-header { display:flex; justify-content:space-between; align-items:center; padding:15px; background:#4a90e2; color:#fff; font-size:1.2rem; cursor:pointer; }
     summary.section-header::after { content:'▼'; }
     details.section[open] summary.section-header::after { content:'▲'; }
-    .section-content { display:none; padding:15px; background:#fff; color:#333; direction:ltr; text-align:left; }
+    .section-content { display:none; padding:15px; background:#fff; direction:ltr; text-align:left; }
     details.section[open] .section-content { display:block; }
-    .section-content h3 { color:#4a90e2; margin-top:15px; }
-    .section-content table { width:100%; border-collapse:collapse; margin:10px 0; }
-    .section-content th, .section-content td { border:1px solid #ddd; padding:8px; }
-    .section-content th { background:#f8f9fa; font-weight:500; }
-    .highlight { background:#fff3cd; padding:2px 4px; border-radius:3px; color:#856404; font-weight:bold; }
-    .expenseResponsibility { background:#fafafa; border:1px solid #e8e8e8; border-radius:5px; padding:15px; margin-top:15px; }
-    .expenseBreakdownTable th, .expenseBreakdownTable td { padding:8px; }
-    .totalRow td { font-weight:bold; background:#f8f9fa; }
-    /* Interactive section */
     .rtl-interactive { margin-top:40px; }
     .controls { position:sticky; top:0; background:#f0f2f5; padding:10px 0; z-index:10; }
-    details.slider-detail { border:1px solid #ddd; border-radius:6px; background:#fff; margin-bottom:10px; overflow:hidden; }
-    summary.slider-summary { padding:10px 15px; cursor:pointer; display:flex; justify-content:space-between; font-weight:bold; }
+    details.slider-detail { background:#fff; border:1px solid #ddd; border-radius:6px; margin-bottom:10px; }
+    summary.slider-summary { padding:10px 15px; cursor:pointer; display:flex; justify-content:space-between; }
     summary.slider-summary::after { content:'▼'; }
     details.slider-detail[open] summary.slider-summary::after { content:'▲'; }
     .slider-group { padding:0 15px 10px; }
     .slider-group label { display:block; margin-bottom:6px; font-size:1.1em; }
-    .slider-group input[type=range] { width:100%; height:12px; -webkit-appearance:none; background:#ddd; border-radius:6px; }
+    .slider-group input[type=range], .slider-group input[type=number] { width:100%; margin-bottom:6px; }
+    .slider-group input[type=range] { height:12px; -webkit-appearance:none; background:#ddd; border-radius:6px; }
     .slider-group input[type=range]::-webkit-slider-thumb { -webkit-appearance:none; width:24px; height:24px; border-radius:50%; background:#007bff; cursor:pointer; }
-    .slider-value-display { text-align:center; margin-top:4px; font-size:1em; color:#333; }
-    .cards { display:grid; grid-template-columns:repeat(auto-fit,minmax(200px,1fr)); gap:15px; margin:15px 0; }
+    .slider-value-display { text-align:center; font-size:1em; color:#333; margin-bottom:6px; }
+    .slider-note { font-size:0.9em; color:#555; }
+    .cards { display:grid; grid-template-columns:repeat(auto-fit,minmax(200px,1fr)); gap:15px; margin-top:15px; }
     .card { background:#fff; border-radius:8px; padding:20px; text-align:center; box-shadow:0 2px 6px rgba(0,0,0,0.1); }
-    .card-icon { font-size:1.8em; margin-bottom:10px; padding:10px; border-radius:50%; display:inline-block; }
-    .icon-rate-work{background:rgba(23,162,184,0.1);color:#17a2b8;} .icon-rate-travel{background:rgba(255,193,7,0.1);color:#ffc107;}
-    .icon-sum-work{background:rgba(40,167,69,0.1);color:#28a745;} .icon-sum-travel{background:rgba(0,123,255,0.1);color:#007bff;}
-    .icon-comp-total{background:rgba(108,117,125,0.1);color:#6c757d;} .icon-ops-expense{background:rgba(220,53,69,0.1);color:#dc3545;} .icon-retainer{background:rgba(0,123,255,0.1);color:#007bff;}
-    .icon-hours{background:rgba(255,87,34,0.1);color:#ff5722;}  
-    .card-title{font-size:1.1em; margin-bottom:8px; font-weight:bold;} .card-value{font-size:1.6em; font-weight:bold;}
+    .card-icon { font-size:1.8em; padding:10px; border-radius:50%; margin-bottom:10px; display:inline-block; }
+    .card-title { font-size:1.1em; margin-bottom:8px; font-weight:bold; }
+    .card-value { font-size:1.6em; font-weight:bold; color:#007bff; }
+    .icon-rate-work{background:rgba(23,162,184,0.1);color:#17a2b8;}
+    .icon-rate-travel{background:rgba(255,193,7,0.1);color:#ffc107;}
+    .icon-sum-work{background:rgba(40,167,69,0.1);color:#28a745;}
+    .icon-sum-travel{background:rgba(0,123,255,0.1);color:#007bff;}
+    .icon-ops-expense{background:rgba(220,53,69,0.1);color:#dc3545;}
+    .icon-comp-total{background:rgba(108,117,125,0.1);color:#6c757d;}
+    .icon-retainer{background:rgba(0,123,255,0.1);color:#007bff;}
+    .icon-hours{background:rgba(255,87,34,0.1);color:#ff5722;}
   </style>
 </head>
 <body>
   <div class="container">
-    <!-- Contract Sections 1-8 (omitted) -->
-    
-    <!-- Interactive Compensation Table -->
+    <!-- Contract Sections 1-8 omitted -->
+
     <div class="rtl-interactive">
       <h1>טבלת פיצויים אינטראקטיבית</h1>
       <div class="controls">
@@ -62,6 +57,9 @@
             <label for="retainer">ריטיינר חודשי ($):</label>
             <input id="retainer" type="range" min="0" max="20000" step="50" value="8650" />
             <div id="retainerDisplay" class="slider-value-display"></div>
+            <label>או הזן ידנית:</label>
+            <input id="retainerInput" type="number" step="0.01" value="8650" />
+            <p class="slider-note">שינוי ישפיע על כל החישובים.</p>
           </div>
         </details>
         <details class="slider-detail">
@@ -70,6 +68,9 @@
             <label for="workDays">ימי עבודה/הכנה:</label>
             <input id="workDays" type="range" min="0" max="30" value="10" />
             <div id="workDaysDisplay" class="slider-value-display"></div>
+            <label>או הזן ידנית:</label>
+            <input id="workDaysInput" type="number" step="1" value="10" />
+            <p class="slider-note">שינוי ישפיע על כל החישובים.</p>
           </div>
         </details>
         <details class="slider-detail">
@@ -78,6 +79,9 @@
             <label for="travelDays">ימי נסיעה:</label>
             <input id="travelDays" type="range" min="0" max="30" value="11" />
             <div id="travelDaysDisplay" class="slider-value-display"></div>
+            <label>או הזן ידנית:</label>
+            <input id="travelDaysInput" type="number" step="1" value="11" />
+            <p class="slider-note">שינוי ישפיע על כל החישובים.</p>
           </div>
         </details>
         <details class="slider-detail">
@@ -86,6 +90,9 @@
             <label for="opsRate">הוצאות מנהל ליום נסיעה ($):</label>
             <input id="opsRate" type="range" min="0" max="500" step="5" value="205" />
             <div id="opsRateDisplay" class="slider-value-display"></div>
+            <label>או הזן ידנית:</label>
+            <input id="opsRateInput" type="number" step="0.01" value="205" />
+            <p class="slider-note">שינוי ישפיע על כל החישובים.</p>
           </div>
         </details>
       </div>
@@ -96,7 +103,6 @@
         <div class="card"><div class="card-icon icon-sum-travel"><i class="fas fa-plane"></i></div><div class="card-title">סכום ימי נסיעה</div><div id="sumTravelValue" class="card-value"></div></div>
         <div class="card"><div class="card-icon icon-ops-expense"><i class="fas fa-file-invoice-dollar"></i></div><div class="card-title">הוצאות מנהל תפעול</div><div id="opsExpenseValue" class="card-value"></div></div>
         <div class="card"><div class="card-icon icon-comp-total"><i class="fas fa-hand-holding-usd"></i></div><div class="card-title">סך הכל פיצוי</div><div id="compTotalValue" class="card-value"></div></div>
-        <div class="card"><div class="card-icon icon-retainer"><i class="fas fa-wallet"></i></div><div class="card-title">ריטיינר חודשי</div><div id="retainerValue" class="card-value"></div></div>
         <div class="card"><div class="card-icon icon-hours"><i class="fas fa-clock"></i></div><div class="card-title">סה"כ שעות עבודה</div><div id="totalWorkHoursValue" class="card-value"></div></div>
         <div class="card"><div class="card-icon icon-hours"><i class="fas fa-clock"></i></div><div class="card-title">סה"כ שעות נסיעה</div><div id="totalTravelHoursValue" class="card-value"></div></div>
       </div>
@@ -105,20 +111,33 @@
   <script>
     const BASE_RATIO = 356.86 / 256.86;
     const HOURS_PER_DAY = 8;
-    const sliders = ['retainer','workDays','travelDays','opsRate'];
-    sliders.forEach(id => {
+    const params = ['retainer','workDays','travelDays','opsRate'];
+    params.forEach(id => {
       const slider = document.getElementById(id);
+      const manual = document.getElementById(id+'Input');
       const display = document.getElementById(id+'Display');
       const summary = document.getElementById(
         id==='retainer'?'retainerSum':
         id==='workDays'?'workSum':
         id==='travelDays'?'travelSum':'opsSum'
       );
+      // slider -> update
       slider.addEventListener('input', () => {
-        if(id==='retainer' || id==='opsRate') display.textContent = '$'+(+slider.value).toLocaleString(undefined,{minimumFractionDigits:2});
-        else display.textContent = +slider.value + ' ימים';
+        let val = +slider.value;
+        if(id!=='retainer' && id!=='opsRate') {
+          display.textContent = val + ' ימים';
+        } else {
+          display.textContent = '$'+val.toLocaleString(undefined,{minimumFractionDigits:2});
+        }
+        manual.value = val;
         summary.textContent = display.textContent;
         updateCards();
+      });
+      // manual input -> slider
+      manual.addEventListener('change', () => {
+        let val = parseFloat(manual.value) || 0;
+        slider.value = val;
+        slider.dispatchEvent(new Event('input'));
       });
     });
     function updateCards(){
@@ -137,13 +156,11 @@
       document.getElementById('sumWorkValue').textContent = '$'+(rateWork*wd).toFixed(2);
       document.getElementById('opsExpenseValue').textContent = '$'+opsExp.toFixed(2);
       document.getElementById('compTotalValue').textContent = '$'+compPool.toFixed(2);
-      document.getElementById('retainerValue').textContent = '$'+R.toFixed(2);
-      // total hours
-      document.getElementById('totalWorkHoursValue').textContent = (wd * HOURS_PER_DAY) + ' שעות';
-      document.getElementById('totalTravelHoursValue').textContent = (td * HOURS_PER_DAY) + ' שעות';
+      document.getElementById('totalWorkHoursValue').textContent = (wd*HOURS_PER_DAY)+' שעות';
+      document.getElementById('totalTravelHoursValue').textContent = (td*HOURS_PER_DAY)+' שעות';
     }
     // Initialize
-    sliders.forEach(id => document.getElementById(id).dispatchEvent(new Event('input')));
+    params.forEach(id => document.getElementById(id).dispatchEvent(new Event('input')));
   </script>
 </body>
 </html>
