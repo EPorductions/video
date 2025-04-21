@@ -22,144 +22,160 @@
       color: #fff;
       font-size: 2rem;
     }
+    .wrapper {
+      display: flex;
+      flex-direction: column;
+      transition: flex-direction 0.5s ease;
+      align-items: stretch;
+    }
     .controls {
-      position: sticky; top: 0;
       background: #f0f2f5;
       padding: 15px 10px;
-      display: flex; flex-direction: column;
-      gap: 20px; width: 100%; z-index: 1000;
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+      width: 100%;
+      transition: width 0.5s ease;
+      z-index: 1000;
     }
-    .slider-group { width: 100%; }
+    .slider-group {
+      width: 100%;
+    }
     .slider-group label {
-      display: block; font-size: 1.4rem;
-      font-weight: bold; margin-bottom: 8px;
-      text-align: right; color: #333;
+      display: block;
+      font-size: 1.4rem;
+      font-weight: bold;
+      margin-bottom: 8px;
+      text-align: right;
+      color: #333;
     }
     .slider-group input[type=range] {
       width: 100%; height: 16px; border-radius: 8px;
-      background: #ddd; outline: none;
-      -webkit-appearance: none; margin-bottom: 6px;
+      background: #ddd; outline: none; -webkit-appearance: none;
+      margin-bottom: 6px;
     }
     .slider-group input[type=range]::-webkit-slider-thumb {
-      -webkit-appearance: none; width: 36px; height: 36px;
-      border-radius: 50%; background: #007bff;
-      cursor: pointer; border: 4px solid #fff; margin-top: -10px;
+      -webkit-appearance: none;
+      width: 36px; height: 36px; border-radius: 50%;
+      background: #007bff; cursor: pointer;
+      border: 4px solid #fff; margin-top: -10px;
     }
     .slider-group input[type=range]::-moz-range-thumb {
       width: 36px; height: 36px; border-radius: 50%;
-      background: #007bff; cursor: pointer; border: 4px solid #fff;
+      background: #007bff; cursor: pointer;
+      border: 4px solid #fff;
     }
     .slider-value-display {
-      text-align: center; font-size: 1.2rem;
-      color: #007bff; font-weight: bold;
+      text-align: center;
+      font-size: 1.2rem;
+      color: #007bff;
+      font-weight: bold;
     }
     .cards {
       display: grid;
       grid-template-columns: 1fr;
-      gap: 15px; padding: 10px;
-      transition: all 0.4s ease;
+      gap: 15px;
+      padding: 10px;
+      transition: width 0.5s ease;
+      width: 100%;
     }
+    .card {
+      background: #fff;
+      border-radius: 10px;
+      padding: 20px;
+      text-align: center;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+      transition: transform .2s ease, box-shadow .2s ease;
+    }
+    .card:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    }
+    .card-icon {
+      font-size: 2rem;
+      margin-bottom: 10px;
+      display: inline-block;
+      padding: 10px;
+      border-radius: 50%;
+    }
+    .card-title { font-size: 1.3rem; margin-bottom: 8px; font-weight: bold; color: #333; }
+    .card-value { font-size: 1.8rem; font-weight: bold; color: #007bff; }
+    /* Layout for landscape: sliders right (30%), cards left (70%) */
+    @media (orientation: landscape) {
+      .wrapper { flex-direction: row-reverse; }
+      .controls { width: 30%; flex: 0 0 30%; padding: 20px; }
+      .cards    { width: 70%; flex: 0 0 70%; padding: 20px; }
+    }
+    /* Responsive grid for cards */
     @media (min-width: 600px) {
       .cards { grid-template-columns: repeat(2, 1fr); }
     }
     @media (min-width: 900px) {
       .cards { grid-template-columns: repeat(3, 1fr); }
     }
-    @media (orientation: landscape) {
-      .cards { grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); }
-    }
-    .card {
-      background: #fff; border-radius: 10px;
-      padding: 20px; text-align: center;
-      box-shadow: 0 2px 6px rgba(0,0,0,0.1);
-      transition: transform 0.4s ease, box-shadow 0.4s ease;
-    }
-    .card:hover {
-      transform: translateY(-4px);
-      box-shadow: 0 6px 18px rgba(0,0,0,0.15);
-    }
-    .card-icon {
-      font-size: 2rem; margin-bottom: 10px;
-      display: inline-block; padding: 10px;
-      border-radius: 50%;
-    }
-    .icon-rate-work     { background: rgba(23,162,184,0.1); color: #17a2b8; }
-    .icon-rate-travel   { background: rgba(255,193,7,0.1); color: #ffc107; }
-    .icon-sum-work      { background: rgba(40,167,69,0.1); color: #28a745; }
-    .icon-sum-travel    { background: rgba(0,123,255,0.1); color: #007bff; }
-    .icon-comp-total    { background: rgba(108,117,125,0.1); color: #6c757d; }
-    .icon-ops-expense   { background: rgba(220,53,69,0.1); color: #dc3545; }
-    .icon-retainer      { background: rgba(0,123,255,0.1); color: #007bff; }
-    .card-title {
-      font-size: 1.3rem; margin-bottom: 8px;
-      font-weight: bold; color: #333;
-    }
-    .card-value {
-      font-size: 1.8rem; font-weight: bold;
-      color: #007bff;
-      transition: opacity 0.4s ease;
-    }
   </style>
 </head>
 <body>
   <h1>טבלת פיצויים אינטראקטיבית</h1>
-  <div class="controls">
-    <div class="slider-group">
-      <label for="retainer">ריטיינר חודשי ($):</label>
-      <input type="range" id="retainer" min="0" max="20000" step="50" value="8650" />
-      <div class="slider-value-display" id="retainerDisplay">$8,650.00</div>
+  <div class="wrapper">
+    <div class="controls">
+      <div class="slider-group">
+        <label for="retainer">ריטיינר חודשי ($):</label>
+        <input type="range" id="retainer" min="0" max="20000" step="50" value="8650" />
+        <div class="slider-value-display" id="retainerDisplay">$8,650.00</div>
+      </div>
+      <div class="slider-group">
+        <label for="workDays">ימי עבודה/הכנה:</label>
+        <input type="range" id="workDays" min="0" max="30" value="10" />
+        <div class="slider-value-display" id="workDaysDisplay">10 ימים</div>
+      </div>
+      <div class="slider-group">
+        <label for="travelDays">ימי נסיעה:</label>
+        <input type="range" id="travelDays" min="0" max="30" value="11" />
+        <div class="slider-value-display" id="travelDaysDisplay">11 ימים</div>
+      </div>
+      <div class="slider-group">
+        <label for="opsRate">הוצאות מנהל ליום נסיעה ($):</label>
+        <input type="range" id="opsRate" min="0" max="500" step="5" value="205" />
+        <div class="slider-value-display" id="opsRateDisplay">$205.00</div>
+      </div>
     </div>
-    <div class="slider-group">
-      <label for="workDays">ימי עבודה/הכנה:</label>
-      <input type="range" id="workDays" min="0" max="30" value="10" />
-      <div class="slider-value-display" id="workDaysDisplay">10 ימים</div>
-    </div>
-    <div class="slider-group">
-      <label for="travelDays">ימי נסיעה:</label>
-      <input type="range" id="travelDays" min="0" max="30" value="11" />
-      <div class="slider-value-display" id="travelDaysDisplay">11 ימים</div>
-    </div>
-    <div class="slider-group">
-      <label for="opsRate">הוצאות מנהל ליום נסיעה ($):</label>
-      <input type="range" id="opsRate" min="0" max="500" step="5" value="205" />
-      <div class="slider-value-display" id="opsRateDisplay">$205.00</div>
-    </div>
-  </div>
-  <div class="cards">
-    <div class="card">
-      <div class="card-icon icon-rate-work"><i class="fas fa-tags"></i></div>
-      <div class="card-title">תעריף ליום עבודה</div>
-      <div class="card-value" id="rateWorkValue">$0.00</div>
-    </div>
-    <div class="card">
-      <div class="card-icon icon-rate-travel"><i class="fas fa-tags"></i></div>
-      <div class="card-title">תעריף ליום נסיעה</div>
-      <div class="card-value" id="rateTravelValue">$0.00</div>
-    </div>
-    <div class="card">
-      <div class="card-icon icon-sum-work"><i class="fas fa-calendar-check"></i></div>
-      <div class="card-title">סכום ימי עבודה</div>
-      <div class="card-value" id="sumWorkValue">$0.00</div>
-    </div>
-    <div class="card">
-      <div class="card-icon icon-sum-travel"><i class="fas fa-plane"></i></div>
-      <div class="card-title">סכום ימי נסיעה</div>
-      <div class="card-value" id="sumTravelValue">$0.00</div>
-    </div>
-    <div class="card">
-      <div class="card-icon icon-comp-total"><i class="fas fa-hand-holding-usd"></i></div>
-      <div class="card-title">סך הכל פיצוי</div>
-      <div class="card-value" id="compTotalValue">$0.00</div>
-    </div>
-    <div class="card">
-      <div class="card-icon icon-ops-expense"><i class="fas fa-file-invoice-dollar"></i></div>
-      <div class="card-title">הוצאות מנהל תפעול</div>
-      <div class="card-value" id="opsExpenseValue">$0.00</div>
-    </div>
-    <div class="card">
-      <div class="card-icon icon-retainer"><i class="fas fa-wallet"></i></div>
-      <div class="card-title">ריטיינר חודשי</div>
-      <div class="card-value" id="retainerValue">$8,650.00</div>
+    <div class="cards">
+      <div class="card">
+        <div class="card-icon icon-rate-work"><i class="fas fa-tags"></i></div>
+        <div class="card-title">תעריף ליום עבודה</div>
+        <div class="card-value" id="rateWorkValue">$0.00</div>
+      </div>
+      <div class="card">
+        <div class="card-icon icon-rate-travel"><i class="fas fa-tags"></i></div>
+        <div class="card-title">תעריף ליום נסיעה</div>
+        <div class="card-value" id="rateTravelValue">$0.00</div>
+      </div>
+      <div class="card">
+        <div class="card-icon icon-sum-work"><i class="fas fa-calendar-check"></i></div>
+        <div class="card-title">סכום ימי עבודה</div>
+        <div class="card-value" id="sumWorkValue">$0.00</div>
+      </div>
+      <div class="card">
+        <div class="card-icon icon-sum-travel"><i class="fas fa-plane"></i></div>
+        <div class="card-title">סכום ימי נסיעה</div>
+        <div class="card-value" id="sumTravelValue">$0.00</div>
+      </div>
+      <div class="card">
+        <div class="card-icon icon-comp-total"><i class="fas fa-hand-holding-usd"></i></div>
+        <div class="card-title">סך הכל פיצוי</div>
+        <div class="card-value" id="compTotalValue">$0.00</div>
+      </div>
+      <div class="card">
+        <div class="card-icon icon-ops-expense"><i class="fas fa-file-invoice-dollar"></i></div>
+        <div class="card-title">הוצאות מנהל תפעול</div>
+        <div class="card-value" id="opsExpenseValue">$0.00</div>
+      </div>
+      <div class="card">
+        <div class="card-icon icon-retainer"><i class="fas fa-wallet"></i></div>
+        <div class="card-title">ריטיינר חודשי</div>
+        <div class="card-value" id="retainerValue">$8,650.00</div>
+      </div>
     </div>
   </div>
   <script>
@@ -185,22 +201,27 @@
     function formatUSD(val) {
       return '$' + val.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
     }
+
     function updateAll() {
       const R = +retainerSlider.value;
       const wd = +workSlider.value;
       const td = +travelSlider.value;
       const or = +opsSlider.value;
+
       retainerDisplay.textContent = formatUSD(R);
       workDisplay.textContent     = wd + (wd === 1 ? ' יום' : ' ימים');
       travelDisplay.textContent   = td + (td === 1 ? ' יום' : ' ימים');
       opsDisplay.textContent      = formatUSD(or);
+
       const totalOpsExp = td * or;
-      const compPool    = R - totalOpsExp;
-      const k           = compPool / (wd * BASE_RATIO + td);
-      const rateTravel  = isFinite(k) && k > 0 ? k : 0;
-      const rateWork    = BASE_RATIO * rateTravel;
-      const sumWork     = rateWork * wd;
-      const sumTravel   = rateTravel * td;
+      const compPool = R - totalOpsExp;
+      const k = compPool / (wd * BASE_RATIO + td);
+      const rateTravel = isFinite(k) && k > 0 ? k : 0;
+      const rateWork   = BASE_RATIO * rateTravel;
+
+      const sumWork   = rateWork * wd;
+      const sumTravel = rateTravel * td;
+
       rateWorkEl.textContent   = formatUSD(rateWork);
       rateTravelEl.textContent = formatUSD(rateTravel);
       sumWorkEl.textContent    = formatUSD(sumWork);
@@ -209,9 +230,11 @@
       opsExpEl.textContent     = formatUSD(totalOpsExp);
       retainerEl.textContent   = formatUSD(R);
     }
+
     [retainerSlider, workSlider, travelSlider, opsSlider].forEach(slider =>
       slider.addEventListener('input', updateAll)
     );
+
     updateAll();
   </script>
 </body>
