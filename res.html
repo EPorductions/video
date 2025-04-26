@@ -1,0 +1,635 @@
+אוקיי, אני מתנצל על השגיאות והתסכול שנגרם. ברור שהיו בעיות בסדר הפעולות ובבניית הקוד בגרסאות האחרונות.
+נתחיל מחדש, תוך שימוש בקוד הבסיסי שסיפקת (זה שלפני כל התכונות המורכבות), נשלב את תוכן החוזה המלא, נוסיף את נתוני ה-CSV, נוסיף את חודש מאי מראש, ונטמיע מחדש את כל התכונות שביקשת בצורה מסודרת וזהירה יותר, תוך תיקון השגיאות שצוינו.
+דגשים:
+ * סדר קוד: הפעם אוודא שכל הקבועים והפונקציות מוגדרים לפני השימוש בהם.
+ * אתחול DOM: אתחול האלמנטים (elements) והוספת המאזינים (event listeners) יתבצעו רק לאחר שה-DOM נטען במלואו (DOMContentLoaded), ובסדר הנכון.
+ * נתוני CSV: נתוני ה-CSV ישמשו לאתחול הטבלה.
+ * שורות מאי: יתווספו אוטומטית.
+ * כל התכונות: כל התכונות שביקשת (GMT, מחיקה/הוספה, הסתרת עמודות, ש"נ, עריכה גמישה, הצמדה, הודעות) יוטמעו.
+ * תיקון שגיאות: אתקן את כל השגיאות שדווחו.
+הנה הקוד המלא, בתקווה שהפעם יעבוד כראוי:
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>הסכם שירותים + לוח זמנים + טבלת פיצויים אינטראקטיבית</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" />
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Assistant:wght@300;400;500;700&display=swap" rel="stylesheet">
+
+    <style>
+        /* --------------------------------------------------
+            GLOBAL THEME & UTILS
+        -------------------------------------------------- */
+        :root {
+            --primary-color: #4a90e2;   /* MindFly Blue */
+            --secondary-color: #34495e; /* Dark slate */
+            --highlight-bg: #fff3cd;    /* Soft yellow */
+            --card-bg: #ffffff;
+            --body-bg: #f0f2f5;
+            --text-color: #333;
+            --muted-color: #6c757d;
+            --border-color: #e8e8e8;
+            --shadow-sm: rgba(0,0,0,0.05);
+            --shadow-md: rgba(0,0,0,0.1);
+            --font-primary: 'Assistant', 'Roboto', Arial, sans-serif;
+            --danger-color: #dc3545;
+            --warning-color: #ffc107;
+            --info-color: #17a2b8;
+            --schedule-marker-color: rgba(220, 53, 69, 0.6);
+            --snap-thumb-color: var(--primary-color); /* Color for slider thumb when snapped */
+             --gmt-button-changed-border: #ffc107;
+             --delete-selected-color: var(--danger-color);
+        }
+        * { box-sizing: border-box; }
+        body { margin: 0; padding: 20px 10px; font-family: var(--font-primary); background: var(--body-bg); color: var(--text-color); line-height: 1.6; direction: rtl; }
+        h1,h2,h3 { font-weight: 500; text-align: center; color: var(--secondary-color); margin-top: 0; }
+        h1 { font-size: 1.8rem; margin-bottom: 25px; }
+        h2 { font-size: 1.5rem; margin: 45px 0 25px; position: relative; }
+        h2:before { content: ''; position: absolute; top: 100%; left: 50%; width: 120px; height: 2px; background: var(--border-color); transform: translateX(-50%); }
+        .container { max-width: 1300px; margin: 0 auto; }
+
+        /* Collapsible sections */
+        details.collapsible-section { background: var(--card-bg); border: 1px solid var(--border-color); border-radius: 8px; box-shadow: 0 2px 5px var(--shadow-sm); margin-bottom: 20px; overflow: hidden; }
+        summary.collapsible-summary { padding: 15px 20px; cursor: pointer; display: flex; justify-content: space-between; align-items: center; font-size: 1.2rem; font-weight: 500; color: var(--secondary-color); background: #f8f9fa; border-bottom: 1px solid var(--border-color); }
+        summary.collapsible-summary:hover { background: #e9ecef; }
+        summary.collapsible-summary::-webkit-details-marker { display: none; }
+        summary.collapsible-summary::after { content: '\f078'; font-family: 'Font Awesome 5 Free'; font-weight: 900; font-size: 1rem; margin-right: auto; padding-right: 10px; transition: transform 0.3s ease; color: var(--primary-color); }
+        details[open].collapsible-section > summary.collapsible-summary::after { transform: rotate(180deg); }
+        .collapsible-content { padding: 20px; }
+
+        /* Schedule Controls */
+        .schedule-controls-container { display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 20px; padding-bottom: 15px; border-bottom: 1px solid var(--border-color); margin-bottom: 15px; }
+        .schedule-bulk-controls, .schedule-view-controls { display: flex; gap: 15px; align-items: center; flex-wrap: wrap; margin-bottom: 0; padding-bottom: 0; border-bottom: none; }
+        .schedule-bulk-controls label { margin-left: 5px; font-weight: 500; cursor: pointer; }
+        .schedule-bulk-controls select { padding: 5px 8px; border: 1px solid var(--border-color); border-radius: 4px; min-width: 150px; }
+        .schedule-bulk-controls button { padding: 6px 12px; background-color: var(--secondary-color); color: white; border: none; border-radius: 4px; cursor: pointer; transition: background-color 0.2s ease; }
+        .schedule-bulk-controls button:hover { background-color: #2c3e50; }
+        .schedule-view-controls span { font-weight: 500; }
+        .schedule-view-controls label { cursor: pointer; font-size: 0.9em; }
+        .schedule-view-controls input[type="checkbox"] { margin-left: 4px; cursor: pointer; }
+        #deleteSelectedBtn { background-color: var(--delete-selected-color); }
+        #deleteSelectedBtn:hover { background-color: #c82333; }
+
+        /* Schedule Add/Delete Buttons Below Table */
+         .schedule-add-delete-controls { margin-top: 15px; text-align: left; padding-top: 15px; border-top: 1px solid var(--border-color); }
+         .schedule-add-delete-controls button, .delete-row-btn { padding: 5px 10px; background-color: var(--primary-color); color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 0.9em; margin-right: 10px; transition: background-color 0.2s ease; vertical-align: middle; }
+        .delete-row-btn { background-color: var(--danger-color); padding: 2px 6px; font-size: 0.8em; }
+        .schedule-add-delete-controls button:hover { background-color: #3a80d2; }
+        .delete-row-btn:hover { background-color: #c82333; }
+
+        /* Schedule Table */
+        .schedule-table-container { overflow-x: auto; margin-bottom: 15px; max-height: 500px; overflow-y: auto; border: 1px solid var(--border-color); border-radius: 4px; }
+        .schedule-table { width: 100%; border-collapse: collapse; font-size: 0.88rem; white-space: nowrap; }
+        .schedule-table th, .schedule-table td { border: 1px solid #ddd; padding: 8px 10px; text-align: right; vertical-align: middle; }
+        .schedule-table th { background-color: #f8f9fa; font-weight: 600; position: sticky; top: 0; z-index: 1; }
+        .schedule-table tbody tr:nth-child(even) { background-color: #f9f9f9; }
+        .schedule-table tbody tr:hover { background-color: #f1f1f1; }
+        .schedule-table td[contenteditable="true"] { background-color: #f0f8ff; cursor: text; }
+        .schedule-table select { padding: 4px 6px; border: 1px solid #ccc; border-radius: 3px; font-size: inherit; width: auto; min-width: 80px; margin-left: 5px; }
+        .schedule-table input[type="date"], .schedule-table input[type="time"] { padding: 4px; border: 1px solid #ccc; border-radius: 3px; font-size: inherit; width: auto; }
+        .schedule-table .israel-time-col { background-color: #e9f5ff; font-size: 0.8rem; }
+        .schedule-table .total-duration-col { font-weight: bold; }
+        .schedule-table .event-type-col select { min-width: 150px; }
+        .schedule-table .location-col { min-width: 200px; white-space: normal; }
+        .schedule-table th:nth-child(1), .schedule-table td:nth-child(1) { width: 35px; text-align: center; }
+        .schedule-table th:last-child, .schedule-table td:last-child { width: 50px; text-align: center; }
+        .gmt-control-wrapper { position: relative; display: inline-block; }
+        .gmt-button { font-size: 0.8em; padding: 2px 5px; min-width: 65px; text-align: center; border: 1px solid var(--border-color); border-radius: 3px; background-color: #f8f9fa; cursor: pointer; transition: border-color 0.2s ease; }
+        .gmt-button.changed { border-color: var(--gmt-button-changed-border); font-weight: bold; }
+        .gmt-select-popup { position: absolute; top: 100%; right: 0; background-color: white; border: 1px solid #ccc; border-radius: 4px; z-index: 10; display: none; padding: 5px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); min-width: 100px; }
+        .gmt-select-popup select { width: 100%; border: none; }
+        .gmt-control-wrapper .gmt-select-popup.visible { display: block; }
+        .schedule-table .col-hidden { display: none; }
+
+
+        /* Sliders */
+        .controls { position: relative; padding: 10px 0; }
+        details.slider-detail { background: var(--card-bg); border: 1px solid var(--border-color); border-radius: 6px; margin-bottom: 12px; overflow: hidden; }
+        summary.slider-summary { padding: 10px 15px; cursor: pointer; display: flex; justify-content: space-between; align-items: center; font-weight: 500; color: var(--secondary-color); }
+        summary.slider-summary::after { content:'\f078'; font-family: 'Font Awesome 5 Free'; font-weight:900; transition: transform 0.3s ease; margin-right: auto; padding-right: 10px; }
+        details[open] summary.slider-summary::after { transform: rotate(180deg); }
+        .slider-group { padding: 10px 15px 15px; position: relative; }
+        .slider-group label { display:block; margin-bottom:6px; font-size:0.95rem; font-weight:500; color: var(--secondary-color); }
+        .slider-group input[type=range] { width:100%; margin-bottom:6px; height:12px; -webkit-appearance:none; background:#ddd; border-radius:6px; cursor: pointer; position: relative; z-index: 1; }
+        .slider-group input[type=range]::-webkit-slider-thumb { -webkit-appearance:none; width:22px; height:22px; border-radius:50%; background:var(--primary-color); cursor:pointer; position: relative; z-index: 2; transition: background-color 0.2s ease; }
+        .slider-value-display { text-align:center; font-size:0.9rem; color:var(--primary-color); margin-bottom:6px; font-weight:500; }
+        .slider-note { font-size:0.8rem; color:var(--muted-color); text-align:center; }
+        .schedule-marker { position: absolute; top: 38px; width: 3px; height: 16px; background-color: var(--schedule-marker-color); border-radius: 2px; transform: translateX(50%); z-index: 0; pointer-events: none; transition: right 0.1s ease-out; }
+        /* Removed snap-marker style */
+        .slider-group input[type=range].snapped::-webkit-slider-thumb { background-color: var(--snap-thumb-color); } /* Use --snap-thumb-color */
+
+        /* Cards */
+        .cards { display:grid; grid-template-columns:repeat(auto-fit,minmax(170px,1fr)); gap:15px; margin-top:18px; }
+        .card { background: var(--card-bg); border: 1px solid var(--border-color); border-radius:8px; padding:18px 12px; text-align:center; box-shadow: 0 2px 6px var(--shadow-sm); transition:transform 0.2s ease, box-shadow 0.2s ease; }
+        .card:hover { transform:translateY(-3px); box-shadow: 0 4px 8px var(--shadow-md); }
+        .card-icon { font-size:1.6rem; padding:8px; border-radius:50%; margin-bottom:10px; display:inline-block; }
+        .card-title { font-size:0.9rem; font-weight:500; margin-bottom:6px; height:2.4em; color:var(--muted-color); }
+        .card-value { font-size:1.4rem; font-weight:bold; color:var(--primary-color); }
+        .editable-card-value { border-bottom: 1px dashed var(--primary-color); cursor: text; min-width: 50px; display: inline-block; padding: 0 3px; }
+        .editable-card-value:focus { outline: 1px solid var(--primary-color); background: #fff9e0; }
+        .icon-rate-work{background:rgba(23,162,184,0.1);color:#17a2b8;} .icon-rate-travel{background:rgba(255,193,7,0.1);color:#ffc107;} .icon-sum-work{background:rgba(40,167,69,0.1);color:#28a745;} .icon-sum-travel{background:rgba(0,123,255,0.1);color:#007bff;} .icon-ops-expense{background:rgba(220,53,69,0.1);color:#dc3545;} .icon-comp-total{background:rgba(108,117,125,0.1);color:#6c757d;} .icon-retainer{background:rgba(0,123,255,0.1);color:#007bff;} .icon-hours{background:rgba(255,87,34,0.1);color:#ff5722;}
+
+        /* Contract */
+        details.contract-section { background: var(--card-bg); border: 1px solid var(--border-color); border-radius:8px; box-shadow: 0 2px 5px var(--shadow-sm); margin-bottom:20px; overflow:hidden; }
+        summary.contract-header { padding:15px 20px; cursor:pointer; display:flex; justify-content:space-between; align-items:center; font-size:1.1rem; color:#fff; background: var(--secondary-color); transition:background 0.2s ease; border-bottom: none; }
+        details[open].contract-section > summary.contract-header { border-bottom: 1px solid var(--border-color); }
+        summary.contract-header:hover { background:#2c3e50; }
+        summary.contract-header::-webkit-details-marker { display:none; }
+        summary.contract-header::after { content:'\f078'; font-family:'Font Awesome 5 Free'; font-weight:900; font-size:0.9rem; margin-right: auto; padding-right: 10px; transition: transform 0.3s ease; }
+        details[open] summary.contract-header::after { transform: rotate(180deg); }
+        .contract-content { padding:22px 25px; direction:ltr; text-align:left; font-size:0.95rem; }
+        .contract-content p { margin-bottom:1em; }
+        .contract-content h3 { color:var(--primary-color); font-size:1.1rem; margin-top:22px; border-bottom:1px dotted #ccc; padding-bottom:6px; text-align: left;}
+        .contract-content ul { padding-left:25px; list-style:disc; }
+        .contract-content li { margin-bottom:8px; }
+        .contract-content table { width:100%; border-collapse:collapse; margin:20px 0; font-size:0.93rem; }
+        .contract-content th, .contract-content td { border:1px solid #ddd; padding:10px 12px; vertical-align:middle; text-align: left;}
+        .contract-content th { background:#f8f9fa; font-weight:600; color:#555; }
+        .contract-content .totalRow td { font-weight:bold; background:#f8f9fa; }
+        .highlight { background:var(--highlight-bg); padding:2px 5px; border-radius:3px; font-weight:600; color:#856404; }
+        .editable-contract-value { background: var(--highlight-bg); padding: 2px 5px; border-radius: 3px; font-weight: 600; color: #856404; border-bottom: 1px dashed var(--primary-color); cursor: text; min-width: 30px; display: inline-block; vertical-align: baseline; }
+        .editable-contract-value:focus { outline: 1px solid var(--primary-color); background: #fff9e0; }
+        .rate-note, .sum-note { font-size: 0.8em; color: var(--muted-color); font-style: italic; display: inline; margin-right: 5px;}
+        .calculation-warning { color: var(--danger-color); font-weight: bold; margin-top: 10px; }
+        .calculation-warning span { display: block; margin-top: 5px; }
+        .ops-rate-warning { color: var(--warning-color); font-weight: bold; }
+        .overtime-warning { color: var(--danger-color); font-weight: bold; font-size: 0.9em; margin-left: 10px; }
+        .overtime-disclaimer { font-size: 0.85rem; color: var(--muted-color); margin-top: 15px; font-style: italic; }
+        .overtime-comparison { border-left: 3px solid #eee; padding-left: 15px; margin-left: 10px; font-size: 0.9em;}
+        .signatureSection { margin-top:30px; padding-top:18px; border-top:1px solid #eee; }
+        .signaturePlaceholder { display:inline-block; width:200px; border-bottom:1px solid #555; margin:30px 0 5px; }
+
+        /* Update Notifier */
+        #updateNotifier { position: fixed; bottom: -100px; left: 50%; transform: translateX(-50%); background-color: rgba(44, 62, 80, 0.9); color: white; padding: 10px 20px; border-radius: 5px; z-index: 1000; font-size: 0.9rem; transition: bottom 0.5s ease-in-out, opacity 0.5s ease-in-out; opacity: 0; text-align: center; }
+        #updateNotifier.show { bottom: 20px; opacity: 1; }
+
+        /* Responsive */
+        @media (max-width:1100px) { .schedule-controls-container { flex-direction: column; align-items: stretch; } .schedule-bulk-controls, .schedule-view-controls { justify-content: flex-start; } }
+        @media (max-width:992px) { .schedule-table { font-size: 0.85rem; } .gmt-button { min-width: 55px; } .cards { grid-template-columns:repeat(auto-fit,minmax(150px,1fr)); } }
+        @media (max-width:768px){ .card { padding:12px 8px; } .card-icon{font-size:1.4rem;} .card-title{font-size:0.8rem; height: 2.8em;} .card-value{font-size:1.1rem;} summary.contract-header, summary.collapsible-summary {font-size:1rem; padding:12px 15px;} .contract-content, .collapsible-content {padding:15px;} h1 { font-size: 1.5rem; } h2 { font-size: 1.3rem; } .schedule-table { font-size: 0.8rem; } .schedule-table th, .schedule-table td { padding: 6px 8px; } .schedule-controls-container { gap: 10px; } }
+        @media (max-width: 480px) { .cards { grid-template-columns:repeat(auto-fit,minmax(120px,1fr)); } .card-title { font-size: 0.75rem; height: 3em; } .card-value { font-size: 1rem; } .schedule-add-delete-controls { text-align: center; } .schedule-add-delete-controls button { margin: 5px; } }
+
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1><i class="fas fa-file-signature" style="color:var(--primary-color);"></i> הסכם שירותים, לוח זמנים ומחשבון פיצויים</h1>
+
+         <details class="collapsible-section" id="scheduleSection" open>
+             <summary class="collapsible-summary"><span><i class="fas fa-calendar-alt"></i> לוח זמנים מפורט</span></summary>
+             <div class="collapsible-content">
+                 <div class="schedule-controls-container">
+                      <div class="schedule-bulk-controls">
+                          <label style="cursor: pointer;"><input type="checkbox" id="headerCheckbox" title="בחר/בטל הכל"> בחר הכל</label>
+                          <select id="bulkGmtSelect" title="בחר אזור זמן להחלה"> <option value="" disabled selected>בחר אזור זמן (UTC)</option> </select>
+                          <button id="applyBulkGmtBtn" type="button" title="החל אזור זמן על השורות שנבחרו">החל GMT</button>
+                          <button id="deleteSelectedBtn" type="button" title="מחק שורות מסומנות"><i class="fas fa-trash-alt"></i> מחק נבחרים</button>
+                      </div>
+                      <div class="schedule-view-controls">
+                          <span>הצג/הסתר:</span>
+                          <label><input type="checkbox" class="toggle-col-cb" data-col-class="col-confirmation" checked> אישור</label>
+                          <label><input type="checkbox" class="toggle-col-cb" data-col-class="col-flight" checked> טיסה</label>
+                          <label><input type="checkbox" class="toggle-col-cb" data-col-class="col-terminal" checked> טרמינל</label>
+                          <label><input type="checkbox" class="toggle-col-cb" data-col-class="col-israel-time" checked> זמן ישראל</label>
+                      </div>
+                 </div>
+                 <div class="schedule-table-container" id="scheduleTableContainer">
+                     <table class="schedule-table">
+                         <thead>
+                             <tr>
+                                 <th><input type="checkbox" id="headerCheckboxDuplicate" title="בחר/בטל הכל"></th>
+                                 <th>תאריך</th><th>התחלה</th><th>אזור</th><th>סיום</th><th>אזור</th><th>סוג אירוע</th>
+                                 <th class="col-confirmation">אישור/טיקט</th><th class="col-flight">טיסה</th><th class="col-location">מיקום</th><th class="col-terminal">טרמינל</th>
+                                 <th class="col-israel-time">התחלה IL</th><th class="col-israel-time">סיום IL</th><th class="total-duration-col">משך</th><th>מחק</th>
+                             </tr>
+                         </thead>
+                         <tbody id="scheduleBody"></tbody>
+                          <tfoot><tr><td colspan="14" style="text-align: left; font-weight: bold;">סה"כ שעות:</td><td id="scheduleTotalHours" style="font-weight: bold;">0.00</td><td></td></tr></tfoot>
+                     </table>
+                 </div>
+                  <div class="schedule-add-delete-controls">
+                      <button type="button" id="addRowBtn"><i class="fas fa-plus"></i> הוסף שורה</button>
+                  </div>
+             </div>
+         </details>
+
+         <details class="collapsible-section" id="compensationSection" open>
+             <summary class="collapsible-summary"><span><i class="fas fa-calculator"></i> טבלת פיצויים אינטראקטיבית</span></summary>
+             <div class="collapsible-content">
+                 <div class="controls">
+                      <details class="slider-detail" open><summary class="slider-summary">ריטיינר: <span id="retainerSum">$8,650.00</span></summary><div class="slider-group"><label for="retainer">ריטיינר חודשי ($):</label><input id="retainer" type="range" min="0" max="20000" step="1" value="8650" /><div id="retainerDisplay" class="slider-value-display">$8,650.00</div></div></details>
+                      <details class="slider-detail"><summary class="slider-summary">ימי עבודה: <span id="workSum">10 ימים</span></summary><div class="slider-group"><label for="workDays">ימי עבודה/הכנה (להסכם):</label><div class="schedule-marker" id="workDaysScheduleMarker"></div><input id="workDays" type="range" min="0" max="30" step="1" value="10" /><div id="workDaysDisplay" class="slider-value-display">10 ימים</div><div class="slider-note">מחושב מהלו"ז: <span id="workDaysFromSchedule">0</span> ימים</div></div></details>
+                      <details class="slider-detail"><summary class="slider-summary">ימי נסיעה: <span id="travelSum">11 ימים</span></summary><div class="slider-group"><label for="travelDays">ימי נסיעה (להסכם):</label><div class="schedule-marker" id="travelDaysScheduleMarker"></div><input id="travelDays" type="range" min="0" max="30" step="1" value="11" /><div id="travelDaysDisplay" class="slider-value-display">11 ימים</div><div class="slider-note">מחושב מהלו"ז: <span id="travelDaysFromSchedule">0</span> ימים</div></div></details>
+                      <details class="slider-detail"><summary class="slider-summary">הוצאות ליום נסיעה: <span id="opsSum">$205.00</span></summary><div class="slider-group"><label for="opsRate">הוצאות מנהל ליום נסיעה ($):</label><input id="opsRate" type="range" min="0" max="500" step="5" value="205" /><div id="opsRateDisplay" class="slider-value-display">$205.00</div></div></details>
+                 </div>
+                 <div class="cards">
+                      <div class="card"><div class="card-icon icon-retainer"><i class="fas fa-wallet"></i></div><div class="card-title">ריטיינר חודשי</div><div id="retainerValue" class="card-value editable-card-value" contenteditable="true">$8,650.00</div></div>
+                      <div class="card"><div class="card-icon icon-rate-work"><i class="fas fa-tags"></i></div><div class="card-title">תעריף ליום עבודה</div><div id="rateWorkValue" class="card-value editable-card-value" contenteditable="true">$356.86</div></div>
+                      <div class="card"><div class="card-icon icon-rate-travel"><i class="fas fa-tags"></i></div><div class="card-title">תעריף ליום נסיעה</div><div id="rateTravelValue" class="card-value editable-card-value" contenteditable="true">$256.86</div></div>
+                      <div class="card"><div class="card-icon icon-sum-work"><i class="fas fa-calendar-check"></i></div><div class="card-title">סכום ימי עבודה</div><div id="sumWorkValue" class="card-value">$3,568.60</div></div>
+                      <div class="card"><div class="card-icon icon-sum-travel"><i class="fas fa-plane"></i></div><div class="card-title">סכום ימי נסיעה</div><div id="sumTravelValue" class="card-value">$2,825.46</div></div>
+                      <div class="card"><div class="card-icon icon-ops-expense"><i class="fas fa-file-invoice-dollar"></i></div><div class="card-title">הוצאות מנהל תפעול</div><div id="opsExpenseValue" class="card-value">$2,255.00</div></div>
+                      <div class="card"><div class="card-icon icon-comp-total"><i class="fas fa-hand-holding-usd"></i></div><div class="card-title">סך הכל פיצוי</div><div id="compTotalValue" class="card-value">$6,394.06</div></div>
+                      <div class="card"><div class="card-icon icon-hours"><i class="fas fa-clock"></i></div><div class="card-title">סה"כ שעות עבודה</div><div id="totalWorkHoursValue" class="card-value">80 שעות</div></div>
+                      <div class="card"><div class="card-icon icon-hours"><i class="fas fa-clock"></i></div><div class="card-title">סה"כ שעות נסיעה</div><div id="totalTravelHoursValue" class="card-value">88 שעות</div></div>
+                 </div>
+             </div>
+         </details>
+
+        <h2><i class="fas fa-file-contract"></i> טיוטת הסכם שירותים (תנאים מוסכמים)</h2>
+
+        <details class="contract-section" id="contractSection1">
+             <summary class="contract-header"><span><span class="icon">ℹ️</span> 1. Parties & Preamble</span><span>פרטים ורקע</span></summary>
+             <div class="contract-content">
+                 <p><strong>To:</strong> Orian Edelenyi (“Operational Manager”)</p>
+                 <p><strong>From:</strong> MindFly Ltd. (in formation) (the “Company”)</p>
+                 <p><strong>Date:</strong> April 22, 2025</p>
+                 <p><strong>Re: Operational Manager Services Agreement</strong></p>
+                 <p>This Agreement covers the period from <span id="contractStartDate" class="highlight">N/A</span> to <span id="contractEndDate" class="highlight">N/A</span> (based on provided schedule).</p>
+                 <hr>
+                 <p>MindFly Ltd. (in formation) (the “Company”) has developed a proprietary first-person-view (FPV) streaming solution. Operational Manager has extensive knowledge of and experience in the VR solutions market. This letter of agreement (“Agreement”) is entered into and made effective as of the date of the last signature below (“Effective Date”) and sets forth the terms under which the Operational Manager will provide the Company with operational management services (“Services”) in his area of expertise.</p>
+            </div>
+        </details>
+
+        <details class="contract-section" id="contractSection2">
+            <summary class="contract-header"><span><span class="icon">🛠️</span> 2. Services</span><span>שירותים</span></summary>
+            <div class="contract-content">
+                 <p>Operational Manager shall provide the Company with event operational management and other services in his area of expertise, including:</p>
+                 <ul>
+                     <li><strong>Preparation and Coordination:</strong> Coordination with the client and local production teams to ensure proper planning and setup of MindFly equipment, including bodycams, prior to the event.</li>
+                     <li><strong>Equipment Setup and Operation:</strong> Fitting the referees and players, the on-site setup, testing, and monitoring of MindFly equipment during live or recorded events to ensure optimal performance and compliance with agreed specifications.</li>
+                     <li><strong>Broadcast Integration:</strong> Collaboration with local production teams to integrate MindFly bodycams into live broadcasts, ensuring compatibility and seamless operation.</li>
+                     <li><strong>Training and Support:</strong> Providing training and support to local personnel on MindFly equipment use, if required.</li>
+                     <li><strong>Real-time Troubleshooting:</strong> Operational management, technical support, and resolution of technical issues during events.</li>
+                     <li><strong>Logistics and Travel Coordination:</strong> Management of all travel-related logistics and preparations between events.</li>
+                     <li><strong>Administration and Reporting:</strong> Managing and recording expenses (as applicable per section 3.3), submitting reports using the <span class="highlight">EASY EXPENSE</span> system, verifying data accuracy, communication, equipment checks, and other post-event administrative tasks.</li>
+                 </ul>
+                 <h3>Detailed Work Hours (Setup & Game Days):</h3>
+                 <div id="contractWorkHoursDetails"><ul><li>No game/setup hours listed.</li></ul></div>
+                 <div id="overtimeSummary">
+                      <p><strong>Overtime Estimate (Israeli Law - Simplified >9.5 hrs):</strong></p>
+                      <div id="overtimeList"><p>No overtime detected based on >9.5 hours/day threshold.</p></div>
+                      <p class="overtime-disclaimer"><strong>Disclaimer:</strong> Overtime calculation is a simplified estimate based on Israeli law's daily threshold (approx. 9.5 hours assumed) and standard multipliers (1.25x/1.5x). Actual overtime pay depends on specific labor laws, workweek definitions, agreements, etc. This is not legal advice.</p>
+                  </div>
+            </div>
+        </details>
+
+        <details class="contract-section" id="contractSection3" open>
+             <summary class="contract-header"><span><span class="icon">💰</span> 3. Remuneration & Expenses</span><span>תמורה והוצאות</span></summary>
+             <div class="contract-content">
+                  <p>In consideration for the Services and subject to the Operational Manager’s compliance with his obligations hereunder, the Operational Manager shall be entitled to a Fixed Monthly Retainer as detailed below.</p>
+                 <h3>3.1 Scope of Work (Based on Schedule & Retainer Inputs)</h3>
+                 <ul>
+                     <li>The agreement covers operational management services for the period specified in Section 1, anticipated to cover approximately <span id="contractGameCount" class="highlight">N/A games</span> (based on schedule).</li>
+                     <li>The workload basis for the retainer calculation involves approximately <span id="contractWorkDaysAvg" class="editable-contract-value" contenteditable="true">10</span> Work Days and <span id="contractTravelDaysAvg" class="editable-contract-value" contenteditable="true">11</span> Travel Days per month. (Actual days based on schedule: <span id="contractWorkDaysActual">0</span> Work, <span id="contractTravelDaysActual">0</span> Travel/Other).</li>
+                 </ul>
+                 <h3>3.2 Fixed Monthly Retainer Calculation</h3>
+                 <p>The total Fixed Monthly Retainer is <span id="contractRetainer" class="editable-contract-value" contenteditable="true">$8,650.00</span> USD, comprising a compensation component and an expense component, calculated as follows:</p>
+                 <table>
+                    <thead><tr><th>Component</th><th>Effective Rate (USD)</th><th>Est. Monthly Qty</th><th>Subtotal (USD)</th></tr></thead>
+                    <tbody>
+                        <tr><td>Work Days Compensation</td><td>$<span id="contractRateWork" class="editable-contract-value" contenteditable="true">356.86</span> / day</td><td>~<span id="contractWorkDaysQty" class="editable-contract-value" contenteditable="true">10</span> days</td><td>$<span id="contractSumWork">3,568.60</span> <span class="sum-note">(Derived)</span></td></tr>
+                        <tr><td>Travel/Preparation Days Compensation</td><td>$<span id="contractRateTravel" class="editable-contract-value" contenteditable="true">256.86</span> / day</td><td>~<span id="contractTravelDaysQty" class="editable-contract-value" contenteditable="true">11</span> days</td><td>$<span id="contractSumTravel">2,825.46</span> <span class="sum-note">(Derived)</span></td></tr>
+                        <tr class="totalRow"><td colspan="3">Total Compensation Component</td><td>$<span id="contractTotalCompensation">6,394.06</span> <span class="sum-note">(Derived)</span></td></tr>
+                        <tr><td>Expense Component (Travel Days)</td><td>$<span id="contractOpsRate" class="editable-contract-value" contenteditable="true">205.00</span> / day</span></td><td>~<span id="contractTravelDaysForExpense">11</span> days <span class="sum-note">(Derived)</span></td><td>$<span id="contractOpsExpense">2,255.00</span> <span class="sum-note">(Derived)</span></td></tr>
+                        <tr class="totalRow"><td colspan="3"><strong>Total Fixed Monthly Retainer</strong></td><td><span class="highlight">$<span id="contractTotalRetainer" class="editable-contract-value" contenteditable="true">8,650.00</span></span></td></tr>
+                    </tbody>
+                </table>
+                 <p class="calculationNote">Rates are recalculated... Ensure rates meet minimums ($<span id="minWorkRateDisplay">300</span>/$<span id="minTravelRateDisplay">200</span>). Current Ratio (Work/Travel): <span id="currentRateRatio">1.39</span>.</p>
+                 <div id="calculationWarning" class="calculation-warning"></div>
+                 <h3>3.3 Expenses</h3>
+                 <p>The calculated Expense Component ($<span id="contractOpsExpense_3_3">N/A</span>) included in the Fixed Monthly Retainer represents the allowance for standard per diem operational expenses during Travel Days (based on $<span id="contractOpsRate_3_3_per_day">205.00</span>/day). The Company shall separately reimburse the Operational Manager for other reasonable and pre-approved out-of-pocket expenses incurred directly in connection with the performance of the Services (e.g., specific supplies, non-standard local transport), provided such expenses are submitted with valid receipts through the <span class="highlight">EASY EXPENSE</span> system and comply with the Company's expense policy. Flight and accommodation expenses shall typically be booked and paid directly by the Company.</p>
+                 <h3>3.4 Payment</h3>
+                 <p>Payments for the Services shall be made as follows: The Fixed Monthly Retainer of <span id="contractRetainer_3_4" class="highlight">$N/A</span> USD will be paid monthly, [Specify Timing, e.g., Net+30] days following the end of the month for which Services were rendered, upon submission of a valid invoice by the Operational Manager. An advance payment structure may be agreed upon separately based on scheduled games. Reimbursement for pre-approved expenses submitted via EASY EXPENSE will be processed according to the Company's policy. Payments will be made via bank transfer to an account designated by the Operational Manager.</p>
+                 <p><em>Note: Specific payment timing and advance details should be finalized.</em></p>
+            </div>
+        </details>
+
+        <details class="contract-section">
+            <summary class="contract-header"><span><span class="icon">⏳</span> 4. Term</span><span>תקופת ההסכם</span></summary>
+            <div class="contract-content">
+                 <p>This Agreement commences on the Effective Date and shall continue for the duration specified in Section 1 (<span id="contractStartDate_4">N/A</span> to <span id="contractEndDate_4">N/A</span>), unless terminated earlier by either party upon thirty (30) days prior written notice. The Company may terminate this Agreement immediately for cause, including but not limited to, material breach of this Agreement, misconduct, or failure to perform the Services adequately.</p>
+            </div>
+        </details>
+        <details class="contract-section">
+            <summary class="contract-header"><span><span class="icon">⚖️</span> 5. Conflict of Interests</span><span>ניגוד עניינים</span></summary>
+            <div class="contract-content">
+                 <p>The Company acknowledges that Operational Manager may engage in other business activities or employment, provided such activities do not create a conflict of interest with his obligations to the Company under this Agreement. Operational Manager agrees to disclose any potential conflicts of interest to the Company promptly.</p>
+            </div>
+        </details>
+        <details class="contract-section">
+            <summary class="contract-header"><span><span class="icon">🔒</span> 6. Confidentiality & IP</span><span>סודיות וקנ"ר</span></summary>
+            <div class="contract-content">
+                 <p>Operational Manager agrees to keep in strict confidence all non-public information concerning the Company's business, products, technology, and affairs ("Confidential Information") learned during the provision of Services. Operational Manager shall not use or disclose Confidential Information except as necessary to perform the Services or as required by law. All work products, developments, and intellectual property created by the Operational Manager in the course of providing the Services shall be the sole property of the Company.</p>
+            </div>
+        </details>
+        <details class="contract-section">
+            <summary class="contract-header"><span><span class="icon">📄</span> 7. Miscellaneous</span><span>שונות</span></summary>
+            <div class="contract-content">
+                 <p>Operational Manager is an independent contractor, not an employee of the Company. This Agreement constitutes the entire agreement between the parties and supersedes all prior understandings. This Agreement shall be governed by the laws of the State of Israel, without regard to its conflict of laws principles. Any amendments must be in writing and signed by both parties. Notices shall be sent to the addresses listed above or as otherwise specified in writing.</p>
+            </div>
+        </details>
+        <details class="contract-section">
+            <summary class="contract-header"><span><span class="icon">✍️</span> 8. Signatures</span><span>חתימות</span></summary>
+             <div class="contract-content signatureSection">
+                 <p>If the foregoing correctly sets forth the agreement between us, please indicate so by signing below.</p>
+                 <p><strong>MindFly Ltd. (in formation)</strong><br><span class="signaturePlaceholder"></span><br>By: _________________________ <br>Name: Eran Tal<br>Title: CEO<br>Date: ____________</p>
+                 <br>
+                 <p><strong>Agreed and Accepted:</strong></p>
+                 <p><strong>Orian Edelenyi</strong><br><span class="signaturePlaceholder"></span><br>Date: ____________</p>
+             </div>
+        </details>
+    </div>
+
+    <div id="updateNotifier"></div>
+
+    <script>
+        // --- Constants (Defined First!) ---
+        const DEFAULT_BASE_RATIO = 356.86 / 256.86;
+        const HOURS_PER_DAY = 8;
+        const MIN_WORK_RATE = 300;
+        const MIN_TRAVEL_RATE = 200;
+        const MIN_OPS_RATE = 100;
+        const OVERTIME_THRESHOLD_IL = 9.5;
+        const OVERTIME_MULTIPLIER_IL_FIRST = 1.25;
+        const OVERTIME_MULTIPLIER_IL_NEXT = 1.5;
+        const ISRAEL_UTC_OFFSET = 3;
+        const SLIDER_SNAP_THRESHOLD = 0.5;
+
+        const timeZoneOptions = [ { name: 'UTC-12', value: -12 }, { name: 'UTC-11', value: -11 }, { name: 'UTC-10', value: -10 }, { name: 'UTC-9', value: -9 },  { name: 'UTC-8', value: -8 },  { name: 'UTC-7', value: -7 }, { name: 'UTC-6', value: -6 },  { name: 'UTC-5', value: -5 },  { name: 'UTC-4', value: -4 }, { name: 'UTC-3', value: -3 },  { name: 'UTC-2', value: -2 },  { name: 'UTC-1', value: -1 }, { name: 'UTC+0', value: 0 },   { name: 'UTC+1', value: 1 },   { name: 'UTC+2', value: 2 }, { name: 'UTC+3', value: 3 },   { name: 'UTC+4', value: 4 },   { name: 'UTC+5', value: 5 }, { name: 'UTC+5.5', value: 5.5 }, { name: 'UTC+5.75', value: 5.75 }, { name: 'UTC+6', value: 6 },   { name: 'UTC+6.5', value: 6.5 }, { name: 'UTC+7', value: 7 },   { name: 'UTC+8', value: 8 },   { name: 'UTC+9', value: 9 }, { name: 'UTC+9.5', value: 9.5 }, { name: 'UTC+10', value: 10 }, { name: 'UTC+11', value: 11 }, { name: 'UTC+12', value: 12 }, { name: 'UTC+13', value: 13 }, { name: 'UTC+14', value: 14 } ].sort((a, b) => a.value - b.value);
+        const workEventTypes=['game','setup','הכנות']; // Added הכנות
+        const travelEventTypes=['טיסה','נסיעות','הגעה לשדה','נחיתה בארץ'];
+        const eventTypeOptions=['טיסה','טיסת המשך','הגעה לשדה בארץ','הגעה לשדה','נחיתה בארץ, סיום המסע','צ\'ק-אין מלון','צ\'ק-אאוט מלון','יום הכנות לפני משחק (Setup)','Game','יום מנוחה/נסיעות','נסיעת עבודה','פגישה','מסעדה','בית קפה','בילוי','אחר'];
+
+        // --- Global State ---
+        let scheduleData = [];
+        let isWorkDaysManual = false; let isTravelDaysManual = false;
+        let scheduleWorkDaysCount = 0; let scheduleTravelDaysCount = 0;
+        let notificationTimeout = null; let initialOpsRateRatio = 1;
+        const columnVisibilityState = { 'col-confirmation': true, 'col-flight': true, 'col-terminal': true, 'col-israel-time': true };
+
+        // --- Raw CSV Data ---
+        const rawCSVData = `תאריך,שעת התחלה (זמן מקומי),שעת סיום  (זמן מקומי),סוג אירוע,מספר אישור (Confirmation #) / ETICKET,מספר טיסה (Flight #),כתובת / מיקום,הגעה לטרמינל,TimeZone,זמן התחלה ישראל,זמן סיום ישראל,"סה""כ זמן",Column 1,Column 2,Column 3,Column 4,Column 5,Column 6,Column 7,Column 8,Column 9,Column 10,Column 11,Column 12,Column 13,Column 14
+03/04/2025,08:30,11:35,הגעה לשדה בארץ,,,Ben Gurion Airport (TLV),Terminal 3,00:00,08:30,,3.08,https://calendar.google.com/calendar/render?action=TEMPLATE&text=%D7%94%D7%92%D7%A2%D7%94+%D7%9C%D7%A9%D7%93%D7%94+%D7%91%D7%90%D7%A8%D7%A5&dates=20250403T083000%2F20250403T113500&location=Ben+Gurion+Airport+%28TLV%29&trp=false,,200,,,,,,,,,,,
+03/04/2025,11:35,17:05,טיסה ישראל → ניו יורק,0062838433402/03,DL0235,"JFK Airport, New York",Terminal 4 (Arrival),06:00,17:35,23:05,11.5,https://calendar.google.com/calendar/render?action=TEMPLATE&text=%D7%98%D7%99%D7%A1%D7%94+%D7%99%D7%A9%D7%A8%D7%90%D7%9C+%E2%86%92+%D7%A0%D7%99%D7%95+%D7%99%D7%95%D7%A8%D7%A7&dates=20250403T113500%2F20250403T170500&location=JFK+Airport%2C+New+York&trp=false,,,,,,,,,,,,,
+03/04/2025,20:55,22:42,טיסת המשך ניו יורק → וושינגטון,0062838433402/03,DL5813,"2401 Ronald Reagan Washington National Airport Access Rd, Arlington, VA 22202, United States",Terminal 2 (B/C),06:00,02:55,04:42,5.62,https://calendar.google.com/calendar/render?action=TEMPLATE&text=%D7%98%D7%99%D7%A1%D7%AA+%D7%94%D7%9E%D7%A9%D7%9A+%D7%A0%D7%99%D7%95+%D7%99%D7%95%D7%A8%D7%A7+%E2%86%92+%D7%95%D7%95%D7%A9%D7%99%D7%A0%D7%92%D7%98%D7%95%D7%9F&dates=20250403T205500%2F20250403T224200&location=2401+Ronald+Reagan+Washington+National+Airport+Access+Rd%2C+Arlington%2C+VA+22202%2C+United+States&trp=false,,,,,,,,,,,,,
+03/04/2025,,,צ'ק-אין Crowne Plaza,89826393,,"1480 Crystal Dr, Arlington, VA 22202, United States",,06:00,,,2,,,,,,,,,,,,,,
+04/04/2025,08:00,16:00,יום הכנות לפני משחק #1 (Setup),,,Audi Field Washington DC,,06:00,14:00,,8,,,300,,,,,,,,,,,
+05/04/2025,08:00,21:00,Game #1 @ Audi Field,,,"Audi Field, Washington, DC",,06:00,14:00,03:00,13,https://calendar.google.com/calendar/render?action=TEMPLATE&text=Game+%231+%40+Audi+Field&dates=20250405T080000%2F20250405T210000&location=100+Potomac+Ave+SW%2C+Washington%2C+DC+20024%2C+United+States&trp=false,,300,,,,,,,,,,,
+06/04/2025,,,,יום מנוחה/נסיעות,,,,,,,200,,,,,,,,,,,
+07/04/2025,,,,יום מנוחה/נסיעות,,,,,,,200,,,,,,,,,,,
+08/04/2025,,,,יום מנוחה/נסיעות,,,,,,,200,,,,,,,,,,,
+09/04/2025,,05:30,צ'ק-אאוט Crowne Plaza,89826393,,"1480 Crystal Dr, Arlington, VA 22202, United States",,06:00,,11:30,1,,,200,,,,,,,,,,,
+09/04/2025,06:00,06:17,הגעה לשדה,,,"Ronald Reagan Washington National Airport",Terminal 2 (B/C),07:00,13:00,13:17,2.5,,,,,,,,,,,,,,
+09/04/2025,08:17,09:37,טיסה Washington → Birmingham,UMLVUU,AA5332,Shuttlesworth Intl (BHM),Terminal TBD,07:00,15:17,16:37,2,,,,,,,,,,,,,,
+09/04/2025,,,צ'ק-אין מלון Birmingham (9–11/4),,,,Birmingham AL,,07:00,,,2,,,,,,,,,,,,,,
+10/04/2025,08:00,16:00,יום לפני משחק #2 (Setup),,,"Protective Stadium, Birmingham, AL",,07:00,15:00,,8,,,300,,,,,,,,,,,
+11/04/2025,,,צ'ק-אאוט בימינגהם,,,,Birmingham AL,,07:00,,,1,,,300,,,,,,,,,,,
+11/04/2025,08:00,21:00,Game #2 @ Protective Stadium,,,"Protective Stadium, Birmingham, AL",,07:00,15:00,04:00,13,https://calendar.google.com/calendar/render?action=TEMPLATE&text=Game+%232+%40+Protective+Stadium&dates=20250411T080000%2F20250411T210000&location=1020+24th+St+N%2C+Birmingham%2C+AL+35203%2C+United+States&trp=false,,,,,,,,,,,,,
+11/04/2025,15:20,15:40,הגעה לשדה,,,Birmingham, AL (BHM),Terminal TBD,07:00,22:20,22:40,0.33,https://calendar.google.com/calendar/render?action=TEMPLATE&text=%D7%94%D7%92%D7%A2%D7%94+%D7%9C%D7%A9%D7%93%D7%94&dates=20250411T150000%2F20250411T173800&location=Shuttlesworth+Intl+%28BHM%29&trp=false,,,,,,,,,,,,,
+11/04/2025,17:38,20:43,טיסה Birmingham → Detroit,62838439562,DL3622,Detroit Metro (DTW),McNamara Terminal,07:00,00:38,03:43,2.08,,,,,,,,,,,,,,
+11/04/2025,,,צ'ק-אין מלון Detroit (11–14/4),84346574,,"8000 Merriman Rd, Romulus, MI 48174, United States",,06:00,,,2,https://calendar.google.com/calendar/render?action=TEMPLATE&text=%D7%98%D7%99%D7%A1%D7%94+Birmingham+%E2%86%92+Detroit&dates=20250411T173800%2F20250411T204300&location=Detroit+Metro+%28DTW%29&trp=false,,,,,,,,,,,,,
+12/04/2025,08:00,16:00,יום לפני משחק #3 (Setup),,,"Ford Field, Detroit, MI",,06:00,14:00,,8,,,300,,,,,,,,,,,
+13/04/2025,08:00,21:00,Game #3 @ Ford Field (Michigan Panthers),,,"Ford Field, Detroit, MI",,06:00,14:00,03:00,13,https://calendar.google.com/calendar/render?action=TEMPLATE&text=Game+%233+%40+Ford+Field+%28Michigan+Panthers%29&dates=20250413T080000%2F20250413T210000&location=Detroit%2C+MI&trp=false,,300,,,,,,,,,,,
+14/04/2025,,,צ'ק-אאוט מלון Detroit,84346574,,"8000 Merriman Rd, Romulus, MI 48174, United States",,06:00,,,1,,,200,,,,,,,,,,,
+14/04/2025,06:30,06:40,הגעה לשדה,,,Detroit Metro (DTW),McNamara Terminal,06:00,12:30,12:40,0.17,https://calendar.google.com/calendar/render?action=TEMPLATE&text=%D7%94%D7%92%D7%A2%D7%94+%D7%9C%D7%A9%D7%93%D7%94&dates=20250414T043000%2F20250414T070000&location=Detroit+Metro+%28DTW%29&trp=false,,,,,,,,,,,,,
+14/04/2025,06:40,08:38,טיסה DTW → JFK (ניו יורק),0062838433402/03,DL2566,"JFK Airport, New York",Terminal 2 (Arrival),06:00,12:40,14:38,1.97,https://calendar.google.com/calendar/render?action=TEMPLATE&text=%D7%98%D7%99%D7%A1%D7%94+DTW+%E2%86%92+JFK+%28%D7%A0%D7%99%D7%95+%D7%99%D7%95%D7%A8%D7%A7%29&dates=20250414T070000%2F20250414T083800&location=JFK+Airport%2C+New+York&trp=false,,,,,,,,,,,,,
+14/04/2025,13:30,06:55,טיסה ניו יורק → תל אביב,0062838433402/03,DL7444,Ben Gurion (TLV),Terminal 3,06:00,19:30,06:55,12.58,https://calendar.google.com/calendar/render?action=TEMPLATE&text=%D7%98%D7%99%D7%A1%D7%94+%D7%A0%D7%99%D7%95+%D7%99%D7%95%D7%A8%D7%A7+%E2%86%92+%D7%AA%D7%9C+%D7%90%D7%91%D7%99%D7%91&dates=20250414T133000%2F20250414T065500&location=Ben+Gurion+%28TLV%29&trp=false,,,,,,,,,,,,,
+15/04/2025,06:55,07:55,"נחיתה בארץ, סיום המסע",,,Ben Gurion (TLV),Terminal 3,00:00,06:55,07:55,1,,,200,,,,,,,,,,,
+`;
+
+        // --- Utility Functions (Defined BEFORE use) ---
+        function formatCurrency(v){const n=Number(v);return isNaN(n)?'$NaN':'$'+n.toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:2});}
+        function formatDays(v){const n=Number(v);return isNaN(n)?'NaN ימים':n+(n===1?' יום':' ימים');}
+        function formatHours(v){const n=Number(v);return isNaN(n)?'NaN שעות':n.toFixed(1)+(n===1?' שעה':' שעות');}
+        function parseValue(t,y='number'){if(typeof t!=='string')return NaN;const c=t.replace(/[$,₪א-ת\s,יים]/g,'').trim();const v=y==='integer'?parseInt(c,10):parseFloat(c);if(!isNaN(v)&&v<0&&(y==='integer'||y==='number'))return 0;return v;}
+        function showNotification(m){ const notifier = document.getElementById('updateNotifier'); if(!notifier) return; clearTimeout(notificationTimeout); notifier.textContent=m; notifier.classList.add('show'); notificationTimeout=setTimeout(()=>{notifier.classList.remove('show');},3500); }
+        function calculateDurationUTC(d,sT,sO,eT,eO){if(!sT||!eT||!d||sO===undefined||eO===undefined)return null;try{const sL=new Date(`${d}T${sT}`);if(isNaN(sL.getTime()))return null;const sU=new Date(sL.getTime()-(sO*3600*1000));let eL=new Date(`${d}T${eT}`);if(isNaN(eL.getTime()))return null;if(eL<sL)eL.setDate(eL.getDate()+1);const eU=new Date(eL.getTime()-(eO*3600*1000));if(isNaN(sU.getTime())||isNaN(eU.getTime()))return null;const dur=(eU-sU)/(3600*1000);return(dur<0)?null:dur;}catch(e){console.error("Err dur:",e);return null;}}
+        function calculateIsraelTimeFromUTC(lT,lD,lO){if(!lT||!lD||lO===undefined||isNaN(lO))return{timeStr:'',dateStr:lD};try{const lDT=new Date(`${lD}T${lT}`);if(isNaN(lDT.getTime()))return{timeStr:'',dateStr:lD};const uM=lDT.getTime()-(lO*3600*1000);const iM=uM+(ISRAEL_UTC_OFFSET*3600*1000);const iDT=new Date(iM);const iTS=iDT.toLocaleTimeString('he-IL',{hour:'2-digit',minute:'2-digit',hour12:false});const iDS=iDT.toISOString().split('T')[0];return{timeStr:iTS,dateStr:iDS};}catch(e){console.error("Err IL time:",e);return{timeStr:'',dateStr:lD};}}
+        function parseCSVData(csvText) {
+             const lines = csvText.split('\n').filter(line => line.trim() !== '');
+             if (lines.length < 2) return [];
+             const headers = lines[0].split(',').map(h => h.trim());
+             const data = [];
+             const findIndex=(names)=>{for(const n of names){const i=headers.findIndex(h=>h.toLowerCase().includes(n.toLowerCase()));if(i!==-1)return i;}return-1;};
+             const dateIdx=findIndex(['תאריך','date']); const startIdx=findIndex(['שעת התחלה','start time']); const endIdx=findIndex(['שעת סיום','end time']); const eventIdx=findIndex(['סוג אירוע','event type']); const confirmIdx=findIndex(['מספר אישור','confirmation','eticket']); const flightIdx=findIndex(['מספר טיסה','flight #']); const locationIdx=findIndex(['כתובת / מיקום','location','address']); const terminalIdx=findIndex(['טרמינל','terminal']);
+             if(dateIdx===-1||eventIdx===-1){console.error("CSV must contain 'Date'/'תאריך' and 'Event Type'/'סוג אירוע'");return[];}
+             for (let i = 1; i < lines.length; i++) {
+                 const values = lines[i].split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/).map(v => v.trim().replace(/^"|"$/g, '')); // Improved CSV split
+                 if (values.length <= Math.max(dateIdx, startIdx, endIdx, eventIdx, confirmIdx, flightIdx, locationIdx, terminalIdx)) continue; // Check enough columns
+                 let date = values[dateIdx] || '';
+                  if (date.includes('/')) { const p=date.split('/'); if(p.length===3){const y=p[2].length===2?`20${p[2]}`:p[2]; const m=(parseInt(p[0],10)<=12)?p[0]:p[1]; const d=(parseInt(p[0],10)<=12)?p[1]:p[0]; if (!isNaN(parseInt(y)) && !isNaN(parseInt(m)) && !isNaN(parseInt(d))) { date=`${y}-${m.padStart(2,'0')}-${d.padStart(2,'0')}`; } else { date = ''; } } else { date = ''; } }
+                  else if (date.length === 8 && !date.includes('-')) { date = `${date.substring(0,4)}-${date.substring(4,6)}-${date.substring(6,8)}`; }
+
+                  // Refined Event Type Categorization
+                  let eventType = values[eventIdx] || 'אחר';
+                  const eventLower = eventType.toLowerCase();
+                  if (eventLower.includes('setup') || eventLower.includes('הכנות')) { eventType = 'יום הכנות לפני משחק (Setup)'; }
+                  else if (eventLower.includes('game #')) { eventType = 'Game'; } // More specific check for Game
+                  else if (eventLower.includes('טיסת המשך')) { eventType = 'טיסת המשך'; }
+                  else if (eventLower.includes('טיסה')) { eventType = 'טיסה'; }
+                  else if (eventLower.includes('הגעה לשדה')) { eventType = 'הגעה לשדה'; }
+                  else if (eventLower.includes('צ\'ק-אין') || eventLower.includes('check-in')) { eventType = 'צ\'ק-אין מלון'; }
+                  else if (eventLower.includes('צ\'ק-אאוט') || eventLower.includes('check-out')) { eventType = 'צ\'ק-אאוט מלון'; }
+                  else if (eventLower.includes('נחיתה בארץ')) { eventType = 'נחיתה בארץ, סיום המסע'; }
+                  else if (eventLower.includes('יום מנוחה') || eventLower.includes('נסיעות')) { eventType = 'יום מנוחה/נסיעות'; }
+
+                  // Default Offset Logic
+                  let defaultOffset = 3; const locLower = (values[locationIdx] || '').toLowerCase();
+                  if (locLower.includes('jfk')||locLower.includes('new york')||locLower.includes('washington')||locLower.includes('arlington')||locLower.includes('detroit')||locLower.includes('mi')||locLower.includes('va')) defaultOffset = -4;
+                  else if (locLower.includes('bhm')||locLower.includes('birmingham')||locLower.includes('al')) defaultOffset = -5;
+                  else if (locLower.includes('tlv') || locLower.includes('israel')) defaultOffset = 3;
+
+                 data.push({ date:date,startTime:values[startIdx]||'',startOffset:defaultOffset,endTime:values[endIdx]||'',endOffset:defaultOffset,eventType:eventType,confirmation:values[confirmIdx]||'',flight:values[flightIdx]||'',location:values[locationIdx]||'',terminal:values[terminalIdx]||'', });
+             }
+             return data;
+        }
+        function renderScheduleTable(dataToRender) {
+             const elements = window.appElements;
+             if (!elements?.scheduleBody) { console.error("Schedule body not found!"); return; }
+             elements.scheduleBody.innerHTML = ''; let totalDuration=0; scheduleWorkDaysCount=0; scheduleTravelDaysCount=0; const countedDates={work:new Set(),travel:new Set()}; const {minDate,maxDate}=getScheduleDateRange(dataToRender);
+             dataToRender.forEach((item,index)=>{
+                const row=elements.scheduleBody.insertRow();row.dataset.index=index;
+                const cells=Array.from({length: 15}, () => row.insertCell());
+                // Add Classes (using columnVisibilityState keys directly)
+                Object.keys(columnVisibilityState).forEach(key => {
+                    if(cells[7] && key === 'col-confirmation') cells[7].classList.add(key);
+                    if(cells[8] && key === 'col-flight') cells[8].classList.add(key);
+                    if(cells[9] && key === 'col-location') cells[9].classList.add(key); // Keep location class
+                    if(cells[10] && key === 'col-terminal') cells[10].classList.add(key);
+                    if(cells[11] && key === 'col-israel-time') cells[11].classList.add(key);
+                    if(cells[12] && key === 'col-israel-time') cells[12].classList.add(key);
+                });
+                cells[13].classList.add('total-duration-col'); cells[6].classList.add('event-type-col');
+
+                // Populate Checkbox
+                const checkbox=document.createElement('input');checkbox.type='checkbox';checkbox.className='row-checkbox';checkbox.dataset.index=index;cells[0].appendChild(checkbox);
+                // Populate Date
+                const dateInput=document.createElement('input');dateInput.type='date';dateInput.value=item.date||'';dateInput.addEventListener('change',(e)=>handleScheduleChange(index,'date',e.target.value));cells[1].appendChild(dateInput);
+                // Populate Start Time & Zone
+                const startTimeInput=document.createElement('input');startTimeInput.type='time';startTimeInput.value=item.startTime||'';startTimeInput.dataset.field='startTime';startTimeInput.addEventListener('change',(e)=>handleScheduleChange(index,'startTime',e.target.value));cells[2].appendChild(startTimeInput);
+                const startGmtControl=createTimeZoneButtonAndSelect(item.startOffset, index, 'startOffset');cells[3].appendChild(startGmtControl);
+                // Populate End Time & Zone
+                const endTimeInput=document.createElement('input');endTimeInput.type='time';endTimeInput.value=item.endTime||'';endTimeInput.dataset.field='endTime';endTimeInput.addEventListener('change',(e)=>handleScheduleChange(index,'endTime',e.target.value));cells[4].appendChild(endTimeInput);
+                const endGmtControl=createTimeZoneButtonAndSelect(item.endOffset, index, 'endOffset');cells[5].appendChild(endGmtControl);
+                // Populate Event Type
+                const eventTypeSelect=document.createElement('select');eventTypeOptions.forEach(opt=>{const o=document.createElement('option');o.value=opt;o.textContent=opt;if(item.eventType===opt)o.selected=true;eventTypeSelect.appendChild(o);});eventTypeSelect.addEventListener('change',(e)=>handleScheduleChange(index,'eventType',e.target.value));cells[6].appendChild(eventTypeSelect);
+                 // Populate other text cells
+                 ['confirmation','flight','location','terminal'].forEach((field,i)=>{const cell=cells[7+i];cell.textContent=item[field]||'';cell.contentEditable=true;cell.addEventListener('blur',(e)=>handleScheduleChange(index,field,e.target.textContent));cell.addEventListener('keydown',preventEnter);});
+                 // Calculations & Dependent Fields
+                 const durationHours=calculateDurationUTC(item.date,item.startTime,item.startOffset,item.endTime,item.endOffset);const israelStartTime=calculateIsraelTimeFromUTC(item.startTime,item.date,item.startOffset);const israelEndTime=calculateIsraelTimeFromUTC(item.endTime,item.date,item.endOffset);let israelEndDateToDisplay=israelEndTime.dateStr;if(durationHours!==null&&item.startTime&&item.endTime&&item.date&&item.startOffset!==undefined){try{const ls=new Date(`${item.date}T${item.startTime}`);if(!isNaN(ls.getTime())){const ele=new Date(ls.getTime()+durationHours*3600*1000);const les=ele.toISOString().split('T')[0];if(les!==item.date){const aET=calculateIsraelTimeFromUTC(item.endTime,les,item.endOffset);cells[12].textContent=aET.timeStr+(aET.dateStr!==israelStartTime.dateStr?` (${aET.dateStr.substring(5)})`:'');israelEndDateToDisplay=aET.dateStr;}else{cells[12].textContent=israelEndTime.timeStr+(israelEndTime.dateStr!==israelStartTime.dateStr?` (${israelEndTime.dateStr.substring(5)})`:'');}}}catch(e){cells[12].textContent=israelEndTime.timeStr+(israelEndTime.dateStr!==israelStartTime.dateStr?` (${israelEndTime.dateStr.substring(5)})`:'');}}else{cells[12].textContent=israelEndTime.timeStr+(israelEndTime.dateStr!==israelStartTime.dateStr?` (${israelEndTime.dateStr.substring(5)})`:'');} cells[11].textContent=israelStartTime.timeStr;cells[13].textContent=durationHours!==null?durationHours.toFixed(2):'';if(durationHours!==null)totalDuration+=durationHours;
+                 // Visibility
+                 const needsTime=item.eventType&&(item.eventType.includes('טיסה')||item.eventType.toLowerCase().includes('game')||item.eventType.toLowerCase().includes('setup')||item.eventType.includes('הגעה')||item.eventType.includes('נחיתה')||item.eventType.includes('פגישה'));startTimeInput.style.visibility=needsTime?'visible':'hidden';endTimeInput.style.visibility=needsTime?'visible':'hidden';startGmtControl.style.visibility=needsTime?'visible':'hidden';endGmtControl.style.visibility=needsTime?'visible':'hidden';
+                 // Count Days
+                 const l=item.eventType?.toLowerCase()||'';if(item.date){if(workEventTypes.some(t=>l.includes(t))){if(!countedDates.work.has(item.date)){scheduleWorkDaysCount++;countedDates.work.add(item.date);}}else if(travelEventTypes.some(t=>l.includes(t))){if(!countedDates.travel.has(item.date)&&!countedDates.work.has(item.date)){scheduleTravelDaysCount++;countedDates.travel.add(item.date);}}}
+                 // Add Delete Button
+                 const deleteBtn=document.createElement('button');deleteBtn.innerHTML='<i class="fas fa-trash-alt"></i>';deleteBtn.className='delete-row-btn';deleteBtn.title='מחק שורה זו';deleteBtn.dataset.index=index;deleteBtn.addEventListener('click',handleDeleteRow);cells[14].appendChild(deleteBtn);
+                 applyColumnVisibility();
+             });
+             if(elements.scheduleTotalHours)elements.scheduleTotalHours.textContent=totalDuration.toFixed(2);const currentWorkRate=getCurrentRates().rateWork;updateContractFromSchedule(dataToRender,minDate,maxDate,scheduleWorkDaysCount,scheduleTravelDaysCount,currentWorkRate);updateSliderMarkers(scheduleWorkDaysCount,scheduleTravelDaysCount);syncSlidersToSchedule(false);updateSnapMarkers();if(elements.headerCheckbox)elements.headerCheckbox.checked=false;}
+        function createTimeZoneButtonAndSelect(selectedValue, rowIndex, fieldName) { const w=document.createElement('div');w.className='gmt-control-wrapper';const b=document.createElement('button');b.className='gmt-button';b.type='button';const oS=(selectedValue!==undefined&&selectedValue!==null)?`UTC${selectedValue>=0?'+':''}${selectedValue}`:'Set TZ';b.textContent=oS;const p=document.createElement('div');p.className='gmt-select-popup';const s=document.createElement('select');s.className='timezone-select-inner';timeZoneOptions.forEach(opt=>{const o=document.createElement('option');o.value=opt.value;o.textContent=opt.name;if(selectedValue!==undefined&&opt.value==selectedValue)o.selected=true;s.appendChild(o);});s.addEventListener('change',(e)=>{const nV=parseFloat(e.target.value);handleScheduleChange(rowIndex,fieldName,nV);b.textContent=`UTC${nV>=0?'+':''}${nV}`;p.classList.remove('visible');});p.appendChild(s);w.appendChild(b);w.appendChild(p);b.addEventListener('click',(e)=>{e.stopPropagation();document.querySelectorAll('.gmt-select-popup.visible').forEach(el=>el.classList.remove('visible'));p.classList.toggle('visible');if(p.classList.contains('visible'))s.focus();});return w; }
+        document.addEventListener('click', (e) => { document.querySelectorAll('.gmt-control-wrapper').forEach(w => { if (!w.contains(e.target)) { w.querySelector('.gmt-select-popup')?.classList.remove('visible'); } }); });
+        function applyBulkGmt() { const elements = window.appElements; const sO=elements.bulkGmtSelect.value;if(sO===""){alert("Please select UTC offset.");return;}const oV=parseFloat(sO);let uC=0;const cbs=elements.scheduleBody.querySelectorAll('.row-checkbox:checked');cbs.forEach(cb=>{const i=parseInt(cb.dataset.index,10);if(i>=0&&i<scheduleData.length){scheduleData[i].startOffset=oV;scheduleData[i].endOffset=oV;uC++;}});if(uC>0){renderScheduleTable(scheduleData);showNotification(`${uC} row(s) updated with UTC offset ${oV>=0?'+':''}${oV}.`);}else{alert("No rows selected.");}}
+        function handleAddRow() { const elements = window.appElements; const dO=scheduleData.length>0?{s:scheduleData[scheduleData.length-1]?.startOffset??3,e:scheduleData[scheduleData.length-1]?.endOffset??3}:{s:3,e:3}; const nRD={date:new Date().toLocaleDateString('en-CA'),startTime:'',startOffset:dO.s,endTime:'',endOffset:dO.e,eventType:'אחר',confirmation:'',flight:'',location:'',terminal:''}; scheduleData.push(nRD); renderScheduleTable(scheduleData); showNotification('שורה חדשה נוספה.'); const container=elements.scheduleTableContainer; if(container){container.scrollTop=container.scrollHeight;}else{console.warn("Cannot find container for scroll");} }
+        function handleDeleteRow(event) { const b=event.currentTarget;const i=parseInt(b.dataset.index,10);if(isNaN(i))return;const item=scheduleData[i];const dS=item?.date||`Row ${i+1}`;if(confirm(`האם למחוק את השורה עבור ${dS}?`)){if(i>=0&&i<scheduleData.length){scheduleData.splice(i,1);renderScheduleTable(scheduleData);updateCalculationsAndUI(null);showNotification(`שורה נמחקה.`);}}}
+        function handleDeleteSelected() { const elements = window.appElements; const cbs=elements.scheduleBody.querySelectorAll('.row-checkbox:checked');if(cbs.length===0){alert("לא נבחרו שורות למחיקה.");return;}if(confirm(`האם למחוק ${cbs.length} שורות מסומנות?`)){const iTD=[];cbs.forEach(cb=>{iTD.push(parseInt(cb.dataset.index,10));});iTD.sort((a,b)=>b-a);iTD.forEach(idx=>{if(idx>=0&&idx<scheduleData.length){scheduleData.splice(idx,1);}});renderScheduleTable(scheduleData);updateCalculationsAndUI(null);showNotification(`${iTD.length} שורות נמחקו.`);}}
+        function handleScheduleChange(index, field, value) { if(index>=0&&index<scheduleData.length){const oV=scheduleData[index][field];let nV=value;if(field==='startOffset'||field==='endOffset')nV=parseFloat(value);scheduleData[index][field]=nV;if(nV!==oV||field==='eventType'||field==='date'){renderScheduleTable(scheduleData);updateCalculationsAndUI(null);showNotification(`שורה ${index+1}, ${field} עודכן.`);}}}
+        function applyColumnVisibility() { const t=document.querySelector('.schedule-table');if(!t)return;for(const cC in columnVisibilityState){const s=columnVisibilityState[cC];t.querySelectorAll(`th.${cC}, td.${cC}`).forEach(el=>{el.classList.toggle('col-hidden',!s);});}} // Corrected selector `th.${cC}, td.${cC}`
+        function handleToggleColumn(event) { const cb=event.target;const cC=cb.dataset.colClass;if(cC){columnVisibilityState[cC]=cb.checked;applyColumnVisibility();}}
+        function updateContractFromSchedule(data,minD,maxD,wDC,tDC,cWR){const elements=window.appElements;const fD=(d)=>d?d.toLocaleDateString('en-CA'):'N/A';const s=fD(minD);const e=fD(maxD);if(elements.contractStartDate)elements.contractStartDate.textContent=s;if(elements.contractEndDate)elements.contractEndDate.textContent=e;if(elements.contractStartDate_4)elements.contractStartDate_4.textContent=s;if(elements.contractEndDate_4)elements.contractEndDate_4.textContent=e;const gC=data.filter(i=>i.eventType?.toLowerCase().includes('game')).length;if(elements.contractGameCount)elements.contractGameCount.textContent=`${gC} game${gC!==1?'s':''}`;if(elements.contractWorkDaysActual)elements.contractWorkDaysActual.textContent=wDC;if(elements.contractTravelDaysActual)elements.contractTravelDaysActual.textContent=tDC;let wH='';let oDH='';let tOPIL=0;let hO=false;const wI=data.filter(i=>i.eventType&&(workEventTypes.some(t=>i.eventType.toLowerCase().includes(t))));if(wI.length>0){wI.forEach(i=>{const dur=calculateDurationUTC(i.date,i.startTime,i.startOffset,i.endTime,i.endOffset);const dTxt=dur!==null?`${dur.toFixed(1)} hours`:'Time TBD';let dOTxt='';let dODet='';if(dur!==null&&dur>OVERTIME_THRESHOLD_IL){hO=true;const hR=(cWR>0)?cWR/HOURS_PER_DAY:0;let oPIL=0;let oHIL=0;if(hR>0){oHIL=dur-OVERTIME_THRESHOLD_IL;const fT=Math.min(oHIL,2);const sT=Math.max(0,oHIL-2);oPIL=(fT*hR*OVERTIME_MULTIPLIER_IL_FIRST)+(sT*hR*OVERTIME_MULTIPLIER_IL_NEXT);tOPIL+=oPIL;dOTxt=`<span class="overtime-warning">(+${oHIL.toFixed(1)} hrs IL OT - Est. ${formatCurrency(oPIL)})</span>`;dODet=`<li>${i.date}: ${dur.toFixed(1)} hrs worked. Est. IL OT Pay: ${formatCurrency(oPIL)}</li>`;}}wH+=`<li>${i.date} (${i.eventType}): ${i.startTime||'N/A'} - ${i.endTime||'N/A'} ${dTxt} @ ${i.location||'N/A'} ${dOTxt}</li>`;if(dODet)oDH+=dODet;});elements.contractWorkHoursDetails.innerHTML=`<ul>${wH}</ul>`;}else{elements.contractWorkHoursDetails.innerHTML='<p>No game/setup hours listed.</p>';}if(elements.overtimeList){if(hO){elements.overtimeList.innerHTML=oDH+`<li style="margin-top:10px;"><strong>Total Est. IL OT Pay: ${formatCurrency(tOPIL)}</strong></li>`;}else{elements.overtimeList.innerHTML=`<li>No overtime detected (> ${OVERTIME_THRESHOLD_IL} hrs/day).</li>`;}}}
+        function updateSliderMarkers(sWD,sTD){const elements=window.appElements;const uM=(mE,sE,sV)=>{if(!sE||!mE)return;const max=parseFloat(sE.max);const min=parseFloat(sE.min);const range=max-min;if(range<=0)return;const sVI=Math.round(sV);if(sVI>=min&&sVI<=max){const p=((sVI-min)/range)*100;mE.style.right=`${p}%`;mE.style.display='block';}else{mE.style.display='none';}};uM(elements.workDaysScheduleMarker,elements.workDaysSlider,sWD);uM(elements.travelDaysScheduleMarker,elements.travelDaysSlider,sTD);if(elements.workDaysFromSchedule)elements.workDaysFromSchedule.textContent=Math.round(sWD);if(elements.travelDaysFromSchedule)elements.travelDaysFromSchedule.textContent=Math.round(sTD);}
+        function updateSnapMarkers(){ /* Removed snap marker logic, function kept empty for now */ }
+        function syncSlidersToSchedule(forceSnap=false){const elements=window.appElements;const sync=(sE,sV,iMFRef)=>{if(!sE)return;const sVI=Math.round(sV);const cVI=parseInt(sE.value,10);let mF=iMFRef.value;if(forceSnap||!mF){if(cVI!==sVI){const min=parseFloat(sE.min);const max=parseFloat(sE.max);if(sVI>=min&&sVI<=max){sE.value=sVI;iMFRef.value=false;updateCalculationsAndUI(sE);showNotification(`${sE.id.includes('work')?'Work':'Travel'} days synced (${sVI}).`);}}}sE.classList.toggle('snapped',cVI===sVI&&!iMFRef.value);};sync(elements.workDaysSlider,scheduleWorkDaysCount,{get:()=>isWorkDaysManual,set:(v)=>{isWorkDaysManual=v;}});sync(elements.travelDaysSlider,scheduleTravelDaysCount,{get:()=>isTravelDaysManual,set:(v)=>{isTravelDaysManual=v;}});}
+        function getCurrentRates(){const elements=window.appElements;const rWE=elements.rateWorkValueCard;const rTE=elements.rateTravelValueCard;const rW=parseValue(rWE?.textContent||'0','number');const rT=parseValue(rTE?.textContent||'0','number');return{rateWork:isNaN(rW)?0:rW,rateTravel:isNaN(rT)?0:rT};}
+        function updateCalculationsAndUI(sourceElement=null,updatedInfo={value:null,field:null}){const elements=window.appElements;let R_fixed=(elements.retainerSlider)?parseFloat(elements.retainerSlider.value):0;let R,wd,td,or;let rateWork,rateTravel;let calculationBasis="Sliders";let opsRateFromRatio=null;const isRetainerSource=sourceElement===elements.retainerSlider||sourceElement===elements.retainerValueCard||sourceElement===elements.contractRetainer||sourceElement===elements.contractTotalRetainer||sourceElement===elements.contractRetainer_3_4;const isRateSource=sourceElement===elements.rateWorkValueCard||sourceElement===elements.contractRateWork||sourceElement===elements.rateTravelValueCard||sourceElement===elements.contractRateTravel;const isWorkDaySource=sourceElement===elements.workDaysSlider||sourceElement===elements.contractWorkDaysAvg||sourceElement===elements.contractWorkDaysQty;const isTravelDaySource=sourceElement===elements.travelDaysSlider||sourceElement===elements.contractTravelDaysAvg||sourceElement===elements.contractTravelDaysQty;const isOpsRateSource=sourceElement===elements.opsRateSlider||sourceElement===elements.contractOpsRate; R=parseFloat(elements.retainerSlider.value)||0;wd=parseInt(elements.workDaysSlider.value,10)||0;td=parseInt(elements.travelDaysSlider.value,10)||0;or=parseFloat(elements.opsRateSlider.value)||0;const currentRates=getCurrentRates();rateWork=currentRates.rateWork;rateTravel=currentRates.rateTravel;if(isRetainerSource){calculationBasis="Total Retainer";R=updatedInfo.value??parseFloat(elements.retainerSlider.value);const opsExp=td*or;let cP=Math.max(0,R-opsExp);let cR=(rateTravel>0&&rateWork>0)?rateWork/rateTravel:DEFAULT_BASE_RATIO;if(isNaN(cR)||!isFinite(cR)||cR<=0)cR=DEFAULT_BASE_RATIO;const den=(cR*wd+td);if(den>0&&cP>=0){rateTravel=cP/den;rateWork=rateTravel*cR;}else{rateWork=0;rateTravel=0;}if(initialOpsRateRatio>0&&rateTravel>=0){const nOR=rateTravel*initialOpsRateRatio;or=Math.max(parseFloat(elements.opsRateSlider.min),Math.min(parseFloat(elements.opsRateSlider.max),nOR));opsRateFromRatio=or;}else{opsRateFromRatio=or;}}else if(isRateSource){ R=R_fixed;calculationBasis=(sourceElement===elements.rateWorkValueCard||sourceElement===elements.contractRateWork)?"Work Rate":"Travel Rate";if(sourceElement===elements.rateWorkValueCard||sourceElement===elements.contractRateWork){rateWork=updatedInfo.value??rateWork;}else{rateTravel=updatedInfo.value??rateTravel;}const newCompPool=(rateWork*wd)+(rateTravel*td);const requiredTotalOpsExp=R-newCompPool;const impliedOpsRate=(td>0)?requiredTotalOpsExp/td:0;if(impliedOpsRate<MIN_OPS_RATE&&td>0){or=MIN_OPS_RATE;R=newCompPool+(or*td);opsRateFromRatio=or;calculationBasis+=` (Ops Floor Hit; Retainer Adj.)`;}else{or=(td>0)?Math.max(parseFloat(elements.opsRateSlider.min),Math.min(parseFloat(elements.opsRateSlider.max),impliedOpsRate)):parseFloat(elements.opsRateSlider.value);opsRateFromRatio=or;}}else{calculationBasis=isWorkDaySource?"Work Days":isTravelDaySource?"Travel Days":isOpsRateSource?"Ops Rate":"Initial Load / Sliders";wd=(isWorkDaySource&&updatedInfo.value!==null)?updatedInfo.value:parseInt(elements.workDaysSlider.value,10)||0;td=(isTravelDaySource&&updatedInfo.value!==null)?updatedInfo.value:parseInt(elements.travelDaysSlider.value,10)||0;or=(isOpsRateSource&&updatedInfo.value!==null)?updatedInfo.value:parseFloat(elements.opsRateSlider.value)||0;const opsExp=td*or;let cP=Math.max(0,R-opsExp);let cR=(rateTravel>0&&rateWork>0)?rateWork/rateTravel:DEFAULT_BASE_RATIO;if(isNaN(cR)||!isFinite(cR)||cR<=0)cR=DEFAULT_BASE_RATIO;const den=(cR*wd+td);if(den>0&&cP>=0){rateTravel=cP/den;rateWork=rateTravel*cR;}else{rateWork=0;rateTravel=0;}if(!isOpsRateSource&&initialOpsRateRatio>0&&rateTravel>=0){const nOR=rateTravel*initialOpsRateRatio;or=Math.max(parseFloat(elements.opsRateSlider.min),Math.min(parseFloat(elements.opsRateSlider.max),nOR));opsRateFromRatio=or;}}performUIUpdates(R,wd,td,or,rateWork,rateTravel,opsRateFromRatio,sourceElement,calculationBasis);}
+        function performUIUpdates(R,wd,td,or,rateWork,rateTravel,opsRateFromRatio,sourceElement=null,calculationBasis="Update"){const elements=window.appElements;const finalOpsRate=opsRateFromRatio!==null?opsRateFromRatio:or;const opsExp=td*finalOpsRate;const compPool=Math.max(0,(rateWork*wd)+(rateTravel*td));const finalRetainer=compPool+opsExp;const meetsMinWorkRate=rateWork>=MIN_WORK_RATE||wd===0||rateWork===0;const meetsMinTravelRate=rateTravel>=MIN_TRAVEL_RATE||td===0||rateTravel===0;const meetsMinOpsRate=finalOpsRate>=MIN_OPS_RATE||td===0;const sumWork=rateWork*wd;const sumTravel=rateTravel*td;const totalWorkHours=wd*HOURS_PER_DAY;const totalTravelHours=td*HOURS_PER_DAY;const currentRatioDisplay=(rateTravel>0&&rateWork>0)?(rateWork/rateTravel).toFixed(2):"N/A";if(elements.calculationWarning)elements.calculationWarning.innerHTML='';if(sourceElement!==elements.retainerSlider&&elements.retainerSlider.value!=Math.round(finalRetainer))elements.retainerSlider.value=Math.round(finalRetainer);if(sourceElement!==elements.workDaysSlider&&elements.workDaysSlider.value!=wd)elements.workDaysSlider.value=wd;if(sourceElement!==elements.travelDaysSlider&&elements.travelDaysSlider.value!=td)elements.travelDaysSlider.value=td;const cOSV=parseFloat(elements.opsRateSlider.value);const nORV=finalOpsRate;if(sourceElement!==elements.opsRateSlider&&cOSV!=Math.round(nORV)){elements.opsRateSlider.value=Math.round(nORV);}if(elements.retainerDisplay)elements.retainerDisplay.textContent=formatCurrency(finalRetainer);if(elements.retainerSum)elements.retainerSum.textContent=formatCurrency(finalRetainer);if(elements.workDaysDisplay)elements.workDaysDisplay.textContent=formatDays(wd);if(elements.workSum)elements.workSum.textContent=formatDays(wd);if(elements.travelDaysDisplay)elements.travelDaysDisplay.textContent=formatDays(td);if(elements.travelSum)elements.travelSum.textContent=formatDays(td);if(elements.opsRateDisplay)elements.opsRateDisplay.textContent=formatCurrency(finalOpsRate);if(elements.opsSum)elements.opsSum.textContent=formatCurrency(finalOpsRate);const finalOpsExp=td*finalOpsRate;const finalCompPool=finalRetainer-finalOpsExp;const finalSumWork=rateWork*wd;const finalSumTravel=rateTravel*td;const updateCard=(el,v,f=formatCurrency)=>{if(el&&sourceElement!==el)el.textContent=f(v);};updateCard(elements.retainerValueCard,finalRetainer);updateCard(elements.rateWorkValueCard,rateWork);updateCard(elements.rateTravelValueCard,rateTravel);updateCard(elements.sumWorkValueCard,finalSumWork);updateCard(elements.sumTravelValueCard,finalSumTravel);updateCard(elements.opsExpenseValueCard,finalOpsExp);updateCard(elements.compTotalValueCard,finalCompPool);updateCard(elements.totalWorkHoursValueCard,totalWorkHours,formatHours);updateCard(elements.totalTravelHoursValueCard,totalTravelHours,formatHours);const updateContractEl=(el,v,f=(v)=>v)=>{if(el&&sourceElement!==el){const fv=f(v);if(el.textContent!==String(fv))el.textContent=fv;}};updateContractEl(elements.contractWorkDaysAvg,wd);updateContractEl(elements.contractTravelDaysAvg,td);updateContractEl(elements.contractRetainer,finalRetainer,formatCurrency);updateContractEl(elements.contractOpsRate,finalOpsRate,formatCurrency);updateContractEl(elements.contractWorkDaysQty,wd);updateContractEl(elements.contractTravelDaysQty,td);updateContractEl(elements.contractTotalRetainer,finalRetainer,formatCurrency);updateContractEl(elements.contractRetainer_3_4,finalRetainer,formatCurrency);updateContractEl(elements.contractRateWork,rateWork,v=>v.toFixed(2));updateContractEl(elements.contractRateTravel,rateTravel,v=>v.toFixed(2));if(elements.contractSumWork)elements.contractSumWork.textContent=formatCurrency(finalSumWork);if(elements.contractSumTravel)elements.contractSumTravel.textContent=formatCurrency(finalSumTravel);if(elements.contractTotalCompensation)elements.contractTotalCompensation.textContent=formatCurrency(finalCompPool);if(elements.contractTravelDaysForExpense)elements.contractTravelDaysForExpense.textContent=td;if(elements.contractOpsExpense)elements.contractOpsExpense.textContent=formatCurrency(finalOpsExp);if(elements.contractOpsExpense_3_3)elements.contractOpsExpense_3_3.textContent=finalOpsExp.toFixed(2);if(elements.contractRateWorkNote)elements.contractRateWorkNote.textContent=rateWork.toFixed(2);if(elements.contractRateTravelNote)elements.contractRateTravelNote.textContent=rateTravel.toFixed(2);if(elements.currentRateRatio)elements.currentRateRatio.textContent=currentRatioDisplay;const warnings=[];if(!meetsMinWorkRate&&wd>0)warnings.push(`Warning: Work Rate ($${rateWork.toFixed(2)}) < Min ($${MIN_WORK_RATE})`);if(!meetsMinTravelRate&&td>0)warnings.push(`Warning: Travel Rate ($${rateTravel.toFixed(2)}) < Min ($${MIN_TRAVEL_RATE})`);if(!meetsMinOpsRate&&td>0)warnings.push(`<span class="ops-rate-warning">Warning: Ops Rate ($${finalOpsRate.toFixed(2)}) < Min ($${MIN_OPS_RATE})</span>`);if(finalCompPool<=0&&finalRetainer>0&&finalOpsExp>0)warnings.push("Warning: Retainer <= Ops Expense.");if(elements.calculationWarning)elements.calculationWarning.innerHTML=warnings.join('<br>');const hC='var(--danger-color)';const dCC='var(--primary-color)';const dCCon='#856404';const applyH=(el,cond,defCol)=>{if(!el)return;const iE=el.classList.contains('editable-contract-value');const tC=cond?(iE?dCCon:defCol):hC;el.style.color=tC;const bT=el.parentElement?.classList.contains('highlight')?el.parentElement:el;if(bT&&(iE||bT.classList.contains('highlight')||el.id?.includes('Display'))){bT.style.borderBottomColor=cond?(iE?'var(--primary-color)':'transparent'):hC;bT.style.borderBottomWidth=cond?'1px':'2px';}};applyH(elements.rateWorkValueCard,meetsMinWorkRate,dCC);applyH(elements.rateTravelValueCard,meetsMinTravelRate,dCC);applyH(elements.contractRateWork,meetsMinWorkRate,dCCon);applyH(elements.contractRateTravel,meetsMinTravelRate,dCCon); const{minDate,maxDate}=getScheduleDateRange(scheduleData);updateContractFromSchedule(scheduleData,minDate,maxDate,scheduleWorkDaysCount,scheduleTravelDaysCount,rateWork);updateSliderMarkers(scheduleWorkDaysCount,scheduleTravelDaysCount);syncSlidersToSchedule(false);if(sourceElement&&calculationBasis!=="Initial Load / Sliders")showNotification(`${calculationBasis} updated.`);}
+        function handleEditableBlur(event,config){const elements=window.appElements;const t=event.target;const rV=t.textContent;const{inputId,type,isRate}=config;const pV=parseValue(rV,type);if(!isNaN(pV)){let vTU=pV;const s=elements[inputId+'Slider'];if(s&&!isRate){const min=parseFloat(s.min);const max=parseFloat(s.max);const vTC=(type==='integer')?Math.round(pV):pV;let cl=Math.max(min,Math.min(max,vTC));if(cl<0)cl=0;vTU=cl;}updateCalculationsAndUI(t,{value:vTU,field:inputId});reformatElement(t,inputId,vTU);}else{console.warn(`Invalid ${inputId}: ${rV}. Reverting.`);revertElementFormatting(t,inputId);}}
+        function revertElementFormatting(element,inputId){const elements=window.appElements;let rV;const s=elements[inputId+'Slider'];const iRE=element===elements.rateWorkValueCard||element===elements.contractRateWork||element===elements.rateTravelValueCard||element===elements.contractRateTravel;if(iRE){const rates=getCurrentRates();rV=(element===elements.rateWorkValueCard||element===elements.contractRateWork)?rates.rateWork:rates.rateTravel;}else if(s){rV=s.value;}else{console.warn("Cannot revert",inputId);return;}reformatElement(element,inputId,rV);}
+        function reformatElement(element,inputId,value){const elements=window.appElements;let fV;const vN=parseFloat(value);const cIDs=['retainerValueCard','contractRetainer','contractTotalRetainer','contractRetainer_3_4','rateWorkValueCard','contractRateWork','rateTravelValueCard','contractRateTravel','opsRateDisplay','contractOpsRate'];const dFIDs=['workDaysDisplay','travelDaysDisplay'];const iIDs=['contractWorkDaysAvg','contractTravelDaysAvg','contractWorkDaysQty','contractTravelDaysQty'];if(cIDs.includes(element?.id)){fV=formatCurrency(vN);}else if(dFIDs.includes(element?.id)){fV=formatDays(parseInt(value,10));}else if(iIDs.includes(element?.id)){fV=parseInt(value,10);}else{fV=value;}if(element&&element.textContent!==String(fV)){element.textContent=fV;}}
+        function preventEnter(event){if(event.key==='Enter'){event.preventDefault();event.target.blur();}}
+        function getScheduleDayCounts(){let w=0;let t=0;const c={work:new Set(),travel:new Set()};scheduleData.forEach(i=>{const l=i.eventType?.toLowerCase()||'';if(i.date){if(workEventTypes.some(type=>l.includes(type))){if(!c.work.has(i.date)){w++;c.work.add(i.date);}}else if(travelEventTypes.some(type=>l.includes(type))){if(!c.travel.has(i.date)&&!c.work.has(i.date)){t++;c.travel.add(i.date);}}}});return{workDays:w,travelDays:t};}
+        function getScheduleDateRange(data){let minD=null;let maxD=null;data.forEach(i=>{const st=calculateIsraelTimeFromUTC(i.startTime,i.date,i.startOffset);const et=calculateIsraelTimeFromUTC(i.endTime,i.date,i.endOffset);const dur=calculateDurationUTC(i.date,i.startTime,i.startOffset,i.endTime,i.endOffset);let endDateStr=et.dateStr;if(dur!==null&&i.startTime&&i.endTime&&i.date&&i.startOffset!==undefined){try{const ls=new Date(`${i.date}T${i.startTime}`);if(!isNaN(ls.getTime())){const ele=new Date(ls.getTime()+dur*3600*1000);const les=ele.toISOString().split('T')[0];if(les!==i.date){const aET=calculateIsraelTimeFromUTC(i.endTime,les,i.endOffset);endDateStr=aET.dateStr;}}}catch(e){console.error("Err range date:",i.date,e)}}if(st.dateStr){const csd=new Date(st.dateStr);if(!isNaN(csd.getTime())){if(!minD||csd<minD)minD=csd;}}if(endDateStr){const ced=new Date(endDateStr);if(!isNaN(ced.getTime())){if(!maxD||ced>maxD)maxD=ced;}}else if(i.date){try{const ced=new Date(i.date);if(!isNaN(ced.getTime())){if(!maxD||ced>maxD)maxD=ced;}}catch(e){}}});return{minDate:minD,maxDate:maxD};}
+
+        // --- Initial Setup ---
+        document.addEventListener('DOMContentLoaded', () => {
+             // Define elements cache FIRST and attach to window
+             window.appElements = {
+                 scheduleBody: document.getElementById('scheduleBody'),
+                 scheduleTotalHours: document.getElementById('scheduleTotalHours'),
+                 headerCheckbox: document.getElementById('headerCheckboxDuplicate'),
+                 bulkGmtSelect: document.getElementById('bulkGmtSelect'),
+                 applyBulkGmtBtn: document.getElementById('applyBulkGmtBtn'),
+                 deleteSelectedBtn: document.getElementById('deleteSelectedBtn'),
+                 addRowBtn: document.getElementById('addRowBtn'),
+                 scheduleTableContainer: document.getElementById('scheduleTableContainer'),
+                 retainerSlider: document.getElementById('retainer'),
+                 workDaysSlider: document.getElementById('workDays'),
+                 travelDaysSlider: document.getElementById('travelDays'),
+                 opsRateSlider: document.getElementById('opsRate'),
+                 workDaysScheduleMarker: document.getElementById('workDaysScheduleMarker'),
+                 travelDaysScheduleMarker: document.getElementById('travelDaysScheduleMarker'),
+                 // snap-marker elements are removed from HTML
+                 // workDaysSnapMarker: document.getElementById('workDaysSnapMarker'),
+                 // travelDaysSnapMarker: document.getElementById('travelDaysSnapMarker'),
+                 workDaysFromSchedule: document.getElementById('workDaysFromSchedule'),
+                 travelDaysFromSchedule: document.getElementById('travelDaysFromSchedule'),
+                 retainerDisplay: document.getElementById('retainerDisplay'),
+                 retainerSum: document.getElementById('retainerSum'),
+                 workDaysDisplay: document.getElementById('workDaysDisplay'),
+                 workSum: document.getElementById('workSum'),
+                 travelDaysDisplay: document.getElementById('travelDaysDisplay'),
+                 travelSum: document.getElementById('travelSum'),
+                 opsRateDisplay: document.getElementById('opsRateDisplay'),
+                 opsSum: document.getElementById('opsSum'),
+                 retainerValueCard: document.getElementById('retainerValue'),
+                 rateWorkValueCard: document.getElementById('rateWorkValue'),
+                 rateTravelValueCard: document.getElementById('rateTravelValue'),
+                 sumWorkValueCard: document.getElementById('sumWorkValue'),
+                 sumTravelValueCard: document.getElementById('sumTravelValue'),
+                 opsExpenseValueCard: document.getElementById('opsExpenseValue'),
+                 compTotalValueCard: document.getElementById('compTotalValue'),
+                 totalWorkHoursValueCard: document.getElementById('totalWorkHoursValue'),
+                 totalTravelHoursValueCard: document.getElementById('totalTravelHoursValue'),
+                 contractStartDate: document.getElementById('contractStartDate'),
+                 contractEndDate: document.getElementById('contractEndDate'),
+                 contractStartDate_4: document.getElementById('contractStartDate_4'),
+                 contractEndDate_4: document.getElementById('contractEndDate_4'),
+                 contractWorkHoursDetails: document.getElementById('contractWorkHoursDetails'),
+                 overtimeSummary: document.getElementById('overtimeSummary'),
+                 overtimeList: document.getElementById('overtimeList'),
+                 contractGameCount: document.getElementById('contractGameCount'),
+                 contractWorkDaysAvg: document.getElementById('contractWorkDaysAvg'),
+                 contractTravelDaysAvg: document.getElementById('contractTravelDaysAvg'),
+                 contractWorkDaysActual: document.getElementById('contractWorkDaysActual'),
+                 contractTravelDaysActual: document.getElementById('contractTravelDaysActual'),
+                 minWorkRateDisplay: document.getElementById('minWorkRateDisplay'),
+                 minTravelRateDisplay: document.getElementById('minTravelRateDisplay'),
+                 currentRateRatio: document.getElementById('currentRateRatio'),
+                 contractRetainer: document.getElementById('contractRetainer'),
+                 contractRateWork: document.getElementById('contractRateWork'),
+                 contractRateTravel: document.getElementById('contractRateTravel'),
+                 contractWorkDaysQty: document.getElementById('contractWorkDaysQty'),
+                 contractTravelDaysQty: document.getElementById('contractTravelDaysQty'),
+                 contractSumWork: document.getElementById('contractSumWork'),
+                 contractSumTravel: document.getElementById('contractSumTravel'),
+                 contractTotalCompensation: document.getElementById('contractTotalCompensation'),
+                 contractOpsRate: document.getElementById('contractOpsRate'),
+                 contractTravelDaysForExpense: document.getElementById('contractTravelDaysForExpense'),
+                 contractOpsExpense: document.getElementById('contractOpsExpense'),
+                 contractTotalRetainer: document.getElementById('contractTotalRetainer'),
+                 contractOpsExpense_3_3: document.getElementById('contractOpsExpense_3_3'), // Span for total ops expense in 3.3
+                 contractOpsRate_3_3_per_day: document.getElementById('contractOpsRate_3_3_per_day'), // Span for ops rate in 3.3
+                 contractRetainer_3_4: document.getElementById('contractRetainer_3_4'),
+                 // Removed contractRateWorkNote and contractRateTravelNote
+                 calculationWarning: document.getElementById('calculationWarning'),
+                 updateNotifier: document.getElementById('updateNotifier'),
+             };
+             const elements = window.appElements; // Local reference
+
+             try {
+                 let essentialElementsExist = true;
+                 const essentialKeys = ['scheduleBody', 'retainerSlider', 'workDaysSlider', 'travelDaysSlider', 'opsRateSlider', 'bulkGmtSelect', 'updateNotifier', 'scheduleTableContainer', 'rateWorkValueCard', 'rateTravelValueCard', 'opsRateDisplay']; // Added potentially problematic elements
+                 essentialKeys.forEach(key => { if (!elements[key]) { console.error(`Init Error: Element ID '${key}' not found.`); essentialElementsExist = false; } });
+                 if (!essentialElementsExist) { alert("Page element missing. Init failed."); return; }
+
+                 timeZoneOptions.forEach(opt=>{const o=document.createElement('option');o.value=opt.value;o.textContent=opt.name;elements.bulkGmtSelect.appendChild(o);});
+                 scheduleData = parseCSVData(rawCSVData);
+                 if(scheduleData.length===0){console.warn("CSV Parsing failed.");scheduleData=[];}
+                 const year=2025;const month=4;const daysInMay=31;const dO=scheduleData.length>0?{s:scheduleData[scheduleData.length-1]?.startOffset??3,e:scheduleData[scheduleData.length-1]?.endOffset??3}:{s:3,e:3};for(let day=1;day<=daysInMay;day++){try{const dt=new Date(year,month,day);const dS=dt.toLocaleDateString('en-CA');scheduleData.push({date:dS,startTime:'',startOffset:dO.s,endTime:'',endOffset:dO.e,eventType:'אחר',confirmation:'',flight:'',location:'',terminal:''});}catch(e){console.error(`Err May ${day}`,e);}}
+
+                 // Safer Initial Ratio Calc (using defaults from attributes)
+                 try{let iTRV=MIN_TRAVEL_RATE; let iORV=parseFloat(elements.opsRateSlider.getAttribute('value')||'205'); const iR=parseFloat(elements.retainerSlider.getAttribute('value')||'8650'); const iWD=parseInt(elements.workDaysSlider.getAttribute('value')||'10',10); const iTD=parseInt(elements.travelDaysSlider.getAttribute('value')||'11',10); const iOE=iTD*iORV; const iCP=Math.max(0,iR-iOE); const iDen=(iWD*DEFAULT_BASE_RATIO+iTD); if(iDen>0){iTRV=iCP/iDen;} if(iTRV<=0)iTRV=MIN_TRAVEL_RATE; initialOpsRateRatio=(iTRV>0)?iORV/iTRV:(iORV/MIN_TRAVEL_RATE); if(isNaN(initialOpsRateRatio)||!isFinite(initialOpsRateRatio)){throw new Error("Ratio calc failed");}}catch(e){console.error("Error calc ratio:",e);initialOpsRateRatio=(205/256.86);}
+
+                 // Link Editable Elements BEFORE initial render/calc that might access them indirectly
+                 const editableElementsConfig=[{element:elements.retainerValueCard,inputId:'retainer',type:'number',isRate:false},{element:elements.rateWorkValueCard,inputId:'rateWorkValue',type:'number',isRate:true},{element:elements.rateTravelValueCard,inputId:'rateTravelValue',type:'number',isRate:true},{element:elements.contractWorkDaysAvg,inputId:'workDays',type:'integer',isRate:false},{element:elements.contractTravelDaysAvg,inputId:'travelDays',type:'integer',isRate:false},{element:elements.contractRetainer,inputId:'retainer',type:'number',isRate:false},{element:elements.contractOpsRate,inputId:'opsRate',type:'number',isRate:false},{element:elements.contractWorkDaysQty,inputId:'workDays',type:'integer',isRate:false},{element:elements.contractTravelDaysQty,inputId:'travelDays',type:'integer',isRate:false},{element:elements.contractRateWork,inputId:'rateWorkValue',type:'number',isRate:true},{element:elements.contractRateTravel,inputId:'rateTravelValue',type:'number',isRate:true},{element:elements.contractTotalRetainer,inputId:'retainer',type:'number',isRate:false},{element:elements.contractRetainer_3_4,inputId:'retainer',type:'number',isRate:false},];
+                 editableElementsConfig.forEach((config)=>{const{element}=config;if(element){element.setAttribute('contenteditable','true');element.addEventListener('blur',(event)=>{handleEditableBlur(event,config);});element.addEventListener('keydown',preventEnter);}else{console.warn(`Editable config missing: ID "${config.inputId}" element.`);}});
+
+                 // Link Sliders
+                 ['retainer','workDays','travelDays','opsRate'].forEach(id=>{const s=elements[id+'Slider'];if(s){s.addEventListener('input',(e)=>{if(id==='workDays')isWorkDaysManual=true;if(id==='travelDays')isTravelDaysManual=true;updateCalculationsAndUI(e.target);if(id==='workDays'||id==='travelDays'){const sV=(id==='workDays')?scheduleWorkDaysCount:scheduleTravelDaysCount;s.classList.toggle('snapped',Math.abs(parseFloat(s.value)-Math.round(sV))<0.1);}});if(id==='workDays'||id==='travelDays'){s.addEventListener('change',(e)=>{const sE=e.target;const sV=(id==='workDays')?scheduleWorkDaysCount:scheduleTravelDaysCount;const cV=parseFloat(sE.value);const sVI=Math.round(sV);if(Math.abs(cV-sVI)<=SLIDER_SNAP_THRESHOLD){if(sE.value!=sVI){sE.value=sVI;if(id==='workDays')isWorkDaysManual=false;if(id==='travelDays')isTravelDaysManual=false;updateCalculationsAndUI(sE);showNotification(`${id==='workDays'?'Work':'Travel'} days snapped (${sVI}).`);}else{if(id==='workDays')isWorkDaysManual=false;if(id==='travelDays')isTravelDaysManual=false;syncSlidersToSchedule(false);}}});}}});
+
+                 // Link Schedule Action Buttons
+                 if(elements.headerCheckbox){elements.headerCheckbox.addEventListener('change',(e)=>{const c=e.target.checked;elements.scheduleBody.querySelectorAll('.row-checkbox').forEach(cb=>cb.checked=c);});}
+                 if(elements.applyBulkGmtBtn){elements.applyBulkGmtBtn.addEventListener('click',applyBulkGmt);}
+                 if(elements.addRowBtn){elements.addRowBtn.addEventListener('click',handleAddRow);}
+                 if(elements.deleteSelectedBtn){elements.deleteSelectedBtn.addEventListener('click',handleDeleteSelected);}
+                 document.querySelectorAll('.toggle-col-cb').forEach(cb=>{cb.addEventListener('change',handleToggleColumn);});
+
+                 // --- Initial Render & Calculations ---
+                 renderScheduleTable(scheduleData);
+                 syncSlidersToSchedule(true);
+                 updateCalculationsAndUI(null,{value:null,field:'Initial Load / Sliders'});
+                 editableElementsConfig.forEach(({element,inputId})=>{if(element){let iv;const s=elements[inputId+'Slider'];const r=element.id.includes('rateWork')||element.id.includes('rateTravel');if(r){const rates=getCurrentRates();iv=(element.id.includes('rateWork'))?rates.rateWork:rates.rateTravel;}else if(s){iv=s.value;}else{iv=element.textContent;}reformatElement(element,inputId,iv);}});
+                 if(elements.minWorkRateDisplay)elements.minWorkRateDisplay.textContent=MIN_WORK_RATE;if(elements.minTravelRateDisplay)elements.minTravelRateDisplay.textContent=MIN_TRAVEL_RATE;
+                 applyColumnVisibility();document.querySelectorAll('.toggle-col-cb').forEach(cb=>{cb.checked=columnVisibilityState[cb.dataset.colClass];});
+
+             }catch(error){console.error("Error during DOMContentLoaded:",error);alert("Page init error. Check console.");}
+        });
+
+    </script>
+</body>
+</html>
+
