@@ -12,9 +12,9 @@
             --light-gray-color: #f8f9fa;
             --dark-gray-color: #343a40;
             --text-color: #212529;
-            --container-bg-color: rgba(255, 255, 255, 0.64); /* Slightly more opaque */
-            --card-bg-color: rgba(255, 255, 255, 0.67); /* Slightly more opaque for cards */
-            --role-brief-bg: rgba(240, 248, 255, 0.57); /* AliceBlue, more subtle */
+            --container-bg-color: rgba(255, 255, 255, 0.65); /* Slightly more opaque for better readability with image bg */
+            --card-bg-color: rgba(255, 255, 255, 0.65); /* Slightly more opaque for cards */
+            --role-brief-bg: rgba(240, 248, 255, 0.65); 
             --border-radius: 10px;
             --box-shadow: 0 5px 20px rgba(0,0,0,0.12);
         }
@@ -24,22 +24,24 @@
             line-height: 1.65; 
             margin: 0;
             padding: 0;
+            /* Restoring background image as requested, with gradient fallback */
             background-image: url("bg48.png"); 
-            background-size: cover; 
-            background-position: center center; 
-            background-attachment: scroll; 
+            background: url("bg48.png"), linear-gradient(180deg, #e0eafc 0%, #cfdef3 100%);
+            background-size: cover;
+            background-position: center center;
+            background-attachment: fixed; 
             background-repeat: no-repeat;
             color: var(--text-color);
             display: flex;
             flex-direction: column;
             align-items: center;
             min-height: 100vh;
-            padding-top: 20px; /* Increased padding */
-            padding-bottom: 20px; /* Increased padding */
+            padding-top: 20px; 
+            padding-bottom: 20px; 
         }
         .main-container {
             background-color: var(--container-bg-color);
-            padding: 25px; /* Increased padding */
+            padding: 25px; 
             border-radius: var(--border-radius);
             box-shadow: var(--box-shadow);
             width: 96%; 
@@ -47,25 +49,25 @@
         }
         .header {
             text-align: center;
-            margin-bottom: 30px; /* Increased margin */
-            padding-bottom: 20px; /* Increased padding */
+            margin-bottom: 30px; 
+            padding-bottom: 20px; 
             border-bottom: 3px solid var(--primary-color);
         }
         .header h1 {
-            font-size: clamp(2em, 5.5vw, 2.8em); /* Slightly larger */
+            font-size: clamp(2em, 5.5vw, 2.8em); 
             color: var(--primary-hover-color);
             margin: 0;
             text-shadow: 1px 1px 2px rgba(0,0,0,0.05); 
         }
         .header .emoji {
-            font-size: clamp(2.8em, 7.5vw, 3.5em); /* Slightly larger */
+            font-size: clamp(2.8em, 7.5vw, 3.5em); 
             display: block;
             margin-bottom: 10px;
         }
         
         .introduction {
             background-color: var(--card-bg-color);
-            padding: 18px; /* Increased padding */
+            padding: 18px; 
             border-radius: var(--border-radius);
             margin-bottom: 25px;
             border-left: 5px solid var(--primary-color);
@@ -74,7 +76,7 @@
         }
         .introduction p {
             margin: 0;
-            font-size: 1.1em; /* Slightly larger */
+            font-size: 1.1em; 
             color: var(--dark-gray-color);
         }
 
@@ -82,7 +84,7 @@
             margin-bottom: 18px; 
             text-align: center;
             font-weight: bold;
-            font-size: 1.15em; /* Slightly larger */
+            font-size: 1.15em; 
             color: var(--primary-hover-color);
         }
 
@@ -90,7 +92,7 @@
             display: flex;
             flex-wrap: wrap;
             justify-content: space-around; 
-            gap: 12px; /* Slightly increased gap */
+            gap: 12px; 
             margin-bottom: 30px; 
             padding: 10px 0; 
         }
@@ -98,11 +100,11 @@
             background-color: var(--card-bg-color);
             cursor: pointer;
             text-align: center;
-            padding: 15px 10px; /* Adjusted padding */
+            padding: 15px 10px; 
             border-radius: var(--border-radius);
             transition: all 0.25s ease-in-out;
             width: calc(25% - 12px); 
-            min-width: 95px; /* Slightly larger min-width */
+            min-width: 95px; 
             box-sizing: border-box;
             border: 1px solid #ddd; 
             box-shadow: 0 2px 4px rgba(0,0,0,0.07);
@@ -110,8 +112,8 @@
         .role-icon.active-role {
             background-color: var(--primary-color) !important;
             color: white;
-            transform: translateY(-4px) scale(1.03); /* Enhanced effect */
-            box-shadow: 0 6px 12px rgba(0,123,255,0.35); /* Enhanced shadow */
+            transform: translateY(-4px) scale(1.03); 
+            box-shadow: 0 6px 12px rgba(0,123,255,0.35); 
         }
         .role-icon.active-role svg {
             fill: white;
@@ -123,17 +125,17 @@
             background-color: #eef7ff; 
             transform: translateY(-4px) scale(1.03);
             border-color: var(--primary-color);
-            box-shadow: 0 4px 8px rgba(0,0,0,0.1); /* Enhanced hover shadow */
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1); 
         }
         .role-icon svg {
-            width: 28px; /* Slightly larger */
+            width: 28px; 
             height: 28px;
             margin-bottom: 6px;
             fill: var(--primary-color);
         }
         .role-icon span {
             display: block;
-            font-size: 0.85em; /* Slightly larger */
+            font-size: 0.85em; 
             color: var(--dark-gray-color);
             font-weight: bold;
         }
@@ -142,7 +144,7 @@
         .role-brief-display {
             background-color: var(--role-brief-bg);
             border: 1px solid #cce5ff;
-            padding: 25px; /* Increased padding */
+            padding: 25px; 
             margin-top: 20px;
             margin-bottom: 30px;
             border-radius: var(--border-radius);
@@ -152,21 +154,21 @@
             color: var(--primary-hover-color);
             margin-top: 0;
             text-align: center;
-            font-size: 1.5em; /* Slightly larger */
+            font-size: 1.5em; 
         }
         .timeline-day-header {
-            font-size: 1.25em; /* Slightly larger */
+            font-size: 1.25em; 
             font-weight: bold;
             color: var(--dark-gray-color);
             margin-top: 28px;
             margin-bottom: 18px;
-            padding-bottom: 8px; /* Increased padding */
+            padding-bottom: 8px; 
             border-bottom: 2px solid var(--primary-color);
         }
         .timeline-item {
             display: flex;
             align-items: flex-start;
-            margin-bottom: 22px; /* Increased margin */
+            margin-bottom: 22px; 
             position: relative;
         }
         .timeline-time {
@@ -175,25 +177,25 @@
             padding-right: 20px;
             font-weight: bold;
             color: var(--primary-hover-color);
-            font-size: 1em; /* Slightly larger */
+            font-size: 1em; 
         }
         .timeline-content {
             flex-grow: 1;
             background: var(--card-bg-color);
-            padding: 18px; /* Increased padding */
+            padding: 18px; 
             border-radius: var(--border-radius);
             box-shadow: 0 2px 5px rgba(0,0,0,0.06);
             border-left: 4px solid var(--primary-color);
         }
-        .timeline-content h4 { /* Though not used in current JS dynamic content */
+        .timeline-content h4 { 
             margin-top: 0;
             margin-bottom: 8px;
             color: var(--dark-gray-color);
-            font-size: 1.05em; /* Slightly larger */
+            font-size: 1.05em; 
         }
         .timeline-content p {
             margin: 0;
-            font-size: 0.95em; /* Slightly larger */
+            font-size: 0.95em; 
         }
         .role-brief-display.hidden {
             display: none;
@@ -201,7 +203,7 @@
 
         /* General Accordion Styles */
         .accordion-item {
-            margin-bottom: 15px; /* Increased margin */
+            margin-bottom: 15px; 
             border-radius: var(--border-radius);
             box-shadow: 0 2px 6px rgba(0,0,0,0.07);
             overflow: hidden;
@@ -210,19 +212,19 @@
             background-color: var(--secondary-color); 
             color: white;
             cursor: pointer;
-            padding: 15px 22px; /* Adjusted padding */
+            padding: 15px 22px; 
             width: 100%;
             border: none;
             text-align: right;
             outline: none;
-            font-size: 1.15em; /* Slightly larger */
+            font-size: 1.15em; 
             font-weight: bold;
             transition: background-color 0.3s ease;
             display: flex;
             justify-content: space-between;
             align-items: center;
         }
-        .accordion-button:hover, .accordion-button:focus { /* Added focus style */
+        .accordion-button:hover, .accordion-button:focus { 
             background-color: #5a6268;
         }
         .accordion-button .arrow {
@@ -233,7 +235,7 @@
             transform: rotate(180deg);
         }
         .panel {
-            padding: 0 22px; /* Adjusted padding */
+            padding: 0 22px; 
             background-color: var(--card-bg-color);
             max-height: 0;
             overflow-y: auto; 
@@ -241,68 +243,83 @@
             border-top: 1px solid #e0e0e0;
         }
         .panel.show {
-            padding: 18px 22px; /* Adjusted padding when shown */
+            padding: 18px 22px; 
         }
         .panel h3 {
             color: var(--primary-hover-color);
             margin-top: 8px; 
-            font-size: 1.15em; /* Slightly larger */
+            font-size: 1.15em; 
             border-bottom: 1px solid #eee;
             padding-bottom: 8px;
         }
-        .panel ul {
+        .panel ul { /* For lists other than schedule table */
             list-style-position: outside;
             padding-right: 20px; 
-            font-size: 1em; /* Slightly larger */
+            font-size: 1em; 
         }
         .panel li {
-            margin-bottom: 10px; /* Increased margin */
-            padding-right: 5px; /* Ensure space for custom bullet */
+            margin-bottom: 10px; 
+            padding-right: 5px; 
         }
          .panel ul.pre-production-list li::before {
-            content: "📝 "; /* Emoji for pre-production lists */
-            margin-left: -20px; /* Adjust if needed */
+            content: "📝 "; 
+            margin-left: -20px; 
         }
 
-
-        /* Table styling for equipment list */
-        .panel table {
+        /* Table styling */
+        .schedule-table {
             width: 100%;
             border-collapse: collapse;
-            margin-top: 15px;
-            margin-bottom: 20px;
+            margin-top: 10px;
+            margin-bottom: 15px; /* Space between tables if multiple */
         }
-        .panel th, .panel td {
+        .schedule-table th, .schedule-table td {
             border: 1px solid #ddd;
-            padding: 12px; /* Increased padding */
-            text-align: right; 
+            padding: 10px; /* Adjusted padding */
+            text-align: right;
+            vertical-align: top;
         }
-        .panel th {
+        .schedule-table th {
             background-color: var(--light-gray-color);
             color: var(--primary-hover-color);
             font-weight: bold;
         }
-        .panel tr:nth-child(even) {
-            background-color: #fdfdfd; /* Subtle striping for rows */
+        .schedule-table tr:nth-child(even) {
+            background-color: rgba(253, 253, 253, 0.7); /* Slightly transparent for image bg */
         }
-        .panel tr:hover {
-            background-color: #f5f5f5; /* Hover effect for rows */
+        .schedule-table tr:hover {
+            background-color: rgba(245, 245, 245, 0.8); /* Slightly transparent for image bg */
         }
+        .schedule-table .time-col {
+            width: 100px; /* Fixed width for time column */
+            font-weight: bold;
+        }
+        .schedule-table .task-col ul { /* For nested lists within table cells */
+            list-style-type: '↪️';
+            padding-right: 15px;
+            margin-top: 5px;
+            margin-bottom: 5px;
+        }
+         .schedule-table .task-col li {
+            font-size: 0.9em;
+            margin-bottom: 3px;
+        }
+
 
         .important-note {
             background-color: rgba(255, 243, 205, 0.95); 
             border-left: 4px solid #ffc107; 
-            padding: 15px; /* Increased padding */
+            padding: 15px; 
             margin: 15px 0;
             border-radius: 5px;
-            font-size: 0.95em; /* Slightly larger */
+            font-size: 0.95em; 
             color: #533f03; 
         }
         .iframe-container {
             position: relative;
             overflow: hidden;
             width: 100%;
-            padding-top: 75%; /* Default 4:3 aspect ratio */
+            padding-top: 75%; 
             margin: 20px 0; 
             border: 1px solid #ccc; 
             border-radius: var(--border-radius);
@@ -317,10 +334,10 @@
         }
         .google-sheet-info {
             background-color: var(--card-bg-color);
-            padding: 18px; /* Increased padding */
+            padding: 18px; 
             border-radius: var(--border-radius);
             margin-bottom: 18px;
-            font-size: 1em; /* Slightly larger */
+            font-size: 1em; 
             box-shadow: 0 1px 3px rgba(0,0,0,0.05);
         }
         .google-sheet-info strong {
@@ -338,21 +355,27 @@
 
         .footer {
             text-align: center;
-            margin-top: 30px; /* Increased margin */
-            padding-top: 20px; /* Increased padding */
+            margin-top: 30px; 
+            padding-top: 20px; 
             border-top: 1px solid rgba(221, 221, 221, 0.7); 
-            font-size: 1em; /* Slightly larger */
+            font-size: 1em; 
             color: var(--dark-gray-color); 
         }
         
         @media (max-width: 768px) {
             .role-icon {
-                width: calc(33.33% - 12px); /* 3 icons for tablets */
+                width: calc(33.33% - 12px); 
+            }
+            .schedule-table th, .schedule-table td {
+                padding: 8px;
+            }
+            .schedule-table .time-col {
+                width: 80px; 
             }
         }
         @media (max-width: 600px) { 
             .role-icon {
-                width: calc(50% - 12px); /* 2 icons for mobile */
+                width: calc(50% - 12px); 
             }
             .timeline-item {
                 flex-direction: column;
@@ -364,17 +387,22 @@
                 padding-right: 0;
                 margin-bottom: 10px;
             }
+             .schedule-table { /* Make table scrollable on small screens */
+                display: block;
+                overflow-x: auto;
+                white-space: nowrap;
+            }
         }
         @media (max-width: 480px) {
             .iframe-container {
-                padding-top: 100%; /* 1:1 aspect ratio on small mobile */
+                padding-top: 100%; 
             }
             .main-container {
                 width: 100%;
-                padding: 15px; /* Adjusted padding for smallest screens */
+                padding: 15px; 
                 margin: 0;
                 border-radius: 0;
-                box-shadow: none; /* Remove shadow on smallest screens */
+                box-shadow: none; 
             }
             body {
                 padding-top: 0;
@@ -435,7 +463,7 @@
             </div>
             <div class="role-icon" data-role="soundman">
                 <svg viewBox="0 0 24 24"><path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z"/></svg>
-                <span>סאונד / עריכה 🎧💻</span> <!-- Combined for editor too -->
+                <span>סאונד / עריכה 🎧💻</span> 
             </div>
         </div>
         
@@ -451,77 +479,149 @@
             </button>
             <div class="panel" id="panelSchedule" aria-hidden="true">
                 <h3>🗓️ יום רביעי (26/07/2017 לדוגמה) - PRE-PRODUCTION & PRODUCTION 🚀</h3>
-                <ul>
-                    <li><strong>14:30:</strong> הגעת מפיק + עוזר מפיק, פתיחת חמ"ל, סידור ציוד וחמ"ל.</li>
-                    <li><strong>15:30:</strong> הגעה של כל הצוות לחמ"ל - חתימה על טפסים, וידוא פרטים אחרונים, הדרכת בטיחות.</li>
-                    <li><strong>16:00:</strong> התרעננות, הכנות מוקדמות ולקיחת ציוד. הגעת נציג לאירוע הזנקת "פרוייקט 48" (למשל, כיכר ביאליק, ת"א).</li>
-                    <li><strong>16:00:</strong> <strong>PRE-PRODUCTION</strong>
-                        <ul class="pre-production-list" style="list-style-type: '📝'; margin-right: 20px; margin-top: 5px;">
-                            <li>אופציות ללוקיישנים</li>
-                            <li>פרופס</li>
-                            <li>תפאורה</li>
-                            <li>תלבושות</li>
-                            <li>חתימה על טפסים</li>
-                            <li>תשלום קופה קטנה</li>
-                        </ul>
-                    </li>
-                    <li><strong>17:30:</strong> הפסקת התרעננות (סנדוויצ'ים, שתייה 🥪🥤).</li>
-                    <li><strong>17:50:</strong> צוות הפקה יוצא ל"ראשס" (השכרת ציוד): תאורנית, ע.תאורה 1+2, ע.צלם, מפיק.</li>
-                    <li><strong>18:00:</strong> הגעה ל"ראשס": בדיקת ציוד, המתנה לציוד שטח, הרכבת מצלמה ומתקונים (לרכב אם צריך), העמסת ציוד.</li>
-                    <li><strong>18:00:</strong> <strong>🏁 תחילת תחרות!</strong> הנציג מעביר בהודעת טקסט את האלמנטים והז'אנר הנבחר.</li>
-                    <li><strong>18:00 - 23:00:</strong> ✍️ כתיבת תסריט.</li>
-                    <li><strong>20:00:</strong> צוות "ראשס" חוזר לאזור החמ"ל.</li>
-                    <li><strong>20:00 - 23:00:</strong> 🧐 ברייקדאון ושוטינג: במאי/ת, מפיק, צלם, תאורנית על שוטינג וברייקדאון. צוות משריין לוקיישנים, פרופס, ארט וכו'. הכנות ציוד.</li>
-                    <li><strong>23:00:</strong> <strong>🎬 PRODUCTION</strong></li>
-                    <li><strong>23:00:</strong> יציאה ללוקיישן A.</li>
-                    <li><strong>23:20:</strong> הגעה ללוקיישן A: פריקת ציוד, הקמת סט, תאורה, מצלמה.</li>
-                    <li><strong>00:00 (לילה רביעי-חמישי):</strong> תחילת צילומים, סצנות [...].</li>
-                    <li><strong>02:40:</strong> סיום צילומים (לוקיישן A). פירוק והעמסת ציוד. חזרה לחמ"ל. 😴 לישון או לנוח חזק!</li>
-                </ul>
+                <table class="schedule-table">
+                    <thead>
+                        <tr>
+                            <th class="time-col">שעה</th>
+                            <th>משימה</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td class="time-col">14:30</td>
+                            <td class="task-col">הגעת מפיק + עוזר מפיק, פתיחת חמ"ל, סידור ציוד וחמ"ל.</td>
+                        </tr>
+                        <tr>
+                            <td class="time-col">15:30</td>
+                            <td class="task-col">הגעה של כל הצוות לחמ"ל - חתימה על טפסים, וידוא פרטים אחרונים, הדרכת בטיחות.</td>
+                        </tr>
+                        <tr>
+                            <td class="time-col">16:00</td>
+                            <td class="task-col">התרעננות, הכנות מוקדמות ולקיחת ציוד. הגעת נציג לאירוע הזנקת "פרוייקט 48" (למשל, כיכר ביאליק, ת"א).</td>
+                        </tr>
+                        <tr>
+                            <td class="time-col">16:00</td>
+                            <td class="task-col"><strong>PRE-PRODUCTION</strong>
+                                <ul>
+                                    <li>אופציות ללוקיישנים</li>
+                                    <li>פרופס</li>
+                                    <li>תפאורה</li>
+                                    <li>תלבושות</li>
+                                    <li>חתימה על טפסים</li>
+                                    <li>תשלום קופה קטנה</li>
+                                </ul>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="time-col">17:30</td>
+                            <td class="task-col">הפסקת התרעננות (סנדוויצ'ים, שתייה 🥪🥤).</td>
+                        </tr>
+                        <tr>
+                            <td class="time-col">17:50</td>
+                            <td class="task-col">צוות הפקה יוצא ל"ראשס" (השכרת ציוד): תאורנית, ע.תאורה 1+2, ע.צלם, מפיק.</td>
+                        </tr>
+                        <tr>
+                            <td class="time-col">18:00</td>
+                            <td class="task-col">הגעה ל"ראשס": בדיקת ציוד, המתנה לציוד שטח, הרכבת מצלמה ומתקונים (לרכב אם צריך), העמסת ציוד.</td>
+                        </tr>
+                        <tr>
+                            <td class="time-col">18:00</td>
+                            <td class="task-col"><strong>🏁 תחילת תחרות!</strong> הנציג מעביר בהודעת טקסט את האלמנטים והז'אנר הנבחר.</td>
+                        </tr>
+                        <tr>
+                            <td class="time-col">18:00 - 23:00</td>
+                            <td class="task-col">✍️ כתיבת תסריט.</td>
+                        </tr>
+                        <tr>
+                            <td class="time-col">20:00</td>
+                            <td class="task-col">צוות "ראשס" חוזר לאזור החמ"ל.</td>
+                        </tr>
+                        <tr>
+                            <td class="time-col">20:00 - 23:00</td>
+                            <td class="task-col">🧐 ברייקדאון ושוטינג: במאי/ת, מפיק, צלם, תאורנית על שוטינג וברייקדאון. צוות משריין לוקיישנים, פרופס, ארט וכו'. הכנות ציוד.</td>
+                        </tr>
+                        <tr>
+                            <td class="time-col">23:00</td>
+                            <td class="task-col"><strong>🎬 PRODUCTION</strong></td>
+                        </tr>
+                        <tr>
+                            <td class="time-col">23:00</td>
+                            <td class="task-col">יציאה ללוקיישן A.</td>
+                        </tr>
+                        <tr>
+                            <td class="time-col">23:20</td>
+                            <td class="task-col">הגעה ללוקיישן A: פריקת ציוד, הקמת סט, תאורה, מצלמה.</td>
+                        </tr>
+                        <tr>
+                            <td class="time-col">00:00 (לילה רביעי-חמישי)</td>
+                            <td class="task-col">תחילת צילומים, סצנות [...].</td>
+                        </tr>
+                        <tr>
+                            <td class="time-col">02:40</td>
+                            <td class="task-col">סיום צילומים (לוקיישן A). פירוק והעמסת ציוד. חזרה לחמ"ל. 😴 לישון או לנוח חזק!</td>
+                        </tr>
+                    </tbody>
+                </table>
 
                 <h3>🎬 יום חמישי (27/07/2017 לדוגמה) - PRODUCTION MARATHON 🏃‍♀️🏃‍♂️</h3>
-                <ul>
-                    <li><strong>05:00:</strong> השכמה, יציאה ללוקיישן B (נסיעה/חופים 🌅).</li>
-                    <li><strong>05:20:</strong> הגעה ללוקיישן B: הקמת סט, מצלמה.</li>
-                    <li><strong>05:40:</strong> תחילת צילומים, סצנות [...] (לוקיישן B).</li>
-                    <li><strong>05:52:</strong> ☀️ נץ החמה (זריחה).</li>
-                    <li><strong>07:00:</strong> סיום צילומים (לוקיישן B). פירוק והעמסת ציוד.</li>
-                    <li><strong>06:00 (צוות נפרד):</strong> יציאה ללוקיישן C.</li>
-                    <li><strong>06:20:</strong> הגעה ללוקיישן C (צוות הכנה): הקמת תפאורה, פרופס, ארט, תאורה.</li>
-                    <li><strong>07:20:</strong> צוות חוץ (צילום) יוצא ללוקיישן C.</li>
-                    <li><strong>08:00:</strong> הגעה ללוקיישן C (צוות צילום): הקמת סט, מצלמה.</li>
-                    <li><strong>08:40:</strong> 🥐 ארוחת בוקר.</li>
-                    <li><strong>09:00:</strong> עורך ומפיק יוצאים לאולפן: הקמת סביבת עבודה, עמדות נוספות.</li>
-                    <li><strong>09:00:</strong> תחילת צילומים, סצנות [...] (לוקיישן C).</li>
-                    <li><strong>12:40:</strong> 🥤 הפסקת התרעננות.</li>
-                    <li><strong>13:00:</strong> המשך צילומים, סצנות [...] (לוקיישן C).</li>
-                    <li><strong>14:30:</strong> סיום צילומים (לוקיישן C).</li>
-                    <li><strong>15:00:</strong> ಊ ארוחת צהריים.</li>
-                    <li><strong>15:30:</strong> יציאה ללוקיישן D.</li>
-                    <li><strong>16:00:</strong> הגעה ללוקיישן D: הקמת סט, ארט ותפאורה, תאורה, מצלמה.</li>
-                    <li><strong>16:30:</strong> תחילת צילומים, סצנות [...] (לוקיישן D).</li>
-                    <li><strong>17:30:</strong> סיום צילומים (לוקיישן D). קיפול ציוד, העמסה ויציאה ל"ראשס".</li>
-                    <li><strong>18:00:</strong> החזרת ציוד ל"ראשס".</li>
-                    <li><strong>19:00:</strong> 🗣️ פגישת צוות בחמ"ל.</li>
-                    <li><strong>20:00:</strong> 🛌 הולכים לישון!</li>
-                    <li><strong>23:40:</strong> ⏰ השכמה (לצוות הפוסט).</li>
-                </ul>
+                 <table class="schedule-table">
+                    <thead>
+                        <tr>
+                            <th class="time-col">שעה</th>
+                            <th>משימה</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr><td class="time-col">05:00</td><td class="task-col">השכמה, יציאה ללוקיישן B (נסיעה/חופים 🌅).</td></tr>
+                        <tr><td class="time-col">05:20</td><td class="task-col">הגעה ללוקיישן B: הקמת סט, מצלמה.</td></tr>
+                        <tr><td class="time-col">05:40</td><td class="task-col">תחילת צילומים, סצנות [...] (לוקיישן B).</td></tr>
+                        <tr><td class="time-col">05:52</td><td class="task-col">☀️ נץ החמה (זריחה).</td></tr>
+                        <tr><td class="time-col">07:00</td><td class="task-col">סיום צילומים (לוקיישן B). פירוק והעמסת ציוד.</td></tr>
+                        <tr><td class="time-col">06:00 (צוות נפרד)</td><td class="task-col">יציאה ללוקיישן C.</td></tr>
+                        <tr><td class="time-col">06:20</td><td class="task-col">הגעה ללוקיישן C (צוות הכנה): הקמת תפאורה, פרופס, ארט, תאורה.</td></tr>
+                        <tr><td class="time-col">07:20</td><td class="task-col">צוות חוץ (צילום) יוצא ללוקיישן C.</td></tr>
+                        <tr><td class="time-col">08:00</td><td class="task-col">הגעה ללוקיישן C (צוות צילום): הקמת סט, מצלמה.</td></tr>
+                        <tr><td class="time-col">08:40</td><td class="task-col">🥐 ארוחת בוקר.</td></tr>
+                        <tr><td class="time-col">09:00</td><td class="task-col">עורך ומפיק יוצאים לאולפן: הקמת סביבת עבודה, עמדות נוספות.</td></tr>
+                        <tr><td class="time-col">09:00</td><td class="task-col">תחילת צילומים, סצנות [...] (לוקיישן C).</td></tr>
+                        <tr><td class="time-col">12:40</td><td class="task-col">🥤 הפסקת התרעננות.</td></tr>
+                        <tr><td class="time-col">13:00</td><td class="task-col">המשך צילומים, סצנות [...] (לוקיישן C).</td></tr>
+                        <tr><td class="time-col">14:30</td><td class="task-col">סיום צילומים (לוקיישן C).</td></tr>
+                        <tr><td class="time-col">15:00</td><td class="task-col">ಊ ארוחת צהריים.</td></tr>
+                        <tr><td class="time-col">15:30</td><td class="task-col">יציאה ללוקיישן D.</td></tr>
+                        <tr><td class="time-col">16:00</td><td class="task-col">הגעה ללוקיישן D: הקמת סט, ארט ותפאורה, תאורה, מצלמה.</td></tr>
+                        <tr><td class="time-col">16:30</td><td class="task-col">תחילת צילומים, סצנות [...] (לוקיישן D).</td></tr>
+                        <tr><td class="time-col">17:30</td><td class="task-col">סיום צילומים (לוקיישן D). קיפול ציוד, העמסה ויציאה ל"ראשס".</td></tr>
+                        <tr><td class="time-col">18:00</td><td class="task-col">החזרת ציוד ל"ראשס".</td></tr>
+                        <tr><td class="time-col">19:00</td><td class="task-col">🗣️ פגישת צוות בחמ"ל.</td></tr>
+                        <tr><td class="time-col">20:00</td><td class="task-col">🛌 הולכים לישון!</td></tr>
+                        <tr><td class="time-col">23:40</td><td class="task-col">⏰ השכמה (לצוות הפוסט).</td></tr>
+                    </tbody>
+                </table>
 
                 <h3>🏆 יום שישי (28/07/2017 לדוגמה) - POST-PRODUCTION & SUBMISSION 🏁</h3>
-                <ul>
-                    <li><strong>00:00:</strong> <strong>🎞️ POST PRODUCTION</strong></li>
-                    <li><strong>00:30:</strong> ✂️ תחילת עריכות.</li>
-                    <li><strong>04:30:</strong> ☕ הפסקת התרעננות.</li>
-                    <li><strong>05:00:</strong> המשך עריכות.</li>
-                    <li><strong>09:00:</strong> 🥐 ארוחת בוקר.</li>
-                    <li><strong>10:40:</strong> המשך עריכות.</li>
-                    <li><strong>13:00:</strong> 🎵 דד ליין פס קול.</li>
-                    <li><strong>14:00:</strong> ✨ פינישים וסיום עריכה.</li>
-                    <li><strong>14:40:</strong> 🔧 זמן תיקונים.</li>
-                    <li><strong>15:30:</strong> 💾 דד ליין לרינדור (עיבוד) סופי.</li>
-                    <li><strong>16:30:</strong> 🚗 יציאה לסינמטק.</li>
-                    <li><strong>17:00:</strong> 🎉 מסירה!</li>
-                </ul>
+                <table class="schedule-table">
+                    <thead>
+                        <tr>
+                            <th class="time-col">שעה</th>
+                            <th>משימה</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr><td class="time-col">00:00</td><td class="task-col"><strong>🎞️ POST PRODUCTION</strong></td></tr>
+                        <tr><td class="time-col">00:30</td><td class="task-col">✂️ תחילת עריכות.</td></tr>
+                        <tr><td class="time-col">04:30</td><td class="task-col">☕ הפסקת התרעננות.</td></tr>
+                        <tr><td class="time-col">05:00</td><td class="task-col">המשך עריכות.</td></tr>
+                        <tr><td class="time-col">09:00</td><td class="task-col">🥐 ארוחת בוקר.</td></tr>
+                        <tr><td class="time-col">10:40</td><td class="task-col">המשך עריכות.</td></tr>
+                        <tr><td class="time-col">13:00</td><td class="task-col">� דד ליין פס קול.</td></tr>
+                        <tr><td class="time-col">14:00</td><td class="task-col">✨ פינישים וסיום עריכה.</td></tr>
+                        <tr><td class="time-col">14:40</td><td class="task-col">🔧 זמן תיקונים.</td></tr>
+                        <tr><td class="time-col">15:30</td><td class="task-col">💾 דד ליין לרינדור (עיבוד) סופי.</td></tr>
+                        <tr><td class="time-col">16:30</td><td class="task-col">🚗 יציאה לסינמטק.</td></tr>
+                        <tr><td class="time-col">17:00</td><td class="task-col">🎉 מסירה!</td></tr>
+                    </tbody>
+                </table>
             </div>
         </div>
         
@@ -532,7 +632,7 @@
             </button>
             <div class="panel" id="panelEquipment" aria-hidden="true">
                 <h3>🔧 ציוד שכור:</h3>
-                <table>
+                <table class="schedule-table"> <!-- Using schedule-table for consistency, can be renamed if needed -->
                     <thead><tr><th>פריט</th><th>כמות</th></tr></thead>
                     <tbody>
                         <tr><td>סט רפלקטורים 5 ב-1</td><td>1</td></tr>
@@ -777,7 +877,7 @@
                     ]
                 }
             },
-            soundman: { // עשוי לכלול גם עורך, בהתאם לגודל הצוות
+            soundman: { 
                 title: "סאונד / עריכה 🎧💻",
                 days: {
                     "יום רביעי 📡": [
@@ -850,3 +950,4 @@
     </script>
 </body>
 </html>
+�
