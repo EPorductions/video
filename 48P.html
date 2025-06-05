@@ -1,937 +1,995 @@
-<!DOCTYPE html>
-<html lang="he" dir="rtl">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>תדריך הפקה פסטי 48</title>
-    <style>
-        :root {
-            --primary-color: #0d6efd; 
-            --primary-hover-color: #0a58ca;
-            --secondary-color: #6c757d;
-            --light-gray-color: #f8f9fa;
-            --dark-gray-color: #343a40;
-            --text-color: #212529;
-            --container-bg-color: rgba(255, 255, 255, 0.65); /* Slightly more opaque for better readability with image bg */
-            --card-bg-color: rgba(255, 255, 255, 0.65); /* Slightly more opaque for cards */
-            --role-brief-bg: rgba(240, 248, 255, 0.56); 
-            --border-radius: 10px;
-            --box-shadow: 0 5px 20px rgba(0,0,0,0.12);
-        }
+ <!DOCTYPE html>
+ <html lang="he" dir="rtl">
+ <head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>תדריך הפקה פסטי 48</title>
+  <style>
+  :root {
+  --primary-color: #0d6efd; 
+  --primary-hover-color: #0a58ca;
+  --secondary-color: #6c757d;
+  --light-gray-color: #f8f9fa;
+  --dark-gray-color: #343a40;
+  --text-color: #212529;
+  --container-bg-color: rgba(255, 255, 255, 0.75); /* Slightly more opaque for better readability with image bg */
+  --card-bg-color: rgba(255, 255, 255, 0.75); /* Slightly more opaque for cards */
+  --role-brief-bg: rgba(240, 248, 255, 0.65); 
+  --border-radius: 10px;
+  --box-shadow: 0 5px 20px rgba(0,0,0,0.12);
+  }
 
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
-            line-height: 1.65; 
-            margin: 0;
-            padding: 0;
-            /* Restoring background image as requested, with gradient fallback */
-            background-image: url("bg48.png"); 
-            background: url("bg48.png"), linear-gradient(180deg, #e0eafc 0%, #cfdef3 100%);
-            background-size: cover;
-            background-position: center center;
-            background-attachment: fixed; 
-            background-repeat: no-repeat;
-            color: var(--text-color);
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            min-height: 100vh;
-            padding-top: 20px; 
-            padding-bottom: 20px; 
-        }
-        .main-container {
-            background-color: var(--container-bg-color);
-            padding: 25px; 
-            border-radius: var(--border-radius);
-            box-shadow: var(--box-shadow);
-            width: 96%; 
-            max-width: 900px;
-        }
-        .header {
-            text-align: center;
-            margin-bottom: 30px; 
-            padding-bottom: 20px; 
-            border-bottom: 3px solid var(--primary-color);
-        }
-        .header h1 {
-            font-size: clamp(2em, 5.5vw, 2.8em); 
-            color: var(--primary-hover-color);
-            margin: 0;
-            text-shadow: 1px 1px 2px rgba(0,0,0,0.05); 
-        }
-        .header .emoji {
-            font-size: clamp(2.8em, 7.5vw, 3.5em); 
-            display: block;
-            margin-bottom: 10px;
-        }
-        
-        .introduction {
-            background-color: var(--card-bg-color);
-            padding: 18px; 
-            border-radius: var(--border-radius);
-            margin-bottom: 25px;
-            border-left: 5px solid var(--primary-color);
-            text-align: center;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
-        }
-        .introduction p {
-            margin: 0;
-            font-size: 1.1em; 
-            color: var(--dark-gray-color);
-        }
+  body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+  line-height: 1.65; 
+  margin: 0;
+  padding: 0;
+  /* Restoring background image as requested, with gradient fallback */
+  background-image: url("bg48.png"); 
+  background: url("bg48.png"), linear-gradient(180deg, #e0eafc 0%, #cfdef3 100%);
+  background-size: cover;
+  background-position: center center;
+  background-attachment: fixed; 
+  background-repeat: no-repeat;
+  color: var(--text-color);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  min-height: 100vh;
+  padding-top: 20px; 
+  padding-bottom: 20px; 
+  }
+  .main-container {
+  background-color: var(--container-bg-color);
+  padding: 25px; 
+  border-radius: var(--border-radius);
+  box-shadow: var(--box-shadow);
+  width: 96%; 
+  max-width: 900px;
+  }
+  .header {
+  text-align: center;
+  margin-bottom: 30px; 
+  padding-bottom: 20px; 
+  border-bottom: 3px solid var(--primary-color);
+  }
+  .header h1 {
+  font-size: clamp(2em, 5.5vw, 2.8em); 
+  color: var(--primary-hover-color);
+  margin: 0;
+  text-shadow: 1px 1px 2px rgba(0,0,0,0.05); 
+  }
+  .header .emoji {
+  font-size: clamp(2.8em, 7.5vw, 3.5em); 
+  display: block;
+  margin-bottom: 10px;
+  }
+  
+  .introduction {
+  background-color: var(--card-bg-color);
+  padding: 18px; 
+  border-radius: var(--border-radius);
+  margin-bottom: 25px;
+  border-left: 5px solid var(--primary-color);
+  text-align: center;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+  }
+  .introduction p {
+  margin: 0;
+  font-size: 1.1em; 
+  color: var(--dark-gray-color);
+  }
 
-        .roles-guidance {
-            margin-bottom: 18px; 
-            text-align: center;
-            font-weight: bold;
-            font-size: 1.15em; 
-            color: var(--primary-hover-color);
-        }
+  .roles-guidance {
+  margin-bottom: 18px; 
+  text-align: center;
+  font-weight: bold;
+  font-size: 1.15em; 
+  color: var(--primary-hover-color);
+  }
 
-        .roles-container {
-            display: flex;
-            flex-wrap: wrap;
-            justify-content: space-around; 
-            gap: 12px; 
-            margin-bottom: 30px; 
-            padding: 10px 0; 
-        }
-        .role-icon {
-            background-color: var(--card-bg-color);
-            cursor: pointer;
-            text-align: center;
-            padding: 15px 10px; 
-            border-radius: var(--border-radius);
-            transition: all 0.25s ease-in-out;
-            width: calc(25% - 12px); 
-            min-width: 95px; 
-            box-sizing: border-box;
-            border: 1px solid #ddd; 
-            box-shadow: 0 2px 4px rgba(0,0,0,0.07);
-        }
-        .role-icon.active-role {
-            background-color: var(--primary-color) !important;
-            color: white;
-            transform: translateY(-4px) scale(1.03); 
-            box-shadow: 0 6px 12px rgba(0,123,255,0.35); 
-        }
-        .role-icon.active-role svg {
-            fill: white;
-        }
-        .role-icon.active-role span {
-            color: white;
-        }
-        .role-icon:hover {
-            background-color: #eef7ff; 
-            transform: translateY(-4px) scale(1.03);
-            border-color: var(--primary-color);
-            box-shadow: 0 4px 8px rgba(0,0,0,0.1); 
-        }
-        .role-icon svg {
-            width: 28px; 
-            height: 28px;
-            margin-bottom: 6px;
-            fill: var(--primary-color);
-        }
-        .role-icon span {
-            display: block;
-            font-size: 0.85em; 
-            color: var(--dark-gray-color);
-            font-weight: bold;
-        }
+  .roles-container {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-around; 
+  gap: 12px; 
+  margin-bottom: 30px; 
+  padding: 10px 0; 
+  }
+  .role-icon {
+  background-color: var(--card-bg-color);
+  cursor: pointer;
+  text-align: center;
+  padding: 15px 10px; 
+  border-radius: var(--border-radius);
+  transition: all 0.25s ease-in-out;
+  width: calc(25% - 12px); 
+  min-width: 95px; 
+  box-sizing: border-box;
+  border: 1px solid #ddd; 
+  box-shadow: 0 2px 4px rgba(0,0,0,0.07);
+  }
+  .role-icon.active-role {
+  background-color: var(--primary-color) !important;
+  color: white;
+  transform: translateY(-4px) scale(1.03); 
+  box-shadow: 0 6px 12px rgba(0,123,255,0.35); 
+  }
+  .role-icon.active-role svg {
+  fill: white;
+  }
+  .role-icon.active-role span {
+  color: white;
+  }
+  .role-icon:hover {
+  background-color: #eef7ff; 
+  transform: translateY(-4px) scale(1.03);
+  border-color: var(--primary-color);
+  box-shadow: 0 4px 8px rgba(0,0,0,0.1); 
+  }
+  .role-icon svg {
+  width: 28px; 
+  height: 28px;
+  margin-bottom: 6px;
+  fill: var(--primary-color);
+  }
+  .role-icon span {
+  display: block;
+  font-size: 0.85em; 
+  color: var(--dark-gray-color);
+  font-weight: bold;
+  }
 
-        /* Modern Timeline/Breakdown Design */
-        .role-brief-display {
-            background-color: var(--role-brief-bg);
-            border: 1px solid #cce5ff;
-            padding: 25px; 
-            margin-top: 20px;
-            margin-bottom: 30px;
-            border-radius: var(--border-radius);
-            box-shadow: 0 3px 10px rgba(0,0,0,0.08);
-        }
-        .role-brief-display h2 {
-            color: var(--primary-hover-color);
-            margin-top: 0;
-            text-align: center;
-            font-size: 1.5em; 
-        }
-        .timeline-day-header {
-            font-size: 1.25em; 
-            font-weight: bold;
-            color: var(--dark-gray-color);
-            margin-top: 28px;
-            margin-bottom: 18px;
-            padding-bottom: 8px; 
-            border-bottom: 2px solid var(--primary-color);
-        }
-        .timeline-item {
-            display: flex;
-            align-items: flex-start;
-            margin-bottom: 22px; 
-            position: relative;
-        }
-        .timeline-time {
-            flex-basis: 120px;
-            flex-shrink: 0;
-            padding-right: 20px;
-            font-weight: bold;
-            color: var(--primary-hover-color);
-            font-size: 1em; 
-        }
-        .timeline-content {
-            flex-grow: 1;
-            background: var(--card-bg-color);
-            padding: 18px; 
-            border-radius: var(--border-radius);
-            box-shadow: 0 2px 5px rgba(0,0,0,0.06);
-            border-left: 4px solid var(--primary-color);
-        }
-        .timeline-content h4 { 
-            margin-top: 0;
-            margin-bottom: 8px;
-            color: var(--dark-gray-color);
-            font-size: 1.05em; 
-        }
-        .timeline-content p {
-            margin: 0;
-            font-size: 0.95em; 
-        }
-        .role-brief-display.hidden {
-            display: none;
-        }
+  /* Modern Timeline/Breakdown Design */
+  .role-brief-display {
+  background-color: var(--role-brief-bg);
+  border: 1px solid #cce5ff;
+  padding: 25px; 
+  margin-top: 20px;
+  margin-bottom: 30px;
+  border-radius: var(--border-radius);
+  box-shadow: 0 3px 10px rgba(0,0,0,0.08);
+  }
+  .role-brief-display h2 {
+  color: var(--primary-hover-color);
+  margin-top: 0;
+  text-align: center;
+  font-size: 1.5em; 
+  }
+  .timeline-day-header {
+  font-size: 1.25em; 
+  font-weight: bold;
+  color: var(--dark-gray-color);
+  margin-top: 28px;
+  margin-bottom: 18px;
+  padding-bottom: 8px; 
+  border-bottom: 2px solid var(--primary-color);
+  }
+  .timeline-item {
+  display: flex;
+  align-items: flex-start;
+  margin-bottom: 22px; 
+  position: relative;
+  }
+  .timeline-time {
+  flex-basis: 120px;
+  flex-shrink: 0;
+  padding-right: 20px;
+  font-weight: bold;
+  color: var(--primary-hover-color);
+  font-size: 1em; 
+  }
+  .timeline-content {
+  flex-grow: 1;
+  background: var(--card-bg-color);
+  padding: 18px; 
+  border-radius: var(--border-radius);
+  box-shadow: 0 2px 5px rgba(0,0,0,0.06);
+  border-left: 4px solid var(--primary-color);
+  }
+  .timeline-content h4 { 
+  margin-top: 0;
+  margin-bottom: 8px;
+  color: var(--dark-gray-color);
+  font-size: 1.05em; 
+  }
+  .timeline-content p {
+  margin: 0;
+  font-size: 0.95em; 
+  }
+  .role-brief-display.hidden {
+  display: none;
+  }
 
-        /* General Accordion Styles */
-        .accordion-item {
-            margin-bottom: 15px; 
-            border-radius: var(--border-radius);
-            box-shadow: 0 2px 6px rgba(0,0,0,0.07);
-            overflow: hidden;
-        }
-        .accordion-button {
-            background-color: var(--secondary-color); 
-            color: white;
-            cursor: pointer;
-            padding: 15px 22px; 
-            width: 100%;
-            border: none;
-            text-align: right;
-            outline: none;
-            font-size: 1.15em; 
-            font-weight: bold;
-            transition: background-color 0.3s ease;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-        .accordion-button:hover, .accordion-button:focus { 
-            background-color: #5a6268;
-        }
-        .accordion-button .arrow {
-            font-size: 1em;
-            transition: transform 0.3s ease;
-        }
-        .accordion-button.active .arrow {
-            transform: rotate(180deg);
-        }
-        .panel {
-            padding: 0 22px; 
-            background-color: var(--card-bg-color);
-            max-height: 0;
-            overflow-y: auto; 
-            transition: max-height 0.35s ease-out, padding 0.35s ease-out;
-            border-top: 1px solid #e0e0e0;
-        }
-        .panel.show {
-            padding: 18px 22px; 
-        }
-        .panel h3 {
-            color: var(--primary-hover-color);
-            margin-top: 8px; 
-            font-size: 1.15em; 
-            border-bottom: 1px solid #eee;
-            padding-bottom: 8px;
-        }
-        .panel ul { /* For lists other than schedule table */
-            list-style-position: outside;
-            padding-right: 20px; 
-            font-size: 1em; 
-        }
-        .panel li {
-            margin-bottom: 10px; 
-            padding-right: 5px; 
-        }
-         .panel ul.pre-production-list li::before {
-            content: "📝 "; 
-            margin-left: -20px; 
-        }
+  /* General Accordion Styles */
+  .accordion-item {
+  margin-bottom: 15px; 
+  border-radius: var(--border-radius);
+  box-shadow: 0 2px 6px rgba(0,0,0,0.07);
+  overflow: hidden;
+  }
+  .accordion-button {
+  background-color: var(--secondary-color); 
+  color: white;
+  cursor: pointer;
+  padding: 15px 22px; 
+  width: 100%;
+  border: none;
+  text-align: right;
+  outline: none;
+  font-size: 1.15em; 
+  font-weight: bold;
+  transition: background-color 0.3s ease;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  }
+  .accordion-button:hover, .accordion-button:focus { 
+  background-color: #5a6268;
+  }
+  .accordion-button .arrow {
+  font-size: 1em;
+  transition: transform 0.3s ease;
+  }
+  .accordion-button.active .arrow {
+  transform: rotate(180deg);
+  }
+  .panel {
+  padding: 0 22px; 
+  background-color: var(--card-bg-color);
+  max-height: 0;
+  overflow-y: auto; 
+  transition: max-height 0.35s ease-out, padding 0.35s ease-out;
+  border-top: 1px solid #e0e0e0;
+  }
+  .panel.show {
+  padding: 18px 22px; 
+  }
+  .panel h3 {
+  color: var(--primary-hover-color);
+  margin-top: 8px; 
+  font-size: 1.15em; 
+  border-bottom: 1px solid #eee;
+  padding-bottom: 8px;
+  }
+  .panel ul { /* For lists other than schedule table */
+  list-style-position: outside;
+  padding-right: 20px; 
+  font-size: 1em; 
+  }
+  .panel li {
+  margin-bottom: 10px; 
+  padding-right: 5px; 
+  }
+  .panel ul.pre-production-list li::before {
+  content: "📝 "; 
+  margin-left: -20px; 
+  }
 
-        /* Table styling */
-        .schedule-table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-top: 10px;
-            margin-bottom: 15px; /* Space between tables if multiple */
-        }
-        .schedule-table th, .schedule-table td {
-            border: 1px solid #ddd;
-            padding: 10px; /* Adjusted padding */
-            text-align: right;
-            vertical-align: top;
-        }
-        .schedule-table th {
-            background-color: var(--light-gray-color);
-            color: var(--primary-hover-color);
-            font-weight: bold;
-        }
-        .schedule-table tr:nth-child(even) {
-            background-color: rgba(253, 253, 253, 0.7); /* Slightly transparent for image bg */
-        }
-        .schedule-table tr:hover {
-            background-color: rgba(245, 245, 245, 0.8); /* Slightly transparent for image bg */
-        }
-        .schedule-table .time-col {
-            width: 110px; /* Adjusted width for time column */
-            font-weight: bold;
-            white-space: nowrap;
-        }
-        .schedule-table .task-col ul { /* For nested lists within table cells */
-            list-style-type: '↪️';
-            padding-right: 15px;
-            margin-top: 5px;
-            margin-bottom: 5px;
-        }
-         .schedule-table .task-col li {
-            font-size: 0.9em;
-            margin-bottom: 3px;
-        }
-
-
-        .important-note {
-            background-color: rgba(255, 243, 205, 0.95); 
-            border-left: 4px solid #ffc107; 
-            padding: 15px; 
-            margin: 15px 0;
-            border-radius: 5px;
-            font-size: 0.95em; 
-            color: #533f03; 
-        }
-        .iframe-container {
-            position: relative;
-            overflow: hidden;
-            width: 100%;
-            padding-top: 75%; 
-            margin: 20px 0; 
-            border: 1px solid #ccc; 
-            border-radius: var(--border-radius);
-        }
-        .iframe-container iframe {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            border: 0;
-        }
-        .google-sheet-info {
-            background-color: var(--card-bg-color);
-            padding: 18px; 
-            border-radius: var(--border-radius);
-            margin-bottom: 18px;
-            font-size: 1em; 
-            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
-        }
-        .google-sheet-info strong {
-            color: var(--primary-hover-color);
-        }
-        .google-sheet-info ul {
-            list-style-type: '💡';
-            padding-right: 22px;
-            margin-top: 12px;
-        }
-        .google-sheet-info li {
-            margin-bottom: 8px;
-        }
+  /* Table styling */
+  .schedule-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 10px;
+  margin-bottom: 15px; /* Space between tables if multiple */
+  }
+  .schedule-table th, .schedule-table td {
+  border: 1px solid #ddd;
+  padding: 10px; /* Adjusted padding */
+  text-align: right;
+  vertical-align: top;
+  font-size: 0.95em; /* Base table font size */
+  }
+  .schedule-table th {
+  background-color: var(--light-gray-color);
+  color: var(--primary-hover-color);
+  font-weight: bold;
+  }
+  .schedule-table tr:nth-child(even) {
+  background-color: rgba(253, 253, 253, 0.7); /* Slightly transparent for image bg */
+  }
+  .schedule-table tr:hover {
+  background-color: rgba(245, 245, 245, 0.8); /* Slightly transparent for image bg */
+  }
+  .schedule-table .time-col {
+  width: 110px; /* Adjusted width for time column */
+  font-weight: bold;
+  white-space: nowrap;
+  }
+  .schedule-table .task-col ul { /* For nested lists within table cells */
+  list-style-type: '↪️';
+  padding-right: 15px;
+  margin-top: 5px;
+  margin-bottom: 5px;
+  }
+  .schedule-table .task-col li {
+  font-size: 0.9em; /* Relative to cell, so 0.9 * 0.95em */
+  margin-bottom: 3px;
+  }
 
 
-        .footer {
-            text-align: center;
-            margin-top: 30px; 
-            padding-top: 20px; 
-            border-top: 1px solid rgba(221, 221, 221, 0.7); 
-            font-size: 1em; 
-            color: var(--dark-gray-color); 
-        }
-        
-        @media (max-width: 768px) {
-            .role-icon {
-                width: calc(33.33% - 12px); 
-            }
-            .schedule-table th, .schedule-table td {
-                padding: 8px;
-            }
-            .schedule-table .time-col {
-                width: 90px; 
-            }
-        }
-        @media (max-width: 600px) { 
-            .role-icon {
-                width: calc(50% - 12px); 
-            }
-            .timeline-item {
-                flex-direction: column;
-                align-items: flex-start;
-                border-bottom: 1px solid #ddd;
-                padding-bottom: 18px;
-            }
-            .timeline-time {
-                padding-right: 0;
-                margin-bottom: 10px;
-            }
-             .schedule-table { /* Make table scrollable on small screens */
-                display: block;
-                overflow-x: auto;
-                /* white-space: nowrap; // Removed to allow text wrapping in cells */
-            }
-            .schedule-table .task-col {
-                white-space: normal; /* Allow task descriptions to wrap */
-            }
-        }
-        @media (max-width: 480px) {
-            .iframe-container {
-                padding-top: 100%; 
-            }
-            .main-container {
-                width: 100%;
-                padding: 15px; 
-                margin: 0;
-                border-radius: 0;
-                box-shadow: none; 
-            }
-            body {
-                padding-top: 0;
-                padding-bottom: 0;
-            }
-            .header h1 {
-                font-size: clamp(1.8em, 6vw, 2.2em);
-            }
-             .header .emoji {
-                font-size: clamp(2.5em, 8vw, 3em);
-            }
-        }
-    </style>
-</head>
-<body>
+  .important-note {
+  background-color: rgba(255, 243, 205, 0.95); 
+  border-left: 4px solid #ffc107; 
+  padding: 15px; 
+  margin: 15px 0;
+  border-radius: 5px;
+  font-size: 0.95em; 
+  color: #533f03; 
+  }
+  .iframe-container {
+  position: relative;
+  overflow: hidden;
+  width: 100%;
+  padding-top: 75%; 
+  margin: 20px 0; 
+  border: 1px solid #ccc; 
+  border-radius: var(--border-radius);
+  }
+  .iframe-container iframe {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  border: 0;
+  }
+  .google-sheet-info {
+  background-color: var(--card-bg-color);
+  padding: 18px; 
+  border-radius: var(--border-radius);
+  margin-bottom: 18px;
+  font-size: 1em; 
+  box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+  }
+  .google-sheet-info strong {
+  color: var(--primary-hover-color);
+  }
+  .google-sheet-info ul {
+  list-style-type: '💡';
+  padding-right: 22px;
+  margin-top: 12px;
+  }
+  .google-sheet-info li {
+  margin-bottom: 8px;
+  }
 
-    <div class="main-container">
-        <div class="header">
-            <span class="emoji">🎬</span>
-            <h1>תדריך הפקה פסטי 48 🎞️</h1>
-        </div>
 
-        <div class="introduction">
-            <p>לחצו על אייקוני התפקידים למטה לקבלת בריף, ברייקדאון ומשימות מותאם אישית. מידע כללי נוסף זמין בכרטיסיות בהמשך. 👇</p>
-        </div>
-        
-        <div class="roles-guidance">בחר/י את התפקיד שלך:</div>
+  .footer {
+  text-align: center;
+  margin-top: 30px; 
+  padding-top: 20px; 
+  border-top: 1px solid rgba(221, 221, 221, 0.7); 
+  font-size: 1em; 
+  color: var(--dark-gray-color); 
+  }
+  
+  @media (max-width: 768px) { /* Tablet and smaller landscape phones */
+  .role-icon {
+  width: calc(33.33% - 12px); 
+  }
+  .role-icon span { font-size: 0.9em; } /* Increased from 0.85em */
+  .timeline-content p { font-size: 1em; } /* Increased from 0.95em */
 
-        <div class="roles-container">
-            <!-- Role icons with data-role attribute -->
-            <div class="role-icon" data-role="producer">
-                <svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm-1-13h2v6h-2zm0 8h2v2h-2z"/></svg>
-                <span>מפיק/ה</span>
-            </div>
-            <div class="role-icon" data-role="director">
-                <svg viewBox="0 0 24 24"><path d="M10 16.5v-9l6 4.5-6 4.5zM12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8z"/></svg>
-                <span>במאי/ת</span>
-            </div>
-            <div class="role-icon" data-role="assistantDirector">
-                <svg viewBox="0 0 24 24"><path d="M18 2H6c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zM6 4h5v8l-2.5-1.5L6 12V4zm0 15v-2h12v2H6zm7-10h5v2h-5v-2zm0 4h5v2h-5v-2z"/></svg>
-                <span>ע. במאי/ת</span>
-            </div>
-            <div class="role-icon" data-role="cinematographer">
-                <svg viewBox="0 0 24 24"><path d="M4 4h16v2H4zm0 4h16v12H4zM12 6.5c-2.49 0-4.5 2.01-4.5 4.5S9.51 15.5 12 15.5s4.5-2.01 4.5-4.5S14.49 6.5 12 6.5zm0 7c-1.38 0-2.5-1.12-2.5-2.5S10.62 8.5 12 8.5s2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg>
-                <span>צילום / תאורה</span>
-            </div>
-            <div class="role-icon" data-role="productionAssistant">
-                <svg viewBox="0 0 24 24"><path d="M14 2H6c-1.1 0-1.99.9-1.99 2L4 20c0 1.1.89 2 1.99 2H18c1.1 0 2-.9 2-2V8l-6-6zm2 16H8v-2h8v2zm0-4H8v-2h8v2zm-3-5V3.5L18.5 9H13z"/></svg>
-                <span>ע. הפקה</span>
-            </div>
-            <div class="role-icon" data-role="artAndCostumes">
-                <svg viewBox="0 0 24 24"><path d="M20.54 5.23l-1.39-1.68C18.88 3.21 18.47 3 18 3H6c-.47 0-.88.21-1.16.55L3.46 5.23C3.17 5.57 3 6.02 3 6.5V19c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V6.5c0-.48-.17-.93-.46-1.27zM6.24 5h11.52l.83 1H5.41l.83-1zM5 19V8h14v11H5zm3-5h2.55v3h2.9v-3H16v-2h-2.55V9h-2.9v3H8v2z" /></svg>
-                <span>הלבשה וארט 🎨</span>
-            </div>
-            <div class="role-icon" data-role="actors">
-                <svg viewBox="0 0 24 24"><path d="M12 5.5c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2zM7.5 15.5c0-1.33.41-2.53 1.09-3.5H4v3c0 1.1.9 2 2 2h1.57c-.05-.33-.07-.66-.07-1zm9.91-3.5c.68.97 1.09 2.17 1.09 3.5 0 .34-.02.67-.07 1H20c1.1 0 2-.9 2-2v-3h-4.41zM12 13c-1.93 0-3.5 1.57-3.5 3.5S10.07 20 12 20s3.5-1.57 3.5-3.5-1.57-3.5-3.5-3.5z"/></svg>
-                <span>משחק 🎭</span>
-            </div>
-            <div class="role-icon" data-role="soundman">
-                <svg viewBox="0 0 24 24"><path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z"/></svg>
-                <span>סאונד / עריכה 🎧💻</span> 
-            </div>
-        </div>
-        
-        <div id="roleBriefDisplay" class="role-brief-display hidden">
-            <h2 id="briefTitle"></h2>
-            <div id="briefContentContainer"></div> 
-        </div>
+  .schedule-table th, .schedule-table td {
+  padding: 8px;
+  font-size: 0.95em; /* Maintain or slightly increase */
+  }
+  .schedule-table .time-col {
+  width: 90px; 
+  }
+  .schedule-table .task-col li { font-size: 0.95em; } /* Increased */
+  .accordion-button { font-size: 1.2em; } /* Increased */
+  .panel { font-size: 1.05em; } /* Increase panel content slightly */
+  .panel h3 { font-size: 1.1em; } /* Relative to panel's new font size */
+  .panel p, .panel li { font-size: 1em; } /* Relative to panel's new font size */
+  }
 
-        <div class="accordion-item">
-            <button class="accordion-button" aria-expanded="false" aria-controls="panelSchedule">
-                🗓️ לו"ז כללי מפורט (48 שעות)
-                <span class="arrow">▼</span>
-            </button>
-            <div class="panel" id="panelSchedule" aria-hidden="true">
-                <h3>🗓️ יום שישי (06/06/2025) - הזנקה, PRE-PRODUCTION ו-PRODUCTION ראשוני 🚀</h3>
-                <table class="schedule-table">
-                    <thead>
-                        <tr>
-                            <th class="time-col">שעה</th>
-                            <th>משימה</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr>
-                            <td class="time-col">09:30</td>
-                            <td class="task-col">מפיק + ע. מפיק: פתיחת חמ"ל, סידור ציוד וחמ"ל.</td>
-                        </tr>
-                        <tr>
-                            <td class="time-col">10:00</td>
-                            <td class="task-col">הגעת נציג (אוריין) למקום ההזנקה (למשל, מוזיאון).</td>
-                        </tr>
-                        <tr>
-                            <td class="time-col">10:30 - 11:30</td>
-                            <td class="task-col">הגעה של כל הצוות לחמ"ל - חתימה על טפסים, וידוא פרטים אחרונים, הדרכת בטיחות, PRE-PRODUCTION ראשוני (רשימות כלליות).</td>
-                        </tr>
-                        <tr>
-                            <td class="time-col">11:50</td>
-                            <td class="task-col">צוות הפקה ייעודי (למשל: תאורנית, ע.צלם, מפיק) יוצא ל"ראשס" (השכרת/איסוף ציוד).</td>
-                        </tr>
-                        <tr>
-                            <td class="time-col">12:00</td>
-                            <td class="task-col"><strong>🏁 הזנקה!</strong> הנציג (אוריין) מקבל את האלמנטים ומעביר מיד בהודעת טקסט לצוות בחמ"ל ולצוות בדרך/ב"ראשס".</td>
-                        </tr>
-                        <tr>
-                            <td class="time-col">12:00 - 14:00</td>
-                            <td class="task-col">צוות ב"ראשס": בדיקה/איסוף ציוד וחזרה לחמ"ל.</td>
-                        </tr>
-                        <tr>
-                            <td class="time-col">12:00 - 17:00</td>
-                            <td class="task-col">✍️ בחמ"ל: כתיבת תסריט אינטנסיבית. במקביל, צוות הפקה (מפיק, ע.מפיק, ארט וכו') מתחיל PRE-PRODUCTION ממוקד (לוקיישנים, פרופס, תלבושות לפי רעיון).</td>
-                        </tr>
-                         <tr>
-                            <td class="time-col">~14:00</td>
-                            <td class="task-col">צוות "ראשס" חוזר לחמ"ל, מצטרף למאמצים. הכנת ציוד.</td>
-                        </tr>
-                        <tr>
-                            <td class="time-col">17:00 - 17:30</td>
-                            <td class="task-col">🥪🥤 הפסקת התרעננות.</td>
-                        </tr>
-                        <tr>
-                            <td class="time-col">17:30 - 20:30</td>
-                            <td class="task-col">🧐 ברייקדאון ושוטינג ליסט (במאית, מפיק, צלם, תאורנית). צוות משריין לוקיישנים סופית, פרופס, ארט. הכנות ציוד אחרונות.</td>
-                        </tr>
-                        <tr>
-                            <td class="time-col">20:30</td>
-                            <td class="task-col">🎬 יציאה ללוקיישן A.</td>
-                        </tr>
-                        <tr>
-                            <td class="time-col">20:50</td>
-                            <td class="task-col">הגעה ללוקיישן A: פריקת ציוד, הקמת סט, תאורה, מצלמה.</td>
-                        </tr>
-                        <tr>
-                            <td class="time-col">21:30</td>
-                            <td class="task-col">תחילת צילומים, סצנות [...] (לוקיישן A). (ממשיך לשעות הלילה המוקדמות של יום שבת)</td>
-                        </tr>
-                    </tbody>
-                </table>
+  @media (max-width: 600px) { /* Portrait phones */
+  .role-icon {
+  width: calc(50% - 12px); 
+  }
+  .role-icon span { font-size: 1em; } /* Further increase */
+  
+  .introduction p { font-size: 1.15em; }
+  .roles-guidance { font-size: 1.2em; }
+  
+  .timeline-item {
+  flex-direction: column;
+  align-items: flex-start;
+  border-bottom: 1px solid #ddd;
+  padding-bottom: 18px;
+  }
+  .timeline-time {
+  padding-right: 0;
+  margin-bottom: 10px;
+  font-size: 1.05em; /* Increased */
+  }
+  .timeline-content p { font-size: 1.05em; } /* Further increase */
+  .timeline-content h4 { font-size: 1.1em; }
 
-                <h3>🎬 יום שבת (07/06/2025) - PRODUCTION MARATHON 🏃‍♀️🏃‍♂️</h3>
-                 <table class="schedule-table">
-                    <thead>
-                        <tr>
-                            <th class="time-col">שעה</th>
-                            <th>משימה</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr><td class="time-col">~00:10</td><td class="task-col">סיום צילומים משוער (לוקיישן A). פירוק והעמסת ציוד. חזרה לחמ"ל. 😴 לישון או לנוח חזק! (בהתאם לאורך הצילומים בלוקיישן A)</td></tr>
-                        <tr><td class="time-col">05:00</td><td class="task-col">השכמה, יציאה ללוקיישן B (נסיעה/חופים 🌅).</td></tr>
-                        <tr><td class="time-col">05:20</td><td class="task-col">הגעה ללוקיישן B: הקמת סט, מצלמה.</td></tr>
-                        <tr><td class="time-col">05:40</td><td class="task-col">תחילת צילומים, סצנות [...] (לוקיישן B).</td></tr>
-                        <tr><td class="time-col">05:52 (משוער)</td><td class="task-col">☀️ נץ החמה (זריחה).</td></tr>
-                        <tr><td class="time-col">07:00</td><td class="task-col">סיום צילומים (לוקיישן B). פירוק והעמסת ציוד.</td></tr>
-                        <tr><td class="time-col">06:00 (צוות נפרד)</td><td class="task-col">יציאה ללוקיישן C (צוות הכנה).</td></tr>
-                        <tr><td class="time-col">06:20</td><td class="task-col">הגעה ללוקיישן C (צוות הכנה): הקמת תפאורה, פרופס, ארט, תאורה.</td></tr>
-                        <tr><td class="time-col">07:20</td><td class="task-col">צוות חוץ (צילום) יוצא ללוקיישן C.</td></tr>
-                        <tr><td class="time-col">08:00</td><td class="task-col">הגעה ללוקיישן C (צוות צילום): הקמת סט, מצלמה.</td></tr>
-                        <tr><td class="time-col">08:40</td><td class="task-col">🥐 ארוחת בוקר.</td></tr>
-                        <tr><td class="time-col">09:00</td><td class="task-col">עורך ומפיק יוצאים לאולפן/עמדת עריכה: הקמת סביבת עבודה, עמדות נוספות.</td></tr>
-                        <tr><td class="time-col">09:00</td><td class="task-col">תחילת צילומים, סצנות [...] (לוקיישן C).</td></tr>
-                        <tr><td class="time-col">12:40</td><td class="task-col">🥤 הפסקת התרעננות.</td></tr>
-                        <tr><td class="time-col">13:00</td><td class="task-col">המשך צילומים, סצנות [...] (לוקיישן C).</td></tr>
-                        <tr><td class="time-col">14:30</td><td class="task-col">סיום צילומים (לוקיישן C).</td></tr>
-                        <tr><td class="time-col">15:00</td><td class="task-col">ಊ ארוחת צהריים.</td></tr>
-                        <tr><td class="time-col">15:30</td><td class="task-col">יציאה ללוקיישן D.</td></tr>
-                        <tr><td class="time-col">16:00</td><td class="task-col">הגעה ללוקיישן D: הקמת סט, ארט ותפאורה, תאורה, מצלמה.</td></tr>
-                        <tr><td class="time-col">16:30</td><td class="task-col">תחילת צילומים, סצנות [...] (לוקיישן D).</td></tr>
-                        <tr><td class="time-col">17:30</td><td class="task-col">סיום צילומים (לוקיישן D). קיפול ציוד, העמסה ויציאה ל"ראשס".</td></tr>
-                        <tr><td class="time-col">18:00</td><td class="task-col">החזרת ציוד ל"ראשס".</td></tr>
-                        <tr><td class="time-col">19:00</td><td class="task-col">🗣️ פגישת צוות בחמ"ל.</td></tr>
-                        <tr><td class="time-col">20:00</td><td class="task-col">🛌 הולכים לישון!</td></tr>
-                        <tr><td class="time-col">23:40</td><td class="task-col">⏰ השכמה (לצוות הפוסט).</td></tr>
-                    </tbody>
-                </table>
+  .schedule-table { /* Make table scrollable on small screens */
+  display: block;
+  overflow-x: auto;
+  /* white-space: nowrap; // Removed to allow text wrapping in cells */
+  }
+  .schedule-table th, .schedule-table td {
+  font-size: 1em; /* Further increase */
+  line-height: 1.45;
+  padding: 7px;
+  }
+  .schedule-table .task-col {
+  white-space: normal; /* Allow task descriptions to wrap */
+  }
+  .schedule-table .task-col li { font-size: 1em; } /* Further increase */
 
-                <h3>🏆 יום ראשון (08/06/2025) - POST-PRODUCTION & SUBMISSION 🏁</h3>
-                <table class="schedule-table">
-                    <thead>
-                        <tr>
-                            <th class="time-col">שעה</th>
-                            <th>משימה</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr><td class="time-col">00:00</td><td class="task-col"><strong>🎞️ POST PRODUCTION</strong></td></tr>
-                        <tr><td class="time-col">00:30</td><td class="task-col">✂️ תחילת עריכות.</td></tr>
-                        <tr><td class="time-col">04:30</td><td class="task-col">☕ הפסקת התרעננות.</td></tr>
-                        <tr><td class="time-col">05:00</td><td class="task-col">המשך עריכות.</td></tr>
-                        <tr><td class="time-col">09:00</td><td class="task-col">🥐 ארוחת בוקר.</td></tr>
-                        <tr><td class="time-col">10:40</td><td class="task-col">המשך עריכות.</td></tr>
-                        <tr><td class="time-col">13:00</td><td class="task-col">🎵 דד ליין פס קול.</td></tr>
-                        <tr><td class="time-col">14:00</td><td class="task-col">✨ פינישים וסיום עריכה.</td></tr>
-                        <tr><td class="time-col">14:40</td><td class="task-col">🔧 זמן תיקונים.</td></tr>
-                        <tr><td class="time-col">15:30</td><td class="task-col">💾 דד ליין לרינדור (עיבוד) סופי.</td></tr>
-                        <tr><td class="time-col">16:30</td><td class="task-col">🚗 יציאה לסינמטק (או מקום המסירה).</td></tr>
-                        <tr><td class="time-col">17:00</td><td class="task-col">🎉 מסירה!</td></tr>
-                    </tbody>
-                </table>
-            </div>
-        </div>
-        
-        <div class="accordion-item">
-            <button class="accordion-button" aria-expanded="false" aria-controls="panelEquipment">
-                🛠️ רשימת ציוד כללית
-                <span class="arrow">▼</span>
-            </button>
-            <div class="panel" id="panelEquipment" aria-hidden="true">
-                <h3>🔧 ציוד שכור:</h3>
-                <table class="schedule-table"> 
-                    <thead><tr><th>פריט</th><th>כמות</th></tr></thead>
-                    <tbody>
-                        <tr><td>סט רפלקטורים 5 ב-1</td><td>1</td></tr>
-                        <tr><td>גובו פלופי 40x40</td><td>1</td></tr>
-                        <tr><td>סט דגלים 4x4</td><td>1</td></tr>
-                        <tr><td>חצובת תאורה קומבו</td><td>1</td></tr>
-                        <tr><td>זרוע גריפ</td><td>1</td></tr>
-                        <tr><td>סטנד תאורה רגיל</td><td>1</td></tr>
-                        <tr><td>מנורת Aputure 300d</td><td>1</td></tr>
-                        <tr><td>כבל מאריך 5 מטר</td><td>1</td></tr>
-                        <tr><td>כבל חשמל 25 מטר</td><td>1</td></tr>
-                    </tbody>
-                </table>
-                <h3>🎒 ציוד מהצוות (רשימה חלקית - <strong>חובה לעדכן בגיליון המשותף! 📢</strong>):</h3>
-                <ul>
-                    <li>💻 לפטופ דוגם מקליט 15' עם אופציה ליציאה למוניטור חיצוני - כמות: 1</li>
-                    <li>🖥️ מוניטור 32' עם סטנד - כמות: 1</li>
-                    <li>📷 <strong>צילום:</strong> ציוד מצלמה ותאורה אישיים.</li>
-                    <li>🎤 <strong>סאונד:</strong> ציוד סאונד אישי.</li>
-                </ul>
-            </div>
-        </div>
-        
-        <div class="accordion-item">
-            <button class="accordion-button" aria-expanded="false" aria-controls="panelGoogleSheet">
-                📊 גיליון הפקה חי (Google Sheets)
-                <span class="arrow">▼</span>
-            </button>
-            <div class="panel" id="panelGoogleSheet" aria-hidden="true">
-                <div class="google-sheet-info">
-                    <p><strong>גיליון זה הוא המקור המרכזי לניהול משאבים ועדכונים חיים. אנא דאגו לעדכן אותו!</strong></p>
-                    <p><u>לדוגמה:</u></p>
-                    <ul>
-                        <li><strong>הלבשה וארט:</strong> "יש לי תחפושת ספיידרמן 🕷️", "מביא עץ חג מולד קטן 🎄".</li>
-                        <li><strong>ציוד אישי:</strong> "מביא מיקרופון רובה נוסף ובום 🎤", "יש לי סט עדשות נוסף".</li>
-                        <li><strong>לוקיישנים פוטנציאלים:</strong> "לדודה שלי יש מחסן נטוש ברחוב Y, צריך לבדוק זמינות 🏚️".</li>
-                    </ul>
-                </div>
-                <div class="iframe-container">
-                    <iframe src="https://docs.google.com/spreadsheets/d/1WEJFmbgzMYM6qO9XflrQcUQM__-gYb_ZvbTAbDgmXTQ/edit?usp=sharing&rm=minimal" loading="lazy" title="גיליון הפקה של פרויקט 48">
-                        [טוען גיליון הפקה...]
-                    </iframe>
-                </div>
-                <p style="text-align:center; margin-top:15px;">
-                    <a href="https://docs.google.com/spreadsheets/d/1WEJFmbgzMYM6qO9XflrQcUQM__-gYb_ZvbTAbDgmXTQ/edit?gid=0#gid=0" target="_blank" rel="noopener noreferrer">
-                        🔗 פתח את הגיליון בחלון חדש (לעריכה נוחה)
-                    </a>
-                </p>
-            </div>
-        </div>
+  .accordion-button { font-size: 1.25em; padding: 14px 20px; } /* Further increase */
+  .panel { font-size: 1.1em; } /* Further increase panel content */
+  .panel h3 { font-size: 1.15em; }
+  .panel p, .panel li { font-size: 1.05em; line-height: 1.55; }
+  
+  .important-note { font-size: 1em; } /* Increased */
+  }
 
-        <div class="accordion-item">
-            <button class="accordion-button" aria-expanded="false" aria-controls="panelFinalPrep">
-                💡 הכנות אחרונות ודגשים
-                <span class="arrow">▼</span>
-            </button>
-            <div class="panel" id="panelFinalPrep" aria-hidden="true">
-                <p>אנא ודאו שאתם מגיעים עם:</p>
-                <ul>
-                    <li>📱 טלפונים טעונים במלואם על מצב שקט.</li>
-                    <li>🥪 סנדוויץ' מהבית.</li>
-                    <li>💰 חלק מהצוות משקיע סכומים אדירים להפקת הפרויקט, אנא תהיו נחמדים ותשתתפו גם בהוצאות 🙏.</li>
-                    <li>✨ הרבה אנרגיה טובה וחיובית!</li>
-                    <li>🧠 ראש פתוח ומוכנות לאלתורים.</li>
-                </ul>
-                <p class="important-note">זה הולך להיות אינטנסיבי, מאתגר, והכי חשוב - חוויה בלתי נשכחת וכיף אדיר! זכרו, אנחנו צוות 🤝, ועובדים ביחד להצלחה. 💪</p>
-            </div>
-        </div>
+  @media (max-width: 480px) { /* Smallest phones */
+  .iframe-container {
+  padding-top: 100%; 
+  }
+  .main-container {
+  width: 100%;
+  padding: 15px; 
+  margin: 0;
+  border-radius: 0;
+  box-shadow: none; 
+  }
+  body {
+  padding-top: 0;
+  padding-bottom: 0;
+  line-height: 1.7; /* Slightly more line height for smaller text if it gets dense */
+  }
+  .header h1 {
+  font-size: clamp(1.8em, 6vw, 2.2em);
+  }
+  .header .emoji {
+  font-size: clamp(2.5em, 8vw, 3em);
+  }
 
-        <div class="footer">
-            <p>בהצלחה ענקית לכולנו! 🥳<br><strong>צוות ההפקה 🌟</strong></p>
-        </div>
-    </div>
+  .introduction p { font-size: 1.2em; }
+  .roles-guidance { font-size: 1.25em; }
+  .role-icon span { font-size: 1.05em; }
+  
+  .timeline-content p { font-size: 1.1em; }
+  .timeline-content h4 { font-size: 1.15em; }
 
-    <script>
-        // Accordion functionality with ARIA attributes
-        const accordionBtns = document.querySelectorAll(".accordion-button");
-        accordionBtns.forEach(btn => {
-            const panel = btn.nextElementSibling;
-            const panelId = panel.id;
-            btn.setAttribute('aria-controls', panelId);
+  .schedule-table th, .schedule-table td {
+  font-size: 1.05em; /* Ensure readability */
+  padding: 6px;
+  }
+  .schedule-table .time-col {
+  width: 75px; /* Adjusted for smaller text */
+  }
+  .schedule-table .task-col li { font-size: 1.05em; }
 
-            const isActiveInitial = btn.classList.contains("active");
-            btn.setAttribute('aria-expanded', isActiveInitial ? 'true' : 'false');
-            panel.setAttribute('aria-hidden', !isActiveInitial ? 'true' : 'false');
-            if (isActiveInitial) {
-                panel.style.maxHeight = panel.scrollHeight + "px";
-                 panel.classList.add("show");
-            }
+  .accordion-button { font-size: 1.3em; padding: 12px 18px; }
+  .panel { font-size: 1.15em; }
+  .panel h3 { font-size: 1.2em; }
+  .panel p, .panel li { font-size: 1.1em; line-height: 1.6; }
 
-            btn.addEventListener("click", function() {
-                const isActive = this.classList.toggle("active");
-                this.setAttribute('aria-expanded', isActive ? 'true' : 'false');
-                panel.setAttribute('aria-hidden', !isActive ? 'true' : 'false');
+  .important-note { font-size: 1.05em; }
+  .footer { font-size: 0.95em;}
+  }
+  </style>
+ </head>
+ <body>
 
-                if (isActive) { 
-                    panel.style.maxHeight = panel.scrollHeight + "px";
-                    panel.classList.add("show");
-                } else { 
-                    panel.style.maxHeight = null;
-                    panel.classList.remove("show");
-                }  
-            });
-        });
+  <div class="main-container">
+  <div class="header">
+  <span class="emoji">🎬</span>
+  <h1>תדריך הפקה פסטי 48 🎞️</h1>
+  </div>
 
-        // Role-specific brief display 
-        const roleIcons = document.querySelectorAll(".role-icon");
-        const briefDisplay = document.getElementById("roleBriefDisplay");
-        const briefTitle = document.getElementById("briefTitle");
-        const briefContentContainer = document.getElementById("briefContentContainer");
+  <div class="introduction">
+  <p>לחצו על אייקוני התפקידים למטה לקבלת בריף, ברייקדאון ומשימות מותאם אישית. מידע כללי נוסף זמין בכרטיסיות בהמשך. 👇</p>
+  </div>
+  
+  <div class="roles-guidance">בחר/י את התפקיד שלך:</div>
 
-        const roleBriefsData = {
-            producer: {
-                title: "מפיק/ה 💼",
-                days: {
-                    "יום שישי (06/06/2025) 🚀": [
-                        { time: "09:30", task: "הגעה לחמ\"ל (עם ע. מפיק), פתיחה וסידור." },
-                        { time: "10:00", task: "וידוא הגעת נציג (אוריין) למקום ההזנקה." },
-                        { time: "10:30-11:30", task: "קבלת צוות, תפסים, הדרכת בטיחות, PRE-PRODUCTION ראשוני." },
-                        { time: "11:50", task: "ניהול יציאת צוות ייעודי ל\"ראשס\" (איסוף ציוד)." },
-                        { time: "12:00", task: "קבלת נושאי התחרות מאוריין והפצתם לכלל הצוות (בחמ\"ל וב\"ראשס\")." },
-                        { time: "12:00-17:00", task: "ניהול PRE-PRODUCTION ממוקד בחמ\"ל (לוקיישנים, פרופס, תיאומים) במקביל לכתיבת תסריט. פיקוח על חזרת צוות \"ראשס\" (~14:00)." },
-                        { time: "17:30-20:30", task: "השתתפות בברייקדאון ושוטינג. ניהול שריון לוקיישנים סופי ומשאבים." },
-                        { time: "20:30 ואילך", task: "ניהול יציאה וצילומים בלוקיישן A. פתרון בעיות על הסט. דאגה לצוות." }
-                    ],
-                    "יום שבת (07/06/2025) 🛠️": [
-                        { time: "כל היום", task: "ניהול לוגיסטי של צילומים בלוקיישנים B, C, D. דאגה לרווחת הצוות, לו\"ז, פתרון בעיות." },
-                        { time: "09:00", task: "יציאה עם עורך לאולפן/עמדת עריכה, הקמת סביבת עבודה לפוסט." },
-                        { time: "17:30-18:00", task: "ניהול החזרת ציוד ל\"ראשס\"." },
-                        { time: "19:00", task: "ניהול פגישת צוות בחמ\"ל." },
-                        { time: "20:00", task: "דאגה למנוחת הצוות." },
-                        { time: "23:40", task: "תיאום השכמה לצוות הפוסט." }
-                    ],
-                    "יום ראשון (08/06/2025) 🏆": [
-                        { time: "00:00 ואילך", task: "ליווי ותמיכה בצוות הפוסט-פרודקשן. ניהול לו\"ז פוסט." },
-                        { time: "16:30", task: "ניהול יציאה למקום המסירה." },
-                        { time: "17:00", task: "אחריות על מסירת הסרט בזמן ובפורמט הנדרש." }
-                    ]
-                }
-            },
-            director: {
-                title: "במאי/ת 📣",
-                days: {
-                    "יום שישי (06/06/2025) ✍️": [
-                        { time: "10:30", task: "הגעה לחמ\"ל." },
-                        { time: "12:00-17:00", task: "הובלת כתיבת התסריט לאחר קבלת נושאי התחרות." },
-                        { time: "17:30-20:30", task: "הובלת ברייקדאון ושוטינג ליסט עם צלם ומפיק." },
-                        { time: "21:30 ואילך", task: "ניהול אמנותי של צילומים בלוקיישן A. עבודה עם שחקנים." }
-                    ],
-                    "יום שבת (07/06/2025) 🎬": [
-                        { time: "כל היום", task: "ניהול אמנותי של צילומים בלוקיישנים B, C, D. שמירה על חזון אומנותי ועקביות." },
-                        { time: "19:00", task: "השתתפות בפגישת צוות, סיכום יום צילומים והכנות ליום הפוסט." }
-                    ],
-                    "יום ראשון (08/06/2025) 🎞️": [
-                        { time: "00:30 ואילך", task: "עבודה צמודה עם העורך על ראף-קאט, בחירת טייקים והכוונה אמנותית." },
-                        { time: "לאורך הפוסט", task: "ליווי תהליכי עיצוב פסקול ותיקוני צבע. נעילת הקאט הסופי." }
-                    ]
-                }
-            },
-            assistantDirector: {
-                title: "ע. במאי/ת 📋",
-                days: {
-                    "יום שישי (06/06/2025) ⏱️": [
-                        { time: "10:30", task: "הגעה לחמ\"ל." },
-                        { time: "17:30-20:30", task: "סיוע בברייקדאון התסריט, הכנת קול שיט ראשוני. תיאום שחקנים לסטים." },
-                        { time: "21:30 ואילך", task: "ניהול לו\"ז על סט לוקיישן A, קשר עם שחקנים, שמירה על המשכיות (continuity)." }
-                    ],
-                    "יום שבת (07/06/2025) 🏃": [
-                        { time: "כל היום", task: "ניהול שוטף של לו\"ז הצילומים בלוקיישנים B, C, D. הכנת והפצת קול שיטס, תיאום בין מחלקות, שמירה על שקט וקצב." },
-                        { time: "19:00", task: "השתתפות בפגישת צוות." }
-                    ],
-                    "יום ראשון (08/06/2025) 📞": [
-                        { time: "במהלך הפוסט", task: "זמינות לספק מידע לעורך (מספרי טייקים, הערות מהסט, פרטי המשכיות)." }
-                    ]
-                }
-            },
-            cinematographer: {
-                title: "צילום / תאורה 🎥💡",
-                days: {
-                    "יום שישי (06/06/2025) 🖼️": [
-                        { time: "10:30", task: "הגעה לחמ\"ל (צלם ראשי, תאורן ראשי)." },
-                        { time: "11:50", task: "(תאורנית, ע. תאורה, ע. צלם) יציאה ל\"ראשס\" עם המפיק." },
-                        { time: "12:00-14:00", task: "בדיקת ציוד צילום ותאורה ב\"ראשס\", הרכבת מצלמה, העמסה וחזרה לחמ\"ל." },
-                        { time: "17:30-20:30", task: "(צלם, תאורנית) השתתפות בברייקדאון ושוטינג. תכנון תאורה וקומפוזיציות." },
-                        { time: "20:50 ואילך", task: "הקמת תאורה ומצלמה בלוקיישן A, ביצוע צילומים לפי שוטינג ליסט." }
-                    ],
-                    "יום שבת (07/06/2025) 🌟": [
-                        { time: "כל היום", task: "אחריות על הצד הוויזואלי בלוקיישנים B, C, D. הקמה וניהול תאורה, תפעול מצלמה, שמירה על איכות ועקביות." },
-                        { time: "17:30", task: "סיוע בקיפול ציוד והכנתו להחזרה ל\"ראשס\"." },
-                        { time: "סוף יום", task: "וידוא גיבוי מאובטח של כל חומרי הגלם והעברתם למפיק/עורך."}
-                    ],
-                    "יום ראשון (08/06/2025) 🎨": [
-                        { time: "במהלך הפוסט", task: "זמינות למעורבות בתהליך תיקוני הצבע (Color Grading) ומתן פידבק מקצועי, במידת האפשר." }
-                    ]
-                }
-            },
-            productionAssistant: {
-                title: "ע. הפקה 🦸",
-                days: {
-                    "יום שישי (06/06/2025) 🛒": [
-                        { time: "09:30", task: "הגעה עם המפיק, סיוע בפתיחת חמ\"ל וסידור ציוד." },
-                        { time: "10:30 ואילך", task: "סיוע למפיק בכל המשימות הלוגיסטיות: תפסים, רכש קטן, שליחויות, הכנת לוקיישנים (אם אפשר מראש), דאגה לצוות (שתיה, כיבוד קל)." },
-                        { time: "11:50", task: "ליווי ל\"ראשס\" במידת הצורך, סיוע בהעמסת ציוד."}
-                    ],
-                    "יום שבת (07/06/2025) ⚙️": [
-                        { time: "כל היום", task: "תמיכה לוגיסטית מלאה בצוות על הסט ובחמ\"ל. 'איש/אשת כל משימה'. סיוע בניהול ארוחות, הפסקות, ניקיון וסדר." }
-                    ],
-                    "יום ראשון (08/06/2025) 👍": [
-                        { time: "במהלך הפוסט", task: "סיוע בשמירה על סדר וארגון בחמ\"ל הפוסט. עזרה בכל משימה לוגיסטית שנותרה (למשל, החזרת ציוד קטן, שליחויות אחרונות)." }
-                    ]
-                }
-            },
-            artAndCostumes: {
-                title: "הלבשה וארט 👚🖼️",
-                days: {
-                    "יום שישי (06/06/2025) ✨": [
-                        { time: "10:30", task: "הגעה לחמ\"ל." },
-                        { time: "12:00-20:30", task: "(במקביל לכתיבה וברייקדאון) עבודה על רשימות פרופס, תפאורה, תלבושות בהתאם לתסריט המתגבש. איתור והכנות מוקדמות." },
-                        { time: "20:50 ואילך", task: "סיוע בהקמת סט לוקיישן A (ארט), הלבשת שחקנים ראשונה, הכנות להמשך." }
-                    ],
-                    "יום שבת (07/06/2025) 🛠️": [
-                        { time: "06:00", task: "(צוות נפרד או אותו צוות ברוטציה) יציאה ללוקיישן C להקמת תפאורה, פרופס, ארט." },
-                        { time: "כל היום", task: "אחריות על נראות הסטים (B,C,D) והדמויות. הלבשה, תיקונים, שינויים לפי הצורך, שמירה על המשכיות ויזואלית של ארט ותלבושות." }
-                    ],
-                    "יום ראשון (08/06/2025) 📦": [ 
-                        { time: "סיום צילומים (שבת בערב)", task: "סיוע בקיפול ואיסוף כל פריטי הארט וההלבשה בצורה מסודרת." }
-                    ]
-                }
-            },
-            actors: {
-                title: "משחק 🎭⭐",
-                days: {
-                    "יום שישי (06/06/2025) 📖": [
-                        { time: "לפי תיאום (אחר הצהריים/ערב)", task: "הגעה לחמ\"ל/לוקיישן (לאחר גיבוש תסריט ראשוני). לימוד טקסטים מהיר והבנת הדמות. עבודה עם הבמאי/ת על פרשנות." },
-                        { time: "21:30 ואילך", task: "צילומים בלוקיישן A. ריכוז מלא, היענות להוראות, שיתוף פעולה." }
-                    ],
-                    "יום שבת (07/06/2025) 🌟": [
-                        { time: "לפי קריאה", task: "המשך צילומים בלוקיישנים B, C, D. שמירה על אנרגיה, רצף דמות והמשכיות בין טייקים וסצנות." }
-                    ],
-                    "יום ראשון (08/06/2025) 🎤": [ 
-                        { time: "סטנד-ביי", task: "להיות זמינים טלפונית לכל צורך (הקלטות קול נוספות - ADR, צילומי השלמה קטנים אם נדרש באופן חריג ובהתאם ללו\"ז הפוסט)." }
-                    ]
-                }
-            },
-            soundman: { 
-                title: "סאונד / עריכה 🎧💻",
-                days: {
-                    "יום שישי (06/06/2025) 📡": [
-                        { time: "10:30 (איש סאונד)", task: "הגעה לחמ\"ל. בדיקת ציוד סאונד." },
-                        { time: "21:30 ואילך (איש סאונד)", task: "הקלטת סאונד (דיאלוגים, אווירה) בלוקיישן A. ניטור רמות שמע." }
-                    ],
-                    "יום שבת (07/06/2025) �": [
-                        { time: "כל היום (איש סאונד)", task: "המשך הקלטות סאונד נקי ואיכותי בלוקיישנים B, C, D. תיוג קפדני של קבצי האודיו." },
-                        { time: "09:00 (עורך)", task: "יציאה עם מפיק לאולפן/עמדת עריכה, הקמת סביבת עבודה." },
-                        { time: "סוף יום (איש סאונד)", task: "העברת כל חומרי הסאונד בצורה מסודרת לעורך/מפיק." },
-                        { time: "בערב (עורך)", task: "קבלת חומרים מצולמים וסאונד, התחלת סידור, גיבוי וסנכרון ראשוני."}
-                    ],
-                    "יום ראשון (08/06/2025) 🎧💻": [
-                        { time: "00:30 (עורך)", task: "תחילת עריכות אינטנסיביות (תמונה וסאונד)." },
-                        { time: "00:30 (איש סאונד, אם מעורב בפוסט)", task: "עבודה עם העורך על עריכת סאונד, מיקס, הוספת אפקטים ומוזיקה." },
-                        { time: "13:00", task: "דד ליין פס קול." },
-                        { time: "14:00 (עורך)", task: "פינישים וסיום עריכת תמונה." },
-                        { time: "15:30 (עורך)", task: "דד ליין לרינדור סופי." }
-                    ]
-                }
-            }
-        };
+  <div class="roles-container">
+  <!-- Role icons with data-role attribute -->
+  <div class="role-icon" data-role="producer">
+  <svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm-1-13h2v6h-2zm0 8h2v2h-2z"/></svg>
+  <span>מפיק/ה</span>
+  </div>
+  <div class="role-icon" data-role="director">
+  <svg viewBox="0 0 24 24"><path d="M10 16.5v-9l6 4.5-6 4.5zM12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8z"/></svg>
+  <span>במאי/ת</span>
+  </div>
+  <div class="role-icon" data-role="assistantDirector">
+  <svg viewBox="0 0 24 24"><path d="M18 2H6c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zM6 4h5v8l-2.5-1.5L6 12V4zm0 15v-2h12v2H6zm7-10h5v2h-5v-2zm0 4h5v2h-5v-2z"/></svg>
+  <span>ע. במאי/ת</span>
+  </div>
+  <div class="role-icon" data-role="cinematographer">
+  <svg viewBox="0 0 24 24"><path d="M4 4h16v2H4zm0 4h16v12H4zM12 6.5c-2.49 0-4.5 2.01-4.5 4.5S9.51 15.5 12 15.5s4.5-2.01 4.5-4.5S14.49 6.5 12 6.5zm0 7c-1.38 0-2.5-1.12-2.5-2.5S10.62 8.5 12 8.5s2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg>
+  <span>צילום / תאורה</span>
+  </div>
+  <div class="role-icon" data-role="productionAssistant">
+  <svg viewBox="0 0 24 24"><path d="M14 2H6c-1.1 0-1.99.9-1.99 2L4 20c0 1.1.89 2 1.99 2H18c1.1 0 2-.9 2-2V8l-6-6zm2 16H8v-2h8v2zm0-4H8v-2h8v2zm-3-5V3.5L18.5 9H13z"/></svg>
+  <span>ע. הפקה</span>
+  </div>
+  <div class="role-icon" data-role="artAndCostumes">
+  <svg viewBox="0 0 24 24"><path d="M20.54 5.23l-1.39-1.68C18.88 3.21 18.47 3 18 3H6c-.47 0-.88.21-1.16.55L3.46 5.23C3.17 5.57 3 6.02 3 6.5V19c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V6.5c0-.48-.17-.93-.46-1.27zM6.24 5h11.52l.83 1H5.41l.83-1zM5 19V8h14v11H5zm3-5h2.55v3h2.9v-3H16v-2h-2.55V9h-2.9v3H8v2z" /></svg>
+  <span>הלבשה וארט 🎨</span>
+  </div>
+  <div class="role-icon" data-role="actors">
+  <svg viewBox="0 0 24 24"><path d="M12 5.5c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2zM7.5 15.5c0-1.33.41-2.53 1.09-3.5H4v3c0 1.1.9 2 2 2h1.57c-.05-.33-.07-.66-.07-1zm9.91-3.5c.68.97 1.09 2.17 1.09 3.5 0 .34-.02.67-.07 1H20c1.1 0 2-.9 2-2v-3h-4.41zM12 13c-1.93 0-3.5 1.57-3.5 3.5S10.07 20 12 20s3.5-1.57 3.5-3.5-1.57-3.5-3.5-3.5z"/></svg>
+  <span>משחק 🎭</span>
+  </div>
+  <div class="role-icon" data-role="soundman">
+  <svg viewBox="0 0 24 24"><path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z"/></svg>
+  <span>סאונד / עריכה 🎧💻</span> 
+  </div>
+  </div>
+  
+  <div id="roleBriefDisplay" class="role-brief-display hidden">
+  <h2 id="briefTitle"></h2>
+  <div id="briefContentContainer"></div> 
+  </div>
 
-        roleIcons.forEach(icon => {
-            icon.addEventListener("click", function() {
-                const role = this.dataset.role;
-                const briefData = roleBriefsData[role];
+  <div class="accordion-item">
+  <button class="accordion-button" aria-expanded="false" aria-controls="panelSchedule">
+  🗓️ לו"ז כללי מפורט (48 שעות)
+  <span class="arrow">▼</span>
+  </button>
+  <div class="panel" id="panelSchedule" aria-hidden="true">
+  <h3>🗓️ יום שישי (06/06/2025) - הזנקה, PRE-PRODUCTION ו-PRODUCTION ראשוני 🚀</h3>
+  <table class="schedule-table">
+  <thead>
+  <tr>
+  <th class="time-col">שעה</th>
+  <th>משימה</th>
+  </tr>
+  </thead>
+  <tbody>
+  <tr>
+  <td class="time-col">09:30</td>
+  <td class="task-col">מפיק + ע. מפיק: פתיחת חמ"ל, סידור ציוד וחמ"ל.</td>
+  </tr>
+  <tr>
+  <td class="time-col">10:00</td>
+  <td class="task-col">הגעת נציג (אוריין) למקום ההזנקה (למשל, מוזיאון).</td>
+  </tr>
+  <tr>
+  <td class="time-col">10:30 - 11:30</td>
+  <td class="task-col">הגעה של כל הצוות לחמ"ל - חתימה על טפסים, וידוא פרטים אחרונים, הדרכת בטיחות, PRE-PRODUCTION ראשוני (רשימות כלליות).</td>
+  </tr>
+  <tr>
+  <td class="time-col">11:50</td>
+  <td class="task-col">צוות הפקה ייעודי (למשל: תאורנית, ע.צלם, מפיק) יוצא ל"ראשס" (השכרת/איסוף ציוד).</td>
+  </tr>
+  <tr>
+  <td class="time-col">12:00</td>
+  <td class="task-col"><strong>🏁 הזנקה!</strong> הנציג (אוריין) מקבל את האלמנטים ומעביר מיד בהודעת טקסט לצוות בחמ"ל ולצוות בדרך/ב"ראשס".</td>
+  </tr>
+  <tr>
+  <td class="time-col">12:00 - 14:00</td>
+  <td class="task-col">צוות ב"ראשס": בדיקה/איסוף ציוד וחזרה לחמ"ל.</td>
+  </tr>
+  <tr>
+  <td class="time-col">12:00 - 17:00</td>
+  <td class="task-col">✍️ בחמ"ל: כתיבת תסריט אינטנסיבית. במקביל, צוות הפקה (מפיק, ע.מפיק, ארט וכו') מתחיל PRE-PRODUCTION ממוקד (לוקיישנים, פרופס, תלבושות לפי רעיון).</td>
+  </tr>
+  <tr>
+  <td class="time-col">~14:00</td>
+  <td class="task-col">צוות "ראשס" חוזר לחמ"ל, מצטרף למאמצים. הכנת ציוד.</td>
+  </tr>
+  <tr>
+  <td class="time-col">17:00 - 17:30</td>
+  <td class="task-col">🥪🥤 הפסקת התרעננות.</td>
+  </tr>
+  <tr>
+  <td class="time-col">17:30 - 20:30</td>
+  <td class="task-col">🧐 ברייקדאון ושוטינג ליסט (במאית, מפיק, צלם, תאורנית). צוות משריין לוקיישנים סופית, פרופס, ארט. הכנות ציוד אחרונות.</td>
+  </tr>
+  <tr>
+  <td class="time-col">20:30</td>
+  <td class="task-col">🎬 יציאה ללוקיישן A.</td>
+  </tr>
+  <tr>
+  <td class="time-col">20:50</td>
+  <td class="task-col">הגעה ללוקיישן A: פריקת ציוד, הקמת סט, תאורה, מצלמה.</td>
+  </tr>
+  <tr>
+  <td class="time-col">21:30</td>
+  <td class="task-col">תחילת צילומים, סצנות [...] (לוקיישן A). (ממשיך לשעות הלילה המוקדמות של יום שבת)</td>
+  </tr>
+  </tbody>
+  </table>
 
-                roleIcons.forEach(i => i.classList.remove("active-role"));
-                this.classList.add("active-role");
+  <h3>🎬 יום שבת (07/06/2025) - PRODUCTION MARATHON 🏃‍♀️🏃‍♂️</h3>
+  <table class="schedule-table">
+  <thead>
+  <tr>
+  <th class="time-col">שעה</th>
+  <th>משימה</th>
+  </tr>
+  </thead>
+  <tbody>
+  <tr><td class="time-col">~00:10</td><td class="task-col">סיום צילומים משוער (לוקיישן A). פירוק והעמסת ציוד. חזרה לחמ"ל. 😴 לישון או לנוח חזק! (בהתאם לאורך הצילומים בלוקיישן A)</td></tr>
+  <tr><td class="time-col">05:00</td><td class="task-col">השכמה, יציאה ללוקיישן B (נסיעה/חופים 🌅).</td></tr>
+  <tr><td class="time-col">05:20</td><td class="task-col">הגעה ללוקיישן B: הקמת סט, מצלמה.</td></tr>
+  <tr><td class="time-col">05:40</td><td class="task-col">תחילת צילומים, סצנות [...] (לוקיישן B).</td></tr>
+  <tr><td class="time-col">05:52 (משוער)</td><td class="task-col">☀️ נץ החמה (זריחה).</td></tr>
+  <tr><td class="time-col">07:00</td><td class="task-col">סיום צילומים (לוקיישן B). פירוק והעמסת ציוד.</td></tr>
+  <tr><td class="time-col">06:00 (צוות נפרד)</td><td class="task-col">יציאה ללוקיישן C (צוות הכנה).</td></tr>
+  <tr><td class="time-col">06:20</td><td class="task-col">הגעה ללוקיישן C (צוות הכנה): הקמת תפאורה, פרופס, ארט, תאורה.</td></tr>
+  <tr><td class="time-col">07:20</td><td class="task-col">צוות חוץ (צילום) יוצא ללוקיישן C.</td></tr>
+  <tr><td class="time-col">08:00</td><td class="task-col">הגעה ללוקיישן C (צוות צילום): הקמת סט, מצלמה.</td></tr>
+  <tr><td class="time-col">08:40</td><td class="task-col">🥐 ארוחת בוקר.</td></tr>
+  <tr><td class="time-col">09:00</td><td class="task-col">עורך ומפיק יוצאים לאולפן/עמדת עריכה: הקמת סביבת עבודה, עמדות נוספות.</td></tr>
+  <tr><td class="time-col">09:00</td><td class="task-col">תחילת צילומים, סצנות [...] (לוקיישן C).</td></tr>
+  <tr><td class="time-col">12:40</td><td class="task-col">🥤 הפסקת התרעננות.</td></tr>
+  <tr><td class="time-col">13:00</td><td class="task-col">המשך צילומים, סצנות [...] (לוקיישן C).</td></tr>
+  <tr><td class="time-col">14:30</td><td class="task-col">סיום צילומים (לוקיישן C).</td></tr>
+  <tr><td class="time-col">15:00</td><td class="task-col">ಊ ארוחת צהריים.</td></tr>
+  <tr><td class="time-col">15:30</td><td class="task-col">יציאה ללוקיישן D.</td></tr>
+  <tr><td class="time-col">16:00</td><td class="task-col">הגעה ללוקיישן D: הקמת סט, ארט ותפאורה, תאורה, מצלמה.</td></tr>
+  <tr><td class="time-col">16:30</td><td class="task-col">תחילת צילומים, סצנות [...] (לוקיישן D).</td></tr>
+  <tr><td class="time-col">17:30</td><td class="task-col">סיום צילומים (לוקיישן D). קיפול ציוד, העמסה ויציאה ל"ראשס".</td></tr>
+  <tr><td class="time-col">18:00</td><td class="task-col">החזרת ציוד ל"ראשס".</td></tr>
+  <tr><td class="time-col">19:00</td><td class="task-col">🗣️ פגישת צוות בחמ"ל.</td></tr>
+  <tr><td class="time-col">20:00</td><td class="task-col">🛌 הולכים לישון!</td></tr>
+  <tr><td class="time-col">23:40</td><td class="task-col">⏰ השכמה (לצוות הפוסט).</td></tr>
+  </tbody>
+  </table>
 
-                briefContentContainer.innerHTML = ""; 
+  <h3>🏆 יום ראשון (08/06/2025) - POST-PRODUCTION & SUBMISSION 🏁</h3>
+  <table class="schedule-table">
+  <thead>
+  <tr>
+  <th class="time-col">שעה</th>
+  <th>משימה</th>
+  </tr>
+  </thead>
+  <tbody>
+  <tr><td class="time-col">00:00</td><td class="task-col"><strong>🎞️ POST PRODUCTION</strong></td></tr>
+  <tr><td class="time-col">00:30</td><td class="task-col">✂️ תחילת עריכות.</td></tr>
+  <tr><td class="time-col">04:30</td><td class="task-col">☕ הפסקת התרעננות.</td></tr>
+  <tr><td class="time-col">05:00</td><td class="task-col">המשך עריכות.</td></tr>
+  <tr><td class="time-col">09:00</td><td class="task-col">🥐 ארוחת בוקר.</td></tr>
+  <tr><td class="time-col">10:40</td><td class="task-col">המשך עריכות.</td></tr>
+  <tr><td class="time-col">13:00</td><td class="task-col">🎵 דד ליין פס קול.</td></tr>
+  <tr><td class="time-col">14:00</td><td class="task-col">✨ פינישים וסיום עריכה.</td></tr>
+  <tr><td class="time-col">14:40</td><td class="task-col">🔧 זמן תיקונים.</td></tr>
+  <tr><td class="time-col">15:30</td><td class="task-col">💾 דד ליין לרינדור (עיבוד) סופי.</td></tr>
+  <tr><td class="time-col">16:30</td><td class="task-col">🚗 יציאה לסינמטק (או מקום המסירה).</td></tr>
+  <tr><td class="time-col">17:00</td><td class="task-col">🎉 מסירה!</td></tr>
+  </tbody>
+  </table>
+  </div>
+  </div>
+  
+  <div class="accordion-item">
+  <button class="accordion-button" aria-expanded="false" aria-controls="panelEquipment">
+  🛠️ רשימת ציוד כללית
+  <span class="arrow">▼</span>
+  </button>
+  <div class="panel" id="panelEquipment" aria-hidden="true">
+  <h3>🔧 ציוד שכור:</h3>
+  <table class="schedule-table"> 
+  <thead><tr><th>פריט</th><th>כמות</th></tr></thead>
+  <tbody>
+  <tr><td>סט רפלקטורים 5 ב-1</td><td>1</td></tr>
+  <tr><td>גובו פלופי 40x40</td><td>1</td></tr>
+  <tr><td>סט דגלים 4x4</td><td>1</td></tr>
+  <tr><td>חצובת תאורה קומבו</td><td>1</td></tr>
+  <tr><td>זרוע גריפ</td><td>1</td></tr>
+  <tr><td>סטנד תאורה רגיל</td><td>1</td></tr>
+  <tr><td>מנורת Aputure 300d</td><td>1</td></tr>
+  <tr><td>כבל מאריך 5 מטר</td><td>1</td></tr>
+  <tr><td>כבל חשמל 25 מטר</td><td>1</td></tr>
+  </tbody>
+  </table>
+  <h3>🎒 ציוד מהצוות (רשימה חלקית - <strong>חובה לעדכן בגיליון המשותף! 📢</strong>):</h3>
+  <ul>
+  <li>💻 לפטופ דוגם מקליט 15' עם אופציה ליציאה למוניטור חיצוני - כמות: 1</li>
+  <li>🖥️ מוניטור 32' עם סטנד - כמות: 1</li>
+  <li>📷 <strong>צילום:</strong> ציוד מצלמה ותאורה אישיים.</li>
+  <li>🎤 <strong>סאונד:</strong> ציוד סאונד אישי.</li>
+  </ul>
+  </div>
+  </div>
+  
+  <div class="accordion-item">
+  <button class="accordion-button" aria-expanded="false" aria-controls="panelGoogleSheet">
+  📊 גיליון הפקה חי (Google Sheets)
+  <span class="arrow">▼</span>
+  </button>
+  <div class="panel" id="panelGoogleSheet" aria-hidden="true">
+  <div class="google-sheet-info">
+  <p><strong>גיליון זה הוא המקור המרכזי לניהול משאבים ועדכונים חיים. אנא דאגו לעדכן אותו!</strong></p>
+  <p><u>לדוגמה:</u></p>
+  <ul>
+  <li><strong>הלבשה וארט:</strong> "יש לי תחפושת ספיידרמן 🕷️", "מביא עץ חג מולד קטן 🎄".</li>
+  <li><strong>ציוד אישי:</strong> "מביא מיקרופון רובה נוסף ובום 🎤", "יש לי סט עדשות נוסף".</li>
+  <li><strong>לוקיישנים פוטנציאלים:</strong> "לדודה שלי יש מחסן נטוש ברחוב Y, צריך לבדוק זמינות 🏚️".</li>
+  </ul>
+  </div>
+  <div class="iframe-container">
+  <iframe src="https://docs.google.com/spreadsheets/d/1WEJFmbgzMYM6qO9XflrQcUQM__-gYb_ZvbTAbDgmXTQ/edit?usp=sharing&rm=minimal" loading="lazy" title="גיליון הפקה של פרויקט 48">
+  [טוען גיליון הפקה...]
+  </iframe>
+  </div>
+  <p style="text-align:center; margin-top:15px;">
+  <a href="https://docs.google.com/spreadsheets/d/1WEJFmbgzMYM6qO9XflrQcUQM__-gYb_ZvbTAbDgmXTQ/edit?gid=0#gid=0" target="_blank" rel="noopener noreferrer">
+  🔗 פתח את הגיליון בחלון חדש (לעריכה נוחה)
+  </a>
+  </p>
+  </div>
+  </div>
 
-                if (briefData) {
-                    briefTitle.textContent = `ברייקדאון לתפקיד: ${briefData.title}`;
-                    
-                    Object.keys(briefData.days).forEach(dayKey => { 
-                        const dayHeader = document.createElement("h3");
-                        dayHeader.className = "timeline-day-header";
-                        dayHeader.textContent = dayKey; 
-                        briefContentContainer.appendChild(dayHeader);
+  <div class="accordion-item">
+  <button class="accordion-button" aria-expanded="false" aria-controls="panelFinalPrep">
+  💡 הכנות אחרונות ודגשים
+  <span class="arrow">▼</span>
+  </button>
+  <div class="panel" id="panelFinalPrep" aria-hidden="true">
+  <p>אנא ודאו שאתם מגיעים עם:</p>
+  <ul>
+  <li>📱 טלפונים טעונים במלואם על מצב שקט.</li>
+  <li>🥪 סנדוויץ' מהבית.</li>
+  <li>💰 חלק מהצוות משקיע סכומים אדירים להפקת הפרויקט, אנא תהיו נחמדים ותשתתפו גם בהוצאות 🙏.</li>
+  <li>✨ הרבה אנרגיה טובה וחיובית!</li>
+  <li>🧠 ראש פתוח ומוכנות לאלתורים.</li>
+  </ul>
+  <p class="important-note">זה הולך להיות אינטנסיבי, מאתגר, והכי חשוב - חוויה בלתי נשכחת וכיף אדיר! זכרו, אנחנו צוות 🤝, ועובדים ביחד להצלחה. 💪</p>
+  </div>
+  </div>
 
-                        briefData.days[dayKey].forEach(item => {
-                            const timelineItem = document.createElement("div");
-                            timelineItem.className = "timeline-item";
+  <div class="footer">
+  <p>בהצלחה ענקית לכולנו! 🥳<br><strong>צוות ההפקה 🌟</strong></p>
+  </div>
+  </div>
 
-                            const timeDiv = document.createElement("div");
-                            timeDiv.className = "timeline-time";
-                            timeDiv.textContent = item.time;
-                            
-                            const contentDiv = document.createElement("div");
-                            contentDiv.className = "timeline-content";
-                            const p = document.createElement("p");
-                            p.textContent = item.task; 
-                            contentDiv.appendChild(p);
+  <script>
+  // Accordion functionality with ARIA attributes
+  const accordionBtns = document.querySelectorAll(".accordion-button");
+  accordionBtns.forEach(btn => {
+  const panel = btn.nextElementSibling;
+  const panelId = panel.id;
+  btn.setAttribute('aria-controls', panelId);
 
-                            timelineItem.appendChild(timeDiv);
-                            timelineItem.appendChild(contentDiv);
-                            briefContentContainer.appendChild(timelineItem);
-                        });
-                    });
+  const isActiveInitial = btn.classList.contains("active");
+  btn.setAttribute('aria-expanded', isActiveInitial ? 'true' : 'false');
+  panel.setAttribute('aria-hidden', !isActiveInitial ? 'true' : 'false');
+  if (isActiveInitial) {
+  panel.style.maxHeight = panel.scrollHeight + "px";
+  panel.classList.add("show");
+  }
 
-                    briefDisplay.classList.remove("hidden");
-                    briefDisplay.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-                } else {
-                    briefDisplay.classList.add("hidden");
-                }
-            });
-        });
-    </script>
-</body>
-</html>
-�
+  btn.addEventListener("click", function() {
+  const isActive = this.classList.toggle("active");
+  this.setAttribute('aria-expanded', isActive ? 'true' : 'false');
+  panel.setAttribute('aria-hidden', !isActive ? 'true' : 'false');
+
+  if (isActive) { 
+  panel.style.maxHeight = panel.scrollHeight + "px";
+  panel.classList.add("show");
+  } else { 
+  panel.style.maxHeight = null;
+  panel.classList.remove("show");
+  }  
+  });
+  });
+
+  // Role-specific brief display 
+  const roleIcons = document.querySelectorAll(".role-icon");
+  const briefDisplay = document.getElementById("roleBriefDisplay");
+  const briefTitle = document.getElementById("briefTitle");
+  const briefContentContainer = document.getElementById("briefContentContainer");
+
+  const roleBriefsData = {
+  producer: {
+  title: "מפיק/ה 💼",
+  days: {
+  "יום שישי (06/06/2025) 🚀": [
+  { time: "09:30", task: "הגעה לחמ\"ל (עם ע. מפיק), פתיחה וסידור." },
+  { time: "10:00", task: "וידוא הגעת נציג (אוריין) למקום ההזנקה." },
+  { time: "10:30-11:30", task: "קבלת צוות, תפסים, הדרכת בטיחות, PRE-PRODUCTION ראשוני." },
+  { time: "11:50", task: "ניהול יציאת צוות ייעודי ל\"ראשס\" (איסוף ציוד)." },
+  { time: "12:00", task: "קבלת נושאי התחרות מאוריין והפצתם לכלל הצוות (בחמ\"ל וב\"ראשס\")." },
+  { time: "12:00-17:00", task: "ניהול PRE-PRODUCTION ממוקד בחמ\"ל (לוקיישנים, פרופס, תיאומים) במקביל לכתיבת תסריט. פיקוח על חזרת צוות \"ראשס\" (~14:00)." },
+  { time: "17:30-20:30", task: "השתתפות בברייקדאון ושוטינג. ניהול שריון לוקיישנים סופי ומשאבים." },
+  { time: "20:30 ואילך", task: "ניהול יציאה וצילומים בלוקיישן A. פתרון בעיות על הסט. דאגה לצוות." }
+  ],
+  "יום שבת (07/06/2025) 🛠️": [
+  { time: "כל היום", task: "ניהול לוגיסטי של צילומים בלוקיישנים B, C, D. דאגה לרווחת הצוות, לו\"ז, פתרון בעיות." },
+  { time: "09:00", task: "יציאה עם עורך לאולפן/עמדת עריכה, הקמת סביבת עבודה לפוסט." },
+  { time: "17:30-18:00", task: "ניהול החזרת ציוד ל\"ראשס\"." },
+  { time: "19:00", task: "ניהול פגישת צוות בחמ\"ל." },
+  { time: "20:00", task: "דאגה למנוחת הצוות." },
+  { time: "23:40", task: "תיאום השכמה לצוות הפוסט." }
+  ],
+  "יום ראשון (08/06/2025) 🏆": [
+  { time: "00:00 ואילך", task: "ליווי ותמיכה בצוות הפוסט-פרודקשן. ניהול לו\"ז פוסט." },
+  { time: "16:30", task: "ניהול יציאה למקום המסירה." },
+  { time: "17:00", task: "אחריות על מסירת הסרט בזמן ובפורמט הנדרש." }
+  ]
+  }
+  },
+  director: {
+  title: "במאי/ת 📣",
+  days: {
+  "יום שישי (06/06/2025) ✍️": [
+  { time: "10:30", task: "הגעה לחמ\"ל." },
+  { time: "12:00-17:00", task: "הובלת כתיבת התסריט לאחר קבלת נושאי התחרות." },
+  { time: "17:30-20:30", task: "הובלת ברייקדאון ושוטינג ליסט עם צלם ומפיק." },
+  { time: "21:30 ואילך", task: "ניהול אמנותי של צילומים בלוקיישן A. עבודה עם שחקנים." }
+  ],
+  "יום שבת (07/06/2025) 🎬": [
+  { time: "כל היום", task: "ניהול אמנותי של צילומים בלוקיישנים B, C, D. שמירה על חזון אומנותי ועקביות." },
+  { time: "19:00", task: "השתתפות בפגישת צוות, סיכום יום צילומים והכנות ליום הפוסט." }
+  ],
+  "יום ראשון (08/06/2025) 🎞️": [
+  { time: "00:30 ואילך", task: "עבודה צמודה עם העורך על ראף-קאט, בחירת טייקים והכוונה אמנותית." },
+  { time: "לאורך הפוסט", task: "ליווי תהליכי עיצוב פסקול ותיקוני צבע. נעילת הקאט הסופי." }
+  ]
+  }
+  },
+  assistantDirector: {
+  title: "ע. במאי/ת 📋",
+  days: {
+  "יום שישי (06/06/2025) ⏱️": [
+  { time: "10:30", task: "הגעה לחמ\"ל." },
+  { time: "17:30-20:30", task: "סיוע בברייקדאון התסריט, הכנת קול שיט ראשוני. תיאום שחקנים לסטים." },
+  { time: "21:30 ואילך", task: "ניהול לו\"ז על סט לוקיישן A, קשר עם שחקנים, שמירה על המשכיות (continuity)." }
+  ],
+  "יום שבת (07/06/2025) 🏃": [
+  { time: "כל היום", task: "ניהול שוטף של לו\"ז הצילומים בלוקיישנים B, C, D. הכנת והפצת קול שיטס, תיאום בין מחלקות, שמירה על שקט וקצב." },
+  { time: "19:00", task: "השתתפות בפגישת צוות." }
+  ],
+  "יום ראשון (08/06/2025) 📞": [
+  { time: "במהלך הפוסט", task: "זמינות לספק מידע לעורך (מספרי טייקים, הערות מהסט, פרטי המשכיות)." }
+  ]
+  }
+  },
+  cinematographer: {
+  title: "צילום / תאורה 🎥💡",
+  days: {
+  "יום שישי (06/06/2025) 🖼️": [
+  { time: "10:30", task: "הגעה לחמ\"ל (צלם ראשי, תאורן ראשי)." },
+  { time: "11:50", task: "(תאורנית, ע. תאורה, ע. צלם) יציאה ל\"ראשס\" עם המפיק." },
+  { time: "12:00-14:00", task: "בדיקת ציוד צילום ותאורה ב\"ראשס\", הרכבת מצלמה, העמסה וחזרה לחמ\"ל." },
+  { time: "17:30-20:30", task: "(צלם, תאורנית) השתתפות בברייקדאון ושוטינג. תכנון תאורה וקומפוזיציות." },
+  { time: "20:50 ואילך", task: "הקמת תאורה ומצלמה בלוקיישן A, ביצוע צילומים לפי שוטינג ליסט." }
+  ],
+  "יום שבת (07/06/2025) 🌟": [
+  { time: "כל היום", task: "אחריות על הצד הוויזואלי בלוקיישנים B, C, D. הקמה וניהול תאורה, תפעול מצלמה, שמירה על איכות ועקביות." },
+  { time: "17:30", task: "סיוע בקיפול ציוד והכנתו להחזרה ל\"ראשס\"." },
+  { time: "סוף יום", task: "וידוא גיבוי מאובטח של כל חומרי הגלם והעברתם למפיק/עורך."}
+  ],
+  "יום ראשון (08/06/2025) 🎨": [
+  { time: "במהלך הפוסט", task: "זמינות למעורבות בתהליך תיקוני הצבע (Color Grading) ומתן פידבק מקצועי, במידת האפשר." }
+  ]
+  }
+  },
+  productionAssistant: {
+  title: "ע. הפקה 🦸",
+  days: {
+  "יום שישי (06/06/2025) 🛒": [
+  { time: "09:30", task: "הגעה עם המפיק, סיוע בפתיחת חמ\"ל וסידור ציוד." },
+  { time: "10:30 ואילך", task: "סיוע למפיק בכל המשימות הלוגיסטיות: תפסים, רכש קטן, שליחויות, הכנת לוקיישנים (אם אפשר מראש), דאגה לצוות (שתיה, כיבוד קל)." },
+  { time: "11:50", task: "ליווי ל\"ראשס\" במידת הצורך, סיוע בהעמסת ציוד."}
+  ],
+  "יום שבת (07/06/2025) ⚙️": [
+  { time: "כל היום", task: "תמיכה לוגיסטית מלאה בצוות על הסט ובחמ\"ל. 'איש/אשת כל משימה'. סיוע בניהול ארוחות, הפסקות, ניקיון וסדר." }
+  ],
+  "יום ראשון (08/06/2025) 👍": [
+  { time: "במהלך הפוסט", task: "סיוע בשמירה על סדר וארגון בחמ\"ל הפוסט. עזרה בכל משימה לוגיסטית שנותרה (למשל, החזרת ציוד קטן, שליחויות אחרונות)." }
+  ]
+  }
+  },
+  artAndCostumes: {
+  title: "הלבשה וארט 👚🖼️",
+  days: {
+  "יום שישי (06/06/2025) ✨": [
+  { time: "10:30", task: "הגעה לחמ\"ל." },
+  { time: "12:00-20:30", task: "(במקביל לכתיבה וברייקדאון) עבודה על רשימות פרופס, תפאורה, תלבושות בהתאם לתסריט המתגבש. איתור והכנות מוקדמות." },
+  { time: "20:50 ואילך", task: "סיוע בהקמת סט לוקיישן A (ארט), הלבשת שחקנים ראשונה, הכנות להמשך." }
+  ],
+  "יום שבת (07/06/2025) 🛠️": [
+  { time: "06:00", task: "(צוות נפרד או אותו צוות ברוטציה) יציאה ללוקיישן C להקמת תפאורה, פרופס, ארט." },
+  { time: "כל היום", task: "אחריות על נראות הסטים (B,C,D) והדמויות. הלבשה, תיקונים, שינויים לפי הצורך, שמירה על המשכיות ויזואלית של ארט ותלבושות." }
+  ],
+  "יום ראשון (08/06/2025) 📦": [ 
+  { time: "סיום צילומים (שבת בערב)", task: "סיוע בקיפול ואיסוף כל פריטי הארט וההלבשה בצורה מסודרת." }
+  ]
+  }
+  },
+  actors: {
+  title: "משחק 🎭⭐",
+  days: {
+  "יום שישי (06/06/2025) 📖": [
+  { time: "לפי תיאום (אחר הצהריים/ערב)", task: "הגעה לחמ\"ל/לוקיישן (לאחר גיבוש תסריט ראשוני). לימוד טקסטים מהיר והבנת הדמות. עבודה עם הבמאי/ת על פרשנות." },
+  { time: "21:30 ואילך", task: "צילומים בלוקיישן A. ריכוז מלא, היענות להוראות, שיתוף פעולה." }
+  ],
+  "יום שבת (07/06/2025) 🌟": [
+  { time: "לפי קריאה", task: "המשך צילומים בלוקיישנים B, C, D. שמירה על אנרגיה, רצף דמות והמשכיות בין טייקים וסצנות." }
+  ],
+  "יום ראשון (08/06/2025) 🎤": [ 
+  { time: "סטנד-ביי", task: "להיות זמינים טלפונית לכל צורך (הקלטות קול נוספות - ADR, צילומי השלמה קטנים אם נדרש באופן חריג ובהתאם ללו\"ז הפוסט)." }
+  ]
+  }
+  },
+  soundman: { 
+  title: "סאונד / עריכה 🎧💻",
+  days: {
+  "יום שישי (06/06/2025) 📡": [
+  { time: "10:30 (איש סאונד)", task: "הגעה לחמ\"ל. בדיקת ציוד סאונד." },
+  { time: "21:30 ואילך (איש סאונד)", task: "הקלטת סאונד (דיאלוגים, אווירה) בלוקיישן A. ניטור רמות שמע." }
+  ],
+  "יום שבת (07/06/2025) �": [
+  { time: "כל היום (איש סאונד)", task: "המשך הקלטות סאונד נקי ואיכותי בלוקיישנים B, C, D. תיוג קפדני של קבצי האודיו." },
+  { time: "09:00 (עורך)", task: "יציאה עם מפיק לאולפן/עמדת עריכה, הקמת סביבת עבודה." },
+  { time: "סוף יום (איש סאונד)", task: "העברת כל חומרי הסאונד בצורה מסודרת לעורך/מפיק." },
+  { time: "בערב (עורך)", task: "קבלת חומרים מצולמים וסאונד, התחלת סידור, גיבוי וסנכרון ראשוני."}
+  ],
+  "יום ראשון (08/06/2025) 🎧💻": [
+  { time: "00:30 (עורך)", task: "תחילת עריכות אינטנסיביות (תמונה וסאונד)." },
+  { time: "00:30 (איש סאונד, אם מעורב בפוסט)", task: "עבודה עם העורך על עריכת סאונד, מיקס, הוספת אפקטים ומוזיקה." },
+  { time: "13:00", task: "דד ליין פס קול." },
+  { time: "14:00 (עורך)", task: "פינישים וסיום עריכת תמונה." },
+  { time: "15:30 (עורך)", task: "דד ליין לרינדור סופי." }
+  ]
+  }
+  }
+  };
+
+  roleIcons.forEach(icon => {
+  icon.addEventListener("click", function() {
+  const role = this.dataset.role;
+  const briefData = roleBriefsData[role];
+
+  roleIcons.forEach(i => i.classList.remove("active-role"));
+  this.classList.add("active-role");
+
+  briefContentContainer.innerHTML = ""; 
+
+  if (briefData) {
+  briefTitle.textContent = `ברייקדאון לתפקיד: ${briefData.title}`;
+  
+  Object.keys(briefData.days).forEach(dayKey => { 
+  const dayHeader = document.createElement("h3");
+  dayHeader.className = "timeline-day-header";
+  dayHeader.textContent = dayKey; 
+  briefContentContainer.appendChild(dayHeader);
+
+  briefData.days[dayKey].forEach(item => {
+  const timelineItem = document.createElement("div");
+  timelineItem.className = "timeline-item";
+
+  const timeDiv = document.createElement("div");
+  timeDiv.className = "timeline-time";
+  timeDiv.textContent = item.time;
+  
+  const contentDiv = document.createElement("div");
+  contentDiv.className = "timeline-content";
+  const p = document.createElement("p");
+  p.textContent = item.task; 
+  contentDiv.appendChild(p);
+
+  timelineItem.appendChild(timeDiv);
+  timelineItem.appendChild(contentDiv);
+  briefContentContainer.appendChild(timelineItem);
+  });
+  });
+
+  briefDisplay.classList.remove("hidden");
+  briefDisplay.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+  } else {
+  briefDisplay.classList.add("hidden");
+  }
+  });
+  });
+  </script>
+ </body>
+ </html>
