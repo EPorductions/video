@@ -390,6 +390,26 @@
   font-size: 0.9em; 
   margin-bottom: 3px;
   }
+   .breakdown-table {
+        font-size: 0.9em; /* Smaller base font for denser table */
+    }
+    .breakdown-table th, .breakdown-table td {
+        padding: 6px 8px; /* Tighter padding */
+        vertical-align: middle;
+    }
+    .breakdown-table input[type="text"], .breakdown-table textarea {
+        width: 95%;
+        padding: 4px;
+        font-size: 0.95em;
+        border: 1px solid #ccc;
+        border-radius: 4px;
+        box-sizing: border-box;
+    }
+    .breakdown-table textarea {
+        min-height: 40px;
+        resize: vertical;
+    }
+
 
   .important-note {
   background-color: rgba(255, 243, 205, 0.95); 
@@ -453,7 +473,7 @@
   .role-icon span { font-size: 1em; } 
   .timeline-content p, .timeline-content ul li { font-size: 1.05em; }
 
-  .schedule-table th, .schedule-table td {
+  .schedule-table th, .schedule-table td, .breakdown-table th, .breakdown-table td {
   padding: 9px; 
   font-size: 1em; 
   }
@@ -492,11 +512,11 @@
   .role-brief-display h2 { font-size: 1.7em; } /* Larger for mobile */
   .timeline-day-header { font-size: 1.4em; } /* Larger for mobile */
 
-  .schedule-table { 
+  .schedule-table, .breakdown-table { 
   display: block;
   overflow-x: auto;
   }
-  .schedule-table th, .schedule-table td {
+  .schedule-table th, .schedule-table td, .breakdown-table th, .breakdown-table td {
   font-size: 1.1em; 
   line-height: 1.5; 
   padding: 8px; 
@@ -547,7 +567,7 @@
   .role-brief-display h2 { font-size: 1.75em;} /* Increased */
 
 
-  .schedule-table th, .schedule-table td {
+  .schedule-table th, .schedule-table td, .breakdown-table th, .breakdown-table td {
   font-size: 1.15em; 
   padding: 7px; 
   }
@@ -636,7 +656,7 @@
             </thead>
             <tbody>
                 <tr>
-                    <td class="time-col">09:30</td>
+                    <td class="time-col">11:00</td>
                     <td class="task-col">צוות גרעין (מפיק, במאי/ת, תסריטאי/ת, ע. במאי/ת, צלם/ת): הגעה לחמ"ל.</td>
                 </tr>
                 <tr>
@@ -644,35 +664,39 @@
                     <td class="task-col"><strong>הזנקה!</strong> נציג צוות יוצא למוזיאון ת"א לקבלת האלמנטים.</td>
                 </tr>
                 <tr>
-                    <td class="time-col">~11:30 - 13:30</td>
+                    <td class="time-col">~11:30 - 14:00</td>
                     <td class="task-col">צוות גרעין: בריינסטורמינג, גיבוש קונספט, כתיבה ראשונית ותכנון סצנות לוקיישן 1.</td>
                 </tr>
                 <tr>
                     <td class="time-col">13:30</td>
                     <td class="task-col">צוות ייעודי (מפיק/ה, ע.הפקה, אולי צלם/ת): יציאה לאיסוף השלמת ציוד מסטודיו ספוט (תמנע 3, חולון - איסוף מ-14:00).</td>
                 </tr>
+                <tr>
+                    <td class="time-col">14:00</td>
+                    <td class="task-col"><strong>הגעת שאר צוות ההפקה (ע. הפקה נוספים, רצים וכו') לחמ"ל.</strong> תדרוך, הכנות.</td>
+                </tr>
                  <tr>
                     <td class="time-col">~15:30</td>
                     <td class="task-col">חזרת צוות איסוף ציוד לחמ"ל, פריקת ציוד.</td>
                 </tr>
                 <tr>
-                    <td class="time-col">15:30-16:30</td>
+                    <td class="time-col">16:00-17:00</td>
                     <td class="task-col">המשך הכנות (שוטינג, ברייקדאון). <strong>הגעת צוות ארט/הלבשה.</strong></td>
                 </tr>
                  <tr>
-                    <td class="time-col">16:30-17:00</td>
+                    <td class="time-col">17:00-17:30</td>
                     <td class="task-col"><strong>הגעת איש/אשת סאונד.</strong> הכנות סופיות של ציוד צילום וסאונד.</td>
                 </tr>
                 <tr>
-                    <td class="time-col">17:00-18:00</td>
+                    <td class="time-col">18:00-18:30</td>
                     <td class="task-col"><strong>הגעת שחקנים (לסצנה 1, בתיאום ע. במאי/ת).</strong> תדריך, הלבשה, איפור.</td>
                 </tr>
                 <tr>
-                    <td class="time-col">18:00 - 18:30</td>
+                    <td class="time-col">18:30 - 19:00</td>
                     <td class="task-col">הפסקת אוכל קלה ומרוכזת לכלל הצוות הנוכח.</td>
                 </tr>
                 <tr>
-                    <td class="time-col">18:30 - 02:00 (שבת)</td>
+                    <td class="time-col">19:00 - 02:00 (שבת)</td>
                     <td class="task-col"><strong>צילומים בלוקיישן 1 (2-3 סצנות).</strong> עורך/ת (ויואב AI) יכולים להתחיל ingest וסידור חומרים ראשוני.</td>
                 </tr>
             </tbody>
@@ -767,6 +791,75 @@
         </table>
     </div>
 </div>
+
+<div class="accordion-item">
+    <button class="accordion-button" aria-expanded="false" aria-controls="panelBreakdown">
+        📝 טבלת ברייקדאון (למילוי)
+        <span class="arrow">▼</span>
+    </button>
+    <div class="panel" id="panelBreakdown" aria-hidden="true">
+        <h3>טבלת ברייקדאון ראשונית</h3>
+        <p><em>יש למלא את הטבלה הזו עם פרטי הסצנות לאחר גיבוש התסריט.</em></p>
+        <div style="overflow-x:auto;"> <!-- Make table scrollable on small screens -->
+            <table class="schedule-table breakdown-table">
+                <thead>
+                    <tr>
+                        <th>סצנה #</th>
+                        <th>פנים/חוץ</th>
+                        <th>לוקיישן (תיאור)</th>
+                        <th>זמן ביום (תסריט)</th>
+                        <th>דמויות</th>
+                        <th>תיאור קצר / אקשן</th>
+                        <th>פרופס מרכזי</th>
+                        <th>הלבשה</th>
+                        <th>הערות סאונד</th>
+                        <th>הערות אחרות</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <!-- Add rows dynamically or pre-fill a few empty rows -->
+                    <tr>
+                        <td><input type="text" placeholder="1"></td>
+                        <td><input type="text" placeholder="פנים"></td>
+                        <td><textarea placeholder="לדוגמה: חמ\"ל הפקה, שז\"ר 26"></textarea></td>
+                        <td><input type="text" placeholder="יום"></td>
+                        <td><textarea placeholder="מפיק, במאי"></textarea></td>
+                        <td><textarea placeholder="דיון סוער על הקונספט"></textarea></td>
+                        <td><textarea placeholder="לוח מחיק, טושים, לפטופים"></textarea></td>
+                        <td><textarea placeholder="בגדי יום-יום"></textarea></td>
+                        <td><textarea placeholder="דיאלוג ברור, רעשי רקע של עבודה"></textarea></td>
+                        <td><textarea placeholder="צילום אינטימי, קלוזאפים"></textarea></td>
+                    </tr>
+                    <tr>
+                        <td><input type="text"></td>
+                        <td><input type="text"></td>
+                        <td><textarea></textarea></td>
+                        <td><input type="text"></td>
+                        <td><textarea></textarea></td>
+                        <td><textarea></textarea></td>
+                        <td><textarea></textarea></td>
+                        <td><textarea></textarea></td>
+                        <td><textarea></textarea></td>
+                        <td><textarea></textarea></td>
+                    </tr>
+                     <tr>
+                        <td><input type="text"></td>
+                        <td><input type="text"></td>
+                        <td><textarea></textarea></td>
+                        <td><input type="text"></td>
+                        <td><textarea></textarea></td>
+                        <td><textarea></textarea></td>
+                        <td><textarea></textarea></td>
+                        <td><textarea></textarea></td>
+                        <td><textarea></textarea></td>
+                        <td><textarea></textarea></td>
+                    </tr>
+                    <!-- Add more rows as needed -->
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
   
   <div class="accordion-item">
   <button class="accordion-button" aria-expanded="false" aria-controls="panelEquipment">
@@ -851,7 +944,7 @@
   </div>
   <p style="text-align:center; margin-top:15px;">
   <a href="https://docs.google.com/spreadsheets/d/1WEJFmbgzMYM6qO9XflrQcUQM__-gYb_ZvbTAbDgmXTQ/edit?gid=0#gid=0" target="_blank" rel="noopener noreferrer">
-  🔗 פתח את הגיליון בחלון חדש (לעריכה נוחה)
+  � פתח את הגיליון בחלון חדש (לעריכה נוחה)
   </a>
   </p>
   </div>
@@ -922,11 +1015,12 @@
         title: "מפיק/ה",
         days: {
             "יום שישי (06/06/2025) ולילה לתוך שבת": [
-                { time: "09:30", task: "הגעה לחמ\"ל (צוות גרעין). וידוא ציוד וארגון." },
+                { time: "11:00", task: "הגעה לחמ\"ל (צוות גרעין). וידוא ציוד וארגון." },
                 { time: "10:00-12:00", task: "תיאום יציאת נציג לקבלת אלמנטים." },
-                { time: "~11:30", task: "קבלת אלמנטים, השתתפות בבריינסטורמינג." },
+                { time: "~11:30-14:00", task: "קבלת אלמנטים, השתתפות בבריינסטורמינג ותכנון ראשוני." },
                 { time: "13:30", task: "תיאום/הצטרפות לאיסוף השלמת ציוד מסטודיו ספוט." },
-                { time: "15:30 ואילך", task: "ניהול הגעת צוותים מדורגים. הטמעת ציוד. דאגה לרווחת הצוות (מזון, שתיה)." },
+                { time: "14:00", task: "קבלת שאר צוות הפקה. תדרוך והכנות." },
+                { time: "15:30 ואילך", task: "ניהול הגעת צוותים מדורגים (ארט, סאונד, שחקנים). הטמעת ציוד. דאגה לרווחת הצוות." },
                 { time: "18:00-02:00 (שבת)", task: "פיקוח צמוד על צילומי לוקיישן 1. פתרון בעיות. תיאום העברת חומרים לעריכה." },
                 { time: "02:00 (שבת) ואילך", task: "ניהול לוגיסטי של המעבר ללוקיישן 2 / המשך עבודה בחמ\"ל. ניהול מנוחות קצרות בתורנות לצוות גרעין (3-4 שעות מקסימום, במשמרות)." }
             ],
@@ -945,10 +1039,10 @@
         title: "במאי/ת",
         days: {
             "יום שישי (06/06/2025) ולילה לתוך שבת": [
-                { time: "09:30", task: "הגעה לחמ\"ל." },
-                { time: "~11:30 - 15:30", task: "הובלת צוות כתיבה, גיבוש קונספט. עבודה על שוטינג ללוקיישן 1." },
-                { time: "17:00 ואילך", task: "תדרוך שחקנים." },
-                { time: "18:30-02:00 (שבת)", task: "ניהול אמנותי של צילומי לוקיישן 1." },
+                { time: "11:00", task: "הגעה לחמ\"ל." },
+                { time: "~11:30 - 16:00", task: "הובלת צוות כתיבה, גיבוש קונספט (8-12 סצנות). עבודה על שוטינג ללוקיישן 1." },
+                { time: "18:00 ואילך", task: "תדרוך שחקנים." },
+                { time: "19:00-02:00 (שבת)", task: "ניהול אמנותי של צילומי לוקיישן 1." },
                 { time: "02:00 (שבת) ואילך", task: "סקירת חומרים. תכנון המשך הלילה/בוקר. המשך כתיבה/תכנון עם צוות גרעין. מנוחה מינימלית בתורנות (אם מתאפשר)." }
             ],
             "שבת (07/06/2025) ולילה לתוך ראשון": [
@@ -964,10 +1058,10 @@
         title: "ע. במאי/ת",
         days: {
             "יום שישי (06/06/2025) ולילה לתוך שבת": [
-                { time: "09:30", task: "הגעה לחמ\"ל. הכנת טמפלטים." },
-                { time: "15:30-17:00", task: "תיאום הגעה מדורג של ארט, סאונד ושחקנים." },
-                { time: "17:00-18:30", task: "קבלת שחקנים, וידוא מוכנות." },
-                { time: "18:30-02:00 (שבת)", task: "ניהול סט לוקיישן 1: לו\"ז, המשכיות, רישום טייקים." },
+                { time: "11:00", task: "הגעה לחמ\"ל. הכנת טמפלטים." },
+                { time: "16:00-18:00", task: "תיאום הגעה מדורג של ארט, סאונד ושחקנים." },
+                { time: "18:00-19:00", task: "קבלת שחקנים, וידוא מוכנות." },
+                { time: "19:00-02:00 (שבת)", task: "ניהול סט לוקיישן 1: לו\"ז, המשכיות, רישום טייקים." },
                 { time: "02:00 (שבת) ואילך", task: "הכנת קול-שיטס להמשך. תיאומים. ניהול הסט בצילומי לילה (אם יש). מנוחה מינימלית בתורנות עם צוות גרעין."}
             ],
             "שבת (07/06/2025) ולילה לתוך ראשון": [
@@ -982,10 +1076,10 @@
         title: "צילום / תאורה",
         days: {
             "יום שישי (06/06/2025) ולילה לתוך שבת": [
-                { time: "09:30", task: "הגעה לחמ\"ל. בדיקת ציוד קיים." },
+                { time: "11:00", task: "הגעה לחמ\"ל. בדיקת ציוד קיים." },
                 { time: "13:30 (אופציונלי)", task: "הצטרפות לאיסוף ציוד." },
                 { time: "15:30 ואילך", task: "הכנת כלל הציוד. תכנון תאורה והקמת סט לוקיישן 1." },
-                { time: "18:30-02:00 (שבת)", task: "אחריות על צילום ותאורה בלוקיישן 1." },
+                { time: "19:00-02:00 (שבת)", task: "אחריות על צילום ותאורה בלוקיישן 1." },
                 { time: "02:00 (שבת) ואילך", task: "גיבוי חומרים והעברה לעורך. הכנות לצילומי לילה/בוקר מוקדם. מנוחה מינימלית בתורנות."}
             ],
             "שבת (07/06/2025) ולילה לתוך ראשון": [
@@ -1001,9 +1095,9 @@
         title: "ע. הפקה",
         days: {
             "יום שישי (06/06/2025) ולילה לתוך שבת": [
-                { time: "09:30 (מומלץ)", task: "הגעה עם צוות הגרעין. סיוע בארגון החמ\"ל." },
-                { time: "13:30", task: "יציאה עם צוות ייעודי לאיסוף השלמת ציוד." },
-                { time: "~15:30", task: "סיוע בפריקת הציוד וארגונו." },
+                { time: "14:00", task: "הגעה לחמ\"ל. סיוע בארגון ובהכנות." },
+                { time: "13:30 (אם נבחר/ה לצאת)", task: "יציאה עם צוות ייעודי לאיסוף השלמת ציוד." },
+                { time: "~15:30 (אם יצא/ה)", task: "סיוע בפריקת הציוד וארגונו." },
                 { time: "כל היום והלילה", task: "סיוע לוגיסטי רצוף: שליחויות, רכישת כיבוד ושתיה (כולל אספקת קפאין בלילה!), ארגון ארוחות, תמיכה בכל צורך של הצוות. שמירה על סדר וניקיון בחמ\"ל ועל הסט." }
             ],
             "שבת (07/06/2025) ולילה לתוך ראשון": [
@@ -1018,9 +1112,9 @@
         title: "הלבשה וארט",
         days: {
             "יום שישי (06/06/2025) ולילה לתוך שבת": [
-                { time: "~15:30-16:00", task: "הגעה לחמ\"ל. קבלת תדריך על הקונספט והדרישות ללוקיישן 1." },
-                { time: "16:00-18:00", task: "עבודה מהירה על עיצוב ארט והלבשה ללוקיישן 1. הלבשת שחקנים עם הגעתם." },
-                { time: "18:30 - 02:00 (שבת)", task: "תפעול ארט והלבשה על סט לוקיישן 1. הכנות ללוקיישנים הבאים (עשוי להימשך לתוך הלילה)." }
+                { time: "~16:00-16:30", task: "הגעה לחמ\"ל. קבלת תדריך על הקונספט והדרישות ללוקיישן 1." },
+                { time: "16:30-18:30", task: "עבודה מהירה על עיצוב ארט והלבשה ללוקיישן 1. הלבשת שחקנים עם הגעתם." },
+                { time: "19:00 - 02:00 (שבת)", task: "תפעול ארט והלבשה על סט לוקיישן 1. הכנות ללוקיישנים הבאים (עשוי להימשך לתוך הלילה)." }
             ],
             "שבת (07/06/2025) ולילה לתוך ראשון": [
                  { time: "לפי צורך, כולל לילה", task: "אחריות על נראות הסטים והדמויות. התאמות ושינויים. שמירה על המשכיות. פירוק והקמה בין לוקיישנים. זמינות גבוהה." }
@@ -1034,8 +1128,8 @@
         title: "משחק",
         days: {
             "יום שישי (06/06/2025)": [
-                { time: "~17:00 (בתיאום ע. במאי/ת)", task: "הגעה לחמ\"ל/לוקיישן. קבלת טקסטים והנחיות. מדידת תלבושות, איפור." },
-                { time: "18:30-02:00 (שבת)", task: "צילומים בלוקיישן 1. ריכוז ושיתוף פעולה." }
+                { time: "~18:00 (בתיאום ע. במאי/ת)", task: "הגעה לחמ\"ל/לוקיישן. קבלת טקסטים והנחיות. מדידת תלבושות, איפור." },
+                { time: "19:00-02:00 (שבת)", task: "צילומים בלוקיישן 1. ריכוז ושיתוף פעולה." }
             ],
             "שבת (07/06/2025)": [
                 { time: "לפי קריאה (Call Time) לכל לוקיישן, כולל אפשרות לצילומי לילה", task: "המשך צילומים. שמירה על אנרגיה. מנוחה בין סצנות בהתאם להנחיות." }
@@ -1049,8 +1143,8 @@
         title: "סאונד / עריכה",
         days: {
             "יום שישי (06/06/2025) ולילה לתוך שבת": [
-                { time: "~16:30 (איש סאונד)", task: "הגעה לחמ\"ל. קבלת תדריך, בדיקת ציוד והכנות להקלטה." },
-                { time: "18:30-02:00 (שבת) (איש סאונד)", task: "הקלטת סאונד בלוקיישן 1." },
+                { time: "~17:00-17:30 (איש סאונד)", task: "הגעה לחמ\"ל. קבלת תדריך, בדיקת ציוד והכנות להקלטה." },
+                { time: "19:00-02:00 (שבת) (איש סאונד)", task: "הקלטת סאונד בלוקיישן 1." },
                 { time: "23:00 ואילך (עורך/ת ויואב AI)", task: "קבלת חומרים ראשונים מלוקיישן 1. התחלת ingest, סידור פרויקט, אופליין ראשוני. עבודה לתוך הלילה." }
             ],
             "שבת (07/06/2025) ולילה לתוך ראשון": [
