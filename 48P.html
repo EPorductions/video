@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>תדריך הפקה V5 - פרויקט 48</title>
+    <title>תדריך הפקה V6 - פרויקט 48</title>
     <style>
         :root {
             --primary-color: #0d6efd; 
@@ -12,9 +12,9 @@
             --light-gray-color: #f8f9fa;
             --dark-gray-color: #343a40;
             --text-color: #212529;
-            --container-bg-color: rgba(255, 255, 255, 0.64); 
-            --card-bg-color: rgba(255, 255, 255, 0.67); 
-            --role-brief-bg: rgba(240, 248, 255, 0.57); /* AliceBlue, more subtle */
+            --container-bg-color: rgba(255, 255, 255, 0.75); /* Slightly more opaque */
+            --card-bg-color: rgba(255, 255, 255, 0.85); /* Slightly more opaque for cards */
+            --role-brief-bg: rgba(240, 248, 255, 0.7); /* AliceBlue, more subtle */
             --border-radius: 10px;
             --box-shadow: 0 5px 20px rgba(0,0,0,0.12);
         }
@@ -24,22 +24,20 @@
             line-height: 1.65; 
             margin: 0;
             padding: 0;
-            background-image: url("bg48.png"); 
-            background-size: cover; 
-            background-position: center center; 
-            background-attachment: scroll; 
-            background-repeat: no-repeat;
+            /* Replaced background image with a gradient */
+            background: linear-gradient(180deg, #e0eafc 0%, #cfdef3 100%);
+            background-attachment: fixed; /* Makes the background stay in place during scroll */
             color: var(--text-color);
             display: flex;
             flex-direction: column;
             align-items: center;
             min-height: 100vh;
-            padding-top: 15px; 
-            padding-bottom: 15px;
+            padding-top: 20px; /* Increased padding */
+            padding-bottom: 20px; /* Increased padding */
         }
         .main-container {
             background-color: var(--container-bg-color);
-            padding: 20px; 
+            padding: 25px; /* Increased padding */
             border-radius: var(--border-radius);
             box-shadow: var(--box-shadow);
             width: 96%; 
@@ -47,62 +45,62 @@
         }
         .header {
             text-align: center;
-            margin-bottom: 25px; 
-            padding-bottom: 18px; 
+            margin-bottom: 30px; /* Increased margin */
+            padding-bottom: 20px; /* Increased padding */
             border-bottom: 3px solid var(--primary-color);
         }
         .header h1 {
-            font-size: clamp(1.9em, 5vw, 2.5em); 
+            font-size: clamp(2em, 5.5vw, 2.8em); /* Slightly larger */
             color: var(--primary-hover-color);
             margin: 0;
             text-shadow: 1px 1px 2px rgba(0,0,0,0.05); 
         }
         .header .emoji {
-            font-size: clamp(2.7em, 7vw, 3.2em); 
+            font-size: clamp(2.8em, 7.5vw, 3.5em); /* Slightly larger */
             display: block;
-            margin-bottom: 8px;
+            margin-bottom: 10px;
         }
         
         .introduction {
             background-color: var(--card-bg-color);
-            padding: 15px; 
+            padding: 18px; /* Increased padding */
             border-radius: var(--border-radius);
-            margin-bottom: 20px;
+            margin-bottom: 25px;
             border-left: 5px solid var(--primary-color);
             text-align: center;
             box-shadow: 0 2px 5px rgba(0,0,0,0.05);
         }
         .introduction p {
             margin: 0;
-            font-size: 1.05em; 
+            font-size: 1.1em; /* Slightly larger */
             color: var(--dark-gray-color);
         }
 
         .roles-guidance {
-             margin-bottom: 15px; 
-             text-align: center;
-             font-weight: bold;
-             font-size: 1.1em; 
-             color: var(--primary-hover-color);
+            margin-bottom: 18px; 
+            text-align: center;
+            font-weight: bold;
+            font-size: 1.15em; /* Slightly larger */
+            color: var(--primary-hover-color);
         }
 
         .roles-container {
             display: flex;
             flex-wrap: wrap;
             justify-content: space-around; 
-            gap: 10px; 
-            margin-bottom: 25px; 
+            gap: 12px; /* Slightly increased gap */
+            margin-bottom: 30px; 
             padding: 10px 0; 
         }
         .role-icon {
             background-color: var(--card-bg-color);
             cursor: pointer;
             text-align: center;
-            padding: 12px 8px; 
+            padding: 15px 10px; /* Adjusted padding */
             border-radius: var(--border-radius);
             transition: all 0.25s ease-in-out;
-            width: calc(25% - 10px); 
-            min-width: 90px; 
+            width: calc(25% - 12px); 
+            min-width: 95px; /* Slightly larger min-width */
             box-sizing: border-box;
             border: 1px solid #ddd; 
             box-shadow: 0 2px 4px rgba(0,0,0,0.07);
@@ -110,8 +108,8 @@
         .role-icon.active-role {
             background-color: var(--primary-color) !important;
             color: white;
-            transform: translateY(-3px) scale(1.02); 
-            box-shadow: 0 5px 10px rgba(0,123,255,0.3);
+            transform: translateY(-4px) scale(1.03); /* Enhanced effect */
+            box-shadow: 0 6px 12px rgba(0,123,255,0.35); /* Enhanced shadow */
         }
         .role-icon.active-role svg {
             fill: white;
@@ -121,19 +119,19 @@
         }
         .role-icon:hover {
             background-color: #eef7ff; 
-            transform: translateY(-3px) scale(1.02);
+            transform: translateY(-4px) scale(1.03);
             border-color: var(--primary-color);
-            box-shadow: 0 3px 6px rgba(0,0,0,0.08);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1); /* Enhanced hover shadow */
         }
         .role-icon svg {
-            width: 26px; 
-            height: 26px;
-            margin-bottom: 5px;
+            width: 28px; /* Slightly larger */
+            height: 28px;
+            margin-bottom: 6px;
             fill: var(--primary-color);
         }
         .role-icon span {
             display: block;
-            font-size: 0.8em; 
+            font-size: 0.85em; /* Slightly larger */
             color: var(--dark-gray-color);
             font-weight: bold;
         }
@@ -142,9 +140,9 @@
         .role-brief-display {
             background-color: var(--role-brief-bg);
             border: 1px solid #cce5ff;
-            padding: 20px;
-            margin-top: 15px;
-            margin-bottom: 25px;
+            padding: 25px; /* Increased padding */
+            margin-top: 20px;
+            margin-bottom: 30px;
             border-radius: var(--border-radius);
             box-shadow: 0 3px 10px rgba(0,0,0,0.08);
         }
@@ -152,21 +150,21 @@
             color: var(--primary-hover-color);
             margin-top: 0;
             text-align: center;
-            font-size: 1.4em;
+            font-size: 1.5em; /* Slightly larger */
         }
         .timeline-day-header {
-            font-size: 1.2em;
+            font-size: 1.25em; /* Slightly larger */
             font-weight: bold;
             color: var(--dark-gray-color);
-            margin-top: 25px;
-            margin-bottom: 15px;
-            padding-bottom: 5px;
+            margin-top: 28px;
+            margin-bottom: 18px;
+            padding-bottom: 8px; /* Increased padding */
             border-bottom: 2px solid var(--primary-color);
         }
         .timeline-item {
             display: flex;
             align-items: flex-start;
-            margin-bottom: 20px;
+            margin-bottom: 22px; /* Increased margin */
             position: relative;
         }
         .timeline-time {
@@ -175,25 +173,25 @@
             padding-right: 20px;
             font-weight: bold;
             color: var(--primary-hover-color);
-            font-size: 0.95em;
+            font-size: 1em; /* Slightly larger */
         }
         .timeline-content {
             flex-grow: 1;
             background: var(--card-bg-color);
-            padding: 15px;
+            padding: 18px; /* Increased padding */
             border-radius: var(--border-radius);
             box-shadow: 0 2px 5px rgba(0,0,0,0.06);
             border-left: 4px solid var(--primary-color);
         }
-        .timeline-content h4 {
+        .timeline-content h4 { /* Though not used in current JS dynamic content */
             margin-top: 0;
             margin-bottom: 8px;
             color: var(--dark-gray-color);
-            font-size: 1em;
+            font-size: 1.05em; /* Slightly larger */
         }
         .timeline-content p {
             margin: 0;
-            font-size: 0.9em;
+            font-size: 0.95em; /* Slightly larger */
         }
         .role-brief-display.hidden {
             display: none;
@@ -201,7 +199,7 @@
 
         /* General Accordion Styles */
         .accordion-item {
-            margin-bottom: 12px; 
+            margin-bottom: 15px; /* Increased margin */
             border-radius: var(--border-radius);
             box-shadow: 0 2px 6px rgba(0,0,0,0.07);
             overflow: hidden;
@@ -210,19 +208,19 @@
             background-color: var(--secondary-color); 
             color: white;
             cursor: pointer;
-            padding: 12px 20px; 
+            padding: 15px 22px; /* Adjusted padding */
             width: 100%;
             border: none;
             text-align: right;
             outline: none;
-            font-size: 1.1em; 
+            font-size: 1.15em; /* Slightly larger */
             font-weight: bold;
             transition: background-color 0.3s ease;
             display: flex;
             justify-content: space-between;
             align-items: center;
         }
-        .accordion-button:hover {
+        .accordion-button:hover, .accordion-button:focus { /* Added focus style */
             background-color: #5a6268;
         }
         .accordion-button .arrow {
@@ -233,7 +231,7 @@
             transform: rotate(180deg);
         }
         .panel {
-            padding: 0 20px; 
+            padding: 0 22px; /* Adjusted padding */
             background-color: var(--card-bg-color);
             max-height: 0;
             overflow-y: auto; 
@@ -241,39 +239,63 @@
             border-top: 1px solid #e0e0e0;
         }
         .panel.show {
-             padding: 15px 20px; 
+            padding: 18px 22px; /* Adjusted padding when shown */
         }
         .panel h3 {
             color: var(--primary-hover-color);
-            margin-top: 5px; 
-            font-size: 1.1em;
+            margin-top: 8px; 
+            font-size: 1.15em; /* Slightly larger */
             border-bottom: 1px solid #eee;
-            padding-bottom: 6px;
+            padding-bottom: 8px;
         }
         .panel ul {
             list-style-type: '➥';
-            padding-right: 18px;
-            font-size: 0.95em;
+            padding-right: 20px; /* Adjusted padding */
+            font-size: 1em; /* Slightly larger */
         }
         .panel li {
-            margin-bottom: 8px;
+            margin-bottom: 10px; /* Increased margin */
         }
         
+        /* Table styling for equipment list */
+        .panel table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 15px;
+            margin-bottom: 20px;
+        }
+        .panel th, .panel td {
+            border: 1px solid #ddd;
+            padding: 12px; /* Increased padding */
+            text-align: right; 
+        }
+        .panel th {
+            background-color: var(--light-gray-color);
+            color: var(--primary-hover-color);
+            font-weight: bold;
+        }
+        .panel tr:nth-child(even) {
+            background-color: #fdfdfd; /* Subtle striping for rows */
+        }
+        .panel tr:hover {
+            background-color: #f5f5f5; /* Hover effect for rows */
+        }
+
         .important-note {
             background-color: rgba(255, 243, 205, 0.95); 
             border-left: 4px solid #ffc107; 
-            padding: 12px;
-            margin: 12px 0;
+            padding: 15px; /* Increased padding */
+            margin: 15px 0;
             border-radius: 5px;
-            font-size: 0.9em;
+            font-size: 0.95em; /* Slightly larger */
             color: #533f03; 
         }
         .iframe-container {
             position: relative;
             overflow: hidden;
             width: 100%;
-            padding-top: 75%; 
-            margin: 15px 0; 
+            padding-top: 75%; /* Default 4:3 aspect ratio */
+            margin: 20px 0; 
             border: 1px solid #ccc; 
             border-radius: var(--border-radius);
         }
@@ -287,67 +309,74 @@
         }
         .google-sheet-info {
             background-color: var(--card-bg-color);
-            padding: 15px;
+            padding: 18px; /* Increased padding */
             border-radius: var(--border-radius);
-            margin-bottom: 15px;
-            font-size: 0.95em;
+            margin-bottom: 18px;
+            font-size: 1em; /* Slightly larger */
             box-shadow: 0 1px 3px rgba(0,0,0,0.05);
         }
         .google-sheet-info strong {
             color: var(--primary-hover-color);
         }
-         .google-sheet-info ul {
+        .google-sheet-info ul {
             list-style-type: '💡';
-            padding-right: 20px;
-            margin-top: 10px;
+            padding-right: 22px;
+            margin-top: 12px;
         }
         .google-sheet-info li {
-            margin-bottom: 5px;
+            margin-bottom: 8px;
         }
 
 
         .footer {
             text-align: center;
-            margin-top: 25px;
-            padding-top: 15px;
+            margin-top: 30px; /* Increased margin */
+            padding-top: 20px; /* Increased padding */
             border-top: 1px solid rgba(221, 221, 221, 0.7); 
-            font-size: 0.95em;
+            font-size: 1em; /* Slightly larger */
             color: var(--dark-gray-color); 
         }
         
         @media (max-width: 768px) {
             .role-icon {
-                 width: calc(33.33% - 10px); /* 3 icons for tablets */
+                width: calc(33.33% - 12px); /* 3 icons for tablets */
             }
         }
         @media (max-width: 600px) { 
             .role-icon {
-                 width: calc(50% - 10px); /* 2 icons for mobile */
+                width: calc(50% - 12px); /* 2 icons for mobile */
             }
-             .timeline-item {
-                 flex-direction: column;
-                 align-items: flex-start;
-                 border-bottom: 1px solid #ddd;
-                 padding-bottom: 15px;
-             }
-             .timeline-time {
-                 padding-right: 0;
-                 margin-bottom: 8px;
-             }
+            .timeline-item {
+                flex-direction: column;
+                align-items: flex-start;
+                border-bottom: 1px solid #ddd;
+                padding-bottom: 18px;
+            }
+            .timeline-time {
+                padding-right: 0;
+                margin-bottom: 10px;
+            }
         }
         @media (max-width: 480px) {
-             .iframe-container {
-                padding-top: 100%;
+            .iframe-container {
+                padding-top: 100%; /* 1:1 aspect ratio on small mobile */
             }
             .main-container {
                 width: 100%;
-                padding: 10px;
+                padding: 15px; /* Adjusted padding for smallest screens */
                 margin: 0;
                 border-radius: 0;
+                box-shadow: none; /* Remove shadow on smallest screens */
             }
             body {
                 padding-top: 0;
                 padding-bottom: 0;
+            }
+            .header h1 {
+                font-size: clamp(1.8em, 6vw, 2.2em);
+            }
+             .header .emoji {
+                font-size: clamp(2.5em, 8vw, 3em);
             }
         }
     </style>
@@ -357,14 +386,17 @@
     <div class="main-container">
         <div class="header">
             <span class="emoji">🎬</span>
-            <h1>תדריך הפקה פסטי 48</h1>
+            <h1>תדריך הפקה פסטי 48 🎞️</h1>
         </div>
 
         <div class="introduction">
-            <p>לחצו על אייקוני התפקידים למטה לקבלת בריף, ברייקדאון ומשימות מותאם אישית. מידע כללי נוסף זמין בכרטיסיות בהמשך.</p>
+            <p>לחצו על אייקוני התפקידים למטה לקבלת בריף, ברייקדאון ומשימות מותאם אישית. מידע כללי נוסף זמין בכרטיסיות בהמשך. 👇</p>
         </div>
         
+        <div class="roles-guidance">בחר/י את התפקיד שלך:</div>
+
         <div class="roles-container">
+            <!-- Role icons with data-role attribute -->
             <div class="role-icon" data-role="producer">
                 <svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm-1-13h2v6h-2zm0 8h2v2h-2z"/></svg>
                 <span>מפיק/ה</span>
@@ -378,7 +410,7 @@
                 <span>ע. במאי/ת</span>
             </div>
             <div class="role-icon" data-role="cinematographer">
-                 <svg viewBox="0 0 24 24"><path d="M4 4h16v2H4zm0 4h16v12H4zM12 6.5c-2.49 0-4.5 2.01-4.5 4.5S9.51 15.5 12 15.5s4.5-2.01 4.5-4.5S14.49 6.5 12 6.5zm0 7c-1.38 0-2.5-1.12-2.5-2.5S10.62 8.5 12 8.5s2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg>
+                <svg viewBox="0 0 24 24"><path d="M4 4h16v2H4zm0 4h16v12H4zM12 6.5c-2.49 0-4.5 2.01-4.5 4.5S9.51 15.5 12 15.5s4.5-2.01 4.5-4.5S14.49 6.5 12 6.5zm0 7c-1.38 0-2.5-1.12-2.5-2.5S10.62 8.5 12 8.5s2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg>
                 <span>צילום / תאורה</span>
             </div>
             <div class="role-icon" data-role="productionAssistant">
@@ -386,16 +418,16 @@
                 <span>ע. הפקה</span>
             </div>
             <div class="role-icon" data-role="artAndCostumes">
-                 <svg viewBox="0 0 24 24"><path d="M20.54 5.23l-1.39-1.68C18.88 3.21 18.47 3 18 3H6c-.47 0-.88.21-1.16.55L3.46 5.23C3.17 5.57 3 6.02 3 6.5V19c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V6.5c0-.48-.17-.93-.46-1.27zM6.24 5h11.52l.83 1H5.41l.83-1zM5 19V8h14v11H5zm3-5h2.55v3h2.9v-3H16v-2h-2.55V9h-2.9v3H8v2z" /></svg>
-                <span>הלבשה וארט</span>
+                <svg viewBox="0 0 24 24"><path d="M20.54 5.23l-1.39-1.68C18.88 3.21 18.47 3 18 3H6c-.47 0-.88.21-1.16.55L3.46 5.23C3.17 5.57 3 6.02 3 6.5V19c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V6.5c0-.48-.17-.93-.46-1.27zM6.24 5h11.52l.83 1H5.41l.83-1zM5 19V8h14v11H5zm3-5h2.55v3h2.9v-3H16v-2h-2.55V9h-2.9v3H8v2z" /></svg>
+                <span>הלבשה וארט 🎨</span>
             </div>
             <div class="role-icon" data-role="actors">
                 <svg viewBox="0 0 24 24"><path d="M12 5.5c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2zM7.5 15.5c0-1.33.41-2.53 1.09-3.5H4v3c0 1.1.9 2 2 2h1.57c-.05-.33-.07-.66-.07-1zm9.91-3.5c.68.97 1.09 2.17 1.09 3.5 0 .34-.02.67-.07 1H20c1.1 0 2-.9 2-2v-3h-4.41zM12 13c-1.93 0-3.5 1.57-3.5 3.5S10.07 20 12 20s3.5-1.57 3.5-3.5-1.57-3.5-3.5-3.5z"/></svg>
-                <span>משחק</span>
+                <span>משחק 🎭</span>
             </div>
             <div class="role-icon" data-role="soundman">
                 <svg viewBox="0 0 24 24"><path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z"/></svg>
-                <span>סאונד</span>
+                <span>סאונד 🎧</span>
             </div>
         </div>
         
@@ -405,43 +437,43 @@
         </div>
 
         <div class="accordion-item">
-            <button class="accordion-button">
+            <button class="accordion-button" aria-expanded="false" aria-controls="panelSchedule">
                 🗓️ לו"ז כללי מפורט (48 שעות)
                 <span class="arrow">▼</span>
             </button>
-            <div class="panel">
-                <h3>יום שישי (היום הראשון - יום ההזנקה)</h3>
+            <div class="panel" id="panelSchedule" aria-hidden="true">
+                <h3>🗓️ יום שישי (היום הראשון - יום ההזנקה) 🚀</h3>
                 <ul>
                     <li><strong>12:00:</strong> <strong>הזנקה!</strong> קבלת נושאים (ז'אנר, דמות, חפץ, שורה) בנקודת המפגש. העברת המידע לחמ"ל. <strong>(השעה גמישה, תעודכן ע"י המפיק/ה)</strong></li>
                     <li><strong>12:30 - 15:00:</strong> <strong>סיעור מוחות וכתיבה.</strong> פיצוח רעיון, כתיבה על לוחות, התחלת כתיבת תסריט ראשוני (בסיוע כלים דיגיטליים).</li>
                     <li><strong>15:00 - 17:00:</strong> <strong>התארגנות לסט ראשון.</strong> בזמן שהתסריט מתגבש, צוותי ארט, הלבשה וצילום מתחילים בהכנות ראשוניות. ע. במאי/ת מתחיל/ה תיאום עם שחקנים.</li>
-                     <li><strong>17:00 - 23:00:</strong> <strong>צילומי סט ראשון.</strong> במקביל, עבודה על סטים ותסריט להמשך.</li>
-                    <li><strong>23:00 - 02:00:</strong> ארוחת ערב מאוחרת, גיבוי חומרים, והמשך צילומים או מנוחה ברוטציה.</li>
+                    <li><strong>17:00 - 23:00:</strong> <strong>צילומי סט ראשון.</strong> במקביל, עבודה על סטים ותסריט להמשך.</li>
+                    <li><strong>23:00 - 02:00:</strong> ארוחת ערב מאוחרת 🍕, גיבוי חומרים, והמשך צילומים או מנוחה ברוטציה.</li>
                 </ul>
-                <h3>יום שבת (היום השני - צילומים וקדם-עריכה)</h3>
+                <h3>🎬 יום שבת (היום השני - צילומים וקדם-עריכה) ✂️</h3>
                 <ul>
-                    <li><strong>08:00 - 09:00:</strong> השכמה, קפה וארוחת בוקר.</li>
+                    <li><strong>08:00 - 09:00:</strong> השכמה, קפה ☕ וארוחת בוקר.</li>
                     <li><strong>09:00 - 19:00:</strong> <strong>מרתון השלמת צילומים.</strong> עבודה אינטנסיבית בסטים.</li>
                     <li><strong>19:00 - 20:00:</strong> סיום צילומים סופי, קיפול ציוד, חזרה לחמ"ל, ארוחת ערב.</li>
                     <li><strong>20:00 ואילך:</strong> <strong>תחילת POST-PRODUCTION.</strong> גיבוי כל החומרים, התחלת עריכה.</li>
                 </ul>
-                 <h3>יום ראשון (היום השלישי - פוסט והגשה)</h3>
+                <h3>🏆 יום ראשון (היום השלישי - פוסט והגשה) 🏁</h3>
                 <ul>
-                    <li><strong>00:00 - 09:00:</strong> <strong>מרתון עריכה, סאונד וצבע.</strong> לילה לבן של ליטושים.</li>
+                    <li><strong>00:00 - 09:00:</strong> <strong>מרתון עריכה, סאונד וצבע.</strong> לילה לבן של ליטושים. 🦉</li>
                     <li><strong>09:00 - 10:30:</strong> ייצוא (רינדור) סופי של הקובץ ובדיקת תקינות.</li>
                     <li><strong>10:30 - 11:45:</strong> זמן באפר לתיקונים קריטיים ורינדור נוסף.</li>
-                    <li><strong>12:00:</strong> <strong>דד-ליין הגשה!</strong></li>
+                    <li><strong>12:00:</strong> <strong>דד-ליין הגשה! ⏱️</strong></li>
                 </ul>
             </div>
         </div>
         
         <div class="accordion-item">
-            <button class="accordion-button">
+            <button class="accordion-button" aria-expanded="false" aria-controls="panelEquipment">
                 🛠️ רשימת ציוד כללית
                 <span class="arrow">▼</span>
             </button>
-            <div class="panel">
-                <h3>ציוד שכור:</h3>
+            <div class="panel" id="panelEquipment" aria-hidden="true">
+                <h3>🔧 ציוד שכור:</h3>
                 <table>
                     <thead><tr><th>פריט</th><th>כמות</th></tr></thead>
                     <tbody>
@@ -456,88 +488,102 @@
                         <tr><td>כבל חשמל 25 מטר</td><td>1</td></tr>
                     </tbody>
                 </table>
-                <h3>ציוד מהצוות (רשימה חלקית - <strong>חובה לעדכן בגיליון המשותף!</strong>):</h3>
+                <h3>🎒 ציוד מהצוות (רשימה חלקית - <strong>חובה לעדכן בגיליון המשותף! 📢</strong>):</h3>
                 <ul>
- <tr><td>     לפטופ דוגם מקליט 15' עם אופציה ליציאה למוניטור חיצוני</td><td>1</td></tr>
-                    
- <tr><td>    מוניטור 32' עם סטנד</td><td>1</td></tr>
-
-                    <li><strong>צילום:</strong> ציוד מצלמה ותאורה אישיים.</li>
-                    <li><strong>סאונד:</strong> ציוד סאונד אישי.</li>
+                    <li>💻 לפטופ דוגם מקליט 15' עם אופציה ליציאה למוניטור חיצוני - כמות: 1</li>
+                    <li>🖥️ מוניטור 32' עם סטנד - כמות: 1</li>
+                    <li>📷 <strong>צילום:</strong> ציוד מצלמה ותאורה אישיים.</li>
+                    <li>🎤 <strong>סאונד:</strong> ציוד סאונד אישי.</li>
                 </ul>
             </div>
         </div>
         
         <div class="accordion-item">
-            <button class="accordion-button">
+            <button class="accordion-button" aria-expanded="false" aria-controls="panelGoogleSheet">
                 📊 גיליון הפקה חי (Google Sheets)
                 <span class="arrow">▼</span>
             </button>
-            <div class="panel">
+            <div class="panel" id="panelGoogleSheet" aria-hidden="true">
                 <div class="google-sheet-info">
                     <p><strong>גיליון זה הוא המקור המרכזי לניהול משאבים ועדכונים חיים. אנא דאגו לעדכן אותו!</strong></p>
                     <p><u>לדוגמה:</u></p>
                     <ul>
-                        <li><strong>הלבשה וארט:</strong> "יש לי תחפושת ספיידרמן", "מביא עץ חג מולד קטן".</li>
-                        <li><strong>ציוד אישי:</strong> "מביא מיקרופון רובה נוסף ובום", "יש לי סט עדשות נוסף".</li>
-                        <li><strong>לוקיישנים פוטנציאלים:</strong> "לדודה שלי יש מחסן נטוש ברחוב Y, צריך לבדוק זמינות".</li>
+                        <li><strong>הלבשה וארט:</strong> "יש לי תחפושת ספיידרמן 🕷️", "מביא עץ חג מולד קטן 🎄".</li>
+                        <li><strong>ציוד אישי:</strong> "מביא מיקרופון רובה נוסף ובום 🎤", "יש לי סט עדשות נוסף 렌즈".</li>
+                        <li><strong>לוקיישנים פוטנציאלים:</strong> "לדודה שלי יש מחסן נטוש ברחוב Y, צריך לבדוק זמינות 🏚️".</li>
                     </ul>
                 </div>
                 <div class="iframe-container">
-                    <iframe src="https://docs.google.com/spreadsheets/d/1WEJFmbgzMYM6qO9XflrQcUQM__-gYb_ZvbTAbDgmXTQ/edit?usp=sharing&rm=minimal" loading="lazy">
+                    <iframe src="https://docs.google.com/spreadsheets/d/1WEJFmbgzMYM6qO9XflrQcUQM__-gYb_ZvbTAbDgmXTQ/edit?usp=sharing&rm=minimal" loading="lazy" title="גיליון הפקה של פרויקט 48">
                         [טוען גיליון הפקה...]
                     </iframe>
                 </div>
-                 <p style="text-align:center; margin-top:10px;">
+                <p style="text-align:center; margin-top:15px;">
                     <a href="https://docs.google.com/spreadsheets/d/1WEJFmbgzMYM6qO9XflrQcUQM__-gYb_ZvbTAbDgmXTQ/edit?gid=0#gid=0" target="_blank" rel="noopener noreferrer">
-                        פתח את הגיליון בחלון חדש (לעריכה נוחה)
+                        🔗 פתח את הגיליון בחלון חדש (לעריכה נוחה)
                     </a>
                 </p>
             </div>
         </div>
 
         <div class="accordion-item">
-            <button class="accordion-button">
+            <button class="accordion-button" aria-expanded="false" aria-controls="panelFinalPrep">
                 💡 הכנות אחרונות ודגשים
                 <span class="arrow">▼</span>
             </button>
-            <div class="panel">
+            <div class="panel" id="panelFinalPrep" aria-hidden="true">
                 <p>אנא ודאו שאתם מגיעים עם:</p>
                 <ul>
-                    <li> טלפונים טעונים במלואם על מצב שקט.</li>
-<li> סנדוויצ' מהבית.</li>
-<li> חלקק מהצוות משקיע סכומים אדירים להפקת הפקורייט אנא תיהיו נחמדים ותשתלוו גם בהוצאות </li>
-                    <li>הרבה אנרגיה טובה וחיובית!</li>
-                    <li>ראש פתוח ומוכנות לאלתורים.</li>
+                    <li>📱 טלפונים טעונים במלואם על מצב שקט.</li>
+                    <li>🥪 סנדוויץ' מהבית.</li>
+                    <li>💰 חלק מהצוות משקיע סכומים אדירים להפקת הפרויקט, אנא תהיו נחמדים ותשתתפו גם בהוצאות 🙏.</li>
+                    <li>✨ הרבה אנרגיה טובה וחיובית!</li>
+                    <li>🧠 ראש פתוח ומוכנות לאלתורים.</li>
                 </ul>
-                <p>זה הולך להיות אינטנסיבי, מאתגר, והכי חשוב - חוויה בלתי נשכחת וכיף אדיר. זכרו, אנחנו צוות, ועובדים ביחד להצלחה.</p>
+                <p class="important-note">זה הולך להיות אינטנסיבי, מאתגר, והכי חשוב - חוויה בלתי נשכחת וכיף אדיר! זכרו, אנחנו צוות 🤝, ועובדים ביחד להצלחה. 💪</p>
             </div>
         </div>
 
         <div class="footer">
-            <p>בהצלחה ענקית לכולנו!<br><strong>ההפקה</strong></p>
+            <p>בהצלחה ענקית לכולנו! 🥳<br><strong>צוות ההפקה 🌟</strong></p>
         </div>
     </div>
 
     <script>
-        // Accordion functionality
+        // Accordion functionality with ARIA attributes
         const accordionBtns = document.querySelectorAll(".accordion-button");
         accordionBtns.forEach(btn => {
+            const panel = btn.nextElementSibling;
+            const panelId = panel.id;
+            btn.setAttribute('aria-controls', panelId);
+
+            // Set initial ARIA states based on class
+            const isActiveInitial = btn.classList.contains("active");
+            btn.setAttribute('aria-expanded', isActiveInitial ? 'true' : 'false');
+            panel.setAttribute('aria-hidden', !isActiveInitial ? 'true' : 'false');
+            if (isActiveInitial) {
+                panel.style.maxHeight = panel.scrollHeight + "px";
+                 panel.classList.add("show"); // Ensure 'show' class is present if initially active
+            }
+
+
             btn.addEventListener("click", function() {
-                const isActive = this.classList.contains("active");
-                this.classList.toggle("active");
-                const panel = this.nextElementSibling;
-                if (panel.style.maxHeight && panel.classList.contains("show")) {
-                    panel.style.maxHeight = null;
-                    panel.classList.remove("show");
-                } else {
+                const isActive = this.classList.toggle("active");
+                this.setAttribute('aria-expanded', isActive ? 'true' : 'false');
+                
+                panel.setAttribute('aria-hidden', !isActive ? 'true' : 'false');
+
+                if (isActive) { // Panel is now open
                     panel.style.maxHeight = panel.scrollHeight + "px";
                     panel.classList.add("show");
-                } 
+                } else { // Panel is now closed
+                    panel.style.maxHeight = null;
+                    panel.classList.remove("show");
+                }  
             });
         });
 
-        // Role-specific brief display
+        // Role-specific brief display 
         const roleIcons = document.querySelectorAll(".role-icon");
         const briefDisplay = document.getElementById("roleBriefDisplay");
         const briefTitle = document.getElementById("briefTitle");
@@ -545,128 +591,128 @@
 
         const roleBriefsData = {
             producer: {
-                title: "מפיק/ה",
+                title: "מפיק/ה 💼",
                 days: {
-                    שישי: [
+                    "יום שישי 🚀": [
                         { time: "12:00", task: "קבלת נושאים בנקודת ההזנקה, עדכון מיידי לצוות וניהול גמישות הלו\"ז." },
                         { time: "12:30-17:00", task: "הובלת סיעור מוחות, ניהול כתיבת תסריט ראשוני, תיאום איסוף ציוד שכור ולוגיסטיקת מזון." },
                         { time: "17:00 ואילך", task: "ניהול לו\"ז צילומים בפועל, פתרון בעיות, גיבוי חומרים ותכנון מנוחה לצוות ברוטציה." }
                     ],
-                    שבת: [
+                    "יום שבת 🛠️": [
                         { time: "כל היום", task: "המשך ניהול לוגיסטי, לו\"ז ופתרון בעיות על הסט. דאגה לרווחת הצוות." },
                         { time: "20:00 ואילך", task: "תיאום ותחילת עבודת פוסט-פרודקשן (עריכה, סאונד)." }
                     ],
-                    ראשון: [
+                    "יום ראשון 🏆": [
                         { time: "כל הלילה/בוקר", task: "שמירה על לו\"ז פוסט צפוף. הכנות טכניות להגשה." },
                         { time: "12:00", task: "אחריות על הגשת הסרט בזמן ובפורמט הנדרש." }
                     ]
                 }
             },
             director: {
-                title: "במאי/ת",
+                title: "במאי/ת  megaphone:", // Using text as emoji might not render well, prefer actual emoji if possible
                 days: {
-                     שישי: [
+                    "יום שישי ✍️": [
                         { time: "12:30-15:00", task: "הובלה קריאייטיבית של פיצוח הרעיון והתסריט. גיבוש חזון אומנותי." },
                         { time: "15:00-17:00", task: "הכנת שוט-ליסט ותדרוך צוות קריאייטיב ושחקנים לסצנות הראשונות." },
                         { time: "17:00 ואילך", task: "ניהול אמנותי מלא של הסט, עבודה עם שחקנים, ווידוא ביצוע השוט-ליסט." }
                     ],
-                    שבת: [
+                    "יום שבת 🎬": [
                         { time: "כל היום", task: "המשך ניהול הסט, שמירה על קוהרנטיות ואווירת הסרט." },
                         { time: "20:00 ואילך", task: "עבודה צמודה עם העורך/ת על הראף-קאט ובחירת טייקים." }
                     ],
-                    ראשון: [
+                    "יום ראשון 🎞️": [
                         { time: "כל הלילה/בוקר", task: "ליווי תהליכי עיצוב פסקול ותיקוני צבע. נעילת הקאט הסופי." }
                     ]
                 }
             },
             assistantDirector: {
-                title: "ע. במאי/ת",
-                 days: {
-                     שישי: [
+                title: "ע. במאי/ת 📋",
+                days: {
+                    "יום שישי ⏱️": [
                         { time: "12:30-17:00", task: "סיוע בפירוק התסריט לשוטים (breakdown). תחילת תזמון שחקנים לסטים הראשונים." },
                         { time: "17:00 ואילך", task: "ניהול לו\"ז הצילומים בפועל על הסט, תיאום בין המחלקות, שמירה על שקט בזמן טייק ואחריות על המשכיות (continuity)." }
                     ],
-                    שבת: [
+                    "יום שבת 🏃": [ // Runner emoji for "running the set"
                         { time: "כל היום", task: "המשך ניהול שוטף של הסט. הכנת דפי קריאה (call sheets) והפצתם. וידוא עמידה בזמנים." }
                     ],
-                    ראשון: [
+                    "יום ראשון 📞": [
                         { time: "במהלך הפוסט", task: "זמינות לספק מידע על טייקים, הערות מהסט או פרטי המשכיות לעורך/ת." }
                     ]
                 }
             },
             cinematographer: {
-                title: "צילום / תאורה",
+                title: "צילום / תאורה 🎥💡",
                 days: {
-                     שישי: [
+                    "יום שישי 🖼️": [ // Framing/Composition emoji
                         { time: "12:30-17:00", task: "הבנת החזון של הבמאי/ת, תכנון קומפוזיציות ותאורה, הכנת ציוד צילום ותאורה." },
                         { time: "17:00 ואילך", task: "אחריות מלאה על הצד הוויזואלי: תפעול מצלמה, בניית פריימים, הקמת וניהול תאורה." }
                     ],
-                    שבת: [
+                    "יום שבת 🌟": [ // Shine/Light emoji
                         { time: "כל היום", task: "המשך צילומים תוך שמירה על איכות ועקביות ויזואלית." },
                         { time: "בסוף יום הצילום", task: "אחריות על גיבוי מאובטח של כל חומרי הגלם והעברתם להפקה/עריכה." }
                     ],
-                    ראשון: [
-                         { time: "במהלך הפוסט", task: "זמינות למעורבות בתהליך תיקוני הצבע (Color Grading) ומתן פידבק מקצועי." }
+                    "יום ראשון 🎨": [ // Color palette for color grading
+                        { time: "במהלך הפוסט", task: "זמינות למעורבות בתהליך תיקוני הצבע (Color Grading) ומתן פידבק מקצועי." }
                     ]
                 }
             },
             productionAssistant: {
-                title: "ע. הפקה",
+                title: "ע. הפקה 🦸", // Superhero for doing everything
                 days: {
-                     שישי: [
+                    "יום שישי 🛒": [ // Shopping cart for errands
                         { time: "12:30 ואילך", task: "הצטרפות לחמ\"ל וסיוע למפיק/ה בכל המשימות הלוגיסטיות: רכש קטן, שליחויות, הכנת לוקיישנים, דאגה לצוות." }
                     ],
-                    שבת: [
+                    "יום שבת ⚙️": [ // Gear for general help
                         { time: "כל היום", task: "תמיכה לוגיסטית מלאה בצוות על הסט ובחמ\"ל. 'איש/אשת כל משימה'." }
                     ],
-                    ראשון: [
+                    "יום ראשון 👍": [
                         { time: "במהלך הפוסט", task: "סיוע בשמירה על סדר וארגון בחמ\"ל. עזרה בכל משימה לוגיסטית שנותרה." }
                     ]
                 }
             },
             artAndCostumes: {
-                title: "הלבשה וארט",
+                title: "הלבשה וארט 👚🖼️",
                 days: {
-                     שישי: [
+                    "יום שישי ✨": [
                         { time: "12:30-17:00", task: "הבנת הקונספט. איתור, הכנה והשגת פריטי ארט, פרופס ותלבושות לסצנות הראשונות." },
                         { time: "17:00 ואילך", task: "עיצוב סט ראשון, הלבשת שחקנים. עבודה ברוטציה על הכנת הסטים וההלבשות הבאות. שמירה על קונטיניואיטי ויזואלית." }
                     ],
-                    שבת: [
+                    "יום שבת 🛠️": [
                         { time: "כל היום", task: "המשך אחריות על נראות הסט והדמויות. תיקונים ושינויים לפי הצורך." }
                     ],
-                    ראשון: [
-                         { time: "סיום צילומים", task: "סיוע בקיפול ואיסוף כל פריטי הארט וההלבשה." }
+                    "יום ראשון 📦": [ // Box for packing up
+                        { time: "סיום צילומים", task: "סיוע בקיפול ואיסוף כל פריטי הארט וההלבשה." }
                     ]
                 }
             },
             actors: {
-                title: "משחק",
+                title: "משחק 🎭⭐",
                 days: {
-                     שישי: [
+                    "יום שישי 📖": [ // Book for script
                         { time: "מרגע קבלת סצנות", task: "לימוד טקסטים מהיר והבנת הדמות. עבודה עם הבמאי/ת על פרשנות." },
                         { time: "לפי קריאה (ערב/לילה)", task: "הגעה בזמן לסט, ריכוז מלא והיענות להוראות. שיתוף פעולה עם הצוות." }
                     ],
-                    שבת: [
+                    "יום שבת �": [
                         { time: "לפי קריאה", task: "המשך צילומים. שמירה על אנרגיה ורצף בין טייקים." }
                     ],
-                    ראשון: [
+                    "יום ראשון 🎤": [ // Microphone for ADR
                         { time: "סטנד-ביי", task: "להיות זמינים טלפונית לכל צורך (הקלטות קול נוספות - ADR, צילומי השלמה קטנים אם נדרש באופן חריג)." }
                     ]
                 }
             },
             soundman: {
-                title: "סאונד",
-                 days: {
-                     שישי: [
+                title: "סאונד 🎧🔊",
+                days: {
+                    "יום שישי 📡": [ // Antenna for picking up sound
                         { time: "12:30-17:00", task: "בדיקת ציוד, תכנון הקלטה לסצנות הראשונות." },
                         { time: "17:00 ואילך", task: "אחריות מלאה על הקלטת סאונד נקי ואיכותי (דיאלוגים, אווירה) על הסט. ניטור רמות שמע." }
                     ],
-                    שבת: [
+                    "יום שבת 🎶": [
                         { time: "כל היום", task: "המשך הקלטות על הסט. תיוג קפדני של קבצי האודיו." },
                         { time: "בסוף יום הצילום", task: "העברת כל חומרי הסאונד בצורה מסודרת לעריכה." }
                     ],
-                    ראשון: [
-                         { time: "במהלך הפוסט", task: "זמינות למתן ייעוץ או חומרים נוספים לצוות הפוסט." }
+                    "יום ראשון 🎧": [
+                        { time: "במהלך הפוסט", task: "זמינות למתן ייעוץ או חומרים נוספים לצוות הפוסט." }
                     ]
                 }
             }
@@ -685,13 +731,13 @@
                 if (briefData) {
                     briefTitle.textContent = `ברייקדאון לתפקיד: ${briefData.title}`;
                     
-                    Object.keys(briefData.days).forEach(day => {
+                    Object.keys(briefData.days).forEach(dayKey => { // dayKey is "יום שישי 🚀", etc.
                         const dayHeader = document.createElement("h3");
                         dayHeader.className = "timeline-day-header";
-                        dayHeader.textContent = day;
+                        dayHeader.textContent = dayKey; // Use the key which now includes emoji
                         briefContentContainer.appendChild(dayHeader);
 
-                        briefData.days[day].forEach(item => {
+                        briefData.days[dayKey].forEach(item => {
                             const timelineItem = document.createElement("div");
                             timelineItem.className = "timeline-item";
 
@@ -701,7 +747,10 @@
                             
                             const contentDiv = document.createElement("div");
                             contentDiv.className = "timeline-content";
-                            contentDiv.innerHTML = `<p>${item.task}</p>`;
+                            // Ensure HTML isn't injected if task content isn't controlled
+                            const p = document.createElement("p");
+                            p.textContent = item.task; 
+                            contentDiv.appendChild(p);
 
                             timelineItem.appendChild(timeDiv);
                             timelineItem.appendChild(contentDiv);
@@ -716,7 +765,7 @@
                 }
             });
         });
-
     </script>
 </body>
 </html>
+�
