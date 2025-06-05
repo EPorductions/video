@@ -368,31 +368,31 @@
   .role-icon {
   width: calc(33.33% - 12px); 
   }
-  .role-icon span { font-size: 0.9em; } /* Increased from 0.85em */
-  .timeline-content p { font-size: 1em; } /* Increased from 0.95em */
+  .role-icon span { font-size: 1em; } /* Increased */
+  .timeline-content p { font-size: 1.05em; } /* Increased */
 
   .schedule-table th, .schedule-table td {
-  padding: 8px;
-  font-size: 0.95em; /* Maintain or slightly increase */
+  padding: 9px; /* Increased */
+  font-size: 1em; /* Increased */
   }
   .schedule-table .time-col {
-  width: 90px; 
+  width: 95px; /* Increased */
   }
-  .schedule-table .task-col li { font-size: 0.95em; } /* Increased */
-  .accordion-button { font-size: 1.2em; } /* Increased */
-  .panel { font-size: 1.05em; } /* Increase panel content slightly */
-  .panel h3 { font-size: 1.1em; } /* Relative to panel's new font size */
-  .panel p, .panel li { font-size: 1em; } /* Relative to panel's new font size */
+  .schedule-table .task-col li { font-size: 1em; } /* Increased */
+  .accordion-button { font-size: 1.25em; } /* Increased */
+  .panel { font-size: 1.1em; } /* Increased */
+  .panel h3 { font-size: 1.15em; } 
+  .panel p, .panel li { font-size: 1.05em; } 
   }
 
   @media (max-width: 600px) { /* Portrait phones */
   .role-icon {
   width: calc(50% - 12px); 
   }
-  .role-icon span { font-size: 1em; } /* Further increase */
+  .role-icon span { font-size: 1.1em; } /* Further increase */
   
-  .introduction p { font-size: 1.15em; }
-  .roles-guidance { font-size: 1.2em; }
+  .introduction p { font-size: 1.25em; } /* Increased */
+  .roles-guidance { font-size: 1.3em; } /* Increased */
   
   .timeline-item {
   flex-direction: column;
@@ -403,32 +403,31 @@
   .timeline-time {
   padding-right: 0;
   margin-bottom: 10px;
-  font-size: 1.05em; /* Increased */
+  font-size: 1.15em; /* Increased */
   }
-  .timeline-content p { font-size: 1.05em; } /* Further increase */
-  .timeline-content h4 { font-size: 1.1em; }
+  .timeline-content p { font-size: 1.15em; } /* Further increase */
+  .timeline-content h4 { font-size: 1.2em; } /* Increased */
 
-  .schedule-table { /* Make table scrollable on small screens */
+  .schedule-table { 
   display: block;
   overflow-x: auto;
-  /* white-space: nowrap; // Removed to allow text wrapping in cells */
   }
   .schedule-table th, .schedule-table td {
-  font-size: 1em; /* Further increase */
-  line-height: 1.45;
-  padding: 7px;
+  font-size: 1.1em; /* Further increase */
+  line-height: 1.5; /* Adjusted */
+  padding: 8px; /* Adjusted */
   }
   .schedule-table .task-col {
-  white-space: normal; /* Allow task descriptions to wrap */
+  white-space: normal; 
   }
-  .schedule-table .task-col li { font-size: 1em; } /* Further increase */
+  .schedule-table .task-col li { font-size: 1.1em; } /* Further increase */
 
-  .accordion-button { font-size: 1.25em; padding: 14px 20px; } /* Further increase */
-  .panel { font-size: 1.1em; } /* Further increase panel content */
-  .panel h3 { font-size: 1.15em; }
-  .panel p, .panel li { font-size: 1.05em; line-height: 1.55; }
+  .accordion-button { font-size: 1.35em; padding: 15px 22px; } /* Further increase */
+  .panel { font-size: 1.2em; } /* Further increase panel content */
+  .panel h3 { font-size: 1.25em; } /* Increased */
+  .panel p, .panel li { font-size: 1.15em; line-height: 1.6; } /* Increased */
   
-  .important-note { font-size: 1em; } /* Increased */
+  .important-note { font-size: 1.1em; } /* Increased */
   }
 
   @media (max-width: 480px) { /* Smallest phones */
@@ -445,38 +444,41 @@
   body {
   padding-top: 0;
   padding-bottom: 0;
-  line-height: 1.7; /* Slightly more line height for smaller text if it gets dense */
+  line-height: 1.75; /* Slightly more line height for smaller text */
   }
   .header h1 {
-  font-size: clamp(1.8em, 6vw, 2.2em);
+  font-size: clamp(2em, 7vw, 2.5em); /* Increased base and max */
   }
   .header .emoji {
-  font-size: clamp(2.5em, 8vw, 3em);
+  font-size: clamp(2.8em, 9vw, 3.3em); /* Increased base and max */
   }
 
-  .introduction p { font-size: 1.2em; }
-  .roles-guidance { font-size: 1.25em; }
-  .role-icon span { font-size: 1.05em; }
+  .introduction p { font-size: 1.3em; } /* Increased */
+  .roles-guidance { font-size: 1.35em; } /* Increased */
+  .role-icon span { font-size: 1.15em; } /* Increased */
   
-  .timeline-content p { font-size: 1.1em; }
-  .timeline-content h4 { font-size: 1.15em; }
+  .timeline-content p { font-size: 1.2em; } /* Increased */
+  .timeline-content h4 { font-size: 1.25em; } /* Increased */
+  .timeline-day-header { font-size: 1.35em;} /* Increased */
+  .role-brief-display h2 { font-size: 1.6em;} /* Increased */
+
 
   .schedule-table th, .schedule-table td {
-  font-size: 1.05em; /* Ensure readability */
-  padding: 6px;
+  font-size: 1.15em; /* Ensure readability */
+  padding: 7px; /* Adjusted */
   }
   .schedule-table .time-col {
-  width: 75px; /* Adjusted for smaller text */
+  width: 80px; /* Adjusted */
   }
-  .schedule-table .task-col li { font-size: 1.05em; }
+  .schedule-table .task-col li { font-size: 1.15em; } /* Increased */
 
-  .accordion-button { font-size: 1.3em; padding: 12px 18px; }
-  .panel { font-size: 1.15em; }
-  .panel h3 { font-size: 1.2em; }
-  .panel p, .panel li { font-size: 1.1em; line-height: 1.6; }
+  .accordion-button { font-size: 1.4em; padding: 14px 20px; } /* Increased */
+  .panel { font-size: 1.25em; } /* Increased */
+  .panel h3 { font-size: 1.3em; } /* Increased */
+  .panel p, .panel li { font-size: 1.2em; line-height: 1.65; } /* Increased */
 
-  .important-note { font-size: 1.05em; }
-  .footer { font-size: 0.95em;}
+  .important-note { font-size: 1.15em; } /* Increased */
+  .footer { font-size: 1em;} /* Increased */
   }
   </style>
  </head>
@@ -661,7 +663,7 @@
   <tr><td class="time-col">14:00</td><td class="task-col">✨ פינישים וסיום עריכה.</td></tr>
   <tr><td class="time-col">14:40</td><td class="task-col">🔧 זמן תיקונים.</td></tr>
   <tr><td class="time-col">15:30</td><td class="task-col">💾 דד ליין לרינדור (עיבוד) סופי.</td></tr>
-  <tr><td class="time-col">16:30</td><td class="task-col">🚗 יציאה לסינמטק (או מקום המסירה).</td></tr>
+  <tr><td class="time-col">16:30</td><td class="task-col">� יציאה לסינמטק (או מקום המסירה).</td></tr>
   <tr><td class="time-col">17:00</td><td class="task-col">🎉 מסירה!</td></tr>
   </tbody>
   </table>
@@ -993,3 +995,4 @@
   </script>
  </body>
  </html>
+�
