@@ -12,11 +12,21 @@
   --light-gray-color: #f8f9fa;
   --dark-gray-color: #343a40;
   --text-color: #212529;
-  --container-bg-color: rgba(255, 255, 255, 0.75); /* Slightly more opaque for better readability with image bg */
-  --card-bg-color: rgba(255, 255, 255, 0.75); /* Slightly more opaque for cards */
-  --role-brief-bg: rgba(240, 248, 255, 0.65); 
+  --container-bg-color: rgba(255, 255, 255, 0.8); /* Increased opacity slightly */
+  --card-bg-color: rgba(255, 255, 255, 0.8); /* Increased opacity slightly */
+  --role-brief-bg: rgba(240, 248, 255, 0.75); /* Increased opacity slightly */
   --border-radius: 10px;
-  --box-shadow: 0 5px 20px rgba(0,0,0,0.12);
+  --box-shadow: 0 5px 20px rgba(0,0,0,0.1); /* Softened shadow */
+
+  /* Role-specific accent colors */
+  --role-producer-accent: #0b5ed7; /* Darker Blue */
+  --role-director-accent: #6f42c1; /* Purple */
+  --role-assistantDirector-accent: #17a2b8; /* Teal/Info Blue */
+  --role-cinematographer-accent: #198754; /* Green */
+  --role-productionAssistant-accent: #586977; /* Slate Gray - derived from secondary */
+  --role-artAndCostumes-accent: #d63384; /* Pink */
+  --role-actors-accent: #fd7e14; /* Orange */
+  --role-soundman-accent: #0dcaf0; /* Cyan */
   }
 
   body {
@@ -24,9 +34,8 @@
   line-height: 1.65; 
   margin: 0;
   padding: 0;
-  /* Restoring background image as requested, with gradient fallback */
   background-image: url("bg48.png"); 
-  background: url("bg48.png"), linear-gradient(180deg, #e0eafc 0%, #cfdef3 100%);
+  background: url("bg48.png"), linear-gradient(180deg, #e9ecef 0%, #dee2e6 100%); /* Slightly more muted gradient */
   background-size: cover;
   background-position: center center;
   background-attachment: fixed; 
@@ -109,11 +118,20 @@
   border: 1px solid #ddd; 
   box-shadow: 0 2px 4px rgba(0,0,0,0.07);
   }
+  /* Styling active role icons with their specific accent colors */
+  .role-icon[data-role="producer"].active-role { background-color: var(--role-producer-accent) !important; }
+  .role-icon[data-role="director"].active-role { background-color: var(--role-director-accent) !important; }
+  .role-icon[data-role="assistantDirector"].active-role { background-color: var(--role-assistantDirector-accent) !important; }
+  .role-icon[data-role="cinematographer"].active-role { background-color: var(--role-cinematographer-accent) !important; }
+  .role-icon[data-role="productionAssistant"].active-role { background-color: var(--role-productionAssistant-accent) !important; }
+  .role-icon[data-role="artAndCostumes"].active-role { background-color: var(--role-artAndCostumes-accent) !important; }
+  .role-icon[data-role="actors"].active-role { background-color: var(--role-actors-accent) !important; }
+  .role-icon[data-role="soundman"].active-role { background-color: var(--role-soundman-accent) !important; }
+
   .role-icon.active-role {
-  background-color: var(--primary-color) !important;
   color: white;
   transform: translateY(-4px) scale(1.03); 
-  box-shadow: 0 6px 12px rgba(0,123,255,0.35); 
+  box-shadow: 0 6px 12px rgba(0,0,0,0.2); /* Slightly stronger shadow for active */
   }
   .role-icon.active-role svg {
   fill: white;
@@ -122,7 +140,7 @@
   color: white;
   }
   .role-icon:hover {
-  background-color: #eef7ff; 
+  background-color: #e9ecef; /* Slightly darker hover */
   transform: translateY(-4px) scale(1.03);
   border-color: var(--primary-color);
   box-shadow: 0 4px 8px rgba(0,0,0,0.1); 
@@ -131,39 +149,47 @@
   width: 28px; 
   height: 28px;
   margin-bottom: 6px;
-  fill: var(--primary-color);
+  fill: var(--primary-color); /* Default fill for non-active SVGs */
+  transition: fill 0.25s ease-in-out;
+  }
+  .role-icon:hover svg {
+    fill: var(--primary-hover-color);
   }
   .role-icon span {
   display: block;
   font-size: 0.85em; 
   color: var(--dark-gray-color);
   font-weight: bold;
+  transition: color 0.25s ease-in-out;
   }
 
-  /* Modern Timeline/Breakdown Design */
+  /* Role Brief Display Styling */
   .role-brief-display {
   background-color: var(--role-brief-bg);
-  border: 1px solid #cce5ff;
+  border: 1px solid #ced4da; /* Softer border */
   padding: 25px; 
   margin-top: 20px;
   margin-bottom: 30px;
   border-radius: var(--border-radius);
-  box-shadow: 0 3px 10px rgba(0,0,0,0.08);
+  box-shadow: 0 3px 10px rgba(0,0,0,0.06); /* Softer shadow */
   }
   .role-brief-display h2 {
-  color: var(--primary-hover-color);
+  /* Color will be set by specific role style */
   margin-top: 0;
   text-align: center;
-  font-size: 1.5em; 
+  font-size: 1.6em; /* Slightly larger */
+  margin-bottom: 20px;
   }
   .timeline-day-header {
-  font-size: 1.25em; 
+  /* Border color will be set by specific role style */
+  font-size: 1.3em; /* Slightly larger */
   font-weight: bold;
   color: var(--dark-gray-color);
   margin-top: 28px;
   margin-bottom: 18px;
   padding-bottom: 8px; 
-  border-bottom: 2px solid var(--primary-color);
+  border-bottom-width: 3px; /* Thicker border */
+  border-bottom-style: solid;
   }
   .timeline-item {
   display: flex;
@@ -176,16 +202,18 @@
   flex-shrink: 0;
   padding-right: 20px;
   font-weight: bold;
-  color: var(--primary-hover-color);
+  /* Color will be set by specific role style or remain primary */
   font-size: 1em; 
   }
   .timeline-content {
   flex-grow: 1;
-  background: var(--card-bg-color);
+  background: rgba(255, 255, 255, 0.85); /* Slightly more opaque content cards */
   padding: 18px; 
   border-radius: var(--border-radius);
   box-shadow: 0 2px 5px rgba(0,0,0,0.06);
-  border-left: 4px solid var(--primary-color);
+  /* Border color will be set by specific role style */
+  border-left-width: 5px; /* Thicker border */
+  border-left-style: solid;
   }
   .timeline-content h4 { 
   margin-top: 0;
@@ -200,6 +228,48 @@
   .role-brief-display.hidden {
   display: none;
   }
+
+  /* Applying accent colors to role brief display elements */
+  #roleBriefDisplay[data-active-role="producer"] h2,
+  #roleBriefDisplay[data-active-role="producer"] .timeline-time { color: var(--role-producer-accent); }
+  #roleBriefDisplay[data-active-role="producer"] .timeline-day-header { border-bottom-color: var(--role-producer-accent); }
+  #roleBriefDisplay[data-active-role="producer"] .timeline-content { border-left-color: var(--role-producer-accent); }
+
+  #roleBriefDisplay[data-active-role="director"] h2,
+  #roleBriefDisplay[data-active-role="director"] .timeline-time { color: var(--role-director-accent); }
+  #roleBriefDisplay[data-active-role="director"] .timeline-day-header { border-bottom-color: var(--role-director-accent); }
+  #roleBriefDisplay[data-active-role="director"] .timeline-content { border-left-color: var(--role-director-accent); }
+
+  #roleBriefDisplay[data-active-role="assistantDirector"] h2,
+  #roleBriefDisplay[data-active-role="assistantDirector"] .timeline-time { color: var(--role-assistantDirector-accent); }
+  #roleBriefDisplay[data-active-role="assistantDirector"] .timeline-day-header { border-bottom-color: var(--role-assistantDirector-accent); }
+  #roleBriefDisplay[data-active-role="assistantDirector"] .timeline-content { border-left-color: var(--role-assistantDirector-accent); }
+
+  #roleBriefDisplay[data-active-role="cinematographer"] h2,
+  #roleBriefDisplay[data-active-role="cinematographer"] .timeline-time { color: var(--role-cinematographer-accent); }
+  #roleBriefDisplay[data-active-role="cinematographer"] .timeline-day-header { border-bottom-color: var(--role-cinematographer-accent); }
+  #roleBriefDisplay[data-active-role="cinematographer"] .timeline-content { border-left-color: var(--role-cinematographer-accent); }
+
+  #roleBriefDisplay[data-active-role="productionAssistant"] h2,
+  #roleBriefDisplay[data-active-role="productionAssistant"] .timeline-time { color: var(--role-productionAssistant-accent); }
+  #roleBriefDisplay[data-active-role="productionAssistant"] .timeline-day-header { border-bottom-color: var(--role-productionAssistant-accent); }
+  #roleBriefDisplay[data-active-role="productionAssistant"] .timeline-content { border-left-color: var(--role-productionAssistant-accent); }
+
+  #roleBriefDisplay[data-active-role="artAndCostumes"] h2,
+  #roleBriefDisplay[data-active-role="artAndCostumes"] .timeline-time { color: var(--role-artAndCostumes-accent); }
+  #roleBriefDisplay[data-active-role="artAndCostumes"] .timeline-day-header { border-bottom-color: var(--role-artAndCostumes-accent); }
+  #roleBriefDisplay[data-active-role="artAndCostumes"] .timeline-content { border-left-color: var(--role-artAndCostumes-accent); }
+
+  #roleBriefDisplay[data-active-role="actors"] h2,
+  #roleBriefDisplay[data-active-role="actors"] .timeline-time { color: var(--role-actors-accent); }
+  #roleBriefDisplay[data-active-role="actors"] .timeline-day-header { border-bottom-color: var(--role-actors-accent); }
+  #roleBriefDisplay[data-active-role="actors"] .timeline-content { border-left-color: var(--role-actors-accent); }
+
+  #roleBriefDisplay[data-active-role="soundman"] h2,
+  #roleBriefDisplay[data-active-role="soundman"] .timeline-time { color: var(--role-soundman-accent); }
+  #roleBriefDisplay[data-active-role="soundman"] .timeline-day-header { border-bottom-color: var(--role-soundman-accent); }
+  #roleBriefDisplay[data-active-role="soundman"] .timeline-content { border-left-color: var(--role-soundman-accent); }
+
 
   /* General Accordion Styles */
   .accordion-item {
@@ -252,7 +322,7 @@
   border-bottom: 1px solid #eee;
   padding-bottom: 8px;
   }
-  .panel ul { /* For lists other than schedule table */
+  .panel ul { 
   list-style-position: outside;
   padding-right: 20px; 
   font-size: 1em; 
@@ -271,14 +341,14 @@
   width: 100%;
   border-collapse: collapse;
   margin-top: 10px;
-  margin-bottom: 15px; /* Space between tables if multiple */
+  margin-bottom: 15px; 
   }
   .schedule-table th, .schedule-table td {
   border: 1px solid #ddd;
-  padding: 10px; /* Adjusted padding */
+  padding: 10px; 
   text-align: right;
   vertical-align: top;
-  font-size: 0.95em; /* Base table font size */
+  font-size: 0.95em; 
   }
   .schedule-table th {
   background-color: var(--light-gray-color);
@@ -286,27 +356,26 @@
   font-weight: bold;
   }
   .schedule-table tr:nth-child(even) {
-  background-color: rgba(253, 253, 253, 0.7); /* Slightly transparent for image bg */
+  background-color: rgba(248, 249, 250, 0.7); 
   }
   .schedule-table tr:hover {
-  background-color: rgba(245, 245, 245, 0.8); /* Slightly transparent for image bg */
+  background-color: rgba(233, 236, 239, 0.8); 
   }
   .schedule-table .time-col {
-  width: 110px; /* Adjusted width for time column */
+  width: 110px; 
   font-weight: bold;
   white-space: nowrap;
   }
-  .schedule-table .task-col ul { /* For nested lists within table cells */
+  .schedule-table .task-col ul { 
   list-style-type: '↪️';
   padding-right: 15px;
   margin-top: 5px;
   margin-bottom: 5px;
   }
   .schedule-table .task-col li {
-  font-size: 0.9em; /* Relative to cell, so 0.9 * 0.95em */
+  font-size: 0.9em; 
   margin-bottom: 3px;
   }
-
 
   .important-note {
   background-color: rgba(255, 243, 205, 0.95); 
@@ -354,7 +423,6 @@
   margin-bottom: 8px;
   }
 
-
   .footer {
   text-align: center;
   margin-top: 30px; 
@@ -364,35 +432,35 @@
   color: var(--dark-gray-color); 
   }
   
-  @media (max-width: 768px) { /* Tablet and smaller landscape phones */
+  @media (max-width: 768px) { 
   .role-icon {
   width: calc(33.33% - 12px); 
   }
-  .role-icon span { font-size: 1em; } /* Increased */
-  .timeline-content p { font-size: 1.05em; } /* Increased */
+  .role-icon span { font-size: 1em; } 
+  .timeline-content p { font-size: 1.05em; }
 
   .schedule-table th, .schedule-table td {
-  padding: 9px; /* Increased */
-  font-size: 1em; /* Increased */
+  padding: 9px; 
+  font-size: 1em; 
   }
   .schedule-table .time-col {
-  width: 95px; /* Increased */
+  width: 95px; 
   }
-  .schedule-table .task-col li { font-size: 1em; } /* Increased */
-  .accordion-button { font-size: 1.25em; } /* Increased */
-  .panel { font-size: 1.1em; } /* Increased */
+  .schedule-table .task-col li { font-size: 1em; } 
+  .accordion-button { font-size: 1.25em; } 
+  .panel { font-size: 1.1em; } 
   .panel h3 { font-size: 1.15em; } 
   .panel p, .panel li { font-size: 1.05em; } 
   }
 
-  @media (max-width: 600px) { /* Portrait phones */
+  @media (max-width: 600px) { 
   .role-icon {
   width: calc(50% - 12px); 
   }
-  .role-icon span { font-size: 1.1em; } /* Further increase */
+  .role-icon span { font-size: 1.1em; } 
   
-  .introduction p { font-size: 1.25em; } /* Increased */
-  .roles-guidance { font-size: 1.3em; } /* Increased */
+  .introduction p { font-size: 1.25em; } 
+  .roles-guidance { font-size: 1.3em; } 
   
   .timeline-item {
   flex-direction: column;
@@ -403,34 +471,36 @@
   .timeline-time {
   padding-right: 0;
   margin-bottom: 10px;
-  font-size: 1.15em; /* Increased */
+  font-size: 1.15em; 
   }
-  .timeline-content p { font-size: 1.15em; } /* Further increase */
-  .timeline-content h4 { font-size: 1.2em; } /* Increased */
+  .timeline-content p { font-size: 1.15em; } 
+  .timeline-content h4 { font-size: 1.2em; } 
+  .role-brief-display h2 { font-size: 1.7em; } /* Larger for mobile */
+  .timeline-day-header { font-size: 1.4em; } /* Larger for mobile */
 
   .schedule-table { 
   display: block;
   overflow-x: auto;
   }
   .schedule-table th, .schedule-table td {
-  font-size: 1.1em; /* Further increase */
-  line-height: 1.5; /* Adjusted */
-  padding: 8px; /* Adjusted */
+  font-size: 1.1em; 
+  line-height: 1.5; 
+  padding: 8px; 
   }
   .schedule-table .task-col {
   white-space: normal; 
   }
-  .schedule-table .task-col li { font-size: 1.1em; } /* Further increase */
+  .schedule-table .task-col li { font-size: 1.1em; } 
 
-  .accordion-button { font-size: 1.35em; padding: 15px 22px; } /* Further increase */
-  .panel { font-size: 1.2em; } /* Further increase panel content */
-  .panel h3 { font-size: 1.25em; } /* Increased */
-  .panel p, .panel li { font-size: 1.15em; line-height: 1.6; } /* Increased */
+  .accordion-button { font-size: 1.35em; padding: 15px 22px; } 
+  .panel { font-size: 1.2em; } 
+  .panel h3 { font-size: 1.25em; } 
+  .panel p, .panel li { font-size: 1.15em; line-height: 1.6; } 
   
-  .important-note { font-size: 1.1em; } /* Increased */
+  .important-note { font-size: 1.1em; } 
   }
 
-  @media (max-width: 480px) { /* Smallest phones */
+  @media (max-width: 480px) { 
   .iframe-container {
   padding-top: 100%; 
   }
@@ -444,41 +514,41 @@
   body {
   padding-top: 0;
   padding-bottom: 0;
-  line-height: 1.75; /* Slightly more line height for smaller text */
+  line-height: 1.75; 
   }
   .header h1 {
-  font-size: clamp(2em, 7vw, 2.5em); /* Increased base and max */
+  font-size: clamp(2em, 7vw, 2.5em); 
   }
   .header .emoji {
-  font-size: clamp(2.8em, 9vw, 3.3em); /* Increased base and max */
+  font-size: clamp(2.8em, 9vw, 3.3em); 
   }
 
-  .introduction p { font-size: 1.3em; } /* Increased */
-  .roles-guidance { font-size: 1.35em; } /* Increased */
-  .role-icon span { font-size: 1.15em; } /* Increased */
+  .introduction p { font-size: 1.3em; } 
+  .roles-guidance { font-size: 1.35em; } 
+  .role-icon span { font-size: 1.15em; } 
   
-  .timeline-content p { font-size: 1.2em; } /* Increased */
-  .timeline-content h4 { font-size: 1.25em; } /* Increased */
-  .timeline-day-header { font-size: 1.35em;} /* Increased */
-  .role-brief-display h2 { font-size: 1.6em;} /* Increased */
+  .timeline-content p { font-size: 1.2em; } 
+  .timeline-content h4 { font-size: 1.25em; } 
+  .timeline-day-header { font-size: 1.45em;} /* Increased */
+  .role-brief-display h2 { font-size: 1.75em;} /* Increased */
 
 
   .schedule-table th, .schedule-table td {
-  font-size: 1.15em; /* Ensure readability */
-  padding: 7px; /* Adjusted */
+  font-size: 1.15em; 
+  padding: 7px; 
   }
   .schedule-table .time-col {
-  width: 80px; /* Adjusted */
+  width: 80px; 
   }
-  .schedule-table .task-col li { font-size: 1.15em; } /* Increased */
+  .schedule-table .task-col li { font-size: 1.15em; } 
 
-  .accordion-button { font-size: 1.4em; padding: 14px 20px; } /* Increased */
-  .panel { font-size: 1.25em; } /* Increased */
-  .panel h3 { font-size: 1.3em; } /* Increased */
-  .panel p, .panel li { font-size: 1.2em; line-height: 1.65; } /* Increased */
+  .accordion-button { font-size: 1.4em; padding: 14px 20px; } 
+  .panel { font-size: 1.25em; } 
+  .panel h3 { font-size: 1.3em; } 
+  .panel p, .panel li { font-size: 1.2em; line-height: 1.65; } 
 
-  .important-note { font-size: 1.15em; } /* Increased */
-  .footer { font-size: 1em;} /* Increased */
+  .important-note { font-size: 1.15em; } 
+  .footer { font-size: 1em;} 
   }
   </style>
  </head>
@@ -491,13 +561,12 @@
   </div>
 
   <div class="introduction">
-  <p>לחצו על אייקוני התפקידים למטה לקבלת בריף, ברייקדאון ומשימות מותאם אישית. מידע כללי נוסף זמין בכרטיסיות בהמשך. 👇</p>
+  <p>לחצו על אייקוני התפקידים למטה לקבלת בריף, ברייקדאון ומשימות מותאם אישית. מידע כללי נוסף זמין בכרטיסיות בהמשך.</p>
   </div>
   
   <div class="roles-guidance">בחר/י את התפקיד שלך:</div>
 
   <div class="roles-container">
-  <!-- Role icons with data-role attribute -->
   <div class="role-icon" data-role="producer">
   <svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm-1-13h2v6h-2zm0 8h2v2h-2z"/></svg>
   <span>מפיק/ה</span>
@@ -520,15 +589,15 @@
   </div>
   <div class="role-icon" data-role="artAndCostumes">
   <svg viewBox="0 0 24 24"><path d="M20.54 5.23l-1.39-1.68C18.88 3.21 18.47 3 18 3H6c-.47 0-.88.21-1.16.55L3.46 5.23C3.17 5.57 3 6.02 3 6.5V19c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V6.5c0-.48-.17-.93-.46-1.27zM6.24 5h11.52l.83 1H5.41l.83-1zM5 19V8h14v11H5zm3-5h2.55v3h2.9v-3H16v-2h-2.55V9h-2.9v3H8v2z" /></svg>
-  <span>הלבשה וארט 🎨</span>
+  <span>הלבשה וארט</span>
   </div>
   <div class="role-icon" data-role="actors">
   <svg viewBox="0 0 24 24"><path d="M12 5.5c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2zM7.5 15.5c0-1.33.41-2.53 1.09-3.5H4v3c0 1.1.9 2 2 2h1.57c-.05-.33-.07-.66-.07-1zm9.91-3.5c.68.97 1.09 2.17 1.09 3.5 0 .34-.02.67-.07 1H20c1.1 0 2-.9 2-2v-3h-4.41zM12 13c-1.93 0-3.5 1.57-3.5 3.5S10.07 20 12 20s3.5-1.57 3.5-3.5-1.57-3.5-3.5-3.5z"/></svg>
-  <span>משחק 🎭</span>
+  <span>משחק</span>
   </div>
   <div class="role-icon" data-role="soundman">
   <svg viewBox="0 0 24 24"><path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z"/></svg>
-  <span>סאונד / עריכה 🎧💻</span> 
+  <span>סאונד / עריכה</span> 
   </div>
   </div>
   
@@ -543,7 +612,7 @@
   <span class="arrow">▼</span>
   </button>
   <div class="panel" id="panelSchedule" aria-hidden="true">
-  <h3>🗓️ יום שישי (06/06/2025) - הזנקה, PRE-PRODUCTION ו-PRODUCTION ראשוני 🚀</h3>
+  <h3>🗓️ יום שישי (06/06/2025) - הזנקה, PRE-PRODUCTION ו-PRODUCTION ראשוני</h3>
   <table class="schedule-table">
   <thead>
   <tr>
@@ -578,7 +647,7 @@
   </tr>
   <tr>
   <td class="time-col">12:00 - 17:00</td>
-  <td class="task-col">✍️ בחמ"ל: כתיבת תסריט אינטנסיבית. במקביל, צוות הפקה (מפיק, ע.מפיק, ארט וכו') מתחיל PRE-PRODUCTION ממוקד (לוקיישנים, פרופס, תלבושות לפי רעיון).</td>
+  <td class="task-col">בחמ"ל: כתיבת תסריט אינטנסיבית. במקביל, צוות הפקה (מפיק, ע.מפיק, ארט וכו') מתחיל PRE-PRODUCTION ממוקד (לוקיישנים, פרופס, תלבושות לפי רעיון).</td>
   </tr>
   <tr>
   <td class="time-col">~14:00</td>
@@ -586,15 +655,15 @@
   </tr>
   <tr>
   <td class="time-col">17:00 - 17:30</td>
-  <td class="task-col">🥪🥤 הפסקת התרעננות.</td>
+  <td class="task-col">הפסקת התרעננות.</td>
   </tr>
   <tr>
   <td class="time-col">17:30 - 20:30</td>
-  <td class="task-col">🧐 ברייקדאון ושוטינג ליסט (במאית, מפיק, צלם, תאורנית). צוות משריין לוקיישנים סופית, פרופס, ארט. הכנות ציוד אחרונות.</td>
+  <td class="task-col">ברייקדאון ושוטינג ליסט (במאית, מפיק, צלם, תאורנית). צוות משריין לוקיישנים סופית, פרופס, ארט. הכנות ציוד אחרונות.</td>
   </tr>
   <tr>
   <td class="time-col">20:30</td>
-  <td class="task-col">🎬 יציאה ללוקיישן A.</td>
+  <td class="task-col">� יציאה ללוקיישן A.</td>
   </tr>
   <tr>
   <td class="time-col">20:50</td>
@@ -607,7 +676,7 @@
   </tbody>
   </table>
 
-  <h3>🎬 יום שבת (07/06/2025) - PRODUCTION MARATHON 🏃‍♀️🏃‍♂️</h3>
+  <h3>🎬 יום שבת (07/06/2025) - PRODUCTION MARATHON</h3>
   <table class="schedule-table">
   <thead>
   <tr>
@@ -616,35 +685,35 @@
   </tr>
   </thead>
   <tbody>
-  <tr><td class="time-col">~00:10</td><td class="task-col">סיום צילומים משוער (לוקיישן A). פירוק והעמסת ציוד. חזרה לחמ"ל. 😴 לישון או לנוח חזק! (בהתאם לאורך הצילומים בלוקיישן A)</td></tr>
-  <tr><td class="time-col">05:00</td><td class="task-col">השכמה, יציאה ללוקיישן B (נסיעה/חופים 🌅).</td></tr>
+  <tr><td class="time-col">~00:10</td><td class="task-col">סיום צילומים משוער (לוקיישן A). פירוק והעמסת ציוד. חזרה לחמ"ל. לישון או לנוח חזק! (בהתאם לאורך הצילומים בלוקיישן A)</td></tr>
+  <tr><td class="time-col">05:00</td><td class="task-col">השכמה, יציאה ללוקיישן B (נסיעה/חופים).</td></tr>
   <tr><td class="time-col">05:20</td><td class="task-col">הגעה ללוקיישן B: הקמת סט, מצלמה.</td></tr>
   <tr><td class="time-col">05:40</td><td class="task-col">תחילת צילומים, סצנות [...] (לוקיישן B).</td></tr>
-  <tr><td class="time-col">05:52 (משוער)</td><td class="task-col">☀️ נץ החמה (זריחה).</td></tr>
+  <tr><td class="time-col">05:52 (משוער)</td><td class="task-col">נץ החמה (זריחה).</td></tr>
   <tr><td class="time-col">07:00</td><td class="task-col">סיום צילומים (לוקיישן B). פירוק והעמסת ציוד.</td></tr>
   <tr><td class="time-col">06:00 (צוות נפרד)</td><td class="task-col">יציאה ללוקיישן C (צוות הכנה).</td></tr>
   <tr><td class="time-col">06:20</td><td class="task-col">הגעה ללוקיישן C (צוות הכנה): הקמת תפאורה, פרופס, ארט, תאורה.</td></tr>
   <tr><td class="time-col">07:20</td><td class="task-col">צוות חוץ (צילום) יוצא ללוקיישן C.</td></tr>
   <tr><td class="time-col">08:00</td><td class="task-col">הגעה ללוקיישן C (צוות צילום): הקמת סט, מצלמה.</td></tr>
-  <tr><td class="time-col">08:40</td><td class="task-col">🥐 ארוחת בוקר.</td></tr>
+  <tr><td class="time-col">08:40</td><td class="task-col">ארוחת בוקר.</td></tr>
   <tr><td class="time-col">09:00</td><td class="task-col">עורך ומפיק יוצאים לאולפן/עמדת עריכה: הקמת סביבת עבודה, עמדות נוספות.</td></tr>
   <tr><td class="time-col">09:00</td><td class="task-col">תחילת צילומים, סצנות [...] (לוקיישן C).</td></tr>
-  <tr><td class="time-col">12:40</td><td class="task-col">🥤 הפסקת התרעננות.</td></tr>
+  <tr><td class="time-col">12:40</td><td class="task-col">הפסקת התרעננות.</td></tr>
   <tr><td class="time-col">13:00</td><td class="task-col">המשך צילומים, סצנות [...] (לוקיישן C).</td></tr>
   <tr><td class="time-col">14:30</td><td class="task-col">סיום צילומים (לוקיישן C).</td></tr>
-  <tr><td class="time-col">15:00</td><td class="task-col">ಊ ארוחת צהריים.</td></tr>
+  <tr><td class="time-col">15:00</td><td class="task-col">ארוחת צהריים.</td></tr>
   <tr><td class="time-col">15:30</td><td class="task-col">יציאה ללוקיישן D.</td></tr>
   <tr><td class="time-col">16:00</td><td class="task-col">הגעה ללוקיישן D: הקמת סט, ארט ותפאורה, תאורה, מצלמה.</td></tr>
   <tr><td class="time-col">16:30</td><td class="task-col">תחילת צילומים, סצנות [...] (לוקיישן D).</td></tr>
   <tr><td class="time-col">17:30</td><td class="task-col">סיום צילומים (לוקיישן D). קיפול ציוד, העמסה ויציאה ל"ראשס".</td></tr>
   <tr><td class="time-col">18:00</td><td class="task-col">החזרת ציוד ל"ראשס".</td></tr>
-  <tr><td class="time-col">19:00</td><td class="task-col">🗣️ פגישת צוות בחמ"ל.</td></tr>
-  <tr><td class="time-col">20:00</td><td class="task-col">🛌 הולכים לישון!</td></tr>
-  <tr><td class="time-col">23:40</td><td class="task-col">⏰ השכמה (לצוות הפוסט).</td></tr>
+  <tr><td class="time-col">19:00</td><td class="task-col">פגישת צוות בחמ"ל.</td></tr>
+  <tr><td class="time-col">20:00</td><td class="task-col">הולכים לישון!</td></tr>
+  <tr><td class="time-col">23:40</td><td class="task-col">השכמה (לצוות הפוסט).</td></tr>
   </tbody>
   </table>
 
-  <h3>🏆 יום ראשון (08/06/2025) - POST-PRODUCTION & SUBMISSION 🏁</h3>
+  <h3>🏆 יום ראשון (08/06/2025) - POST-PRODUCTION & SUBMISSION</h3>
   <table class="schedule-table">
   <thead>
   <tr>
@@ -655,15 +724,15 @@
   <tbody>
   <tr><td class="time-col">00:00</td><td class="task-col"><strong>🎞️ POST PRODUCTION</strong></td></tr>
   <tr><td class="time-col">00:30</td><td class="task-col">✂️ תחילת עריכות.</td></tr>
-  <tr><td class="time-col">04:30</td><td class="task-col">☕ הפסקת התרעננות.</td></tr>
+  <tr><td class="time-col">04:30</td><td class="task-col">הפסקת התרעננות.</td></tr>
   <tr><td class="time-col">05:00</td><td class="task-col">המשך עריכות.</td></tr>
-  <tr><td class="time-col">09:00</td><td class="task-col">🥐 ארוחת בוקר.</td></tr>
+  <tr><td class="time-col">09:00</td><td class="task-col">ארוחת בוקר.</td></tr>
   <tr><td class="time-col">10:40</td><td class="task-col">המשך עריכות.</td></tr>
   <tr><td class="time-col">13:00</td><td class="task-col">🎵 דד ליין פס קול.</td></tr>
   <tr><td class="time-col">14:00</td><td class="task-col">✨ פינישים וסיום עריכה.</td></tr>
   <tr><td class="time-col">14:40</td><td class="task-col">🔧 זמן תיקונים.</td></tr>
   <tr><td class="time-col">15:30</td><td class="task-col">💾 דד ליין לרינדור (עיבוד) סופי.</td></tr>
-  <tr><td class="time-col">16:30</td><td class="task-col">� יציאה לסינמטק (או מקום המסירה).</td></tr>
+  <tr><td class="time-col">16:30</td><td class="task-col">➡️ יציאה לסינמטק (או מקום המסירה).</td></tr>
   <tr><td class="time-col">17:00</td><td class="task-col">🎉 מסירה!</td></tr>
   </tbody>
   </table>
@@ -691,7 +760,7 @@
   <tr><td>כבל חשמל 25 מטר</td><td>1</td></tr>
   </tbody>
   </table>
-  <h3>🎒 ציוד מהצוות (רשימה חלקית - <strong>חובה לעדכן בגיליון המשותף! 📢</strong>):</h3>
+  <h3>🎒 ציוד מהצוות (רשימה חלקית - <strong>חובה לעדכן בגיליון המשותף!</strong>):</h3>
   <ul>
   <li>💻 לפטופ דוגם מקליט 15' עם אופציה ליציאה למוניטור חיצוני - כמות: 1</li>
   <li>🖥️ מוניטור 32' עם סטנד - כמות: 1</li>
@@ -711,9 +780,9 @@
   <p><strong>גיליון זה הוא המקור המרכזי לניהול משאבים ועדכונים חיים. אנא דאגו לעדכן אותו!</strong></p>
   <p><u>לדוגמה:</u></p>
   <ul>
-  <li><strong>הלבשה וארט:</strong> "יש לי תחפושת ספיידרמן 🕷️", "מביא עץ חג מולד קטן 🎄".</li>
-  <li><strong>ציוד אישי:</strong> "מביא מיקרופון רובה נוסף ובום 🎤", "יש לי סט עדשות נוסף".</li>
-  <li><strong>לוקיישנים פוטנציאלים:</strong> "לדודה שלי יש מחסן נטוש ברחוב Y, צריך לבדוק זמינות 🏚️".</li>
+  <li><strong>הלבשה וארט:</strong> "יש לי תחפושת ספיידרמן", "מביא עץ חג מולד קטן".</li>
+  <li><strong>ציוד אישי:</strong> "מביא מיקרופון רובה נוסף ובום", "יש לי סט עדשות נוסף".</li>
+  <li><strong>לוקיישנים פוטנציאלים:</strong> "לדודה שלי יש מחסן נטוש ברחוב Y, צריך לבדוק זמינות".</li>
   </ul>
   </div>
   <div class="iframe-container">
@@ -739,7 +808,7 @@
   <ul>
   <li>📱 טלפונים טעונים במלואם על מצב שקט.</li>
   <li>🥪 סנדוויץ' מהבית.</li>
-  <li>💰 חלק מהצוות משקיע סכומים אדירים להפקת הפרויקט, אנא תהיו נחמדים ותשתתפו גם בהוצאות 🙏.</li>
+  <li>💰 חלק מהצוות משקיע סכומים אדירים להפקת הפרויקט, אנא תהיו נחמדים ותשתתפו גם בהוצאות.</li>
   <li>✨ הרבה אנרגיה טובה וחיובית!</li>
   <li>🧠 ראש פתוח ומוכנות לאלתורים.</li>
   </ul>
@@ -791,9 +860,9 @@
 
   const roleBriefsData = {
   producer: {
-  title: "מפיק/ה 💼",
+  title: "מפיק/ה",
   days: {
-  "יום שישי (06/06/2025) 🚀": [
+  "יום שישי (06/06/2025)": [
   { time: "09:30", task: "הגעה לחמ\"ל (עם ע. מפיק), פתיחה וסידור." },
   { time: "10:00", task: "וידוא הגעת נציג (אוריין) למקום ההזנקה." },
   { time: "10:30-11:30", task: "קבלת צוות, תפסים, הדרכת בטיחות, PRE-PRODUCTION ראשוני." },
@@ -803,7 +872,7 @@
   { time: "17:30-20:30", task: "השתתפות בברייקדאון ושוטינג. ניהול שריון לוקיישנים סופי ומשאבים." },
   { time: "20:30 ואילך", task: "ניהול יציאה וצילומים בלוקיישן A. פתרון בעיות על הסט. דאגה לצוות." }
   ],
-  "יום שבת (07/06/2025) 🛠️": [
+  "יום שבת (07/06/2025)": [
   { time: "כל היום", task: "ניהול לוגיסטי של צילומים בלוקיישנים B, C, D. דאגה לרווחת הצוות, לו\"ז, פתרון בעיות." },
   { time: "09:00", task: "יציאה עם עורך לאולפן/עמדת עריכה, הקמת סביבת עבודה לפוסט." },
   { time: "17:30-18:00", task: "ניהול החזרת ציוד ל\"ראשס\"." },
@@ -811,7 +880,7 @@
   { time: "20:00", task: "דאגה למנוחת הצוות." },
   { time: "23:40", task: "תיאום השכמה לצוות הפוסט." }
   ],
-  "יום ראשון (08/06/2025) 🏆": [
+  "יום ראשון (08/06/2025)": [
   { time: "00:00 ואילך", task: "ליווי ותמיכה בצוות הפוסט-פרודקשן. ניהול לו\"ז פוסט." },
   { time: "16:30", task: "ניהול יציאה למקום המסירה." },
   { time: "17:00", task: "אחריות על מסירת הסרט בזמן ובפורמט הנדרש." }
@@ -819,123 +888,123 @@
   }
   },
   director: {
-  title: "במאי/ת 📣",
+  title: "במאי/ת",
   days: {
-  "יום שישי (06/06/2025) ✍️": [
+  "יום שישי (06/06/2025)": [
   { time: "10:30", task: "הגעה לחמ\"ל." },
   { time: "12:00-17:00", task: "הובלת כתיבת התסריט לאחר קבלת נושאי התחרות." },
   { time: "17:30-20:30", task: "הובלת ברייקדאון ושוטינג ליסט עם צלם ומפיק." },
   { time: "21:30 ואילך", task: "ניהול אמנותי של צילומים בלוקיישן A. עבודה עם שחקנים." }
   ],
-  "יום שבת (07/06/2025) 🎬": [
+  "יום שבת (07/06/2025)": [
   { time: "כל היום", task: "ניהול אמנותי של צילומים בלוקיישנים B, C, D. שמירה על חזון אומנותי ועקביות." },
   { time: "19:00", task: "השתתפות בפגישת צוות, סיכום יום צילומים והכנות ליום הפוסט." }
   ],
-  "יום ראשון (08/06/2025) 🎞️": [
+  "יום ראשון (08/06/2025)": [
   { time: "00:30 ואילך", task: "עבודה צמודה עם העורך על ראף-קאט, בחירת טייקים והכוונה אמנותית." },
   { time: "לאורך הפוסט", task: "ליווי תהליכי עיצוב פסקול ותיקוני צבע. נעילת הקאט הסופי." }
   ]
   }
   },
   assistantDirector: {
-  title: "ע. במאי/ת 📋",
+  title: "ע. במאי/ת",
   days: {
-  "יום שישי (06/06/2025) ⏱️": [
+  "יום שישי (06/06/2025)": [
   { time: "10:30", task: "הגעה לחמ\"ל." },
   { time: "17:30-20:30", task: "סיוע בברייקדאון התסריט, הכנת קול שיט ראשוני. תיאום שחקנים לסטים." },
   { time: "21:30 ואילך", task: "ניהול לו\"ז על סט לוקיישן A, קשר עם שחקנים, שמירה על המשכיות (continuity)." }
   ],
-  "יום שבת (07/06/2025) 🏃": [
+  "יום שבת (07/06/2025)": [
   { time: "כל היום", task: "ניהול שוטף של לו\"ז הצילומים בלוקיישנים B, C, D. הכנת והפצת קול שיטס, תיאום בין מחלקות, שמירה על שקט וקצב." },
   { time: "19:00", task: "השתתפות בפגישת צוות." }
   ],
-  "יום ראשון (08/06/2025) 📞": [
+  "יום ראשון (08/06/2025)": [
   { time: "במהלך הפוסט", task: "זמינות לספק מידע לעורך (מספרי טייקים, הערות מהסט, פרטי המשכיות)." }
   ]
   }
   },
   cinematographer: {
-  title: "צילום / תאורה 🎥💡",
+  title: "צילום / תאורה",
   days: {
-  "יום שישי (06/06/2025) 🖼️": [
+  "יום שישי (06/06/2025)": [
   { time: "10:30", task: "הגעה לחמ\"ל (צלם ראשי, תאורן ראשי)." },
   { time: "11:50", task: "(תאורנית, ע. תאורה, ע. צלם) יציאה ל\"ראשס\" עם המפיק." },
   { time: "12:00-14:00", task: "בדיקת ציוד צילום ותאורה ב\"ראשס\", הרכבת מצלמה, העמסה וחזרה לחמ\"ל." },
   { time: "17:30-20:30", task: "(צלם, תאורנית) השתתפות בברייקדאון ושוטינג. תכנון תאורה וקומפוזיציות." },
   { time: "20:50 ואילך", task: "הקמת תאורה ומצלמה בלוקיישן A, ביצוע צילומים לפי שוטינג ליסט." }
   ],
-  "יום שבת (07/06/2025) 🌟": [
+  "יום שבת (07/06/2025)": [
   { time: "כל היום", task: "אחריות על הצד הוויזואלי בלוקיישנים B, C, D. הקמה וניהול תאורה, תפעול מצלמה, שמירה על איכות ועקביות." },
   { time: "17:30", task: "סיוע בקיפול ציוד והכנתו להחזרה ל\"ראשס\"." },
   { time: "סוף יום", task: "וידוא גיבוי מאובטח של כל חומרי הגלם והעברתם למפיק/עורך."}
   ],
-  "יום ראשון (08/06/2025) 🎨": [
+  "יום ראשון (08/06/2025)": [
   { time: "במהלך הפוסט", task: "זמינות למעורבות בתהליך תיקוני הצבע (Color Grading) ומתן פידבק מקצועי, במידת האפשר." }
   ]
   }
   },
   productionAssistant: {
-  title: "ע. הפקה 🦸",
+  title: "ע. הפקה",
   days: {
-  "יום שישי (06/06/2025) 🛒": [
+  "יום שישי (06/06/2025)": [
   { time: "09:30", task: "הגעה עם המפיק, סיוע בפתיחת חמ\"ל וסידור ציוד." },
   { time: "10:30 ואילך", task: "סיוע למפיק בכל המשימות הלוגיסטיות: תפסים, רכש קטן, שליחויות, הכנת לוקיישנים (אם אפשר מראש), דאגה לצוות (שתיה, כיבוד קל)." },
   { time: "11:50", task: "ליווי ל\"ראשס\" במידת הצורך, סיוע בהעמסת ציוד."}
   ],
-  "יום שבת (07/06/2025) ⚙️": [
+  "יום שבת (07/06/2025)": [
   { time: "כל היום", task: "תמיכה לוגיסטית מלאה בצוות על הסט ובחמ\"ל. 'איש/אשת כל משימה'. סיוע בניהול ארוחות, הפסקות, ניקיון וסדר." }
   ],
-  "יום ראשון (08/06/2025) 👍": [
+  "יום ראשון (08/06/2025)": [
   { time: "במהלך הפוסט", task: "סיוע בשמירה על סדר וארגון בחמ\"ל הפוסט. עזרה בכל משימה לוגיסטית שנותרה (למשל, החזרת ציוד קטן, שליחויות אחרונות)." }
   ]
   }
   },
   artAndCostumes: {
-  title: "הלבשה וארט 👚🖼️",
+  title: "הלבשה וארט",
   days: {
-  "יום שישי (06/06/2025) ✨": [
+  "יום שישי (06/06/2025)": [
   { time: "10:30", task: "הגעה לחמ\"ל." },
   { time: "12:00-20:30", task: "(במקביל לכתיבה וברייקדאון) עבודה על רשימות פרופס, תפאורה, תלבושות בהתאם לתסריט המתגבש. איתור והכנות מוקדמות." },
   { time: "20:50 ואילך", task: "סיוע בהקמת סט לוקיישן A (ארט), הלבשת שחקנים ראשונה, הכנות להמשך." }
   ],
-  "יום שבת (07/06/2025) 🛠️": [
+  "יום שבת (07/06/2025)": [
   { time: "06:00", task: "(צוות נפרד או אותו צוות ברוטציה) יציאה ללוקיישן C להקמת תפאורה, פרופס, ארט." },
   { time: "כל היום", task: "אחריות על נראות הסטים (B,C,D) והדמויות. הלבשה, תיקונים, שינויים לפי הצורך, שמירה על המשכיות ויזואלית של ארט ותלבושות." }
   ],
-  "יום ראשון (08/06/2025) 📦": [ 
+  "יום ראשון (08/06/2025)": [ 
   { time: "סיום צילומים (שבת בערב)", task: "סיוע בקיפול ואיסוף כל פריטי הארט וההלבשה בצורה מסודרת." }
   ]
   }
   },
   actors: {
-  title: "משחק 🎭⭐",
+  title: "משחק",
   days: {
-  "יום שישי (06/06/2025) 📖": [
+  "יום שישי (06/06/2025)": [
   { time: "לפי תיאום (אחר הצהריים/ערב)", task: "הגעה לחמ\"ל/לוקיישן (לאחר גיבוש תסריט ראשוני). לימוד טקסטים מהיר והבנת הדמות. עבודה עם הבמאי/ת על פרשנות." },
   { time: "21:30 ואילך", task: "צילומים בלוקיישן A. ריכוז מלא, היענות להוראות, שיתוף פעולה." }
   ],
-  "יום שבת (07/06/2025) 🌟": [
+  "יום שבת (07/06/2025)": [
   { time: "לפי קריאה", task: "המשך צילומים בלוקיישנים B, C, D. שמירה על אנרגיה, רצף דמות והמשכיות בין טייקים וסצנות." }
   ],
-  "יום ראשון (08/06/2025) 🎤": [ 
+  "יום ראשון (08/06/2025)": [ 
   { time: "סטנד-ביי", task: "להיות זמינים טלפונית לכל צורך (הקלטות קול נוספות - ADR, צילומי השלמה קטנים אם נדרש באופן חריג ובהתאם ללו\"ז הפוסט)." }
   ]
   }
   },
   soundman: { 
-  title: "סאונד / עריכה 🎧💻",
+  title: "סאונד / עריכה",
   days: {
-  "יום שישי (06/06/2025) 📡": [
+  "יום שישי (06/06/2025)": [
   { time: "10:30 (איש סאונד)", task: "הגעה לחמ\"ל. בדיקת ציוד סאונד." },
   { time: "21:30 ואילך (איש סאונד)", task: "הקלטת סאונד (דיאלוגים, אווירה) בלוקיישן A. ניטור רמות שמע." }
   ],
-  "יום שבת (07/06/2025) �": [
+  "יום שבת (07/06/2025)": [
   { time: "כל היום (איש סאונד)", task: "המשך הקלטות סאונד נקי ואיכותי בלוקיישנים B, C, D. תיוג קפדני של קבצי האודיו." },
   { time: "09:00 (עורך)", task: "יציאה עם מפיק לאולפן/עמדת עריכה, הקמת סביבת עבודה." },
   { time: "סוף יום (איש סאונד)", task: "העברת כל חומרי הסאונד בצורה מסודרת לעורך/מפיק." },
   { time: "בערב (עורך)", task: "קבלת חומרים מצולמים וסאונד, התחלת סידור, גיבוי וסנכרון ראשוני."}
   ],
-  "יום ראשון (08/06/2025) 🎧💻": [
+  "יום ראשון (08/06/2025)": [
   { time: "00:30 (עורך)", task: "תחילת עריכות אינטנסיביות (תמונה וסאונד)." },
   { time: "00:30 (איש סאונד, אם מעורב בפוסט)", task: "עבודה עם העורך על עריכת סאונד, מיקס, הוספת אפקטים ומוזיקה." },
   { time: "13:00", task: "דד ליין פס קול." },
@@ -951,9 +1020,13 @@
   const role = this.dataset.role;
   const briefData = roleBriefsData[role];
 
+  // Remove active class from all icons
   roleIcons.forEach(i => i.classList.remove("active-role"));
+  // Add active class to the clicked icon
   this.classList.add("active-role");
 
+  // Set the active role on the brief display container
+  briefDisplay.dataset.activeRole = role;
   briefContentContainer.innerHTML = ""; 
 
   if (briefData) {
@@ -962,7 +1035,7 @@
   Object.keys(briefData.days).forEach(dayKey => { 
   const dayHeader = document.createElement("h3");
   dayHeader.className = "timeline-day-header";
-  dayHeader.textContent = dayKey; 
+  dayHeader.textContent = dayKey.replace(/ \S*$/, ''); // Remove emoji from day key for display
   briefContentContainer.appendChild(dayHeader);
 
   briefData.days[dayKey].forEach(item => {
@@ -989,6 +1062,7 @@
   briefDisplay.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
   } else {
   briefDisplay.classList.add("hidden");
+  briefDisplay.removeAttribute('data-active-role');
   }
   });
   });
