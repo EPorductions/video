@@ -12,19 +12,19 @@
             --light-gray-color: #f8f9fa;
             --dark-gray-color: #343a40;
             --text-color: #212529;
-            --container-bg-color: rgba(255, 255, 255, 0.93); 
-            --card-bg-color: rgba(255, 255, 255, 0.96); 
-            --role-brief-bg: rgba(230, 242, 255, 0.96); 
-            --border-radius: 10px; /* Slightly more rounded */
+            --container-bg-color: rgba(255, 255, 255, 0.94); 
+            --card-bg-color: rgba(255, 255, 255, 0.97); 
+            --role-brief-bg: rgba(240, 248, 255, 0.97); /* AliceBlue, more subtle */
+            --border-radius: 10px;
             --box-shadow: 0 5px 20px rgba(0,0,0,0.12);
         }
 
         body {
-            font-family: 'Arial', 'Helvetica Neue', Helvetica, sans-serif;
-            line-height: 1.65; /* Adjusted line height */
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            line-height: 1.65; 
             margin: 0;
             padding: 0;
-            background-image: url("bg48.jpg"); 
+            background-image: url("bg48.png"); 
             background-size: cover; 
             background-position: center center; 
             background-attachment: scroll; 
@@ -34,7 +34,7 @@
             flex-direction: column;
             align-items: center;
             min-height: 100vh;
-            padding-top: 15px; /* Reduced padding for smaller screens */
+            padding-top: 15px; 
             padding-bottom: 15px;
         }
         .main-container {
@@ -42,8 +42,8 @@
             padding: 20px; 
             border-radius: var(--border-radius);
             box-shadow: var(--box-shadow);
-            width: 96%; /* Slightly wider */
-            max-width: 900px; /* Increased max-width */
+            width: 96%; 
+            max-width: 900px;
         }
         .header {
             text-align: center;
@@ -65,7 +65,7 @@
         
         .introduction {
             background-color: var(--card-bg-color);
-            padding: 15px; /* Reduced padding */
+            padding: 15px; 
             border-radius: var(--border-radius);
             margin-bottom: 20px;
             border-left: 5px solid var(--primary-color);
@@ -100,8 +100,8 @@
             text-align: center;
             padding: 12px 8px; 
             border-radius: var(--border-radius);
-            transition: background-color 0.3s ease, transform 0.2s ease, box-shadow 0.2s ease;
-            width: calc(25% - 10px); /* 4 icons, adjusted gap */
+            transition: all 0.25s ease-in-out;
+            width: calc(25% - 10px); 
             min-width: 90px; 
             box-sizing: border-box;
             border: 1px solid #ddd; 
@@ -133,56 +133,73 @@
         }
         .role-icon span {
             display: block;
-            font-size: 0.78em; 
+            font-size: 0.8em; 
             color: var(--dark-gray-color);
             font-weight: bold;
         }
 
+        /* Modern Timeline/Breakdown Design */
         .role-brief-display {
             background-color: var(--role-brief-bg);
-            border: 1px solid var(--primary-color);
-            padding: 18px; /* Reduced padding */
-            margin-top: 12px; 
+            border: 1px solid #cce5ff;
+            padding: 20px;
+            margin-top: 15px;
             margin-bottom: 25px;
             border-radius: var(--border-radius);
             box-shadow: 0 3px 10px rgba(0,0,0,0.08);
-            overflow-x: auto; /* Allow horizontal scroll for table if needed */
         }
         .role-brief-display h2 {
             color: var(--primary-hover-color);
             margin-top: 0;
             text-align: center;
-            border-bottom: 2px solid #b8d9ff; 
-            padding-bottom: 10px; 
-            font-size: 1.3em; 
+            font-size: 1.4em;
         }
-        .role-brief-display table { /* Table styles for breakdown */
-            width: 100%;
-            border-collapse: collapse;
-            margin-top: 15px;
-            font-size: 0.9em;
+        .timeline-day-header {
+            font-size: 1.2em;
+            font-weight: bold;
+            color: var(--dark-gray-color);
+            margin-top: 25px;
+            margin-bottom: 15px;
+            padding-bottom: 5px;
+            border-bottom: 2px solid var(--primary-color);
         }
-        .role-brief-display th, .role-brief-display td {
-            border: 1px solid #b8d9ff; /* Lighter blue borders */
-            padding: 10px 8px; /* Adjusted padding */
-            text-align: right;
-            vertical-align: top; /* Align content to top of cell */
+        .timeline-item {
+            display: flex;
+            align-items: flex-start;
+            margin-bottom: 20px;
+            position: relative;
         }
-        .role-brief-display th {
-            background-color: #dcedff; /* Light blue for table headers */
+        .timeline-time {
+            flex-basis: 120px;
+            flex-shrink: 0;
+            padding-right: 20px;
             font-weight: bold;
             color: var(--primary-hover-color);
-        }
-         .role-brief-display td ul { /* For lists within table cells */
-            list-style-type: '• ';
-            padding-right: 15px;
-            margin: 0;
             font-size: 0.95em;
+        }
+        .timeline-content {
+            flex-grow: 1;
+            background: var(--card-bg-color);
+            padding: 15px;
+            border-radius: var(--border-radius);
+            box-shadow: 0 2px 5px rgba(0,0,0,0.06);
+            border-left: 4px solid var(--primary-color);
+        }
+        .timeline-content h4 {
+            margin-top: 0;
+            margin-bottom: 8px;
+            color: var(--dark-gray-color);
+            font-size: 1em;
+        }
+        .timeline-content p {
+            margin: 0;
+            font-size: 0.9em;
         }
         .role-brief-display.hidden {
             display: none;
         }
 
+        /* General Accordion Styles */
         .accordion-item {
             margin-bottom: 12px; 
             border-radius: var(--border-radius);
@@ -280,7 +297,7 @@
             color: var(--primary-hover-color);
         }
          .google-sheet-info ul {
-            list-style-type: '�';
+            list-style-type: '💡';
             padding-right: 20px;
             margin-top: 10px;
         }
@@ -299,35 +316,26 @@
         }
         
         @media (max-width: 768px) {
-            .main-container {
-                padding: 15px; 
-            }
-            .header h1 {
-                font-size: 1.7em; 
-            }
             .role-icon {
-                 width: calc(50% - 10px); /* 2 icons per row for tablets */
-            }
-             .role-brief-display th, .role-brief-display td {
-                padding: 8px 6px; 
-                font-size: 0.85em;
+                 width: calc(33.33% - 10px); /* 3 icons for tablets */
             }
         }
-        @media (max-width: 600px) { /* More aggressive for smaller mobile */
-             .role-icon {
-                 width: calc(50% - 8px); 
-                 min-width: 0; 
-                 padding: 10px 5px;
+        @media (max-width: 600px) { 
+            .role-icon {
+                 width: calc(50% - 10px); /* 2 icons for mobile */
             }
-            .role-icon span {
-                font-size: 0.75em; 
-            }
-             .role-brief-display th, .role-brief-display td {
-                font-size: 0.8em; /* Even smaller for very small screens */
-                 white-space: normal; /* Allow text to wrap */
-            }
+             .timeline-item {
+                 flex-direction: column;
+                 align-items: flex-start;
+                 border-bottom: 1px solid #ddd;
+                 padding-bottom: 15px;
+             }
+             .timeline-time {
+                 padding-right: 0;
+                 margin-bottom: 8px;
+             }
         }
-         @media (max-width: 480px) {
+        @media (max-width: 480px) {
              .iframe-container {
                 padding-top: 100%;
             }
@@ -341,15 +349,7 @@
                 padding-top: 0;
                 padding-bottom: 0;
             }
-             .roles-container {
-                gap: 8px;
-            }
-             .role-icon {
-                 width: calc(50% - 8px);
-            }
         }
-
-
     </style>
 </head>
 <body>
@@ -366,75 +366,46 @@
         
         <div class="roles-guidance">בחרו את התפקיד שלכם:</div>
         <div class="roles-container">
-            <!-- מפיק -->
             <div class="role-icon" data-role="producer">
                 <svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm-1-13h2v6h-2zm0 8h2v2h-2z"/></svg>
                 <span>מפיק/ה</span>
             </div>
-            <!-- במאי -->
             <div class="role-icon" data-role="director">
                 <svg viewBox="0 0 24 24"><path d="M10 16.5v-9l6 4.5-6 4.5zM12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8z"/></svg>
                 <span>במאי/ת</span>
             </div>
-            <!-- ע. במאי -->
             <div class="role-icon" data-role="assistantDirector">
                 <svg viewBox="0 0 24 24"><path d="M18 2H6c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zM6 4h5v8l-2.5-1.5L6 12V4zm0 15v-2h12v2H6zm7-10h5v2h-5v-2zm0 4h5v2h-5v-2z"/></svg>
                 <span>ע. במאי/ת</span>
             </div>
-            <!-- צלם/תאורן -->
             <div class="role-icon" data-role="cinematographer">
                  <svg viewBox="0 0 24 24"><path d="M4 4h16v2H4zm0 4h16v12H4zM12 6.5c-2.49 0-4.5 2.01-4.5 4.5S9.51 15.5 12 15.5s4.5-2.01 4.5-4.5S14.49 6.5 12 6.5zm0 7c-1.38 0-2.5-1.12-2.5-2.5S10.62 8.5 12 8.5s2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg>
-                <span>צלם/ת ותאורן/ית</span>
+                <span>צילום / תאורה</span>
             </div>
-             <!-- ע. הפקה -->
             <div class="role-icon" data-role="productionAssistant">
                 <svg viewBox="0 0 24 24"><path d="M14 2H6c-1.1 0-1.99.9-1.99 2L4 20c0 1.1.89 2 1.99 2H18c1.1 0 2-.9 2-2V8l-6-6zm2 16H8v-2h8v2zm0-4H8v-2h8v2zm-3-5V3.5L18.5 9H13z"/></svg>
                 <span>ע. הפקה</span>
             </div>
-            <!-- מלבישה/ארט -->
             <div class="role-icon" data-role="artAndCostumes">
                  <svg viewBox="0 0 24 24"><path d="M20.54 5.23l-1.39-1.68C18.88 3.21 18.47 3 18 3H6c-.47 0-.88.21-1.16.55L3.46 5.23C3.17 5.57 3 6.02 3 6.5V19c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V6.5c0-.48-.17-.93-.46-1.27zM6.24 5h11.52l.83 1H5.41l.83-1zM5 19V8h14v11H5zm3-5h2.55v3h2.9v-3H16v-2h-2.55V9h-2.9v3H8v2z" /></svg>
-                <span>מלבישה/ארט</span>
+                <span>הלבשה וארט</span>
             </div>
-             <!-- שחקנים -->
             <div class="role-icon" data-role="actors">
                 <svg viewBox="0 0 24 24"><path d="M12 5.5c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2zM7.5 15.5c0-1.33.41-2.53 1.09-3.5H4v3c0 1.1.9 2 2 2h1.57c-.05-.33-.07-.66-.07-1zm9.91-3.5c.68.97 1.09 2.17 1.09 3.5 0 .34-.02.67-.07 1H20c1.1 0 2-.9 2-2v-3h-4.41zM12 13c-1.93 0-3.5 1.57-3.5 3.5S10.07 20 12 20s3.5-1.57 3.5-3.5-1.57-3.5-3.5-3.5z"/></svg>
-                <span>שחקן/ית</span>
+                <span>משחק</span>
             </div>
-            <!-- סאונדמן -->
             <div class="role-icon" data-role="soundman">
                 <svg viewBox="0 0 24 24"><path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z"/></svg>
-                <span>סאונדמן/ית</span>
+                <span>סאונד</span>
             </div>
         </div>
         
         <div id="roleBriefDisplay" class="role-brief-display hidden">
             <h2 id="briefTitle"></h2>
-            <div id="briefTableContainer"></div> <!-- Container for the table -->
+            <div id="briefContentContainer"></div> 
         </div>
 
         <h3 style="text-align:center; margin-bottom:15px; color: var(--secondary-color);">מידע כללי לכלל הצוות:</h3>
-
-        <div class="accordion-item">
-            <button class="accordion-button">
-                📍 מיקומים וזמנים (יום שישי)
-                <span class="arrow">▼</span>
-            </button>
-            <div class="panel">
-                <h3>אוריין (מפיק):</h3>
-                <p>נקודת הזנקה רשמית: <strong>ביאליק 27</strong>, החל מ-10:00. לאחר קבלת נושאים - עדכון ויציאה לחמ"ל.</p>
-                
-                <h3>צוות גרעין (יונתן, נוי, סרג'יו):</h3>
-                <p>הגעה ישירה לחמ"ל ב-<strong>10:00</strong> להקמת חדר מבצעים.</p>
-                
-                <div class="important-note">
-                    <h3>כל שאר הצוות:</h3>
-                    <p>הגעה לחמ"ל ב-<strong>12:30 בצהריים</strong>.</p>
-                    <p><strong>כתובת החמ"ל:</strong> שז"ר 26, תל אביב (חניה זמינה).</p>
-                    <p><strong>לתשומת לבכם:</strong> ההזנקה הרשמית ב-10:00. היו מוכנים לרעיונות מרגע העדכון על הנושאים!</p>
-                </div>
-            </div>
-        </div>
 
         <div class="accordion-item">
             <button class="accordion-button">
@@ -444,32 +415,25 @@
             <div class="panel">
                 <h3>יום שישי (היום הראשון - יום ההזנקה)</h3>
                 <ul>
-                    <li><strong>10:00:</strong> <strong>הזנקה!</strong> קבלת נושאים (ז'אנר, דמות, חפץ, שורה) בביאליק 27 (אוריין). במקביל, צוות גרעין (יונתן, נוי, סרג'יו) מקים חמ"ל בשז"ר 26.</li>
-                    <li><strong>10:30 - 12:30:</strong> אוריין חוזר לחמ"ל. <strong>סיעור מוחות אינטנסיבי</strong>, פיצוח רעיון ראשוני, כתיבה על לוחות. במקביל, מתחילים בכתיבת תסריט ראשוני (אוריין, יונתן, בסיוע AI אם נדרש).</li>
-                    <li><strong>12:30:</strong> הגעת שאר הצוות לחמ"ל. עדכון והמשך פיתוח תסריט.</li>
-                    <li><strong>13:30 - 14:30:</strong> ארוחת צהריים קלה בחמ"ל. חלוקת משימות ראשונית לסט הראשון.</li>
-                    <li><strong>14:30 - 16:00:</strong> במקביל לסיום כתיבת סצנות ראשונות: <strong>התארגנות לסט ראשון</strong> (צלם-גיא, ארט-דניאל מתחילים לארגן פרופס ותפאורה. ע.במאי-נינה מתחילה תיאום ראשוני עם שחקנים רלוונטיים. מלבישה-דניאל אוספת/מכינה תלבושות). המפיק (אוריין) והבמאי (יונתן) מוודאים איסוף ציוד שכור.</li>
-                    <li><strong>16:00 - 22:00:</strong> <strong>צילומי סט ראשון.</strong> במקביל, צוות כתיבה (אוריין, יונתן) ממשיך לפתח את שאר התסריט. ברגע שיש סצנות נוספות, מתחילים <strong>לארגן סט שני ברוטציה.</strong></li>
-                    <li><strong>22:00 - 23:00:</strong> ארוחת ערב קלה / הפסקה קצרה. גיבוי חומרים מצולמים.</li>
-                    <li><strong>23:00 ואילך:</strong> המשך צילומים לפי התקדמות וזמינות לוקיישנים/שחקנים. חלק מהצוות (שלא חיוני לסט הנוכחי) יכול להתחיל מנוחה קצרה או לעבוד על הכנות ליום המחרת. <strong>חשוב לתכנן שעות שינה מינימליות ברוטציה!</strong></li>
+                    <li><strong>12:00:</strong> <strong>הזנקה!</strong> קבלת נושאים (ז'אנר, דמות, חפץ, שורה) בנקודת המפגש. העברת המידע לחמ"ל. <strong>(השעה גמישה, תעודכן ע"י המפיק/ה)</strong></li>
+                    <li><strong>12:30 - 15:00:</strong> <strong>סיעור מוחות וכתיבה.</strong> פיצוח רעיון, כתיבה על לוחות, התחלת כתיבת תסריט ראשוני (בסיוע כלים דיגיטליים).</li>
+                    <li><strong>15:00 - 17:00:</strong> <strong>התארגנות לסט ראשון.</strong> בזמן שהתסריט מתגבש, צוותי ארט, הלבשה וצילום מתחילים בהכנות ראשוניות. ע. במאי/ת מתחיל/ה תיאום עם שחקנים.</li>
+                     <li><strong>17:00 - 23:00:</strong> <strong>צילומי סט ראשון.</strong> במקביל, עבודה על סטים ותסריט להמשך.</li>
+                    <li><strong>23:00 - 02:00:</strong> ארוחת ערב מאוחרת, גיבוי חומרים, והמשך צילומים או מנוחה ברוטציה.</li>
                 </ul>
                 <h3>יום שבת (היום השני - צילומים וקדם-עריכה)</h3>
                 <ul>
-                    <li><strong>08:00 - 09:00:</strong> השכמה, קפה וארוחת בוקר קלה.</li>
-                    <li><strong>09:00 - 18:00:</strong> <strong>המשך וסיום צילומים.</strong> עבודה אינטנסיבית בסטים, תוך הקפדה על לו"ז.</li>
-                    <li><strong>18:00 - 19:00:</strong> סיום צילומים סופי! קיפול ציוד, ניקיון לוקיישנים.</li>
-                    <li><strong>19:00 - 20:00:</strong> חזרה לחמ"ל, פריקת ציוד, ארוחת ערב משותפת.</li>
-                    <li><strong>20:00 ואילך:</strong> <strong>תחילת POST-PRODUCTION רציני.</strong> גיבוי כל החומרים. העורך/ת (יש לקבוע מי) מתחיל/ה לעבוד על הראף-קאט. במקביל, סאונדמן (לירן) מכין קבצי סאונד.</li>
-                    <li><strong>לילה:</strong> המשך עריכה. צוות קריאייטיב (במאי, מפיק) צמוד לעורך. <strong>הקפדה על שעות שינה מינימליות לצוות הפוסט.</strong></li>
+                    <li><strong>08:00 - 09:00:</strong> השכמה, קפה וארוחת בוקר.</li>
+                    <li><strong>09:00 - 19:00:</strong> <strong>מרתון השלמת צילומים.</strong> עבודה אינטנסיבית בסטים.</li>
+                    <li><strong>19:00 - 20:00:</strong> סיום צילומים סופי, קיפול ציוד, חזרה לחמ"ל, ארוחת ערב.</li>
+                    <li><strong>20:00 ואילך:</strong> <strong>תחילת POST-PRODUCTION.</strong> גיבוי כל החומרים, התחלת עריכה.</li>
                 </ul>
                  <h3>יום ראשון (היום השלישי - פוסט והגשה)</h3>
                 <ul>
-                    <li><strong>00:00 - 07:00:</strong> <strong>מרתון עריכה, סאונד וצבע.</strong> לילה לבן של ליטושים אחרונים.</li>
-                    <li><strong>07:00:</strong> דד-ליין לנעילת העריכה (Picture Lock).</li>
-                    <li><strong>07:00 - 08:30:</strong> ייצוא (רינדור) סופי של הקובץ בפורמט הנדרש.</li>
-                    <li><strong>08:30 - 09:00:</strong> צפייה משותפת בקובץ הסופי לבדיקת תקלות טכניות אחרונות.</li>
-                    <li><strong>09:00 - 09:45:</strong> זמן באפר לתיקונים קריטיים ורינדור נוסף במידת הצורך.</li>
-                    <li><strong>10:00:</strong> <strong>דד-ליין הגשה!</strong> (יש לוודא מול נווה את שיטת ההגשה המדויקת).</li>
+                    <li><strong>00:00 - 09:00:</strong> <strong>מרתון עריכה, סאונד וצבע.</strong> לילה לבן של ליטושים.</li>
+                    <li><strong>09:00 - 10:30:</strong> ייצוא (רינדור) סופי של הקובץ ובדיקת תקינות.</li>
+                    <li><strong>10:30 - 11:45:</strong> זמן באפר לתיקונים קריטיים ורינדור נוסף.</li>
+                    <li><strong>12:00:</strong> <strong>דד-ליין הגשה!</strong></li>
                 </ul>
             </div>
         </div>
@@ -498,9 +462,8 @@
                 </table>
                 <h3>ציוד מהצוות (רשימה חלקית - <strong>חובה לעדכן בגיליון המשותף!</strong>):</h3>
                 <ul>
-                    <li><strong>גיא (צלם):</strong> ציוד מצלמה, ציוד תאורה.</li>
-                    <li><strong>יונתן (במאי):</strong> ייתכן ציוד סאונד בסיסי (לבדוק).</li>
-                    <li><strong>לירן (סאונדמן):</strong> נא לוודא איזה ציוד סאונד נוסף הוא מביא ולעדכן בגיליון.</li>
+                    <li><strong>צילום:</strong> ציוד מצלמה ותאורה אישיים.</li>
+                    <li><strong>סאונד:</strong> ציוד סאונד אישי.</li>
                 </ul>
             </div>
         </div>
@@ -512,15 +475,13 @@
             </button>
             <div class="panel">
                 <div class="google-sheet-info">
-                    <p><strong>גיליון זה הוא המקור המרכזי לניהול משאבים, רשימות קשר ועדכונים חיים. אנא דאגו לעדכן אותו באופן שוטף!</strong></p>
-                    <p><u>דוגמאות למידע שכדאי להוסיף (כל אחד בתחומו):</u></p>
+                    <p><strong>גיליון זה הוא המקור המרכזי לניהול משאבים ועדכונים חיים. אנא דאגו לעדכן אותו!</strong></p>
+                    <p><u>לדוגמה:</u></p>
                     <ul>
-                        <li><strong>מלבישה/ארט (דניאל):</strong> "הבאתי עץ חג מולד קטן לסצנה X", "יש לי תחפושת ספיידרמן מידה L".</li>
-                        <li><strong>ציוד אישי (כללי):</strong> "מביא מיקרופון רובה נוסף ובום", "יש לי סט עדשות נוסף למצלמה".</li>
-                        <li><strong>לוקיישנים פוטנציאלים:</strong> "לדודה שלי יש מחסן נטוש ברחוב Y, נראה מבטיח - צריך לבדוק זמינות".</li>
-                        <li><strong>זמינות/מגבלות אישיות:</strong> "פנוי רק עד 20:00 ביום שישי", "אלרגי לבוטנים".</li>
+                        <li><strong>הלבשה וארט:</strong> "יש לי תחפושת ספיידרמן", "מביא עץ חג מולד קטן".</li>
+                        <li><strong>ציוד אישי:</strong> "מביא מיקרופון רובה נוסף ובום", "יש לי סט עדשות נוסף".</li>
+                        <li><strong>לוקיישנים פוטנציאלים:</strong> "לדודה שלי יש מחסן נטוש ברחוב Y, צריך לבדוק זמינות".</li>
                     </ul>
-                    <p>כל מידע שתורם לניהול יעיל יותר חשוב וצריך להירשם כאן בגיליון.</p>
                 </div>
                 <div class="iframe-container">
                     <iframe src="https://docs.google.com/spreadsheets/d/1WEJFmbgzMYM6qO9XflrQcUQM__-gYb_ZvbTAbDgmXTQ/edit?usp=sharing&rm=minimal" loading="lazy">
@@ -552,7 +513,7 @@
         </div>
 
         <div class="footer">
-            <p>בהצלחה ענקית לכולנו!<br><strong>אוריין</strong></p>
+            <p>בהצלחה ענקית לכולנו!<br><strong>ההפקה</strong></p>
         </div>
     </div>
 
@@ -578,81 +539,134 @@
         const roleIcons = document.querySelectorAll(".role-icon");
         const briefDisplay = document.getElementById("roleBriefDisplay");
         const briefTitle = document.getElementById("briefTitle");
-        const briefTableContainer = document.getElementById("briefTableContainer");
+        const briefContentContainer = document.getElementById("briefContentContainer");
 
         const roleBriefsData = {
             producer: {
-                title: "מפיק/ה (אוריין)",
-                breakdown: [
-                    { phase: "שישי 10:00 (הזנקה)", task: "קבלת נושאים בביאליק 27. עדכון מיידי לצוות בחמ\"ל.", comms: "כלל הצוות, נווה (פסטיבל)." },
-                    { phase: "שישי 10:30-14:30 (חמ\"ל)", task: "הובלת סיעור מוחות. ניהול כתיבת תסריט ראשוני (בשיתוף יונתן וצוות גרעין, כולל שימוש ב-AI). תיאום איסוף ציוד שכור. ארגון לוגיסטיקת אוכל ושתייה.", comms: "יונתן, צוות גרעין, ספקים." },
-                    { phase: "שישי 14:30-22:00 (הכנות וצילום סט 1)", task: "ווידוא מוכנות סט ראשון. ניהול לו\"ז צילומים בפועל. פתרון בעיות לוגיסטיות וטכניות. שמירה על תקציב.", comms: "כלל הצוות בסט, במאי, ע. במאי." },
-                    { phase: "שישי לילה - שבת (צילומים)", task: "המשך ניהול לוגיסטי, לו\"ז ופתרון בעיות. דאגה לרווחת הצוות (אוכל, מנוחה ברוטציה). אחריות על גיבוי יומי של חומרי גלם.", comms: "כלל הצוות, במאי." },
-                    { phase: "שבת ערב - ראשון בוקר (פוסט)", task: "תיאום עבודה מול עורך/ת, סאונד וצבע. שמירה על לו\"ז פוסט צפוף. הכנות טכניות להגשת הסרט (פורמט, מדיה).", comms: "צוות פוסט, במאי." },
-                    { phase: "ראשון 10:00 (הגשה)", task: "אחריות על הגשת הסרט בזמן ובפורמט הנדרש.", comms: "נווה (פסטיבל)." },
-                    { phase: "כללי (לאורך כל ה-48 שעות)", task: "שמירה על מורל גבוה. קשר עם נווה. פתרון קונפליקטים. <strong>עדכון שוטף וחובה של גיליון ההפקה המשותף</strong> (לוגיסטיקה, משאבים, הוצאות, פרטי קשר וכו').", comms: "כלל הצוות." }
-                ]
+                title: "מפיק/ה",
+                days: {
+                    שישי: [
+                        { time: "12:00", task: "קבלת נושאים בנקודת ההזנקה, עדכון מיידי לצוות וניהול גמישות הלו\"ז." },
+                        { time: "12:30-17:00", task: "הובלת סיעור מוחות, ניהול כתיבת תסריט ראשוני, תיאום איסוף ציוד שכור ולוגיסטיקת מזון." },
+                        { time: "17:00 ואילך", task: "ניהול לו\"ז צילומים בפועל, פתרון בעיות, גיבוי חומרים ותכנון מנוחה לצוות ברוטציה." }
+                    ],
+                    שבת: [
+                        { time: "כל היום", task: "המשך ניהול לוגיסטי, לו\"ז ופתרון בעיות על הסט. דאגה לרווחת הצוות." },
+                        { time: "20:00 ואילך", task: "תיאום ותחילת עבודת פוסט-פרודקשן (עריכה, סאונד)." }
+                    ],
+                    ראשון: [
+                        { time: "כל הלילה/בוקר", task: "שמירה על לו\"ז פוסט צפוף. הכנות טכניות להגשה." },
+                        { time: "12:00", task: "אחריות על הגשת הסרט בזמן ובפורמט הנדרש." }
+                    ]
+                }
             },
             director: {
-                title: "במאי/ת (יונתן)",
-                breakdown: [
-                    { phase: "שישי 10:30-14:30 (חמ\"ל)", task: "הובלה קריאייטיבית של פיצוח הרעיון. עבודה עם אוריין וצוות גרעין על תסריט ראשוני (כולל AI). גיבוש חזון אומנותי. תחילת הכנת שוט-ליסט.", comms: "אוריין, צוות גרעין." },
-                    { phase: "שישי 14:30-16:00 (הכנות סט 1)", task: "תדרוך צלם (גיא), ארט (דניאל) ושחקנים רלוונטיים לגבי החזון לסצנות הראשונות. השלמת שוט-ליסט לסט 1.", comms: "גיא, דניאל, נינה, שחקנים." },
-                    { phase: "שישי 16:00 - שבת (צילומים)", task: "ניהול אמנותי מלא של הסט. עבודה אינטנסיבית עם שחקנים. ווידוא ביצוע מדויק של השוט-ליסט. שמירה על אווירה וחזון. עבודה עם צוות כתיבה על סטים הבאים במקביל.", comms: "שחקנים, צלם, ע.במאי, כל צוות הסט." },
-                    { phase: "שבת ערב - ראשון בוקר (פוסט)", task: "עבודה צמודה עם עורך/ת על הקאט, בחירת טייקים. ליווי עיצוב פסקול ותיקוני צבע.", comms: "עורך/ת, סאונדמן, מפיק." },
-                    { phase: "כללי", task: "קבלת החלטות אומנותיות מכריעות. שמירה על קוהרנטיות הסרט. התייעצות מתמדת עם כרטיסיית <strong>הלו\"ז הכללי</strong> לתזמונים.", comms: "כלל הצוות." }
-                ]
+                title: "במאי/ת",
+                days: {
+                     שישי: [
+                        { time: "12:30-15:00", task: "הובלה קריאייטיבית של פיצוח הרעיון והתסריט. גיבוש חזון אומנותי." },
+                        { time: "15:00-17:00", task: "הכנת שוט-ליסט ותדרוך צוות קריאייטיב ושחקנים לסצנות הראשונות." },
+                        { time: "17:00 ואילך", task: "ניהול אמנותי מלא של הסט, עבודה עם שחקנים, ווידוא ביצוע השוט-ליסט." }
+                    ],
+                    שבת: [
+                        { time: "כל היום", task: "המשך ניהול הסט, שמירה על קוהרנטיות ואווירת הסרט." },
+                        { time: "20:00 ואילך", task: "עבודה צמודה עם העורך/ת על הראף-קאט ובחירת טייקים." }
+                    ],
+                    ראשון: [
+                        { time: "כל הלילה/בוקר", task: "ליווי תהליכי עיצוב פסקול ותיקוני צבע. נעילת הקאט הסופי." }
+                    ]
+                }
             },
             assistantDirector: {
-                title: "ע. במאי/ת (נינה)",
-                breakdown: [
-                    { phase: "שישי 12:30-16:00 (חמ\"ל והכנות)", task: "סיוע לבמאי (יונתן) בהכנת שוט-ליסט מפורט ותסריט מצולם (breakdown). תחילת תזמון שחקנים לסט הראשון לפי הנחיות במאי.", comms: "יונתן, שחקנים." },
-                    { phase: "שישי 16:00 - שבת (צילומים)", task: "ניהול לו\"ז הצילומים בפועל על הסט. 'יד ימינו' של הבמאי. תיאום בין כל המחלקות בסט (צילום, ארט, סאונד, הלבשה). שמירה על שקט בזמן טייק. אחריות על המשכיות (continuity) כללית (תסריט, פעולות).", comms: "במאי, כל צוות הסט, מפיק." },
-                    { phase: "כללי", task: "הכנת דפי קריאה (call sheets) יומיים והפצתם. עבודה צמודה עם המפיק והבמאי לווידוא זרימה חלקה של הצילומים. עדכון שוטף של הסטטוס ב<strong>גיליון ההפקה</strong>.", comms: "אוריין, יונתן." }
-                ]
+                title: "ע. במאי/ת",
+                 days: {
+                     שישי: [
+                        { time: "12:30-17:00", task: "סיוע בפירוק התסריט לשוטים (breakdown). תחילת תזמון שחקנים לסטים הראשונים." },
+                        { time: "17:00 ואילך", task: "ניהול לו\"ז הצילומים בפועל על הסט, תיאום בין המחלקות, שמירה על שקט בזמן טייק ואחריות על המשכיות (continuity)." }
+                    ],
+                    שבת: [
+                        { time: "כל היום", task: "המשך ניהול שוטף של הסט. הכנת דפי קריאה (call sheets) והפצתם. וידוא עמידה בזמנים." }
+                    ],
+                    ראשון: [
+                        { time: "במהלך הפוסט", task: "זמינות לספק מידע על טייקים, הערות מהסט או פרטי המשכיות לעורך/ת." }
+                    ]
+                }
             },
             cinematographer: {
-                title: "צלם/ת ותאורן/ית (גיא, ע. צלם: עזרא)",
-                breakdown: [
-                    { phase: "שישי 12:30-16:00 (חמ\"ל והכנות)", task: "הבנת החזון של הבמאי (יונתן) לסצנות הראשונות. תכנון קומפוזיציות, תנועות מצלמה ותאורה. הכנת ציוד צילום ותאורה (ראו כרטיסיית <strong>ציוד</strong> ועדכנו בגיליון). תיאום עם ע. צלם (עזרא).", comms: "יונתן, עזרא, דניאל (ארט)." },
-                    { phase: "שישי 16:00 - שבת (צילומים)", task: "אחריות מלאה על הצד הוויזואלי. תפעול מצלמה, בניית פריימים, פוקוס, חשיפה. הקמה וניהול תאורה (בשיתוף עזרא). עבודה דינמית בהתאם להתפתחויות בסט.", comms: "יונתן, עזרא, כל צוות הסט." },
-                    { phase: "בסוף כל יום צילום", task: "אחריות על גיבוי מאובטח של כל חומרי הגלם. העברת החומרים למפיק/עורך.", comms: "אוריין, עורך/ת." },
-                    { phase: "שבת ערב - ראשון (פוסט)", task: "זמינות למעורבות בתהליך תיקוני הצבע (Color Grading) ומתן פידבק.", comms: "במאי, עורך/ת." },
-                    { phase: "כללי", task: "שמירה על איכות צילום גבוהה ועקבית. עדכנו ב<strong>גיליון המשותף</strong> כל ציוד אישי רלוונטי שאתם מביאים.", comms: "כלל הצוות." }
-                ]
+                title: "צילום / תאורה",
+                days: {
+                     שישי: [
+                        { time: "12:30-17:00", task: "הבנת החזון של הבמאי/ת, תכנון קומפוזיציות ותאורה, הכנת ציוד צילום ותאורה." },
+                        { time: "17:00 ואילך", task: "אחריות מלאה על הצד הוויזואלי: תפעול מצלמה, בניית פריימים, הקמת וניהול תאורה." }
+                    ],
+                    שבת: [
+                        { time: "כל היום", task: "המשך צילומים תוך שמירה על איכות ועקביות ויזואלית." },
+                        { time: "בסוף יום הצילום", task: "אחריות על גיבוי מאובטח של כל חומרי הגלם והעברתם להפקה/עריכה." }
+                    ],
+                    ראשון: [
+                         { time: "במהלך הפוסט", task: "זמינות למעורבות בתהליך תיקוני הצבע (Color Grading) ומתן פידבק מקצועי." }
+                    ]
+                }
             },
             productionAssistant: {
-                title: "ע. הפקה (ליאור)",
-                breakdown: [
-                    { phase: "שישי 12:30 (הגעה לחמ\"ל)", task: "סיוע למפיק (אוריין) בארגונים אחרונים בחמ\"ל. עזרה ברכש קטן (מים, חטיפים נוספים). היכרות עם הצרכים המיידיים.", comms: "אוריין." },
-                    { phase: "שישי 14:30 - שבת (הכנות וצילומים)", task: "תמיכה לוגיסטית מלאה בצוות על הסט ובחמ\"ל. דאגה מתמדת לאוכל ושתיה לצוות. סיוע בנשיאת ציוד קל. שמירה על סדר וניקיון בלוקיישנים. תיאום הגעות ועזיבות של אנשים שאינם בצוות הקבוע (למשל, בעלי לוקיישן). שליחויות קטנות ודחופות.", comms: "אוריין, כלל הצוות." },
-                    { phase: "כללי", task: "להיות 'האיש לכל משימה'. זמינות גבוהה, פרואקטיביות, חשיבה מחוץ לקופסה ויכולת אלתור. עדכון רשימות מלאי (אוכל, ציוד מתכלה) ב<strong>גיליון המשותף</strong>.", comms: "אוריין." }
-                ]
+                title: "ע. הפקה",
+                days: {
+                     שישי: [
+                        { time: "12:30 ואילך", task: "הצטרפות לחמ\"ל וסיוע למפיק/ה בכל המשימות הלוגיסטיות: רכש קטן, שליחויות, הכנת לוקיישנים, דאגה לצוות." }
+                    ],
+                    שבת: [
+                        { time: "כל היום", task: "תמיכה לוגיסטית מלאה בצוות על הסט ובחמ\"ל. 'איש/אשת כל משימה'." }
+                    ],
+                    ראשון: [
+                        { time: "במהלך הפוסט", task: "סיוע בשמירה על סדר וארגון בחמ\"ל. עזרה בכל משימה לוגיסטית שנותרה." }
+                    ]
+                }
             },
             artAndCostumes: {
-                title: "מלבישה/ארט (דניאל)",
-                breakdown: [
-                    { phase: "שישי 12:30 (הגעה לחמ\"ל)", task: "הבנת הקונספט והאווירה הנדרשת מהבמאי (יונתן) והתסריט המתגבש. איתור, הכנה והשגת פריטי ארט, פרופס, תלבושות ואביזרים רלוונטיים לסצנות הראשונות (כולל 'החפץ' המחייב).", comms: "יונתן, שחקנים רלוונטיים." },
-                    { phase: "שישי 14:30 - שבת (הכנות וצילומים)", task: "עיצוב סט ראשון בלוקיישן. הלבשת שחקנים לסצנות הראשונות. לאחר מכן, עבודה ברוטציה על הכנת הסטים וההלבשות הבאות במקביל לצילומים. אחריות על נראות הסט והדמויות. שמירה על קונטיניואיטי ויזואלית (ארט ולבוש).", comms: "יונתן, גיא (צלם), שחקנים." },
-                    { phase: "כללי", task: "תיקונים ושינויים קטנים בסט ובלבוש לפי הצורך במהלך הצילומים. <strong>עדכנו בגיליון המשותף</strong> רשימה מפורטת של כל פריטי הארט וההלבשה שברשותכם או שאתם מארגנים (לדוגמה: 'עץ חג מולד', 'תחפושת ספיידרמן').", comms: "כלל הצוות." }
-                ]
+                title: "הלבשה וארט",
+                days: {
+                     שישי: [
+                        { time: "12:30-17:00", task: "הבנת הקונספט. איתור, הכנה והשגת פריטי ארט, פרופס ותלבושות לסצנות הראשונות." },
+                        { time: "17:00 ואילך", task: "עיצוב סט ראשון, הלבשת שחקנים. עבודה ברוטציה על הכנת הסטים וההלבשות הבאות. שמירה על קונטיניואיטי ויזואלית." }
+                    ],
+                    שבת: [
+                        { time: "כל היום", task: "המשך אחריות על נראות הסט והדמויות. תיקונים ושינויים לפי הצורך." }
+                    ],
+                    ראשון: [
+                         { time: "סיום צילומים", task: "סיוע בקיפול ואיסוף כל פריטי הארט וההלבשה." }
+                    ]
+                }
             },
             actors: {
-                title: "שחקן/ית (בן עמי, גליה, ארז)",
-                breakdown: [
-                    { phase: "שישי (מרגע קבלת סצנות ראשונות)", task: "לימוד טקסטים והבנת הדמות והסצנה במהירות. עבודה עם הבמאי (יונתן) על פרשנות הדמות. הכנות אישיות (למשל, לבוש בסיסי שביקשו מכם).", comms: "יונתן, נינה (ע.במאי), דניאל (מלבישה/ארט)." },
-                    { phase: "שישי-שבת (צילומים, לפי קריאה)", task: "הגעה בזמן לסט לפי הקריאה של ע.הבמאי (נינה). ריכוז מלא והיענות להוראות הבמאי. שמירה על אנרגיה ורצף בין טייקים. שיתוף פעולה עם שאר השחקנים והצוות. סבלנות והבנה לתהליך הטכני. להיות זמינים לשינויים של הרגע האחרון בתסריט או בבימוי.", comms: "יונתן, נינה, צוות הסט." },
-                    { phase: "כללי (לאורך כל ה-48 שעות)", task: "<strong>להיות בסטנד-ביי מלא וזמינים טלפונית.</strong> תקבלו שעות מדויקות ככל הניתן, אך הלו\"ז דינמי. שמרו על קשר עם מחלקת ההלבשה והארט לגבי צרכים. עדכנו זמינות ומגבלות אישיות (אם יש) ב<strong>גיליון המשותף</strong>.", comms: "נינה, אוריין." }
-                ]
+                title: "משחק",
+                days: {
+                     שישי: [
+                        { time: "מרגע קבלת סצנות", task: "לימוד טקסטים מהיר והבנת הדמות. עבודה עם הבמאי/ת על פרשנות." },
+                        { time: "לפי קריאה (ערב/לילה)", task: "הגעה בזמן לסט, ריכוז מלא והיענות להוראות. שיתוף פעולה עם הצוות." }
+                    ],
+                    שבת: [
+                        { time: "לפי קריאה", task: "המשך צילומים. שמירה על אנרגיה ורצף בין טייקים." }
+                    ],
+                    ראשון: [
+                        { time: "סטנד-ביי", task: "להיות זמינים טלפונית לכל צורך (הקלטות קול נוספות - ADR, צילומי השלמה קטנים אם נדרש באופן חריג)." }
+                    ]
+                }
             },
             soundman: {
-                title: "סאונדמן/ית (לירן)",
-                breakdown: [
-                    { phase: "שישי 12:30-16:00 (חמ\"ל והכנות)", task: "בדיקת ציוד הקלטה. הכנת מיקרופונים (בום, דש וכו') ותכנון הקלטה לסצנות הראשונות בהתאם ללוקיישן, תנועת שחקנים וסוג הסאונד הנדרש. ודאו שכל הציוד שלכם רשום בגיליון המשותף.", comms: "יונתן, גיא (צלם)." },
-                    { phase: "שישי 16:00 - שבת (צילומים)", task: "אחריות מלאה על הקלטת סאונד נקי, ברור ואיכותי לכל הדיאלוגים, האווירות (room tone) והאפקטים החשובים. ניטור רמות שמע קפדני. טיפול אקטיבי ברעשי רקע (מיזוג, תנועה וכו') ככל הניתן. הצמדת דשים לשחקנים.", comms: "יונתן, גיא, שחקנים." },
-                    { phase: "בסוף כל יום צילום/סשן", task: "תיוג קפדני וארגון מסודר של קבצי האודיו. העברת קבצי הסאונד בצורה מסודרת ומקוטלגת לעורך/ת או למפיק (לגיבוי).", comms: "עורך/ת, אוריין." },
-                    { phase: "שבת ערב - ראשון (פוסט)", task: "זמינות למתן ייעוץ או חומרים נוספים (כמו אפקטים מספרייה אישית) לצוות הפוסט.", comms: "צוות פוסט." }
-                ]
+                title: "סאונד",
+                 days: {
+                     שישי: [
+                        { time: "12:30-17:00", task: "בדיקת ציוד, תכנון הקלטה לסצנות הראשונות." },
+                        { time: "17:00 ואילך", task: "אחריות מלאה על הקלטת סאונד נקי ואיכותי (דיאלוגים, אווירה) על הסט. ניטור רמות שמע." }
+                    ],
+                    שבת: [
+                        { time: "כל היום", task: "המשך הקלטות על הסט. תיוג קפדני של קבצי האודיו." },
+                        { time: "בסוף יום הצילום", task: "העברת כל חומרי הסאונד בצורה מסודרת לעריכה." }
+                    ],
+                    ראשון: [
+                         { time: "במהלך הפוסט", task: "זמינות למתן ייעוץ או חומרים נוספים לצוות הפוסט." }
+                    ]
+                }
             }
         };
 
@@ -664,43 +678,34 @@
                 roleIcons.forEach(i => i.classList.remove("active-role"));
                 this.classList.add("active-role");
 
-                briefTableContainer.innerHTML = ""; // Clear previous table
+                briefContentContainer.innerHTML = ""; // Clear previous content
 
                 if (briefData) {
-                    briefTitle.textContent = `ברייקדאון ל${briefData.title}`;
+                    briefTitle.textContent = `ברייקדאון לתפקיד: ${briefData.title}`;
                     
-                    const table = document.createElement("table");
-                    const thead = document.createElement("thead");
-                    const tbody = document.createElement("tbody");
-                    
-                    const headerRow = document.createElement("tr");
-                    ["שלב / זמן משוער", "משימה מרכזית", "דגשים / תקשורת / כלים"].forEach(text => {
-                        const th = document.createElement("th");
-                        th.textContent = text;
-                        headerRow.appendChild(th);
-                    });
-                    thead.appendChild(headerRow);
-                    table.appendChild(thead);
+                    Object.keys(briefData.days).forEach(day => {
+                        const dayHeader = document.createElement("h3");
+                        dayHeader.className = "timeline-day-header";
+                        dayHeader.textContent = day;
+                        briefContentContainer.appendChild(dayHeader);
 
-                    briefData.breakdown.forEach(item => {
-                        const row = document.createElement("tr");
-                        
-                        const phaseCell = document.createElement("td");
-                        phaseCell.innerHTML = `<strong>${item.phase}</strong>`; // Make phase bold
-                        row.appendChild(phaseCell);
-                        
-                        const taskCell = document.createElement("td");
-                        taskCell.innerHTML = item.task; // Use innerHTML if task contains HTML like <strong>
-                        row.appendChild(taskCell);
-                        
-                        const commsCell = document.createElement("td");
-                        commsCell.innerHTML = item.comms; // Use innerHTML for potential formatting
-                        row.appendChild(commsCell);
-                        
-                        tbody.appendChild(row);
+                        briefData.days[day].forEach(item => {
+                            const timelineItem = document.createElement("div");
+                            timelineItem.className = "timeline-item";
+
+                            const timeDiv = document.createElement("div");
+                            timeDiv.className = "timeline-time";
+                            timeDiv.textContent = item.time;
+                            
+                            const contentDiv = document.createElement("div");
+                            contentDiv.className = "timeline-content";
+                            contentDiv.innerHTML = `<p>${item.task}</p>`;
+
+                            timelineItem.appendChild(timeDiv);
+                            timelineItem.appendChild(contentDiv);
+                            briefContentContainer.appendChild(timelineItem);
+                        });
                     });
-                    table.appendChild(tbody);
-                    briefTableContainer.appendChild(table);
 
                     briefDisplay.classList.remove("hidden");
                     briefDisplay.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
@@ -713,4 +718,3 @@
     </script>
 </body>
 </html>
-�
