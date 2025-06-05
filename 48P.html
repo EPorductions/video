@@ -1,0 +1,620 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>תדריך הפקה אינטראקטיבי V4 - פרויקט 48</title>
+    <style>
+        :root {
+            --primary-color: #007bff;
+            --primary-hover-color: #0056b3;
+            --secondary-color: #6c757d;
+            --light-gray-color: #f8f9fa;
+            --dark-gray-color: #343a40;
+            --background-color: #f0f2f5;
+            --text-color: #212529;
+            --border-radius: 8px;
+            --box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+
+        body {
+            font-family: 'Arial', 'Helvetica Neue', Helvetica, sans-serif;
+            line-height: 1.7;
+            margin: 0;
+            padding: 0;
+            background-color: var(--background-color);
+            color: var(--text-color);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+            padding-top: 15px;
+            padding-bottom: 15px;
+        }
+        .main-container {
+            background-color: #ffffff;
+            padding: 20px;
+            border-radius: var(--border-radius);
+            box-shadow: var(--box-shadow);
+            width: 95%;
+            max-width: 850px;
+        }
+        .header {
+            text-align: center;
+            margin-bottom: 25px;
+            padding-bottom: 15px;
+            border-bottom: 3px solid var(--primary-color);
+        }
+        .header h1 {
+            font-size: clamp(1.8em, 5vw, 2.4em);
+            color: var(--primary-hover-color);
+            margin: 0;
+        }
+        .header .emoji {
+            font-size: clamp(2.5em, 7vw, 3em);
+            display: block;
+            margin-bottom: 8px;
+        }
+        
+        .introduction {
+            background-color: var(--light-gray-color);
+            padding: 15px;
+            border-radius: var(--border-radius);
+            margin-bottom: 20px;
+            border-left: 5px solid var(--primary-color);
+            text-align: center;
+        }
+        .introduction p {
+            margin: 0;
+            font-size: 1.05em; /* Slightly smaller */
+        }
+
+        .roles-guidance {
+             margin-bottom: 15px; /* Reduced margin */
+             text-align: center;
+             font-weight: bold;
+             font-size: 1.1em;
+             color: var(--dark-gray-color);
+        }
+
+        .roles-container {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-around; /* Better distribution */
+            gap: 12px; /* Slightly increased gap */
+            margin-bottom: 25px;
+            padding: 10px 0; 
+        }
+        .role-icon {
+            cursor: pointer;
+            text-align: center;
+            padding: 12px 8px; /* Adjusted padding */
+            border-radius: var(--border-radius);
+            transition: background-color 0.3s ease, transform 0.2s ease, box-shadow 0.2s ease;
+            width: calc(25% - 12px); /* 4 icons per row */
+            min-width: 100px; 
+            box-sizing: border-box;
+            border: 1px solid #ddd; /* Softer border */
+        }
+        .role-icon.active-role {
+            background-color: var(--primary-color) !important;
+            color: white;
+            transform: translateY(-3px);
+            box-shadow: 0 4px 8px rgba(0,123,255,0.3);
+        }
+        .role-icon.active-role svg {
+            fill: white;
+        }
+        .role-icon.active-role span {
+            color: white;
+        }
+        .role-icon:hover {
+            background-color: #e9ecef;
+            transform: translateY(-3px);
+            border-color: #ccc;
+        }
+        .role-icon svg {
+            width: 28px; 
+            height: 28px;
+            margin-bottom: 6px;
+            fill: var(--primary-color);
+        }
+        .role-icon span {
+            display: block;
+            font-size: 0.75em; /* Slightly smaller for longer names */
+            color: var(--dark-gray-color);
+            font-weight: bold;
+        }
+
+        .role-brief-display {
+            background-color: #eef7ff;
+            border: 1px solid var(--primary-color);
+            padding: 20px;
+            margin-top: 10px;
+            margin-bottom: 25px;
+            border-radius: var(--border-radius);
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+        }
+        .role-brief-display h2 {
+            color: var(--primary-hover-color);
+            margin-top: 0;
+            text-align: center;
+            border-bottom: 1px solid #cce5ff;
+            padding-bottom: 10px;
+        }
+        .role-brief-display ul {
+            list-style-type: '✔ ';
+            padding-right: 20px;
+            font-size: 0.95em;
+        }
+         .role-brief-display li {
+            margin-bottom: 8px;
+        }
+        .role-brief-display.hidden {
+            display: none;
+        }
+
+        .accordion-item {
+            margin-bottom: 12px;
+            border-radius: var(--border-radius);
+            box-shadow: 0 2px 5px rgba(0,0,0,0.06);
+            overflow: hidden;
+        }
+        .accordion-button {
+            background-color: var(--secondary-color); 
+            color: white;
+            cursor: pointer;
+            padding: 12px 20px; 
+            width: 100%;
+            border: none;
+            text-align: right;
+            outline: none;
+            font-size: 1.1em; 
+            font-weight: bold;
+            transition: background-color 0.3s ease;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .accordion-button:hover {
+            background-color: #5a6268;
+        }
+        .accordion-button .arrow {
+            font-size: 1em;
+            transition: transform 0.3s ease;
+        }
+        .accordion-button.active .arrow {
+            transform: rotate(180deg);
+        }
+        .panel {
+            padding: 0 20px;
+            background-color: white;
+            max-height: 0;
+            overflow-y: auto; 
+            transition: max-height 0.35s ease-out, padding 0.35s ease-out;
+            border-top: 1px solid #e0e0e0;
+        }
+        .panel.show {
+             padding: 15px 20px; 
+        }
+        .panel h3 {
+            color: var(--primary-hover-color);
+            margin-top: 0;
+            font-size: 1.1em;
+            border-bottom: 1px solid #eee;
+            padding-bottom: 5px;
+        }
+        .panel ul {
+            list-style-type: '➥';
+            padding-right: 18px;
+            font-size: 0.95em;
+        }
+        .panel li {
+            margin-bottom: 8px;
+        }
+        
+        .important-note {
+            background-color: #fff3cd;
+            border-left: 4px solid #ffeeba;
+            padding: 12px;
+            margin: 12px 0;
+            border-radius: 5px;
+            font-size: 0.9em;
+        }
+        .iframe-container {
+            position: relative;
+            overflow: hidden;
+            width: 100%;
+            padding-top: 75%; 
+            margin: 15px 0;
+        }
+        .iframe-container iframe {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            border: 0;
+            border-radius: var(--border-radius);
+        }
+        .google-sheet-info {
+            background-color: var(--light-gray-color);
+            padding: 15px;
+            border-radius: var(--border-radius);
+            margin-bottom: 15px;
+            font-size: 0.95em;
+        }
+        .google-sheet-info strong {
+            color: var(--primary-hover-color);
+        }
+         .google-sheet-info ul {
+            list-style-type: '💡';
+            padding-right: 20px;
+            margin-top: 10px;
+        }
+        .google-sheet-info li {
+            margin-bottom: 5px;
+        }
+
+
+        .footer {
+            text-align: center;
+            margin-top: 25px;
+            padding-top: 15px;
+            border-top: 1px solid #ddd;
+            font-size: 0.9em;
+            color: #666;
+        }
+        
+        @media (max-width: 768px) {
+            .main-container {
+                padding: 15px;
+            }
+            .header h1 {
+                font-size: 1.7em; /* Adjusted for mobile */
+            }
+            .accordion-button {
+                font-size: 1em;
+                padding: 10px 15px;
+            }
+            .panel.show {
+                 padding: 10px 15px;
+            }
+            .role-icon {
+                 width: calc(50% - 10px); /* 2 icons per row */
+            }
+        }
+        @media (max-width: 480px) {
+            .roles-container {
+                /* Keep as flex-wrap for now, let them stack if needed */
+            }
+            .role-icon {
+                 width: calc(50% - 8px); /* Still 2 per row, but tighter */
+                 min-width: 0; /* Allow more flexibility */
+                 padding: 10px 5px;
+            }
+            .role-icon span {
+                font-size: 0.7em;
+            }
+             .iframe-container {
+                padding-top: 100%;
+            }
+        }
+
+    </style>
+</head>
+<body>
+
+    <div class="main-container">
+        <div class="header">
+            <span class="emoji">🎬</span>
+            <h1>תדריך הפקה אינטראקטיבי - פרויקט 48</h1>
+        </div>
+
+        <div class="introduction">
+            <p>לחצו על אייקוני התפקידים למטה לקבלת בריף מותאם אישית. מידע כללי נוסף זמין בכרטיסיות בהמשך.</p>
+        </div>
+        
+        <div class="roles-guidance">בחרו את התפקיד שלכם:</div>
+        <div class="roles-container">
+            <!-- מפיק -->
+            <div class="role-icon" data-role="producer">
+                <svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm-1-13h2v6h-2zm0 8h2v2h-2z"/></svg>
+                <span>מפיק/ה</span>
+            </div>
+            <!-- במאי -->
+            <div class="role-icon" data-role="director">
+                <svg viewBox="0 0 24 24"><path d="M10 16.5v-9l6 4.5-6 4.5zM12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8z"/></svg>
+                <span>במאי/ת</span>
+            </div>
+            <!-- ע. במאי -->
+            <div class="role-icon" data-role="assistantDirector">
+                <svg viewBox="0 0 24 24"><path d="M18 2H6c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zM6 4h5v8l-2.5-1.5L6 12V4zm0 15v-2h12v2H6zm7-10h5v2h-5v-2zm0 4h5v2h-5v-2z"/></svg>
+                <span>ע. במאי/ת</span>
+            </div>
+            <!-- צלם/תאורן -->
+            <div class="role-icon" data-role="cinematographer">
+                 <svg viewBox="0 0 24 24"><path d="M4 4h16v2H4zm0 4h16v12H4zM12 6.5c-2.49 0-4.5 2.01-4.5 4.5S9.51 15.5 12 15.5s4.5-2.01 4.5-4.5S14.49 6.5 12 6.5zm0 7c-1.38 0-2.5-1.12-2.5-2.5S10.62 8.5 12 8.5s2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg>
+                <span>צלם/ת ותאורן/ית</span>
+            </div>
+             <!-- ע. הפקה -->
+            <div class="role-icon" data-role="productionAssistant">
+                <svg viewBox="0 0 24 24"><path d="M14 2H6c-1.1 0-1.99.9-1.99 2L4 20c0 1.1.89 2 1.99 2H18c1.1 0 2-.9 2-2V8l-6-6zm2 16H8v-2h8v2zm0-4H8v-2h8v2zm-3-5V3.5L18.5 9H13z"/></svg>
+                <span>ע. הפקה</span>
+            </div>
+            <!-- מלבישה/ארט -->
+            <div class="role-icon" data-role="artAndCostumes">
+                 <svg viewBox="0 0 24 24"><path d="M20.54 5.23l-1.39-1.68C18.88 3.21 18.47 3 18 3H6c-.47 0-.88.21-1.16.55L3.46 5.23C3.17 5.57 3 6.02 3 6.5V19c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V6.5c0-.48-.17-.93-.46-1.27zM6.24 5h11.52l.83 1H5.41l.83-1zM5 19V8h14v11H5zm3-5h2.55v3h2.9v-3H16v-2h-2.55V9h-2.9v3H8v2z" /></svg> <!-- Combined icon for clothes and art/props -->
+                <span>מלבישה/ארט</span>
+            </div>
+             <!-- שחקנים -->
+            <div class="role-icon" data-role="actors">
+                <svg viewBox="0 0 24 24"><path d="M12 5.5c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2zM7.5 15.5c0-1.33.41-2.53 1.09-3.5H4v3c0 1.1.9 2 2 2h1.57c-.05-.33-.07-.66-.07-1zm9.91-3.5c.68.97 1.09 2.17 1.09 3.5 0 .34-.02.67-.07 1H20c1.1 0 2-.9 2-2v-3h-4.41zM12 13c-1.93 0-3.5 1.57-3.5 3.5S10.07 20 12 20s3.5-1.57 3.5-3.5-1.57-3.5-3.5-3.5z"/></svg>
+                <span>שחקן/ית</span>
+            </div>
+            <!-- סאונדמן -->
+            <div class="role-icon" data-role="soundman">
+                <svg viewBox="0 0 24 24"><path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z"/></svg>
+                <span>סאונדמן/ית</span>
+            </div>
+        </div>
+        
+        <div id="roleBriefDisplay" class="role-brief-display hidden">
+            <h2 id="briefTitle"></h2>
+            <ul id="briefList"></ul>
+        </div>
+
+        <h3 style="text-align:center; margin-bottom:15px; color: var(--secondary-color);">מידע כללי לכלל הצוות:</h3>
+
+        <div class="accordion-item">
+            <button class="accordion-button">
+                📍 מיקומים וזמנים (יום שישי)
+                <span class="arrow">▼</span>
+            </button>
+            <div class="panel">
+                <h3>אוריין (מפיק):</h3>
+                <p>נקודת הזנקה רשמית: <strong>ביאליק 27</strong>, החל מ-10:00. לאחר קבלת נושאים - עדכון ויציאה לחמ"ל.</p>
+                
+                <h3>צוות גרעין (יונתן, נוי, סרג'יו):</h3>
+                <p>הגעה ישירה לחמ"ל ב-<strong>10:00</strong> להקמת חדר מבצעים.</p>
+                
+                <div class="important-note">
+                    <h3>כל שאר הצוות:</h3>
+                    <p>הגעה לחמ"ל ב-<strong>12:30 בצהריים</strong>.</p>
+                    <p><strong>כתובת החמ"ל:</strong> שז"ר 26, תל אביב (חניה זמינה).</p>
+                    <p><strong>לתשומת לבכם:</strong> ההזנקה הרשמית ב-10:00. היו מוכנים לרעיונות מרגע העדכון על הנושאים!</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="accordion-item">
+            <button class="accordion-button">
+                🗓️ לו"ז בנקודות מפתח
+                <span class="arrow">▼</span>
+            </button>
+            <div class="panel">
+                <ul>
+                    <li><strong>שישי (בוקר/צהריים):</strong> פיצוח רעיון ותסריט. חלוקת תפקידים.</li>
+                    <li><strong>שישי (אחה"צ/ערב):</strong> איסוף ציוד שכור. יציאה לצילומים!</li>
+                    <li><strong>שבת:</strong> השלמות צילום. תחילת עריכה בחמ"ל.</li>
+                    <li><strong>מוצ"ש - ראשון (בוקר):</strong> מרתון פוסט (עריכה, סאונד, צבע).</li>
+                    <li><strong>ראשון 10:00:</strong> דד-ליין הגשה! 🏁</li>
+                </ul>
+            </div>
+        </div>
+        
+        <div class="accordion-item">
+            <button class="accordion-button">
+                🛠️ רשימת ציוד כללית
+                <span class="arrow">▼</span>
+            </button>
+            <div class="panel">
+                <h3>ציוד שכור (איי סי ספוט):</h3>
+                <table>
+                    <thead><tr><th>פריט</th><th>כמות</th></tr></thead>
+                    <tbody>
+                        <tr><td>מוניטור מקליט ATOMOS SUMO 19"</td><td>1</td></tr>
+                        <tr><td>סט רפלקטורים 5 ב-1</td><td>1</td></tr>
+                        <tr><td>גובו פלופי 40x40</td><td>1</td></tr>
+                        <tr><td>סט דגלים 4x4</td><td>1</td></tr>
+                        <tr><td>חצובת תאורה קומבו</td><td>1</td></tr>
+                        <tr><td>זרוע גריפ</td><td>1</td></tr>
+                        <tr><td>סטנד תאורה רגיל</td><td>1</td></tr>
+                        <tr><td>מנורת Aputure 300d</td><td>1</td></tr>
+                        <tr><td>כבל מאריך 5 מטר</td><td>1</td></tr>
+                        <tr><td>כבל חשמל 25 מטר</td><td>1</td></tr>
+                    </tbody>
+                </table>
+                <h3>ציוד מהצוות (רשימה חלקית - יש לעדכן בגיליון המשותף!):</h3>
+                <ul>
+                    <li><strong>גיא (צלם):</strong> ציוד מצלמה, ציוד תאורה.</li>
+                    <li><strong>יונתן (במאי):</strong> ציוד סאונד.</li>
+                    <li><strong>לירן (סאונדמן):</strong> נא לוודא איזה ציוד סאונד נוסף הוא מביא ולעדכן בגיליון.</li>
+                </ul>
+            </div>
+        </div>
+        
+        <div class="accordion-item">
+            <button class="accordion-button">
+                📊 גיליון הפקה חי (Google Sheets)
+                <span class="arrow">▼</span>
+            </button>
+            <div class="panel">
+                <div class="google-sheet-info">
+                    <p><strong>גיליון זה הוא המקור המרכזי לניהול משאבים, רשימות קשר ועדכונים חיים. אנא דאגו לעדכן אותו באופן שוטף!</strong></p>
+                    <p><u>דוגמאות למידע שכדאי להוסיף (כל אחד בתחומו):</u></p>
+                    <ul>
+                        <li><strong>מלבישה/ארט:</strong> "הבאתי עץ חג מולד קטן לסצנה X", "יש לי תחפושת ספיידרמן מידה L".</li>
+                        <li><strong>ציוד אישי (כללי):</strong> "מביא מיקרופון רובה נוסף ובום", "יש לי סט עדשות נוסף למצלמה".</li>
+                        <li><strong>לוקיישנים פוטנציאלים:</strong> "לדודה שלי יש מחסן נטוש ברחוב Y, נראה מבטיח - צריך לבדוק זמינות".</li>
+                        <li><strong>זמינות/מגבלות אישיות:</strong> "פנוי רק עד 20:00 ביום שישי", "אלרגי לבוטנים".</li>
+                    </ul>
+                    <p>כל מידע שתורם לניהול יעיל יותר חשוב וצריך להירשם כאן בגיליון.</p>
+                </div>
+                <div class="iframe-container">
+                    <iframe src="https://docs.google.com/spreadsheets/d/1WEJFmbgzMYM6qO9XflrQcUQM__-gYb_ZvbTAbDgmXTQ/edit?usp=sharing&rm=minimal" loading="lazy">
+                        [טוען גיליון הפקה...]
+                    </iframe>
+                </div>
+                 <p style="text-align:center; margin-top:10px;">
+                    <a href="https://docs.google.com/spreadsheets/d/1WEJFmbgzMYM6qO9XflrQcUQM__-gYb_ZvbTAbDgmXTQ/edit?gid=0#gid=0" target="_blank" rel="noopener noreferrer">
+                        פתח את הגיליון בחלון חדש (לעריכה נוחה)
+                    </a>
+                </p>
+            </div>
+        </div>
+
+        <div class="accordion-item">
+            <button class="accordion-button">
+                💡 הכנות אחרונות ודגשים
+                <span class="arrow">▼</span>
+            </button>
+            <div class="panel">
+                <p>אנא ודאו שאתם מגיעים עם:</p>
+                <ul>
+                    <li>טלפונים טעונים במלואם.</li>
+                    <li>הרבה אנרגיה טובה וחיובית!</li>
+                    <li>ראש פתוח ומוכנות לאלתורים.</li>
+                </ul>
+                <p>זה הולך להיות אינטנסיבי, מאתגר, והכי חשוב - חוויה בלתי נשכחת וכיף אדיר. זכרו, אנחנו צוות, ועובדים ביחד להצלחה.</p>
+            </div>
+        </div>
+
+        <div class="footer">
+            <p>בהצלחה ענקית לכולנו!<br><strong>אוריין</strong></p>
+        </div>
+    </div>
+
+    <script>
+        // Accordion functionality
+        const accordionBtns = document.querySelectorAll(".accordion-button");
+        accordionBtns.forEach(btn => {
+            btn.addEventListener("click", function() {
+                const isActive = this.classList.contains("active");
+                // Optional: Close all other panels first
+                /*
+                accordionBtns.forEach(otherBtn => {
+                    if (otherBtn !== this && otherBtn.classList.contains("active")) {
+                        otherBtn.classList.remove("active");
+                        otherBtn.nextElementSibling.style.maxHeight = null;
+                        otherBtn.nextElementSibling.classList.remove("show");
+                    }
+                });
+                */
+                this.classList.toggle("active");
+                const panel = this.nextElementSibling;
+                if (panel.style.maxHeight && panel.classList.contains("show")) {
+                    panel.style.maxHeight = null;
+                    panel.classList.remove("show");
+                } else {
+                    panel.style.maxHeight = panel.scrollHeight + "px";
+                    panel.classList.add("show");
+                } 
+            });
+        });
+
+        // Role-specific brief display
+        const roleIcons = document.querySelectorAll(".role-icon");
+        const briefDisplay = document.getElementById("roleBriefDisplay");
+        const briefTitle = document.getElementById("briefTitle");
+        const briefList = document.getElementById("briefList");
+
+        const roleBriefs = {
+            producer: {
+                title: "מפיק/ה (אוריין)",
+                points: [
+                    "<strong>יום שישי:</strong> קבלת נושאים (ביאליק 27, 10:00), תיאום איסוף ציוד שכור. ניהול לוגיסטיקה מלאה: אוכל, שתיה, הסעות (במידת הצורך). קביעת לו\"ז צילומים ראשוני ועדכונו. מעקב תקציב.",
+                    "<strong>צילומים (שישי-שבת):</strong> פתרון בעיות לוגיסטיות וטכניות בשטח. ניהול זמן קפדני. דאגה לרווחת הצוות. אחריות על גיבוי חומרים בסוף כל יום. קשר רציף עם בעלי לוקיישנים.",
+                    "<strong>פוסט (שבת-ראשון):</strong> תיאום עבודה מול עורך/ת, סאונד וצבע. שמירה על לו\"ז עריכה צפוף. הכנות טכניות להגשה (פורמט, מדיה).",
+                    "<strong>כללי:</strong> שמירה על מורל גבוה. קשר עם נווה (נציגת הפסטיבל). פתרון קונפליקטים. אחריות על עדכון שוטף של <strong>גיליון ההפקה המשותף</strong> בכל הקשור ללוגיסטיקה, משאבים, הוצאות ופרטי קשר."
+                ]
+            },
+            director: {
+                title: "במאי/ת (יונתן)",
+                points: [
+                    "<strong>יום שישי:</strong> הובלה קריאייטיבית של פיצוח הרעיון בהתאם לנושאים שיתקבלו. עבודה צמודה עם התסריטאי/ת (אם יש, אחרת הובלת הכתיבה) ליצירת תסריט. הכנת שוט-ליסט מפורט. תדרוך צלם/ת ושחקנים לגבי החזון האומנותי.",
+                    "<strong>צילומים (שישי-שבת):</strong> ניהול אמנותי של הסט. עבודה אינטנסיבית עם שחקנים להשגת הביצוע הרצוי. ווידוא ביצוע מדויק של השוט-ליסט. שמירה על החזון והאווירה של הסרט.",
+                    "<strong>פוסט (שבת-ראשון):</strong> עבודה צמודה עם עורך/ת לקביעת הקאט ובחירת טייקים. ליווי תהליכי עיצוב פסקול ותיקוני צבע.",
+                    "<strong>כללי:</strong> קבלת החלטות אומנותיות מכריעות. שמירה על קוהרנטיות הסרט. עיינו בכרטיסיית <strong>הלו\"ז</strong> לתזמונים קריטיים."
+                ]
+            },
+             assistantDirector: {
+                title: "ע. במאי/ת (נינה)",
+                points: [
+                    "<strong>יום שישי (פרה-פרודקשן):</strong> סיוע לבמאי/ת בהכנת שוט-ליסט, תסריט מצולם (breakdown). הכנת דפי קריאה (call sheets) לצוות ולשחקנים ליום הצילום הראשון.",
+                    "<strong>צילומים (שישי-שבת):</strong> יד ימינו של הבמאי/ת על הסט. ניהול לו\"ז צילומים בפועל בשטח. תיאום בין המחלקות (צילום, ארט, סאונד). ניהול ניצבים (אם יש). שמירה על שקט על הסט בזמן טייק. אחריות על המשכיות (continuity) כללית.",
+                    "<strong>כללי:</strong> עבודה צמודה עם המפיק/ה והבמאי/ת לווידוא זרימה חלקה של הצילומים. עדכון לוח זמנים בגיליון המשותף."
+                ]
+            },
+            cinematographer: {
+                title: "צלם/ת ותאורן/ית (גיא, ע. צלם: עזרא)",
+                points: [
+                    "<strong>יום שישי:</strong> הבנת החזון של הבמאי/ת. תכנון קומפוזיציות, תנועות מצלמה ותאורה לכל סצנה. הכנת ציוד הצילום והתאורה (ראו כרטיסיית <strong>ציוד</strong> ובדקו מלאי בגיליון). תיאום עם ע. צלם.",
+                    "<strong>צילומים (שישי-שבת):</strong> אחריות מלאה על הצד הוויזואלי של הסרט. תפעול מצלמה, בניית פריימים, הקפדה על פוקוס וחשיפה. הקמת וניהול תאורה בשיתוף עם ע. צלם (אם יש).",
+                    "<strong>פוסט (שבת-ראשון):</strong> מעורבות בתהליך תיקוני הצבע (Color Grading) למתן פידבק מקצועי.",
+                    "<strong>כללי:</strong> שמירה על איכות צילום גבוהה ועקבית. גיבוי מאובטח של חומרי הגלם בסוף כל יום צילום. עדכנו בגיליון המשותף כל ציוד אישי רלוונטי שאתם מביאים."
+                ]
+            },
+            productionAssistant: {
+                title: "ע. הפקה (ליאור)",
+                points: [
+                    "<strong>יום שישי:</strong> סיוע למפיק/ה בהקמת החמ\"ל. רכש קטן (שתיה, חטיפים, ציוד משרדי). שליחויות לפי צורך. הכנת לוקיישנים ראשונים.",
+                    "<strong>צילומים (שישי-שבת):</strong> תמיכה לוגיסטית מלאה בצוות על הסט ובחמ\"ל. דאגה לאוכל ושתיה לצוות. סיוע בנשיאת ציוד קל. שמירה על סדר וניקיון בלוקיישנים. תיאום הגעות ועזיבות.",
+                    "<strong>כללי:</strong> להיות 'האיש לכל משימה'. זמינות גבוהה, פרואקטיביות ויכולת אלתור. עדכון רשימות מלאי (אוכל, ציוד מתכלה) בגיליון המשותף."
+                ]
+            },
+            artAndCostumes: {
+                title: "מלבישה/ארט (דניאל)",
+                points: [
+                    "<strong>יום שישי (לאחר קבלת נושא):</strong> הבנת הקונספט והאווירה הנדרשת מהבמאי/ת. איתור, הכנה והשגת כל פריטי הארט, הפרופס, התלבושות והאביזרים הרלוונטיים (כולל 'החפץ' המחייב).",
+                    "עיצוב סט בסיסי בלוקיישנים בהתאם לתסריט וחזון הבמאי/ת.",
+                    "<strong>בזמן צילום:</strong> אחריות מלאה על הנראות הוויזואלית של הסט והדמויות. הלבשת השחקנים. שמירה על קונטיניואיטי (המשכיות) ויזואלית של ארט ולבוש.",
+                    "תיקונים ושינויים קטנים בסט ובלבוש לפי הצורך. <strong>עדכנו בגיליון המשותף</strong> רשימה מפורטת של כל פריטי הארט וההלבשה שברשותכם או שאתם מארגנים."
+                ]
+            },
+            actors: {
+                title: "שחקן/ית (בן עמי, גליה, ארז)",
+                points: [
+                    "<strong>יום שישי (לאחר קבלת התסריט):</strong> לימוד טקסטים והבנת הדמות לעומק. עבודה עם הבמאי/ת על פרשנות הדמות. הכנות אישיות (לבוש בסיסי אם נדרש לפני מדידות).",
+                    "<strong>צילומים (שישי-שבת):</strong> הגעה בזמן לסט. ריכוז מלא והיענות להוראות הבמאי/ת. שמירה על אנרגיה ורצף בין טייקים. שיתוף פעולה עם שאר השחקנים והצוות. סבלנות והבנה לתהליך הטכני.",
+                    "<strong>כללי:</strong> שמרו על קשר עם מחלקת ההלבשה והארט לגבי צרכים. עדכנו זמינות ומגבלות אישיות (אם יש) בגיליון המשותף."
+                ]
+            },
+            soundman: {
+                title: "סאונדמן/ית (לירן)",
+                points: [
+                    "<strong>לפני צילום:</strong> בדיקת ציוד הקלטה, הכנת מיקרופונים (בום, דש וכו') ותכנון הקלטה לכל סצנה בהתאם ללוקיישן ולפעולה. ודאו שכל הציוד שלכם רשום בגיליון המשותף.",
+                    "<strong>בזמן צילום:</strong> אחריות מלאה על הקלטת סאונד נקי, ברור ואיכותי לכל הדיאלוגים והאפקטים החשובים (room tone). ניטור רמות שמע קפדני. טיפול אקטיבי ברעשי רקע ככל הניתן.",
+                    "תיוג קפדני וארגון מסודר של קבצי האודיו.",
+                    "<strong>פוסט:</strong> העברת כל חומרי הסאונד בצורה מסודרת ומקוטלגת לעורך/ת הסאונד או לעורך/ת הראשי/ת, כולל הערות מהשטח."
+                ]
+            }
+        };
+
+        roleIcons.forEach(icon => {
+            icon.addEventListener("click", function() {
+                const role = this.dataset.role;
+                const briefData = roleBriefs[role];
+
+                roleIcons.forEach(i => i.classList.remove("active-role"));
+                this.classList.add("active-role");
+
+                if (briefData) {
+                    briefTitle.textContent = `בריף ל${briefData.title}`;
+                    briefList.innerHTML = ""; 
+                    briefData.points.forEach(point => {
+                        const li = document.createElement("li");
+                        li.innerHTML = point; 
+                        briefList.appendChild(li);
+                    });
+                    briefDisplay.classList.remove("hidden");
+                    briefDisplay.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+                } else {
+                    briefDisplay.classList.add("hidden");
+                }
+            });
+        });
+
+    </script>
+</body>
+</html>
