@@ -12,21 +12,21 @@
   --light-gray-color: #f8f9fa;
   --dark-gray-color: #343a40;
   --text-color: #212529;
-  --container-bg-color: rgba(255, 255, 255, 0.8); /* Increased opacity slightly */
-  --card-bg-color: rgba(255, 255, 255, 0.8); /* Increased opacity slightly */
-  --role-brief-bg: rgba(240, 248, 255, 0.75); /* Increased opacity slightly */
+  --container-bg-color: rgba(255, 255, 255, 0.8); 
+  --card-bg-color: rgba(255, 255, 255, 0.8); 
+  --role-brief-bg: rgba(240, 248, 255, 0.75); 
   --border-radius: 10px;
-  --box-shadow: 0 5px 20px rgba(0,0,0,0.1); /* Softened shadow */
+  --box-shadow: 0 5px 20px rgba(0,0,0,0.1); 
 
   /* Role-specific accent colors */
-  --role-producer-accent: #0b5ed7; /* Darker Blue */
-  --role-director-accent: #6f42c1; /* Purple */
-  --role-assistantDirector-accent: #17a2b8; /* Teal/Info Blue */
-  --role-cinematographer-accent: #198754; /* Green */
-  --role-productionAssistant-accent: #586977; /* Slate Gray - derived from secondary */
-  --role-artAndCostumes-accent: #d63384; /* Pink */
-  --role-actors-accent: #fd7e14; /* Orange */
-  --role-soundman-accent: #0dcaf0; /* Cyan */
+  --role-producer-accent: #0b5ed7; 
+  --role-director-accent: #6f42c1; 
+  --role-assistantDirector-accent: #17a2b8; 
+  --role-cinematographer-accent: #198754; 
+  --role-productionAssistant-accent: #586977; 
+  --role-artAndCostumes-accent: #d63384; 
+  --role-actors-accent: #fd7e14; 
+  --role-soundman-accent: #0dcaf0; 
   }
 
   body {
@@ -35,7 +35,7 @@
   margin: 0;
   padding: 0;
   background-image: url("bg48.png"); 
-  background: url("bg48.png"), linear-gradient(180deg, #e9ecef 0%, #dee2e6 100%); /* Slightly more muted gradient */
+  background: url("bg48.png"), linear-gradient(180deg, #e9ecef 0%, #dee2e6 100%); 
   background-size: cover;
   background-position: center center;
   background-attachment: fixed; 
@@ -48,6 +48,89 @@
   padding-top: 20px; 
   padding-bottom: 20px; 
   }
+
+  /* Modal Styles */
+  .modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.6);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.3s ease, visibility 0.3s ease;
+  }
+  .modal-overlay.active {
+    opacity: 1;
+    visibility: visible;
+  }
+  .modal-content {
+    background-color: #fff;
+    padding: 30px;
+    border-radius: var(--border-radius);
+    box-shadow: 0 5px 25px rgba(0,0,0,0.2);
+    width: 90%;
+    max-width: 600px;
+    max-height: 80vh;
+    overflow-y: auto;
+    position: relative;
+  }
+  .modal-content h2 {
+    color: var(--primary-color);
+    margin-top: 0;
+    margin-bottom: 20px;
+    text-align: center;
+    font-size: 1.8em;
+  }
+  .modal-content h3 {
+    color: var(--primary-hover-color);
+    margin-top: 25px;
+    margin-bottom: 10px;
+    font-size: 1.3em;
+    border-bottom: 1px solid #eee;
+    padding-bottom: 5px;
+  }
+  .modal-content p, .modal-content li {
+    font-size: 1em;
+    line-height: 1.7;
+    color: var(--dark-gray-color);
+  }
+   .modal-content ul {
+    padding-right: 20px;
+    list-style-position: outside;
+   }
+  .modal-close-btn {
+    position: absolute;
+    top: 15px;
+    left: 20px; /* Changed from right to left for LTR close button on RTL page */
+    background: transparent;
+    border: none;
+    font-size: 2em;
+    cursor: pointer;
+    color: var(--secondary-color);
+  }
+   .show-rules-btn {
+    display: none; /* Hidden by default, shown by JS if rules already seen */
+    margin: 15px auto;
+    padding: 10px 20px;
+    background-color: var(--primary-color);
+    color: white;
+    border: none;
+    border-radius: var(--border-radius);
+    cursor: pointer;
+    font-size: 1em;
+    transition: background-color 0.3s ease;
+  }
+  .show-rules-btn:hover {
+    background-color: var(--primary-hover-color);
+  }
+
+
   .main-container {
   background-color: var(--container-bg-color);
   padding: 25px; 
@@ -449,7 +532,7 @@
   color: var(--primary-hover-color);
   }
   .google-sheet-info ul {
-  list-style-type: '💡'; /* Changed from emoji */
+  list-style-type: '�'; /* Changed from emoji */
   padding-right: 22px;
   margin-top: 12px;
   }
@@ -532,6 +615,10 @@
   .panel p, .panel li { font-size: 1.15em; line-height: 1.6; } 
   
   .important-note { font-size: 1.1em; } 
+  .modal-content { width: 95%; padding: 20px;}
+  .modal-content h2 { font-size: 1.6em;}
+  .modal-content h3 { font-size: 1.2em;}
+  .modal-content p, .modal-content li { font-size: 0.95em;}
   }
 
   @media (max-width: 480px) { 
@@ -583,10 +670,38 @@
 
   .important-note { font-size: 1.15em; } 
   .footer { font-size: 1em;} 
+  .modal-content h2 { font-size: 1.4em;}
+  .modal-content h3 { font-size: 1.1em;}
+  .modal-content p, .modal-content li { font-size: 0.9em;}
   }
   </style>
  </head>
  <body>
+  <div id="rulesModal" class="modal-overlay">
+    <div class="modal-content">
+        <button id="closeModalBtn" class="modal-close-btn">&times;</button>
+        <h2>ברוכים הבאים לפסטיבל סרטי 48 שעות!</h2>
+        
+        <h3>1. על הפרויקט</h3>
+        <p>פרויקט 48 הוא אתגר קולנועי בינלאומי בו צוותים יוצרים סרט קצר (באורך 4-7 דקות) בתוך 48 שעות בלבד. האתגר כולל קבלת אלמנטים ייחודיים (לדוגמה: דמות, אביזר, שורת דיאלוג) שחייבים להשתלב בסרט. המטרה היא לעבוד יחד ביצירתיות, במהירות וביעילות כדי להפיק סרט שלם – מהרעיון ועד הגרסה הסופית – במסגרת זמן מאתגרת זו.</p>
+
+        <h3>2. התנהלות וציפיות</h3>
+        <ul>
+            <li><strong>אינטנסיביות:</strong> צפו ל-48 שעות (ואף יותר לחלק מהתפקידים, במיוחד לצוות הגרעין) של עבודה מאומצת, לילות לבנים, והרבה אדרנלין.</li>
+            <li><strong>שיתוף פעולה ועבודת צוות:</strong> אנחנו צוות! תקשורת פתוחה, כבוד הדדי, וסיוע אחד לשני הם המפתח להצלחה. כל אחד נותן את המיטב בתחומו ותומך באחרים.</li>
+            <li><strong>גמישות ואלתור:</strong> דברים ישתנו, תוכניות יתעדכנו, וצריך להיות מוכנים לאלתר ולמצוא פתרונות יצירתיים במהירות. זה חלק מהכיף!</li>
+            <li><strong>מקצועיות ואווירה:</strong> גם תחת לחץ, חשוב לשמור על אווירה טובה, מכבדת ומקצועית.</li>
+            <li><strong>לוחות זמנים:</strong> הלו"ז צפוף מאוד. חשוב לעמוד בזמנים שנקבעו לכל שלב כדי שנספיק הכל.</li>
+            <li><strong>בטיחות:</strong> בטיחות לפני הכל. שימו לב לעצמכם ולסובבים אתכם, במיוחד בצילומים ועם ציוד.</li>
+        </ul>
+
+        <h3>3. השתתפות ותמיכה</h3>
+        <p>הפרויקט הזה מבוסס על התנדבות, יצירתיות משותפת ותשוקה לקולנוע. כדי לכסות הוצאות בסיסיות של ההפקה (כיבוד ושתיה לחמ"ל, רכישות קטנות אחרונות של פרופס אם צריך, וכדומה), נשמח מאוד אם כל אחד יוכל לתרום סכום סמלי.</p>
+        <p>מעבר לעזרה הכספית, השקעה אישית, גם אם קטנה, מחזקת את תחושת השייכות והשותפות של כולנו ביצירה המשותפת. כל תרומה תתקבל בברכה ותעזור לנו להפוך את החוויה הזו לטובה ומוצלחת עוד יותר.</p>
+        <p><strong>תודה על ההבנה ושיתוף הפעולה, וברוכים הבאים להרפתקה!</strong></p>
+    </div>
+  </div>
+  <button id="showRulesAgainBtn" class="show-rules-btn">הצג כללי פתיחה</button>
 
   <div class="main-container">
   <div class="header">
@@ -657,7 +772,7 @@
             <tbody>
                 <tr>
                     <td class="time-col">11:00</td>
-                    <td class="task-col">צוות גרעין (מפיק, במאי/ת, תסריטאי/ת, ע. במאי/ת, צלם/ת): הגעה לחמ"ל.</td>
+                    <td class="task-col">צוות גרעין (מפיק, במאי/ת, תסריטאי/ת, ע. במאי/ת, צלם/ת): הגעה לחמ"ל (שז"ר 26, ת"א).</td>
                 </tr>
                 <tr>
                     <td class="time-col">10:00-12:00</td>
@@ -944,7 +1059,7 @@
   </div>
   <p style="text-align:center; margin-top:15px;">
   <a href="https://docs.google.com/spreadsheets/d/1WEJFmbgzMYM6qO9XflrQcUQM__-gYb_ZvbTAbDgmXTQ/edit?gid=0#gid=0" target="_blank" rel="noopener noreferrer">
-  � פתח את הגיליון בחלון חדש (לעריכה נוחה)
+  🔗 פתח את הגיליון בחלון חדש (לעריכה נוחה)
   </a>
   </p>
   </div>
@@ -974,6 +1089,48 @@
   </div>
 
   <script>
+  // Modal Functionality
+  const modalOverlay = document.getElementById('rulesModal');
+  const closeModalBtn = document.getElementById('closeModalBtn');
+  const showRulesAgainBtn = document.getElementById('showRulesAgainBtn');
+
+  function setCookie(name, value, days) {
+    let expires = "";
+    if (days) {
+        const date = new Date();
+        date.setTime(date.getTime() + (days*24*60*60*1000));
+        expires = "; expires=" + date.toUTCString();
+    }
+    document.cookie = name + "=" + (value || "")  + expires + "; path=/";
+  }
+
+  function getCookie(name) {
+    const nameEQ = name + "=";
+    const ca = document.cookie.split(';');
+    for(let i=0;i < ca.length;i++) {
+        let c = ca[i];
+        while (c.charAt(0)==' ') c = c.substring(1,c.length);
+        if (c.indexOf(nameEQ) == 0) return c.substring(nameEQ.length,c.length);
+    }
+    return null;
+  }
+
+  if (!getCookie('rulesSeen')) {
+    modalOverlay.classList.add('active');
+  } else {
+    showRulesAgainBtn.style.display = 'block';
+  }
+
+  closeModalBtn.addEventListener('click', () => {
+    modalOverlay.classList.remove('active');
+    setCookie('rulesSeen', 'true', 7); // Cookie expires in 7 days
+    showRulesAgainBtn.style.display = 'block';
+  });
+  
+  showRulesAgainBtn.addEventListener('click', () => {
+    modalOverlay.classList.add('active');
+  });
+
   // Accordion functionality with ARIA attributes
   const accordionBtns = document.querySelectorAll(".accordion-button");
   accordionBtns.forEach(btn => {
@@ -1243,3 +1400,4 @@
   </script>
  </body>
  </html>
+�
