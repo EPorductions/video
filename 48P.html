@@ -107,7 +107,7 @@
   .modal-close-btn {
     position: absolute;
     top: 15px;
-    left: 20px; /* Changed from right to left for LTR close button on RTL page */
+    left: 20px;
     background: transparent;
     border: none;
     font-size: 2em;
@@ -115,7 +115,7 @@
     color: var(--secondary-color);
   }
    .show-rules-btn {
-    display: none; /* Hidden by default, shown by JS if rules already seen */
+    display: none;
     margin: 15px auto;
     padding: 10px 20px;
     background-color: var(--primary-color);
@@ -128,6 +128,13 @@
   }
   .show-rules-btn:hover {
     background-color: var(--primary-hover-color);
+  }
+  .passport-image {
+      max-width: 150px;
+      display: block;
+      margin: 10px auto;
+      border-radius: 5px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
   }
 
 
@@ -214,7 +221,7 @@
   .role-icon.active-role {
   color: white;
   transform: translateY(-4px) scale(1.03); 
-  box-shadow: 0 6px 12px rgba(0,0,0,0.2); /* Slightly stronger shadow for active */
+  box-shadow: 0 6px 12px rgba(0,0,0,0.2); 
   }
   .role-icon.active-role svg {
   fill: white;
@@ -223,7 +230,7 @@
   color: white;
   }
   .role-icon:hover {
-  background-color: #e9ecef; /* Slightly darker hover */
+  background-color: #e9ecef; 
   transform: translateY(-4px) scale(1.03);
   border-color: var(--primary-color);
   box-shadow: 0 4px 8px rgba(0,0,0,0.1); 
@@ -232,7 +239,7 @@
   width: 28px; 
   height: 28px;
   margin-bottom: 6px;
-  fill: var(--primary-color); /* Default fill for non-active SVGs */
+  fill: var(--primary-color); 
   transition: fill 0.25s ease-in-out;
   }
   .role-icon:hover svg {
@@ -249,29 +256,29 @@
   /* Role Brief Display Styling */
   .role-brief-display {
   background-color: var(--role-brief-bg);
-  border: 1px solid #ced4da; /* Softer border */
+  border: 1px solid #ced4da; 
   padding: 25px; 
   margin-top: 20px;
   margin-bottom: 30px;
   border-radius: var(--border-radius);
-  box-shadow: 0 3px 10px rgba(0,0,0,0.06); /* Softer shadow */
+  box-shadow: 0 3px 10px rgba(0,0,0,0.06); 
   }
   .role-brief-display h2 {
-  /* Color will be set by specific role style */
+  
   margin-top: 0;
   text-align: center;
-  font-size: 1.6em; /* Slightly larger */
+  font-size: 1.6em; 
   margin-bottom: 20px;
   }
   .timeline-day-header {
-  /* Border color will be set by specific role style */
-  font-size: 1.3em; /* Slightly larger */
+  
+  font-size: 1.3em; 
   font-weight: bold;
   color: var(--dark-gray-color);
   margin-top: 28px;
   margin-bottom: 18px;
   padding-bottom: 8px; 
-  border-bottom-width: 3px; /* Thicker border */
+  border-bottom-width: 3px; 
   border-bottom-style: solid;
   }
   .timeline-item {
@@ -285,17 +292,17 @@
   flex-shrink: 0;
   padding-right: 20px;
   font-weight: bold;
-  /* Color will be set by specific role style or remain primary */
+  
   font-size: 1em; 
   }
   .timeline-content {
   flex-grow: 1;
-  background: rgba(255, 255, 255, 0.85); /* Slightly more opaque content cards */
+  background: rgba(255, 255, 255, 0.85); 
   padding: 18px; 
   border-radius: var(--border-radius);
   box-shadow: 0 2px 5px rgba(0,0,0,0.06);
-  /* Border color will be set by specific role style */
-  border-left-width: 5px; /* Thicker border */
+  
+  border-left-width: 5px; 
   border-left-style: solid;
   }
   .timeline-content h4 { 
@@ -311,12 +318,12 @@
   .timeline-content ul {
     margin-top: 5px;
     margin-bottom: 0;
-    padding-right: 20px; /* Standard ul padding */
-    list-style-type: disc; /* Standard disc bullets */
+    padding-right: 20px; 
+    list-style-type: disc; 
   }
   .timeline-content ul li {
-      margin-bottom: 4px; /* Space between list items */
-      font-size: 0.95em; /* Consistent with p */
+      margin-bottom: 4px; 
+      font-size: 0.95em; 
   }
   .role-brief-display.hidden {
   display: none;
@@ -464,7 +471,7 @@
   white-space: nowrap;
   }
   .schedule-table .task-col ul { 
-  list-style-type: '↪️'; /* Changed from emoji to text for wider support if needed */
+  list-style-type: '↪️'; 
   padding-right: 15px;
   margin-top: 5px;
   margin-bottom: 5px;
@@ -474,10 +481,10 @@
   margin-bottom: 3px;
   }
    .breakdown-table {
-        font-size: 0.9em; /* Smaller base font for denser table */
+        font-size: 0.9em; 
     }
     .breakdown-table th, .breakdown-table td {
-        padding: 6px 8px; /* Tighter padding */
+        padding: 6px 8px; 
         vertical-align: middle;
     }
     .breakdown-table input[type="text"], .breakdown-table textarea {
@@ -491,6 +498,10 @@
     .breakdown-table textarea {
         min-height: 40px;
         resize: vertical;
+    }
+    .breakdown-table .passport-image {
+      max-width: 100px;
+      margin: 0;
     }
 
 
@@ -532,7 +543,7 @@
   color: var(--primary-hover-color);
   }
   .google-sheet-info ul {
-  list-style-type: '💡'; /* Changed from emoji */
+  list-style-type: '�'; 
   padding-right: 22px;
   margin-top: 12px;
   }
@@ -592,8 +603,8 @@
   }
   .timeline-content p, .timeline-content ul li { font-size: 1.15em; } 
   .timeline-content h4 { font-size: 1.2em; } 
-  .role-brief-display h2 { font-size: 1.7em; } /* Larger for mobile */
-  .timeline-day-header { font-size: 1.4em; } /* Larger for mobile */
+  .role-brief-display h2 { font-size: 1.7em; }
+  .timeline-day-header { font-size: 1.4em; }
 
   .schedule-table, .breakdown-table { 
   display: block;
@@ -650,8 +661,8 @@
   
   .timeline-content p, .timeline-content ul li { font-size: 1.2em; } 
   .timeline-content h4 { font-size: 1.25em; } 
-  .timeline-day-header { font-size: 1.45em;} /* Increased */
-  .role-brief-display h2 { font-size: 1.75em;} /* Increased */
+  .timeline-day-header { font-size: 1.45em;}
+  .role-brief-display h2 { font-size: 1.75em;}
 
 
   .schedule-table th, .schedule-table td, .breakdown-table th, .breakdown-table td {
@@ -686,7 +697,7 @@
         <h3>1. על הפרויקט והאלמנטים שלנו</h3>
         <p>אנחנו יוצרים סרט קצר (4-7 דקות) ב-48 שעות. <strong>הז'אנר פתוח לבחירתנו.</strong> האלמנטים שחובה לשלב הם:</p>
         <ul>
-            <li><strong>חפץ:</strong> דרכון תל אביבי (פקטיבי).</li>
+            <li><strong>חפץ:</strong> דרכון תל אביבי <br> <img src="https://eporductions.github.io/video/pasport.png" alt="תמונה של דרכון תל אביבי" class="passport-image"></li>
             <li><strong>שורת דיאלוג:</strong> "אני לא רוצה להיות כאן".</li>
             <li><strong>לוקיישן חובה:</strong> סצנה או שוט של הים של תל אביב.</li>
         </ul>
@@ -925,7 +936,7 @@
                         <td><input type="text" placeholder="יום"></td>
                         <td><textarea placeholder="מפיק, במאי"></textarea></td>
                         <td><textarea placeholder='דיון סוער על הקונספט. בסופו, אחת הדמויות אומרת "אני לא רוצה להיות כאן".'></textarea></td>
-                        <td><textarea placeholder="דרכון תל אביבי, לוח מחיק, טושים, לפטופים"></textarea></td>
+                        <td><textarea><img src="https://eporductions.github.io/video/pasport.png" alt="תמונה של דרכון תל אביבי" class="passport-image"></textarea></td>
                         <td><textarea placeholder="בגדי יום-יום"></textarea></td>
                         <td><textarea placeholder="דיאלוג ברור, רעשי רקע של עבודה"></textarea></td>
                         <td><textarea placeholder="צילום אינטימי, קלוזאפים"></textarea></td>
@@ -1385,6 +1396,4 @@
   </script>
  </body>
  </html>
-" in your chat. Please follow the instructions and edit the document.
-תעדכן את הדרכון התל אביבי בתמונה הזו
-https://eporductions.github.io/video/pasport.
+�
