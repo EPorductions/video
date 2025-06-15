@@ -322,9 +322,44 @@
         .gallery-card p { font-size: 0.95rem; color: #666; }
 
         /* --- Pricing Section --- */
+        .pricing-toggle {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 2.5rem;
+            background-color: #e2e8f0;
+            border-radius: 99px;
+            padding: 5px;
+            width: fit-content;
+            margin-left: auto;
+            margin-right: auto;
+        }
+        .pricing-toggle-btn {
+            padding: 10px 25px;
+            border: none;
+            background: transparent;
+            color: #475569;
+            font-weight: 600;
+            cursor: pointer;
+            border-radius: 99px;
+            transition: all 0.3s ease;
+            font-size: 1rem;
+        }
+        .pricing-toggle-btn.active {
+            background-color: var(--primary-purple);
+            color: white;
+            box-shadow: 0 4px 15px rgba(122, 81, 149, 0.4);
+        }
+
+        .pricing-category {
+            display: none;
+        }
+        .pricing-category.active {
+            display: block;
+        }
+
         .pricing-grid {
             display: grid; grid-template-columns: repeat(1, 1fr);
-            gap: 30px; margin-top: 40px;
+            gap: 30px;
         }
         @media (min-width: 1024px) { .pricing-grid { grid-template-columns: repeat(3, 1fr); } }
         .pricing-card {
@@ -336,11 +371,10 @@
             display: flex; flex-direction: column;
         }
         .pricing-card.featured {
-            transform: scale(1.05);
             border-color: var(--primary-purple);
         }
         .pricing-card:hover {
-            transform: translateY(-5px) scale(1.02);
+            transform: translateY(-5px);
             box-shadow: 0 10px 30px rgba(0,0,0,0.1);
         }
         .pricing-card-header {
@@ -676,93 +710,172 @@
                     <span data-lang="he" class="visible-lang">כל פרויקט הוא ייחודי. לכן, אנו מציעים מגוון מסלולים גמישים - בין אם אתם צריכים איש מקצוע נקודתי שיצטרף לצוות שלכם, ובין אם אתם מחפשים שותף מלא להפקת הכנס הבא שלכם.</span>
                     <span data-lang="en">Every project is unique. That's why we offer a range of flexible tracks – whether you need a specific professional to join your team, or a full partner to produce your next conference.</span>
                 </p>
-                <div class="pricing-grid">
-                    <!-- Pricing Card 1 -->
-                    <div class="pricing-card scroll-animate">
-                        <div class="pricing-card-header">
-                            <div class="pricing-card-icon">
-                                <svg class="w-12 h-12 mx-auto" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M20.25 14.15v4.075c0 1.313-.964 2.508-2.25 2.75l-5.25.75c-1.286.188-2.714.188-4 0l-5.25-.75c-1.286-.242-2.25-1.437-2.25-2.75V14.15M3 9.375l5.026-2.872A1.875 1.875 0 019 8.25v2.25M21 9.375l-5.026-2.872A1.875 1.875 0 0015 8.25v2.25m-6 0v-2.25c0-.414.224-.79.568-1.002l5.026-2.872a1.875 1.875 0 012.112 0l5.026 2.872c.344.197.568.588.568 1.002v2.25m-15 0v2.25c0 .414.224.79.568 1.002l5.026 2.872a1.875 1.875 0 002.112 0l5.026-2.872a.568.568 0 00.568-1.002v-2.25" /></svg>
-                            </div>
-                            <h3>
-                                <span data-lang="he" class="visible-lang">מפעיל טכני</span>
-                                <span data-lang="en">Technical Operator</span>
-                            </h3>
-                            <p class="text-slate-500 font-semibold mt-1">
-                                <span data-lang="he" class="visible-lang">לחיזוק הצוות הקיים שלכם</span>
-                                <span data-lang="en">To strengthen your existing team</span>
-                            </p>
-                        </div>
-                        <div class="price">
-                           <span data-lang="he" class="visible-lang">החל מ-1,800 ₪</span>
-                           <span data-lang="en">From $500</span>
-                           <span class="term" data-lang="he"> / ליום</span>
-                           <span class="term" data-lang="en"> / per day</span>
-                        </div>
-                        <ul>
-                            <li><svg class="w-5 h-5 text-green-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5" /></svg><span data-lang="he" class="visible-lang"><b>הפתרון המושלם</b> להפקות שכבר יש להן מנהל, וצריכות איש מקצוע מומחה למשימה ספציפית.</span><span data-lang="en"><b>The perfect solution</b> for productions that already have a manager and need a specialist for a specific task.</span></li>
-                            <li><svg class="w-5 h-5 text-green-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5" /></svg><span data-lang="he" class="visible-lang">מומחיות ב-VMIX, ניהול Zoom, תפעול פרומפטר, וניתוב שידור.</span><span data-lang="en">Expertise in VMIX, Zoom management, teleprompter operation, and broadcast switching.</span></li>
-                        </ul>
-                        <a href="#contact" class="cta-btn mt-auto"><span data-lang="he" class="visible-lang">בואו נדבר</span><span data-lang="en">Let's Talk</span></a>
-                    </div>
-                    
-                    <!-- Pricing Card 2 (Featured) -->
-                    <div class="pricing-card featured scroll-animate delay-1">
-                        <div class="pricing-card-header">
-                            <div class="pricing-card-icon">
-                                <svg class="w-12 h-12 mx-auto" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M21 7.5l-9-5.25L3 7.5m18 0l-9 5.25m9-5.25v9l-9 5.25M3 7.5l9 5.25M3 7.5v9l9 5.25m0-9v9" /></svg>
-                            </div>
-                            <h3>
-                                 <span data-lang="he" class="visible-lang">הפקת בוטיק</span>
-                                <span data-lang="en">Boutique Production</span>
-                            </h3>
-                            <p class="text-slate-500 font-semibold mt-1">
-                                 <span data-lang="he" class="visible-lang">לפרויקטים ממוקדים ואיכותיים</span>
-                                <span data-lang="en">For focused, high-quality projects</span>
-                            </p>
-                        </div>
-                        <div class="price">
-                           <span data-lang="he" class="visible-lang">החל מ-15,000 ₪</span>
-                           <span data-lang="en">From $4,000</span>
-                           <span class="term" data-lang="he"> / לפרויקט</span>
-                           <span class="term" data-lang="en"> / per project</span>
-                        </div>
-                         <ul>
-                            <li><svg class="w-5 h-5 text-green-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5" /></svg><span data-lang="he" class="visible-lang"><b>ליווי מלא משלב הרעיון ועד התוצר הסופי.</b> אידיאלי לוובינרים, ימי צילום באולפן, ותוכן דיגיטלי.</span><span data-lang="en"><b>Full support from concept to final product.</b> Ideal for webinars, studio shoots, and digital content.</span></li>
-                            <li><svg class="w-5 h-5 text-green-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5" /></svg><span data-lang="he" class="visible-lang">כולל תכנון, ניהול טכני, וגרפיקה לשידור ליצירת נראות מקצועית ומרשימה.</span><span data-lang="en">Includes planning, technical management, and broadcast graphics for a professional look.</span></li>
-                             <li><svg class="w-5 h-5 text-green-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5" /></svg><span data-lang="he" class="visible-lang">שילוב פתרונות יצירתיים וטכנולוגיים להשגת מקסימום אימפקט.</span><span data-lang="en">Integrating creative and tech solutions for maximum impact.</span></li>
-                        </ul>
-                         <a href="#contact" class="cta-btn mt-auto"><span data-lang="he" class="visible-lang">להצעת מחיר</span><span data-lang="en">Get a Quote</span></a>
-                    </div>
 
-                    <!-- Pricing Card 3 -->
-                    <div class="pricing-card scroll-animate delay-2">
-                         <div class="pricing-card-header">
-                            <div class="pricing-card-icon">
-                                <svg class="w-12 h-12 mx-auto" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M18 18.72a9.094 9.094 0 003.741-.479 3 3 0 00-4.682-2.72m-7.5-2.228a4.5 4.5 0 00-1.897 1.897M18 18.72a9.094 9.094 0 01-7.5 0M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                <div class="pricing-toggle">
+                    <button id="btn-core-services" class="pricing-toggle-btn active">
+                        <span data-lang="he" class="visible-lang">שירותי ליבה</span>
+                        <span data-lang="en">Core Services</span>
+                    </button>
+                    <button id="btn-full-solutions" class="pricing-toggle-btn">
+                        <span data-lang="he" class="visible-lang">פתרונות הפקה מלאים</span>
+                        <span data-lang="en">Full Solutions</span>
+                    </button>
+                </div>
+
+                <!-- Core Services Grid -->
+                <div id="core-services-grid" class="pricing-category active">
+                    <div class="pricing-grid">
+                        <!-- Card 1 -->
+                        <div class="pricing-card scroll-animate">
+                            <div class="pricing-card-header">
+                                <div class="pricing-card-icon">
+                                    <svg class="w-12 h-12 mx-auto" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /><path stroke-linecap="round" stroke-linejoin="round" d="M15.91 11.672a.375.375 0 010 .656l-5.603 3.113a.375.375 0 01-.557-.328V8.887c0-.286.307-.466.557-.327l5.603 3.112z" /></svg>
+                                </div>
+                                <h3>
+                                    <span data-lang="he" class="visible-lang">מפעיל VMIX</span>
+                                    <span data-lang="en">VMIX Operator</span>
+                                </h3>
+                                <p class="text-slate-500 font-semibold mt-1">
+                                    <span data-lang="he" class="visible-lang">לשידורים חיים דינמיים</span>
+                                    <span data-lang="en">For Dynamic Live Streams</span>
+                                </p>
                             </div>
-                            <h3>
-                                 <span data-lang="he" class="visible-lang">הפקת כנסים ואירועים</span>
-                                <span data-lang="en">Conference & Event Production</span>
-                            </h3>
-                            <p class="text-slate-500 font-semibold mt-1">
-                                 <span data-lang="he" class="visible-lang">שותפות מלאה לאירועים גדולים</span>
-                                <span data-lang="en">Full partnership for large-scale events</span>
-                            </p>
+                            <ul>
+                                <li><svg class="w-5 h-5 text-green-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5" /></svg><span data-lang="he" class="visible-lang"><b>ניתוב ובימוי שידור חי</b> מרובה מצלמות ומקורות.</span><span data-lang="en"><b>Live switching & directing</b> with multiple cameras and sources.</span></li>
+                                <li><svg class="w-5 h-5 text-green-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5" /></svg><span data-lang="he" class="visible-lang">הפעלה וניהול גרפיקה, כותרות, סרטונים ומעברונים בזמן אמת.</span><span data-lang="en">Real-time operation of graphics, titles, videos, and transitions.</span></li>
+                            </ul>
+                            <a href="#contact" class="cta-btn mt-auto"><span data-lang="he" class="visible-lang">הזמינו מפעיל</span><span data-lang="en">Book an Operator</span></a>
                         </div>
-                        <div class="price">
-                           <span data-lang="he" class="visible-lang">תמחור מותאם</span>
-                           <span data-lang="en">Custom Pricing</span>
-                           <span class="term" data-lang="he"> / מבוסס עמלת הפקה</span>
-                           <span class="term" data-lang="en"> / based on production fee</span>
+                        
+                        <!-- Card 2 -->
+                        <div class="pricing-card scroll-animate delay-1">
+                           <div class="pricing-card-header">
+                                <div class="pricing-card-icon">
+                                    <svg class="w-12 h-12 mx-auto" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M18 18.72a9.094 9.094 0 003.741-.479 3 3 0 00-4.682-2.72m-7.5-2.228a4.5 4.5 0 00-1.897 1.897M18 18.72a9.094 9.094 0 01-7.5 0M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                                </div>
+                                <h3>
+                                    <span data-lang="he" class="visible-lang">מפיק Zoom</span>
+                                    <span data-lang="en">Zoom Producer</span>
+                                </h3>
+                                <p class="text-slate-500 font-semibold mt-1">
+                                    <span data-lang="he" class="visible-lang">לוובינרים ואירועים וירטואליים</span>
+                                    <span data-lang="en">For Webinars & Virtual Events</span>
+                                </p>
+                            </div>
+                             <ul>
+                                <li><svg class="w-5 h-5 text-green-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5" /></svg><span data-lang="he" class="visible-lang"><b>ניהול טכני מלא</b> של וובינרים ופגישות Zoom גדולות.</span><span data-lang="en"><b>Full technical management</b> of webinars and large Zoom meetings.</span></li>
+                                <li><svg class="w-5 h-5 text-green-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5" /></svg><span data-lang="he" class="visible-lang">תפעול חדרים (Breakout Rooms), סקרים, Q&A, ושיתוף מדיה.</span><span data-lang="en">Operating Breakout Rooms, polls, Q&A, and media sharing.</span></li>
+                            </ul>
+                             <a href="#contact" class="cta-btn mt-auto"><span data-lang="he" class="visible-lang">הזמינו מפיק</span><span data-lang="en">Book a Producer</span></a>
                         </div>
-                         <ul>
-                            <li><svg class="w-5 h-5 text-green-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5" /></svg><span data-lang="he" class="visible-lang"><b>ניהול 360 מעלות</b> של כנסים ואירועים פיזיים, וירטואליים והיברידיים.</span><span data-lang="en"><b>360° management</b> of physical, virtual, and hybrid conferences and events.</span></li>
-                            <li><svg class="w-5 h-5 text-green-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5" /></svg><span data-lang="he" class="visible-lang">כולל ניהול כלל הספקים (אולם, קייטרינג, AV), לוגיסטיקה, צוותים, מיתוג ותוכן.</span><span data-lang="en">Includes management of all vendors (venue, catering, AV), logistics, staff, branding, and content.</span></li>
-                            <li><svg class="w-5 h-5 text-green-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5" /></svg><span data-lang="he" class="visible-lang">אנו נהיה השותפים האסטרטגיים שלכם להצלחת האירוע, עם שקיפות מלאה בתקציב.</span><span data-lang="en">We become your strategic partner for the event's success, with full budget transparency.</span></li>
-                        </ul>
-                         <a href="#contact" class="cta-btn mt-auto"><span data-lang="he" class="visible-lang">תיאום פגישת ייעוץ</span><span data-lang="en">Schedule a Consultation</span></a>
+
+                        <!-- Card 3 -->
+                        <div class="pricing-card scroll-animate delay-2">
+                            <div class="pricing-card-header">
+                                <div class="pricing-card-icon">
+                                    <svg class="w-12 h-12 mx-auto" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M9 17.25v1.007a3 3 0 01-.879 2.122L7.5 21h9l-1.621-.87a3 3 0 01-.879-2.122v-1.007M15 15.75a3 3 0 00-3-3H9a3 3 0 00-3 3h12z" /><path stroke-linecap="round" stroke-linejoin="round" d="M9 9.75a3 3 0 013-3h.008a3 3 0 013 3v1.5a3 3 0 01-3 3h-.008a3 3 0 01-3-3v-1.5z" /></svg>
+                                </div>
+                                <h3>
+                                    <span data-lang="he" class="visible-lang">מפיק טכני</span>
+                                    <span data-lang="en">Technical Producer</span>
+                                </h3>
+                                <p class="text-slate-500 font-semibold mt-1">
+                                    <span data-lang="he" class="visible-lang">לניהול טכני ביום האירוע</span>
+                                    <span data-lang="en">For On-Site Technical Management</span>
+                                </p>
+                            </div>
+                             <ul>
+                                <li><svg class="w-5 h-5 text-green-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5" /></svg><span data-lang="he" class="visible-lang"><b>אחריות כוללת</b> על כל ההיבטים הטכניים ביום האירוע הפיזי.</span><span data-lang="en"><b>Overall responsibility</b> for all technical aspects on the event day.</span></li>
+                                <li><svg class="w-5 h-5 text-green-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5" /></svg><span data-lang="he" class="visible-lang">ניהול צוותי סאונד, תאורה, וידאו ותקשורת מול כל הספקים.</span><span data-lang="en">Managing sound, lighting, video teams, and vendor communication.</span></li>
+                            </ul>
+                             <a href="#contact" class="cta-btn mt-auto"><span data-lang="he" class="visible-lang">צרו קשר</span><span data-lang="en">Contact Us</span></a>
+                        </div>
                     </div>
                 </div>
+
+                <!-- Full Solutions Grid -->
+                <div id="full-solutions-grid" class="pricing-category">
+                    <div class="pricing-grid">
+                       <!-- Card 1 -->
+                        <div class="pricing-card scroll-animate">
+                            <div class="pricing-card-header">
+                                <div class="pricing-card-icon">
+                                    <svg class="w-12 h-12 mx-auto" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M21 7.5l-9-5.25L3 7.5m18 0l-9 5.25m9-5.25v9l-9 5.25M3 7.5l9 5.25M3 7.5v9l9 5.25m0-9v9" /></svg>
+                                </div>
+                                <h3>
+                                    <span data-lang="he" class="visible-lang">הפקת בוטיק</span>
+                                    <span data-lang="en">Boutique Production</span>
+                                </h3>
+                                <p class="text-slate-500 font-semibold mt-1">
+                                    <span data-lang="he" class="visible-lang">לוובינרים ותוכן דיגיטלי</span>
+                                    <span data-lang="en">For Webinars & Digital Content</span>
+                                </p>
+                            </div>
+                            <div class="price">
+                               <span data-lang="he" class="visible-lang">החל מ-15,000 ₪</span>
+                               <span data-lang="en">From $4,000</span>
+                            </div>
+                            <ul>
+                                <li><svg class="w-5 h-5 text-green-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5" /></svg><span data-lang="he" class="visible-lang"><b>ליווי מלא משלב הרעיון ועד התוצר הסופי.</b></span><span data-lang="en"><b>Full support from concept to final product.</b></span></li>
+                                <li><svg class="w-5 h-5 text-green-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5" /></svg><span data-lang="he" class="visible-lang">כולל תכנון, ניהול טכני, וגרפיקה לשידור.</span><span data-lang="en">Includes planning, technical management, and broadcast graphics.</span></li>
+                            </ul>
+                            <a href="#contact" class="cta-btn mt-auto"><span data-lang="he" class="visible-lang">להצעת מחיר</span><span data-lang="en">Get a Quote</span></a>
+                        </div>
+                        
+                        <!-- Card 2 (Featured) -->
+                        <div class="pricing-card featured scroll-animate delay-1">
+                           <div class="pricing-card-header">
+                                <div class="pricing-card-icon">
+                                    <svg class="w-12 h-12 mx-auto" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M8.25 21v-4.875c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125V21m0 0h4.5V3.545M12.75 21h7.5V10.75M2.25 21h1.5m18 0h-18M2.25 9l4.5-1.636M18.75 3l-1.5.545m0 6.205l3 1m-3-1l-3-1m-3 1l-3-1" /></svg>
+                                </div>
+                                <h3>
+                                    <span data-lang="he" class="visible-lang">אירוע היברידי</span>
+                                    <span data-lang="en">Hybrid Event</span>
+                                </h3>
+                                <p class="text-slate-500 font-semibold mt-1">
+                                    <span data-lang="he" class="visible-lang">לשילוב קהל פיזי ודיגיטלי</span>
+                                    <span data-lang="en">For Physical & Digital Audiences</span>
+                                </p>
+                            </div>
+                            <div class="price">
+                               <span data-lang="he" class="visible-lang">תמחור מותאם</span>
+                               <span data-lang="en">Custom Pricing</span>
+                            </div>
+                             <ul>
+                                <li><svg class="w-5 h-5 text-green-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5" /></svg><span data-lang="he" class="visible-lang"><b>פתרון מלא</b> לאירועים המשלבים קהל באולם וקהל אונליין.</span><span data-lang="en"><b>Complete solution</b> for events combining in-person and online audiences.</span></li>
+                                <li><svg class="w-5 h-5 text-green-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5" /></svg><span data-lang="he" class="visible-lang">ניהול פלטפורמת השידור, אינטראקציה עם הקהל הדיגיטלי וסנכרון מלא.</span><span data-lang="en">Managing the broadcast platform, digital audience interaction, and full sync.</span></li>
+                            </ul>
+                             <a href="#contact" class="cta-btn mt-auto"><span data-lang="he" class="visible-lang">תכנון אירוע</span><span data-lang="en">Plan an Event</span></a>
+                        </div>
+
+                        <!-- Card 3 -->
+                        <div class="pricing-card scroll-animate delay-2">
+                            <div class="pricing-card-header">
+                                <div class="pricing-card-icon">
+                                    <svg class="w-12 h-12 mx-auto" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M2.25 7.125C2.25 6.504 2.754 6 3.375 6h6c.621 0 1.125.504 1.125 1.125v3.75c0 .621-.504 1.125-1.125 1.125h-6A1.125 1.125 0 012.25 10.875V7.125zM14.25 8.625c0-.621.504-1.125 1.125-1.125h5.25c.621 0 1.125.504 1.125 1.125v8.25c0 .621-.504 1.125-1.125 1.125h-5.25a1.125 1.125 0 01-1.125-1.125v-8.25zM3.75 16.125c0-.621.504-1.125 1.125-1.125h5.25c.621 0 1.125.504 1.125 1.125v2.25c0 .621-.504 1.125-1.125 1.125h-5.25a1.125 1.125 0 01-1.125-1.125v-2.25z" /></svg>
+                                </div>
+                                <h3>
+                                    <span data-lang="he" class="visible-lang">הפקת כנס מלאה</span>
+                                    <span data-lang="en">Full Conference</span>
+                                </h3>
+                                <p class="text-slate-500 font-semibold mt-1">
+                                    <span data-lang="he" class="visible-lang">שותפות אסטרטגית מלאה</span>
+                                    <span data-lang="en">Full Strategic Partnership</span>
+                                </p>
+                            </div>
+                             <div class="price">
+                               <span data-lang="he" class="visible-lang">מבוסס עמלה</span>
+                               <span data-lang="en">Fee-Based</span>
+                            </div>
+                             <ul>
+                                <li><svg class="w-5 h-5 text-green-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5" /></svg><span data-lang="he" class="visible-lang"><b>ניהול 360°</b> של כנסים ואירועים פיזיים, וירטואליים והיברידיים.</span><span data-lang="en"><b>360° management</b> of physical, virtual, and hybrid conferences.</span></li>
+                                <li><svg class="w-5 h-5 text-green-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5" /></svg><span data-lang="he" class="visible-lang">ניהול כלל הספקים (אולם, AV, תוכן), לוגיסטיקה, וצוותים.</span><span data-lang="en">Managing all vendors (venue, AV, content), logistics, and staff.</span></li>
+                            </ul>
+                             <a href="#contact" class="cta-btn mt-auto"><span data-lang="he" class="visible-lang">תיאום פגישה</span><span data-lang="en">Schedule a Meeting</span></a>
+                        </div>
+                    </div>
+                </div>
+
             </div>
         </section>
 
@@ -860,7 +973,7 @@
                 </h2>
                 <p>
                     <span data-lang="he" class="visible-lang">מוכנים לשמוע על האתגרים שלכם ולהציע פתרונות שישדרגו לכם את האירוע.</span>
-                    <span data--lang="en">Ready to hear about your challenges and offer solutions that will elevate your event.</span>
+                    <span data-lang="en">Ready to hear about your challenges and offer solutions that will elevate your event.</span>
                 </p>
                 <div class="mt-6 text-lg">
                     <p><strong>Orian Edleni</strong></p>
@@ -909,6 +1022,7 @@
                 this.setupHeaderTitleObserver();
                 this.setupInfographicAnimation();
                 this.setupScrollAnimations();
+                this.setupPricingToggle();
             },
 
             cacheDOM() {
@@ -931,60 +1045,71 @@
                     canvasBack: document.getElementById('orb-canvas-back'),
                     processInfographic: document.querySelector('.infographic-process-wrapper'),
                     sections: document.querySelectorAll('.content-section'),
+                    pricing: {
+                        btnCore: document.getElementById('btn-core-services'),
+                        btnFull: document.getElementById('btn-full-solutions'),
+                        coreGrid: document.getElementById('core-services-grid'),
+                        fullGrid: document.getElementById('full-solutions-grid')
+                    }
                 };
             },
 
             bindEvents() {
-                // Mouse move for physics simulation
                 window.addEventListener('mousemove', this.handleMouseMove.bind(this));
-
-                // Language Switching
                 this.dom.langBtns.he.addEventListener('click', () => this.setLanguage('he'));
                 this.dom.langBtns.en.addEventListener('click', () => this.setLanguage('en'));
                 this.dom.langBtnsMobile.he.addEventListener('click', () => this.setLanguage('he'));
                 this.dom.langBtnsMobile.en.addEventListener('click', () => this.setLanguage('en'));
-
-                // Navigation
-                this.dom.navLinks.forEach(link => {
-                    link.addEventListener('click', (e) => {
-                        e.preventDefault();
-                        const targetId = link.getAttribute('href');
-                        const targetElement = document.querySelector(targetId);
-                        if (targetElement) {
-                           const offset = this.dom.header.offsetHeight;
-                           const bodyRect = document.body.getBoundingClientRect().top;
-                           const elementRect = targetElement.getBoundingClientRect().top;
-                           const elementPosition = elementRect - bodyRect;
-                           const offsetPosition = elementPosition - offset;
-
-                           window.scrollTo({
-                               top: offsetPosition,
-                               behavior: 'smooth'
-                           });
-                        }
-                        this.dom.offcanvasMenu.classList.remove('active');
-                    });
-                });
-                
-                // Hamburger Menu
-                this.dom.hamburgerBtn.addEventListener('click', () => {
-                    this.dom.offcanvasMenu.classList.add('active');
-                });
-                this.dom.closeMenuBtn.addEventListener('click', () => {
-                    this.dom.offcanvasMenu.classList.remove('active');
-                });
-
-                // Infographic phase toggling
+                this.dom.navLinks.forEach(link => link.addEventListener('click', this.handleNavClick.bind(this)));
+                this.dom.hamburgerBtn.addEventListener('click', () => this.dom.offcanvasMenu.classList.add('active'));
+                this.dom.closeMenuBtn.addEventListener('click', () => this.dom.offcanvasMenu.classList.remove('active'));
                 document.body.addEventListener('click', (e) => {
                     const phaseNode = e.target.closest('.phase-node');
-                    if (phaseNode) {
-                        this.togglePhaseDetails(phaseNode);
-                    }
+                    if (phaseNode) this.togglePhaseDetails(phaseNode);
                 });
-
                 window.addEventListener('resize', this.resizeCanvas.bind(this));
             },
             
+            setupPricingToggle() {
+                if (!this.dom.pricing.btnCore) return;
+
+                this.dom.pricing.btnCore.addEventListener('click', () => {
+                    this.dom.pricing.btnCore.classList.add('active');
+                    this.dom.pricing.btnFull.classList.remove('active');
+                    $(this.dom.pricing.fullGrid).fadeOut(200, () => {
+                        $(this.dom.pricing.coreGrid).fadeIn(200);
+                        this.dom.pricing.coreGrid.classList.add('active');
+                        this.dom.pricing.fullGrid.classList.remove('active');
+                    });
+                });
+
+                this.dom.pricing.btnFull.addEventListener('click', () => {
+                    this.dom.pricing.btnFull.classList.add('active');
+                    this.dom.pricing.btnCore.classList.remove('active');
+                     $(this.dom.pricing.coreGrid).fadeOut(200, () => {
+                        $(this.dom.pricing.fullGrid).fadeIn(200);
+                        this.dom.pricing.fullGrid.classList.add('active');
+                        this.dom.pricing.coreGrid.classList.remove('active');
+                    });
+                });
+            },
+
+            handleNavClick(e) {
+                e.preventDefault();
+                const targetId = e.currentTarget.getAttribute('href');
+                const targetElement = document.querySelector(targetId);
+                if (targetElement) {
+                   const offset = this.dom.header.offsetHeight;
+                   const bodyRect = document.body.getBoundingClientRect().top;
+                   const elementRect = targetElement.getBoundingClientRect().top;
+                   const elementPosition = elementRect - bodyRect;
+                   const offsetPosition = elementPosition - offset;
+
+                   window.scrollTo({ top: offsetPosition, behavior: 'smooth' });
+                }
+                this.dom.offcanvasMenu.classList.remove('active');
+            },
+
             handleMouseMove(e) {
                 this.state.mouse.x = e.clientX;
                 this.state.mouse.y = e.clientY;
@@ -1076,7 +1201,7 @@
                     entries.forEach(entry => {
                         if (entry.isIntersecting) {
                             entry.target.classList.add('in-view');
-                            observer.unobserve(entry.target);
+                            // observer.unobserve(entry.target); // Optional: keep animating on re-scroll
                         }
                     });
                 }, { threshold: 0.1 });
