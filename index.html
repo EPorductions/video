@@ -1,659 +1,941 @@
 <!DOCTYPE html>
 <html lang="he" dir="rtl">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>PsychoFlash Productions – פתרונות הפקה מודרניים</title>
-    
-    <!-- Tailwind CSS for modern utility-first styling -->
-    <script src="https://cdn.tailwindcss.com"></script>
-    
-    <!-- Google Fonts -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Assistant:wght@400;600;700&display=swap" rel="stylesheet">
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <title>PsychoFlash Productions – פתרונות הפקה טכניים ויצירתיים</title>
+  <meta name="description" content="שירותי הפקת וידאו, שידורים חיים ופתרונות טכנולוגיים מתקדמים. השילוב המושלם בין ביצוע טכני לחדשנות יצירתית.">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  <link href="https://fonts.googleapis.com/css2?family=Assistant:wght@400;600;700&display=swap" rel="stylesheet">
+  
+  <style>
+    :root {
+      --primary-dark: #003f5c;
+      --primary-purple: #7a5195;
+      --primary-pink: #ef5675;
+      --primary-orange: #ffa600;
+      --text-light: #f8f9fa;
+      --text-dark: #212529;
+      --bg-light: #f8f9fa;
+    }
+    html { scroll-behavior: smooth; }
+    body {
+      font-family: 'Assistant', sans-serif;
+      overflow-x: hidden;
+      background-color: var(--bg-light);
+    }
+    .orb-canvas {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      z-index: -1;
+      opacity: 0.7;
+    }
+    #language-toggle {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      z-index: 12000;
+    }
+    #language-toggle button {
+      margin: 0 5px;
+      padding: 8px 12px;
+      font-size: 14px;
+      cursor: pointer;
+      border: 1px solid #fff;
+      background-color: rgba(0,0,0,0.5);
+      color: #fff;
+      border-radius: 20px;
+      transition: all 0.3s;
+    }
+    #language-toggle button:hover, #language-toggle button.active-lang {
+      background-color: var(--primary-orange);
+      color: var(--text-dark);
+      border-color: var(--primary-orange);
+    }
+    header {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      background-color: rgba(255, 255, 255, 0.8);
+      backdrop-filter: blur(10px);
+      color: var(--text-dark);
+      z-index: 10000;
+      height: 80px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 1rem;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    }
+    header h1 {
+      font-size: 1.8rem;
+      font-weight: 700;
+      color: var(--primary-dark);
+    }
+    header nav {
+      display: flex;
+      gap: 25px;
+      overflow-x: auto;
+      white-space: nowrap;
+      -webkit-overflow-scrolling: touch;
+    }
+    header nav::-webkit-scrollbar { display: none; }
+    header nav a {
+      color: var(--text-dark);
+      text-decoration: none;
+      font-weight: 600;
+      padding: 8px 16px;
+      border-radius: 20px;
+      font-size: 16px;
+      transition: background-color 0.3s, color 0.3s;
+      cursor: pointer;
+    }
+    header nav a:hover, header nav a.active {
+      background-color: var(--primary-purple);
+      color: var(--text-light);
+    }
+    .hamburger {
+      display: none;
+      background: none;
+      border: none;
+      cursor: pointer;
+      z-index: 11000;
+      padding: 10px;
+    }
+    .hamburger span {
+      display: block;
+      width: 28px;
+      height: 3px;
+      background: var(--text-dark);
+      margin: 5px 0;
+      transition: all 0.3s;
+    }
+    @media (max-width: 992px) {
+      header nav { display: none; }
+     .hamburger { display: block; }
+    }
+    .offcanvas-menu {
+      position: fixed;
+      top: 0;
+      right: -300px;
+      width: 300px;
+      height: 100%;
+      background: var(--text-dark);
+      color: #fff;
+      z-index: 11000;
+      padding: 60px 20px 20px;
+      transition: right 0.3s ease;
+      box-shadow: -5px 0 15px rgba(0,0,0,0.5);
+    }
+    .offcanvas-menu.active { right: 0; }
+    .offcanvas-menu a {
+      color: var(--text-light);
+      text-decoration: none;
+      display: block;
+      margin-bottom: 1.5rem;
+      font-size: 18px;
+      font-weight: 600;
+    }
+    .sub-nav {
+      position: sticky;
+      top: 80px;
+      background-color: rgba(255, 255, 255, 0.9);
+      backdrop-filter: blur(8px);
+      padding: 12px;
+      display: flex;
+      gap: 15px;
+      justify-content: center;
+      z-index: 9998;
+      flex-wrap: wrap;
+      border-bottom: 1px solid #e1e8ed;
+    }
+    .sub-nav a {
+      text-decoration: none;
+      background: #e1e8ed;
+      color: var(--text-dark);
+      padding: 6px 12px;
+      border-radius: 15px;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s;
+    }
+    .sub-nav a:hover,.sub-nav a.active-sub {
+      background-color: var(--primary-purple);
+      color: #fff;
+    }
+    #main-content {
+      padding-top: 80px;
+      position: relative;
+      z-index: 2;
+    }
+    .category-page {
+      display: none;
+      opacity: 0;
+      transition: opacity 0.3s ease-in-out;
+    }
+    .category-page.active {
+      display: block;
+      opacity: 1;
+    }
+    .category-page-container {
+        padding: 40px 20px;
+    }
+    .category-content {
+      max-width: 1000px;
+      margin: 20px auto;
+      padding: 30px;
+      background: #ffffff;
+      border-radius: 12px;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+      color: #333;
+    }
+    .category-content h2 {
+      margin-bottom: 1rem;
+      font-size: 2.25rem;
+      font-weight: 700;
+      color: var(--primary-dark);
+      text-align: center;
+    }
+     .category-content h3 {
+      margin-top: 1.5rem;
+      margin-bottom: 1rem;
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: var(--primary-purple);
+    }
+    .category-content p, .category-content ul, .category-content li {
+      color: #444;
+      font-size: 1.1rem;
+      line-height: 1.7;
+    }
+    .category-content ul {
+      list-style-type: '✓ ';
+      padding-right: 20px;
+      margin-bottom: 20px;
+    }
+    .category-content[dir="ltr"] ul {
+        padding-right: 0;
+        padding-left: 20px;
+        list-style-position: inside;
+    }
+    .category-content li { margin-bottom: 10px; }
+    .info-cards {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 25px;
+      margin-top: 30px;
+    }
+    .info-card {
+      background: #fff;
+      border-radius: 12px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+      transition: transform 0.3s, box-shadow 0.3s;
+      padding: 20px;
+      border-left: 4px solid var(--primary-purple);
+    }
+    .info-card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 8px 25px rgba(0,0,0,0.12);
+    }
+    .info-card h4 {
+      color: var(--primary-dark);
+      margin-bottom: 10px;
+      font-size: 1.25rem;
+    }
+    .info-card h4 i {
+        margin-left: 8px;
+        color: var(--primary-purple);
+    }
+    .gallery-cards {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+        gap: 25px;
+        margin-top: 30px;
+    }
+    .gallery-card {
+      background: #fff;
+      border-radius: 10px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+      transition: transform 0.3s, box-shadow 0.3s;
+      overflow: hidden;
+      text-align: center;
+    }
+     .gallery-card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 8px 25px rgba(0,0,0,0.12);
+    }
+    .gallery-card img {
+      width: 100%;
+      height: 200px;
+      object-fit: cover;
+      display: block;
+    }
+    .gallery-card-content { padding: 15px; }
+    .gallery-card h4 {
+      margin-bottom: 5px;
+      font-size: 1.2rem;
+    }
+    .gallery-card p {
+      font-size: 0.95rem;
+      color: #666;
+    }
+    footer {
+      background: var(--text-dark);
+      color: #aab8c2;
+      text-align: center;
+      padding: 30px;
+      font-size: 0.9rem;
+      margin-top: 40px;
+    }
+    .chart-container {
+        height: 400px;
+        width: 100%;
+        max-width: 800px;
+        margin: 30px auto;
+    }
+    .hero-section {
+        padding: 80px 20px;
+    }
+    @media (min-width: 768px) { .hero-section { padding: 120px 20px; } }
 
-    <style>
-        /* Custom styles to complement Tailwind */
-        body {
-            font-family: 'Assistant', sans-serif;
-        }
-
-        /* Smooth scrolling behavior */
-        html {
-            scroll-behavior: smooth;
-        }
-
-        /* Custom transition for page fades */
-        .category-page {
-            transition: opacity 300ms ease-in-out, transform 300ms ease-in-out;
-        }
-        .category-page:not(.active) {
-            opacity: 0;
-            transform: translateY(10px);
-            display: none; /* Hide non-active pages for performance */
-        }
-        .category-page.active {
-            display: block; /* Show active pages */
-            opacity: 1;
-            transform: translateY(0);
-        }
-
-        /* Styling for list bullets */
-        .category-content ul {
-            list-style-type: '✓  ';
-        }
-        [dir="ltr"] .category-content ul {
-            list-style-type: '✓  ';
-            padding-left: 1.5rem;
-        }
-        [dir="rtl"] .category-content ul {
-            padding-right: 1.5rem;
-        }
-    </style>
+  </style>
 </head>
-<body class="bg-slate-50 text-slate-700">
-
-    <!-- Background canvas for animated orbs -->
-    <canvas id="orb-canvas" class="fixed top-0 left-0 w-full h-full -z-10"></canvas>
-
-    <!-- Language Toggle Buttons -->
-    <div id="language-toggle" class="fixed top-4 right-4 z-[100]">
-        <button id="btn-he" class="px-3 py-1 text-sm font-semibold transition-colors duration-300 rounded-full">עברית</button>
-        <button id="btn-en" class="px-3 py-1 text-sm font-semibold transition-colors duration-300 rounded-full">English</button>
-    </div>
-
-    <!-- Main Container for Hebrew Content -->
-    <div id="content-he" class="lang-container">
-        <header class="fixed top-0 left-0 right-0 z-50 flex items-center justify-between h-20 px-4 text-white bg-gray-900/80 backdrop-blur-lg sm:px-8">
-            <h1 class="text-xl font-bold sm:text-2xl">PsychoFlash Productions</h1>
-            <nav class="hidden lg:flex items-center gap-2">
-                <a data-category="he-cat1" class="nav-link">שירותים</a>
-                <a data-category="he-cat2" class="nav-link">הפקות</a>
-                <a data-category="he-cat3" class="nav-link">שידורים חיים</a>
-                <a data-category="he-cat4" class="nav-link">תעריפים</a>
-                <a data-category="he-cat5" class="nav-link">ייעוץ</a>
-                <a data-category="he-cat6" class="nav-link">פרויקטים</a>
-                <a data-category="he-cat7" class="nav-link">צרו קשר</a>
-            </nav>
-            <button class="hamburger-btn lg:hidden" aria-label="תפריט">
-                <div class="space-y-1.5">
-                    <span class="block w-6 h-0.5 bg-white transition-transform duration-300"></span>
-                    <span class="block w-6 h-0.5 bg-white transition-opacity duration-300"></span>
-                    <span class="block w-6 h-0.5 bg-white transition-transform duration-300"></span>
-                </div>
-            </button>
-        </header>
-
-        <div class="offcanvas-menu">
-            <nav class="flex flex-col gap-6 p-8 mt-20">
-                <a data-category="he-cat1" class="nav-link">שירותים</a>
-                <a data-category="he-cat2" class="nav-link">הפקות</a>
-                <a data-category="he-cat3" class="nav-link">שידורים חיים</a>
-                <a data-category="he-cat4" class="nav-link">תעריפים</a>
-                <a data-category="he-cat5" class="nav-link">ייעוץ</a>
-                <a data-category="he-cat6" class="nav-link">פרויקטים</a>
-                <a data-category="he-cat7" class="nav-link">צרו קשר</a>
-            </nav>
-        </div>
-        
-        <main class="pt-20">
-            <!-- Content pages will be dynamically shown here -->
-        </main>
+<body>
+  <canvas id="orb-canvas-back" class="orb-canvas"></canvas>
+  
+  <div id="language-toggle">
+    <button id="btn-he" class="active-lang">עברית</button>
+    <button id="btn-en">English</button>
+  </div>
+  
+  <div id="content-he" dir="rtl">
+    <header>
+      <h1>PsychoFlash</h1>
+      <nav>
+        <a data-category="he-cat1">ראשי</a>
+        <a data-category="he-cat2">שירותים</a>
+        <a data-category="he-cat3">ניתוח פיננסי</a>
+        <a data-category="he-cat4">פרויקטים</a>
+        <a data-category="he-cat5">צרו קשר</a>
+      </nav>
+      <button class="hamburger" id="hamburger-btn-he" aria-label="תפריט">
+        <span></span><span></span><span></span>
+      </button>
+    </header>
+    
+    <div class="offcanvas-menu" id="offcanvas-menu-he">
+      <a href="#" data-category="he-cat1" class="offcanvas-link">ראשי</a>
+      <a href="#" data-category="he-cat2" class="offcanvas-link">שירותים</a>
+      <a href="#" data-category="he-cat3" class="offcanvas-link">ניתוח פיננסי</a>
+      <a href="#" data-category="he-cat4" class="offcanvas-link">פרויקטים</a>
+      <a href="#" data-category="he-cat5" class="offcanvas-link">צרו קשר</a>
     </div>
     
-    <!-- Main Container for English Content -->
-    <div id="content-en" class="lang-container">
-        <header class="fixed top-0 left-0 right-0 z-50 flex items-center justify-between h-20 px-4 text-white bg-gray-900/80 backdrop-blur-lg sm:px-8">
-            <h1 class="text-xl font-bold sm:text-2xl">PsychoFlash Productions</h1>
-            <nav class="hidden lg:flex items-center gap-2">
-                <a data-category="en-cat1" class="nav-link">Services</a>
-                <a data-category="en-cat2" class="nav-link">Productions</a>
-                <a data-category="en-cat3" class="nav-link">Live Streams</a>
-                <a data-category="en-cat4" class="nav-link">Pricing</a>
-                <a data-category="en-cat5" class="nav-link">Consulting</a>
-                <a data-category="en-cat6" class="nav-link">Projects</a>
-                <a data-category="en-cat7" class="nav-link">Contact</a>
-            </nav>
-            <button class="hamburger-btn lg:hidden" aria-label="Menu">
-                <div class="space-y-1.5">
-                    <span class="block w-6 h-0.5 bg-white transition-transform duration-300"></span>
-                    <span class="block w-6 h-0.5 bg-white transition-opacity duration-300"></span>
-                    <span class="block w-6 h-0.5 bg-white transition-transform duration-300"></span>
+    <div id="main-content">
+      <div id="he-cat1" class="category-page">
+        <div class="category-page-container">
+            <div class="hero-section text-center">
+                 <h1 class="text-4xl md:text-6xl font-extrabold text-gray-800 leading-tight">השילוב המושלם בין <span class="text-transparent bg-clip-text bg-gradient-to-r from-purple-600 to-pink-600">ביצוע טכני</span> לחדשנות יצירתית</h1>
+                 <p class="mt-4 text-lg md:text-xl text-gray-600 max-w-3xl mx-auto">מהפקות וידאו ושידורים חיים ועד פיתוח פתרונות תוכנה ו-AI, אנחנו כאן כדי להפוך את החזון שלכם למציאות מרשימה, חלקה ונטולת תקלות.</p>
+            </div>
+            <div class="category-content">
+                <div class="row align-items-center g-4">
+                    <div class="col-md-6 text-center p-4">
+                        <i class="fas fa-cogs fa-3x text-purple-600 mb-3"></i>
+                        <h3>ה"תכל'ס" - הביצוע האמין</h3>
+                        <p>שנים של ניסיון בתפעול טכני מדויק, ניהול שידורים והקמות מקצועיות. זהו הבסיס היציב והאמין שמאפשר לכל הפקה לרוץ חלק, והסיבה שלקוחותינו סומכים עלינו פעם אחר פעם.</p>
+                    </div>
+                    <div class="col-md-6 text-center p-4">
+                        <i class="fas fa-lightbulb fa-3x text-pink-600 mb-3"></i>
+                        <h3>"ארגז הכלים" - הפתרון היצירתי</h3>
+                        <p>מאגר רחב של יכולות טכנולוגיות ויצירתיות, כולל פיתוח, גרפיקה מתקדמת, אוטומציה ופתרונות AI. זהו הערך המוסף שמקפיץ כל הפקה והופך אותה לייחודית ומרשימה.</p>
+                    </div>
                 </div>
-            </button>
-        </header>
-
-        <div class="offcanvas-menu">
-            <nav class="flex flex-col gap-6 p-8 mt-20">
-                <a data-category="en-cat1" class="nav-link">Services</a>
-                <a data-category="en-cat2" class="nav-link">Productions</a>
-                <a data-category="en-cat3" class="nav-link">Live Streams</a>
-                <a data-category="en-cat4" class="nav-link">Pricing</a>
-                <a data-category="en-cat5" class="nav-link">Consulting</a>
-                <a data-category="en-cat6" class="nav-link">Projects</a>
-                <a data-category="en-cat7" class="nav-link">Contact</a>
-            </nav>
+            </div>
         </div>
-        
-        <main class="pt-20">
-            <!-- Content pages will be dynamically shown here -->
-        </main>
+      </div>
+      
+      <div id="he-cat2" class="category-page">
+        <div class="sub-nav">
+          <a href="#he-cat2-sub1">שירותי ליבה</a>
+          <a href="#he-cat2-sub2">שירותי צמיחה</a>
+          <a href="#he-cat2-sub3">ייעוץ</a>
+        </div>
+        <div class="category-page-container">
+            <div class="category-content" id="he-cat2-sub1">
+              <h2>שירותי ליבה (ה"תכל'ס") 🛠️</h2>
+              <p>אלו השירותים המהווים את הבסיס היציב של העסק, המייצרים מוניטין של אמינות ומקצועיות ללא פשרות.</p>
+              <div class="info-cards">
+                  <div class="info-card"><h4><i class="fas fa-sliders-h"></i>תפעול טכני מקיף</h4><p>ניהול מלא של הצד הטכני בהפקות ושידורים חיים, מהקמה ועד פירוק.</p></div>
+                  <div class="info-card"><h4><i class="fas fa-broadcast-tower"></i>ניהול שידורים וירטואליים</h4><p>מומחיות בפלטפורמות Zoom, VMIX ועוד, להבטחת שידור חלק ונטול תקלות.</p></div>
+                  <div class="info-card"><h4><i class="fas fa-desktop"></i>הפעלת טלפרומפטר</h4><p>שירות מקצועי ומדויק המבטיח שהמסר שלכם יעבור בצורה חלקה וברורה.</p></div>
+                  <div class="info-card"><h4><i class="fas fa-video"></i>ניתוב ובימוי מצלמות</h4><p>ניהול מערך מצלמות בזמן אמת ליצירת זרימה ויזואלית דינמית ומרתקת.</p></div>
+              </div>
+            </div>
+            <div class="category-content" id="he-cat2-sub2">
+              <h2>מנועי צמיחה ("ארגז הכלים") 🚀</h2>
+              <p>אלו שירותי הערך המוסף שמבדלים אותנו, מגדילים את הרווחיות ומאפשרים לנו לספק פתרונות ייחודיים.</p>
+               <div class="info-cards">
+                  <div class="info-card"><h4><i class="fas fa-palette"></i>גרפיקה ואנימציה לשידור</h4><p>פיתוח גרפיקות מותאמות אישית, מעברונים ואנימציות המשדרגים כל שידור חי.</p></div>
+                  <div class="info-card"><h4><i class="fas fa-brain"></i>פתרונות מבוססי AI</h4><p>ייעוץ ושילוב כלי בינה מלאכותית לייעול תהליכים, יצירת תוכן והעשרת ההפקה.</p></div>
+                  <div class="info-card"><h4><i class="fas fa-code"></i>פיתוח כלי תוכנה ייעודיים</h4><p>בניית פתרונות תוכנה קטנים וחכמים לאוטומציה של משימות חוזרות בהפקה.</p></div>
+              </div>
+            </div>
+            <div class="category-content" id="he-cat2-sub3">
+              <h2>ייעוץ טכנולוגי ואסטרטגי 🧭</h2>
+              <p>הידע הנרחב שלנו, המשלב תכנות, עיצוב וטכנולוגיות AI, מאפשר לנו להציע שירותי ייעוץ ייחודיים שיכולים לשדרג כל אולפן או חברת הפקות.</p>
+              <div class="info-cards">
+                <div class="info-card"><h4>חדשנות טכנולוגית</h4><p>המלצות והכוונה בתחום הציוד והטכנולוגיות העדכניות ביותר.</p></div>
+                <div class="info-card"><h4>אוטומציה וייעול תהליכים</h4><p>ניתוח תהליכי עבודה ובניית פתרונות אוטומציה חכמים החוסכים זמן וכסף.</p></div>
+                <div class="info-card"><h4>אסטרטגיית תוכן דיגיטלי</h4><p>ייעוץ בבניית דפי נחיתה, נגני וידאו והטמעת תוכן במדיות חברתיות.</p></div>
+              </div>
+            </div>
+        </div>
+      </div>
+      
+      <div id="he-cat3" class="category-page">
+          <div class="sub-nav">
+              <a href="#he-cat3-sub1">חלוקת הכנסות</a>
+              <a href="#he-cat3-sub2">צמיחה פיננסית</a>
+          </div>
+          <div class="category-page-container">
+            <div class="category-content" id="he-cat3-sub1">
+                <h2>אינפוגרפיקה: חלוקת הכנסות לפי שירות (2024-2025)</h2>
+                <p>בעוד קורות החיים מדגישים פיתוח ואנימציה, יומני העבודה חושפים שההכנסה בפועל מגיעה כמעט כולה משירותי תפעול ותמיכה טכנית בהפקות חיות. תרשים זה מציג את חלוקת ההכנסות לפי סוג השירותים שסופקו.</p>
+                <div class="chart-container">
+                    <canvas id="he-servicesChart"></canvas>
+                </div>
+            </div>
+            <div class="category-content" id="he-cat3-sub2">
+                <h2>אינפוגרפיקה: האבולוציה הפיננסית</h2>
+                <p>השוואה בין המצב הפיננסי בשנת 2013 לבין ההכנסות הנוכחיות מדגימה צמיחה משמעותית. בשנת 2013, חלק ניכר מההכנסה נסמך על תמיכת הורים. כיום, ההכנסה מבוססת כולה על עבודתו כפרילנסר.</p>
+                <div class="row g-4">
+                    <div class="col-md-6">
+                        <h3 class="text-center h5">מקורות הכנסה 2013</h3>
+                        <div class="chart-container" style="height: 300px;">
+                            <canvas id="he-income2013Chart"></canvas>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <h3 class="text-center h5">הוצאות עיקריות 2013</h3>
+                        <div class="chart-container" style="height: 300px;">
+                            <canvas id="he-expenses2013Chart"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+      </div>
+      
+      <div id="he-cat4" class="category-page">
+        <div class="category-page-container">
+            <div class="category-content" id="he-cat4-sub1">
+              <h2>פרויקטים נבחרים</h2>
+              <p>הניסיון שלנו מגובה בעבודה עם מגוון רחב של לקוחות ופרויקטים. הנה טעימה קטנה:</p>
+              <div class="gallery-cards">
+                <div class="gallery-card">
+                  <img src="https://placehold.co/280x180/003f5c/ffffff?text=Live+Broadcast" alt="שידור חי">
+                  <div class="gallery-card-content"><h4>שידורים חיים מורכבים</h4><p>ניהול שידורים עבור לקוחות מובילים כמו גו-לייב, כולל ניתוב מצלמות, VMIX וניהול טכני מלא.</p></div>
+                </div>
+                <div class="gallery-card">
+                  <img src="https://placehold.co/280x180/7a5195/ffffff?text=Corporate+Event" alt="אירוע חברה">
+                  <div class="gallery-card-content"><h4>אירועי חברה וכנסים</h4><p>תפעול טכני לאירועים של חברות כמו רפאל, לאומי ואל על, תוך הבטחת ביצוע חלק ומקצועי.</p></div>
+                </div>
+                <div class="gallery-card">
+                  <img src="https://placehold.co/280x180/ef5675/ffffff?text=Software" alt="פיתוח תוכנה">
+                  <div class="gallery-card-content"><h4>פיתוח פתרונות תוכנה</h4><p>בניית מערכות ייעודיות, כמו תוכנה להוספת גרפיקות בשידור חי ומערכת CRM למסעדות.</p></div>
+                </div>
+              </div>
+            </div>
+        </div>
+      </div>
+      
+      <div id="he-cat5" class="category-page">
+         <div class="category-page-container">
+            <div class="category-content text-center" id="he-cat5-sub1">
+              <h2>בואו נדבר על ההפקה הבאה שלכם</h2>
+              <p>מוכנים לשמוע על האתגרים שלכם ולהציע פתרונות שישדרגו לכם את האירוע.</p>
+              <div class="mt-4">
+                <p><strong>אוריין אדלני</strong></p>
+                <p><strong>טלפון:</strong> 054-255-9027</p>
+                <p><strong>אימייל:</strong> <a href="mailto:EdelenviProductions@gmail.com" class="text-decoration-none">EdelenviProductions@gmail.com</a></p>
+              </div>
+            </div>
+         </div>
+      </div>
+    </div> 
+  </div> 
+  
+  <div id="content-en" dir="ltr">
+    <header>
+      <h1>PsychoFlash</h1>
+      <nav>
+        <a data-category="en-cat1">Home</a>
+        <a data-category="en-cat2">Services</a>
+        <a data-category="en-cat3">Financial Analysis</a>
+        <a data-category="en-cat4">Projects</a>
+        <a data-category="en-cat5">Contact</a>
+      </nav>
+      <button class="hamburger" id="hamburger-btn-en" aria-label="Menu">
+        <span></span><span></span><span></span>
+      </button>
+    </header>
+    
+    <div class="offcanvas-menu" id="offcanvas-menu-en">
+        <a href="#" data-category="en-cat1" class="offcanvas-link">Home</a>
+        <a href="#" data-category="en-cat2" class="offcanvas-link">Services</a>
+        <a href="#" data-category="en-cat3" class="offcanvas-link">Financial Analysis</a>
+        <a href="#" data-category="en-cat4" class="offcanvas-link">Projects</a>
+        <a href="#" data-category="en-cat5" class="offcanvas-link">Contact</a>
     </div>
-
-
-    <footer>
-        <p class="py-10 mt-10 text-center text-sm text-slate-500 bg-slate-100">&copy; 2025 PsychoFlash Productions. All rights reserved.</p>
-    </footer>
-
-    <!-- Templates for content pages (will be cloned by JS) -->
-    <template id="page-templates">
-        <!-- Hebrew Pages -->
-        <div id="he-cat1" class="category-page">
-            <div class="sub-nav">
-                <a href="#he-cat1-sub-video">וידאו הדגמה</a><a href="#he-cat1-sub1">אסטרטגיה</a><a href="#he-cat1-sub2">שירותי ליבה</a><a href="#he-cat1-sub3">מנועי צמיחה</a>
-            </div>
-            <div class="page-content-wrapper">
-                <div id="he-cat1-sub-video" class="category-content"><h2>ברוכים הבאים ל-PsychoFlash</h2><p>סרטון הדגמה של יכולותינו יעלה בקרוב. בינתיים, אנו מזמינים אתכם להתרשם ממגוון השירותים שאנו מציעים.</p></div>
-                <div id="he-cat1-sub1" class="category-content"><h2>האסטרטגיה שלנו: לגשר בין ביצוע לחדשנות</h2><p>העולם המקצועי שלנו מורכב משני חלקים המשלימים זה את זה:</p><ul><li><strong>ה"תכל'ס" - הביצוע האמין:</strong> שנים של ניסיון בתפעול טכני מדויק, ניהול שידורים והקמות מקצועיות. זהו הבסיס היציב והאמין שמאפשר לכל הפקה לרוץ חלק.</li><li><strong>"ארגז הכלים" - הפתרון היצירתי:</strong> מאגר רחב של יכולות טכנולוגיות ויצירתיות, כולל פיתוח, גרפיקה מתקדמת, אוטומציה ופתרונות AI. זהו הערך המוסף שמקפיץ כל הפקה.</li></ul><p>האסטרטגיה שלנו היא להשתמש בניסיון התפעולי כדי להבין לעומק את הצרכים שלכם, וליישם את היכולות הטכנולוגיות כדי לתת להם את הפתרון הטוב ביותר.</p></div>
-                <div id="he-cat1-sub2" class="category-content"><h2>שירותי ליבה (ה"תכל'ס")</h2><p>אלו השירותים המהווים את הבסיס היציב של העסק, המייצרים מוניטין של אמינות ומקצועיות ללא פשרות.</p><div class="card-grid"><div class="info-card"><h4>תפעול טכני מקיף</h4><p>ניהול מלא של הצד הטכני בהפקות ושידורים חיים, מהקמה ועד פירוק.</p></div><div class="info-card"><h4>ניהול שידורים וירטואליים</h4><p>מומחיות בפלטפורמות Zoom, VMIX ועוד, להבטחת שידור חלק ונטול תקלות.</p></div><div class="info-card"><h4>הפעלת טלפרומפטר</h4><p>שירות מקצועי ומדויק המבטיח שהמסר שלכם יעבור בצורה חלקה וברורה.</p></div></div></div>
-                <div id="he-cat1-sub3" class="category-content"><h2>מנועי צמיחה ("ארגז הכלים")</h2><p>אלו שירותי הערך המוסף שמבדלים אותנו, מגדילים את הרווחיות ומאפשרים לנו לספק פתרונות ייחודיים.</p><div class="card-grid"><div class="info-card"><h4>גרפיקה ואנימציה לשידור</h4><p>פיתוח גרפיקות מותאמות אישית, מעברונים ואנימציות המשדרגים כל שידור חי.</p></div><div class="info-card"><h4>פתרונות מבוססי AI</h4><p>ייעוץ ושילוב כלי בינה מלאכותית לייעול תהליכים, יצירת תוכן והעשרת ההפקה.</p></div><div class="info-card"><h4>פיתוח כלי תוכנה ייעודיים</h4><p>בניית פתרונות תוכנה קטנים וחכמים לאוטומציה של משימות חוזרות בהפקה.</p></div></div></div>
-            </div>
-        </div>
-        <div id="he-cat2" class="category-page"><div class="sub-nav"><a href="#he-cat2-sub1">ניהול הפקה</a><a href="#he-cat2-sub2">תכנון ותקצוב</a></div><div class="page-content-wrapper"><div id="he-cat2-sub1" class="category-content"><h2>ניהול הפקה מקצה לקצה</h2><p>מעבר ליכולות הטכניות, אנו מציעים ניהול מלא של פרויקטים, תוך שימת דגש על תיאום, יעילות ושקט נפשי עבורכם.</p><ul><li><strong>ניהול צוות הפקה בשטח:</strong> תיאום בין כל אנשי המקצוע המעורבים כדי להבטיח סינרגיה מושלמת.</li><li><strong>ניהול טכני ואמנותי:</strong> שילוב בין החזון הקריאייטיבי לבין הביצוע הטכני.</li><li><strong>תיאום קבלני משנה:</strong> עבודה מול ספקים חיצוניים, אולפנים וחברות הגברה ותאורה.</li></ul></div><div id="he-cat2-sub2" class="category-content"><h2>תכנון ותקצוב</h2><p>הפקה מוצלחת מתחילה בתכנון נכון. אנו מלווים אתכם מהשלבים הראשונים כדי להבטיח שהפרויקט יעמוד ביעדים ובתקציב.</p><ul><li>בניית תקציבים ריאליים ויעילים להפקות ואירועים.</li><li>איתור קהלי יעד ופילוח דמוגרפי להתאמת המסר.</li><li>עריכת תוכן, תחקירים וכתיבת שאלות.</li></ul></div></div></div>
-        <div id="he-cat3" class="category-page"><div class="sub-nav"><a href="#he-cat3-sub1">שידורים חיים</a><a href="#he-cat3-sub2">תפקידים ומומחיות</a></div><div class="page-content-wrapper"><div id="he-cat3-sub1" class="category-content"><h2>המומחיות שלנו: שידורים חיים ללא תקלות</h2><p>שידור חי הוא אירוע שאין בו הזדמנות שנייה. הניסיון שלנו מבטיח שהשידור שלכם יעבור בצורה חלקה, מקצועית ומרשימה, ומאפשר לכם להתמקד בתוכן.</p></div><div id="he-cat3-sub2" class="category-content"><h2>תפקידים ומומחיות</h2><div class="card-grid"><div class="info-card"><h4>ניתוב ובימוי מצלמות</h4><p>ניהול מערך מצלמות בזמן אמת, בחירת הזוויות הנכונות ויצירת זרימה ויזואלית דינמית.</p></div><div class="info-card"><h4>הפעלת VMIX ו-Zoom</h4><p>שליטה מלאה בתוכנות השידור המובילות, כולל שילוב גרפיקות וניהול משתתפים.</p></div><div class="info-card"><h4>מפעיל טלפרומפטר</h4><p>שירות חיוני המאפשר לדוברים להעביר מסרים מורכבים בביטחון ובצורה טבעית.</p></div><div class="info-card"><h4>הקמות טכניות מורכבות</h4><p>תכנון והקמה של אולפנים זמניים ופתרונות שידור מורכבים בשטח.</p></div></div></div></div></div>
-        <div id="he-cat4" class="category-page"><div class="sub-nav"><a href="#he-cat4-sub1">חבילות לדוגמה</a></div><div class="page-content-wrapper"><div id="he-cat4-sub1" class="category-content"><h2>תעריפים וחבילות</h2><p class="text-center">אנו מציעים מגוון פתרונות המותאמים לכל צורך ותקציב. להלן מספר חבילות לדוגמה:</p><div class="card-grid"><div class="price-card border-t-sky-500"><h3>תפעול טכני</h3><p>ליווי טכני להפקה קיימת. כולל תפעול פרומפטר, VMIX או ניתוב.</p><div class="price-tag">החל מ-₪1,000</div></div><div class="price-card border-t-pink-500"><h3>הפקה משולבת</h3><p>תפעול טכני מלא בתוספת שירותי ערך מוסף כמו עיצוב גרפי בסיסי.</p><div class="price-tag">החל מ-₪2,500</div></div><div class="price-card border-t-indigo-500"><h3>חבילת פרימיום</h3><p>פתרון מלא מקצה לקצה: תכנון, ניהול, תפעול, קריאייטיב ופיתוחים.</p><div class="price-tag">מותאם אישית</div></div></div></div></div></div>
-        <div id="he-cat5" class="category-page"><div class="sub-nav"><a href="#he-cat5-sub1">ייעוץ טכנולוגי</a></div><div class="page-content-wrapper"><div id="he-cat5-sub1" class="category-content"><h2>ייעוץ טכנולוגי לעולם ההפקות</h2><p>הידע הנרחב שלנו, המשלב תכנות, עיצוב וטכנולוגיות AI, מאפשר לנו להציע שירותי ייעוץ ייחודיים שיכולים לשדרג כל אולפן או חברת הפקות.</p><div class="card-grid"><div class="info-card"><h4>חדשנות טכנולוגית</h4><p>המלצות והכוונה בתחום הציוד והטכנולוגיות העדכניות ביותר.</p></div><div class="info-card"><h4>אוטומציה וייעול תהליכים</h4><p>ניתוח תהליכי עבודה ובניית פתרונות אוטומציה קטנים וחכמים.</p></div><div class="info-card"><h4>אסטרטגיית תוכן דיגיטלי</h4><p>ייעוץ בבניית דפי נחיתה, נגני וידאו והטמעת תוכן במדיה.</p></div></div></div></div></div>
-        <div id="he-cat6" class="category-page"><div class="sub-nav"><a href="#he-cat6-sub1">גלריית פרויקטים</a></div><div class="page-content-wrapper"><div id="he-cat6-sub1" class="category-content"><h2>פרויקטים נבחרים</h2><p>הניסיון שלנו מגובה בעבודה עם מגוון רחב של לקוחות ופרויקטים. הנה טעימה קטנה:</p><div class="card-grid"><div class="gallery-card"><img src="https://placehold.co/400x250/0284c7/FFFFFF?text=שידור+חי" alt="שידור חי"><div class="gallery-content"><h4>שידורים חיים מורכבים</h4><p>ניהול שידורים עבור לקוחות מובילים, כולל ניתוב, VMIX וניהול טכני מלא.</p></div></div><div class="gallery-card"><img src="https://placehold.co/400x250/db2777/FFFFFF?text=אירוע+חברה" alt="אירוע חברה"><div class="gallery-content"><h4>אירועי חברה וכנסים</h4><p>תפעול טכני לאירועים של חברות כמו רפאל, לאומי ואל על, תוך הבטחת ביצוע חלק.</p></div></div><div class="gallery-card"><img src="https://placehold.co/400x250/4f46e5/FFFFFF?text=פיתוח+תוכנה" alt="פיתוח תוכנה"><div class="gallery-content"><h4>פיתוח פתרונות תוכנה</h4><p>בניית מערכות ייעודיות, כמו תוכנה להוספת גרפיקות בשידור חי ומערכת CRM.</p></div></div></div></div></div></div>
-        <div id="he-cat7" class="category-page"><div class="sub-nav"><a href="#he-cat7-sub1">יצירת קשר</a></div><div class="page-content-wrapper"><div id="he-cat7-sub1" class="category-content text-center"><h2 class="text-3xl font-bold">בואו נדבר על ההפקה הבאה שלכם</h2><p class="mt-2">מוכנים לשמוע על האתגרים שלכם ולהציע פתרונות שישדרגו לכם את האירוע.</p><div class="mt-8 text-lg"><p><strong>אוריין אדלני</strong></p><p class="mt-1"><strong>טלפון:</strong> <a href="tel:054-255-9027" class="hover:text-sky-600">054-255-9027</a></p><p class="mt-1"><strong>אימייל:</strong> <a href="mailto:EdelenviProductions@gmail.com" class="hover:text-sky-600">EdelenviProductions@gmail.com</a></p></div></div></div></div>
-
-        <!-- English Pages -->
+    
+    <div id="main-content">
         <div id="en-cat1" class="category-page">
-            <div class="sub-nav">
-                <a href="#en-cat1-sub-video">Demo</a><a href="#en-cat1-sub1">Strategy</a><a href="#en-cat1-sub2">Core Services</a><a href="#en-cat1-sub3">Growth Engines</a>
-            </div>
-            <div class="page-content-wrapper">
-                <div id="en-cat1-sub-video" class="category-content"><h2>Welcome to PsychoFlash</h2><p>Our capabilities demo reel is coming soon. In the meantime, we invite you to explore the range of services we offer.</p></div>
-                <div id="en-cat1-sub1" class="category-content"><h2>Our Strategy: Bridging Execution and Innovation</h2><p>Our professional world consists of two complementary parts:</p><ul><li><strong>The "Get-it-Done" - Reliable Execution:</strong> Years of experience in precise technical operation and professional setups. This is the stable foundation that allows every production to run smoothly.</li><li><strong>The "Toolbox" - The Creative Solution:</strong> A broad repository of technological and creative capabilities, including development, advanced graphics, automation, and AI solutions. This is the added value that elevates any production.</li></ul><p>Our strategy is to use our operational experience to deeply understand your needs and apply our technological capabilities to provide the best solution.</p></div>
-                <div id="en-cat1-sub2" class="category-content"><h2>Core Services (The "Get-it-Done")</h2><p>These services form the stable foundation of our business, building a reputation for reliability and professionalism.</p><div class="card-grid"><div class="info-card"><h4>Comprehensive Technical Operation</h4><p>Full management of the technical side of productions and live broadcasts.</p></div><div class="info-card"><h4>Virtual Broadcast Management</h4><p>Expertise in Zoom, VMIX, and other platforms to ensure a glitch-free broadcast.</p></div><div class="info-card"><h4>Teleprompter Operation</h4><p>A professional and precise service that ensures your message is delivered smoothly.</p></div></div></div>
-                <div id="en-cat1-sub3" class="category-content"><h2>Growth Engines (The "Toolbox")</h2><p>These value-added services differentiate us and allow us to provide unique solutions.</p><div class="card-grid"><div class="info-card"><h4>Live Graphics & Animation</h4><p>Development of custom graphics, transitions, and animations that upgrade any broadcast.</p></div><div class="info-card"><h4>AI-Based Solutions</h4><p>Consulting and integration of AI tools to streamline processes and enrich production.</p></div><div class="info-card"><h4>Custom Software Tools</h4><p>Building small, smart software solutions to automate repetitive production tasks.</p></div></div></div>
+            <div class="category-page-container">
+                <div class="hero-section text-center">
+                    <h1 class="text-4xl md:text-6xl font-extrabold text-gray-800 leading-tight">The Perfect Blend of <span class="text-transparent bg-clip-text bg-gradient-to-r from-purple-600 to-pink-600">Technical Execution</span> & Creative Innovation</h1>
+                    <p class="mt-4 text-lg md:text-xl text-gray-600 max-w-3xl mx-auto">From video productions and live streams to custom software and AI solutions, we're here to turn your vision into an impressive, smooth, and flawless reality.</p>
+                </div>
+                <div class="category-content">
+                    <div class="row align-items-center g-4">
+                        <div class="col-md-6 text-center p-4">
+                            <i class="fas fa-cogs fa-3x text-purple-600 mb-3"></i>
+                            <h3>The "Get-it-Done": Reliable Execution</h3>
+                            <p>Years of experience in precise technical operation, live broadcast management, and professional setups. This is the stable and reliable foundation that allows every production to run smoothly.</p>
+                        </div>
+                        <div class="col-md-6 text-center p-4">
+                             <i class="fas fa-lightbulb fa-3x text-pink-600 mb-3"></i>
+                            <h3>The "Toolbox": The Creative Solution</h3>
+                            <p>A broad repository of technological and creative capabilities, including development, advanced graphics, automation, and AI solutions. This is the added value that elevates any production.</p>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
-        <div id="en-cat2" class="category-page"><div class="sub-nav"><a href="#en-cat2-sub1">Production Management</a><a href="#en-cat2-sub2">Planning & Budgeting</a></div><div class="page-content-wrapper"><div id="en-cat2-sub1" class="category-content"><h2>End-to-End Production Management</h2><p>Beyond technical skills, we offer full project management, emphasizing coordination, efficiency, and peace of mind.</p><ul><li><strong>On-Site Team Management:</strong> Coordinating all professionals to ensure perfect synergy.</li><li><strong>Technical and Artistic Direction:</strong> Combining creative vision with technical execution.</li><li><strong>Subcontractor Coordination:</strong> Working with external suppliers, studios, and A/V companies.</li></ul></div><div id="en-cat2-sub2" class="category-content"><h2>Planning & Budgeting</h2><p>A successful production starts with proper planning. We guide you to ensure the project meets its goals and budget.</p><ul><li>Building realistic and efficient budgets for productions and events.</li><li>Identifying target audiences to tailor the message accurately.</li><li>Content editing, research, and question writing.</li></ul></div></div></div>
-        <div id="en-cat3" class="category-page"><div class="sub-nav"><a href="#en-cat3-sub1">Live Streams</a><a href="#en-cat3-sub2">Roles & Expertise</a></div><div class="page-content-wrapper"><div id="en-cat3-sub1" class="category-content"><h2>Our Expertise: Flawless Live Streams</h2><p>A live broadcast has no second chances. Our experience ensures your broadcast will be smooth, professional, and impressive, allowing you to focus on the content.</p></div><div id="en-cat3-sub2" class="category-content"><h2>Roles & Expertise</h2><div class="card-grid"><div class="info-card"><h4>Camera Switching & Directing</h4><p>Real-time management of multi-camera setups to create a dynamic visual flow.</p></div><div class="info-card"><h4>VMIX & Zoom Operation</h4><p>Full control of leading broadcast software, including graphics and remote participants.</p></div><div class="info-card"><h4>Teleprompter Operator</h4><p>An essential service allowing speakers to deliver complex messages confidently.</p></div><div class="info-card"><h4>Complex Technical Setups</h4><p>Planning and building temporary studios and complex broadcast solutions on-site.</p></div></div></div></div></div>
-        <div id="en-cat4" class="category-page"><div class="sub-nav"><a href="#en-cat4-sub1">Sample Packages</a></div><div class="page-content-wrapper"><div id="en-cat4-sub1" class="category-content"><h2>Pricing & Packages</h2><p class="text-center">We offer a variety of solutions tailored to every need and budget. Here are a few samples:</p><div class="card-grid"><div class="price-card border-t-sky-500"><h3>Tech Operation</h3><p>Technical support for an existing production, including teleprompter or VMIX.</p><div class="price-tag">From $300</div></div><div class="price-card border-t-pink-500"><h3>Integrated Production</h3><p>Full technical operation plus value-added services like basic graphic design.</p><div class="price-tag">From $700</div></div><div class="price-card border-t-indigo-500"><h3>Premium Package</h3><p>A complete end-to-end solution: planning, management, creative, and custom solutions.</p><div class="price-tag">Custom</div></div></div></div></div></div>
-        <div id="en-cat5" class="category-page"><div class="sub-nav"><a href="#en-cat5-sub1">Tech Consulting</a></div><div class="page-content-wrapper"><div id="en-cat5-sub1" class="category-content"><h2>Tech Consulting for the Production World</h2><p>Our extensive knowledge of programming, design, and AI allows us to offer unique consulting services to upgrade any studio or production company.</p><div class="card-grid"><div class="info-card"><h4>Technological Innovation</h4><p>Recommendations and guidance on the latest equipment and technologies.</p></div><div class="info-card"><h4>Automation & Optimization</h4><p>Analysis of workflows and building smart automation solutions.</p></div><div class="info-card"><h4>Digital Content Strategy</h4><p>Consulting on building landing pages, custom video players, and social media.</p></div></div></div></div></div>
-        <div id="en-cat6" class="category-page"><div class="sub-nav"><a href="#en-cat6-sub1">Project Gallery</a></div><div class="page-content-wrapper"><div id="en-cat6-sub1" class="category-content"><h2>Featured Projects</h2><p>Our experience is backed by work with a wide range of clients and projects. Here's a small taste:</p><div class="card-grid"><div class="gallery-card"><img src="https://placehold.co/400x250/0284c7/FFFFFF?text=Live+Broadcast" alt="Live Broadcast"><div class="gallery-content"><h4>Complex Live Broadcasts</h4><p>Managing broadcasts for leading clients, including switching, VMIX, and full technical direction.</p></div></div><div class="gallery-card"><img src="https://placehold.co/400x250/db2777/FFFFFF?text=Corporate+Event" alt="Corporate Event"><div class="gallery-content"><h4>Corporate Events</h4><p>Technical operation for events of companies like Rafael, Leumi, and El Al.</p></div></div><div class="gallery-card"><img src="https://placehold.co/400x250/4f46e5/FFFFFF?text=Software" alt="Software Development"><div class="gallery-content"><h4>Custom Software Solutions</h4><p>Building dedicated systems, such as live graphics software and CRM systems.</p></div></div></div></div></div></div>
-        <div id="en-cat7" class="category-page"><div class="sub-nav"><a href="#en-cat7-sub1">Get in Touch</a></div><div class="page-content-wrapper"><div id="en-cat7-sub1" class="category-content text-center"><h2 class="text-3xl font-bold">Let's Talk About Your Next Production</h2><p class="mt-2">Ready to hear about your challenges and offer solutions that will elevate your event.</p><div class="mt-8 text-lg"><p><strong>Orian Edleni</strong></p><p class="mt-1"><strong>Phone:</strong> <a href="tel:+972-54-255-9027" class="hover:text-sky-600">+972-54-255-9027</a></p><p class="mt-1"><strong>Email:</strong> <a href="mailto:EdelenviProductions@gmail.com" class="hover:text-sky-600">EdelenviProductions@gmail.com</a></p></div></div></div></div>
-    </template>
-    
-    <script>
+        <div id="en-cat2" class="category-page">
+            <div class="sub-nav">
+                <a href="#en-cat2-sub1">Core Services</a>
+                <a href="#en-cat2-sub2">Growth Services</a>
+                <a href="#en-cat2-sub3">Consulting</a>
+            </div>
+            <div class="category-page-container">
+                <div class="category-content" id="en-cat2-sub1">
+                  <h2>Core Services (The "Get-it-Done") 🛠️</h2>
+                  <p>These are the services that form the stable foundation of the business, building a reputation for reliability and uncompromising professionalism.</p>
+                  <div class="info-cards">
+                      <div class="info-card"><h4><i class="fas fa-sliders-h"></i>Comprehensive Technical Operation</h4><p>Full management of the technical side of productions and live broadcasts.</p></div>
+                      <div class="info-card"><h4><i class="fas fa-broadcast-tower"></i>Virtual Broadcast Management</h4><p>Expertise in Zoom, VMIX, and other platforms to ensure a smooth, glitch-free broadcast.</p></div>
+                      <div class="info-card"><h4><i class="fas fa-desktop"></i>Teleprompter Operation</h4><p>A professional and precise service that ensures your message is delivered smoothly and clearly.</p></div>
+                      <div class="info-card"><h4><i class="fas fa-video"></i>Camera Switching & Directing</h4><p>Real-time management of a multi-camera setup for a dynamic and engaging visual flow.</p></div>
+                  </div>
+                </div>
+                <div class="category-content" id="en-cat2-sub2">
+                  <h2>Growth Engines (The "Toolbox") 🚀</h2>
+                  <p>These are the value-added services that differentiate us, increase profitability, and allow us to provide unique solutions.</p>
+                   <div class="info-cards">
+                      <div class="info-card"><h4><i class="fas fa-palette"></i>Live Graphics & Animation</h4><p>Development of custom graphics, transitions, and animations that upgrade any live broadcast.</p></div>
+                      <div class="info-card"><h4><i class="fas fa-brain"></i>AI-Based Solutions</h4><p>Consulting and integration of AI tools to streamline processes, create content, and enrich the production.</p></div>
+                      <div class="info-card"><h4><i class="fas fa-code"></i>Custom Software Tools</h4><p>Building small, smart software solutions to automate repetitive tasks in production.</p></div>
+                  </div>
+                </div>
+                <div class="category-content" id="en-cat2-sub3">
+                    <h2>Tech Consulting for the Production World 🧭</h2>
+                    <p>Our extensive knowledge, combining programming, design, and AI technologies, allows us to offer unique consulting services that can upgrade any studio or production company.</p>
+                    <div class="info-cards">
+                        <div class="info-card"><h4>Technological Innovation</h4><p>Recommendations on the latest equipment and technologies.</p></div>
+                        <div class="info-card"><h4>Automation & Process Optimization</h4><p>Analysis of workflows and building smart automation solutions.</p></div>
+                        <div class="info-card"><h4>Digital Content Strategy</h4><p>Consulting on building landing pages and custom video players.</p></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div id="en-cat3" class="category-page">
+            <div class="sub-nav">
+                <a href="#en-cat3-sub1">Revenue Breakdown</a>
+                <a href="#en-cat3-sub2">Financial Growth</a>
+            </div>
+            <div class="category-page-container">
+                <div class="category-content" id="en-cat3-sub1">
+                    <h2>Infographic: Revenue Breakdown by Service (2024-2025)</h2>
+                    <p>While the CV emphasizes development and animation, the work logs reveal that income is almost entirely from technical operation and support services for live productions. This chart displays the revenue breakdown by service type.</p>
+                    <div class="chart-container">
+                        <canvas id="en-servicesChart"></canvas>
+                    </div>
+                </div>
+                <div class="category-content" id="en-cat3-sub2">
+                    <h2>Infographic: The Financial Evolution</h2>
+                    <p>A comparison between the financial situation in 2013 and current revenues demonstrates significant growth. In 2013, a considerable portion of income was based on parental support. Today, income is based entirely on freelance work.</p>
+                    <div class="row g-4">
+                        <div class="col-md-6">
+                            <h3 class="text-center h5">2013 Income Sources</h3>
+                            <div class="chart-container" style="height: 300px;">
+                                <canvas id="en-income2013Chart"></canvas>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <h3 class="text-center h5">2013 Main Expenses</h3>
+                            <div class="chart-container" style="height: 300px;">
+                                <canvas id="en-expenses2013Chart"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div id="en-cat4" class="category-page">
+            <div class="category-page-container">
+                <div class="category-content" id="en-cat4-sub1">
+                  <h2>Featured Projects</h2>
+                  <p>Our experience is backed by work with a wide range of clients and projects. Here's a small taste:</p>
+                  <div class="gallery-cards">
+                    <div class="gallery-card">
+                      <img src="https://placehold.co/280x180/003f5c/ffffff?text=Live+Broadcast" alt="Live Broadcast">
+                      <div class="gallery-card-content"><h4>Complex Live Broadcasts</h4><p>Managing broadcasts for leading clients like Go-Live, including camera switching, VMIX, and full technical direction.</p></div>
+                    </div>
+                    <div class="gallery-card">
+                      <img src="https://placehold.co/280x180/7a5195/ffffff?text=Corporate+Event" alt="Corporate Event">
+                      <div class="gallery-card-content"><h4>Corporate Events & Conferences</h4><p>Technical operation for events of companies like Rafael, Leumi, and El Al, ensuring a smooth and professional execution.</p></div>
+                    </div>
+                    <div class="gallery-card">
+                      <img src="https://placehold.co/280x180/ef5675/ffffff?text=Software" alt="Software Development">
+                      <div class="gallery-card-content"><h4>Custom Software Solutions</h4><p>Building dedicated systems, such as software for adding live graphics and a CRM system for restaurants.</p></div>
+                    </div>
+                  </div>
+                </div>
+            </div>
+        </div>
+        <div id="en-cat5" class="category-page">
+            <div class="category-page-container">
+                <div class="category-content text-center" id="en-cat5-sub1">
+                  <h2>Let's Talk About Your Next Production</h2>
+                  <p>Ready to hear about your challenges and offer solutions that will elevate your event.</p>
+                  <div class="mt-4">
+                    <p><strong>Orian Edleni</strong></p>
+                    <p><strong>Phone:</strong> +972-54-255-9027</p>
+                    <p><strong>Email:</strong> <a href="mailto:EdelenviProductions@gmail.com" class="text-decoration-none">EdelenviProductions@gmail.com</a></p>
+                  </div>
+                </div>
+            </div>
+        </div>
+    </div>
+  </div> 
+  
+  <footer>
+    <p>&copy; 2025 PsychoFlash Productions. All rights reserved.</p>
+  </footer>
+  
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+  
+  <script>
     document.addEventListener('DOMContentLoaded', () => {
-        const app = {
-            // --- STATE ---
-            state: {
-                language: 'he',
-                activeCategory: 'he-cat1',
-            },
-
-            // --- ELEMENTS ---
-            elements: {
-                html: document.documentElement,
-                btnHe: document.getElementById('btn-he'),
-                btnEn: document.getElementById('btn-en'),
-                contentHe: document.getElementById('content-he'),
-                contentEn: document.getElementById('content-en'),
-                pageTemplates: document.getElementById('page-templates'),
-                orbCanvas: document.getElementById('orb-canvas'),
-                orbCtx: null,
-                orbs: [],
-            },
-
-            // --- INITIALIZATION ---
-            init() {
-                this.elements.orbCtx = this.elements.orbCanvas.getContext('2d');
-                this.setupEventListeners();
-                this.initLanguage();
-                this.initCanvas();
-                this.animateOrbs();
-            },
+        /* 1) Language Switching */
+        const btnHe = document.getElementById('btn-he');
+        const btnEn = document.getElementById('btn-en');
+        const contentHe = document.getElementById('content-he');
+        const contentEn = document.getElementById('content-en');
+        
+        function switchLanguage(lang) {
+            const activeLangContainer = lang === 'he' ? contentHe : contentEn;
+            const firstNavLink = activeLangContainer.querySelector('header nav a');
+            let firstCatId = 'he-cat1'; // Default
+            if (firstNavLink) {
+                firstCatId = firstNavLink.getAttribute('data-category');
+            }
+    
+            if (lang === 'he') {
+                contentHe.style.display = 'block';
+                contentEn.style.display = 'none';
+                btnHe.classList.add('active-lang');
+                btnEn.classList.remove('active-lang');
+                document.documentElement.lang = 'he';
+                document.documentElement.dir = 'rtl';
+            } else {
+                contentHe.style.display = 'none';
+                contentEn.style.display = 'block';
+                btnEn.classList.add('active-lang');
+                btnHe.classList.remove('active-lang');
+                document.documentElement.lang = 'en';
+                document.documentElement.dir = 'ltr';
+            }
+            initCategorySwitching(lang, firstCatId);
+        }
+    
+        btnHe.addEventListener('click', () => switchLanguage('he'));
+        btnEn.addEventListener('click', () => switchLanguage('en'));
+    
+        /* 2) Category Switching Logic */
+        function initCategorySwitching(lang, defaultCategory) {
+          const container = document.getElementById(`content-${lang}`);
+          if (!container) return;
+          
+          const pages = container.querySelectorAll('.category-page');
+          const navLinks = container.querySelectorAll('header nav a, .offcanvas-menu a');
+          
+          function showCategory(catId) {
+            pages.forEach(page => page.classList.remove('active'));
+            const newPage = container.querySelector('#' + catId);
+            if (newPage) newPage.classList.add('active');
             
-            // --- LANGUAGE & CONTENT ---
-            initLanguage() {
-                // Clone content from templates to the correct language container
-                const heMain = this.elements.contentHe.querySelector('main');
-                const enMain = this.elements.contentEn.querySelector('main');
-                
-                Array.from(this.elements.pageTemplates.content.children).forEach(page => {
-                    const clone = page.cloneNode(true);
-                    if (clone.id.startsWith('he-')) {
-                        heMain.appendChild(clone);
-                    } else if (clone.id.startsWith('en-')) {
-                        enMain.appendChild(clone);
+            navLinks.forEach(link => {
+              link.classList.remove('active');
+              if (link.getAttribute('data-category') === catId) {
+                link.classList.add('active');
+              }
+            });
+          }
+          
+          navLinks.forEach(link => {
+            link.addEventListener('click', (e) => {
+              e.preventDefault();
+              const targetCat = link.getAttribute('data-category');
+              showCategory(targetCat);
+              window.scrollTo({ top: 0, behavior: 'smooth' });
+              const offcanvasMenu = container.querySelector('.offcanvas-menu');
+              if (offcanvasMenu) offcanvasMenu.classList.remove('active');
+            });
+          });
+          
+          if (defaultCategory) {
+            showCategory(defaultCategory);
+          }
+        }
+    
+        /* 3) Hamburger Menu */
+        function initHamburger(lang) {
+            const container = document.getElementById(`content-${lang}`);
+            if (!container) return;
+            const hamburgerBtn = container.querySelector(`#hamburger-btn-${lang}`);
+            const offcanvasMenu = container.querySelector(`#offcanvas-menu-${lang}`);
+            if (hamburgerBtn && offcanvasMenu) {
+                hamburgerBtn.addEventListener('click', () => {
+                    offcanvasMenu.classList.toggle('active');
+                });
+            }
+        }
+    
+        /* 4) Sub-nav scrolling and active state */
+        function initSubNav() {
+            const subNavLinks = document.querySelectorAll('.sub-nav a');
+            subNavLinks.forEach(link => {
+                link.addEventListener('click', e => {
+                    e.preventDefault();
+                    const targetId = link.getAttribute('href').substring(1);
+                    const targetElement = document.getElementById(targetId);
+                    if (targetElement) {
+                        const offsetTop = targetElement.getBoundingClientRect().top + window.pageYOffset - 150;
+                        window.scrollTo({ top: offsetTop, behavior: 'smooth' });
                     }
                 });
-
-                this.switchLanguage(this.state.language, true);
-            },
-
-            switchLanguage(lang, isInitial = false) {
-                this.state.language = lang;
-                const isRTL = lang === 'he';
-
-                this.elements.html.lang = lang;
-                this.elements.html.dir = isRTL ? 'rtl' : 'ltr';
-
-                this.elements.contentHe.style.display = isRTL ? 'block' : 'none';
-                this.elements.contentEn.style.display = isRTL ? 'none' : 'block';
-
-                this.elements.btnHe.classList.toggle('active-lang', isRTL);
-                this.elements.btnEn.classList.toggle('active-lang', !isRTL);
-                
-                this.updateNavStyles();
-                
-                // On language switch, set to the first category of that language
-                const firstCategory = this.getActiveContainer().querySelector('.nav-link').dataset.category;
-                this.showCategory(firstCategory, isInitial);
-            },
-            
-            showCategory(categoryId, isInitial = false) {
-                if (!categoryId) return;
-                this.state.activeCategory = categoryId;
-                const activeContainer = this.getActiveContainer();
-
-                activeContainer.querySelectorAll('.category-page').forEach(page => {
-                    page.classList.remove('active');
-                });
-                
-                const newPage = activeContainer.querySelector(`#${categoryId}`);
-                if (newPage) {
-                    newPage.classList.add('active');
-                }
-                
-                this.updateNavStyles();
-                
-                if (!isInitial) {
-                    window.scrollTo({ top: 0, behavior: 'smooth' });
-                }
-            },
-            
-            updateNavStyles() {
-                // Update language button styles
-                document.querySelectorAll('#language-toggle button').forEach(btn => {
-                   btn.classList.remove('bg-amber-300', 'text-slate-900', 'text-white', 'bg-slate-800/50');
-                   if (btn.classList.contains('active-lang')) {
-                       btn.classList.add('bg-amber-300', 'text-slate-900');
-                   } else {
-                       btn.classList.add('text-white', 'bg-slate-800/50');
-                   }
-                });
-
-                // Update main navigation link styles
-                this.getActiveContainer().querySelectorAll('.nav-link').forEach(link => {
-                    link.classList.remove('active');
-                    if (link.dataset.category === this.state.activeCategory) {
-                        link.classList.add('active');
-                    }
-                });
-                
-                // Update sub-navigation link styles based on scroll
-                this.updateSubNavActiveState();
-            },
-
-            // --- EVENT LISTENERS ---
-            setupEventListeners() {
-                this.elements.btnHe.addEventListener('click', () => this.switchLanguage('he'));
-                this.elements.btnEn.addEventListener('click', () => this.switchLanguage('en'));
-                
-                // Event delegation for navigation
-                document.body.addEventListener('click', (e) => {
-                    const navLink = e.target.closest('.nav-link');
-                    const subNavLink = e.target.closest('.sub-nav a');
-                    const hamburgerBtn = e.target.closest('.hamburger-btn');
-
-                    if (navLink && navLink.dataset.category) {
-                        e.preventDefault();
-                        this.showCategory(navLink.dataset.category);
-                        this.closeOffcanvas();
-                    }
-                    
+            });
+    
+            const observerOptions = { root: null, rootMargin: '-150px 0px -50% 0px', threshold: 0 };
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    const id = entry.target.getAttribute('id');
+                    const activePage = entry.target.closest('.category-page.active');
+                    if (!activePage) return;
+    
+                    const subNavLink = activePage.querySelector(`.sub-nav a[href="#${id}"]`);
                     if (subNavLink) {
-                        e.preventDefault();
-                        const targetElement = document.querySelector(subNavLink.getAttribute('href'));
-                        if (targetElement) {
-                             const offsetTop = targetElement.getBoundingClientRect().top + window.pageYOffset - (this.isMobile() ? 80 : 140);
-                             window.scrollTo({ top: offsetTop, behavior: 'smooth' });
+                        if (entry.isIntersecting) {
+                            activePage.querySelectorAll('.sub-nav a.active-sub').forEach(a => a.classList.remove('active-sub'));
+                            subNavLink.classList.add('active-sub');
                         }
                     }
-                    
-                    if (hamburgerBtn) {
-                        this.toggleOffcanvas();
-                    }
                 });
-                
-                window.addEventListener('resize', () => this.initCanvas());
-                window.addEventListener('scroll', () => this.updateSubNavActiveState());
-            },
-
-            updateSubNavActiveState() {
-                const activePage = this.getActiveContainer().querySelector('.category-page.active');
-                if (!activePage) return;
-
-                let currentSectionId = '';
-                const sections = activePage.querySelectorAll('.category-content');
-                
-                sections.forEach(section => {
-                    const rect = section.getBoundingClientRect();
-                    // Check if the top of the section is above the middle of the screen
-                    if (rect.top <= window.innerHeight / 2) {
-                        currentSectionId = section.id;
-                    }
-                });
-                
-                const activeSubNavLinks = activePage.querySelectorAll('.sub-nav a');
-
-                if (activeSubNavLinks.length > 0 && !currentSectionId) {
-                    currentSectionId = activeSubNavLinks[0].getAttribute('href').substring(1);
+            }, observerOptions);
+    
+            document.querySelectorAll('.category-content[id]').forEach(section => observer.observe(section));
+        }
+    
+        /* 5) Chart.js Implementation */
+        let charts = {};
+        function createCharts() {
+            const brilliantBlues = ['#003f5c', '#7a5195', '#ef5675', '#ffa600', '#bc5090', '#ff764a'];
+            const chartFont = { family: "'Assistant', sans-serif" };
+    
+            const commonOptions = {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { position: 'bottom', labels: { font: chartFont } },
+                    tooltip: { bodyFont: chartFont, titleFont: chartFont }
                 }
-
-                activeSubNavLinks.forEach(a => {
-                    a.classList.remove('active');
-                    if(a.getAttribute('href') === `#${currentSectionId}`) {
-                        a.classList.add('active');
-                    }
-                });
-            },
-
-            // --- UI HELPERS ---
-            getActiveContainer() {
-                return this.state.language === 'he' ? this.elements.contentHe : this.elements.contentEn;
-            },
-            
-            isMobile() {
-                return window.innerWidth < 1024;
-            },
-
-            toggleOffcanvas() {
-                const container = this.getActiveContainer();
-                container.querySelector('.offcanvas-menu').classList.toggle('open');
-                container.querySelector('.hamburger-btn').classList.toggle('open');
-            },
-            
-            closeOffcanvas() {
-                 this.getActiveContainer().querySelector('.offcanvas-menu').classList.remove('open');
-                 this.getActiveContainer().querySelector('.hamburger-btn').classList.remove('open');
-            },
-
-            // --- CANVAS ANIMATION ---
-            initCanvas() {
-                this.elements.orbCanvas.width = window.innerWidth;
-                this.elements.orbCanvas.height = window.innerHeight;
-                this.elements.orbs = [];
-                const numOrbs = Math.min(Math.floor(window.innerWidth / 50), 40);
-                for (let i = 0; i < numOrbs; i++) {
-                    this.elements.orbs.push(new this.GlowingOrb(this.elements.orbCanvas));
+            };
+    
+            const chartConfigs = {
+                'he-servicesChart': {
+                    type: 'bar',
+                    data: {
+                        labels: ['הפקה ותפעול', 'פרויקטים ספציפיים', 'פרומפטר', 'מר ד לאבס', 'מינדפליי'],
+                        datasets: [{
+                            label: 'סך הכנסות (₪) 2024-2025',
+                            data: [55200, 32500, 18500, 16300, 14000],
+                            backgroundColor: brilliantBlues,
+                        }]
+                    },
+                    options: { ...commonOptions, indexAxis: 'y', scales: { x: { ticks: { font: chartFont }}, y: { ticks: { font: chartFont }}}}
+                },
+                'he-income2013Chart': {
+                    type: 'doughnut',
+                    data: {
+                        labels: ['הורים', 'משכורת', 'אחר'],
+                        datasets: [{ data: [61900, 47524, 78794], backgroundColor: brilliantBlues.slice(0,3) }]
+                    },
+                    options: commonOptions
+                },
+                'he-expenses2013Chart': {
+                    type: 'doughnut',
+                    data: {
+                        labels: ['הקמת עסק', 'דירה', 'אחר'],
+                        datasets: [{ data: [45275, 37586, 85539], backgroundColor: brilliantBlues.slice(3,6) }]
+                    },
+                    options: commonOptions
+                },
+                'en-servicesChart': {
+                    type: 'bar',
+                    data: {
+                        labels: ['Production & Ops', 'Specific Projects', 'Teleprompter', 'Mr. D Labs', 'Mindfly'],
+                        datasets: [{
+                            label: 'Total Revenue ($) 2024-2025',
+                            data: [14720, 8670, 4930, 4350, 3730], // Assuming an exchange rate for demo
+                            backgroundColor: brilliantBlues,
+                        }]
+                    },
+                    options: { ...commonOptions, indexAxis: 'y', scales: { x: { ticks: { font: chartFont }}, y: { ticks: { font: chartFont }}}}
+                },
+                'en-income2013Chart': {
+                    type: 'doughnut',
+                    data: {
+                        labels: ['Parents', 'Salary', 'Other'],
+                        datasets: [{ data: [16500, 12670, 21010], backgroundColor: brilliantBlues.slice(0,3) }]
+                    },
+                    options: commonOptions
+                },
+                'en-expenses2013Chart': {
+                    type: 'doughnut',
+                    data: {
+                        labels: ['Business Setup', 'Rent', 'Other'],
+                        datasets: [{ data: [12070, 10020, 22810], backgroundColor: brilliantBlues.slice(3,6) }]
+                    },
+                    options: commonOptions
                 }
-            },
-
-            animateOrbs() {
-                this.elements.orbCtx.clearRect(0, 0, this.elements.orbCanvas.width, this.elements.orbCanvas.height);
-                this.elements.orbs.forEach(orb => {
-                    orb.update();
-                    orb.draw(this.elements.orbCtx);
-                });
-                requestAnimationFrame(() => this.animateOrbs());
-            },
-
-            // Orb Class
-            GlowingOrb: class {
-                constructor(canvas) {
-                    this.canvas = canvas;
-                    this.x = Math.random() * this.canvas.width;
-                    this.y = Math.random() * this.canvas.height;
-                    this.radius = Math.random() * 2.5 + 1;
-                    this.speedX = (Math.random() - 0.5) * 0.2;
-                    this.speedY = (Math.random() - 0.5) * 0.2;
-                    this.color = `rgba(168, 142, 255, ${Math.random() * 0.5 + 0.1})`; // Softer purple
-                    this.shadowColor = `rgba(168, 142, 255, 0.7)`;
+            };
+    
+            for (const chartId in chartConfigs) {
+                if (charts[chartId]) {
+                    charts[chartId].destroy();
                 }
-                update() {
-                    this.x += this.speedX;
-                    this.y += this.speedY;
-                    if (this.x < 0 || this.x > this.canvas.width) this.speedX *= -1;
-                    if (this.y < 0 || this.y > this.canvas.height) this.speedY *= -1;
-                }
-                draw(ctx) {
-                    ctx.beginPath();
-                    ctx.arc(this.x, this.y, this.radius, 0, 2 * Math.PI);
-                    ctx.fillStyle = this.color;
-                    ctx.shadowColor = this.shadowColor;
-                    ctx.shadowBlur = 10;
-                    ctx.fill();
-                    ctx.shadowBlur = 0;
+                const ctx = document.getElementById(chartId)?.getContext('2d');
+                if (ctx) {
+                    charts[chartId] = new Chart(ctx, chartConfigs[chartId]);
                 }
             }
-        };
-
-        app.init();
-    });
-    </script>
+        }
     
-    <!-- Custom CSS to be Injected by JS (Tailwind config cannot be used here) -->
-    <style id="dynamic-styles">
-        /* Base styles for navigation links */
-        .nav-link {
-            padding: 0.5rem 1rem;
-            font-size: 1rem;
-            line-height: 1.5rem;
-            font-weight: 600;
-            color: rgb(203 213 225);
-            border-radius: 0.375rem;
-            cursor: pointer;
-            transition: all 300ms cubic-bezier(0.4, 0, 0.2, 1);
-        }
-        .nav-link:hover {
-            color: white;
-            background-color: rgba(51, 65, 85, 0.5);
-        }
-        .nav-link.active {
-            color: rgb(252 211 77); /* amber-300 */
-            font-weight: 700;
-            background-color: rgba(51, 65, 85, 0.5);
+    
+        /* 6) Background Effects */
+        const canvasBack = document.getElementById('orb-canvas-back');
+        const ctxBack = canvasBack.getContext('2d');
+        
+        function resizeCanvas() {
+          canvasBack.width = window.innerWidth;
+          canvasBack.height = window.innerHeight;
         }
         
-        /* Mobile menu (Offcanvas) styles */
-        .offcanvas-menu {
-            position: fixed;
-            top: 0;
-            width: 18rem; /* w-72 */
-            height: 100%;
-            background-color: rgba(17, 24, 39, 0.95); /* bg-gray-900/95 */
-            backdrop-filter: blur(1rem);
-            z-index: 40;
-            transition: transform 300ms ease-in-out;
+        class GlowingOrb {
+          constructor() {
+            this.x = Math.random() * canvasBack.width;
+            this.y = Math.random() * canvasBack.height;
+            this.radius = Math.random() * 5 + 2;
+            this.speedX = (Math.random() - 0.5) * 0.2;
+            this.speedY = (Math.random() - 0.5) * 0.2;
+            this.color = `rgba(${Math.floor(Math.random()*50 + 100)}, ${Math.floor(Math.random()*50 + 150)}, 255, ${Math.random()*0.4 + 0.1})`;
+          }
+          update() {
+            this.x += this.speedX;
+            this.y += this.speedY;
+            if (this.x < 0 || this.x > canvasBack.width) this.speedX *= -1;
+            if (this.y < 0 || this.y > canvasBack.height) this.speedY *= -1;
+          }
+          draw() {
+            ctxBack.save();
+            ctxBack.beginPath();
+            ctxBack.shadowBlur = 15;
+            ctxBack.shadowColor = this.color;
+            ctxBack.fillStyle = this.color;
+            ctxBack.arc(this.x, this.y, this.radius, 0, 2 * Math.PI);
+            ctxBack.fill();
+            ctxBack.restore();
+          }
         }
-        [dir="rtl"] .offcanvas-menu {
-             right: 0;
-             transform: translateX(100%);
+        
+        let orbs = [];
+        function initOrbs() {
+          orbs = [];
+          for (let i = 0; i < 40; i++) {
+            orbs.push(new GlowingOrb());
+          }
         }
-        [dir="ltr"] .offcanvas-menu {
-             left: 0;
-             transform: translateX(-100%);
+        
+        function animateOrbs() {
+          ctxBack.clearRect(0, 0, canvasBack.width, canvasBack.height);
+          orbs.forEach(orb => {
+            orb.update();
+            orb.draw();
+          });
+          requestAnimationFrame(animateOrbs);
         }
-        .offcanvas-menu.open {
-            transform: translateX(0);
-        }
-        .offcanvas-menu .nav-link {
-            font-size: 1.25rem; /* text-xl */
-        }
-
-        /* Hamburger button animation */
-        .hamburger-btn.open span:first-child { transform: translateY(0.5rem) rotate(45deg); }
-        .hamburger-btn.open span:nth-child(2) { opacity: 0; }
-        .hamburger-btn.open span:last-child { transform: translateY(-0.5rem) rotate(-45deg); }
-
-        /* Sub-navigation bar */
-        .sub-nav {
-            position: sticky;
-            top: 5rem; /* top-20 */
-            background-color: rgba(241, 245, 249, 0.8); /* bg-slate-100/80 */
-            backdrop-filter: blur(0.5rem);
-            z-index: 30;
-            display: flex;
-            flex-wrap: wrap;
-            align-items: center;
-            justify-content: center;
-            gap: 0.5rem; /* gap-2 */
-            padding: 0.75rem; /* p-3 */
-            border-bottom: 1px solid rgb(226, 232, 240); /* border-slate-200 */
-        }
-        .sub-nav a {
-            padding: 0.375rem 1rem; /* px-4 py-1.5 */
-            font-size: 0.875rem; /* text-sm */
-            font-weight: 600;
-            color: rgb(71 85 105); /* text-slate-600 */
-            background-color: rgba(226, 232, 240, 0.7); /* bg-slate-200/70 */
-            border-radius: 9999px; /* rounded-full */
-            transition: all 300ms;
-        }
-        .sub-nav a:hover {
-            background-color: rgb(203 213 225); /* hover:bg-slate-300 */
-            color: rgb(30 41 59); /* hover:text-slate-800 */
-        }
-        .sub-nav a.active {
-            background-color: rgb(99 102 241); /* bg-indigo-500 */
-            color: white;
-            box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1); /* shadow-md */
-        }
-
-        /* General content wrapper for consistent padding */
-        .page-content-wrapper {
-            max-width: 64rem; /* max-w-5xl */
-            margin-left: auto;
-            margin-right: auto;
-            padding: 2rem 1rem; /* px-4 py-8 */
-        }
-        @media (min-width: 640px) {
-            .page-content-wrapper { padding-left: 1.5rem; padding-right: 1.5rem; }
-        }
-        @media (min-width: 1024px) {
-            .page-content-wrapper { padding-left: 2rem; padding-right: 2rem; }
-        }
-
-        .category-content {
-            background-color: rgba(255, 255, 255, 0.8);
-            backdrop-filter: blur(4px);
-            padding: 1.5rem; /* p-6 */
-            border-radius: 1rem; /* rounded-2xl */
-            box-shadow: 0 1px 2px 0 rgb(0 0 0 / 0.05); /* shadow-sm */
-            margin-bottom: 2rem;
-        }
-        @media (min-width: 640px) {
-            .category-content { padding: 2rem; }
-        }
-
-        .category-content h2 {
-            font-size: 1.5rem; /* text-2xl */
-            font-weight: 700;
-            color: rgb(30 41 59); /* text-slate-800 */
-            text-align: center;
-            margin-bottom: 1.5rem;
-        }
-        @media (min-width: 640px) {
-            .category-content h2 { font-size: 1.875rem; } /* sm:text-3xl */
-        }
-
-        .category-content p, .category-content ul {
-            font-size: 1rem; /* text-base */
-            line-height: 1.75; /* leading-relaxed */
-        }
-        @media (min-width: 640px) {
-            .category-content p, .category-content ul { font-size: 1.125rem; } /* sm:text-lg */
-        }
-
-        .category-content ul {
-            margin-top: 1rem;
-            display: flex;
-            flex-direction: column;
-            gap: 0.5rem;
-        }
-
-        /* Card grid styling */
-        .card-grid {
-            display: grid;
-            grid-template-columns: repeat(1, minmax(0, 1fr));
-            gap: 1.5rem;
-            margin-top: 2rem;
-        }
-        @media (min-width: 768px) {
-            .card-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-        }
-        @media (min-width: 1024px) {
-            .card-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
-        }
-
-        .info-card, .price-card, .gallery-card {
-            background-color: white;
-            border-radius: 0.75rem; /* rounded-xl */
-            padding: 1.5rem;
-            box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1); /* shadow-md */
-            transition: all 300ms;
-        }
-        .info-card:hover, .price-card:hover, .gallery-card:hover {
-            box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1); /* shadow-lg */
-            transform: translateY(-0.25rem);
-        }
-
-        .info-card h4 {
-            font-size: 1.125rem;
-            font-weight: 700;
-            color: rgb(2 132 199); /* text-sky-700 */
-            margin-bottom: 0.5rem;
-        }
-
-        /* Price card specific styles */
-        .price-card {
-            text-align: center;
-            border-top-width: 4px;
-        }
-        .price-card h3 {
-            font-size: 1.25rem;
-            font-weight: 700;
-            color: rgb(30 41 59);
-        }
-        .price-tag {
-            font-size: 2.25rem;
-            font-weight: 700;
-            color: rgb(17 24 39);
-            margin-top: 1rem;
-            margin-bottom: 0.5rem;
-        }
-
-        /* Gallery card specific styles */
-        .gallery-card {
-            padding: 0;
-            overflow: hidden;
-        }
-        .gallery-card img {
-            width: 100%;
-            height: 12rem; /* h-48 */
-            object-fit: cover;
-        }
-        .gallery-content {
-            padding: 1rem;
-        }
-        .gallery-content h4 {
-            font-weight: 700;
-            font-size: 1.125rem;
-            color: rgb(30 41 59);
-        }
-        .gallery-content p {
-            font-size: 0.875rem;
-            color: rgb(71 85 105);
-            margin-top: 0.25rem;
-        }
-
-    </style>
     
+        // Initialize for Hebrew by default
+        const firstHeCat = document.querySelector('#content-he header nav a').getAttribute('data-category');
+        initCategorySwitching('he', firstHeCat);
+        initHamburger('he');
+        
+        // Prepare English but keep it hidden
+        const firstEnCat = document.querySelector('#content-en header nav a').getAttribute('data-category');
+        initCategorySwitching('en', firstEnCat);
+        initHamburger('en');
+
+        // Init shared components
+        initSubNav();
+        createCharts();
+        
+        // Init background effects
+        resizeCanvas();
+        initOrbs();
+        animateOrbs();
+        window.addEventListener('resize', () => {
+            resizeCanvas();
+            initOrbs();
+        });
+    });
+  </script>
 </body>
 </html>
+```
+
+---
+* **הערות נוספות:** לא נכלל קוד ה-JavaScript לאפקט ה"שלג" מהדוגמה המקורית מכיוון שהוא הכביד על הביצועים ולא היה חיוני למסר המקצועי של האתר. כמו כן, תמונות הגלריה הוחלפו בתמונות Placeholder, ויש להחליפן בתמונות אמיתיות מפרויקטים. וידאו ההדגמה גם הוא Placeholder ויש לספק קובץ וידאו אמי" code between  and  in the most up-to-date Canvas "PsychoFlash Productions - האתר המלא (מעוצב מחדש)" document above and am asking a query about/based on this code below.
+Instructions to follow:
+  * Don't output/edit the document if the query is Direct/Simple. For example, if the query asks for a simple explanation, output a direct answer.
+  * Make sure to **edit** the document if the query shows the intent of editing the document, in which case output the entire edited document, **not just that section or the edits**.
+    * Don't output the same document/empty document and say that you have edited it.
+    * Don't change unrelated code in the document.
+  * Don't output  and  in your final response.
+  * Any references like "this" or "selected code" refers to the code between  and  tags.
+  * Just acknowledge my request in the introduction.
+  * Make sure to refer to the document as "Canvas" in your response.
+
+Add the following to the 'services' page:
+- One main video that takes up all the space
+- The rest of the page should have more cards with videos, each video with a short descript
