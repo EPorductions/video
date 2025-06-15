@@ -1,924 +1,1024 @@
 <!DOCTYPE html>
 <html lang="he" dir="rtl">
 <head>
-  <meta charset="UTF-8">
-  <meta http-equiv="X-UA-Compatible" content="IE=edge">
-  <title>PsychoFlash Productions – פתרונות הפקה טכניים ויצירתיים</title>
-  <meta name="description" content="שירותי הפקת וידאו, שידורים חיים ופתרונות טכנולוגיים מתקדמים. השילוב המושלם בין ביצוע טכני לחדשנות יצירתית.">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <script src="https://cdn.tailwindcss.com"></script>
-  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-  <link href="https://fonts.googleapis.com/css2?family=Assistant:wght@400;600;700&display=swap" rel="stylesheet">
-  
-  <style>
-    :root {
-      --primary-dark: #003f5c;
-      --primary-purple: #7a5195;
-      --primary-pink: #ef5675;
-      --primary-orange: #ffa600;
-      --text-light: #f8f9fa;
-      --text-dark: #212529;
-      --bg-light: #f8f9fa;
-    }
-    html { scroll-behavior: smooth; }
-    body {
-      font-family: 'Assistant', sans-serif;
-      overflow-x: hidden;
-      background-color: var(--bg-light);
-    }
-    .orb-canvas {
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      pointer-events: none;
-      z-index: -1;
-      opacity: 0.7;
-    }
-    #language-toggle {
-      position: fixed;
-      top: 20px;
-      right: 20px;
-      z-index: 12000;
-    }
-    #language-toggle button {
-      margin: 0 5px;
-      padding: 8px 12px;
-      font-size: 14px;
-      cursor: pointer;
-      border: 1px solid #fff;
-      background-color: rgba(0,0,0,0.5);
-      color: #fff;
-      border-radius: 20px;
-      transition: all 0.3s;
-    }
-    #language-toggle button:hover, #language-toggle button.active-lang {
-      background-color: var(--primary-orange);
-      color: var(--text-dark);
-      border-color: var(--primary-orange);
-    }
-    header {
-      position: fixed;
-      top: 0;
-      left: 0;
-      right: 0;
-      background-color: rgba(255, 255, 255, 0.8);
-      backdrop-filter: blur(10px);
-      color: var(--text-dark);
-      z-index: 10000;
-      height: 80px;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      padding: 0 1rem;
-      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-    }
-    header h1 {
-      font-size: 1.8rem;
-      font-weight: 700;
-      color: var(--primary-dark);
-    }
-    header nav {
-      display: flex;
-      gap: 25px;
-      overflow-x: auto;
-      white-space: nowrap;
-      -webkit-overflow-scrolling: touch;
-    }
-    header nav::-webkit-scrollbar { display: none; }
-    header nav a {
-      color: var(--text-dark);
-      text-decoration: none;
-      font-weight: 600;
-      padding: 8px 16px;
-      border-radius: 20px;
-      font-size: 16px;
-      transition: background-color 0.3s, color 0.3s;
-      cursor: pointer;
-    }
-    header nav a:hover, header nav a.active {
-      background-color: var(--primary-purple);
-      color: var(--text-light);
-    }
-    .hamburger {
-      display: none;
-      background: none;
-      border: none;
-      cursor: pointer;
-      z-index: 11000;
-      padding: 10px;
-    }
-    .hamburger span {
-      display: block;
-      width: 28px;
-      height: 3px;
-      background: var(--text-dark);
-      margin: 5px 0;
-      transition: all 0.3s;
-    }
-    @media (max-width: 992px) {
-      header nav { display: none; }
-     .hamburger { display: block; }
-    }
-    .offcanvas-menu {
-      position: fixed;
-      top: 0;
-      right: -300px;
-      width: 300px;
-      height: 100%;
-      background: var(--text-dark);
-      color: #fff;
-      z-index: 11000;
-      padding: 60px 20px 20px;
-      transition: right 0.3s ease;
-      box-shadow: -5px 0 15px rgba(0,0,0,0.5);
-    }
-    .offcanvas-menu.active { right: 0; }
-    .offcanvas-menu a {
-      color: var(--text-light);
-      text-decoration: none;
-      display: block;
-      margin-bottom: 1.5rem;
-      font-size: 18px;
-      font-weight: 600;
-    }
-    .sub-nav {
-      position: sticky;
-      top: 80px;
-      background-color: rgba(255, 255, 255, 0.9);
-      backdrop-filter: blur(8px);
-      padding: 12px;
-      display: flex;
-      gap: 15px;
-      justify-content: center;
-      z-index: 9998;
-      flex-wrap: wrap;
-      border-bottom: 1px solid #e1e8ed;
-    }
-    .sub-nav a {
-      text-decoration: none;
-      background: #e1e8ed;
-      color: var(--text-dark);
-      padding: 6px 12px;
-      border-radius: 15px;
-      font-size: 14px;
-      font-weight: 600;
-      cursor: pointer;
-      transition: all 0.3s;
-    }
-    .sub-nav a:hover,.sub-nav a.active-sub {
-      background-color: var(--primary-purple);
-      color: #fff;
-    }
-    #main-content {
-      padding-top: 80px;
-      position: relative;
-      z-index: 2;
-    }
-    .category-page {
-      display: none;
-      opacity: 0;
-      transition: opacity 0.3s ease-in-out;
-    }
-    .category-page.active {
-      display: block;
-      opacity: 1;
-    }
-    .category-page-container {
-        padding: 40px 20px;
-    }
-    .category-content {
-      max-width: 1000px;
-      margin: 20px auto;
-      padding: 30px;
-      background: #ffffff;
-      border-radius: 12px;
-      box-shadow: 0 4px 20px rgba(0,0,0,0.08);
-      color: #333;
-    }
-    .category-content h2 {
-      margin-bottom: 1rem;
-      font-size: 2.25rem;
-      font-weight: 700;
-      color: var(--primary-dark);
-      text-align: center;
-    }
-     .category-content h3 {
-      margin-top: 1.5rem;
-      margin-bottom: 1rem;
-      font-size: 1.5rem;
-      font-weight: 700;
-      color: var(--primary-purple);
-    }
-    .category-content p, .category-content ul, .category-content li {
-      color: #444;
-      font-size: 1.1rem;
-      line-height: 1.7;
-    }
-    .category-content ul {
-      list-style-type: '✓ ';
-      padding-right: 20px;
-      margin-bottom: 20px;
-    }
-    .category-content[dir="ltr"] ul {
-        padding-right: 0;
-        padding-left: 20px;
-        list-style-position: inside;
-    }
-    .category-content li { margin-bottom: 10px; }
-    .info-cards {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-      gap: 25px;
-      margin-top: 30px;
-    }
-    .info-card {
-      background: #fff;
-      border-radius: 12px;
-      box-shadow: 0 2px 10px rgba(0,0,0,0.08);
-      transition: transform 0.3s, box-shadow 0.3s;
-      padding: 20px;
-      border-left: 4px solid var(--primary-purple);
-    }
-    .info-card:hover {
-      transform: translateY(-5px);
-      box-shadow: 0 8px 25px rgba(0,0,0,0.12);
-    }
-    .info-card h4 {
-      color: var(--primary-dark);
-      margin-bottom: 10px;
-      font-size: 1.25rem;
-    }
-    .info-card h4 i {
-        margin-left: 8px;
-        color: var(--primary-purple);
-    }
-    .gallery-cards {
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-        gap: 25px;
-        margin-top: 30px;
-    }
-    .gallery-card {
-      background: #fff;
-      border-radius: 10px;
-      box-shadow: 0 2px 10px rgba(0,0,0,0.08);
-      transition: transform 0.3s, box-shadow 0.3s;
-      overflow: hidden;
-      text-align: center;
-    }
-     .gallery-card:hover {
-      transform: translateY(-5px);
-      box-shadow: 0 8px 25px rgba(0,0,0,0.12);
-    }
-    .gallery-card img {
-      width: 100%;
-      height: 200px;
-      object-fit: cover;
-      display: block;
-    }
-    .gallery-card-content { padding: 15px; }
-    .gallery-card h4 {
-      margin-bottom: 5px;
-      font-size: 1.2rem;
-    }
-    .gallery-card p {
-      font-size: 0.95rem;
-      color: #666;
-    }
-    footer {
-      background: var(--text-dark);
-      color: #aab8c2;
-      text-align: center;
-      padding: 30px;
-      font-size: 0.9rem;
-      margin-top: 40px;
-    }
-    .chart-container {
-        height: 400px;
-        width: 100%;
-        max-width: 800px;
-        margin: 30px auto;
-    }
-    .hero-section {
-        padding: 80px 20px;
-    }
-    @media (min-width: 768px) { .hero-section { padding: 120px 20px; } }
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title>PsychoFlash Productions – פתרונות הפקה טכניים ויצירתיים</title>
+    <meta name="description" content="שירותי הפקת וידאו, שידורים חיים ופתרונות טכנולוגיים מתקדמים. השילוב המושלם בין ביצוע טכני לחדשנות יצירתית.">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Assistant:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    
+    <style>
+        :root {
+            --primary-dark: #003f5c;
+            --primary-purple: #7a5195;
+            --primary-pink: #ef5675;
+            --primary-orange: #ffa600;
+            --text-light: #f8f9fa;
+            --text-dark: #212529;
+            --bg-light: #f1f5f9;
+            --bg-white: #ffffff;
+            --border-color: #e2e8f0;
+        }
+        html { scroll-behavior: smooth; }
+        body {
+            font-family: 'Assistant', sans-serif;
+            background-color: var(--bg-light);
+            color: var(--text-dark);
+        }
+        .orb-canvas {
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            pointer-events: none;
+            z-index: -1;
+            opacity: 0.6;
+        }
 
-  </style>
+        /* --- Header --- */
+        header {
+            position: fixed;
+            top: 0; left: 0; right: 0;
+            background-color: rgba(255, 255, 255, 0.85);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            z-index: 1000;
+            height: 70px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 1rem;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+            transition: all 0.3s ease;
+        }
+        .header-title {
+            position: absolute;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--primary-dark);
+            transition: opacity 0.3s ease, transform 0.3s ease;
+        }
+        .header-title.hidden-title {
+            opacity: 0;
+            transform: translateX(-50%) translateY(-10px);
+        }
+        header nav { display: none; }
+        @media (min-width: 1024px) {
+            header nav {
+                display: flex;
+                align-items: center;
+                gap: 1rem;
+            }
+        }
+        header nav a {
+            color: var(--text-dark);
+            text-decoration: none;
+            font-weight: 600;
+            padding: 6px 14px;
+            border-radius: 20px;
+            font-size: 16px;
+            transition: background-color 0.3s, color 0.3s;
+        }
+        header nav a:hover, header nav a.active {
+            background-color: var(--primary-purple);
+            color: var(--text-light);
+        }
+        .language-toggle {
+            display: flex;
+            gap: 8px;
+            border-right: 1px solid var(--border-color);
+            padding-right: 1rem;
+            margin-left: -1rem; /* Visual alignment fix */
+        }
+        [dir="rtl"] .language-toggle {
+            border-right: none;
+            border-left: 1px solid var(--border-color);
+            padding-right: 0;
+            padding-left: 1rem;
+            margin-left: 0;
+            margin-right: -1rem;
+        }
+        .lang-btn {
+            cursor: pointer;
+            opacity: 0.5;
+            transition: opacity 0.3s;
+            font-size: 1.2rem;
+        }
+        .lang-btn.active-lang, .lang-btn:hover { opacity: 1; }
+
+        /* --- Hamburger & Offcanvas --- */
+        .hamburger {
+            display: block;
+            background: none; border: none; cursor: pointer;
+            z-index: 11000; padding: 10px;
+        }
+        @media (min-width: 1024px) { .hamburger { display: none; } }
+        .hamburger span {
+            display: block; width: 25px; height: 3px;
+            background: var(--text-dark);
+            margin: 5px 0; transition: all 0.3s;
+        }
+        .offcanvas-menu {
+            position: fixed; top: 0; width: 280px; height: 100%;
+            background: var(--text-dark); color: var(--text-light);
+            z-index: 10500; padding: 80px 20px 20px;
+            transition: transform 0.3s ease;
+            box-shadow: -5px 0 15px rgba(0,0,0,0.5);
+        }
+        [dir="rtl"] .offcanvas-menu { right: 0; transform: translateX(100%); }
+        [dir="ltr"] .offcanvas-menu { left: 0; transform: translateX(-100%); }
+        .offcanvas-menu.active { transform: translateX(0); }
+        .offcanvas-menu a {
+            color: var(--text-light); text-decoration: none;
+            display: block; margin-bottom: 1.5rem;
+            font-size: 18px; font-weight: 600;
+        }
+
+        /* --- Main Content & Sections --- */
+        main { padding-top: 70px; }
+        .content-section {
+            padding: 50px 20px;
+            scroll-margin-top: 70px;
+        }
+        .section-container {
+            max-width: 1100px;
+            margin: 0 auto;
+            padding: 30px;
+            background: var(--bg-white);
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.07);
+        }
+        .section-container h2, .section-title {
+            margin-bottom: 2rem;
+            font-size: 2.5rem;
+            font-weight: 800;
+            text-align: center;
+            color: var(--primary-dark);
+        }
+        .section-container h3 {
+            margin-top: 1.5rem; margin-bottom: 1rem;
+            font-size: 1.75rem; font-weight: 700;
+            color: var(--primary-purple);
+        }
+        .section-container p, .section-container ul li {
+            font-size: 1.1rem;
+            line-height: 1.8;
+            color: #334155;
+        }
+        [dir="rtl"] .section-container ul { list-style-type: '✓ '; padding-right: 20px; }
+        [dir="ltr"] .section-container ul { list-style-type: '✓ '; padding-left: 20px; }
+
+        /* --- Hero Section --- */
+        #home { padding: 60px 20px; }
+        #home .hero-title {
+            font-size: 2.5rem;
+            font-weight: 800;
+            line-height: 1.2;
+        }
+        @media (min-width: 768px) {
+            #home { padding: 80px 20px; }
+            #home .hero-title { font-size: 3.5rem; }
+        }
+
+        /* --- Info Cards & Gallery --- */
+        .info-cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 25px; margin-top: 30px;
+        }
+        .info-card {
+            background: #fafafa; border-radius: 12px;
+            padding: 25px; border-bottom: 3px solid var(--primary-purple);
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+        .info-card:hover { transform: translateY(-5px); box-shadow: 0 8px 25px rgba(0,0,0,0.1); }
+        .info-card h4 {
+            color: var(--primary-dark); margin-bottom: 10px;
+            font-size: 1.25rem; font-weight: 700; display: flex; align-items: center; gap: 10px;
+        }
+        .info-card i { color: var(--primary-purple); }
+
+        /* --- Our Process Infographic --- */
+        .timeline-container { position: relative; display: flex; justify-content: space-between; max-width: 1000px; margin: 40px auto; padding: 0 20px; }
+        .timeline-line { position: absolute; top: 38px; left: 20px; right: 20px; height: 4px; background: #ccc; z-index: -1; }
+        .timeline-line-progress { position: absolute; top: 0; height: 100%; background: var(--primary-purple); width: 0; transition: width 1.5s cubic-bezier(0.25, 1, 0.5, 1); }
+        .phase-node { position: relative; text-align: center; width: 20%; cursor: pointer; opacity: 0; transform: translateY(20px); transition: opacity 0.5s ease, transform 0.5s ease; }
+        .phase-node.visible { opacity: 1; transform: translateY(0); }
+        .phase-icon-wrapper { width: 80px; height: 80px; border-radius: 50%; background: #fff; border: 4px solid #ccc; display: flex; align-items: center; justify-content: center; margin: 0 auto 15px; transition: all 0.3s ease; }
+        .phase-node.active .phase-icon-wrapper,.phase-node:hover .phase-icon-wrapper { border-color: var(--primary-purple); transform: scale(1.1); box-shadow: 0 0 15px rgba(122, 81, 149, 0.5); }
+        .infographic-icon { width: 40px; height: 40px; stroke: #333; transition: stroke 0.3s; }
+        .phase-node.active .infographic-icon,.phase-node:hover .infographic-icon { stroke: var(--primary-purple); }
+        .phase-node h4 { font-weight: 700; color: var(--primary-dark); font-size: 1rem; }
+        .phase-details-container { max-width: 1000px; margin: 0 auto; padding: 0 20px; }
+        .phase-details { background-color: #f8f9fa; border: 1px solid #e9ecef; border-radius: 8px; padding: 25px; display: none; margin-top: 20px; }
+        .phase-details h5 { color: var(--primary-purple); font-weight: 700; margin-bottom: 15px; }
+        [dir="rtl"] .phase-details ul { list-style-type: '→ '; padding-right: 20px; }
+        [dir="ltr"] .phase-details ul { list-style-type: '→ '; padding-left: 20px; }
+
+        @media (max-width: 768px) {
+            .timeline-container { flex-direction: column; align-items: center; gap: 50px; }
+            .timeline-line { width: 4px; height: 100%; left: 50%; top: 0; transform: translateX(-50%); }
+            .timeline-line-progress { width: 100%; height: 0; transition: height 1.5s cubic-bezier(0.25, 1, 0.5, 1); }
+            .phase-node { width: 100%; }
+        }
+
+        /* --- Clients Section --- */
+        .clients-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 25px;
+        }
+        .client-card {
+            background-color: #f8fafc;
+            border-radius: 10px;
+            padding: 20px;
+            text-align: center;
+            border: 1px solid var(--border-color);
+            transition: all 0.3s ease;
+        }
+        .client-card:hover { transform: translateY(-5px); box-shadow: 0 6px 20px rgba(0,0,0,0.08); }
+        .client-logo {
+            height: 60px;
+            width: auto;
+            margin: 0 auto 15px;
+            object-fit: contain;
+        }
+        .client-card h4 { font-weight: 700; color: var(--primary-dark); }
+        .client-card p { font-size: 0.95rem; color: #64748b; }
+
+        /* --- Projects Section --- */
+        .projects-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 25px;
+        }
+        .gallery-card {
+            background: var(--bg-white); border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+            transition: transform 0.3s, box-shadow 0.3s;
+            overflow: hidden; text-align: center;
+        }
+        .gallery-card:hover { transform: translateY(-5px); box-shadow: 0 8px 25px rgba(0,0,0,0.1); }
+        .gallery-card img {
+            width: 100%; height: 200px;
+            object-fit: cover; display: block;
+        }
+        .gallery-card-content { padding: 15px; }
+        .gallery-card h4 { margin-bottom: 5px; font-size: 1.2rem; font-weight: 700; }
+        .gallery-card p { font-size: 0.95rem; color: #666; }
+
+        /* --- Pricing Section --- */
+        .pricing-grid {
+            display: grid; grid-template-columns: repeat(1, 1fr);
+            gap: 30px; margin-top: 40px;
+        }
+        @media (min-width: 1024px) { .pricing-grid { grid-template-columns: repeat(3, 1fr); } }
+        .pricing-card {
+            background-color: var(--bg-white); border-radius: 12px;
+            padding: 30px; text-align: center;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.07);
+            border: 2px solid var(--border-color);
+            transition: all 0.3s ease;
+            display: flex; flex-direction: column;
+        }
+        .pricing-card.featured {
+            transform: scale(1.05);
+            border-color: var(--primary-purple);
+        }
+        .pricing-card:hover {
+            transform: translateY(-5px) scale(1.02);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        }
+        .pricing-card h3 { font-size: 1.5rem; font-weight: 800; color: var(--primary-dark); }
+        .price { font-size: 2.5rem; font-weight: 800; color: var(--primary-purple); margin: 10px 0; }
+        .price .term { font-size: 1rem; font-weight: 600; color: #64748b; }
+        .pricing-card ul { list-style: none; padding: 0; margin: 20px 0; text-align: right; flex-grow: 1; }
+        [dir="ltr"] .pricing-card ul { text-align: left; }
+        .pricing-card li { margin-bottom: 12px; display: flex; align-items: center; }
+        [dir="rtl"] .pricing-card li { padding-right: 0; }
+        [dir="ltr"] .pricing-card li { padding-left: 0; }
+        .pricing-card li i { color: #16a34a; margin-left: 10px; }
+        [dir="rtl"] .pricing-card li i { margin-left: 0; margin-right: 10px; }
+        .cta-btn {
+            display: inline-block; background-color: var(--primary-dark);
+            color: var(--text-light); padding: 12px 20px;
+            border-radius: 8px; text-decoration: none; font-weight: 700;
+            transition: background-color 0.3s;
+        }
+        .cta-btn:hover { background-color: var(--primary-purple); }
+        .pricing-card.featured .cta-btn { background-color: var(--primary-purple); }
+        .pricing-card.featured .cta-btn:hover { background-color: var(--primary-pink); }
+        
+        /* --- Footer --- */
+        footer {
+            background: var(--text-dark); color: #a0aec0;
+            text-align: center; padding: 40px 20px;
+            font-size: 0.9rem; margin-top: 40px;
+        }
+        .footer-content { max-width: 1100px; margin: auto; }
+        footer a { color: var(--text-light); text-decoration: none; font-weight: 600; }
+        footer a:hover { color: var(--primary-orange); }
+        
+        /* Language-specific content */
+        [data-lang]:not(.visible-lang) { display: none; }
+
+    </style>
 </head>
-<body>
-  <canvas id="orb-canvas-back" class="orb-canvas"></canvas>
-  
-  <div id="language-toggle">
-    <button id="btn-he" class="active-lang">עברית</button>
-    <button id="btn-en">English</button>
-  </div>
-  
-  <div id="content-he" dir="rtl">
-    <header>
-      <h1>PsychoFlash</h1>
-      <nav>
-        <a data-category="he-cat1">ראשי</a>
-        <a data-category="he-cat2">שירותים</a>
-        <a data-category="he-cat3">ניתוח פיננסי</a>
-        <a data-category="he-cat4">פרויקטים</a>
-        <a data-category="he-cat5">צרו קשר</a>
-      </nav>
-      <button class="hamburger" id="hamburger-btn-he" aria-label="תפריט">
-        <span></span><span></span><span></span>
-      </button>
-    </header>
-    
-    <div class="offcanvas-menu" id="offcanvas-menu-he">
-      <a href="#" data-category="he-cat1" class="offcanvas-link">ראשי</a>
-      <a href="#" data-category="he-cat2" class="offcanvas-link">שירותים</a>
-      <a href="#" data-category="he-cat3" class="offcanvas-link">ניתוח פיננסי</a>
-      <a href="#" data-category="he-cat4" class="offcanvas-link">פרויקטים</a>
-      <a href="#" data-category="he-cat5" class="offcanvas-link">צרו קשר</a>
-    </div>
-    
-    <div id="main-content">
-      <div id="he-cat1" class="category-page">
-        <div class="category-page-container">
-            <div class="hero-section text-center">
-                 <h1 class="text-4xl md:text-6xl font-extrabold text-gray-800 leading-tight">השילוב המושלם בין <span class="text-transparent bg-clip-text bg-gradient-to-r from-purple-600 to-pink-600">ביצוע טכני</span> לחדשנות יצירתית</h1>
-                 <p class="mt-4 text-lg md:text-xl text-gray-600 max-w-3xl mx-auto">מהפקות וידאו ושידורים חיים ועד פיתוח פתרונות תוכנה ו-AI, אנחנו כאן כדי להפוך את החזון שלכם למציאות מרשימה, חלקה ונטולת תקלות.</p>
-            </div>
-            <div class="category-content">
-                <div class="row align-items-center g-4">
-                    <div class="col-md-6 text-center p-4">
-                        <i class="fas fa-cogs fa-3x text-purple-600 mb-3"></i>
-                        <h3>ה"תכל'ס" - הביצוע האמין</h3>
-                        <p>שנים של ניסיון בתפעול טכני מדויק, ניהול שידורים והקמות מקצועיות. זהו הבסיס היציב והאמין שמאפשר לכל הפקה לרוץ חלק, והסיבה שלקוחותינו סומכים עלינו פעם אחר פעם.</p>
-                    </div>
-                    <div class="col-md-6 text-center p-4">
-                        <i class="fas fa-lightbulb fa-3x text-pink-600 mb-3"></i>
-                        <h3>"ארגז הכלים" - הפתרון היצירתי</h3>
-                        <p>מאגר רחב של יכולות טכנולוגיות ויצירתיות, כולל פיתוח, גרפיקה מתקדמת, אוטומציה ופתרונות AI. זהו הערך המוסף שמקפיץ כל הפקה והופך אותה לייחודית ומרשימה.</p>
-                    </div>
-                </div>
-            </div>
-        </div>
-      </div>
-      
-      <div id="he-cat2" class="category-page">
-        <div class="sub-nav">
-          <a href="#he-cat2-sub1">שירותי ליבה</a>
-          <a href="#he-cat2-sub2">שירותי צמיחה</a>
-          <a href="#he-cat2-sub3">ייעוץ</a>
-        </div>
-        <div class="category-page-container">
-            <div class="category-content" id="he-cat2-sub1">
-              <h2>שירותי ליבה (ה"תכל'ס") 🛠️</h2>
-              <p>אלו השירותים המהווים את הבסיס היציב של העסק, המייצרים מוניטין של אמינות ומקצועיות ללא פשרות.</p>
-              <div class="info-cards">
-                  <div class="info-card"><h4><i class="fas fa-sliders-h"></i>תפעול טכני מקיף</h4><p>ניהול מלא של הצד הטכני בהפקות ושידורים חיים, מהקמה ועד פירוק.</p></div>
-                  <div class="info-card"><h4><i class="fas fa-broadcast-tower"></i>ניהול שידורים וירטואליים</h4><p>מומחיות בפלטפורמות Zoom, VMIX ועוד, להבטחת שידור חלק ונטול תקלות.</p></div>
-                  <div class="info-card"><h4><i class="fas fa-desktop"></i>הפעלת טלפרומפטר</h4><p>שירות מקצועי ומדויק המבטיח שהמסר שלכם יעבור בצורה חלקה וברורה.</p></div>
-                  <div class="info-card"><h4><i class="fas fa-video"></i>ניתוב ובימוי מצלמות</h4><p>ניהול מערך מצלמות בזמן אמת ליצירת זרימה ויזואלית דינמית ומרתקת.</p></div>
-              </div>
-            </div>
-            <div class="category-content" id="he-cat2-sub2">
-              <h2>מנועי צמיחה ("ארגז הכלים") 🚀</h2>
-              <p>אלו שירותי הערך המוסף שמבדלים אותנו, מגדילים את הרווחיות ומאפשרים לנו לספק פתרונות ייחודיים.</p>
-               <div class="info-cards">
-                  <div class="info-card"><h4><i class="fas fa-palette"></i>גרפיקה ואנימציה לשידור</h4><p>פיתוח גרפיקות מותאמות אישית, מעברונים ואנימציות המשדרגים כל שידור חי.</p></div>
-                  <div class="info-card"><h4><i class="fas fa-brain"></i>פתרונות מבוססי AI</h4><p>ייעוץ ושילוב כלי בינה מלאכותית לייעול תהליכים, יצירת תוכן והעשרת ההפקה.</p></div>
-                  <div class="info-card"><h4><i class="fas fa-code"></i>פיתוח כלי תוכנה ייעודיים</h4><p>בניית פתרונות תוכנה קטנים וחכמים לאוטומציה של משימות חוזרות בהפקה.</p></div>
-              </div>
-            </div>
-            <div class="category-content" id="he-cat2-sub3">
-              <h2>ייעוץ טכנולוגי ואסטרטגי 🧭</h2>
-              <p>הידע הנרחב שלנו, המשלב תכנות, עיצוב וטכנולוגיות AI, מאפשר לנו להציע שירותי ייעוץ ייחודיים שיכולים לשדרג כל אולפן או חברת הפקות.</p>
-              <div class="info-cards">
-                <div class="info-card"><h4>חדשנות טכנולוגית</h4><p>המלצות והכוונה בתחום הציוד והטכנולוגיות העדכניות ביותר.</p></div>
-                <div class="info-card"><h4>אוטומציה וייעול תהליכים</h4><p>ניתוח תהליכי עבודה ובניית פתרונות אוטומציה חכמים החוסכים זמן וכסף.</p></div>
-                <div class="info-card"><h4>אסטרטגיית תוכן דיגיטלי</h4><p>ייעוץ בבניית דפי נחיתה, נגני וידאו והטמעת תוכן במדיות חברתיות.</p></div>
-              </div>
-            </div>
-        </div>
-      </div>
-      
-      <div id="he-cat3" class="category-page">
-          <div class="sub-nav">
-              <a href="#he-cat3-sub1">חלוקת הכנסות</a>
-              <a href="#he-cat3-sub2">צמיחה פיננסית</a>
-          </div>
-          <div class="category-page-container">
-            <div class="category-content" id="he-cat3-sub1">
-                <h2>אינפוגרפיקה: חלוקת הכנסות לפי שירות (2024-2025)</h2>
-                <p>בעוד קורות החיים מדגישים פיתוח ואנימציה, יומני העבודה חושפים שההכנסה בפועל מגיעה כמעט כולה משירותי תפעול ותמיכה טכנית בהפקות חיות. תרשים זה מציג את חלוקת ההכנסות לפי סוג השירותים שסופקו.</p>
-                <div class="chart-container">
-                    <canvas id="he-servicesChart"></canvas>
-                </div>
-            </div>
-            <div class="category-content" id="he-cat3-sub2">
-                <h2>אינפוגרפיקה: האבולוציה הפיננסית</h2>
-                <p>השוואה בין המצב הפיננסי בשנת 2013 לבין ההכנסות הנוכחיות מדגימה צמיחה משמעותית. בשנת 2013, חלק ניכר מההכנסה נסמך על תמיכת הורים. כיום, ההכנסה מבוססת כולה על עבודתו כפרילנסר.</p>
-                <div class="row g-4">
-                    <div class="col-md-6">
-                        <h3 class="text-center h5">מקורות הכנסה 2013</h3>
-                        <div class="chart-container" style="height: 300px;">
-                            <canvas id="he-income2013Chart"></canvas>
-                        </div>
-                    </div>
-                    <div class="col-md-6">
-                        <h3 class="text-center h5">הוצאות עיקריות 2013</h3>
-                        <div class="chart-container" style="height: 300px;">
-                            <canvas id="he-expenses2013Chart"></canvas>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-      </div>
-      
-      <div id="he-cat4" class="category-page">
-        <div class="category-page-container">
-            <div class="category-content" id="he-cat4-sub1">
-              <h2>פרויקטים נבחרים</h2>
-              <p>הניסיון שלנו מגובה בעבודה עם מגוון רחב של לקוחות ופרויקטים. הנה טעימה קטנה:</p>
-              <div class="gallery-cards">
-                <div class="gallery-card">
-                  <img src="https://placehold.co/280x180/003f5c/ffffff?text=Live+Broadcast" alt="שידור חי">
-                  <div class="gallery-card-content"><h4>שידורים חיים מורכבים</h4><p>ניהול שידורים עבור לקוחות מובילים כמו גו-לייב, כולל ניתוב מצלמות, VMIX וניהול טכני מלא.</p></div>
-                </div>
-                <div class="gallery-card">
-                  <img src="https://placehold.co/280x180/7a5195/ffffff?text=Corporate+Event" alt="אירוע חברה">
-                  <div class="gallery-card-content"><h4>אירועי חברה וכנסים</h4><p>תפעול טכני לאירועים של חברות כמו רפאל, לאומי ואל על, תוך הבטחת ביצוע חלק ומקצועי.</p></div>
-                </div>
-                <div class="gallery-card">
-                  <img src="https://placehold.co/280x180/ef5675/ffffff?text=Software" alt="פיתוח תוכנה">
-                  <div class="gallery-card-content"><h4>פיתוח פתרונות תוכנה</h4><p>בניית מערכות ייעודיות, כמו תוכנה להוספת גרפיקות בשידור חי ומערכת CRM למסעדות.</p></div>
-                </div>
-              </div>
-            </div>
-        </div>
-      </div>
-      
-      <div id="he-cat5" class="category-page">
-         <div class="category-page-container">
-            <div class="category-content text-center" id="he-cat5-sub1">
-              <h2>בואו נדבר על ההפקה הבאה שלכם</h2>
-              <p>מוכנים לשמוע על האתגרים שלכם ולהציע פתרונות שישדרגו לכם את האירוע.</p>
-              <div class="mt-4">
-                <p><strong>אוריין אדלני</strong></p>
-                <p><strong>טלפון:</strong> 054-255-9027</p>
-                <p><strong>אימייל:</strong> <a href="mailto:EdelenviProductions@gmail.com" class="text-decoration-none">EdelenviProductions@gmail.com</a></p>
-              </div>
-            </div>
-         </div>
-      </div>
-    </div> 
-  </div> 
-  
-  <div id="content-en" dir="ltr">
-    <header>
-      <h1>PsychoFlash</h1>
-      <nav>
-        <a data-category="en-cat1">Home</a>
-        <a data-category="en-cat2">Services</a>
-        <a data-category="en-cat3">Financial Analysis</a>
-        <a data-category="en-cat4">Projects</a>
-        <a data-category="en-cat5">Contact</a>
-      </nav>
-      <button class="hamburger" id="hamburger-btn-en" aria-label="Menu">
-        <span></span><span></span><span></span>
-      </button>
-    </header>
-    
-    <div class="offcanvas-menu" id="offcanvas-menu-en">
-        <a href="#" data-category="en-cat1" class="offcanvas-link">Home</a>
-        <a href="#" data-category="en-cat2" class="offcanvas-link">Services</a>
-        <a href="#" data-category="en-cat3" class="offcanvas-link">Financial Analysis</a>
-        <a href="#" data-category="en-cat4" class="offcanvas-link">Projects</a>
-        <a href="#" data-category="en-cat5" class="offcanvas-link">Contact</a>
-    </div>
-    
-    <div id="main-content">
-        <div id="en-cat1" class="category-page">
-            <div class="category-page-container">
-                <div class="hero-section text-center">
-                    <h1 class="text-4xl md:text-6xl font-extrabold text-gray-800 leading-tight">The Perfect Blend of <span class="text-transparent bg-clip-text bg-gradient-to-r from-purple-600 to-pink-600">Technical Execution</span> & Creative Innovation</h1>
-                    <p class="mt-4 text-lg md:text-xl text-gray-600 max-w-3xl mx-auto">From video productions and live streams to custom software and AI solutions, we're here to turn your vision into an impressive, smooth, and flawless reality.</p>
-                </div>
-                <div class="category-content">
-                    <div class="row align-items-center g-4">
-                        <div class="col-md-6 text-center p-4">
-                            <i class="fas fa-cogs fa-3x text-purple-600 mb-3"></i>
-                            <h3>The "Get-it-Done": Reliable Execution</h3>
-                            <p>Years of experience in precise technical operation, live broadcast management, and professional setups. This is the stable and reliable foundation that allows every production to run smoothly.</p>
-                        </div>
-                        <div class="col-md-6 text-center p-4">
-                             <i class="fas fa-lightbulb fa-3x text-pink-600 mb-3"></i>
-                            <h3>The "Toolbox": The Creative Solution</h3>
-                            <p>A broad repository of technological and creative capabilities, including development, advanced graphics, automation, and AI solutions. This is the added value that elevates any production.</p>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-        <div id="en-cat2" class="category-page">
-            <div class="sub-nav">
-                <a href="#en-cat2-sub1">Core Services</a>
-                <a href="#en-cat2-sub2">Growth Services</a>
-                <a href="#en-cat2-sub3">Consulting</a>
-            </div>
-            <div class="category-page-container">
-                <div class="category-content" id="en-cat2-sub1">
-                  <h2>Core Services (The "Get-it-Done") 🛠️</h2>
-                  <p>These are the services that form the stable foundation of the business, building a reputation for reliability and uncompromising professionalism.</p>
-                  <div class="info-cards">
-                      <div class="info-card"><h4><i class="fas fa-sliders-h"></i>Comprehensive Technical Operation</h4><p>Full management of the technical side of productions and live broadcasts.</p></div>
-                      <div class="info-card"><h4><i class="fas fa-broadcast-tower"></i>Virtual Broadcast Management</h4><p>Expertise in Zoom, VMIX, and other platforms to ensure a smooth, glitch-free broadcast.</p></div>
-                      <div class="info-card"><h4><i class="fas fa-desktop"></i>Teleprompter Operation</h4><p>A professional and precise service that ensures your message is delivered smoothly and clearly.</p></div>
-                      <div class="info-card"><h4><i class="fas fa-video"></i>Camera Switching & Directing</h4><p>Real-time management of a multi-camera setup for a dynamic and engaging visual flow.</p></div>
-                  </div>
-                </div>
-                <div class="category-content" id="en-cat2-sub2">
-                  <h2>Growth Engines (The "Toolbox") 🚀</h2>
-                  <p>These are the value-added services that differentiate us, increase profitability, and allow us to provide unique solutions.</p>
-                   <div class="info-cards">
-                      <div class="info-card"><h4><i class="fas fa-palette"></i>Live Graphics & Animation</h4><p>Development of custom graphics, transitions, and animations that upgrade any live broadcast.</p></div>
-                      <div class="info-card"><h4><i class="fas fa-brain"></i>AI-Based Solutions</h4><p>Consulting and integration of AI tools to streamline processes, create content, and enrich the production.</p></div>
-                      <div class="info-card"><h4><i class="fas fa-code"></i>Custom Software Tools</h4><p>Building small, smart software solutions to automate repetitive tasks in production.</p></div>
-                  </div>
-                </div>
-                <div class="category-content" id="en-cat2-sub3">
-                    <h2>Tech Consulting for the Production World 🧭</h2>
-                    <p>Our extensive knowledge, combining programming, design, and AI technologies, allows us to offer unique consulting services that can upgrade any studio or production company.</p>
-                    <div class="info-cards">
-                        <div class="info-card"><h4>Technological Innovation</h4><p>Recommendations on the latest equipment and technologies.</p></div>
-                        <div class="info-card"><h4>Automation & Process Optimization</h4><p>Analysis of workflows and building smart automation solutions.</p></div>
-                        <div class="info-card"><h4>Digital Content Strategy</h4><p>Consulting on building landing pages and custom video players.</p></div>
-                    </div>
-                </div>
-            </div>
-        </div>
-        <div id="en-cat3" class="category-page">
-            <div class="sub-nav">
-                <a href="#en-cat3-sub1">Revenue Breakdown</a>
-                <a href="#en-cat3-sub2">Financial Growth</a>
-            </div>
-            <div class="category-page-container">
-                <div class="category-content" id="en-cat3-sub1">
-                    <h2>Infographic: Revenue Breakdown by Service (2024-2025)</h2>
-                    <p>While the CV emphasizes development and animation, the work logs reveal that income is almost entirely from technical operation and support services for live productions. This chart displays the revenue breakdown by service type.</p>
-                    <div class="chart-container">
-                        <canvas id="en-servicesChart"></canvas>
-                    </div>
-                </div>
-                <div class="category-content" id="en-cat3-sub2">
-                    <h2>Infographic: The Financial Evolution</h2>
-                    <p>A comparison between the financial situation in 2013 and current revenues demonstrates significant growth. In 2013, a considerable portion of income was based on parental support. Today, income is based entirely on freelance work.</p>
-                    <div class="row g-4">
-                        <div class="col-md-6">
-                            <h3 class="text-center h5">2013 Income Sources</h3>
-                            <div class="chart-container" style="height: 300px;">
-                                <canvas id="en-income2013Chart"></canvas>
-                            </div>
-                        </div>
-                        <div class="col-md-6">
-                            <h3 class="text-center h5">2013 Main Expenses</h3>
-                            <div class="chart-container" style="height: 300px;">
-                                <canvas id="en-expenses2013Chart"></canvas>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-        <div id="en-cat4" class="category-page">
-            <div class="category-page-container">
-                <div class="category-content" id="en-cat4-sub1">
-                  <h2>Featured Projects</h2>
-                  <p>Our experience is backed by work with a wide range of clients and projects. Here's a small taste:</p>
-                  <div class="gallery-cards">
-                    <div class="gallery-card">
-                      <img src="https://placehold.co/280x180/003f5c/ffffff?text=Live+Broadcast" alt="Live Broadcast">
-                      <div class="gallery-card-content"><h4>Complex Live Broadcasts</h4><p>Managing broadcasts for leading clients like Go-Live, including camera switching, VMIX, and full technical direction.</p></div>
-                    </div>
-                    <div class="gallery-card">
-                      <img src="https://placehold.co/280x180/7a5195/ffffff?text=Corporate+Event" alt="Corporate Event">
-                      <div class="gallery-card-content"><h4>Corporate Events & Conferences</h4><p>Technical operation for events of companies like Rafael, Leumi, and El Al, ensuring a smooth and professional execution.</p></div>
-                    </div>
-                    <div class="gallery-card">
-                      <img src="https://placehold.co/280x180/ef5675/ffffff?text=Software" alt="Software Development">
-                      <div class="gallery-card-content"><h4>Custom Software Solutions</h4><p>Building dedicated systems, such as software for adding live graphics and a CRM system for restaurants.</p></div>
-                    </div>
-                  </div>
-                </div>
-            </div>
-        </div>
-        <div id="en-cat5" class="category-page">
-            <div class="category-page-container">
-                <div class="category-content text-center" id="en-cat5-sub1">
-                  <h2>Let's Talk About Your Next Production</h2>
-                  <p>Ready to hear about your challenges and offer solutions that will elevate your event.</p>
-                  <div class="mt-4">
-                    <p><strong>Orian Edleni</strong></p>
-                    <p><strong>Phone:</strong> +972-54-255-9027</p>
-                    <p><strong>Email:</strong> <a href="mailto:EdelenviProductions@gmail.com" class="text-decoration-none">EdelenviProductions@gmail.com</a></p>
-                  </div>
-                </div>
-            </div>
-        </div>
-    </div>
-  </div> 
-  
-  <footer>
-    <p>&copy; 2025 PsychoFlash Productions. All rights reserved.</p>
-  </footer>
-  
-  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-  
-  <script>
-    document.addEventListener('DOMContentLoaded', () => {
-        /* 1) Language Switching */
-        const btnHe = document.getElementById('btn-he');
-        const btnEn = document.getElementById('btn-en');
-        const contentHe = document.getElementById('content-he');
-        const contentEn = document.getElementById('content-en');
-        
-        function switchLanguage(lang) {
-            const activeLangContainer = lang === 'he' ? contentHe : contentEn;
-            const firstNavLink = activeLangContainer.querySelector('header nav a');
-            let firstCatId = 'he-cat1'; // Default
-            if (firstNavLink) {
-                firstCatId = firstNavLink.getAttribute('data-category');
-            }
-    
-            if (lang === 'he') {
-                contentHe.style.display = 'block';
-                contentEn.style.display = 'none';
-                btnHe.classList.add('active-lang');
-                btnEn.classList.remove('active-lang');
-                document.documentElement.lang = 'he';
-                document.documentElement.dir = 'rtl';
-            } else {
-                contentHe.style.display = 'none';
-                contentEn.style.display = 'block';
-                btnEn.classList.add('active-lang');
-                btnHe.classList.remove('active-lang');
-                document.documentElement.lang = 'en';
-                document.documentElement.dir = 'ltr';
-            }
-            initCategorySwitching(lang, firstCatId);
-        }
-    
-        btnHe.addEventListener('click', () => switchLanguage('he'));
-        btnEn.addEventListener('click', () => switchLanguage('en'));
-    
-        /* 2) Category Switching Logic */
-        function initCategorySwitching(lang, defaultCategory) {
-          const container = document.getElementById(`content-${lang}`);
-          if (!container) return;
-          
-          const pages = container.querySelectorAll('.category-page');
-          const navLinks = container.querySelectorAll('header nav a, .offcanvas-menu a');
-          
-          function showCategory(catId) {
-            pages.forEach(page => page.classList.remove('active'));
-            const newPage = container.querySelector('#' + catId);
-            if (newPage) newPage.classList.add('active');
-            
-            navLinks.forEach(link => {
-              link.classList.remove('active');
-              if (link.getAttribute('data-category') === catId) {
-                link.classList.add('active');
-              }
-            });
-          }
-          
-          navLinks.forEach(link => {
-            link.addEventListener('click', (e) => {
-              e.preventDefault();
-              const targetCat = link.getAttribute('data-category');
-              showCategory(targetCat);
-              window.scrollTo({ top: 0, behavior: 'smooth' });
-              const offcanvasMenu = container.querySelector('.offcanvas-menu');
-              if (offcanvasMenu) offcanvasMenu.classList.remove('active');
-            });
-          });
-          
-          if (defaultCategory) {
-            showCategory(defaultCategory);
-          }
-        }
-    
-        /* 3) Hamburger Menu */
-        function initHamburger(lang) {
-            const container = document.getElementById(`content-${lang}`);
-            if (!container) return;
-            const hamburgerBtn = container.querySelector(`#hamburger-btn-${lang}`);
-            const offcanvasMenu = container.querySelector(`#offcanvas-menu-${lang}`);
-            if (hamburgerBtn && offcanvasMenu) {
-                hamburgerBtn.addEventListener('click', () => {
-                    offcanvasMenu.classList.toggle('active');
-                });
-            }
-        }
-    
-        /* 4) Sub-nav scrolling and active state */
-        function initSubNav() {
-            const subNavLinks = document.querySelectorAll('.sub-nav a');
-            subNavLinks.forEach(link => {
-                link.addEventListener('click', e => {
-                    e.preventDefault();
-                    const targetId = link.getAttribute('href').substring(1);
-                    const targetElement = document.getElementById(targetId);
-                    if (targetElement) {
-                        const offsetTop = targetElement.getBoundingClientRect().top + window.pageYOffset - 150;
-                        window.scrollTo({ top: offsetTop, behavior: 'smooth' });
-                    }
-                });
-            });
-    
-            const observerOptions = { root: null, rootMargin: '-150px 0px -50% 0px', threshold: 0 };
-            const observer = new IntersectionObserver((entries) => {
-                entries.forEach(entry => {
-                    const id = entry.target.getAttribute('id');
-                    const activePage = entry.target.closest('.category-page.active');
-                    if (!activePage) return;
-    
-                    const subNavLink = activePage.querySelector(`.sub-nav a[href="#${id}"]`);
-                    if (subNavLink) {
-                        if (entry.isIntersecting) {
-                            activePage.querySelectorAll('.sub-nav a.active-sub').forEach(a => a.classList.remove('active-sub'));
-                            subNavLink.classList.add('active-sub');
-                        }
-                    }
-                });
-            }, observerOptions);
-    
-            document.querySelectorAll('.category-content[id]').forEach(section => observer.observe(section));
-        }
-    
-        /* 5) Chart.js Implementation */
-        let charts = {};
-        function createCharts() {
-            const brilliantBlues = ['#003f5c', '#7a5195', '#ef5675', '#ffa600', '#bc5090', '#ff764a'];
-            const chartFont = { family: "'Assistant', sans-serif" };
-    
-            const commonOptions = {
-                responsive: true,
-                maintainAspectRatio: false,
-                plugins: {
-                    legend: { position: 'bottom', labels: { font: chartFont } },
-                    tooltip: { bodyFont: chartFont, titleFont: chartFont }
-                }
-            };
-    
-            const chartConfigs = {
-                'he-servicesChart': {
-                    type: 'bar',
-                    data: {
-                        labels: ['הפקה ותפעול', 'פרויקטים ספציפיים', 'פרומפטר', 'מר ד לאבס', 'מינדפליי'],
-                        datasets: [{
-                            label: 'סך הכנסות (₪) 2024-2025',
-                            data: [55200, 32500, 18500, 16300, 14000],
-                            backgroundColor: brilliantBlues,
-                        }]
-                    },
-                    options: { ...commonOptions, indexAxis: 'y', scales: { x: { ticks: { font: chartFont }}, y: { ticks: { font: chartFont }}}}
-                },
-                'he-income2013Chart': {
-                    type: 'doughnut',
-                    data: {
-                        labels: ['הורים', 'משכורת', 'אחר'],
-                        datasets: [{ data: [61900, 47524, 78794], backgroundColor: brilliantBlues.slice(0,3) }]
-                    },
-                    options: commonOptions
-                },
-                'he-expenses2013Chart': {
-                    type: 'doughnut',
-                    data: {
-                        labels: ['הקמת עסק', 'דירה', 'אחר'],
-                        datasets: [{ data: [45275, 37586, 85539], backgroundColor: brilliantBlues.slice(3,6) }]
-                    },
-                    options: commonOptions
-                },
-                'en-servicesChart': {
-                    type: 'bar',
-                    data: {
-                        labels: ['Production & Ops', 'Specific Projects', 'Teleprompter', 'Mr. D Labs', 'Mindfly'],
-                        datasets: [{
-                            label: 'Total Revenue ($) 2024-2025',
-                            data: [14720, 8670, 4930, 4350, 3730], // Assuming an exchange rate for demo
-                            backgroundColor: brilliantBlues,
-                        }]
-                    },
-                    options: { ...commonOptions, indexAxis: 'y', scales: { x: { ticks: { font: chartFont }}, y: { ticks: { font: chartFont }}}}
-                },
-                'en-income2013Chart': {
-                    type: 'doughnut',
-                    data: {
-                        labels: ['Parents', 'Salary', 'Other'],
-                        datasets: [{ data: [16500, 12670, 21010], backgroundColor: brilliantBlues.slice(0,3) }]
-                    },
-                    options: commonOptions
-                },
-                'en-expenses2013Chart': {
-                    type: 'doughnut',
-                    data: {
-                        labels: ['Business Setup', 'Rent', 'Other'],
-                        datasets: [{ data: [12070, 10020, 22810], backgroundColor: brilliantBlues.slice(3,6) }]
-                    },
-                    options: commonOptions
-                }
-            };
-    
-            for (const chartId in chartConfigs) {
-                if (charts[chartId]) {
-                    charts[chartId].destroy();
-                }
-                const ctx = document.getElementById(chartId)?.getContext('2d');
-                if (ctx) {
-                    charts[chartId] = new Chart(ctx, chartConfigs[chartId]);
-                }
-            }
-        }
-    
-    
-        /* 6) Background Effects */
-        const canvasBack = document.getElementById('orb-canvas-back');
-        const ctxBack = canvasBack.getContext('2d');
-        
-        function resizeCanvas() {
-          canvasBack.width = window.innerWidth;
-          canvasBack.height = window.innerHeight;
-        }
-        
-        class GlowingOrb {
-          constructor() {
-            this.x = Math.random() * canvasBack.width;
-            this.y = Math.random() * canvasBack.height;
-            this.radius = Math.random() * 5 + 2;
-            this.speedX = (Math.random() - 0.5) * 0.2;
-            this.speedY = (Math.random() - 0.5) * 0.2;
-            this.color = `rgba(${Math.floor(Math.random()*50 + 100)}, ${Math.floor(Math.random()*50 + 150)}, 255, ${Math.random()*0.4 + 0.1})`;
-          }
-          update() {
-            this.x += this.speedX;
-            this.y += this.speedY;
-            if (this.x < 0 || this.x > canvasBack.width) this.speedX *= -1;
-            if (this.y < 0 || this.y > canvasBack.height) this.speedY *= -1;
-          }
-          draw() {
-            ctxBack.save();
-            ctxBack.beginPath();
-            ctxBack.shadowBlur = 15;
-            ctxBack.shadowColor = this.color;
-            ctxBack.fillStyle = this.color;
-            ctxBack.arc(this.x, this.y, this.radius, 0, 2 * Math.PI);
-            ctxBack.fill();
-            ctxBack.restore();
-          }
-        }
-        
-        let orbs = [];
-        function initOrbs() {
-          orbs = [];
-          for (let i = 0; i < 40; i++) {
-            orbs.push(new GlowingOrb());
-          }
-        }
-        
-        function animateOrbs() {
-          ctxBack.clearRect(0, 0, canvasBack.width, canvasBack.height);
-          orbs.forEach(orb => {
-            orb.update();
-            orb.draw();
-          });
-          requestAnimationFrame(animateOrbs);
-        }
-    
-        // Initialize for Hebrew by default
-        const firstHeCat = document.querySelector('#content-he header nav a').getAttribute('data-category');
-        initCategorySwitching('he', firstHeCat);
-        initHamburger('he');
-        
-        // Prepare English but keep it hidden
-        const firstEnCat = document.querySelector('#content-en header nav a').getAttribute('data-category');
-        initCategorySwitching('en', firstEnCat);
-        initHamburger('en');
 
-        // Init shared components
-        initSubNav();
-        createCharts();
+<body>
+    <canvas id="orb-canvas-back" class="orb-canvas"></canvas>
+
+    <header>
+        <div class="flex items-center gap-4">
+            <button class="hamburger" id="hamburger-btn" aria-label="Menu">
+                <span></span><span></span><span></span>
+            </button>
+            <h1 class="header-title" id="header-title-text">
+                <span data-lang="he" class="visible-lang">PsychoFlash</span>
+                <span data-lang="en">PsychoFlash</span>
+            </h1>
+        </div>
         
-        // Init background effects
-        resizeCanvas();
-        initOrbs();
-        animateOrbs();
-        window.addEventListener('resize', () => {
-            resizeCanvas();
-            initOrbs();
-        });
+        <nav id="desktop-nav">
+            <div class="language-toggle">
+                <span id="btn-he" class="lang-btn active-lang">🇮🇱</span>
+                <span id="btn-en" class="lang-btn">🇺🇸</span>
+            </div>
+            <a href="#home" class="nav-link active">
+                <span data-lang="he" class="visible-lang">ראשי</span>
+                <span data-lang="en">Home</span>
+            </a>
+            <a href="#process" class="nav-link">
+                <span data-lang="he" class="visible-lang">התהליך שלנו</span>
+                <span data-lang="en">Our Process</span>
+            </a>
+            <a href="#services" class="nav-link">
+                <span data-lang="he" class="visible-lang">שירותים</span>
+                <span data-lang="en">Services</span>
+            </a>
+            <a href="#clients" class="nav-link">
+                <span data-lang="he" class="visible-lang">לקוחות</span>
+                <span data-lang="en">Clients</span>
+            </a>
+            <a href="#projects" class="nav-link">
+                <span data-lang="he" class="visible-lang">פרויקטים</span>
+                <span data-lang="en">Projects</span>
+            </a>
+            <a href="#pricing" class="nav-link">
+                <span data-lang="he" class="visible-lang">תעריפים</span>
+                <span data-lang="en">Pricing</span>
+            </a>
+            <a href="#contact" class="nav-link">
+                <span data-lang="he" class="visible-lang">צרו קשר</span>
+                <span data-lang="en">Contact</span>
+            </a>
+        </nav>
+    </header>
+    
+    <div class="offcanvas-menu" id="offcanvas-menu">
+        <a href="#home" class="nav-link">
+            <span data-lang="he" class="visible-lang">ראשי</span>
+            <span data-lang="en">Home</span>
+        </a>
+        <a href="#process" class="nav-link">
+            <span data-lang="he" class="visible-lang">התהליך שלנו</span>
+            <span data-lang="en">Our Process</span>
+        </a>
+        <a href="#services" class="nav-link">
+            <span data-lang="he" class="visible-lang">שירותים</span>
+            <span data-lang="en">Services</span>
+        </a>
+        <a href="#clients" class="nav-link">
+            <span data-lang="he" class="visible-lang">לקוחות</span>
+            <span data-lang="en">Clients</span>
+        </a>
+        <a href="#projects" class="nav-link">
+            <span data-lang="he" class="visible-lang">פרויקטים</span>
+            <span data-lang="en">Projects</span>
+        </a>
+        <a href="#pricing" class="nav-link">
+            <span data-lang="he" class="visible-lang">תעריפים</span>
+            <span data-lang="en">Pricing</span>
+        </a>
+        <a href="#contact" class="nav-link">
+            <span data-lang="he" class="visible-lang">צרו קשר</span>
+            <span data-lang="en">Contact</span>
+        </a>
+    </div>
+
+    <main>
+        <!-- Home Section -->
+        <section id="home" class="content-section" data-title-he="ראשי" data-title-en="Home">
+            <div class="text-center max-w-4xl mx-auto">
+                <h1 class="hero-title">
+                    <span data-lang="he" class="visible-lang">השילוב המושלם בין <span class="text-transparent bg-clip-text bg-gradient-to-r from-purple-600 to-pink-600">ביצוע טכני</span> לחדשנות יצירתית</span>
+                    <span data-lang="en">The Perfect Blend of <span class="text-transparent bg-clip-text bg-gradient-to-r from-purple-600 to-pink-600">Technical Execution</span> & Creative Innovation</span>
+                </h1>
+                <p class="mt-4 text-lg md:text-xl text-slate-600">
+                    <span data-lang="he" class="visible-lang">מהפקות וידאו ושידורים חיים ועד פיתוח פתרונות תוכנה ו-AI, אנחנו כאן כדי להפוך את החזון שלכם למציאות מרשימה, חלקה ונטולת תקלות.</span>
+                    <span data-lang="en">From video productions and live streams to custom software and AI solutions, we're here to turn your vision into an impressive, smooth, and flawless reality.</span>
+                </p>
+            </div>
+            <div class="section-container mt-12">
+                <h2 class="text-2xl md:text-3xl">
+                    <span data-lang="he" class="visible-lang">האסטרטגיה שלנו: לגשר בין ביצוע לחדשנות</span>
+                    <span data-lang="en">Our Strategy: Bridging Execution and Innovation</span>
+                </h2>
+                <p class="text-center max-w-3xl mx-auto">
+                    <span data-lang="he" class="visible-lang">העולם המקצועי שלנו מורכב משני חלקים המשלימים זה את זה. האסטרטגיה שלנו היא להשתמש בניסיון התפעולי כדי להבין לעומק את הצרכים שלכם, וליישם את היכולות הטכנולוגיות כדי לתת להם את הפתרון הטוב ביותר, היעיל ביותר והמרשים ביותר.</span>
+                    <span data-lang="en">Our professional world is composed of two complementary parts. Our strategy is to use our operational experience to deeply understand your needs, and apply our technological capabilities to provide the best, most efficient, and most impressive solution.</span>
+                </p>
+                <div class="grid md:grid-cols-2 gap-8 mt-8">
+                    <div class="text-center p-4">
+                        <i class="fas fa-cogs fa-3x text-purple-500 mb-4"></i>
+                        <h3 class="m-0 text-xl font-bold">
+                            <span data-lang="he" class="visible-lang">ה"תכל'ס" - הביצוע האמין</span>
+                            <span data-lang="en">The "Get-it-Done" - Reliable Execution</span>
+                        </h3>
+                        <p class="mt-2">
+                            <span data-lang="he" class="visible-lang">שנים של ניסיון בתפעול טכני מדויק, ניהול שידורים והקמות מקצועיות. זהו הבסיס היציב והאמין שמאפשר לכל הפקה לרוץ חלק, והסיבה שלקוחותינו סומכים עלינו פעם אחר פעם.</span>
+                            <span data-lang="en">Years of experience in precise technical operation and professional setups. This is the stable, reliable foundation that allows every production to run smoothly, and why our clients trust us time and again.</span>
+                        </p>
+                    </div>
+                    <div class="text-center p-4">
+                        <i class="fas fa-lightbulb fa-3x text-pink-500 mb-4"></i>
+                        <h3 class="m-0 text-xl font-bold">
+                            <span data-lang="he" class="visible-lang">"ארגז הכלים" - הפתרון היצירתי</span>
+                            <span data-lang="en">The "Toolbox" - The Creative Solution</span>
+                        </h3>
+                        <p class="mt-2">
+                            <span data-lang="he" class="visible-lang">מאגר רחב של יכולות טכנולוגיות ויצירתיות, כולל פיתוח, גרפיקה מתקדמת, אוטומציה ופתרונות AI. זהו הערך המוסף שמקפיץ כל הפקה והופך אותה לייחודית ומרשימה.</span>
+                            <span data-lang="en">A broad repository of technological and creative capabilities, including development, advanced graphics, automation, and AI solutions. This is the added value that elevates any production, making it unique and impressive.</span>
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Our Process Section -->
+        <section id="process" class="content-section" data-title-he="התהליך שלנו" data-title-en="Our Process">
+            <div class="section-container infographic-process-wrapper">
+                <h2 class="section-title">
+                    <span data-lang="he" class="visible-lang">התהליך שלנו: מאסטרטגיה לתוצאה</span>
+                    <span data-lang="en">Our Process: From Strategy to Result</span>
+                </h2>
+                <p class="text-center max-w-3xl mx-auto">
+                    <span data-lang="he" class="visible-lang">אנו מאמינים שהפקה מוצלחת היא מסע מובנה. כל פרויקט, גדול כקטן, עובר דרך ארבעה שלבים מרכזיים המבטיחים איכות, יעילות ועמידה ביעדים. לחצו על כל שלב כדי ללמוד עוד.</span>
+                    <span data-lang="en">We believe a successful production is a structured journey. Every project, large or small, goes through four key phases that ensure quality, efficiency, and goal achievement. Click on each phase to learn more.</span>
+                </p>
+                <div class="timeline-container">
+                    <div class="timeline-line"><div class="timeline-line-progress"></div></div>
+                    <div class="phase-node" data-phase="phase1">
+                        <div class="phase-icon-wrapper"><svg xmlns="http://www.w3.org/2000/svg" class="infographic-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 21h-9a2 2 0 0 1 -2 -2v-12a2 2 0 0 1 2 -2h4"/><path d="M18 18m-3 0a3 3 0 1 0 6 0a3 3 0 1 0 -6 0" /><path d="M20.2 20.2l1.8 1.8" /><path d="M11 7h4"/><path d="M9 11h2"/><path d="M9 15h4"/></svg></div>
+                        <h4>
+                            <span data-lang="he" class="visible-lang">I. אסטרטגיה ותכנון</span>
+                            <span data-lang="en">I. Strategy & Plan</span>
+                        </h4>
+                    </div>
+                    <div class="phase-node" data-phase="phase2">
+                        <div class="phase-icon-wrapper"><svg xmlns="http://www.w3.org/2000/svg" class="infographic-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 10l4.553 -2.276a1 1 0 0 1 1.447.894v6.764a1 1 0 0 1 -1.447.894l-4.553 -2.276v-4z" /><rect x="3" y="6" width="12" height="12" rx="2" /></svg></div>
+                        <h4>
+                            <span data-lang="he" class="visible-lang">II. הפקה ותפעול</span>
+                            <span data-lang="en">II. Production</span>
+                        </h4>
+                    </div>
+                    <div class="phase-node" data-phase="phase3">
+                        <div class="phase-icon-wrapper"><svg xmlns="http://www.w3.org/2000/svg" class="infographic-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 6v12" /><path d="M6 6v12" /><path d="M12 18h-4a2 2 0 0 1 -2 -2v-8a2 2 0 0 1 2 -2h4" /><path d="M12 6h4a2 2 0 0 1 2 2v8a2 2 0 0 1 -2 2h-4" /><path d="M7 12l-4 4" /><path d="M7 12l-4 -4" /><path d="M17 12l4 4" /><path d="M17 12l4 -4" /></svg></div>
+                        <h4>
+                            <span data-lang="he" class="visible-lang">III. פוסט והעשרה</span>
+                            <span data-lang="en">III. Post-Production</span>
+                        </h4>
+                    </div>
+                    <div class="phase-node" data-phase="phase4">
+                        <div class="phase-icon-wrapper"><svg xmlns="http://www.w3.org/2000/svg" class="infographic-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 12m-1 0a1 1 0 1 0 2 0a1 1 0 1 0 -2 0" /><path d="M15.51 15.56a5 5 0 1 0 -7.02 0" /><path d="M18.832 18.88a9 9 0 1 0 -13.664 0" /><path d="M12 4v8" /></svg></div>
+                        <h4>
+                            <span data-lang="he" class="visible-lang">IV. הפצה וניתוח</span>
+                            <span data-lang="en">IV. Delivery & Analysis</span>
+                        </h4>
+                    </div>
+                </div>
+                <div class="phase-details-container">
+                    <div id="phase1" class="phase-details">
+                        <span data-lang="he" class="visible-lang"><h5>שלב I: אסטרטגיה ותכנון (השרטוט)</h5><p>זהו היסוד של כל פרויקט מוצלח. בשלב זה אנו מגדירים את המטרות, מבינים את הקהל, בונים תקציב ומפתחים את הקונספט הקריאייטיבי.</p><ul><li>ייעוץ טכנולוגי ובחירת פלטפורמות</li><li>תכנון ותקצוב הפקה</li><li>תחקיר ועריכת תוכן</li></ul></span>
+                        <span data-lang="en"><h5>Phase I: Strategy & Pre-Production (The Blueprint)</h5><p>This is the foundation of every successful project. In this stage, we define goals, understand the audience, build a budget, and develop the creative concept.</p><ul><li>Technology consulting and platform selection</li><li>Production planning and budgeting</li><li>Research and content editing</li></ul></span>
+                    </div>
+                    <div id="phase2" class="phase-details">
+                        <span data-lang="he" class="visible-lang"><h5>שלב II: הפקה ותפעול (הביצוע)</h5><p>בשלב זה, התוכנית הופכת למציאות. אנו מנהלים את כל ההיבטים הטכניים והלוגיסטיים של יום הצילום או השידור החי, ומבטיחים ביצוע חלק, מקצועי ויעיל.</p><ul><li>ניהול שידורים חיים (VMIX, Zoom)</li><li>ניתוב ובימוי מצלמות</li><li>הפעלת טלפרומפטר</li></ul></span>
+                        <span data-lang="en"><h5>Phase II: Production & Operation (The Execution)</h5><p>In this phase, the plan becomes reality. We manage all technical and logistical aspects of the shoot day or live broadcast, ensuring a smooth, professional, and efficient execution.</p><ul><li>Live broadcast management (VMIX, Zoom)</li><li>Camera switching and directing</li><li>Teleprompter operation</li></ul></span>
+                    </div>
+                    <div id="phase3" class="phase-details">
+                        <span data-lang="he" class="visible-lang"><h5>שלב III: פוסט-פרודקשן והעשרה (הליטוש)</h5><p>כאן הקסם האמיתי קורה. אנו לוקחים את חומרי הגלם ומשדרגים אותם באמצעות עריכה, עיצוב גרפי, אנימציה, וטכנולוגיות מתקדמות.</p><ul><li>עריכת וידאו</li><li>גרפיקה ואנימציה לשידור</li><li>שילוב פתרונות AI</li></ul></span>
+                        <span data-lang="en"><h5>Phase III: Post-Production & Enhancement (The Polish)</h5><p>This is where the real magic happens. We take the raw materials and elevate them through editing, graphic design, animation, and advanced technologies.</p><ul><li>Video editing</li><li>Broadcast graphics and animation</li><li>Integration of AI solutions</li></ul></span>
+                    </div>
+                    <div id="phase4" class="phase-details">
+                         <span data-lang="he" class="visible-lang"><h5>שלב IV: הפצה וניתוח (ההשקה והלמידה)</h5><p>הפקה מעולה צריכה להגיע לקהל הנכון ולהשיג את יעדיה. אנו מסייעים בהפצת התוכן בערוצים המתאימים, ומספקים כלים לניתוח ביצועים.</p><ul><li>ניהול הפצה במדיות דיגיטליות</li><li>בניית דפי נחיתה ונגנים מותאמים</li><li>ניתוח נתונים ומשוב</li></ul></span>
+                         <span data-lang="en"><h5>Phase IV: Delivery & Analysis (The Launch & Learn)</h5><p>Excellent production needs to reach the right audience and achieve its goals. We assist in distributing the content on the appropriate channels and provide tools for performance analysis.</p><ul><li>Digital media distribution management</li><li>Building custom landing pages and players</li><li>Data analysis and feedback</li></ul></span>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Services Section -->
+        <section id="services" class="content-section" data-title-he="שירותים" data-title-en="Services">
+            <div class="section-container">
+                <h2 class="section-title">
+                    <span data-lang="he" class="visible-lang">שירותים</span>
+                    <span data-lang="en">Our Services</span>
+                </h2>
+                <div>
+                    <h3>
+                        <span data-lang="he" class="visible-lang">שירותי ליבה (ה"תכל'ס")</span>
+                        <span data-lang="en">Core Services (The "Get-it-Done")</span>
+                    </h3>
+                    <div class="info-cards">
+                        <div class="info-card"><h4><i class="fas fa-sliders-h"></i><span data-lang="he" class="visible-lang">תפעול טכני מקיף</span><span data-lang="en">Comprehensive Technical Operation</span></h4></div>
+                        <div class="info-card"><h4><i class="fas fa-broadcast-tower"></i><span data-lang="he" class="visible-lang">ניהול שידורים וירטואליים</span><span data-lang="en">Virtual Broadcast Management</span></h4></div>
+                        <div class="info-card"><h4><i class="fas fa-desktop"></i><span data-lang="he" class="visible-lang">הפעלת טלפרומפטר</span><span data-lang="en">Teleprompter Operation</span></h4></div>
+                    </div>
+                </div>
+                <div class="mt-12">
+                    <h3>
+                        <span data-lang="he" class="visible-lang">מנועי צמיחה ("ארגז הכלים")</span>
+                        <span data-lang="en">Growth Engines (The "Toolbox")</span>
+                    </h3>
+                    <div class="info-cards">
+                        <div class="info-card"><h4><i class="fas fa-palette"></i><span data-lang="he" class="visible-lang">גרפיקה ואנימציה לשידור</span><span data-lang="en">Live Graphics & Animation</span></h4></div>
+                        <div class="info-card"><h4><i class="fas fa-brain"></i><span data-lang="he" class="visible-lang">פתרונות מבוססי AI</span><span data-lang="en">AI-Based Solutions</span></h4></div>
+                        <div class="info-card"><h4><i class="fas fa-code"></i><span data-lang="he" class="visible-lang">פיתוח כלי תוכנה ייעודיים</span><span data-lang="en">Custom Software Tools</span></h4></div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Clients Section -->
+        <section id="clients" class="content-section" data-title-he="לקוחות" data-title-en="Clients">
+            <div class="section-container">
+                <h2 class="section-title">
+                    <span data-lang="he" class="visible-lang">האמון של הלקוחות שלנו</span>
+                    <span data-lang="en">Trusted by Our Clients</span>
+                </h2>
+                 <p class="text-center max-w-3xl mx-auto">
+                    <span data-lang="he" class="visible-lang">אנו גאים לעבוד עם מגוון רחב של לקוחות מובילים, המספקים לנו אתגרים חדשים ומאפשרים לנו למתוח את גבולות היצירתיות והטכנולוגיה.</span>
+                    <span data-lang="en">We are proud to work with a wide range of leading clients, who provide us with new challenges and allow us to push the boundaries of creativity and technology.</span>
+                </p>
+                <div class="clients-grid mt-10">
+                    <div class="client-card">
+                        <img src="https://placehold.co/150x60/003f5c/ffffff?text=Client+Logo" alt="Client Logo" class="client-logo">
+                        <h4><span data-lang="he" class="visible-lang">שם לקוח 1</span><span data-lang="en">Client Name 1</span></h4>
+                        <p><span data-lang="he" class="visible-lang">ניהול טכני מלא לשידורים חיים, הפעלת VMIX ופרומפטר.</span><span data-lang="en">Full technical management for live broadcasts, VMIX and teleprompter operation.</span></p>
+                    </div>
+                    <div class="client-card">
+                        <img src="https://placehold.co/150x60/7a5195/ffffff?text=Client+Logo" alt="Client Logo" class="client-logo">
+                        <h4><span data-lang="he" class="visible-lang">שם לקוח 2</span><span data-lang="en">Client Name 2</span></h4>
+                        <p><span data-lang="he" class="visible-lang">תפעול כנסים ואירועי חברה, ניהול צוות טכני.</span><span data-lang="en">Conference and corporate event operations, technical team management.</span></p>
+                    </div>
+                     <div class="client-card">
+                        <img src="https://placehold.co/150x60/ef5675/ffffff?text=Client+Logo" alt="Client Logo" class="client-logo">
+                        <h4><span data-lang="he" class="visible-lang">שם לקוח 3</span><span data-lang="en">Client Name 3</span></h4>
+                        <p><span data-lang="he" class="visible-lang">פיתוח פתרונות תוכנה ו-AI לייעול הפקות.</span><span data-lang="en">Development of software and AI solutions for production optimization.</span></p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Projects Section -->
+        <section id="projects" class="content-section" data-title-he="פרויקטים" data-title-en="Projects">
+            <div class="section-container">
+                <h2 class="section-title">
+                    <span data-lang="he" class="visible-lang">פרויקטים נבחרים</span>
+                    <span data-lang="en">Featured Projects</span>
+                </h2>
+                <div class="projects-grid">
+                    <!-- Repeat this block for each project -->
+                    <div class="gallery-card">
+                        <img src="https://placehold.co/400x250/003f5c/ffffff?text=Live+Broadcast" alt="Project">
+                        <div class="gallery-card-content">
+                            <h4><span data-lang="he" class="visible-lang">שידורים חיים מורכבים</span><span data-lang="en">Complex Live Broadcasts</span></h4>
+                            <p><span data-lang="he" class="visible-lang">ניהול שידורים עבור לקוחות מובילים.</span><span data-lang="en">Managing broadcasts for leading clients.</span></p>
+                        </div>
+                    </div>
+                    <div class="gallery-card">
+                        <img src="https://placehold.co/400x250/7a5195/ffffff?text=Corporate+Event" alt="Project">
+                        <div class="gallery-card-content">
+                            <h4><span data-lang="he" class="visible-lang">אירועי חברה וכנסים</span><span data-lang="en">Corporate Events</span></h4>
+                            <p><span data-lang="he" class="visible-lang">תפעול טכני לאירועים של חברות מובילות.</span><span data-lang="en">Technical operations for major companies.</span></p>
+                        </div>
+                    </div>
+                    <div class="gallery-card">
+                        <img src="https://placehold.co/400x250/ef5675/ffffff?text=Software" alt="Project">
+                        <div class="gallery-card-content">
+                            <h4><span data-lang="he" class="visible-lang">פיתוח פתרונות תוכנה</span><span data-lang="en">Software Solutions</span></h4>
+                            <p><span data-lang="he" class="visible-lang">בניית מערכות ייעודיות לשידור חי.</span><span data-lang="en">Building custom systems for live streaming.</span></p>
+                        </div>
+                    </div>
+                    <div class="gallery-card">
+                        <img src="https://placehold.co/400x250/ffa600/ffffff?text=AI+Integration" alt="Project">
+                        <div class="gallery-card-content">
+                            <h4><span data-lang="he" class="visible-lang">שילוב AI בהפקה</span><span data-lang="en">AI in Production</span></h4>
+                             <p><span data-lang="he" class="visible-lang">שימוש בכלי AI לייעול ושיפור.</span><span data-lang="en">Using AI tools for optimization.</span></p>
+                        </div>
+                    </div>
+                     <div class="gallery-card">
+                        <img src="https://placehold.co/400x250/2a9d8f/ffffff?text=Virtual+Studio" alt="Project">
+                        <div class="gallery-card-content">
+                            <h4><span data-lang="he" class="visible-lang">אולפנים וירטואליים</span><span data-lang="en">Virtual Studios</span></h4>
+                            <p><span data-lang="he" class="visible-lang">הקמה ותפעול של אולפנים וירטואליים.</span><span data-lang="en">Setup and operation of virtual studios.</span></p>
+                        </div>
+                    </div>
+                     <div class="gallery-card">
+                        <img src="https://placehold.co/400x250/e76f51/ffffff?text=Consulting" alt="Project">
+                        <div class="gallery-card-content">
+                            <h4><span data-lang="he" class="visible-lang">ייעוץ טכנולוגי</span><span data-lang="en">Tech Consulting</span></h4>
+                           <p><span data-lang="he" class="visible-lang">ליווי חברות הפקה ושדרוג מערכים.</span><span data-lang="en">Guiding production companies and upgrading systems.</span></p>
+                        </div>
+                    </div>
+                    <!-- End project block -->
+                </div>
+            </div>
+        </section>
+
+        <!-- Pricing Section -->
+        <section id="pricing" class="content-section" data-title-he="תעריפים" data-title-en="Pricing">
+            <div class="section-container">
+                <h2 class="section-title">
+                    <span data-lang="he" class="visible-lang">תעריפים ופתרונות</span>
+                    <span data-lang="en">Pricing & Solutions</span>
+                </h2>
+                 <p class="text-center max-w-3xl mx-auto">
+                    <span data-lang="he" class="visible-lang">אנו מציעים מגוון פתרונות המותאמים לצרכים ולתקציב שלכם. בחרו את החבילה המתאימה או צרו קשר להתאמה אישית.</span>
+                    <span data-lang="en">We offer a variety of solutions tailored to your needs and budget. Choose the right package for you or contact us for a custom quote.</span>
+                </p>
+                <div class="pricing-grid">
+                    <!-- Pricing Card 1 -->
+                    <div class="pricing-card">
+                        <h3>
+                            <span data-lang="he" class="visible-lang">חבילת תפעול</span>
+                            <span data-lang="en">Operator Package</span>
+                        </h3>
+                        <p class="text-slate-500">
+                            <span data-lang="he" class="visible-lang">לאירועים ושידורים נקודתיים</span>
+                            <span data-lang="en">For single events & broadcasts</span>
+                        </p>
+                        <div class="price">
+                           <span data-lang="he" class="visible-lang">החל מ-₪1,800</span>
+                           <span data-lang="en">Starts at $500</span>
+                           <span class="term" data-lang="he"> / ליום הפקה</span>
+                           <span class="term" data-lang="en"> / per day</span>
+                        </div>
+                        <ul>
+                            <li><i class="fas fa-check-circle"></i><span data-lang="he" class="visible-lang">תפעול טכני מלא</span><span data-lang="en">Full Technical Operation</span></li>
+                            <li><i class="fas fa-check-circle"></i><span data-lang="he" class="visible-lang">ניהול שידור (Zoom/VMIX)</span><span data-lang="en">Broadcast Management (Zoom/VMIX)</span></li>
+                            <li><i class="fas fa-check-circle"></i><span data-lang="he" class="visible-lang">תמיכה טכנית</span><span data-lang="en">On-site Technical Support</span></li>
+                        </ul>
+                        <a href="#contact" class="cta-btn"><span data-lang="he" class="visible-lang">התחל כאן</span><span data-lang="en">Get Started</span></a>
+                    </div>
+                    <!-- Pricing Card 2 (Featured) -->
+                    <div class="pricing-card featured">
+                        <h3>
+                             <span data-lang="he" class="visible-lang">חבילת הפקה פלוס</span>
+                            <span data-lang="en">Production+ Package</span>
+                        </h3>
+                        <p class="text-slate-500">
+                             <span data-lang="he" class="visible-lang">לפרויקטים הדורשים ערך מוסף</span>
+                            <span data-lang="en">For projects needing added value</span>
+                        </p>
+                        <div class="price">
+                           <span data-lang="he" class="visible-lang">מותאם אישית</span>
+                           <span data-lang="en">Custom Quote</span>
+                        </div>
+                         <ul>
+                            <li><i class="fas fa-check-circle"></i><span data-lang="he" class="visible-lang"><b>כל מה שבחבילת תפעול</b></span><span data-lang="en"><b>Everything in Operator Package</b></span></li>
+                            <li><i class="fas fa-check-circle"></i><span data-lang="he" class="visible-lang">גרפיקה ואנימציה לשידור</span><span data-lang="en">Broadcast Graphics & Animation</span></li>
+                            <li><i class="fas fa-check-circle"></i><span data-lang="he" class="visible-lang">ייעוץ קריאייטיב וטכני</span><span data-lang="en">Creative & Technical Consulting</span></li>
+                            <li><i class="fas fa-check-circle"></i><span data-lang="he" class="visible-lang">ניהול פרויקט</span><span data-lang="en">Project Management</span></li>
+                        </ul>
+                         <a href="#contact" class="cta-btn"><span data-lang="he" class="visible-lang">צרו קשר</span><span data-lang="en">Contact Us</span></a>
+                    </div>
+                    <!-- Pricing Card 3 -->
+                    <div class="pricing-card">
+                         <h3>
+                             <span data-lang="he" class="visible-lang">חבילת ריטיינר</span>
+                            <span data-lang="en">Retainer Package</span>
+                        </h3>
+                         <p class="text-slate-500">
+                             <span data-lang="he" class="visible-lang">שותפות ארוכת טווח</span>
+                            <span data-lang="en">For long-term partnership</span>
+                        </p>
+                        <div class="price">
+                           <span data-lang="he" class="visible-lang">תמחור חודשי</span>
+                           <span data-lang="en">Monthly</span>
+                        </div>
+                         <ul>
+                             <li><i class="fas fa-check-circle"></i><span data-lang="he" class="visible-lang">שירותים מקיפים לפי דרישה</span><span data-lang="en">Comprehensive On-Demand Services</span></li>
+                            <li><i class="fas fa-check-circle"></i><span data-lang="he" class="visible-lang">פיתוח פתרונות AI ותוכנה</span><span data-lang="en">AI & Software Solution Development</span></li>
+                             <li><i class="fas fa-check-circle"></i><span data-lang="he" class="visible-lang">תמיכה וייעוץ שוטף</span><span data-lang="en">Ongoing Support & Consulting</span></li>
+                        </ul>
+                         <a href="#contact" class="cta-btn"><span data-lang="he" class="visible-lang">לפרטים נוספים</span><span data-lang="en">Learn More</span></a>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Contact Section -->
+        <section id="contact" class="content-section" data-title-he="צרו קשר" data-title-en="Contact">
+             <div class="section-container text-center">
+                <h2 class="section-title">
+                    <span data-lang="he" class="visible-lang">בואו נדבר על ההפקה הבאה שלכם</span>
+                    <span data-lang="en">Let's Talk About Your Next Production</span>
+                </h2>
+                <p>
+                    <span data-lang="he" class="visible-lang">מוכנים לשמוע על האתגרים שלכם ולהציע פתרונות שישדרגו לכם את האירוע.</span>
+                    <span data-lang="en">Ready to hear about your challenges and offer solutions that will elevate your event.</span>
+                </p>
+                <div class="mt-6 text-lg">
+                    <p><strong>Orian Edleni</strong></p>
+                    <p>
+                        <strong data-lang="he" class="visible-lang">טלפון: </strong>
+                        <strong data-lang="en">Phone: </strong>
+                        <a href="tel:054-255-9027">054-255-9027</a>
+                    </p>
+                    <p>
+                        <strong data-lang="he" class="visible-lang">אימייל: </strong>
+                        <strong data-lang="en">Email: </strong>
+                        <a href="mailto:EdelenviProductions@gmail.com">EdelenviProductions@gmail.com</a>
+                    </p>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer>
+        <div class="footer-content">
+            <p>&copy; 2025 PsychoFlash Productions. All rights reserved.</p>
+             <p>
+                <span data-lang="he" class="visible-lang">נבנה ועוצב על ידי אוריין אדלני בסיוע Gemini</span>
+                <span data-lang="en">Built & Designed by Orian Edleni with assistance from Gemini</span>
+            </p>
+        </div>
+    </footer>
+
+    <script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const app = {
+            state: {
+                lang: 'he',
+                activePhaseNode: null,
+                infographicObserver: null,
+                headerTitleObserver: null,
+                currentTitle: '',
+            },
+            
+            init() {
+                this.cacheDOM();
+                this.bindEvents();
+                this.setLanguage(this.state.lang, true);
+                this.setupOrbAnimation();
+                this.setupHeaderTitleObserver();
+                this.setupInfographicAnimation();
+            },
+
+            cacheDOM() {
+                this.dom = {
+                    html: document.documentElement,
+                    header: document.querySelector('header'),
+                    headerTitle: document.getElementById('header-title-text'),
+                    navLinks: document.querySelectorAll('.nav-link'),
+                    hamburgerBtn: document.getElementById('hamburger-btn'),
+                    offcanvasMenu: document.getElementById('offcanvas-menu'),
+                    langBtns: {
+                        he: document.getElementById('btn-he'),
+                        en: document.getElementById('btn-en'),
+                    },
+                    canvasBack: document.getElementById('orb-canvas-back'),
+                    processInfographic: document.querySelector('.infographic-process-wrapper'),
+                    sections: document.querySelectorAll('.content-section'),
+                };
+            },
+
+            bindEvents() {
+                // Language Switching
+                this.dom.langBtns.he.addEventListener('click', () => this.setLanguage('he'));
+                this.dom.langBtns.en.addEventListener('click', () => this.setLanguage('en'));
+
+                // Navigation
+                this.dom.navLinks.forEach(link => {
+                    link.addEventListener('click', (e) => {
+                        e.preventDefault();
+                        const targetId = link.getAttribute('href');
+                        const targetElement = document.querySelector(targetId);
+                        if (targetElement) {
+                           const offset = this.dom.header.offsetHeight;
+                           const bodyRect = document.body.getBoundingClientRect().top;
+                           const elementRect = targetElement.getBoundingClientRect().top;
+                           const elementPosition = elementRect - bodyRect;
+                           const offsetPosition = elementPosition - offset;
+
+                           window.scrollTo({
+                               top: offsetPosition,
+                               behavior: 'smooth'
+                           });
+                        }
+                        this.dom.offcanvasMenu.classList.remove('active');
+                    });
+                });
+                
+                // Hamburger Menu
+                this.dom.hamburgerBtn.addEventListener('click', () => {
+                    this.dom.offcanvasMenu.classList.toggle('active');
+                });
+
+                // Infographic phase toggling
+                document.body.addEventListener('click', (e) => {
+                    const phaseNode = e.target.closest('.phase-node');
+                    if (phaseNode) {
+                        this.togglePhaseDetails(phaseNode);
+                    }
+                });
+
+                window.addEventListener('resize', this.resizeCanvas.bind(this));
+            },
+
+            setLanguage(lang, isInitial = false) {
+                this.state.lang = lang;
+                this.dom.html.lang = lang;
+                this.dom.html.dir = lang === 'he' ? 'rtl' : 'ltr';
+
+                // Toggle active class on buttons
+                this.dom.langBtns.he.classList.toggle('active-lang', lang === 'he');
+                this.dom.langBtns.en.classList.toggle('active-lang', lang === 'en');
+                
+                // Show/hide language-specific content
+                document.querySelectorAll('[data-lang]').forEach(el => {
+                    el.classList.toggle('visible-lang', el.dataset.lang === lang);
+                });
+
+                if (!isInitial) {
+                    this.updateHeaderTitle(this.state.currentTitle);
+                }
+            },
+            
+            setupHeaderTitleObserver() {
+                const observerOptions = {
+                    root: null,
+                    rootMargin: `-${this.dom.header.offsetHeight}px 0px -75% 0px`,
+                    threshold: 0
+                };
+
+                this.state.headerTitleObserver = new IntersectionObserver((entries) => {
+                    entries.forEach(entry => {
+                        if (entry.isIntersecting) {
+                            const sectionId = entry.target.id;
+                            this.state.currentTitle = sectionId;
+                            
+                            // Update header title
+                            this.updateHeaderTitle(sectionId);
+
+                            // Update active nav link
+                            this.dom.navLinks.forEach(link => {
+                                link.classList.toggle('active', link.getAttribute('href') === `#${sectionId}`);
+                            });
+                        }
+                    });
+                }, observerOptions);
+
+                this.dom.sections.forEach(section => {
+                    this.state.headerTitleObserver.observe(section);
+                });
+            },
+
+            updateHeaderTitle(sectionId) {
+                const section = document.getElementById(sectionId);
+                if (!section) return;
+
+                const titleHe = section.dataset.titleHe || 'PsychoFlash';
+                const titleEn = section.dataset.titleEn || 'PsychoFlash';
+
+                const newTitle = this.state.lang === 'he' ? titleHe : titleEn;
+                const isHomePage = sectionId === 'home';
+
+                this.dom.headerTitle.classList.toggle('hidden-title', isHomePage);
+                this.dom.headerTitle.querySelector('[data-lang="he"]').textContent = titleHe;
+                this.dom.headerTitle.querySelector('[data-lang="en"]').textContent = titleEn;
+            },
+
+            setupInfographicAnimation() {
+                const timeline = this.dom.processInfographic.querySelector('.timeline-container');
+                if (!timeline) return;
+
+                const progressLine = timeline.querySelector('.timeline-line-progress');
+                const nodes = timeline.querySelectorAll('.phase-node');
+                const isVertical = window.innerWidth <= 768;
+
+                this.state.infographicObserver = new IntersectionObserver((entries) => {
+                    if (entries[0].isIntersecting) {
+                        if (isVertical) {
+                            progressLine.style.height = '100%';
+                        } else {
+                            progressLine.style.width = '100%';
+                        }
+                        nodes.forEach((node, index) => {
+                            setTimeout(() => node.classList.add('visible'), index * 200);
+                        });
+                        this.state.infographicObserver.disconnect();
+                    }
+                }, { threshold: 0.5 });
+
+                this.state.infographicObserver.observe(timeline);
+            },
+
+            togglePhaseDetails(phaseNode) {
+                const phaseId = phaseNode.dataset.phase;
+                const detailPanel = document.getElementById(phaseId);
+                if (!detailPanel) return;
+
+                const isActive = phaseNode.classList.contains('active');
+
+                if (this.state.activePhaseNode && this.state.activePhaseNode !== phaseNode) {
+                    this.state.activePhaseNode.classList.remove('active');
+                    const oldDetailPanel = document.getElementById(this.state.activePhaseNode.dataset.phase);
+                    $(oldDetailPanel).slideUp();
+                }
+
+                if (isActive) {
+                    phaseNode.classList.remove('active');
+                    $(detailPanel).slideUp();
+                    this.state.activePhaseNode = null;
+                } else {
+                    phaseNode.classList.add('active');
+                    $(detailPanel).slideDown();
+                    this.state.activePhaseNode = phaseNode;
+                }
+            },
+            
+            // --- ORB ANIMATION ---
+            orbs: [],
+            ctxBack: null,
+            setupOrbAnimation() {
+                if (!this.dom.canvasBack) return;
+                this.ctxBack = this.dom.canvasBack.getContext('2d');
+                this.resizeCanvas();
+                this.animateOrbs();
+            },
+            resizeCanvas() {
+                if (!this.dom.canvasBack) return;
+                this.dom.canvasBack.width = window.innerWidth;
+                this.dom.canvasBack.height = window.innerHeight;
+                this.initOrbs();
+            },
+            GlowingOrb: class {
+                 constructor(canvas) {
+                    this.canvas = canvas;
+                    this.x = Math.random() * this.canvas.width;
+                    this.y = Math.random() * this.canvas.height;
+                    this.radius = Math.random() * 4 + 1.5;
+                    this.speedX = (Math.random() - 0.5) * 0.15;
+                    this.speedY = (Math.random() - 0.5) * 0.15;
+                    this.color = `rgba(122, 81, 149, ${Math.random()*0.3 + 0.1})`;
+                 }
+                 update() {
+                     this.x += this.speedX;
+                     this.y += this.speedY;
+                     if (this.x < 0 || this.x > this.canvas.width) this.speedX *= -1;
+                     if (this.y < 0 || this.y > this.canvas.height) this.speedY *= -1;
+                 }
+                 draw(ctx) {
+                     ctx.save();
+                     ctx.beginPath();
+                     ctx.shadowBlur = 10;
+                     ctx.shadowColor = this.color;
+                     ctx.fillStyle = this.color;
+                     ctx.arc(this.x, this.y, this.radius, 0, 2 * Math.PI);
+                     ctx.fill();
+                     ctx.restore();
+                 }
+             },
+            initOrbs() {
+                if (!this.dom.canvasBack) return;
+                this.orbs = [];
+                let numOrbs = window.innerWidth < 768 ? 25 : 50;
+                for (let i = 0; i < numOrbs; i++) {
+                    this.orbs.push(new this.GlowingOrb(this.dom.canvasBack));
+                }
+            },
+            animateOrbs() {
+                if (this.ctxBack) {
+                    this.ctxBack.clearRect(0, 0, this.dom.canvasBack.width, this.dom.canvasBack.height);
+                    this.orbs.forEach(orb => {
+                        orb.update();
+                        orb.draw(this.ctxBack);
+                    });
+                }
+                requestAnimationFrame(this.animateOrbs.bind(this));
+            }
+        };
+
+        app.init();
     });
-  </script>
+    </script>
 </body>
 </html>
