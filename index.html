@@ -54,7 +54,7 @@
             box-shadow: 0 2px 10px rgba(0,0,0,0.05);
             transition: all 0.3s ease;
         }
-        .header-title {
+        .header-title-container {
             position: absolute;
             left: 50%;
             transform: translateX(-50%);
@@ -62,10 +62,6 @@
             font-weight: 700;
             color: var(--primary-dark);
             transition: opacity 0.3s ease, transform 0.3s ease;
-        }
-        .header-title.hidden-title {
-            opacity: 0;
-            transform: translateX(-50%) translateY(-10px);
         }
         header nav { display: none; }
         @media (min-width: 1024px) {
@@ -138,6 +134,32 @@
             display: block; margin-bottom: 1.5rem;
             font-size: 18px; font-weight: 600;
         }
+        #close-menu-btn {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: none;
+            border: none;
+            color: white;
+            font-size: 2rem;
+            cursor: pointer;
+        }
+        [dir="ltr"] #close-menu-btn {
+            right: auto;
+            left: 20px;
+        }
+        .language-toggle-mobile {
+            position: absolute;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 20px;
+        }
+        .language-toggle-mobile .lang-btn {
+            font-size: 1.5rem; /* Make flags bigger */
+        }
+
 
         /* --- Main Content & Sections --- */
         main { padding-top: 70px; }
@@ -201,31 +223,41 @@
             color: var(--primary-dark); margin-bottom: 10px;
             font-size: 1.25rem; font-weight: 700; display: flex; align-items: center; gap: 10px;
         }
+        .info-card p {
+            font-size: 1rem;
+            line-height: 1.6;
+            color: #475569;
+        }
         .info-card i { color: var(--primary-purple); }
 
         /* --- Our Process Infographic --- */
-        .timeline-container { position: relative; display: flex; justify-content: space-between; max-width: 1000px; margin: 40px auto; padding: 0 20px; }
-        .timeline-line { position: absolute; top: 38px; left: 20px; right: 20px; height: 4px; background: #ccc; z-index: -1; }
+        .timeline-container { position: relative; display: flex; justify-content: space-between; max-width: 1000px; margin: 40px auto; padding: 0 10px; }
+        .timeline-line { position: absolute; top: 38px; left: 10px; right: 10px; height: 4px; background: #ccc; z-index: -1; }
         .timeline-line-progress { position: absolute; top: 0; height: 100%; background: var(--primary-purple); width: 0; transition: width 1.5s cubic-bezier(0.25, 1, 0.5, 1); }
-        .phase-node { position: relative; text-align: center; width: 20%; cursor: pointer; opacity: 0; transform: translateY(20px); transition: opacity 0.5s ease, transform 0.5s ease; }
+        .phase-node { position: relative; text-align: center; width: 25%; padding: 0 5px; cursor: pointer; opacity: 0; transform: translateY(20px); transition: opacity 0.5s ease, transform 0.5s ease; }
         .phase-node.visible { opacity: 1; transform: translateY(0); }
         .phase-icon-wrapper { width: 80px; height: 80px; border-radius: 50%; background: #fff; border: 4px solid #ccc; display: flex; align-items: center; justify-content: center; margin: 0 auto 15px; transition: all 0.3s ease; }
         .phase-node.active .phase-icon-wrapper,.phase-node:hover .phase-icon-wrapper { border-color: var(--primary-purple); transform: scale(1.1); box-shadow: 0 0 15px rgba(122, 81, 149, 0.5); }
         .infographic-icon { width: 40px; height: 40px; stroke: #333; transition: stroke 0.3s; }
         .phase-node.active .infographic-icon,.phase-node:hover .infographic-icon { stroke: var(--primary-purple); }
-        .phase-node h4 { font-weight: 700; color: var(--primary-dark); font-size: 1rem; }
+        .phase-node h4 { font-weight: 700; color: var(--primary-dark); font-size: 0.9rem; }
         .phase-details-container { max-width: 1000px; margin: 0 auto; padding: 0 20px; }
         .phase-details { background-color: #f8f9fa; border: 1px solid #e9ecef; border-radius: 8px; padding: 25px; display: none; margin-top: 20px; }
         .phase-details h5 { color: var(--primary-purple); font-weight: 700; margin-bottom: 15px; }
         [dir="rtl"] .phase-details ul { list-style-type: '→ '; padding-right: 20px; }
         [dir="ltr"] .phase-details ul { list-style-type: '→ '; padding-left: 20px; }
 
-        @media (max-width: 768px) {
-            .timeline-container { flex-direction: column; align-items: center; gap: 50px; }
-            .timeline-line { width: 4px; height: 100%; left: 50%; top: 0; transform: translateX(-50%); }
-            .timeline-line-progress { width: 100%; height: 0; transition: height 1.5s cubic-bezier(0.25, 1, 0.5, 1); }
-            .phase-node { width: 100%; }
+        @media (max-width: 767px) {
+            .timeline-container { justify-content: space-around; }
+            .timeline-line { top: 30px; }
+            .phase-icon-wrapper { width: 60px; height: 60px; margin-bottom: 10px; }
+            .infographic-icon { width: 30px; height: 30px; }
+            .phase-node h4 { font-size: 0.8rem; line-height: 1.2; }
         }
+        @media (max-width: 480px) {
+            .phase-node h4 { display: none; } /* Hide text on very small screens to prevent clutter */
+        }
+
 
         /* --- Clients Section --- */
         .clients-grid {
@@ -338,17 +370,15 @@
             <button class="hamburger" id="hamburger-btn" aria-label="Menu">
                 <span></span><span></span><span></span>
             </button>
-            <h1 class="header-title" id="header-title-text">
-                <span data-lang="he" class="visible-lang">PsychoFlash</span>
-                <span data-lang="en">PsychoFlash</span>
-            </h1>
+             <h1 class="text-2xl font-bold text-primary-dark hidden lg:block">PsychoFlash</h1>
+        </div>
+
+        <div class="header-title-container lg:hidden" id="header-title-container">
+            <span data-lang="he" class="visible-lang">PsychoFlash</span>
+            <span data-lang="en">PsychoFlash</span>
         </div>
         
         <nav id="desktop-nav">
-            <div class="language-toggle">
-                <span id="btn-he" class="lang-btn active-lang">🇮🇱</span>
-                <span id="btn-en" class="lang-btn">🇺🇸</span>
-            </div>
             <a href="#home" class="nav-link active">
                 <span data-lang="he" class="visible-lang">ראשי</span>
                 <span data-lang="en">Home</span>
@@ -361,6 +391,10 @@
                 <span data-lang="he" class="visible-lang">שירותים</span>
                 <span data-lang="en">Services</span>
             </a>
+            <a href="#pricing" class="nav-link">
+                <span data-lang="he" class="visible-lang">תעריפים</span>
+                <span data-lang="en">Pricing</span>
+            </a>
             <a href="#clients" class="nav-link">
                 <span data-lang="he" class="visible-lang">לקוחות</span>
                 <span data-lang="en">Clients</span>
@@ -369,18 +403,19 @@
                 <span data-lang="he" class="visible-lang">פרויקטים</span>
                 <span data-lang="en">Projects</span>
             </a>
-            <a href="#pricing" class="nav-link">
-                <span data-lang="he" class="visible-lang">תעריפים</span>
-                <span data-lang="en">Pricing</span>
-            </a>
             <a href="#contact" class="nav-link">
                 <span data-lang="he" class="visible-lang">צרו קשר</span>
                 <span data-lang="en">Contact</span>
             </a>
+             <div class="language-toggle">
+                <span id="btn-he" class="lang-btn active-lang">🇮🇱</span>
+                <span id="btn-en" class="lang-btn">🇺🇸</span>
+            </div>
         </nav>
     </header>
     
     <div class="offcanvas-menu" id="offcanvas-menu">
+        <button id="close-menu-btn" aria-label="Close menu">&times;</button>
         <a href="#home" class="nav-link">
             <span data-lang="he" class="visible-lang">ראשי</span>
             <span data-lang="en">Home</span>
@@ -393,6 +428,10 @@
             <span data-lang="he" class="visible-lang">שירותים</span>
             <span data-lang="en">Services</span>
         </a>
+         <a href="#pricing" class="nav-link">
+            <span data-lang="he" class="visible-lang">תעריפים</span>
+            <span data-lang="en">Pricing</span>
+        </a>
         <a href="#clients" class="nav-link">
             <span data-lang="he" class="visible-lang">לקוחות</span>
             <span data-lang="en">Clients</span>
@@ -401,19 +440,19 @@
             <span data-lang="he" class="visible-lang">פרויקטים</span>
             <span data-lang="en">Projects</span>
         </a>
-        <a href="#pricing" class="nav-link">
-            <span data-lang="he" class="visible-lang">תעריפים</span>
-            <span data-lang="en">Pricing</span>
-        </a>
         <a href="#contact" class="nav-link">
             <span data-lang="he" class="visible-lang">צרו קשר</span>
             <span data-lang="en">Contact</span>
         </a>
+        <div class="language-toggle-mobile">
+            <span id="btn-he-mobile" class="lang-btn active-lang">🇮🇱</span>
+            <span id="btn-en-mobile" class="lang-btn">🇺🇸</span>
+        </div>
     </div>
 
     <main>
         <!-- Home Section -->
-        <section id="home" class="content-section" data-title-he="ראשי" data-title-en="Home">
+        <section id="home" class="content-section" data-title-he="PsychoFlash" data-title-en="PsychoFlash">
             <div class="text-center max-w-4xl mx-auto">
                 <h1 class="hero-title">
                     <span data-lang="he" class="visible-lang">השילוב המושלם בין <span class="text-transparent bg-clip-text bg-gradient-to-r from-purple-600 to-pink-600">ביצוע טכני</span> לחדשנות יצירתית</span>
@@ -536,9 +575,18 @@
                         <span data-lang="en">Core Services (The "Get-it-Done")</span>
                     </h3>
                     <div class="info-cards">
-                        <div class="info-card"><h4><i class="fas fa-sliders-h"></i><span data-lang="he" class="visible-lang">תפעול טכני מקיף</span><span data-lang="en">Comprehensive Technical Operation</span></h4></div>
-                        <div class="info-card"><h4><i class="fas fa-broadcast-tower"></i><span data-lang="he" class="visible-lang">ניהול שידורים וירטואליים</span><span data-lang="en">Virtual Broadcast Management</span></h4></div>
-                        <div class="info-card"><h4><i class="fas fa-desktop"></i><span data-lang="he" class="visible-lang">הפעלת טלפרומפטר</span><span data-lang="en">Teleprompter Operation</span></h4></div>
+                        <div class="info-card">
+                            <h4><i class="fas fa-sliders-h"></i><span data-lang="he" class="visible-lang">תפעול טכני מקיף</span><span data-lang="en">Comprehensive Technical Operation</span></h4>
+                            <p><span data-lang="he" class="visible-lang">ניהול מלא של הצד הטכני בהפקות, מהקמה ועד פירוק, כדי להבטיח שהכל יתפקד בצורה חלקה וללא תקלות.</span><span data-lang="en">Full management of the technical aspects of productions, from setup to breakdown, ensuring everything runs smoothly and without glitches.</span></p>
+                        </div>
+                        <div class="info-card">
+                            <h4><i class="fas fa-broadcast-tower"></i><span data-lang="he" class="visible-lang">ניהול שידורים וירטואליים</span><span data-lang="en">Virtual Broadcast Management</span></h4>
+                            <p><span data-lang="he" class="visible-lang">מומחיות בפלטפורמות המובילות (Zoom, VMIX) ליצירת שידור וירטואלי או היברידי ברמה הגבוהה ביותר.</span><span data-lang="en">Expertise in leading platforms (Zoom, VMIX) to create top-tier virtual or hybrid broadcasts.</span></p>
+                        </div>
+                        <div class="info-card">
+                            <h4><i class="fas fa-desktop"></i><span data-lang="he" class="visible-lang">הפעלת טלפרומפטר</span><span data-lang="en">Teleprompter Operation</span></h4>
+                            <p><span data-lang="he" class="visible-lang">שירות מדויק המאפשר לדוברים להעביר את המסר בביטחון, בבהירות ובצורה טבעית מול המצלמה.</span><span data-lang="en">A precise service allowing speakers to deliver their message confidently, clearly, and naturally on camera.</span></p>
+                        </div>
                     </div>
                 </div>
                 <div class="mt-12">
@@ -547,9 +595,100 @@
                         <span data-lang="en">Growth Engines (The "Toolbox")</span>
                     </h3>
                     <div class="info-cards">
-                        <div class="info-card"><h4><i class="fas fa-palette"></i><span data-lang="he" class="visible-lang">גרפיקה ואנימציה לשידור</span><span data-lang="en">Live Graphics & Animation</span></h4></div>
-                        <div class="info-card"><h4><i class="fas fa-brain"></i><span data-lang="he" class="visible-lang">פתרונות מבוססי AI</span><span data-lang="en">AI-Based Solutions</span></h4></div>
-                        <div class="info-card"><h4><i class="fas fa-code"></i><span data-lang="he" class="visible-lang">פיתוח כלי תוכנה ייעודיים</span><span data-lang="en">Custom Software Tools</span></h4></div>
+                        <div class="info-card">
+                            <h4><i class="fas fa-palette"></i><span data-lang="he" class="visible-lang">גרפיקה ואנימציה לשידור</span><span data-lang="en">Live Graphics & Animation</span></h4>
+                             <p><span data-lang="he" class="visible-lang">עיצוב והפקה של גרפיקה דינמית, מעברונים וכותרות המשדרגים את הנראות של כל שידור חי.</span><span data-lang="en">Design and production of dynamic graphics, transitions, and titles that elevate the visual quality of any live broadcast.</span></p>
+                        </div>
+                        <div class="info-card">
+                            <h4><i class="fas fa-brain"></i><span data-lang="he" class="visible-lang">פתרונות מבוססי AI</span><span data-lang="en">AI-Based Solutions</span></h4>
+                            <p><span data-lang="he" class="visible-lang">שילוב כלי בינה מלאכותית לייעול תהליכים, אוטומציה של משימות ויצירת תוכן חדשני ומרתק.</span><span data-lang="en">Integrating AI tools to streamline processes, automate tasks, and create innovative and engaging content.</span></p>
+                        </div>
+                        <div class="info-card">
+                            <h4><i class="fas fa-code"></i><span data-lang="he" class="visible-lang">פיתוח כלי תוכנה ייעודיים</span><span data-lang="en">Custom Software Tools</span></h4>
+                            <p><span data-lang="he" class="visible-lang">בניית פתרונות תוכנה מותאמים אישית לאוטומציה ופתרון אתגרים ייחודיים בהפקות שלכם.</span><span data-lang="en">Building custom software solutions to automate and solve unique challenges in your productions.</span></p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Pricing Section -->
+        <section id="pricing" class="content-section" data-title-he="תעריפים" data-title-en="Pricing">
+            <div class="section-container">
+                <h2 class="section-title">
+                    <span data-lang="he" class="visible-lang">תעריפים ופתרונות</span>
+                    <span data-lang="en">Pricing & Solutions</span>
+                </h2>
+                 <p class="text-center max-w-3xl mx-auto">
+                    <span data-lang="he" class="visible-lang">אנו מציעים מגוון פתרונות המותאמים לצרכים ולתקציב שלכם. בחרו את החבילה המתאימה או צרו קשר להתאמה אישית.</span>
+                    <span data-lang="en">We offer a variety of solutions tailored to your needs and budget. Choose the right package for you or contact us for a custom quote.</span>
+                </p>
+                <div class="pricing-grid">
+                    <!-- Pricing Card 1 -->
+                    <div class="pricing-card">
+                        <h3>
+                            <span data-lang="he" class="visible-lang">חבילת תפעול</span>
+                            <span data-lang="en">Operator Package</span>
+                        </h3>
+                        <p class="text-slate-500">
+                            <span data-lang="he" class="visible-lang">לאירועים ושידורים נקודתיים</span>
+                            <span data-lang="en">For single events & broadcasts</span>
+                        </p>
+                        <div class="price">
+                           <span data-lang="he" class="visible-lang">החל מ-₪1,800</span>
+                           <span data-lang="en">Starts at $500</span>
+                           <span class="term" data-lang="he"> / ליום הפקה</span>
+                           <span class="term" data-lang="en"> / per day</span>
+                        </div>
+                        <ul>
+                            <li><i class="fas fa-check-circle"></i><span data-lang="he" class="visible-lang">תפעול טכני מלא</span><span data-lang="en">Full Technical Operation</span></li>
+                            <li><i class="fas fa-check-circle"></i><span data-lang="he" class="visible-lang">ניהול שידור (Zoom/VMIX)</span><span data-lang="en">Broadcast Management (Zoom/VMIX)</span></li>
+                            <li><i class="fas fa-check-circle"></i><span data-lang="he" class="visible-lang">תמיכה טכנית</span><span data-lang="en">On-site Technical Support</span></li>
+                        </ul>
+                        <a href="#contact" class="cta-btn"><span data-lang="he" class="visible-lang">התחל כאן</span><span data-lang="en">Get Started</span></a>
+                    </div>
+                    <!-- Pricing Card 2 (Featured) -->
+                    <div class="pricing-card featured">
+                        <h3>
+                             <span data-lang="he" class="visible-lang">חבילת הפקה פלוס</span>
+                            <span data-lang="en">Production+ Package</span>
+                        </h3>
+                        <p class="text-slate-500">
+                             <span data-lang="he" class="visible-lang">לפרויקטים הדורשים ערך מוסף</span>
+                            <span data-lang="en">For projects needing added value</span>
+                        </p>
+                        <div class="price">
+                           <span data-lang="he" class="visible-lang">מותאם אישית</span>
+                           <span data-lang="en">Custom Quote</span>
+                        </div>
+                         <ul>
+                            <li><i class="fas fa-check-circle"></i><span data-lang="he" class="visible-lang"><b>כל מה שבחבילת תפעול</b></span><span data-lang="en"><b>Everything in Operator Package</b></span></li>
+                            <li><i class="fas fa-check-circle"></i><span data-lang="he" class="visible-lang">גרפיקה ואנימציה לשידור</span><span data-lang="en">Broadcast Graphics & Animation</span></li>
+                            <li><i class="fas fa-check-circle"></i><span data-lang="he" class="visible-lang">ייעוץ קריאייטיב וטכני</span><span data-lang="en">Creative & Technical Consulting</span></li>
+                            <li><i class="fas fa-check-circle"></i><span data-lang="he" class="visible-lang">ניהול פרויקט</span><span data-lang="en">Project Management</span></li>
+                        </ul>
+                         <a href="#contact" class="cta-btn"><span data-lang="he" class="visible-lang">צרו קשר</span><span data-lang="en">Contact Us</span></a>
+                    </div>
+                    <!-- Pricing Card 3 -->
+                    <div class="pricing-card">
+                         <h3>
+                             <span data-lang="he" class="visible-lang">חבילת ריטיינר</span>
+                            <span data-lang="en">Retainer Package</span>
+                        </h3>
+                         <p class="text-slate-500">
+                             <span data-lang="he" class="visible-lang">שותפות ארוכת טווח</span>
+                            <span data-lang="en">For long-term partnership</span>
+                        </p>
+                        <div class="price">
+                           <span data-lang="he" class="visible-lang">תמחור חודשי</span>
+                           <span data-lang="en">Monthly</span>
+                        </div>
+                         <ul>
+                             <li><i class="fas fa-check-circle"></i><span data-lang="he" class="visible-lang">שירותים מקיפים לפי דרישה</span><span data-lang="en">Comprehensive On-Demand Services</span></li>
+                            <li><i class="fas fa-check-circle"></i><span data-lang="he" class="visible-lang">פיתוח פתרונות AI ותוכנה</span><span data-lang="en">AI & Software Solution Development</span></li>
+                             <li><i class="fas fa-check-circle"></i><span data-lang="he" class="visible-lang">תמיכה וייעוץ שוטף</span><span data-lang="en">Ongoing Support & Consulting</span></li>
+                        </ul>
+                         <a href="#contact" class="cta-btn"><span data-lang="he" class="visible-lang">לפרטים נוספים</span><span data-lang="en">Learn More</span></a>
                     </div>
                 </div>
             </div>
@@ -642,88 +781,6 @@
             </div>
         </section>
 
-        <!-- Pricing Section -->
-        <section id="pricing" class="content-section" data-title-he="תעריפים" data-title-en="Pricing">
-            <div class="section-container">
-                <h2 class="section-title">
-                    <span data-lang="he" class="visible-lang">תעריפים ופתרונות</span>
-                    <span data-lang="en">Pricing & Solutions</span>
-                </h2>
-                 <p class="text-center max-w-3xl mx-auto">
-                    <span data-lang="he" class="visible-lang">אנו מציעים מגוון פתרונות המותאמים לצרכים ולתקציב שלכם. בחרו את החבילה המתאימה או צרו קשר להתאמה אישית.</span>
-                    <span data-lang="en">We offer a variety of solutions tailored to your needs and budget. Choose the right package for you or contact us for a custom quote.</span>
-                </p>
-                <div class="pricing-grid">
-                    <!-- Pricing Card 1 -->
-                    <div class="pricing-card">
-                        <h3>
-                            <span data-lang="he" class="visible-lang">חבילת תפעול</span>
-                            <span data-lang="en">Operator Package</span>
-                        </h3>
-                        <p class="text-slate-500">
-                            <span data-lang="he" class="visible-lang">לאירועים ושידורים נקודתיים</span>
-                            <span data-lang="en">For single events & broadcasts</span>
-                        </p>
-                        <div class="price">
-                           <span data-lang="he" class="visible-lang">החל מ-₪1,800</span>
-                           <span data-lang="en">Starts at $500</span>
-                           <span class="term" data-lang="he"> / ליום הפקה</span>
-                           <span class="term" data-lang="en"> / per day</span>
-                        </div>
-                        <ul>
-                            <li><i class="fas fa-check-circle"></i><span data-lang="he" class="visible-lang">תפעול טכני מלא</span><span data-lang="en">Full Technical Operation</span></li>
-                            <li><i class="fas fa-check-circle"></i><span data-lang="he" class="visible-lang">ניהול שידור (Zoom/VMIX)</span><span data-lang="en">Broadcast Management (Zoom/VMIX)</span></li>
-                            <li><i class="fas fa-check-circle"></i><span data-lang="he" class="visible-lang">תמיכה טכנית</span><span data-lang="en">On-site Technical Support</span></li>
-                        </ul>
-                        <a href="#contact" class="cta-btn"><span data-lang="he" class="visible-lang">התחל כאן</span><span data-lang="en">Get Started</span></a>
-                    </div>
-                    <!-- Pricing Card 2 (Featured) -->
-                    <div class="pricing-card featured">
-                        <h3>
-                             <span data-lang="he" class="visible-lang">חבילת הפקה פלוס</span>
-                            <span data-lang="en">Production+ Package</span>
-                        </h3>
-                        <p class="text-slate-500">
-                             <span data-lang="he" class="visible-lang">לפרויקטים הדורשים ערך מוסף</span>
-                            <span data-lang="en">For projects needing added value</span>
-                        </p>
-                        <div class="price">
-                           <span data-lang="he" class="visible-lang">מותאם אישית</span>
-                           <span data-lang="en">Custom Quote</span>
-                        </div>
-                         <ul>
-                            <li><i class="fas fa-check-circle"></i><span data-lang="he" class="visible-lang"><b>כל מה שבחבילת תפעול</b></span><span data-lang="en"><b>Everything in Operator Package</b></span></li>
-                            <li><i class="fas fa-check-circle"></i><span data-lang="he" class="visible-lang">גרפיקה ואנימציה לשידור</span><span data-lang="en">Broadcast Graphics & Animation</span></li>
-                            <li><i class="fas fa-check-circle"></i><span data-lang="he" class="visible-lang">ייעוץ קריאייטיב וטכני</span><span data-lang="en">Creative & Technical Consulting</span></li>
-                            <li><i class="fas fa-check-circle"></i><span data-lang="he" class="visible-lang">ניהול פרויקט</span><span data-lang="en">Project Management</span></li>
-                        </ul>
-                         <a href="#contact" class="cta-btn"><span data-lang="he" class="visible-lang">צרו קשר</span><span data-lang="en">Contact Us</span></a>
-                    </div>
-                    <!-- Pricing Card 3 -->
-                    <div class="pricing-card">
-                         <h3>
-                             <span data-lang="he" class="visible-lang">חבילת ריטיינר</span>
-                            <span data-lang="en">Retainer Package</span>
-                        </h3>
-                         <p class="text-slate-500">
-                             <span data-lang="he" class="visible-lang">שותפות ארוכת טווח</span>
-                            <span data-lang="en">For long-term partnership</span>
-                        </p>
-                        <div class="price">
-                           <span data-lang="he" class="visible-lang">תמחור חודשי</span>
-                           <span data-lang="en">Monthly</span>
-                        </div>
-                         <ul>
-                             <li><i class="fas fa-check-circle"></i><span data-lang="he" class="visible-lang">שירותים מקיפים לפי דרישה</span><span data-lang="en">Comprehensive On-Demand Services</span></li>
-                            <li><i class="fas fa-check-circle"></i><span data-lang="he" class="visible-lang">פיתוח פתרונות AI ותוכנה</span><span data-lang="en">AI & Software Solution Development</span></li>
-                             <li><i class="fas fa-check-circle"></i><span data-lang="he" class="visible-lang">תמיכה וייעוץ שוטף</span><span data-lang="en">Ongoing Support & Consulting</span></li>
-                        </ul>
-                         <a href="#contact" class="cta-btn"><span data-lang="he" class="visible-lang">לפרטים נוספים</span><span data-lang="en">Learn More</span></a>
-                    </div>
-                </div>
-            </div>
-        </section>
-
         <!-- Contact Section -->
         <section id="contact" class="content-section" data-title-he="צרו קשר" data-title-en="Contact">
              <div class="section-container text-center">
@@ -770,7 +827,7 @@
                 activePhaseNode: null,
                 infographicObserver: null,
                 headerTitleObserver: null,
-                currentTitle: '',
+                currentSectionId: 'home',
             },
             
             init() {
@@ -786,13 +843,18 @@
                 this.dom = {
                     html: document.documentElement,
                     header: document.querySelector('header'),
-                    headerTitle: document.getElementById('header-title-text'),
+                    headerTitleContainer: document.getElementById('header-title-container'),
                     navLinks: document.querySelectorAll('.nav-link'),
                     hamburgerBtn: document.getElementById('hamburger-btn'),
                     offcanvasMenu: document.getElementById('offcanvas-menu'),
+                    closeMenuBtn: document.getElementById('close-menu-btn'),
                     langBtns: {
                         he: document.getElementById('btn-he'),
                         en: document.getElementById('btn-en'),
+                    },
+                    langBtnsMobile: {
+                        he: document.getElementById('btn-he-mobile'),
+                        en: document.getElementById('btn-en-mobile'),
                     },
                     canvasBack: document.getElementById('orb-canvas-back'),
                     processInfographic: document.querySelector('.infographic-process-wrapper'),
@@ -804,6 +866,8 @@
                 // Language Switching
                 this.dom.langBtns.he.addEventListener('click', () => this.setLanguage('he'));
                 this.dom.langBtns.en.addEventListener('click', () => this.setLanguage('en'));
+                this.dom.langBtnsMobile.he.addEventListener('click', () => this.setLanguage('he'));
+                this.dom.langBtnsMobile.en.addEventListener('click', () => this.setLanguage('en'));
 
                 // Navigation
                 this.dom.navLinks.forEach(link => {
@@ -829,8 +893,12 @@
                 
                 // Hamburger Menu
                 this.dom.hamburgerBtn.addEventListener('click', () => {
-                    this.dom.offcanvasMenu.classList.toggle('active');
+                    this.dom.offcanvasMenu.classList.add('active');
                 });
+                this.dom.closeMenuBtn.addEventListener('click', () => {
+                    this.dom.offcanvasMenu.classList.remove('active');
+                });
+
 
                 // Infographic phase toggling
                 document.body.addEventListener('click', (e) => {
@@ -850,7 +918,9 @@
 
                 // Toggle active class on buttons
                 this.dom.langBtns.he.classList.toggle('active-lang', lang === 'he');
-                this.dom.langBtns.en.classList.toggle('active-lang', lang === 'en');
+                this.dom.langBtns.en.classList.toggle('active-lang', lang !== 'he');
+                this.dom.langBtnsMobile.he.classList.toggle('active-lang', lang === 'he');
+                this.dom.langBtnsMobile.en.classList.toggle('active-lang', lang !== 'he');
                 
                 // Show/hide language-specific content
                 document.querySelectorAll('[data-lang]').forEach(el => {
@@ -858,7 +928,7 @@
                 });
 
                 if (!isInitial) {
-                    this.updateHeaderTitle(this.state.currentTitle);
+                    this.updateHeaderTitle(this.state.currentSectionId);
                 }
             },
             
@@ -873,12 +943,10 @@
                     entries.forEach(entry => {
                         if (entry.isIntersecting) {
                             const sectionId = entry.target.id;
-                            this.state.currentTitle = sectionId;
+                            this.state.currentSectionId = sectionId;
                             
-                            // Update header title
                             this.updateHeaderTitle(sectionId);
 
-                            // Update active nav link
                             this.dom.navLinks.forEach(link => {
                                 link.classList.toggle('active', link.getAttribute('href') === `#${sectionId}`);
                             });
@@ -895,15 +963,14 @@
                 const section = document.getElementById(sectionId);
                 if (!section) return;
 
-                const titleHe = section.dataset.titleHe || 'PsychoFlash';
-                const titleEn = section.dataset.titleEn || 'PsychoFlash';
+                const titleHe = section.dataset.titleHe;
+                const titleEn = section.dataset.titleEn;
 
-                const newTitle = this.state.lang === 'he' ? titleHe : titleEn;
-                const isHomePage = sectionId === 'home';
-
-                this.dom.headerTitle.classList.toggle('hidden-title', isHomePage);
-                this.dom.headerTitle.querySelector('[data-lang="he"]').textContent = titleHe;
-                this.dom.headerTitle.querySelector('[data-lang="en"]').textContent = titleEn;
+                const titleContainerHe = this.dom.headerTitleContainer.querySelector('[data-lang="he"]');
+                const titleContainerEn = this.dom.headerTitleContainer.querySelector('[data-lang="en"]');
+                
+                titleContainerHe.textContent = titleHe;
+                titleContainerEn.textContent = titleEn;
             },
 
             setupInfographicAnimation() {
@@ -912,10 +979,11 @@
 
                 const progressLine = timeline.querySelector('.timeline-line-progress');
                 const nodes = timeline.querySelectorAll('.phase-node');
-                const isVertical = window.innerWidth <= 768;
-
+                
                 this.state.infographicObserver = new IntersectionObserver((entries) => {
                     if (entries[0].isIntersecting) {
+                        // Check orientation on trigger, not just load
+                        const isVertical = window.innerWidth <= 767 && false; // Disabled vertical mode as requested
                         if (isVertical) {
                             progressLine.style.height = '100%';
                         } else {
