@@ -35,8 +35,25 @@
             width: 100%; height: 100%;
             pointer-events: none;
             z-index: -1;
-            opacity: 0.6;
+            opacity: 0.5;
         }
+
+        /* --- Animation --- */
+        .scroll-animate {
+            opacity: 0;
+            transform: translateY(30px);
+            transition: opacity 0.6s ease-out, transform 0.6s ease-out;
+        }
+        .scroll-animate.in-view {
+            opacity: 1;
+            transform: translateY(0);
+        }
+        /* Staggered animation delays */
+        .delay-1 { transition-delay: 0.1s; }
+        .delay-2 { transition-delay: 0.2s; }
+        .delay-3 { transition-delay: 0.3s; }
+        .delay-4 { transition-delay: 0.4s; }
+
 
         /* --- Header --- */
         header {
@@ -362,7 +379,7 @@
     </style>
 </head>
 
-<body>
+<body class="overflow-x-hidden">
     <canvas id="orb-canvas-back" class="orb-canvas"></canvas>
 
     <header>
@@ -454,16 +471,16 @@
         <!-- Home Section -->
         <section id="home" class="content-section" data-title-he="PsychoFlash" data-title-en="PsychoFlash">
             <div class="text-center max-w-4xl mx-auto">
-                <h1 class="hero-title">
+                <h1 class="hero-title scroll-animate">
                     <span data-lang="he" class="visible-lang">השילוב המושלם בין <span class="text-transparent bg-clip-text bg-gradient-to-r from-purple-600 to-pink-600">ביצוע טכני</span> לחדשנות יצירתית</span>
                     <span data-lang="en">The Perfect Blend of <span class="text-transparent bg-clip-text bg-gradient-to-r from-purple-600 to-pink-600">Technical Execution</span> & Creative Innovation</span>
                 </h1>
-                <p class="mt-4 text-lg md:text-xl text-slate-600">
+                <p class="mt-4 text-lg md:text-xl text-slate-600 scroll-animate delay-1">
                     <span data-lang="he" class="visible-lang">מהפקות וידאו ושידורים חיים ועד פיתוח פתרונות תוכנה ו-AI, אנחנו כאן כדי להפוך את החזון שלכם למציאות מרשימה, חלקה ונטולת תקלות.</span>
                     <span data-lang="en">From video productions and live streams to custom software and AI solutions, we're here to turn your vision into an impressive, smooth, and flawless reality.</span>
                 </p>
             </div>
-            <div class="section-container mt-12">
+            <div class="section-container mt-12 scroll-animate delay-2">
                 <h2 class="text-2xl md:text-3xl">
                     <span data-lang="he" class="visible-lang">האסטרטגיה שלנו: לגשר בין ביצוע לחדשנות</span>
                     <span data-lang="en">Our Strategy: Bridging Execution and Innovation</span>
@@ -501,7 +518,7 @@
 
         <!-- Our Process Section -->
         <section id="process" class="content-section" data-title-he="התהליך שלנו" data-title-en="Our Process">
-            <div class="section-container infographic-process-wrapper">
+            <div class="section-container infographic-process-wrapper scroll-animate">
                 <h2 class="section-title">
                     <span data-lang="he" class="visible-lang">התהליך שלנו: מאסטרטגיה לתוצאה</span>
                     <span data-lang="en">Our Process: From Strategy to Result</span>
@@ -564,7 +581,7 @@
 
         <!-- Services Section -->
         <section id="services" class="content-section" data-title-he="שירותים" data-title-en="Services">
-            <div class="section-container">
+            <div class="section-container scroll-animate">
                 <h2 class="section-title">
                     <span data-lang="he" class="visible-lang">שירותים</span>
                     <span data-lang="en">Our Services</span>
@@ -575,15 +592,15 @@
                         <span data-lang="en">Core Services (The "Get-it-Done")</span>
                     </h3>
                     <div class="info-cards">
-                        <div class="info-card">
+                        <div class="info-card scroll-animate">
                             <h4><i class="fas fa-sliders-h"></i><span data-lang="he" class="visible-lang">תפעול טכני מקיף</span><span data-lang="en">Comprehensive Technical Operation</span></h4>
                             <p><span data-lang="he" class="visible-lang">ניהול מלא של הצד הטכני בהפקות, מהקמה ועד פירוק, כדי להבטיח שהכל יתפקד בצורה חלקה וללא תקלות.</span><span data-lang="en">Full management of the technical aspects of productions, from setup to breakdown, ensuring everything runs smoothly and without glitches.</span></p>
                         </div>
-                        <div class="info-card">
+                        <div class="info-card scroll-animate delay-1">
                             <h4><i class="fas fa-broadcast-tower"></i><span data-lang="he" class="visible-lang">ניהול שידורים וירטואליים</span><span data-lang="en">Virtual Broadcast Management</span></h4>
                             <p><span data-lang="he" class="visible-lang">מומחיות בפלטפורמות המובילות (Zoom, VMIX) ליצירת שידור וירטואלי או היברידי ברמה הגבוהה ביותר.</span><span data-lang="en">Expertise in leading platforms (Zoom, VMIX) to create top-tier virtual or hybrid broadcasts.</span></p>
                         </div>
-                        <div class="info-card">
+                        <div class="info-card scroll-animate delay-2">
                             <h4><i class="fas fa-desktop"></i><span data-lang="he" class="visible-lang">הפעלת טלפרומפטר</span><span data-lang="en">Teleprompter Operation</span></h4>
                             <p><span data-lang="he" class="visible-lang">שירות מדויק המאפשר לדוברים להעביר את המסר בביטחון, בבהירות ובצורה טבעית מול המצלמה.</span><span data-lang="en">A precise service allowing speakers to deliver their message confidently, clearly, and naturally on camera.</span></p>
                         </div>
@@ -595,15 +612,15 @@
                         <span data-lang="en">Growth Engines (The "Toolbox")</span>
                     </h3>
                     <div class="info-cards">
-                        <div class="info-card">
+                        <div class="info-card scroll-animate">
                             <h4><i class="fas fa-palette"></i><span data-lang="he" class="visible-lang">גרפיקה ואנימציה לשידור</span><span data-lang="en">Live Graphics & Animation</span></h4>
                              <p><span data-lang="he" class="visible-lang">עיצוב והפקה של גרפיקה דינמית, מעברונים וכותרות המשדרגים את הנראות של כל שידור חי.</span><span data-lang="en">Design and production of dynamic graphics, transitions, and titles that elevate the visual quality of any live broadcast.</span></p>
                         </div>
-                        <div class="info-card">
+                        <div class="info-card scroll-animate delay-1">
                             <h4><i class="fas fa-brain"></i><span data-lang="he" class="visible-lang">פתרונות מבוססי AI</span><span data-lang="en">AI-Based Solutions</span></h4>
                             <p><span data-lang="he" class="visible-lang">שילוב כלי בינה מלאכותית לייעול תהליכים, אוטומציה של משימות ויצירת תוכן חדשני ומרתק.</span><span data-lang="en">Integrating AI tools to streamline processes, automate tasks, and create innovative and engaging content.</span></p>
                         </div>
-                        <div class="info-card">
+                        <div class="info-card scroll-animate delay-2">
                             <h4><i class="fas fa-code"></i><span data-lang="he" class="visible-lang">פיתוח כלי תוכנה ייעודיים</span><span data-lang="en">Custom Software Tools</span></h4>
                             <p><span data-lang="he" class="visible-lang">בניית פתרונות תוכנה מותאמים אישית לאוטומציה ופתרון אתגרים ייחודיים בהפקות שלכם.</span><span data-lang="en">Building custom software solutions to automate and solve unique challenges in your productions.</span></p>
                         </div>
@@ -614,7 +631,7 @@
 
         <!-- Pricing Section -->
         <section id="pricing" class="content-section" data-title-he="תעריפים" data-title-en="Pricing">
-            <div class="section-container">
+            <div class="section-container scroll-animate">
                 <h2 class="section-title">
                     <span data-lang="he" class="visible-lang">תעריפים ופתרונות</span>
                     <span data-lang="en">Pricing & Solutions</span>
@@ -625,7 +642,7 @@
                 </p>
                 <div class="pricing-grid">
                     <!-- Pricing Card 1 -->
-                    <div class="pricing-card">
+                    <div class="pricing-card scroll-animate">
                         <h3>
                             <span data-lang="he" class="visible-lang">חבילת תפעול</span>
                             <span data-lang="en">Operator Package</span>
@@ -648,7 +665,7 @@
                         <a href="#contact" class="cta-btn"><span data-lang="he" class="visible-lang">התחל כאן</span><span data-lang="en">Get Started</span></a>
                     </div>
                     <!-- Pricing Card 2 (Featured) -->
-                    <div class="pricing-card featured">
+                    <div class="pricing-card featured scroll-animate delay-1">
                         <h3>
                              <span data-lang="he" class="visible-lang">חבילת הפקה פלוס</span>
                             <span data-lang="en">Production+ Package</span>
@@ -670,7 +687,7 @@
                          <a href="#contact" class="cta-btn"><span data-lang="he" class="visible-lang">צרו קשר</span><span data-lang="en">Contact Us</span></a>
                     </div>
                     <!-- Pricing Card 3 -->
-                    <div class="pricing-card">
+                    <div class="pricing-card scroll-animate delay-2">
                          <h3>
                              <span data-lang="he" class="visible-lang">חבילת ריטיינר</span>
                             <span data-lang="en">Retainer Package</span>
@@ -696,7 +713,7 @@
 
         <!-- Clients Section -->
         <section id="clients" class="content-section" data-title-he="לקוחות" data-title-en="Clients">
-            <div class="section-container">
+            <div class="section-container scroll-animate">
                 <h2 class="section-title">
                     <span data-lang="he" class="visible-lang">האמון של הלקוחות שלנו</span>
                     <span data-lang="en">Trusted by Our Clients</span>
@@ -706,17 +723,17 @@
                     <span data-lang="en">We are proud to work with a wide range of leading clients, who provide us with new challenges and allow us to push the boundaries of creativity and technology.</span>
                 </p>
                 <div class="clients-grid mt-10">
-                    <div class="client-card">
+                    <div class="client-card scroll-animate">
                         <img src="https://placehold.co/150x60/003f5c/ffffff?text=Client+Logo" alt="Client Logo" class="client-logo">
                         <h4><span data-lang="he" class="visible-lang">שם לקוח 1</span><span data-lang="en">Client Name 1</span></h4>
                         <p><span data-lang="he" class="visible-lang">ניהול טכני מלא לשידורים חיים, הפעלת VMIX ופרומפטר.</span><span data-lang="en">Full technical management for live broadcasts, VMIX and teleprompter operation.</span></p>
                     </div>
-                    <div class="client-card">
+                    <div class="client-card scroll-animate delay-1">
                         <img src="https://placehold.co/150x60/7a5195/ffffff?text=Client+Logo" alt="Client Logo" class="client-logo">
                         <h4><span data-lang="he" class="visible-lang">שם לקוח 2</span><span data-lang="en">Client Name 2</span></h4>
                         <p><span data-lang="he" class="visible-lang">תפעול כנסים ואירועי חברה, ניהול צוות טכני.</span><span data-lang="en">Conference and corporate event operations, technical team management.</span></p>
                     </div>
-                     <div class="client-card">
+                     <div class="client-card scroll-animate delay-2">
                         <img src="https://placehold.co/150x60/ef5675/ffffff?text=Client+Logo" alt="Client Logo" class="client-logo">
                         <h4><span data-lang="he" class="visible-lang">שם לקוח 3</span><span data-lang="en">Client Name 3</span></h4>
                         <p><span data-lang="he" class="visible-lang">פיתוח פתרונות תוכנה ו-AI לייעול הפקות.</span><span data-lang="en">Development of software and AI solutions for production optimization.</span></p>
@@ -727,70 +744,68 @@
 
         <!-- Projects Section -->
         <section id="projects" class="content-section" data-title-he="פרויקטים" data-title-en="Projects">
-            <div class="section-container">
+            <div class="section-container scroll-animate">
                 <h2 class="section-title">
                     <span data-lang="he" class="visible-lang">פרויקטים נבחרים</span>
                     <span data-lang="en">Featured Projects</span>
                 </h2>
                 <div class="projects-grid">
-                    <!-- Repeat this block for each project -->
-                    <div class="gallery-card">
+                    <div class="gallery-card scroll-animate">
                         <img src="https://placehold.co/400x250/003f5c/ffffff?text=Live+Broadcast" alt="Project">
                         <div class="gallery-card-content">
                             <h4><span data-lang="he" class="visible-lang">שידורים חיים מורכבים</span><span data-lang="en">Complex Live Broadcasts</span></h4>
                             <p><span data-lang="he" class="visible-lang">ניהול שידורים עבור לקוחות מובילים.</span><span data-lang="en">Managing broadcasts for leading clients.</span></p>
                         </div>
                     </div>
-                    <div class="gallery-card">
+                    <div class="gallery-card scroll-animate delay-1">
                         <img src="https://placehold.co/400x250/7a5195/ffffff?text=Corporate+Event" alt="Project">
                         <div class="gallery-card-content">
                             <h4><span data-lang="he" class="visible-lang">אירועי חברה וכנסים</span><span data-lang="en">Corporate Events</span></h4>
                             <p><span data-lang="he" class="visible-lang">תפעול טכני לאירועים של חברות מובילות.</span><span data-lang="en">Technical operations for major companies.</span></p>
                         </div>
                     </div>
-                    <div class="gallery-card">
+                    <div class="gallery-card scroll-animate delay-2">
                         <img src="https://placehold.co/400x250/ef5675/ffffff?text=Software" alt="Project">
                         <div class="gallery-card-content">
                             <h4><span data-lang="he" class="visible-lang">פיתוח פתרונות תוכנה</span><span data-lang="en">Software Solutions</span></h4>
                             <p><span data-lang="he" class="visible-lang">בניית מערכות ייעודיות לשידור חי.</span><span data-lang="en">Building custom systems for live streaming.</span></p>
                         </div>
                     </div>
-                    <div class="gallery-card">
+                    <div class="gallery-card scroll-animate delay-3">
                         <img src="https://placehold.co/400x250/ffa600/ffffff?text=AI+Integration" alt="Project">
                         <div class="gallery-card-content">
                             <h4><span data-lang="he" class="visible-lang">שילוב AI בהפקה</span><span data-lang="en">AI in Production</span></h4>
                              <p><span data-lang="he" class="visible-lang">שימוש בכלי AI לייעול ושיפור.</span><span data-lang="en">Using AI tools for optimization.</span></p>
                         </div>
                     </div>
-                     <div class="gallery-card">
+                     <div class="gallery-card scroll-animate delay-4">
                         <img src="https://placehold.co/400x250/2a9d8f/ffffff?text=Virtual+Studio" alt="Project">
                         <div class="gallery-card-content">
                             <h4><span data-lang="he" class="visible-lang">אולפנים וירטואליים</span><span data-lang="en">Virtual Studios</span></h4>
                             <p><span data-lang="he" class="visible-lang">הקמה ותפעול של אולפנים וירטואליים.</span><span data-lang="en">Setup and operation of virtual studios.</span></p>
                         </div>
                     </div>
-                     <div class="gallery-card">
+                     <div class="gallery-card scroll-animate" style="transition-delay: 0.5s;">
                         <img src="https://placehold.co/400x250/e76f51/ffffff?text=Consulting" alt="Project">
                         <div class="gallery-card-content">
                             <h4><span data-lang="he" class="visible-lang">ייעוץ טכנולוגי</span><span data-lang="en">Tech Consulting</span></h4>
                            <p><span data-lang="he" class="visible-lang">ליווי חברות הפקה ושדרוג מערכים.</span><span data-lang="en">Guiding production companies and upgrading systems.</span></p>
                         </div>
                     </div>
-                    <!-- End project block -->
                 </div>
             </div>
         </section>
 
         <!-- Contact Section -->
         <section id="contact" class="content-section" data-title-he="צרו קשר" data-title-en="Contact">
-             <div class="section-container text-center">
+             <div class="section-container text-center scroll-animate">
                 <h2 class="section-title">
                     <span data-lang="he" class="visible-lang">בואו נדבר על ההפקה הבאה שלכם</span>
                     <span data-lang="en">Let's Talk About Your Next Production</span>
                 </h2>
                 <p>
                     <span data-lang="he" class="visible-lang">מוכנים לשמוע על האתגרים שלכם ולהציע פתרונות שישדרגו לכם את האירוע.</span>
-                    <span data-lang="en">Ready to hear about your challenges and offer solutions that will elevate your event.</span>
+                    <span data--lang="en">Ready to hear about your challenges and offer solutions that will elevate your event.</span>
                 </p>
                 <div class="mt-6 text-lg">
                     <p><strong>Orian Edleni</strong></p>
@@ -828,6 +843,7 @@
                 infographicObserver: null,
                 headerTitleObserver: null,
                 currentSectionId: 'home',
+                mouse: { x: null, y: null, radius: 150 },
             },
             
             init() {
@@ -837,6 +853,7 @@
                 this.setupOrbAnimation();
                 this.setupHeaderTitleObserver();
                 this.setupInfographicAnimation();
+                this.setupScrollAnimations();
             },
 
             cacheDOM() {
@@ -863,6 +880,9 @@
             },
 
             bindEvents() {
+                // Mouse move for physics simulation
+                window.addEventListener('mousemove', this.handleMouseMove.bind(this));
+
                 // Language Switching
                 this.dom.langBtns.he.addEventListener('click', () => this.setLanguage('he'));
                 this.dom.langBtns.en.addEventListener('click', () => this.setLanguage('en'));
@@ -899,7 +919,6 @@
                     this.dom.offcanvasMenu.classList.remove('active');
                 });
 
-
                 // Infographic phase toggling
                 document.body.addEventListener('click', (e) => {
                     const phaseNode = e.target.closest('.phase-node');
@@ -910,19 +929,22 @@
 
                 window.addEventListener('resize', this.resizeCanvas.bind(this));
             },
+            
+            handleMouseMove(e) {
+                this.state.mouse.x = e.clientX;
+                this.state.mouse.y = e.clientY;
+            },
 
             setLanguage(lang, isInitial = false) {
                 this.state.lang = lang;
                 this.dom.html.lang = lang;
                 this.dom.html.dir = lang === 'he' ? 'rtl' : 'ltr';
 
-                // Toggle active class on buttons
                 this.dom.langBtns.he.classList.toggle('active-lang', lang === 'he');
                 this.dom.langBtns.en.classList.toggle('active-lang', lang !== 'he');
                 this.dom.langBtnsMobile.he.classList.toggle('active-lang', lang === 'he');
                 this.dom.langBtnsMobile.en.classList.toggle('active-lang', lang !== 'he');
                 
-                // Show/hide language-specific content
                 document.querySelectorAll('[data-lang]').forEach(el => {
                     el.classList.toggle('visible-lang', el.dataset.lang === lang);
                 });
@@ -982,13 +1004,7 @@
                 
                 this.state.infographicObserver = new IntersectionObserver((entries) => {
                     if (entries[0].isIntersecting) {
-                        // Check orientation on trigger, not just load
-                        const isVertical = window.innerWidth <= 767 && false; // Disabled vertical mode as requested
-                        if (isVertical) {
-                            progressLine.style.height = '100%';
-                        } else {
-                            progressLine.style.width = '100%';
-                        }
+                        progressLine.style.width = '100%';
                         nodes.forEach((node, index) => {
                             setTimeout(() => node.classList.add('visible'), index * 200);
                         });
@@ -997,6 +1013,22 @@
                 }, { threshold: 0.5 });
 
                 this.state.infographicObserver.observe(timeline);
+            },
+            
+            setupScrollAnimations() {
+                const animatedElements = document.querySelectorAll('.scroll-animate');
+                const observer = new IntersectionObserver((entries) => {
+                    entries.forEach(entry => {
+                        if (entry.isIntersecting) {
+                            entry.target.classList.add('in-view');
+                            observer.unobserve(entry.target);
+                        }
+                    });
+                }, { threshold: 0.1 });
+
+                animatedElements.forEach(el => {
+                    observer.observe(el);
+                });
             },
 
             togglePhaseDetails(phaseNode) {
@@ -1043,22 +1075,48 @@
                     this.canvas = canvas;
                     this.x = Math.random() * this.canvas.width;
                     this.y = Math.random() * this.canvas.height;
-                    this.radius = Math.random() * 4 + 1.5;
-                    this.speedX = (Math.random() - 0.5) * 0.15;
-                    this.speedY = (Math.random() - 0.5) * 0.15;
-                    this.color = `rgba(122, 81, 149, ${Math.random()*0.3 + 0.1})`;
+                    this.radius = Math.random() * 3 + 1;
+                    this.baseSpeedX = (Math.random() - 0.5) * 0.2;
+                    this.baseSpeedY = (Math.random() - 0.5) * 0.2;
+                    this.speedX = this.baseSpeedX;
+                    this.speedY = this.baseSpeedY;
+                    this.color = `rgba(122, 81, 149, ${Math.random()*0.4 + 0.1})`;
                  }
-                 update() {
-                     this.x += this.speedX;
-                     this.y += this.speedY;
-                     if (this.x < 0 || this.x > this.canvas.width) this.speedX *= -1;
-                     if (this.y < 0 || this.y > this.canvas.height) this.speedY *= -1;
+                 update(mouse) {
+                    // Mouse interaction
+                    if (mouse.x !== null) {
+                        const dx = this.x - mouse.x;
+                        const dy = this.y - mouse.y;
+                        const distance = Math.sqrt(dx * dx + dy * dy);
+
+                        if (distance < mouse.radius) {
+                            const forceDirectionX = dx / distance;
+                            const forceDirectionY = dy / distance;
+                            const force = (mouse.radius - distance) / mouse.radius;
+                            const directionX = forceDirectionX * force * 0.6;
+                            const directionY = forceDirectionY * force * 0.6;
+                            this.speedX += directionX;
+                            this.speedY += directionY;
+                        }
+                    }
+
+                    // Apply friction/drag and pull back to base speed
+                    this.speedX = (this.speedX * 0.96) + (this.baseSpeedX * 0.04);
+                    this.speedY = (this.speedY * 0.96) + (this.baseSpeedY * 0.04);
+                    
+                    // Move the orb
+                    this.x += this.speedX;
+                    this.y += this.speedY;
+                    
+                    // Screen wrap
+                    if (this.x > this.canvas.width + this.radius) this.x = -this.radius;
+                    if (this.x < -this.radius) this.x = this.canvas.width + this.radius;
+                    if (this.y > this.canvas.height + this.radius) this.y = -this.radius;
+                    if (this.y < -this.radius) this.y = this.canvas.height + this.radius;
                  }
                  draw(ctx) {
                      ctx.save();
                      ctx.beginPath();
-                     ctx.shadowBlur = 10;
-                     ctx.shadowColor = this.color;
                      ctx.fillStyle = this.color;
                      ctx.arc(this.x, this.y, this.radius, 0, 2 * Math.PI);
                      ctx.fill();
@@ -1068,7 +1126,7 @@
             initOrbs() {
                 if (!this.dom.canvasBack) return;
                 this.orbs = [];
-                let numOrbs = window.innerWidth < 768 ? 25 : 50;
+                let numOrbs = window.innerWidth < 768 ? 40 : 80;
                 for (let i = 0; i < numOrbs; i++) {
                     this.orbs.push(new this.GlowingOrb(this.dom.canvasBack));
                 }
@@ -1077,7 +1135,7 @@
                 if (this.ctxBack) {
                     this.ctxBack.clearRect(0, 0, this.dom.canvasBack.width, this.dom.canvasBack.height);
                     this.orbs.forEach(orb => {
-                        orb.update();
+                        orb.update(this.state.mouse);
                         orb.draw(this.ctxBack);
                     });
                 }
