@@ -12,9 +12,7 @@
         :root {
             --primary-dark: #003f5c;
             --primary-purple: #7a5195;
-            --primary-pink: #ef5675;
-            --primary-orange: #ffa600;
-            --text-light: #f8f9fa;
+            --secondary-blue: #005f73;
             --text-dark: #212529;
             --bg-light: #f1f5f9;
             --bg-white: #ffffff;
@@ -23,492 +21,704 @@
             --warning: #f59e0b;
             --danger: #ef4444;
         }
-        body {
-            font-family: 'Assistant', sans-serif;
-            background-color: var(--bg-light);
-            color: var(--text-dark);
-        }
-        .hidden {
-            display: none;
-        }
-        .g-signin-button {
-            display: inline-flex;
-            align-items: center;
-            gap: 1.5rem; /* Increased gap */
-            background-color: white;
-            color: #444;
-            border-radius: 8px;
-            border: 1px solid #ddd;
-            font-size: 1.25rem; /* Larger font */
-            font-weight: 700;
-            padding: 0.75rem 1.5rem; /* More padding */
-            cursor: pointer;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-            transition: all 0.3s ease;
-        }
-        .g-signin-button:hover {
-            box-shadow: 0 4px 8px rgba(0,0,0,0.15);
-            border-color: #ccc;
-        }
-        .g-signin-button img {
-            width: 30px; /* Larger icon */
-        }
-        
-        .dashboard-grid {
-            display: grid;
-            grid-template-columns: repeat(12, 1fr);
-            gap: 1.5rem;
-        }
-        .main-content {
-            grid-column: span 12 / span 12;
-        }
+        body { font-family: 'Assistant', sans-serif; background-color: var(--bg-light); color: var(--text-dark); }
+        .hidden { display: none; }
+        .dashboard-grid { display: grid; grid-template-columns: repeat(12, 1fr); gap: 1.5rem; }
+        .main-content { grid-column: span 12 / span 12; }
         @media (min-width: 1024px) {
-            .main-content {
-                grid-column: span 9 / span 9;
-            }
-            .sidebar {
-                grid-column: span 3 / span 3;
-            }
+            .main-content { grid-column: span 8 / span 8; }
+            .sidebar { grid-column: span 4 / span 4; }
         }
-        .card {
-            background-color: var(--bg-white);
-            border-radius: 12px;
-            padding: 1.5rem;
-            box-shadow: 0 4px 20px rgba(0,0,0,0.05);
-            border: 1px solid var(--border-color);
-        }
-        .card-title {
-            font-size: 1.5rem;
-            font-weight: 700;
-            color: var(--primary-dark);
-            margin-bottom: 1rem;
-            padding-bottom: 0.75rem;
-            border-bottom: 1px solid var(--border-color);
-        }
+        .card { background-color: var(--bg-white); border-radius: 12px; padding: 1.5rem; box-shadow: 0 4px 20px rgba(0,0,0,0.05); border: 1px solid var(--border-color); }
+        .card-title { font-size: 1.5rem; font-weight: 700; color: var(--primary-dark); margin-bottom: 1rem; padding-bottom: 0.75rem; border-bottom: 1px solid var(--border-color); }
+        
+        .calendar-header { display: flex; justify-content: space-between; align-items: center; padding: 0.5rem 0; font-size: 1.25rem; font-weight: 700;}
+        .calendar-container { padding: 1rem; }
+        .calendar-day { position: relative; border: 1px solid var(--border-color); background-color: #fafafa; aspect-ratio: 1 / 1; padding: 8px; font-weight: 600; cursor: pointer; transition: all 0.2s ease; overflow: hidden; }
+        .calendar-day:not(.other-month):hover { transform: scale(1.05); z-index: 10; box-shadow: 0 0 15px rgba(0,0,0,0.2);}
+        .calendar-day.other-month { background: transparent; border-color: transparent; cursor: default; }
+        .calendar-day .day-number { font-size: 0.9rem; z-index: 2; position: relative; color: var(--text-dark); }
+        .calendar-day .price { font-size: 1rem; font-weight: 800; position: absolute; bottom: 5px; left: 50%; transform: translateX(-50%); z-index: 2; }
+        .day-events { display: flex; justify-content: center; align-items: center; gap: 4px; position: absolute; top: 35px; left: 0; right: 0; }
+        .event-chip { width: 9px; height: 9px; border-radius: 50%; border: 1px solid rgba(0,0,0,0.3); }
 
-        /* Calendar Styling */
-        .calendar-container {
-            padding: 1rem;
-        }
-        .calendar-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 1.5rem;
-        }
-        .calendar-grid {
-            display: grid;
-            grid-template-columns: repeat(7, 1fr);
-            gap: 5px;
-        }
-        .calendar-day-name {
-            font-weight: 700;
-            text-align: center;
-            font-size: 0.9rem;
-            color: #64748b;
-            padding-bottom: 0.5rem;
-        }
-        .calendar-day {
-            position: relative;
-            border: 1px solid var(--border-color);
-            background-color: #fafafa;
-            aspect-ratio: 1 / 1;
-            padding: 8px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.2s ease;
-        }
-        .calendar-day.other-month {
-            color: #9ca3af;
-            background-color: transparent;
-            border-color: transparent;
-        }
-        .calendar-day:not(.other-month):hover {
-            background-color: #eef2ff;
-            border-color: var(--primary-purple);
-        }
-        .calendar-day .day-number {
-            font-size: 0.9rem;
-        }
-        .calendar-day .price {
-            font-size: 1rem;
-            font-weight: 800;
-            position: absolute;
-            bottom: 5px;
-            left: 50%;
-            transform: translateX(-50%);
-        }
-        .calendar-day.available .price { color: var(--success); }
-        .calendar-day.partial .price { color: var(--warning); }
-        .calendar-day.booked {
-            background-color: #fee2e2;
-            color: var(--danger);
-            cursor: not-allowed;
-            text-decoration: line-through;
-        }
+        .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.65); z-index: 50; display: flex; align-items: center; justify-content: center; opacity: 0; visibility: hidden; transition: opacity 0.3s ease, visibility 0.3s; }
+        .modal-overlay.active { opacity: 1; visibility: visible; }
+        .modal-container { background: var(--bg-white); border-radius: 15px; width: 90%; max-width: 1100px; max-height: 90vh; display: flex; flex-direction: column; transform: scale(0.95); transition: transform 0.3s ease; box-shadow: 0 10px 30px rgba(0,0,0,0.2); }
+        .modal-overlay.active .modal-container { transform: scale(1); }
+        
+        .timeline { display: grid; grid-template-columns: 60px 1fr; gap: 1rem; }
+        .hour-labels { display: flex; flex-direction: column; text-align: center; }
+        .hour-label { height: 40px; font-size: 0.8rem; font-weight: 600; color: #64748b; border-right: 2px solid var(--border-color); padding-top:2px; }
+        .time-slots { position: relative; border-radius: 8px; overflow: hidden; }
+        .time-slot { height: 20px; border-bottom: 1px dashed #e2e8f0a0; cursor: crosshair; position: relative; z-index: 5;}
+        
+        #selected-block-overlay { position: absolute; width: 100%; border-radius: 8px; z-index: 10; cursor: grab; display: flex; flex-direction: column; align-items: center; justify-content: center; color: white; font-weight: bold; padding: 4px; line-height: 1.2;}
+        .other-booking-block { position: absolute; width: 100%; border-radius: 8px; z-index: 8; display: flex; flex-direction: column; align-items: center; justify-content: center; color: var(--text-dark); background-color: rgba(209, 213, 219, 0.7); border: 2px solid #9ca3af; cursor: pointer; padding: 4px; line-height: 1.2; }
+        .other-booking-block:hover { background-color: rgba(156, 163, 175, 0.7); border-color: #6b7280; }
 
-        .file-list-item {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            padding: 0.75rem;
-            border-radius: 8px;
-            transition: background-color 0.2s;
-        }
-        .file-list-item:hover {
-            background-color: #f8fafc;
-        }
+        #selected-block-overlay:active { cursor: grabbing; }
+        #block-name-label, .block-name-label { font-size: 0.85rem; font-weight: bold; }
+        #block-time-label, .block-time-label { font-size: 0.75rem; opacity: 0.9; }
 
-        .loader {
-            border: 4px solid #f3f3f3;
-            border-radius: 50%;
-            border-top: 4px solid var(--primary-purple);
-            width: 40px;
-            height: 40px;
-            animation: spin 1s linear infinite;
-        }
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
+        .resize-handle { position: absolute; left: 0; right: 0; height: 10px; z-index: 11; }
+        .resize-handle.top { top: -5px; cursor: n-resize; }
+        .resize-handle.bottom { bottom: -5px; cursor: s-resize; }
+
+        .form-label { display: block; margin-bottom: 0.5rem; font-weight: 600; color: var(--primary-dark); }
+        .form-select, .form-input { width: 100%; padding: 0.5rem 0.75rem; border: 1px solid var(--border-color); border-radius: 8px; background-color: var(--bg-white); }
+        
+        /* Histogram Styles */
+        #histogram-container { display: flex; align-items: flex-end; gap: 2px; height: 100px; padding: 1rem; border-top: 1px solid var(--border-color); }
+        .histo-bar-wrapper { flex: 1; display: flex; flex-direction: column; align-items: center; text-align: center; }
+        .histo-bar { width: 100%; background-color: var(--success); transition: height 0.3s ease, background-color 0.3s ease; border-radius: 4px 4px 0 0;}
+        .histo-label { font-size: 0.75rem; color: #64748b; margin-top: 4px; }
     </style>
 </head>
 <body class="p-4 md:p-8">
 
-    <!-- Login View -->
-    <div id="login-view">
-        <div class="max-w-md mx-auto mt-20 text-center card">
-            <i class="fas fa-brain fa-3x text-primary-purple mb-4"></i>
-            <h1 class="text-3xl font-extrabold text-primary-dark">פורטל הלקוחות של PsychoFlash</h1>
-            <p class="text-slate-600 mt-2 mb-8">נא התחבר/י עם חשבון גוגל שלך כדי לגשת לאזור הפרויקט שלך.</p>
-            <button id="google-login-btn" class="g-signin-button">
-                <img src="https://www.google.com/images/branding/googlelogo/1x/googlelogo_color_272x92dp.png" alt="Google logo">
-                <span>התחברות עם Google</span>
-            </button>
-        </div>
-    </div>
-
-    <!-- Dashboard View -->
-    <div id="dashboard-view" class="hidden">
+    <div id="dashboard-view">
         <header class="flex justify-between items-center mb-6 pb-4 border-b">
-            <div>
-                <h1 class="text-3xl font-extrabold text-primary-dark">אזור הלקוח</h1>
-                <p id="user-greeting" class="text-slate-600">טוען נתונים...</p>
-            </div>
-            <button id="logout-btn" class="font-semibold text-primary-purple hover:text-primary-pink transition">
-                <i class="fas fa-sign-out-alt mr-2"></i>התנתקות
-            </button>
+            <div><h1 class="text-3xl font-extrabold text-primary-dark">אזור הלקוח</h1><p id="user-greeting" class="text-slate-600">שלום, לקוח יקר!</p></div>
         </header>
-
         <div class="dashboard-grid">
-            <!-- Main Content Area -->
             <main class="main-content flex flex-col gap-6">
-                <div class="card">
+                 <div class="card">
                     <h2 class="card-title">זמינות ותמחור דינמי</h2>
-                    <p class="mb-4 text-slate-600">זהו לוח השנה המדמה את זמינותי. המחירים משתנים בהתאם לביקוש, סוג העבודה וגורמים נוספים. לחצ/י על תאריך פנוי כדי לבקש הצעת מחיר.</p>
-                    <div id="calendar-container" class="calendar-container">
-                        <!-- Calendar will be generated by JS -->
-                    </div>
-                     <div class="flex justify-center items-center gap-6 mt-4 text-sm">
-                        <span class="flex items-center gap-2"><div class="w-4 h-4 rounded-full bg-green-100 border border-green-500"></div>זמין</span>
-                        <span class="flex items-center gap-2"><div class="w-4 h-4 rounded-full bg-yellow-100 border border-yellow-500"></div>זמינות חלקית</span>
-                        <span class="flex items-center gap-2"><div class="w-4 h-4 rounded-full bg-red-100 border border-red-500"></div>תפוס</span>
-                    </div>
+                    <p class="mb-4 text-slate-600">לחצ/י על תאריך כדי לפתוח את יומן השעות. הנקודות הצבעוניות מייצגות אירועים קיימים. גוון היום משתנה בהתאם לעומס ולתמחור.</p>
+                    <div id="calendar-container" class="calendar-container"></div>
+                </div>
+                <div class="card">
+                    <h2 class="card-title">ההזמנות שלי</h2>
+                    <div id="bookings-table-container" class="overflow-x-auto"></div>
                 </div>
             </main>
-
-            <!-- Sidebar -->
-            <aside class="sidebar flex flex-col gap-6">
-                <div class="card">
-                    <h2 class="card-title">פרויקט: <span id="project-name">טוען...</span></h2>
-                    
-                    <div id="project-info-loader" class="flex justify-center items-center h-32"><div class="loader"></div></div>
-                    
-                    <div id="project-details" class="hidden">
-                        <div>
-                            <h3 class="font-bold text-lg mb-2 text-primary-purple">קישורים מהירים</h3>
-                            <ul class="space-y-2" id="project-links">
-                                <!-- Links will be generated by JS -->
-                            </ul>
-                        </div>
-                        <hr class="my-6">
-                        <div>
-                            <h3 class="font-bold text-lg mb-2 text-primary-purple">מסמכים וקבצים</h3>
-                             <ul class="space-y-1" id="project-files">
-                                <!-- Files will be generated by JS -->
-                            </ul>
-                        </div>
-                         <hr class="my-6">
-                        <button class="w-full bg-primary-dark hover:bg-primary-purple text-white font-bold py-2 px-4 rounded-lg transition">
-                            <i class="fas fa-upload mr-2"></i>העלאת קבצים
-                        </button>
-                    </div>
-                </div>
-            </aside>
+            <aside id="sidebar" class="sidebar flex flex-col gap-6"></aside>
+        </div>
+        <div class="card mt-6 col-span-12">
+             <h2 class="card-title">גרף עומסים חודשי</h2>
+             <div id="histogram-container"></div>
         </div>
     </div>
     
-    <!-- Firebase SDKs -->
-    <script type="module">
-        // Import Firebase services
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-        import { getAuth, GoogleAuthProvider, signInWithPopup, onAuthStateChanged, signOut, setPersistence, browserLocalPersistence } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-        import { getFirestore, doc, getDoc, collection, getDocs } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
-
-        // --- IMPORTANT: Firebase Configuration ---
-        // In a real application, this configuration object would be populated with your actual Firebase project credentials.
-        // For this example, we use placeholder variables that would be replaced in a real environment.
-        const firebaseConfig = {
-            apiKey: "YOUR_API_KEY",
-            authDomain: "YOUR_AUTH_DOMAIN",
-            projectId: "YOUR_PROJECT_ID",
-            storageBucket: "YOUR_STORAGE_BUCKET",
-            messagingSenderId: "YOUR_MESSAGING_SENDER_ID",
-            appId: "YOUR_APP_ID"
-        };
-
-        // Initialize Firebase
-        const app = initializeApp(firebaseConfig);
-        const auth = getAuth(app);
-        const db = getFirestore(app);
-        const provider = new GoogleAuthProvider();
-        
-        // Use local persistence to keep the user logged in across sessions
-        setPersistence(auth, browserLocalPersistence);
-
-        // DOM Elements
-        const loginView = document.getElementById('login-view');
-        const dashboardView = document.getElementById('dashboard-view');
-        const googleLoginBtn = document.getElementById('google-login-btn');
-        const logoutBtn = document.getElementById('logout-btn');
-        const userGreeting = document.getElementById('user-greeting');
-        const projectNameEl = document.getElementById('project-name');
-        const projectLinksEl = document.getElementById('project-links');
-        const projectFilesEl = document.getElementById('project-files');
-        const projectInfoLoader = document.getElementById('project-info-loader');
-        const projectDetails = document.getElementById('project-details');
-        const calendarContainer = document.getElementById('calendar-container');
-
-        // --- Authentication Logic ---
-        
-        // Handle Google Login button click
-        googleLoginBtn.addEventListener('click', () => {
-            signInWithPopup(auth, provider)
-                .then((result) => {
-                    // This gives you a Google Access Token. You can use it to access the Google API.
-                    const credential = GoogleAuthProvider.credentialFromResult(result);
-                    const token = credential.accessToken;
-                    // The signed-in user info.
-                    const user = result.user;
-                    console.log("User logged in: ", user);
-                }).catch((error) => {
-                    console.error("Authentication Error: ", error);
-                    alert("התחברות נכשלה. נסו שוב.");
-                });
-        });
-
-        // Handle Logout button click
-        logoutBtn.addEventListener('click', () => {
-            signOut(auth).then(() => {
-                console.log("User signed out.");
-            }).catch((error) => {
-                console.error("Sign out error: ", error);
-            });
-        });
-        
-        // Listen for authentication state changes
-        onAuthStateChanged(auth, (user) => {
-            if (user) {
-                // User is signed in.
-                loginView.classList.add('hidden');
-                dashboardView.classList.remove('hidden');
-                displayUserData(user);
-                loadProjectData(user.uid); // Pass user's unique ID to load their data
-                generateCalendar();
-            } else {
-                // User is signed out.
-                loginView.classList.remove('hidden');
-                dashboardView.classList.add('hidden');
-            }
-        });
-        
-        // --- Data Loading and Display ---
-
-        function displayUserData(user) {
-            userGreeting.textContent = `שלום, ${user.displayName || 'משתמש'}!`;
-        }
-
-        async function loadProjectData(userId) {
-            // This is a placeholder. In a real app, you would query for a project associated with the userId.
-            const projectId = "project_123_abc"; // Example project ID
-            
-            projectDetails.classList.add('hidden');
-            projectInfoLoader.classList.remove('hidden');
-
-            try {
-                // Fetch the project document from Firestore
-                const projectRef = doc(db, "projects", projectId);
-                const projectSnap = await getDoc(projectRef);
-
-                if (projectSnap.exists()) {
-                    const projectData = projectSnap.data();
-
-                    // MOCK DATA CHECK: In a real scenario, you'd check if projectData.clientId === userId
-                    // For now, we'll assume this user has access to this mock project.
-                    
-                    projectNameEl.textContent = projectData.name || 'לא נמצא שם';
-                    
-                    // Populate links
-                    projectLinksEl.innerHTML = ''; // Clear old links
-                    if(projectData.links) {
-                        for (const [key, value] of Object.entries(projectData.links)) {
-                             const icon = key.includes('drive') ? 'fa-google-drive' : 'fa-folder';
-                             projectLinksEl.innerHTML += `
-                                <li class="file-list-item">
-                                    <a href="${value}" target="_blank" class="flex items-center gap-3 text-blue-600 hover:underline">
-                                        <i class="fab ${icon} text-xl text-slate-500"></i>
-                                        <span>${key === 'driveFolder' ? 'תיקיית חומרים' : 'קישור נוסף'}</span>
-                                    </a>
-                                    <i class="fas fa-external-link-alt text-slate-400"></i>
-                                </li>
-                            `;
-                        }
-                    }
-
-                    // Populate files
-                    projectFilesEl.innerHTML = ''; // Clear old files
-                    if(projectData.files) {
-                        projectData.files.forEach(file => {
-                            const icon = file.type === 'invoice' ? 'fa-file-invoice-dollar' : 'fa-file-alt';
-                            projectFilesEl.innerHTML += `
-                                 <li class="file-list-item">
-                                    <div class="flex items-center gap-3">
-                                        <i class="fas ${icon} text-xl text-slate-500"></i>
-                                        <span>${file.name}</span>
-                                    </div>
-                                    <a href="${file.url}" download><i class="fas fa-download text-slate-400 hover:text-primary-purple"></i></a>
-                                </li>
-                            `;
-                        });
-                    }
-
-                } else {
-                    console.log("No such project!");
-                    projectNameEl.textContent = 'לא נמצא פרויקט';
-                }
-
-            } catch (error) {
-                console.error("Error fetching project data: ", error);
-                projectNameEl.textContent = 'שגיאה בטעינה';
-            } finally {
-                projectInfoLoader.classList.add('hidden');
-                projectDetails.classList.remove('hidden');
-            }
-        }
-
-        // --- Calendar and Dynamic Pricing Logic ---
-        
-        function generateCalendar() {
-            // This function creates a visual calendar. The pricing logic is currently mocked.
-            const now = new Date();
-            const year = now.getFullYear();
-            const month = now.getMonth();
-
-            const firstDayOfMonth = new Date(year, month, 1);
-            const daysInMonth = new Date(year, month + 1, 0).getDate();
-            const dateString = firstDayOfMonth.toLocaleDateString('he-IL', { month: 'long', year: 'numeric' });
-            
-            let calendarHTML = `
-                <div class="calendar-header">
-                    <button class="p-2 rounded-full hover:bg-slate-200"><i class="fas fa-chevron-right"></i></button>
-                    <h3 class="text-xl font-bold">${dateString}</h3>
-                    <button class="p-2 rounded-full hover:bg-slate-200"><i class="fas fa-chevron-left"></i></button>
+    <div id="booking-modal" class="modal-overlay">
+        <div class="modal-container">
+            <header class="p-4 border-b flex justify-between items-center bg-slate-50 rounded-t-lg"><h3 id="modal-title" class="text-xl font-bold text-primary-dark"></h3><button id="modal-close-btn" class="text-2xl text-slate-500 hover:text-danger">&times;</button></header>
+            <div class="p-6 grid grid-cols-1 md:grid-cols-3 gap-6 overflow-y-auto">
+                <div class="md:col-span-2">
+                    <h4 class="font-bold text-lg mb-2">בחירת שעות</h4>
+                    <p class="text-sm text-slate-500 mb-4">לחצ/י וגרר/י ליצירת בלוק חדש. לחץ על בלוק קיים כדי לערוך אותו.</p>
+                    <div class="timeline">
+                        <div class="hour-labels" id="hour-labels"></div>
+                        <div class="time-slots" id="time-slots"></div>
+                    </div>
                 </div>
-                <div class="calendar-grid">
-                    <div class="calendar-day-name">א'</div>
-                    <div class="calendar-day-name">ב'</div>
-                    <div class="calendar-day-name">ג'</div>
-                    <div class="calendar-day-name">ד'</div>
-                    <div class="calendar-day-name">ה'</div>
-                    <div class="calendar-day-name">ו'</div>
-                    <div class="calendar-day-name">ש'</div>
-            `;
-            
-            // Add blank days for the start of the month
-            for (let i = 0; i < firstDayOfMonth.getDay(); i++) {
-                calendarHTML += `<div class="calendar-day other-month"></div>`;
+                <div class="md:col-span-1 flex flex-col gap-4">
+                     <div class="card bg-slate-50 p-4">
+                        <h4 class="font-bold text-lg mb-3" id="block-form-title">פרטי בלוק</h4>
+                        <div class="space-y-4">
+                             <div><label for="block-name" class="form-label">שם הבלוק (אופציונלי)</label><input type="text" id="block-name" class="form-input"></div>
+                             <div><label for="block-prod-id" class="form-label">שיוך להפקה</label><select id="block-prod-id" class="form-select"></select></div>
+                             <div><label for="block-manual-price" class="form-label">תמחור ידני (₪)</label><input type="number" id="block-manual-price" class="form-input" placeholder="אוטומטי לפי שעות"></div>
+                             <div id="dynamic-pricing-fields">
+                                <div><label for="block-work-type" class="form-label">סוג עבודה</label><select id="block-work-type" class="form-select"></select></div>
+                                <div><h5 class="form-label">ציוד נלווה</h5><div id="block-equipment" class="space-y-2 max-h-24 overflow-y-auto p-2 bg-white rounded-md border"></div></div>
+                             </div>
+                             <div><h5 class="form-label">ספקים נוספים</h5><div id="block-suppliers" class="space-y-2 max-h-24 overflow-y-auto p-2 bg-white rounded-md border"></div></div>
+                             <hr>
+                             <div id="summary-details" class="space-y-2 text-sm"></div>
+                        </div>
+                        <div class="flex items-center gap-2 mt-4">
+                            <button id="save-block-btn" class="flex-grow w-full bg-green-600 text-white font-bold py-2 px-4 rounded-lg transition-colors duration-300 hover:bg-green-700 disabled:bg-gray-400"><i class="fas fa-check mr-2"></i><span>שמור בלוק</span></button>
+                            <button id="delete-block-btn" class="hidden w-auto bg-danger text-white font-bold py-2 px-4 rounded-lg transition hover:bg-red-700"><i class="fas fa-trash"></i></button>
+                         </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div id="confirm-modal" class="modal-overlay">
+        <div class="modal-container" style="max-width: 400px;">
+            <div class="p-6 text-center">
+                <i class="fas fa-exclamation-triangle text-4xl text-yellow-500 mb-4"></i><h3 class="text-xl font-bold text-primary-dark mb-2">שינויים שלא נשמרו</h3>
+                <p class="text-slate-600 mb-6">ישנם שינויים שלא נשמרו. האם להמשיך ולבטל אותם?</p>
+                <div class="flex justify-center gap-4">
+                    <button id="confirm-discard-btn" class="bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-6 rounded-lg">בטל שינויים</button>
+                    <button id="confirm-cancel-btn" class="bg-gray-300 hover:bg-gray-400 text-gray-800 font-bold py-2 px-6 rounded-lg">המשך עריכה</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script type="module">
+        // --- DATA STORE ---
+        const AppData = {
+            entities: {
+                productions: {
+                    'prod_1': { id: 'prod_1', name: "כנס שנתי 2025", files: [], links: [] },
+                    'prod_2': { id: 'prod_2', name: "השקת מוצר", files: [], links: [] },
+                    'prod_3': { id: 'prod_3', name: "פסטיבל קיץ", files: [], links: [] },
+                    'prod_4': { id: 'prod_4', name: "צילומי אולפן - סדרה חדשה", files: [], links: [] },
+                    'prod_5': { id: 'prod_5', name: "אירוע חברה - סוף שנה", files: [], links: [] },
+                    'prod_personal': { id: 'prod_personal', name: "אישי", files: [], links: [] }
+                },
+                workTypes: {
+                    'tech_op': { id: 'tech_op', name: 'מפעיל טכני', baseRate: 80, color: 'rgba(54, 162, 235, 0.8)' },
+                    'sound': { id: 'sound', name: 'סאונדמן', baseRate: 120, color: 'rgba(75, 192, 192, 0.8)' },
+                    'lighting': { id: 'lighting', name: 'תאורן', baseRate: 150, color: 'rgba(255, 206, 86, 0.8)' },
+                    'stage_manager': { id: 'stage_manager', name: 'ניהול במה', baseRate: 300, color: 'rgba(255, 99, 132, 0.8)' },
+                    'personal': { id: 'personal', name: 'אישי/סידורים', baseRate: 0, color: 'rgba(156, 163, 175, 0.7)'} 
+                },
+                equipment: {
+                    'projector_1': { id: 'projector_1', name: 'מקרן 10K', price: 800 },
+                    'mic_set_1': { id: 'mic_set_1', name: 'סט 4 מיקרופונים', price: 450 },
+                },
+                suppliers: { 'sup_1': {id: 'sup_1', name: 'הגברה חיצונית', cost: 1200} },
+                bookings: {} // Start with empty bookings, will be populated
+            },
+            ui: { currentDate: new Date(2025, 5, 1), modal: { isOpen: false, selectedDate: null, editingBlockId: null, isDirty: false, interaction: null }, activeProdId: null },
+            pricing: { cache: {} }
+        };
+        const PRICING_CONFIG = {
+            BASE_WORK_HOURS: 8, // A "full day" equivalent for load calculation
+            NEIGHBOR_INFLUENCE_DISTANCE: 4, 
+            DECAY_FACTOR_K: 1.8,
+            MAX_INFLUENCE_MULTIPLIER: 4.5, // Allow for significant price hikes up to ~800/hr
+            PATTERNS: { standard: (h) => 1.0, morningRush: (h) => (h >= 8 && h < 12) ? 1.2 : 1.0, weekend: (h) => 1.8, weekend_quiet: (h) => 1.3 }
+        };
+        const DOMElements = {
+            calendarContainer: document.getElementById('calendar-container'), bookingsTable: document.getElementById('bookings-table-container'), sidebar: document.getElementById('sidebar'),
+            histogramContainer: document.getElementById('histogram-container'),
+            modal: {
+                overlay: document.getElementById('booking-modal'), title: document.getElementById('modal-title'), closeBtn: document.getElementById('modal-close-btn'), formTitle: document.getElementById('block-form-title'),
+                blockNameInput: document.getElementById('block-name'), prodIdSelect: document.getElementById('block-prod-id'),
+                manualPriceInput: document.getElementById('block-manual-price'), dynamicPricingFields: document.getElementById('dynamic-pricing-fields'),
+                workTypeSelect: document.getElementById('block-work-type'), equipmentContainer: document.getElementById('block-equipment'), suppliersContainer: document.getElementById('block-suppliers'),
+                summaryDetails: document.getElementById('summary-details'), saveBtn: document.getElementById('save-block-btn'), saveBtnLabel: document.querySelector('#save-block-btn span'), deleteBtn: document.getElementById('delete-block-btn'), 
+                hourLabels: document.getElementById('hour-labels'), timeSlots: document.getElementById('time-slots'),
+            },
+            confirmModal: { overlay: document.getElementById('confirm-modal'), discardBtn: document.getElementById('confirm-discard-btn'), cancelBtn: document.getElementById('confirm-cancel-btn') }
+        };
+        let liveBlockState = null;
+
+        // --- HELPER & UTILITY FUNCTIONS ---
+        const timeToMinutes = (time) => !time ? 0 : (time.split(':').map(Number).reduce((h, m) => h * 60 + m));
+        const minutesToTime = (minutes) => `${String(Math.floor(minutes / 60)).padStart(2,'0')}:${String(minutes % 60).padStart(2,'0')}`;
+        const timeAdd = (time, min) => minutesToTime(timeToMinutes(time) + min);
+        function rateToColor(rate, baseRate, asRgb = false) {
+            const ratio = Math.min(rate / baseRate, 5); // Cap ratio to prevent extreme colors
+            if (asRgb) {
+                const success = [16, 185, 129];
+                const warning = [245, 158, 11];
+                const danger = [239, 68, 68];
+                
+                if (ratio <= 1.5) return success.join(', ');
+                if (ratio <= 3) { // Interpolate green -> yellow
+                    const p = (ratio - 1.5) / 1.5;
+                    const r = Math.round(success[0] + p * (warning[0] - success[0]));
+                    const g = Math.round(success[1] + p * (warning[1] - success[1]));
+                    const b = Math.round(success[2] + p * (warning[2] - success[2]));
+                    return `${r}, ${g}, ${b}`;
+                }
+                // Interpolate yellow -> red
+                const p = (ratio - 3) / 2;
+                const r = Math.round(warning[0] + p * (danger[0] - warning[0]));
+                const g = Math.round(warning[1] + p * (danger[1] - warning[1]));
+                const b = Math.round(warning[2] + p * (danger[2] - warning[2]));
+                return `${r}, ${g}, ${b}`;
+
+            }
+            if (ratio <= 1.5) return 'var(--success)';
+            if (ratio <= 3) return 'var(--warning)';
+            return 'var(--danger)';
+        }
+        function getBlockStateFromUI() {
+            const { modal } = DOMElements;
+            return {
+                name: modal.blockNameInput.value, prodId: modal.prodIdSelect.value, workTypeId: modal.workTypeSelect.value,
+                manualPrice: modal.manualPriceInput.value ? parseFloat(modal.manualPriceInput.value) : null,
+                equipmentIds: Array.from(modal.equipmentContainer.querySelectorAll('input:checked')).map(chk => chk.value),
+                supplierIds: Array.from(modal.suppliersContainer.querySelectorAll('input:checked')).map(chk => chk.value),
+            };
+        }
+        function generateRandomErrands(year, month) {
+            const errandsCount = Math.floor(Math.random() * 4) + 3; // 3 to 6 errands
+            const daysInMonth = new Date(year, month + 1, 0).getDate();
+            const errandNames = ["רופא", "סידורים", "בנק", "קניות", "זמן משפחה", "חופש"];
+
+            for (let i = 0; i < errandsCount; i++) {
+                const day = Math.floor(Math.random() * daysInMonth) + 1;
+                const dateStr = new Date(year, month, day).toISOString().split('T')[0];
+                
+                const isLongErrand = Math.random() < 0.25; // 25% chance of a long errand
+                let startHour, endHour;
+
+                if (isLongErrand) {
+                    startHour = Math.floor(Math.random() * 4) + 8; // 8am - 11am
+                    endHour = startHour + Math.floor(Math.random() * 3) + 7; // 7-9 hours long
+                } else {
+                    startHour = Math.floor(Math.random() * 8) + 9; // 9am - 4pm
+                    endHour = startHour + (Math.random() > 0.5 ? 1 : 2); // 1 or 2 hours long
+                }
+                endHour = Math.min(endHour, 22);
+
+                const blockId = `b_personal_${i}_${Date.now()}`;
+                AppData.entities.bookings[blockId] = {
+                    blockId: blockId, name: errandNames[Math.floor(Math.random() * errandNames.length)], date: dateStr,
+                    prodId: 'prod_personal', workTypeId: 'personal', equipmentIds: [], supplierIds:[], manualPrice: null,
+                    start: minutesToTime(startHour * 60), end: minutesToTime(endHour * 60)
+                };
+            }
+        }
+
+
+        // --- DYNAMIC PRICING ENGINE ---
+        function calculateBaseBlockValue(block) {
+            if (!block || !block.start || !block.end) return 0;
+            if (block.manualPrice != null && block.manualPrice > 0) return parseFloat(block.manualPrice);
+            const workType = AppData.entities.workTypes[block.workTypeId];
+            if (!workType) return 0;
+            const durationHours = (timeToMinutes(block.end) - timeToMinutes(block.start)) / 60;
+
+            if (workType.id === 'personal') {
+                // Personal errands have a "load" value, not a monetary one.
+                // Long errands have a very high load to block the day.
+                return (durationHours >= 6) 
+                    ? AppData.entities.workTypes['tech_op'].baseRate * PRICING_CONFIG.BASE_WORK_HOURS * 2
+                    : AppData.entities.workTypes['tech_op'].baseRate * durationHours * 0.5;
             }
 
-            // Add days of the month
-            for (let i = 1; i <= daysInMonth; i++) {
-                const date = new Date(year, month, i);
-                // Mock pricing logic
-                const random = Math.random();
-                let dayClass = 'available';
-                let price = 2500 + Math.floor(Math.random() * 5) * 100; // Base price
-                let title = 'זמין להזמנה';
+            const hourlyPrice = durationHours * workType.baseRate;
+            const equipmentPrice = (block.equipmentIds || []).reduce((acc, eqId) => acc + (AppData.entities.equipment[eqId]?.price || 0), 0);
+            const supplierCost = (block.supplierIds || []).reduce((acc, supId) => acc + (AppData.entities.suppliers[supId]?.cost || 0), 0);
+            return hourlyPrice + equipmentPrice + supplierCost;
+        }
+        function getDailyLoad(date) {
+            const dateStr = date.toISOString().split('T')[0];
+            const bookingsOnDay = Object.values(AppData.entities.bookings).filter(b => b.date === dateStr);
+            if (bookingsOnDay.length === 0) return 0;
+            const totalValue = bookingsOnDay.reduce((acc, b) => acc + calculateBaseBlockValue(b), 0);
+            const equivalentHours = totalValue / AppData.entities.workTypes['tech_op'].baseRate;
+            return equivalentHours / PRICING_CONFIG.BASE_WORK_HOURS;
+        }
+        function getNeighborModifier(date) {
+            const dateStr = date.toISOString().split('T')[0];
+            if (AppData.pricing.cache[dateStr]) return AppData.pricing.cache[dateStr];
+            let totalInfluence = 0;
+            for (let i = -PRICING_CONFIG.NEIGHBOR_INFLUENCE_DISTANCE; i <= PRICING_CONFIG.NEIGHBOR_INFLUENCE_DISTANCE; i++) {
+                if (i === 0) continue;
+                const neighborDate = new Date(date);
+                neighborDate.setDate(date.getDate() + i);
+                const distance = Math.abs(i);
+                const influence = getDailyLoad(neighborDate) / Math.pow(distance, PRICING_CONFIG.DECAY_FACTOR_K);
+                totalInfluence += influence;
+            }
+            const modifier = 1 + Math.min(totalInfluence, PRICING_CONFIG.MAX_INFLUENCE_MULTIPLIER);
+            AppData.pricing.cache[dateStr] = modifier;
+            return modifier;
+        }
+        function getLocalHourLoad(date, hour) {
+            const dateStr = date.toISOString().split('T')[0];
+            const bookingsOnDay = Object.values(AppData.entities.bookings).filter(b => b.date === dateStr);
+            let influence = 0;
+            const baseTechRate = AppData.entities.workTypes['tech_op'].baseRate;
 
-                if (random < 0.2) { // 20% chance to be booked
-                    dayClass = 'booked';
-                    price = 0;
-                    title = 'תפוס';
-                } else if (random < 0.5) { // 30% chance to be partially available (higher price)
-                    dayClass = 'partial';
-                    price += 1000;
-                    title = 'זמינות חלקית (מחיר גבוה)';
+            bookingsOnDay.forEach(block => {
+                if (!block.start || !block.end) return;
+                const blockValue = calculateBaseBlockValue(block);
+                const weight = blockValue / (baseTechRate * 4); 
+                const startHour = parseInt(block.start.split(':')[0]);
+                const endHour = parseInt(block.end.split(':')[0]);
+                let dist = 0;
+                if (hour < startHour) {
+                    dist = startHour - hour;
+                } else if (hour >= endHour) {
+                    dist = hour - endHour + 1;
                 }
                 
-                // Weekend higher price
-                const dayOfWeek = date.getDay();
-                if (dayOfWeek === 4 || dayOfWeek === 5) { // Thu, Fri
-                    price *= 1.25;
+                if (dist === 0) {
+                    influence += 0.5 * weight; 
+                } else if (dist <= 3) {
+                    influence += (0.25 * weight) / dist;
                 }
-
-                calendarHTML += `
-                    <div class="calendar-day ${dayClass}" title="${title}">
-                        <div class="day-number">${i}</div>
-                        ${price > 0 ? `<div class="price">₪${Math.round(price)}</div>` : ''}
-                    </div>
-                `;
+            });
+            return influence;
+        }
+        function getHourlyRate(date, time, workTypeId) {
+            const hour = parseInt(time.split(':')[0]);
+            const workType = AppData.entities.workTypes[workTypeId];
+            if (!workType) return 0;
+            const baseRate = workType.baseRate;
+            if (baseRate === 0) return 0; // Personal events have no rate
+            const dayOfWeek = date.getDay();
+            let patternKey = 'standard';
+            if (dayOfWeek === 5 || dayOfWeek === 6) { 
+                 patternKey = getDailyLoad(date) > 0.1 ? 'weekend' : 'weekend_quiet';
+            } else {
+                 const dailyPatternKeys = Object.keys(PRICING_CONFIG.PATTERNS).filter(k => k !== 'weekend' && k !== 'weekend_quiet');
+                 patternKey = dailyPatternKeys[date.getDate() % dailyPatternKeys.length];
             }
+            const timeMultiplier = (PRICING_CONFIG.PATTERNS[patternKey] || PRICING_CONFIG.PATTERNS['standard'])(hour);
+            const localMultiplier = 1 + getLocalHourLoad(date, hour);
+            return baseRate * timeMultiplier * getNeighborModifier(date) * localMultiplier;
+        }
+        function calculateBlockPrice(block, date) {
+            if (!block || !block.start || !block.end) return 0;
+            if (block.manualPrice != null && !isNaN(block.manualPrice) && block.manualPrice > 0) return parseFloat(block.manualPrice);
+            if(block.workTypeId === 'personal') return 0;
 
-            calendarHTML += '</div>';
-            calendarContainer.innerHTML = calendarHTML;
+            let totalCost = 0;
+            const startMins = timeToMinutes(block.start);
+            const endMins = timeToMinutes(block.end);
+            for (let min = startMins; min < endMins; min += 30) {
+                 totalCost += getHourlyRate(date, minutesToTime(min), block.workTypeId) * 0.5;
+            }
+            const equipmentPrice = (block.equipmentIds || []).reduce((acc, eqId) => acc + (AppData.entities.equipment[eqId]?.price || 0), 0);
+            const supplierCost = (block.supplierIds || []).reduce((acc, supId) => acc + (AppData.entities.suppliers[supId]?.cost || 0), 0);
+            return totalCost + equipmentPrice + supplierCost;
         }
 
-        // --- Mock Firestore Data Setup (for demonstration without a real backend) ---
-        // In a real app, this data would exist in your Firestore database.
-        // We can't write to the database from the client like this without proper rules.
-        // This section is for explaining the data structure.
-        /*
-        // In Firestore, you would have collections like this:
-
-        // Collection: "projects"
-        // Document ID: "project_123_abc"
-        {
-            name: "הפקת כנס שנתי 2025",
-            clientId: "some_user_uid_from_auth",
-            links: {
-                driveFolder: "https://drive.google.com/...",
-            },
-            files: [
-                { name: "חשבונית #101.pdf", type: "invoice", url: "/path/to/invoice.pdf" },
-                { name: "לוגו לקוח.png", type: "asset", url: "/path/to/logo.png" }
-            ]
-        }
+        // --- RENDER FUNCTIONS ---
+        function renderAll() { AppData.pricing.cache = {}; renderCalendar(); renderBookingsTable(); renderSidebar(); renderHistogram(); }
         
-        // Collection: "availability"
-        // Document ID: "2025-06-25"
-        {
-            status: "partial", // 'available', 'partial', 'booked'
-            notes: "צילומים בבוקר, פנוי מהצהריים",
-            slots: [
-                { time: "morning", status: "booked", basePrice: 2500 },
-                { time: "evening", status: "available", basePrice: 3000 }
-            ]
-        }
-        */
+        function renderCalendar() {
+            const { currentDate } = AppData.ui; const year = currentDate.getFullYear(), month = currentDate.getMonth();
+            const firstDayOfMonth = new Date(year, month, 1);
+            let html = `<div class="calendar-header"><button class="p-2" data-nav="prev"><i class="fas fa-chevron-left"></i></button><h3>${firstDayOfMonth.toLocaleDateString('he-IL', {month:'long', year:'numeric'})}</h3><button class="p-2" data-nav="next"><i class="fas fa-chevron-right"></i></button></div>`;
+            html += `<div class="grid grid-cols-7 gap-1 text-center font-bold text-slate-500 text-sm mb-2">` + ['א','ב','ג','ד','ה','ו','ש'].map(d => `<div>${d}</div>`).join('') + `</div><div class="grid grid-cols-7 gap-1">`;
+            for (let i = 0; i < firstDayOfMonth.getDay(); i++) html += `<div class="calendar-day other-month"></div>`;
+            const daysInMonth = new Date(year, month + 1, 0).getDate();
+            const baseRate = AppData.entities.workTypes['tech_op'].baseRate;
+            for(let i = 1; i <= daysInMonth; i++) {
+                const date = new Date(year, month, i);
+                let dayPrice = 0;
+                for (let h = 8; h < 19; h++) dayPrice += getHourlyRate(date, `${String(h).padStart(2, '0')}:00`, 'tech_op');
+                dayPrice += getHourlyRate(date, '19:00', 'tech_op') * 0.5;
 
+                const activeBookings = Object.values(AppData.entities.bookings).filter(b => b.date === date.toISOString().split('T')[0]);
+                let eventsHtml = '<div class="day-events">';
+                if (activeBookings.length > 0) {
+                     [...new Set(activeBookings.map(b => b.workTypeId))].slice(0, 3).forEach(wtId => {
+                         const workType = AppData.entities.workTypes[wtId];
+                         if(workType) eventsHtml += `<div class="event-chip" style="background-color:${workType.color}"></div>`;
+                    });
+                }
+                eventsHtml += '</div>';
+
+                const morningColor = rateToColor(getHourlyRate(date, '09:00', 'tech_op'), baseRate, true);
+                const eveningColor = rateToColor(getHourlyRate(date, '18:00', 'tech_op'), baseRate, true);
+                const gradientStyle = `background: linear-gradient(to bottom right, rgba(${morningColor}, 0.25), rgba(${eveningColor}, 0.25)), var(--bg-white);`;
+                const avgRateForDay = dayPrice / 11.5;
+                const priceColor = rateToColor(avgRateForDay, baseRate);
+                html += `<div class="calendar-day" data-day="${i}" style="${gradientStyle}"><div class="day-number">${i}</div>${eventsHtml}<div class="price" style="color:${priceColor}">₪${Math.round(dayPrice)}</div></div>`;
+            }
+            html += '</div>'; DOMElements.calendarContainer.innerHTML = html;
+        }
+
+        function renderBookingsTable() { 
+            let html = `<table class="w-full text-sm text-gray-500"><thead class="text-xs text-gray-700 uppercase bg-gray-50 rounded-t-lg"><tr><th class="px-6 py-3">שם/הפקה</th><th class="px-6 py-3">תאריך</th><th class="px-6 py-3">שעות</th><th class="px-6 py-3">פעולות</th></tr></thead><tbody>`;
+            const allBookings = Object.values(AppData.entities.bookings).sort((a,b) => new Date(a.date) - new Date(b.date));
+            if (allBookings.length === 0) {
+                 html += '<tr><td colspan="4" class="text-center p-8 text-slate-500">אין עדיין הזמנות.</td></tr>';
+            } else {
+                 for (const block of allBookings) { 
+                    const production = AppData.entities.productions[block.prodId]; 
+                    html += `<tr class="bg-white border-b hover:bg-gray-50 cursor-pointer" data-block-id="${block.blockId}" data-prod-id="${block.prodId}"><td class="px-6 py-4 font-semibold">${block.name || `<em>${production?.name || ''}</em>`}</td><td class="px-6 py-4">${new Date(block.date + 'T00:00:00').toLocaleDateString('he-IL', {day:'2-digit', month:'2-digit'})}</td><td class="px-6 py-4">${block.start || ''} - ${block.end || ''}</td><td class="px-6 py-4"><button class="text-blue-600 hover:underline" data-action="edit" data-block-id="${block.blockId}">ערוך</button></td></tr>`;
+                }
+            }
+             html += `</tbody></table>`;
+             DOMElements.bookingsTable.innerHTML = html;
+        }
+
+        function renderSidebar() {
+            const prodId = AppData.ui.activeProdId;
+            const production = prodId ? AppData.entities.productions[prodId] : null;
+            if (!prodId || !production) { DOMElements.sidebar.innerHTML = `<div class="card"><h2 class="card-title">בחרו הפקה</h2><p class="text-slate-500">לחצו על שורה בטבלת ההזמנות כדי לראות את פרטי ההפקה המשוייכת.</p></div>`; return; }
+            const bookingsForProd = Object.values(AppData.entities.bookings).filter(b => b.prodId === prodId);
+            const allProdDocs = bookingsForProd.flatMap(b => (b.documents || []));
+            DOMElements.sidebar.innerHTML = `<div class="card"><h2 class="card-title">פרטי הפקה: <span class="text-primary-purple">${production.name}</span></h2><div><h3 class="font-bold text-lg mb-2 text-primary-purple">קישורים מהירים</h3><ul class="space-y-2">${(production.links || []).map(l => `<li class="file-list-item"><a href="${l.url}" target="_blank" class="flex items-center gap-3 text-blue-600 hover:underline"><i class="fas fa-link text-slate-500"></i><span>${l.name}</span></a></li>`).join('') || '<li class="text-slate-500 text-sm">אין קישורים.</li>'}</ul></div><hr class="my-6"><div><h3 class="font-bold text-lg mb-2 text-primary-purple">מסמכי הפקה</h3><ul class="space-y-1">${allProdDocs.map(d => `<li class="file-list-item"><div class="flex items-center gap-3"><i class="fas fa-file-alt text-slate-500"></i><span>${d.name}</span></div><a href="${d.url}" download><i class="fas fa-download text-slate-400"></i></a></li>`).join('') || '<li class="text-slate-500 text-sm">אין מסמכים.</li>'}</ul></div></div>`;
+        }
+
+        function renderHistogram() {
+            const container = DOMElements.histogramContainer;
+            container.innerHTML = '';
+            const { currentDate } = AppData.ui;
+            const daysInMonth = new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 0).getDate();
+            const baseRate = AppData.entities.workTypes['tech_op'].baseRate;
+            
+            for (let i = 1; i <= daysInMonth; i++) {
+                const date = new Date(currentDate.getFullYear(), currentDate.getMonth(), i);
+                const dailyLoad = getDailyLoad(date);
+                const neighborInfluence = getNeighborModifier(date);
+                const effectiveRate = baseRate * neighborInfluence * (1 + dailyLoad);
+
+                const barWrapper = document.createElement('div');
+                barWrapper.className = 'histo-bar-wrapper';
+
+                const bar = document.createElement('div');
+                bar.className = 'histo-bar';
+                bar.style.height = `${Math.min(dailyLoad * 120, 100)}%`;
+                bar.style.backgroundColor = rateToColor(effectiveRate, baseRate);
+                
+                const label = document.createElement('div');
+                label.className = 'histo-label';
+                label.textContent = i;
+
+                barWrapper.appendChild(bar);
+                barWrapper.appendChild(label);
+                container.appendChild(barWrapper);
+            }
+        }
+        function generateTimelineGradient(date) {
+            const baseRate = AppData.entities.workTypes['tech_op'].baseRate;
+            const colorStops = [];
+            for (let h = 0; h < 24; h++) {
+                const rate = getHourlyRate(date, `${String(h).padStart(2, '0')}:00`, 'tech_op');
+                const rgb = rateToColor(rate, baseRate, true);
+                colorStops.push(`rgba(${rgb}, 0.5)`);
+            }
+            return `linear-gradient(to bottom, ${colorStops.join(', ')})`;
+        }
+
+
+        // --- MODAL & INTERACTION ---
+        function openModal(date, blockId = null) {
+            AppData.ui.modal.isOpen = true; AppData.ui.modal.selectedDate = date; AppData.ui.modal.editingBlockId = blockId;
+            liveBlockState = blockId ? JSON.parse(JSON.stringify(AppData.entities.bookings[blockId])) : createNewBlockTemplate();
+            renderModalContent(); DOMElements.modal.overlay.classList.add('active');
+        }
+        function forceCloseModal() {
+            DOMElements.modal.overlay.classList.remove('active');
+            AppData.ui.modal = { isOpen: false, selectedDate: null, editingBlockId: null, isDirty: false, interaction: null };
+            liveBlockState = null; renderAll();
+        }
+        function requestCloseModal() { if (AppData.ui.modal.isDirty) DOMElements.confirmModal.overlay.classList.add('active'); else forceCloseModal(); }
+        function saveBlock() {
+            if (!liveBlockState) return;
+            const wasNew = !AppData.entities.bookings[liveBlockState.blockId];
+            AppData.entities.bookings[liveBlockState.blockId] = { ...liveBlockState };
+            if (wasNew) AppData.ui.modal.editingBlockId = liveBlockState.blockId;
+            
+            AppData.ui.modal.isDirty = false;
+            renderAll(); renderTimeline();
+
+            const btn = DOMElements.modal.saveBtn;
+            const originalText = DOMElements.modal.saveBtnLabel.textContent;
+            btn.classList.add('bg-blue-500', 'hover:bg-blue-600');
+            btn.classList.remove('bg-green-600', 'hover:bg-green-700');
+            DOMElements.modal.saveBtnLabel.textContent = "נשמר!";
+            btn.disabled = true;
+            setTimeout(() => {
+                DOMElements.modal.saveBtnLabel.textContent = originalText;
+                btn.classList.remove('bg-blue-500', 'hover:bg-blue-600');
+                btn.classList.add('bg-green-600', 'hover:bg-green-700');
+                btn.disabled = false;
+            }, 1500);
+        }
+        function deleteBlock() { const { editingBlockId } = AppData.ui.modal; if (editingBlockId) delete AppData.entities.bookings[editingBlockId]; forceCloseModal(); }
+        function createNewBlockTemplate() {
+            const date = AppData.ui.modal.selectedDate;
+            return {
+                blockId: `b_${Date.now()}`, name: '', date: date.toISOString().split('T')[0],
+                prodId: 'prod_personal', workTypeId: Object.keys(AppData.entities.workTypes)[0],
+                equipmentIds: [], supplierIds: [], manualPrice: null, start: null, end: null
+            };
+        }
+        function switchActiveBlock(blockId) {
+            function proceed() {
+                AppData.ui.modal.isDirty = false;
+                AppData.ui.modal.editingBlockId = blockId;
+                liveBlockState = JSON.parse(JSON.stringify(AppData.entities.bookings[blockId]));
+                renderModalContent();
+            }
+            if (AppData.ui.modal.isDirty) {
+                DOMElements.confirmModal.overlay.classList.add('active');
+                DOMElements.confirmModal.discardBtn.onclick = () => { DOMElements.confirmModal.overlay.classList.remove('active'); proceed(); };
+            } else { proceed(); }
+        }
+        function renderTimeline(){
+            const { selectedDate } = AppData.ui.modal;
+            const { timeSlots } = DOMElements.modal;
+            timeSlots.innerHTML = '';
+            timeSlots.style.background = generateTimelineGradient(selectedDate);
+            let gridHtml = '';
+            for (let h = 0; h < 24; h++) { for (let m = 0; m < 2; m++) {
+                gridHtml += `<div class="time-slot" data-time="${String(h).padStart(2, '0')}:${m === 0 ? '00' : '30'}"></div>`;
+            } }
+            timeSlots.innerHTML = gridHtml;
+
+            const dateStr = selectedDate.toISOString().split('T')[0];
+            const allBookingsToday = Object.values(AppData.entities.bookings).filter(b => b.date === dateStr);
+            
+            allBookingsToday.forEach(block => {
+                if (liveBlockState && block.blockId === liveBlockState.blockId) return;
+                if (!block.start || !block.end) return;
+
+                const blockEl = document.createElement('div');
+                blockEl.className = 'other-booking-block';
+                blockEl.dataset.blockId = block.blockId;
+                blockEl.innerHTML = `<span class="block-name-label">${block.name || '...'}</span><span class="block-time-label">${block.start} - ${block.end}</span>`;
+                const startSlot = timeSlots.querySelector(`[data-time="${block.start}"]`);
+                const endSlot = timeSlots.querySelector(`[data-time="${timeAdd(block.end, -30)}"]`);
+                if (startSlot && endSlot) {
+                    blockEl.style.top = `${startSlot.offsetTop}px`;
+                    blockEl.style.height = `${(endSlot.offsetTop + endSlot.offsetHeight) - startSlot.offsetTop}px`;
+                    const workType = AppData.entities.workTypes[block.workTypeId];
+                    if (workType) blockEl.style.borderColor = workType.color.replace(/, 0\.\d+\)/, ', 1)');
+                    timeSlots.appendChild(blockEl);
+                }
+            });
+
+            if (liveBlockState && liveBlockState.start) {
+                const blockEl = document.createElement('div');
+                blockEl.id = 'selected-block-overlay';
+                blockEl.dataset.blockId = liveBlockState.blockId;
+                blockEl.innerHTML = `<div class="resize-handle top"></div><span id="block-name-label"></span><span id="block-time-label"></span><div class="resize-handle bottom"></div>`;
+                timeSlots.appendChild(blockEl);
+                updateSelectedBlockUI(liveBlockState);
+            }
+        }
+        function renderModalContent() {
+            const { selectedDate } = AppData.ui.modal; const { modal } = DOMElements;
+            modal.title.textContent = `הזמנה עבור: ${selectedDate.toLocaleDateString('he-IL', { weekday: 'long', day: 'numeric', month: 'long' })}`;
+            modal.prodIdSelect.innerHTML = Object.values(AppData.entities.productions).map(p => `<option value="${p.id}" ${liveBlockState.prodId === p.id ? 'selected' : ''}>${p.name}</option>`).join('');
+            modal.workTypeSelect.innerHTML = Object.values(AppData.entities.workTypes).map(wt => `<option value="${wt.id}" ${liveBlockState.workTypeId === wt.id ? 'selected' : ''}>${wt.name}</option>`).join('');
+            modal.equipmentContainer.innerHTML = Object.values(AppData.entities.equipment).map(eq => `<label class="flex items-center gap-2 p-1"><input type="checkbox" value="${eq.id}" class="form-checkbox" ${(liveBlockState.equipmentIds || []).includes(eq.id) ? 'checked' : ''}><span>${eq.name} (+₪${eq.price})</span></label>`).join('');
+            modal.suppliersContainer.innerHTML = Object.values(AppData.entities.suppliers).map(s => `<label class="flex items-center gap-2 p-1"><input type="checkbox" value="${s.id}" class="form-checkbox" ${(liveBlockState.supplierIds || []).includes(s.id) ? 'checked' : ''}><span>${s.name} (+₪${s.cost})</span></label>`).join('');
+            modal.hourLabels.innerHTML = Array.from({length: 24}, (_, h) => `<div class="hour-label">${String(h).padStart(2, '0')}:00</div>`).join('');
+            renderTimeline(); updateModalForm();
+        }
+        function updateModalForm() {
+            const { modal } = DOMElements; const block = liveBlockState;
+            modal.formTitle.textContent = AppData.ui.modal.editingBlockId && AppData.entities.bookings[AppData.ui.modal.editingBlockId] ? 'עריכת בלוק קיים' : 'הוספת בלוק חדש';
+            modal.deleteBtn.classList.toggle('hidden', !(AppData.ui.modal.editingBlockId && AppData.entities.bookings[AppData.ui.modal.editingBlockId]));
+            modal.blockNameInput.value = block.name || ""; modal.manualPriceInput.value = block.manualPrice || "";
+            modal.prodIdSelect.value = block.prodId; modal.workTypeSelect.value = block.workTypeId;
+            toggleManualPriceFields(); updateSelectedBlockUI(block); updateSummaryAndSaveState(block);
+        }
+        function toggleManualPriceFields() { const isManual = DOMElements.modal.manualPriceInput.value > 0; DOMElements.modal.dynamicPricingFields.style.opacity = isManual ? '0.5' : '1'; DOMElements.modal.dynamicPricingFields.style.pointerEvents = isManual ? 'none' : 'auto'; }
+        function updateSelectedBlockUI(block) {
+            const selectedBlockOverlay = DOMElements.modal.timeSlots.querySelector('#selected-block-overlay');
+            if (!block || !block.start || !block.end || !selectedBlockOverlay) { if(selectedBlockOverlay) selectedBlockOverlay.classList.add('hidden'); return; }
+            selectedBlockOverlay.classList.remove('hidden');
+            const startSlot = DOMElements.modal.timeSlots.querySelector(`[data-time="${block.start}"]`);
+            const endSlot = DOMElements.modal.timeSlots.querySelector(`[data-time="${timeAdd(block.end, -30)}"]`);
+            if (startSlot && endSlot) {
+                selectedBlockOverlay.style.top = `${startSlot.offsetTop}px`;
+                selectedBlockOverlay.style.height = `${(endSlot.offsetTop + endSlot.offsetHeight) - startSlot.offsetTop}px`;
+                const workType = AppData.entities.workTypes[block.workTypeId];
+                if(workType) {
+                    selectedBlockOverlay.style.backgroundColor = workType.color;
+                    selectedBlockOverlay.style.border = `2px solid ${workType.color.replace(/, 0\.\d+\)/, ', 1)')}`;
+                }
+                selectedBlockOverlay.querySelector('#block-name-label').textContent = block.name || '';
+                selectedBlockOverlay.querySelector('#block-time-label').textContent = `${block.start} - ${block.end}`;
+            }
+        }
+        function updateSummaryAndSaveState(block) {
+            const price = calculateBlockPrice(block, AppData.ui.modal.selectedDate);
+            DOMElements.modal.summaryDetails.innerHTML = (!block.start || !block.end) ? '<p class="text-center text-slate-500">גרור/י כדי לבחור טווח שעות</p>' : `<div class="flex justify-between"><span>זמן:</span><span class="font-semibold">${block.start} - ${block.end}</span></div><div class="flex justify-between font-bold text-lg"><span>עלות סופית:</span><span>₪${price.toFixed(0)}</span></div>`;
+            DOMElements.modal.saveBtn.disabled = !block.start || !block.end;
+        }
+        function handleFormChange() { AppData.ui.modal.isDirty = true; const blockChanges = getBlockStateFromUI(); liveBlockState = {...liveBlockState, ...blockChanges}; updateModalForm(); }
+
+        // --- INITIALIZATION ---
+        function init() {
+            const { currentDate } = AppData.ui;
+            generateRandomErrands(currentDate.getFullYear(), currentDate.getMonth());
+            renderAll();
+            // Event Listeners
+            DOMElements.calendarContainer.addEventListener('click', e => {
+                const dayEl = e.target.closest('.calendar-day:not(.other-month)'), navEl = e.target.closest('[data-nav]');
+                if(dayEl) openModal(new Date(AppData.ui.currentDate.getFullYear(), AppData.ui.currentDate.getMonth(), parseInt(dayEl.dataset.day)));
+                if(navEl) { 
+                    AppData.ui.currentDate.setMonth(AppData.ui.currentDate.getMonth() + (navEl.dataset.nav === 'next' ? 1 : -1));
+                    generateRandomErrands(AppData.ui.currentDate.getFullYear(), AppData.ui.currentDate.getMonth()); 
+                    renderAll(); 
+                }
+            });
+            DOMElements.bookingsTable.addEventListener('click', e => {
+                const editBtn = e.target.closest('[data-action="edit"]'), row = e.target.closest('tr[data-block-id]');
+                if (editBtn) { const { blockId } = editBtn.dataset; const blockToEdit = AppData.entities.bookings[blockId]; if (blockToEdit) openModal(new Date(blockToEdit.date + 'T12:00:00'), blockId); }
+                else if (row) { AppData.ui.activeProdId = row.dataset.prodId; renderSidebar(); }
+            });
+            DOMElements.modal.closeBtn.addEventListener('click', requestCloseModal);
+            DOMElements.modal.overlay.addEventListener('click', e => { if(e.target === DOMElements.modal.overlay) requestCloseModal(); });
+            DOMElements.modal.saveBtn.addEventListener('click', saveBlock);
+            DOMElements.modal.deleteBtn.addEventListener('click', deleteBlock);
+            
+            [DOMElements.modal.manualPriceInput, DOMElements.modal.blockNameInput, DOMElements.modal.prodIdSelect, DOMElements.modal.workTypeSelect].forEach(el => el.addEventListener('input', handleFormChange));
+            [DOMElements.modal.equipmentContainer, DOMElements.modal.suppliersContainer].forEach(el => el.addEventListener('change', handleFormChange));
+
+            DOMElements.confirmModal.cancelBtn.addEventListener('click', () => { DOMElements.confirmModal.overlay.classList.remove('active'); });
+            DOMElements.confirmModal.discardBtn.addEventListener('click', () => { 
+                DOMElements.confirmModal.overlay.classList.remove('active');
+                if (DOMElements.confirmModal.discardBtn.onclick) {
+                    DOMElements.confirmModal.discardBtn.onclick();
+                    DOMElements.confirmModal.discardBtn.onclick = null;
+                } else {
+                    forceCloseModal();
+                }
+            });
+
+
+            const timeSlotsContainer = DOMElements.modal.timeSlots;
+            timeSlotsContainer.addEventListener('mousedown', e => {
+                if (AppData.ui.modal.interaction) return;
+                let interactionType;
+                const targettedBlock = e.target.closest('#selected-block-overlay, .other-booking-block');
+                if (targettedBlock) {
+                    if (targettedBlock.id === 'selected-block-overlay') {
+                        interactionType = e.target.classList.contains('resize-handle') ? (e.target.classList.contains('top') ? 'resize-start' : 'resize-end') : 'drag';
+                    } else {
+                        switchActiveBlock(targettedBlock.dataset.blockId);
+                        return;
+                    }
+                } else if (e.target.classList.contains('time-slot')) {
+                    interactionType = 'create-drag';
+                } else return;
+                e.preventDefault(); AppData.ui.modal.isDirty = true;
+                const rect = timeSlotsContainer.getBoundingClientRect(); const y = e.clientY - rect.top;
+
+                if (interactionType === 'create-drag') {
+                    liveBlockState = createNewBlockTemplate();
+                    const timeIndex = Math.floor(y / timeSlotsContainer.querySelector('.time-slot').offsetHeight);
+                    const clickedTime = minutesToTime(timeIndex * 30);
+                    liveBlockState.start = clickedTime; liveBlockState.end = timeAdd(clickedTime, 30);
+                    renderTimeline(); updateModalForm();
+                }
+                AppData.ui.modal.interaction = { type: interactionType, startY: y, originalStartMin: timeToMinutes(liveBlockState.start), originalEndMin: timeToMinutes(liveBlockState.end) };
+            });
+
+            window.addEventListener('mousemove', e => {
+                const interaction = AppData.ui.modal.interaction; if (!interaction || !liveBlockState) return; e.preventDefault();
+                const rect = timeSlotsContainer.getBoundingClientRect(); const dy = e.clientY - rect.top - interaction.startY;
+                const dMinutes = Math.round(dy / (timeSlotsContainer.offsetHeight / (24 * 2))) * 30;
+                let newStartMin = interaction.originalStartMin, newEndMin = interaction.originalEndMin;
+
+                if (interaction.type === 'drag') { newStartMin += dMinutes; newEndMin += dMinutes; } 
+                else if (interaction.type === 'resize-start') { newStartMin += dMinutes; } 
+                else if (interaction.type === 'resize-end' || (interaction.type === 'create-drag' && dy > 0)) { newEndMin += dMinutes; } 
+                else if (interaction.type === 'create-drag' && dy < 0) { newStartMin += dMinutes; }
+                
+                if (newStartMin > newEndMin) { [newStartMin, newEndMin] = [newEndMin, newStartMin]; }
+                if (newEndMin - newStartMin < 30) {
+                    if (interaction.type === 'resize-start' || (interaction.type === 'create-drag' && dy <0)) newStartMin = newEndMin - 30; else newEndMin = newStartMin + 30;
+                }
+                newStartMin = Math.max(0, newStartMin); newEndMin = Math.min(24 * 60, newEndMin);
+                const newBlock = { start: minutesToTime(newStartMin), end: minutesToTime(newEndMin) };
+                
+                const otherBookings = Object.values(AppData.entities.bookings).filter(b => b.date === liveBlockState.date && b.blockId !== liveBlockState.blockId);
+                let collision = otherBookings.some(b => timeToMinutes(newBlock.start) < timeToMinutes(b.end) && timeToMinutes(newBlock.end) > timeToMinutes(b.start));
+
+                if(!collision) { liveBlockState.start = newBlock.start; liveBlockState.end = newBlock.end; updateSelectedBlockUI(liveBlockState); updateSummaryAndSaveState(liveBlockState); }
+            });
+
+            window.addEventListener('mouseup', () => { AppData.ui.modal.interaction = null; });
+        }
+
+        init();
     </script>
 </body>
 </html>
