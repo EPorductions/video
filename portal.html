@@ -68,8 +68,7 @@
         .form-label { display: block; margin-bottom: 0.5rem; font-weight: 600; color: var(--primary-dark); }
         .form-select, .form-input { width: 100%; padding: 0.5rem 0.75rem; border: 1px solid var(--border-color); border-radius: 8px; background-color: var(--bg-white); }
         
-        /* Histogram Styles */
-        #histogram-container { display: flex; align-items: flex-end; gap: 2px; height: 100px; padding: 1rem; border-top: 1px solid var(--border-color); }
+        #histogram-container { display: flex; align-items: flex-end; gap: 2px; height: 120px; padding: 1rem; border-top: 1px solid var(--border-color); }
         .histo-bar-wrapper { flex: 1; display: flex; flex-direction: column; align-items: center; text-align: center; }
         .histo-bar { width: 100%; background-color: var(--success); transition: height 0.3s ease, background-color 0.3s ease; border-radius: 4px 4px 0 0;}
         .histo-label { font-size: 0.75rem; color: #64748b; margin-top: 4px; }
@@ -96,7 +95,14 @@
             <aside id="sidebar" class="sidebar flex flex-col gap-6"></aside>
         </div>
         <div class="card mt-6 col-span-12">
-             <h2 class="card-title">גרף עומסים חודשי</h2>
+            <div class="flex justify-between items-center">
+                <h2 class="card-title" style="margin-bottom:0; border-bottom:0;">גרף עומסים חודשי</h2>
+                <div class="flex items-center gap-2">
+                    <span class="text-sm text-slate-500">סקאלה:</span>
+                    <button id="zoom-out-btn" class="flex items-center justify-center w-8 h-8 bg-slate-200 rounded-full text-lg font-bold hover:bg-slate-300">-</button>
+                    <button id="zoom-in-btn" class="flex items-center justify-center w-8 h-8 bg-slate-200 rounded-full text-lg font-bold hover:bg-slate-300">+</button>
+                </div>
+            </div>
              <div id="histogram-container"></div>
         </div>
     </div>
@@ -177,7 +183,7 @@
                 suppliers: { 'sup_1': {id: 'sup_1', name: 'הגברה חיצונית', cost: 1200} },
                 bookings: {} // Start with empty bookings, will be populated
             },
-            ui: { currentDate: new Date(2025, 5, 1), modal: { isOpen: false, selectedDate: null, editingBlockId: null, isDirty: false, interaction: null }, activeProdId: null },
+            ui: { currentDate: new Date(2025, 5, 1), modal: { isOpen: false, selectedDate: null, editingBlockId: null, isDirty: false, interaction: null }, activeProdId: null, histogramZoom: 1 },
             pricing: { cache: {} }
         };
         const PRICING_CONFIG = {
@@ -190,6 +196,8 @@
         const DOMElements = {
             calendarContainer: document.getElementById('calendar-container'), bookingsTable: document.getElementById('bookings-table-container'), sidebar: document.getElementById('sidebar'),
             histogramContainer: document.getElementById('histogram-container'),
+            zoomInBtn: document.getElementById('zoom-in-btn'),
+            zoomOutBtn: document.getElementById('zoom-out-btn'),
             modal: {
                 overlay: document.getElementById('booking-modal'), title: document.getElementById('modal-title'), closeBtn: document.getElementById('modal-close-btn'), formTitle: document.getElementById('block-form-title'),
                 blockNameInput: document.getElementById('block-name'), prodIdSelect: document.getElementById('block-prod-id'),
@@ -282,8 +290,6 @@
             const durationHours = (timeToMinutes(block.end) - timeToMinutes(block.start)) / 60;
 
             if (workType.id === 'personal') {
-                // Personal errands have a "load" value, not a monetary one.
-                // Long errands have a very high load to block the day.
                 return (durationHours >= 6) 
                     ? AppData.entities.workTypes['tech_op'].baseRate * PRICING_CONFIG.BASE_WORK_HOURS * 2
                     : AppData.entities.workTypes['tech_op'].baseRate * durationHours * 0.5;
@@ -443,32 +449,44 @@
         function renderHistogram() {
             const container = DOMElements.histogramContainer;
             container.innerHTML = '';
-            const { currentDate } = AppData.ui;
-            const daysInMonth = new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 0).getDate();
+            const { currentDate, histogramZoom } = AppData.ui;
+            const year = currentDate.getFullYear();
+            const month = currentDate.getMonth();
+            const daysInMonth = new Date(year, month + 1, 0).getDate();
             const baseRate = AppData.entities.workTypes['tech_op'].baseRate;
-            
-            for (let i = 1; i <= daysInMonth; i++) {
-                const date = new Date(currentDate.getFullYear(), currentDate.getMonth(), i);
-                const dailyLoad = getDailyLoad(date);
-                const neighborInfluence = getNeighborModifier(date);
-                const effectiveRate = baseRate * neighborInfluence * (1 + dailyLoad);
 
+            const dailyMetrics = [];
+            let maxPrice = 0;
+
+            for (let i = 1; i <= daysInMonth; i++) {
+                const date = new Date(year, month, i);
+                let dayPrice = 0;
+                for (let h = 9; h < 17; h++) {
+                    dayPrice += getHourlyRate(date, `${String(h).padStart(2, '0')}:00`, 'tech_op');
+                }
+                dailyMetrics.push({ day: i, price: dayPrice });
+                if (dayPrice > maxPrice) {
+                    maxPrice = dayPrice;
+                }
+            }
+            if (maxPrice === 0) maxPrice = baseRate * 8; 
+
+            dailyMetrics.forEach(metric => {
                 const barWrapper = document.createElement('div');
                 barWrapper.className = 'histo-bar-wrapper';
-
                 const bar = document.createElement('div');
                 bar.className = 'histo-bar';
-                bar.style.height = `${Math.min(dailyLoad * 120, 100)}%`;
+                const heightPercentage = (metric.price / maxPrice) * 100 * histogramZoom;
+                bar.style.height = `${Math.min(heightPercentage, 100)}%`;
+                const effectiveRate = metric.price / 8;
                 bar.style.backgroundColor = rateToColor(effectiveRate, baseRate);
-                
                 const label = document.createElement('div');
                 label.className = 'histo-label';
-                label.textContent = i;
-
+                label.textContent = metric.day;
                 barWrapper.appendChild(bar);
                 barWrapper.appendChild(label);
                 container.appendChild(barWrapper);
-            }
+            });
         }
         function generateTimelineGradient(date) {
             const baseRate = AppData.entities.workTypes['tech_op'].baseRate;
@@ -634,6 +652,7 @@
                 if(dayEl) openModal(new Date(AppData.ui.currentDate.getFullYear(), AppData.ui.currentDate.getMonth(), parseInt(dayEl.dataset.day)));
                 if(navEl) { 
                     AppData.ui.currentDate.setMonth(AppData.ui.currentDate.getMonth() + (navEl.dataset.nav === 'next' ? 1 : -1));
+                    AppData.entities.bookings = {}; // Clear old random errands
                     generateRandomErrands(AppData.ui.currentDate.getFullYear(), AppData.ui.currentDate.getMonth()); 
                     renderAll(); 
                 }
@@ -647,6 +666,8 @@
             DOMElements.modal.overlay.addEventListener('click', e => { if(e.target === DOMElements.modal.overlay) requestCloseModal(); });
             DOMElements.modal.saveBtn.addEventListener('click', saveBlock);
             DOMElements.modal.deleteBtn.addEventListener('click', deleteBlock);
+            DOMElements.zoomInBtn.addEventListener('click', () => { AppData.ui.histogramZoom *= 1.5; renderHistogram(); });
+            DOMElements.zoomOutBtn.addEventListener('click', () => { AppData.ui.histogramZoom /= 1.5; renderHistogram(); });
             
             [DOMElements.modal.manualPriceInput, DOMElements.modal.blockNameInput, DOMElements.modal.prodIdSelect, DOMElements.modal.workTypeSelect].forEach(el => el.addEventListener('input', handleFormChange));
             [DOMElements.modal.equipmentContainer, DOMElements.modal.suppliersContainer].forEach(el => el.addEventListener('change', handleFormChange));
