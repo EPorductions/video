@@ -1,0 +1,514 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>פורטל לקוחות - PsychoFlash Productions</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Assistant:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+
+    <style>
+        :root {
+            --primary-dark: #003f5c;
+            --primary-purple: #7a5195;
+            --primary-pink: #ef5675;
+            --primary-orange: #ffa600;
+            --text-light: #f8f9fa;
+            --text-dark: #212529;
+            --bg-light: #f1f5f9;
+            --bg-white: #ffffff;
+            --border-color: #e2e8f0;
+            --success: #10b981;
+            --warning: #f59e0b;
+            --danger: #ef4444;
+        }
+        body {
+            font-family: 'Assistant', sans-serif;
+            background-color: var(--bg-light);
+            color: var(--text-dark);
+        }
+        .hidden {
+            display: none;
+        }
+        .g-signin-button {
+            display: inline-flex;
+            align-items: center;
+            gap: 1.5rem; /* Increased gap */
+            background-color: white;
+            color: #444;
+            border-radius: 8px;
+            border: 1px solid #ddd;
+            font-size: 1.25rem; /* Larger font */
+            font-weight: 700;
+            padding: 0.75rem 1.5rem; /* More padding */
+            cursor: pointer;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            transition: all 0.3s ease;
+        }
+        .g-signin-button:hover {
+            box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+            border-color: #ccc;
+        }
+        .g-signin-button img {
+            width: 30px; /* Larger icon */
+        }
+        
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: repeat(12, 1fr);
+            gap: 1.5rem;
+        }
+        .main-content {
+            grid-column: span 12 / span 12;
+        }
+        @media (min-width: 1024px) {
+            .main-content {
+                grid-column: span 9 / span 9;
+            }
+            .sidebar {
+                grid-column: span 3 / span 3;
+            }
+        }
+        .card {
+            background-color: var(--bg-white);
+            border-radius: 12px;
+            padding: 1.5rem;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.05);
+            border: 1px solid var(--border-color);
+        }
+        .card-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--primary-dark);
+            margin-bottom: 1rem;
+            padding-bottom: 0.75rem;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        /* Calendar Styling */
+        .calendar-container {
+            padding: 1rem;
+        }
+        .calendar-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+        }
+        .calendar-grid {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 5px;
+        }
+        .calendar-day-name {
+            font-weight: 700;
+            text-align: center;
+            font-size: 0.9rem;
+            color: #64748b;
+            padding-bottom: 0.5rem;
+        }
+        .calendar-day {
+            position: relative;
+            border: 1px solid var(--border-color);
+            background-color: #fafafa;
+            aspect-ratio: 1 / 1;
+            padding: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        .calendar-day.other-month {
+            color: #9ca3af;
+            background-color: transparent;
+            border-color: transparent;
+        }
+        .calendar-day:not(.other-month):hover {
+            background-color: #eef2ff;
+            border-color: var(--primary-purple);
+        }
+        .calendar-day .day-number {
+            font-size: 0.9rem;
+        }
+        .calendar-day .price {
+            font-size: 1rem;
+            font-weight: 800;
+            position: absolute;
+            bottom: 5px;
+            left: 50%;
+            transform: translateX(-50%);
+        }
+        .calendar-day.available .price { color: var(--success); }
+        .calendar-day.partial .price { color: var(--warning); }
+        .calendar-day.booked {
+            background-color: #fee2e2;
+            color: var(--danger);
+            cursor: not-allowed;
+            text-decoration: line-through;
+        }
+
+        .file-list-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0.75rem;
+            border-radius: 8px;
+            transition: background-color 0.2s;
+        }
+        .file-list-item:hover {
+            background-color: #f8fafc;
+        }
+
+        .loader {
+            border: 4px solid #f3f3f3;
+            border-radius: 50%;
+            border-top: 4px solid var(--primary-purple);
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body class="p-4 md:p-8">
+
+    <!-- Login View -->
+    <div id="login-view">
+        <div class="max-w-md mx-auto mt-20 text-center card">
+            <i class="fas fa-brain fa-3x text-primary-purple mb-4"></i>
+            <h1 class="text-3xl font-extrabold text-primary-dark">פורטל הלקוחות של PsychoFlash</h1>
+            <p class="text-slate-600 mt-2 mb-8">נא התחבר/י עם חשבון גוגל שלך כדי לגשת לאזור הפרויקט שלך.</p>
+            <button id="google-login-btn" class="g-signin-button">
+                <img src="https://www.google.com/images/branding/googlelogo/1x/googlelogo_color_272x92dp.png" alt="Google logo">
+                <span>התחברות עם Google</span>
+            </button>
+        </div>
+    </div>
+
+    <!-- Dashboard View -->
+    <div id="dashboard-view" class="hidden">
+        <header class="flex justify-between items-center mb-6 pb-4 border-b">
+            <div>
+                <h1 class="text-3xl font-extrabold text-primary-dark">אזור הלקוח</h1>
+                <p id="user-greeting" class="text-slate-600">טוען נתונים...</p>
+            </div>
+            <button id="logout-btn" class="font-semibold text-primary-purple hover:text-primary-pink transition">
+                <i class="fas fa-sign-out-alt mr-2"></i>התנתקות
+            </button>
+        </header>
+
+        <div class="dashboard-grid">
+            <!-- Main Content Area -->
+            <main class="main-content flex flex-col gap-6">
+                <div class="card">
+                    <h2 class="card-title">זמינות ותמחור דינמי</h2>
+                    <p class="mb-4 text-slate-600">זהו לוח השנה המדמה את זמינותי. המחירים משתנים בהתאם לביקוש, סוג העבודה וגורמים נוספים. לחצ/י על תאריך פנוי כדי לבקש הצעת מחיר.</p>
+                    <div id="calendar-container" class="calendar-container">
+                        <!-- Calendar will be generated by JS -->
+                    </div>
+                     <div class="flex justify-center items-center gap-6 mt-4 text-sm">
+                        <span class="flex items-center gap-2"><div class="w-4 h-4 rounded-full bg-green-100 border border-green-500"></div>זמין</span>
+                        <span class="flex items-center gap-2"><div class="w-4 h-4 rounded-full bg-yellow-100 border border-yellow-500"></div>זמינות חלקית</span>
+                        <span class="flex items-center gap-2"><div class="w-4 h-4 rounded-full bg-red-100 border border-red-500"></div>תפוס</span>
+                    </div>
+                </div>
+            </main>
+
+            <!-- Sidebar -->
+            <aside class="sidebar flex flex-col gap-6">
+                <div class="card">
+                    <h2 class="card-title">פרויקט: <span id="project-name">טוען...</span></h2>
+                    
+                    <div id="project-info-loader" class="flex justify-center items-center h-32"><div class="loader"></div></div>
+                    
+                    <div id="project-details" class="hidden">
+                        <div>
+                            <h3 class="font-bold text-lg mb-2 text-primary-purple">קישורים מהירים</h3>
+                            <ul class="space-y-2" id="project-links">
+                                <!-- Links will be generated by JS -->
+                            </ul>
+                        </div>
+                        <hr class="my-6">
+                        <div>
+                            <h3 class="font-bold text-lg mb-2 text-primary-purple">מסמכים וקבצים</h3>
+                             <ul class="space-y-1" id="project-files">
+                                <!-- Files will be generated by JS -->
+                            </ul>
+                        </div>
+                         <hr class="my-6">
+                        <button class="w-full bg-primary-dark hover:bg-primary-purple text-white font-bold py-2 px-4 rounded-lg transition">
+                            <i class="fas fa-upload mr-2"></i>העלאת קבצים
+                        </button>
+                    </div>
+                </div>
+            </aside>
+        </div>
+    </div>
+    
+    <!-- Firebase SDKs -->
+    <script type="module">
+        // Import Firebase services
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, GoogleAuthProvider, signInWithPopup, onAuthStateChanged, signOut, setPersistence, browserLocalPersistence } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, doc, getDoc, collection, getDocs } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+        // --- IMPORTANT: Firebase Configuration ---
+        // In a real application, this configuration object would be populated with your actual Firebase project credentials.
+        // For this example, we use placeholder variables that would be replaced in a real environment.
+        const firebaseConfig = {
+            apiKey: "YOUR_API_KEY",
+            authDomain: "YOUR_AUTH_DOMAIN",
+            projectId: "YOUR_PROJECT_ID",
+            storageBucket: "YOUR_STORAGE_BUCKET",
+            messagingSenderId: "YOUR_MESSAGING_SENDER_ID",
+            appId: "YOUR_APP_ID"
+        };
+
+        // Initialize Firebase
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+        const provider = new GoogleAuthProvider();
+        
+        // Use local persistence to keep the user logged in across sessions
+        setPersistence(auth, browserLocalPersistence);
+
+        // DOM Elements
+        const loginView = document.getElementById('login-view');
+        const dashboardView = document.getElementById('dashboard-view');
+        const googleLoginBtn = document.getElementById('google-login-btn');
+        const logoutBtn = document.getElementById('logout-btn');
+        const userGreeting = document.getElementById('user-greeting');
+        const projectNameEl = document.getElementById('project-name');
+        const projectLinksEl = document.getElementById('project-links');
+        const projectFilesEl = document.getElementById('project-files');
+        const projectInfoLoader = document.getElementById('project-info-loader');
+        const projectDetails = document.getElementById('project-details');
+        const calendarContainer = document.getElementById('calendar-container');
+
+        // --- Authentication Logic ---
+        
+        // Handle Google Login button click
+        googleLoginBtn.addEventListener('click', () => {
+            signInWithPopup(auth, provider)
+                .then((result) => {
+                    // This gives you a Google Access Token. You can use it to access the Google API.
+                    const credential = GoogleAuthProvider.credentialFromResult(result);
+                    const token = credential.accessToken;
+                    // The signed-in user info.
+                    const user = result.user;
+                    console.log("User logged in: ", user);
+                }).catch((error) => {
+                    console.error("Authentication Error: ", error);
+                    alert("התחברות נכשלה. נסו שוב.");
+                });
+        });
+
+        // Handle Logout button click
+        logoutBtn.addEventListener('click', () => {
+            signOut(auth).then(() => {
+                console.log("User signed out.");
+            }).catch((error) => {
+                console.error("Sign out error: ", error);
+            });
+        });
+        
+        // Listen for authentication state changes
+        onAuthStateChanged(auth, (user) => {
+            if (user) {
+                // User is signed in.
+                loginView.classList.add('hidden');
+                dashboardView.classList.remove('hidden');
+                displayUserData(user);
+                loadProjectData(user.uid); // Pass user's unique ID to load their data
+                generateCalendar();
+            } else {
+                // User is signed out.
+                loginView.classList.remove('hidden');
+                dashboardView.classList.add('hidden');
+            }
+        });
+        
+        // --- Data Loading and Display ---
+
+        function displayUserData(user) {
+            userGreeting.textContent = `שלום, ${user.displayName || 'משתמש'}!`;
+        }
+
+        async function loadProjectData(userId) {
+            // This is a placeholder. In a real app, you would query for a project associated with the userId.
+            const projectId = "project_123_abc"; // Example project ID
+            
+            projectDetails.classList.add('hidden');
+            projectInfoLoader.classList.remove('hidden');
+
+            try {
+                // Fetch the project document from Firestore
+                const projectRef = doc(db, "projects", projectId);
+                const projectSnap = await getDoc(projectRef);
+
+                if (projectSnap.exists()) {
+                    const projectData = projectSnap.data();
+
+                    // MOCK DATA CHECK: In a real scenario, you'd check if projectData.clientId === userId
+                    // For now, we'll assume this user has access to this mock project.
+                    
+                    projectNameEl.textContent = projectData.name || 'לא נמצא שם';
+                    
+                    // Populate links
+                    projectLinksEl.innerHTML = ''; // Clear old links
+                    if(projectData.links) {
+                        for (const [key, value] of Object.entries(projectData.links)) {
+                             const icon = key.includes('drive') ? 'fa-google-drive' : 'fa-folder';
+                             projectLinksEl.innerHTML += `
+                                <li class="file-list-item">
+                                    <a href="${value}" target="_blank" class="flex items-center gap-3 text-blue-600 hover:underline">
+                                        <i class="fab ${icon} text-xl text-slate-500"></i>
+                                        <span>${key === 'driveFolder' ? 'תיקיית חומרים' : 'קישור נוסף'}</span>
+                                    </a>
+                                    <i class="fas fa-external-link-alt text-slate-400"></i>
+                                </li>
+                            `;
+                        }
+                    }
+
+                    // Populate files
+                    projectFilesEl.innerHTML = ''; // Clear old files
+                    if(projectData.files) {
+                        projectData.files.forEach(file => {
+                            const icon = file.type === 'invoice' ? 'fa-file-invoice-dollar' : 'fa-file-alt';
+                            projectFilesEl.innerHTML += `
+                                 <li class="file-list-item">
+                                    <div class="flex items-center gap-3">
+                                        <i class="fas ${icon} text-xl text-slate-500"></i>
+                                        <span>${file.name}</span>
+                                    </div>
+                                    <a href="${file.url}" download><i class="fas fa-download text-slate-400 hover:text-primary-purple"></i></a>
+                                </li>
+                            `;
+                        });
+                    }
+
+                } else {
+                    console.log("No such project!");
+                    projectNameEl.textContent = 'לא נמצא פרויקט';
+                }
+
+            } catch (error) {
+                console.error("Error fetching project data: ", error);
+                projectNameEl.textContent = 'שגיאה בטעינה';
+            } finally {
+                projectInfoLoader.classList.add('hidden');
+                projectDetails.classList.remove('hidden');
+            }
+        }
+
+        // --- Calendar and Dynamic Pricing Logic ---
+        
+        function generateCalendar() {
+            // This function creates a visual calendar. The pricing logic is currently mocked.
+            const now = new Date();
+            const year = now.getFullYear();
+            const month = now.getMonth();
+
+            const firstDayOfMonth = new Date(year, month, 1);
+            const daysInMonth = new Date(year, month + 1, 0).getDate();
+            const dateString = firstDayOfMonth.toLocaleDateString('he-IL', { month: 'long', year: 'numeric' });
+            
+            let calendarHTML = `
+                <div class="calendar-header">
+                    <button class="p-2 rounded-full hover:bg-slate-200"><i class="fas fa-chevron-right"></i></button>
+                    <h3 class="text-xl font-bold">${dateString}</h3>
+                    <button class="p-2 rounded-full hover:bg-slate-200"><i class="fas fa-chevron-left"></i></button>
+                </div>
+                <div class="calendar-grid">
+                    <div class="calendar-day-name">א'</div>
+                    <div class="calendar-day-name">ב'</div>
+                    <div class="calendar-day-name">ג'</div>
+                    <div class="calendar-day-name">ד'</div>
+                    <div class="calendar-day-name">ה'</div>
+                    <div class="calendar-day-name">ו'</div>
+                    <div class="calendar-day-name">ש'</div>
+            `;
+            
+            // Add blank days for the start of the month
+            for (let i = 0; i < firstDayOfMonth.getDay(); i++) {
+                calendarHTML += `<div class="calendar-day other-month"></div>`;
+            }
+
+            // Add days of the month
+            for (let i = 1; i <= daysInMonth; i++) {
+                const date = new Date(year, month, i);
+                // Mock pricing logic
+                const random = Math.random();
+                let dayClass = 'available';
+                let price = 2500 + Math.floor(Math.random() * 5) * 100; // Base price
+                let title = 'זמין להזמנה';
+
+                if (random < 0.2) { // 20% chance to be booked
+                    dayClass = 'booked';
+                    price = 0;
+                    title = 'תפוס';
+                } else if (random < 0.5) { // 30% chance to be partially available (higher price)
+                    dayClass = 'partial';
+                    price += 1000;
+                    title = 'זמינות חלקית (מחיר גבוה)';
+                }
+                
+                // Weekend higher price
+                const dayOfWeek = date.getDay();
+                if (dayOfWeek === 4 || dayOfWeek === 5) { // Thu, Fri
+                    price *= 1.25;
+                }
+
+                calendarHTML += `
+                    <div class="calendar-day ${dayClass}" title="${title}">
+                        <div class="day-number">${i}</div>
+                        ${price > 0 ? `<div class="price">₪${Math.round(price)}</div>` : ''}
+                    </div>
+                `;
+            }
+
+            calendarHTML += '</div>';
+            calendarContainer.innerHTML = calendarHTML;
+        }
+
+        // --- Mock Firestore Data Setup (for demonstration without a real backend) ---
+        // In a real app, this data would exist in your Firestore database.
+        // We can't write to the database from the client like this without proper rules.
+        // This section is for explaining the data structure.
+        /*
+        // In Firestore, you would have collections like this:
+
+        // Collection: "projects"
+        // Document ID: "project_123_abc"
+        {
+            name: "הפקת כנס שנתי 2025",
+            clientId: "some_user_uid_from_auth",
+            links: {
+                driveFolder: "https://drive.google.com/...",
+            },
+            files: [
+                { name: "חשבונית #101.pdf", type: "invoice", url: "/path/to/invoice.pdf" },
+                { name: "לוגו לקוח.png", type: "asset", url: "/path/to/logo.png" }
+            ]
+        }
+        
+        // Collection: "availability"
+        // Document ID: "2025-06-25"
+        {
+            status: "partial", // 'available', 'partial', 'booked'
+            notes: "צילומים בבוקר, פנוי מהצהריים",
+            slots: [
+                { time: "morning", status: "booked", basePrice: 2500 },
+                { time: "evening", status: "available", basePrice: 3000 }
+            ]
+        }
+        */
+
+    </script>
+</body>
+</html>
