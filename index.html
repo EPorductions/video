@@ -85,16 +85,16 @@
             header nav {
                 display: flex;
                 align-items: center;
-                gap: 1rem;
+                gap: 0.5rem; /* Reduced gap for more items */
             }
         }
         header nav a {
             color: var(--text-dark);
             text-decoration: none;
             font-weight: 600;
-            padding: 6px 14px;
+            padding: 6px 12px; /* Slightly reduced padding */
             border-radius: 20px;
-            font-size: 16px;
+            font-size: 15px; /* Slightly reduced font size */
             transition: background-color 0.3s, color 0.3s;
         }
         header nav a:hover, header nav a.active {
@@ -272,54 +272,8 @@
             .phase-node h4 { font-size: 0.8rem; line-height: 1.2; }
         }
         @media (max-width: 480px) {
-            .phase-node h4 { display: none; } /* Hide text on very small screens to prevent clutter */
+            .phase-node h4 { display: none; }
         }
-
-
-        /* --- Clients Section --- */
-        .clients-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-            gap: 25px;
-        }
-        .client-card {
-            background-color: #f8fafc;
-            border-radius: 10px;
-            padding: 20px;
-            text-align: center;
-            border: 1px solid var(--border-color);
-            transition: all 0.3s ease;
-        }
-        .client-card:hover { transform: translateY(-5px); box-shadow: 0 6px 20px rgba(0,0,0,0.08); }
-        .client-logo {
-            height: 60px;
-            width: auto;
-            margin: 0 auto 15px;
-            object-fit: contain;
-        }
-        .client-card h4 { font-weight: 700; color: var(--primary-dark); }
-        .client-card p { font-size: 0.95rem; color: #64748b; }
-
-        /* --- Projects Section --- */
-        .projects-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-            gap: 25px;
-        }
-        .gallery-card {
-            background: var(--bg-white); border-radius: 10px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
-            transition: transform 0.3s, box-shadow 0.3s;
-            overflow: hidden; text-align: center;
-        }
-        .gallery-card:hover { transform: translateY(-5px); box-shadow: 0 8px 25px rgba(0,0,0,0.1); }
-        .gallery-card img {
-            width: 100%; height: 200px;
-            object-fit: cover; display: block;
-        }
-        .gallery-card-content { padding: 15px; }
-        .gallery-card h4 { margin-bottom: 5px; font-size: 1.2rem; font-weight: 700; }
-        .gallery-card p { font-size: 0.95rem; color: #666; }
 
         /* --- Pricing Section --- */
         .pricing-grid {
@@ -343,9 +297,7 @@
             transform: translateY(-5px) scale(1.02);
             box-shadow: 0 10px 30px rgba(0,0,0,0.1);
         }
-        .pricing-card-header {
-            text-align: center;
-        }
+        .pricing-card-header { text-align: center; }
         .pricing-card h3 { 
             font-size: 1.5rem; 
             font-weight: 800; 
@@ -398,14 +350,142 @@
         .cta-btn:hover { background-color: var(--primary-purple); }
         .pricing-card.featured .cta-btn { background-color: var(--primary-purple); }
         .pricing-card.featured .cta-btn:hover { background-color: var(--primary-pink); }
-        
         .kit-fee-note {
             text-align: center;
             margin-top: 2.5rem;
             font-size: 0.9rem;
             color: #64748b;
         }
-        
+
+        /* --- Dynamics Section & Modal --- */
+        .dynamics-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 25px;
+            margin-top: 2rem;
+        }
+        .dynamic-card {
+            background-color: var(--bg-white);
+            border-radius: 12px;
+            padding: 25px;
+            border: 1px solid var(--border-color);
+            transition: all 0.3s ease;
+            cursor: pointer;
+            display: flex;
+            flex-direction: column;
+        }
+        .dynamic-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 25px rgba(0,0,0,0.1);
+            border-color: var(--primary-purple);
+        }
+        .dynamic-card h4 {
+            font-size: 1.3rem;
+            font-weight: 700;
+            color: var(--primary-dark);
+            margin-bottom: 0.5rem;
+        }
+        .dynamic-card p {
+            font-size: 1rem;
+            color: #475569;
+            flex-grow: 1;
+            margin-bottom: 1.5rem;
+        }
+        .work-circle {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: -10px; /* Overlap icons */
+            margin-bottom: 1.5rem;
+        }
+        .work-circle-icon {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background-color: var(--bg-light);
+            color: var(--primary-purple);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 3px solid white;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            font-size: 1.5rem;
+            position: relative;
+        }
+        .work-circle-icon:not(:first-child) {
+            margin-right: -15px;
+        }
+        [dir="ltr"] .work-circle-icon:not(:first-child) {
+            margin-right: 0;
+            margin-left: -15px;
+        }
+
+        .modal-overlay {
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            background: rgba(0,0,0,0.6);
+            backdrop-filter: blur(5px);
+            -webkit-backdrop-filter: blur(5px);
+            z-index: 20000;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+        .modal-container {
+            background: var(--bg-white);
+            border-radius: 15px;
+            width: 90%;
+            max-width: 800px;
+            max-height: 90vh;
+            overflow-y: auto;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+            transform: scale(0.95);
+            transition: transform 0.3s ease;
+        }
+        .modal-overlay.active {
+            opacity: 1;
+        }
+        .modal-overlay.active .modal-container {
+            transform: scale(1);
+        }
+        .modal-header {
+            padding: 20px 30px;
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .modal-header h3 {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--primary-dark);
+            margin: 0;
+        }
+        .modal-close-btn {
+            background: none;
+            border: none;
+            font-size: 2rem;
+            color: #64748b;
+            cursor: pointer;
+            line-height: 1;
+        }
+        .modal-body { padding: 30px; }
+        .modal-body h4 {
+            font-size: 1.2rem;
+            font-weight: 700;
+            color: var(--primary-purple);
+            margin-top: 1.5rem;
+            margin-bottom: 0.5rem;
+        }
+        .modal-body img {
+            width: 100%;
+            border-radius: 8px;
+            margin-top: 1rem;
+        }
+
         /* --- Footer --- */
         footer {
             background: var(--text-dark); color: #a0aec0;
@@ -447,21 +527,21 @@
                 <span data-lang="he" class="visible-lang">התהליך שלנו</span>
                 <span data-lang="en">Our Process</span>
             </a>
-            <a href="#services" class="nav-link">
-                <span data-lang="he" class="visible-lang">שירותים</span>
-                <span data-lang="en">Services</span>
-            </a>
             <a href="#pricing" class="nav-link">
                 <span data-lang="he" class="visible-lang">תעריפים</span>
                 <span data-lang="en">Pricing</span>
+            </a>
+             <a href="#dynamics" class="nav-link">
+                <span data-lang="he" class="visible-lang">מעגלי עבודה</span>
+                <span data-lang="en">Work Dynamics</span>
             </a>
             <a href="#clients" class="nav-link">
                 <span data-lang="he" class="visible-lang">לקוחות</span>
                 <span data-lang="en">Clients</span>
             </a>
-            <a href="#projects" class="nav-link">
-                <span data-lang="he" class="visible-lang">פרויקטים</span>
-                <span data-lang="en">Projects</span>
+            <a href="#portal" class="nav-link">
+                <span data-lang="he" class="visible-lang">פורטל לקוחות</span>
+                <span data-lang="en">Client Portal</span>
             </a>
             <a href="#contact" class="nav-link">
                 <span data-lang="he" class="visible-lang">צרו קשר</span>
@@ -484,21 +564,21 @@
             <span data-lang="he" class="visible-lang">התהליך שלנו</span>
             <span data-lang="en">Our Process</span>
         </a>
-        <a href="#services" class="nav-link">
-            <span data-lang="he" class="visible-lang">שירותים</span>
-            <span data-lang="en">Services</span>
-        </a>
-         <a href="#pricing" class="nav-link">
+        <a href="#pricing" class="nav-link">
             <span data-lang="he" class="visible-lang">תעריפים</span>
             <span data-lang="en">Pricing</span>
+        </a>
+        <a href="#dynamics" class="nav-link">
+            <span data-lang="he" class="visible-lang">מעגלי עבודה</span>
+            <span data-lang="en">Work Dynamics</span>
         </a>
         <a href="#clients" class="nav-link">
             <span data-lang="he" class="visible-lang">לקוחות</span>
             <span data-lang="en">Clients</span>
         </a>
-        <a href="#projects" class="nav-link">
-            <span data-lang="he" class="visible-lang">פרויקטים</span>
-            <span data-lang="en">Projects</span>
+        <a href="#portal" class="nav-link">
+            <span data-lang="he" class="visible-lang">פורטל לקוחות</span>
+            <span data-lang="en">Client Portal</span>
         </a>
         <a href="#contact" class="nav-link">
             <span data-lang="he" class="visible-lang">צרו קשר</span>
@@ -511,7 +591,7 @@
     </div>
 
     <main>
-        <!-- Home Section -->
+        
         <section id="home" class="content-section" data-title-he="PsychoFlash" data-title-en="PsychoFlash">
             <div class="text-center max-w-4xl mx-auto">
                 <h1 class="hero-title scroll-animate">
@@ -529,8 +609,8 @@
                     <span data-lang="en">Our Strategy: Bridging Execution and Innovation</span>
                 </h2>
                 <p class="text-center max-w-3xl mx-auto">
-                    <span data-lang="he" class="visible-lang">העולם המקצועי שלנו מורכב משני חלקים המשלימים זה את זה. האסטרטגיה שלנו היא להשתמש בניסיון התפעולי כדי להבין לעומק את הצרכים שלכם, וליישם את היכולות הטכנולוגיות כדי לתת להם את הפתרון הטוב ביותר, היעיל ביותר והמרשים ביותר.</span>
-                    <span data-lang="en">Our professional world is composed of two complementary parts. Our strategy is to use our operational experience to deeply understand your needs, and apply our technological capabilities to provide the best, most efficient, and most impressive solution.</span>
+                    <span data-lang="he" class="visible-lang">העולם המקצועי שלנו מורכב משני חלקים המשלימים זה את זה. האסטרטגיה שלנו היא להשתמש ב<strong>ניסיון התפעולי</strong> כדי להבין לעומק את הצרכים שלכם, וליישם את ה<strong>יכולות הטכנולוגיות</strong> כדי לתת להם את הפתרון הטוב ביותר, היעיל ביותר והמרשים ביותר.</span>
+                    <span data-lang="en">Our professional world is composed of two complementary parts. Our strategy is to use our <strong>operational experience</strong> to deeply understand your needs, and apply our <strong>technological capabilities</strong> to provide the best, most efficient, and most impressive solution.</span>
                 </p>
                 <div class="grid md:grid-cols-2 gap-8 mt-8">
                     <div class="text-center p-4">
@@ -540,8 +620,8 @@
                             <span data-lang="en">The "Get-it-Done" - Reliable Execution</span>
                         </h3>
                         <p class="mt-2">
-                            <span data-lang="he" class="visible-lang">שנים של ניסיון בתפעול טכני מדויק, ניהול שידורים והקמות מקצועיות. זהו הבסיס היציב והאמין שמאפשר לכל הפקה לרוץ חלק, והסיבה שלקוחותינו סומכים עלינו פעם אחר פעם.</span>
-                            <span data-lang="en">Years of experience in precise technical operation and professional setups. This is the stable, reliable foundation that allows every production to run smoothly, and why our clients trust us time and again.</span>
+                            <span data-lang="he" class="visible-lang">שנים של ניסיון בתפעול טכני מדויק, ניהול שידורים והקמות מקצועיות. זהו ה<strong>בסיס היציב והאמין</strong> שמאפשר לכל הפקה לרוץ חלק, והסיבה שלקוחותינו סומכים עלינו פעם אחר פעם.</span>
+                            <span data-lang="en">Years of experience in precise technical operation and professional setups. This is the <strong>stable, reliable foundation</strong> that allows every production to run smoothly, and why our clients trust us time and again.</span>
                         </p>
                     </div>
                     <div class="text-center p-4">
@@ -551,15 +631,14 @@
                             <span data-lang="en">The "Toolbox" - The Creative Solution</span>
                         </h3>
                         <p class="mt-2">
-                            <span data-lang="he" class="visible-lang">מאגר רחב של יכולות טכנולוגיות ויצירתיות, כולל פיתוח, גרפיקה מתקדמת, אוטומציה ופתרונות AI. זהו הערך המוסף שמקפיץ כל הפקה והופך אותה לייחודית ומרשימה.</span>
-                            <span data-lang="en">A broad repository of technological and creative capabilities, including development, advanced graphics, automation, and AI solutions. This is the added value that elevates any production, making it unique and impressive.</span>
+                            <span data-lang="he" class="visible-lang">מאגר רחב של יכולות טכנולוגיות ויצירתיות, כולל פיתוח, גרפיקה מתקדמת, אוטומציה ופתרונות AI. זהו ה<strong>ערך המוסף</strong> שמקפיץ כל הפקה והופך אותה לייחודית ומרשימה.</span>
+                            <span data-lang="en">A broad repository of technological and creative capabilities, including development, advanced graphics, automation, and AI solutions. This is the <strong>added value</strong> that elevates any production, making it unique and impressive.</span>
                         </p>
                     </div>
                 </div>
             </div>
         </section>
 
-        <!-- Our Process Section -->
         <section id="process" class="content-section" data-title-he="התהליך שלנו" data-title-en="Our Process">
             <div class="section-container infographic-process-wrapper scroll-animate">
                 <h2 class="section-title">
@@ -621,58 +700,7 @@
                 </div>
             </div>
         </section>
-
-        <!-- Services Section -->
-        <section id="services" class="content-section" data-title-he="שירותים" data-title-en="Services">
-            <div class="section-container scroll-animate">
-                <h2 class="section-title">
-                    <span data-lang="he" class="visible-lang">שירותים</span>
-                    <span data-lang="en">Our Services</span>
-                </h2>
-                <div>
-                    <h3>
-                        <span data-lang="he" class="visible-lang">שירותי ליבה (ה"תכל'ס")</span>
-                        <span data-lang="en">Core Services (The "Get-it-Done")</span>
-                    </h3>
-                    <div class="info-cards">
-                        <div class="info-card scroll-animate">
-                            <h4><i class="fas fa-sliders-h"></i><span data-lang="he" class="visible-lang">תפעול טכני מקיף</span><span data-lang="en">Comprehensive Technical Operation</span></h4>
-                            <p><span data-lang="he" class="visible-lang">ניהול מלא של הצד הטכני בהפקות, מהקמה ועד פירוק, כדי להבטיח שהכל יתפקד בצורה חלקה וללא תקלות.</span><span data-lang="en">Full management of the technical aspects of productions, from setup to breakdown, ensuring everything runs smoothly and without glitches.</span></p>
-                        </div>
-                        <div class="info-card scroll-animate delay-1">
-                            <h4><i class="fas fa-broadcast-tower"></i><span data-lang="he" class="visible-lang">ניהול שידורים וירטואליים</span><span data-lang="en">Virtual Broadcast Management</span></h4>
-                            <p><span data-lang="he" class="visible-lang">מומחיות בפלטפורמות המובילות (Zoom, VMIX) ליצירת שידור וירטואלי או היברידי ברמה הגבוהה ביותר.</span><span data-lang="en">Expertise in leading platforms (Zoom, VMIX) to create top-tier virtual or hybrid broadcasts.</span></p>
-                        </div>
-                        <div class="info-card scroll-animate delay-2">
-                            <h4><i class="fas fa-desktop"></i><span data-lang="he" class="visible-lang">הפעלת טלפרומפטר</span><span data-lang="en">Teleprompter Operation</span></h4>
-                            <p><span data-lang="he" class="visible-lang">שירות מדויק המאפשר לדוברים להעביר את המסר בביטחון, בבהירות ובצורה טבעית מול המצלמה.</span><span data-lang="en">A precise service allowing speakers to deliver their message confidently, clearly, and naturally on camera.</span></p>
-                        </div>
-                    </div>
-                </div>
-                <div class="mt-12">
-                    <h3>
-                        <span data-lang="he" class="visible-lang">מנועי צמיחה ("ארגז הכלים")</span>
-                        <span data-lang="en">Growth Engines (The "Toolbox")</span>
-                    </h3>
-                    <div class="info-cards">
-                        <div class="info-card scroll-animate">
-                            <h4><i class="fas fa-palette"></i><span data-lang="he" class="visible-lang">גרפיקה ואנימציה לשידור</span><span data-lang="en">Live Graphics & Animation</span></h4>
-                             <p><span data-lang="he" class="visible-lang">עיצוב והפקה של גרפיקה דינמית, מעברונים וכותרות המשדרגים את הנראות של כל שידור חי.</span><span data-lang="en">Design and production of dynamic graphics, transitions, and titles that elevate the visual quality of any live broadcast.</span></p>
-                        </div>
-                        <div class="info-card scroll-animate delay-1">
-                            <h4><i class="fas fa-brain"></i><span data-lang="he" class="visible-lang">פתרונות מבוססי AI</span><span data-lang="en">AI-Based Solutions</span></h4>
-                            <p><span data-lang="he" class="visible-lang">שילוב כלי בינה מלאכותית לייעול תהליכים, אוטומציה של משימות ויצירת תוכן חדשני ומרתק.</span><span data-lang="en">Integrating AI tools to streamline processes, automate tasks, and create innovative and engaging content.</span></p>
-                        </div>
-                        <div class="info-card scroll-animate delay-2">
-                            <h4><i class="fas fa-code"></i><span data-lang="he" class="visible-lang">פיתוח כלי תוכנה ייעודיים</span><span data-lang="en">Custom Software Tools</span></h4>
-                            <p><span data-lang="he" class="visible-lang">בניית פתרונות תוכנה מותאמים אישית לאוטומציה ופתרון אתגרים ייחודיים בהפקות שלכם.</span><span data-lang="en">Building custom software solutions to automate and solve unique challenges in your productions.</span></p>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </section>
-
-        <!-- Pricing Section -->
+        
         <section id="pricing" class="content-section" data-title-he="תעריפים" data-title-en="Pricing">
             <div class="section-container scroll-animate">
                 <h2 class="section-title">
@@ -685,7 +713,6 @@
                 </p>
 
                 <div class="pricing-grid">
-                    <!-- Pricing Card 1: Operator -->
                     <div class="pricing-card scroll-animate">
                         <div class="pricing-card-header">
                             <div class="pricing-card-icon">
@@ -713,7 +740,6 @@
                         <a href="#contact" class="cta-btn mt-auto"><span data-lang="he" class="visible-lang">הזמינו מפעיל</span><span data-lang="en">Book an Operator</span></a>
                     </div>
                     
-                    <!-- Pricing Card 2 (Featured) -->
                     <div class="pricing-card featured scroll-animate delay-1">
                         <div class="pricing-card-header">
                             <div class="pricing-card-icon">
@@ -740,8 +766,7 @@
                         </ul>
                          <a href="#contact" class="cta-btn mt-auto"><span data-lang="he" class="visible-lang">להצעת מחיר</span><span data-lang="en">Get a Quote</span></a>
                     </div>
-
-                    <!-- Pricing Card 3 -->
+                    
                     <div class="pricing-card scroll-animate delay-2">
                          <div class="pricing-card-header">
                             <div class="pricing-card-icon">
@@ -774,7 +799,80 @@
             </div>
         </section>
 
-        <!-- Clients Section -->
+        <section id="dynamics" class="content-section" data-title-he="מעגלי עבודה" data-title-en="Work Dynamics">
+            <div class="section-container scroll-animate">
+                <h2 class="section-title">
+                    <span data-lang="he" class="visible-lang">מעגלי עבודה</span>
+                    <span data-lang="en">Work Dynamics</span>
+                </h2>
+                <p class="text-center max-w-3xl mx-auto">
+                    <span data-lang="he" class="visible-lang">הצלחה של הפקה טמונה בשיתוף פעולה. כאן תוכלו לראות דוגמאות לאופן שבו אני משתלב במערכים שונים, עובד עם קולגות וספקים, ומנווט פרויקטים מורכבים להצלחה.</span>
+                    <span data-lang="en">Production success lies in collaboration. Here you can see examples of how I integrate into different teams, work with colleagues and vendors, and navigate complex projects to success.</span>
+                </p>
+                <div class="dynamics-grid">
+                    <div class="dynamic-card scroll-animate" data-casestudy="case1">
+                        <div class="work-circle">
+                            <div class="work-circle-icon" title="PsychoFlash"><i class="fas fa-brain"></i></div>
+                            <div class="work-circle-icon" title="חברת הפקה"><i class="fas fa-building"></i></div>
+                            <div class="work-circle-icon" title="לקוח קצה"><i class="fas fa-user-tie"></i></div>
+                        </div>
+                        <h4>
+                            <span data-lang="he" class="visible-lang">אינטגרציה בצוות הפקה</span>
+                            <span data-lang="en">Production Team Integration</span>
+                        </h4>
+                        <p>
+                            <span data-lang="he" class="visible-lang">כיצד אני מצטרף כאיש מקצוע מומחה לצוות קיים של חברת הפקה, לוקח אחריות על התחום הטכני ומוודא ביצוע חלק מול הלקוח.</span>
+                            <span data-lang="en">How I join an existing production team as a technical specialist, taking ownership of the tech domain to ensure smooth execution for the client.</span>
+                        </p>
+                        <a class="cta-btn mt-auto">
+                           <span data-lang="he" class="visible-lang">צפו בתיאור מקרה</span>
+                           <span data-lang="en">View Case Study</span>
+                        </a>
+                    </div>
+                    
+                    <div class="dynamic-card scroll-animate delay-1" data-casestudy="case2">
+                         <div class="work-circle">
+                            <div class="work-circle-icon" title="PsychoFlash"><i class="fas fa-brain"></i></div>
+                            <div class="work-circle-icon" title="ספק AV"><i class="fas fa-video"></i></div>
+                            <div class="work-circle-icon" title="ספק תאורה"><i class="far fa-lightbulb"></i></div>
+                        </div>
+                        <h4>
+                            <span data-lang="he" class="visible-lang">ניהול ספקים טכניים</span>
+                            <span data-lang="en">Technical Vendor Management</span>
+                        </h4>
+                        <p>
+                            <span data-lang="he" class="visible-lang">עבודה כמנהל טכני מטעם הלקוח. אני "מדבר בשפה שלהם" ומתאם בין כל ספקי ה-AV, התאורה והסאונד כדי ליצור פתרון אחוד ומושלם.</span>
+                            <span data-lang="en">Acting as the client's Technical Director. I "speak the language," coordinating all AV, lighting, and sound vendors to create a single, flawless solution.</span>
+                        </p>
+                         <a class="cta-btn mt-auto">
+                           <span data-lang="he" class="visible-lang">צפו בתיאור מקרה</span>
+                           <span data-lang="en">View Case Study</span>
+                        </a>
+                    </div>
+                     
+                    <div class="dynamic-card scroll-animate delay-2" data-casestudy="case3">
+                        <div class="work-circle">
+                            <div class="work-circle-icon" title="PsychoFlash"><i class="fas fa-brain"></i></div>
+                            <div class="work-circle-icon" title="במאי/ת"><i class="fas fa-bullhorn"></i></div>
+                            <div class="work-circle-icon" title="איש/אשת תוכן"><i class="fas fa-pencil-alt"></i></div>
+                        </div>
+                        <h4>
+                            <span data-lang="he" class="visible-lang">שותפות קריאייטיבית</span>
+                            <span data-lang="en">Creative Partnership</span>
+                        </h4>
+                        <p>
+                            <span data-lang="he" class="visible-lang">שיתוף פעולה הדוק עם אנשי קריאייטיב. אני מתרגם את החזון האמנותי של הבמאי והתוכן של הכותב לפתרונות טכניים ברי-ביצוע.</span>
+                            <span data-lang="en">Close collaboration with creative professionals. I translate the artistic vision of the director and writer into feasible technical solutions.</span>
+                        </p>
+                         <a class="cta-btn mt-auto">
+                           <span data-lang="he" class="visible-lang">צפו בתיאור מקרה</span>
+                           <span data-lang="en">View Case Study</span>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </section>
+
         <section id="clients" class="content-section" data-title-he="לקוחות" data-title-en="Clients">
             <div class="section-container scroll-animate">
                 <h2 class="section-title">
@@ -805,61 +903,12 @@
             </div>
         </section>
 
-        <!-- Projects Section -->
-        <section id="projects" class="content-section" data-title-he="פרויקטים" data-title-en="Projects">
-            <div class="section-container scroll-animate">
-                <h2 class="section-title">
-                    <span data-lang="he" class="visible-lang">פרויקטים נבחרים</span>
-                    <span data-lang="en">Featured Projects</span>
-                </h2>
-                <div class="projects-grid">
-                    <div class="gallery-card scroll-animate">
-                        <img src="https://placehold.co/400x250/003f5c/ffffff?text=Live+Broadcast" alt="Project">
-                        <div class="gallery-card-content">
-                            <h4><span data-lang="he" class="visible-lang">שידורים חיים מורכבים</span><span data-lang="en">Complex Live Broadcasts</span></h4>
-                            <p><span data-lang="he" class="visible-lang">ניהול שידורים עבור לקוחות מובילים.</span><span data-lang="en">Managing broadcasts for leading clients.</span></p>
-                        </div>
-                    </div>
-                    <div class="gallery-card scroll-animate delay-1">
-                        <img src="https://placehold.co/400x250/7a5195/ffffff?text=Corporate+Event" alt="Project">
-                        <div class="gallery-card-content">
-                            <h4><span data-lang="he" class="visible-lang">אירועי חברה וכנסים</span><span data-lang="en">Corporate Events</span></h4>
-                            <p><span data-lang="he" class="visible-lang">תפעול טכני לאירועים של חברות מובילות.</span><span data-lang="en">Technical operations for major companies.</span></p>
-                        </div>
-                    </div>
-                    <div class="gallery-card scroll-animate delay-2">
-                        <img src="https://placehold.co/400x250/ef5675/ffffff?text=Software" alt="Project">
-                        <div class="gallery-card-content">
-                            <h4><span data-lang="he" class="visible-lang">פיתוח פתרונות תוכנה</span><span data-lang="en">Software Solutions</span></h4>
-                            <p><span data-lang="he" class="visible-lang">בניית מערכות ייעודיות לשידור חי.</span><span data-lang="en">Building custom systems for live streaming.</span></p>
-                        </div>
-                    </div>
-                    <div class="gallery-card scroll-animate delay-3">
-                        <img src="https://placehold.co/400x250/ffa600/ffffff?text=AI+Integration" alt="Project">
-                        <div class="gallery-card-content">
-                            <h4><span data-lang="he" class="visible-lang">שילוב AI בהפקה</span><span data-lang="en">AI in Production</span></h4>
-                             <p><span data-lang="he" class="visible-lang">שימוש בכלי AI לייעול ושיפור.</span><span data-lang="en">Using AI tools for optimization.</span></p>
-                        </div>
-                    </div>
-                     <div class="gallery-card scroll-animate delay-4">
-                        <img src="https://placehold.co/400x250/2a9d8f/ffffff?text=Virtual+Studio" alt="Project">
-                        <div class="gallery-card-content">
-                            <h4><span data-lang="he" class="visible-lang">אולפנים וירטואליים</span><span data-lang="en">Virtual Studios</span></h4>
-                            <p><span data-lang="he" class="visible-lang">הקמה ותפעול של אולפנים וירטואליים.</span><span data-lang="en">Setup and operation of virtual studios.</span></p>
-                        </div>
-                    </div>
-                     <div class="gallery-card scroll-animate" style="transition-delay: 0.5s;">
-                        <img src="https://placehold.co/400x250/e76f51/ffffff?text=Consulting" alt="Project">
-                        <div class="gallery-card-content">
-                            <h4><span data-lang="he" class="visible-lang">ייעוץ טכנולוגי</span><span data-lang="en">Tech Consulting</span></h4>
-                           <p><span data-lang="he" class="visible-lang">ליווי חברות הפקה ושדרוג מערכים.</span><span data-lang="en">Guiding production companies and upgrading systems.</span></p>
-                        </div>
-                    </div>
-                </div>
+        <section id="portal" class="content-section" data-title-he="פורטל לקוחות" data-title-en="Client Portal">
+             <div class="section-container scroll-animate" style="padding: 0; max-width: 95%; height: 80vh; overflow: hidden;">
+                 <iframe src="https://eporductions.github.io/video/portal.html" style="width: 100%; height: 100%; border: none; border-radius: 12px;" title="פורטל לקוחות"></iframe>
             </div>
         </section>
 
-        <!-- Contact Section -->
         <section id="contact" class="content-section" data-title-he="צרו קשר" data-title-en="Contact">
              <div class="section-container text-center scroll-animate">
                 <h2 class="section-title">
@@ -887,6 +936,17 @@
         </section>
     </main>
 
+    <div id="case-study-modal" class="modal-overlay">
+        <div class="modal-container">
+            <div class="modal-header">
+                <h3 id="modal-title"></h3>
+                <button id="modal-close" class="modal-close-btn">&times;</button>
+            </div>
+            <div class="modal-body" id="modal-body">
+            </div>
+        </div>
+    </div>
+
     <footer>
         <div class="footer-content">
             <p>&copy; 2025 PsychoFlash Productions. All rights reserved.</p>
@@ -903,10 +963,89 @@
             state: {
                 lang: 'he',
                 activePhaseNode: null,
-                infographicObserver: null,
-                headerTitleObserver: null,
                 currentSectionId: 'home',
                 mouse: { x: null, y: null, radius: 150 },
+            },
+            
+            caseStudies: {
+                case1: {
+                    title_he: "כנס לקוחות שנתי - חברת הייטק",
+                    title_en: "Annual Customer Conference - Tech Company",
+                    content_he: `
+                        <img src="https://placehold.co/700x400/003f5c/ffffff?text=Project+Image" alt="כנס לקוחות">
+                        <h4>האתגר</h4>
+                        <p>חברת הפקה גדולה נשכרה להפיק כנס לקוחות בינלאומי עבור חברת הייטק. הם היו זקוקים למומחה שינהל את כל היבט השידור החי המורכב, הכולל מספר במות, דוברים מרחוק, ואינטראקציה עם קהל אונליין.</p>
+                        <h4>התפקיד שלי: במאי טכני</h4>
+                        <p>הצטרפתי לצוות ההפקה כבמאי הטכני של האירוע. הייתי אחראי על תכנון ארכיטקטורת השידור, ניהול צוות המפעילים, ותיאום מלא מול צוות הקריאייטיב של חברת ההפקה והלקוח הסופי.</p>
+                        <h4>התהליך</h4>
+                        <p>בשלב התכנון, בניתי תרשים זרימה מפורט לשידור. ביום האירוע, ניהלתי את חדר הבקרה, ביצעתי את הניתובים בזמן אמת, טיפלתי בתקלות באופן מיידי והבטחתי שהחזון של הלקוח מתורגם לשידור חי באיכות הגבוהה ביותר.</p>
+                        <h4>התוצאה</h4>
+                        <p>האירוע עבר בהצלחה מסחררת, עם פידבק חיובי מהלקוח ומהקהל. חברת ההפקה קיבלה שקט נפשי מלא בידיעה שהצד הטכני נמצא בידיים בטוחות, מה שאיפשר להם להתמקד בשאר היבטי האירוע.</p>
+                    `,
+                    content_en: `
+                        <img src="https://placehold.co/700x400/003f5c/ffffff?text=Project+Image" alt="Customer Conference">
+                        <h4>The Challenge</h4>
+                        <p>A large production company was hired to produce an international customer conference for a tech company. They needed a specialist to manage the complex live broadcast aspect, involving multiple stages, remote speakers, and online audience interaction.</p>
+                        <h4>My Role: Technical Director</h4>
+                        <p>I joined the production team as the event's Technical Director. I was responsible for planning the broadcast architecture, managing the team of operators, and coordinating fully with the production company's creative team and the end client.</p>
+                        <h4>The Process</h4>
+                        <p>During the planning phase, I built a detailed broadcast flowchart. On the event day, I managed the control room, performed real-time switching, handled any issues immediately, and ensured the client's vision was translated into the highest quality live broadcast.</p>
+                        <h4>The Outcome</h4>
+                        <p>The event was a resounding success, with positive feedback from the client and audience. The production company had complete peace of mind knowing the technical side was in safe hands, allowing them to focus on other aspects of the event.</p>
+                    `
+                },
+                case2: {
+                    title_he: "השקת מוצר גלובלית",
+                    title_en: "Global Product Launch",
+                    content_he: `
+                        <img src="https://placehold.co/700x400/7a5195/ffffff?text=Product+Launch" alt="השקת מוצר">
+                        <h4>האתגר</h4>
+                        <p>חברת סטארטאפ תכננה אירוע השקה היברידי למוצר הדגל שלה. הם רצו להבטיח חוויה טכנולוגית מרשימה וחלקה, אך לא היה להם את הידע לנהל ספקים טכניים מרובים (סאונד, תאורה, וידאו, סטרימינג).</p>
+                        <h4>התפקיד שלי: מנהל טכני מטעם הלקוח</h4>
+                        <p>נכנסתי לתפקיד המנהל הטכני של הפרויקט. פעלתי כנציג הלקוח מול כל הספקים. תרגמתי את הצרכים של הלקוח למפרטים טכניים, ניהלתי את המכרז בין הספקים, ופיקחתי על עבודתם בשטח.</p>
+                        <h4>התהליך</h4>
+                        <p>יצרתי מסמך טכני מאוחד (Tech Rider) שכלל את כל הדרישות. קיימתי פגישות תיאום שבועיות עם כלל הספקים כדי להבטיח סינכרון מלא. ביום האירוע, הייתי נקודת הקשר המרכזית לכל בעיה טכנית, מה שאיפשר ללקוח להתמקד בתוכן ובמסרים.</p>
+                        <h4>התוצאה</h4>
+                        <p>כל המערכות עבדו בהרמוניה מושלמת. הלקוח חסך זמן וכסף בזכות ניהול יעיל, והשיג אירוע מרשים טכנולוגית שעמד בסטנדרטים הגבוהים ביותר.</p>
+                    `,
+                     content_en: `
+                        <img src="https://placehold.co/700x400/7a5195/ffffff?text=Product+Launch" alt="Product Launch">
+                        <h4>The Challenge</h4>
+                        <p>A startup was planning a hybrid launch event for its flagship product. They wanted an impressive and seamless technological experience but lacked the expertise to manage multiple technical vendors (sound, lighting, video, streaming).</p>
+                        <h4>My Role: Client-Side Technical Director</h4>
+                        <p>I stepped in as the project's Technical Director, acting as the client's representative to all vendors. I translated the client's needs into technical specifications, managed the vendor bidding process, and supervised their work on-site.</p>
+                        <h4>The Process</h4>
+                        <p>I created a unified technical rider that included all requirements. I held weekly coordination meetings with all vendors to ensure full synchronization. On event day, I was the central point of contact for any technical issue, allowing the client to focus on their content and message.</p>
+                        <h4>The Outcome</h4>
+                        <p>All systems worked in perfect harmony. The client saved time and money through efficient management and achieved a technologically impressive event that met the highest standards.</p>
+                    `
+                },
+                 case3: {
+                    title_he: "סדרת וובינרים שיווקיים",
+                    title_en: "Marketing Webinar Series",
+                    content_he: `
+                        <img src="https://placehold.co/700x400/ef5675/ffffff?text=Webinar+Series" alt="סדרת וובינרים">
+                        <h4>האתגר</h4>
+                        <p>מחלקת השיווק של חברה גדולה רצתה להפיק סדרת וובינרים מקצועית. הבמאי ואיש התוכן היו מעולים, אך היו זקוקים לשותף טכני שיבין את החזון הקריאייטיבי ויהפוך אותו למציאות טכנית.</p>
+                        <h4>התפקיד שלי: מפיק טכני ויועץ</h4>
+                        <p>עבדתי בצמוד לבמאי ולאיש התוכן. בפגישות הקריאייטיב, תרמתי רעיונות לשימוש בגרפיקה, אנימציות, וכלים אינטראקטיביים כדי להעשיר את התוכן. לאחר מכן, תרגמתי את הרעיונות למפרט עבודה למפעיל ה-vMix.</p>
+                        <h4>התהליך</h4>
+                        <p>בניתי תבנית שידור (template) ב-vMix שכללה את כל האלמנטים הגרפיים והמעברים שסוכמו. לפני כל וובינר, ביצענו חזרה טכנית מלאה. במהלך השידור החי, תפקדתי כבמאי טכני, מפעיל את כל המערכות בהתאם לתסריט ולחזון של הבמאי.</p>
+                        <h4>התוצאה</h4>
+                        <p>הוובינרים נראו ברמה של שידור טלוויזיוני, עם זרימה חלקה וגרפיקה מרשימה. השותפות הקריאייטיבית-טכנית אפשרה למצות את הפוטנציאל של התוכן ולהעביר אותו לקהל בצורה האפקטיבית ביותר.</p>
+                    `,
+                     content_en: `
+                        <img src="https://placehold.co/700x400/ef5675/ffffff?text=Webinar+Series" alt="Webinar Series">
+                        <h4>The Challenge</h4>
+                        <p>A large company's marketing department wanted to produce a professional webinar series. The director and content manager were excellent, but they needed a technical partner who could understand the creative vision and turn it into a technical reality.</p>
+                        <h4>My Role: Technical Producer & Consultant</h4>
+                        <p>I worked closely with the director and content manager. In creative meetings, I contributed ideas for using graphics, animations, and interactive tools to enrich the content. I then translated these ideas into a work specification for the vMix operator.</p>
+                        <h4>The Process</h4>
+                        <p>I built a vMix broadcast template that included all the agreed-upon graphic elements and transitions. Before each webinar, we conducted a full technical rehearsal. During the live broadcast, I acted as the technical director, operating all systems according to the script and the director's vision.</p>
+                        <h4>The Outcome</h4>
+                        <p>The webinars had a television-broadcast quality, with a smooth flow and impressive graphics. The creative-technical partnership allowed us to maximize the content's potential and deliver it to the audience in the most effective way.</p>
+                    `
+                }
             },
             
             init() {
@@ -917,6 +1056,7 @@
                 this.setupHeaderTitleObserver();
                 this.setupInfographicAnimation();
                 this.setupScrollAnimations();
+                this.setupModal();
             },
 
             cacheDOM() {
@@ -939,6 +1079,13 @@
                     canvasBack: document.getElementById('orb-canvas-back'),
                     processInfographic: document.querySelector('.infographic-process-wrapper'),
                     sections: document.querySelectorAll('.content-section'),
+                    modal: {
+                        overlay: document.getElementById('case-study-modal'),
+                        title: document.getElementById('modal-title'),
+                        body: document.getElementById('modal-body'),
+                        closeBtn: document.getElementById('modal-close'),
+                    },
+                    dynamicCards: document.querySelectorAll('.dynamic-card'),
                 };
             },
 
@@ -957,6 +1104,47 @@
                 });
                 window.addEventListener('resize', this.resizeCanvas.bind(this));
             },
+
+            setupModal() {
+                this.dom.dynamicCards.forEach(card => {
+                    card.addEventListener('click', () => {
+                        const caseId = card.dataset.casestudy;
+                        this.openModal(caseId);
+                    });
+                });
+                this.dom.modal.closeBtn.addEventListener('click', () => this.closeModal());
+                this.dom.modal.overlay.addEventListener('click', (e) => {
+                    if (e.target === this.dom.modal.overlay) {
+                        this.closeModal();
+                    }
+                });
+            },
+
+            openModal(caseId) {
+                const caseData = this.caseStudies[caseId];
+                if (!caseData) return;
+
+                const title = this.state.lang === 'he' ? caseData.title_he : caseData.title_en;
+                const content = this.state.lang === 'he' ? caseData.content_he : caseData.content_en;
+
+                this.dom.modal.title.innerHTML = title;
+                this.dom.modal.body.innerHTML = content;
+                
+                this.dom.modal.overlay.style.display = 'flex';
+                setTimeout(() => {
+                    this.dom.modal.overlay.classList.add('active');
+                }, 10);
+                document.body.style.overflow = 'hidden';
+            },
+
+            closeModal() {
+                this.dom.modal.overlay.classList.remove('active');
+                setTimeout(() => {
+                    this.dom.modal.overlay.style.display = 'none';
+                }, 300);
+                document.body.style.overflow = '';
+            },
+
 
             handleNavClick(e) {
                 e.preventDefault();
@@ -995,6 +1183,10 @@
 
                 if (!isInitial) {
                     this.updateHeaderTitle(this.state.currentSectionId);
+                    if (this.dom.modal.overlay.style.display === 'flex') {
+                        const currentCaseId = this.dom.dynamicCards.find(c => c.classList.contains('active-case'))?.dataset.casestudy;
+                        if(currentCaseId) this.openModal(currentCaseId);
+                    }
                 }
             },
             
@@ -1005,7 +1197,7 @@
                     threshold: 0
                 };
 
-                this.state.headerTitleObserver = new IntersectionObserver((entries) => {
+                const observer = new IntersectionObserver((entries) => {
                     entries.forEach(entry => {
                         if (entry.isIntersecting) {
                             const sectionId = entry.target.id;
@@ -1021,7 +1213,7 @@
                 }, observerOptions);
 
                 this.dom.sections.forEach(section => {
-                    this.state.headerTitleObserver.observe(section);
+                    observer.observe(section);
                 });
             },
 
@@ -1035,8 +1227,8 @@
                 const titleContainerHe = this.dom.headerTitleContainer.querySelector('[data-lang="he"]');
                 const titleContainerEn = this.dom.headerTitleContainer.querySelector('[data-lang="en"]');
                 
-                titleContainerHe.textContent = titleHe;
-                titleContainerEn.textContent = titleEn;
+                if (titleContainerHe) titleContainerHe.textContent = titleHe || 'PsychoFlash';
+                if (titleContainerEn) titleContainerEn.textContent = titleEn || 'PsychoFlash';
             },
 
             setupInfographicAnimation() {
@@ -1046,17 +1238,17 @@
                 const progressLine = timeline.querySelector('.timeline-line-progress');
                 const nodes = timeline.querySelectorAll('.phase-node');
                 
-                this.state.infographicObserver = new IntersectionObserver((entries) => {
+                const observer = new IntersectionObserver((entries) => {
                     if (entries[0].isIntersecting) {
                         progressLine.style.width = '100%';
                         nodes.forEach((node, index) => {
                             setTimeout(() => node.classList.add('visible'), index * 200);
                         });
-                        this.state.infographicObserver.disconnect();
+                        observer.disconnect();
                     }
                 }, { threshold: 0.5 });
 
-                this.state.infographicObserver.observe(timeline);
+                observer.observe(timeline);
             },
             
             setupScrollAnimations() {
@@ -1065,7 +1257,6 @@
                     entries.forEach(entry => {
                         if (entry.isIntersecting) {
                             entry.target.classList.add('in-view');
-                            // observer.unobserve(entry.target); // Optional: keep animating on re-scroll
                         }
                     });
                 }, { threshold: 0.1 });
@@ -1119,15 +1310,14 @@
                     this.canvas = canvas;
                     this.x = Math.random() * this.canvas.width;
                     this.y = Math.random() * this.canvas.height;
-                    this.radius = Math.random() * 3 + 1;
-                    this.baseSpeedX = (Math.random() - 0.5) * 0.2;
-                    this.baseSpeedY = (Math.random() - 0.5) * 0.2;
+                    this.radius = Math.random() * 6 + 3; // Orbs are now bigger (2px to 7px radius)
+                    this.baseSpeedX = (Math.random() - 0.5) * 0.25;
+                    this.baseSpeedY = (Math.random() - 0.5) * 0.3;
                     this.speedX = this.baseSpeedX;
                     this.speedY = this.baseSpeedY;
                     this.color = `rgba(122, 81, 149, ${Math.random()*0.4 + 0.1})`;
                  }
                  update(mouse) {
-                    // Mouse interaction
                     if (mouse.x !== null) {
                         const dx = this.x - mouse.x;
                         const dy = this.y - mouse.y;
@@ -1143,16 +1333,12 @@
                             this.speedY += directionY;
                         }
                     }
-
-                    // Apply friction/drag and pull back to base speed
                     this.speedX = (this.speedX * 0.96) + (this.baseSpeedX * 0.04);
                     this.speedY = (this.speedY * 0.96) + (this.baseSpeedY * 0.04);
                     
-                    // Move the orb
                     this.x += this.speedX;
                     this.y += this.speedY;
                     
-                    // Screen wrap
                     if (this.x > this.canvas.width + this.radius) this.x = -this.radius;
                     if (this.x < -this.radius) this.x = this.canvas.width + this.radius;
                     if (this.y > this.canvas.height + this.radius) this.y = -this.radius;
@@ -1170,7 +1356,7 @@
             initOrbs() {
                 if (!this.dom.canvasBack) return;
                 this.orbs = [];
-                let numOrbs = window.innerWidth < 768 ? 40 : 80;
+                let numOrbs = window.innerWidth < 768 ? 60 : 100;
                 for (let i = 0; i < numOrbs; i++) {
                     this.orbs.push(new this.GlowingOrb(this.dom.canvasBack));
                 }
