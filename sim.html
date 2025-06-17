@@ -2,7 +2,7 @@
 <html lang="he" dir="rtl">
 <head>
     <meta charset="UTF-8">
-    <title>אוריין אדלני - סימולציה אינטראקטיבית V3.5</title>
+    <title>אוריין אדלני - סימולציה אינטראקטיבית V3.6</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <style>
         /* --- General & Reset Styles --- */
@@ -82,7 +82,7 @@
             flex-direction: column;
             gap: 5px;
             text-align: right;
-            min-width: 180px;
+            min-width: 200px;
         }
         #gravityCenterMarker {
             position: absolute; width: 24px; height: 24px;
@@ -95,22 +95,33 @@
 
         /* --- News Ticker --- */
         #news-ticker-container {
-            position: fixed; bottom: 0; left: 0; width: 100%;
+            position: fixed;
+            bottom: 10px;
+            left: 10px;
+            right: 10px;
+            width: calc(100% - 20px);
             background-color: rgba(10, 10, 15, 0.85);
             backdrop-filter: blur(5px);
-            overflow: hidden; white-space: nowrap; z-index: 10001; /* High z-index */
-            padding: 8px 0; border-top: 1px solid #444;
-            pointer-events: none; /* Make it non-interactive */
-            direction: ltr; /* Container direction is LTR for the animation */
+            overflow: hidden;
+            white-space: nowrap;
+            z-index: 10001;
+            padding: 8px 0;
+            border: 1px solid #444;
+            border-radius: 8px;
+            box-shadow: 0 0 15px rgba(0,0,0,0.5);
+            pointer-events: none;
+            direction: ltr;
         }
         #news-ticker-content {
             display: inline-block;
-            color: #ffc107; font-size: 15px;
+            color: #ffc107;
+            font-size: 15px;
             text-shadow: 0 0 5px rgba(255,193,7,0.5);
             will-change: transform;
-            position: absolute; /* Needed for JS transform */
+            position: absolute;
             white-space: nowrap;
-            /* Animation is now fully controlled by GSAP */
+            visibility: hidden; /* Start hidden */
+            padding: 0 15px;
         }
     </style>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.9.1/gsap.min.js"></script>
@@ -154,10 +165,12 @@
 
     <canvas id="canvas"></canvas>
     <div id="hudContainer">
-        <div id="zoomInfo">Zoom: 1.00x</div>
+        <div id="zoomInfo">זום: 1.00x</div>
         <div id="objectCount"></div>
         <div id="physicsStatus"></div>
         <div id="mouseCoords"></div>
+        <div id="fpsDisplay"></div>
+        <div id="energyDisplay"></div>
     </div>
     <div id="gravityCenterMarker"></div>
     <div id="news-ticker-container">
@@ -187,8 +200,9 @@
     let layoutMode = 'circle', gravityMode = 'none', vortexStrength = 0;
     let gravityCenter = { x: 0, y: 0 };
 
-    // Interactive Forces
+    // Interactive Forces & HUD Stats
     let earthquakeLevel = 0, windLevel = 0, lastEarthquakeClick = 0;
+    let frameCount = 0, lastFpsUpdate = 0, fps = 0, totalKineticEnergy = 0;
 
     // Ticker & Idle Mode
     let tickerMessages = []; let tickerContentEl, tickerTween = null;
@@ -859,7 +873,8 @@
             keyCubes.forEach(cube => {
                 cube.x = cube.gridX + (Math.random() - 0.5) * 10;
                 cube.y = cube.gridY + (Math.random() - 0.5) * 10;
-                cube.vx = 0; cube.vy = 0; cube.dragging = false;
+                cube.vx = 0; cube.vy = 0;
+                cube.dragging = false;
             });
         }
     }
@@ -867,63 +882,80 @@
     // =========================================
     // 9. Ticker and Idle Mode (REBUILT)
     // =========================================
-    function startTickerAnimation(isLoop = false) {
-        if (!tickerContentEl || !canvas || tickerMessages.length === 0) {
-            if (tickerTween) tickerTween.kill();
-            if (tickerContentEl) tickerContentEl.textContent = "";
-            return;
-        }
+    function createStyledHTML(text) {
+        const regex = /(\*[^*]+\*|\|[^|]+\|#[0-9a-fA-F]{6}\|)/g;
+        let resultHTML = '';
+        let lastIndex = 0;
+        let match;
 
+        while ((match = regex.exec(text)) !== null) {
+            if (match.index > lastIndex) {
+                resultHTML += `<span>${text.substring(lastIndex, match.index)}</span>`;
+            }
+            const styledMatch = match[0];
+            if (styledMatch.startsWith('*')) {
+                resultHTML += `<strong>${styledMatch.slice(1, -1)}</strong>`;
+            } else if (styledMatch.startsWith('|')) {
+                const [_, word, color] = styledMatch.split('|');
+                resultHTML += `<span style="color: ${color}; text-shadow: 0 0 5px ${color}60;">${word}</span>`;
+            }
+            lastIndex = regex.lastIndex;
+        }
+        if (lastIndex < text.length) {
+            resultHTML += `<span>${text.substring(lastIndex)}</span>`;
+        }
+        return resultHTML;
+    }
+
+    function runTicker() {
+        if (!tickerContentEl || !tickerContentEl.parentElement) return;
         if (tickerTween) tickerTween.kill();
 
-        const el = tickerContentEl;
-        const fullWidth = el.offsetWidth;
-        const containerWidth = canvas.width;
-        const speed = 80;
-        const duration = (fullWidth + containerWidth) / speed;
+        const fullText = tickerMessages.map(m => m.text).join('   |   ');
+        tickerContentEl.innerHTML = createStyledHTML(fullText);
 
-        if (duration <= 0.1) {
-            setTimeout(() => startTickerAnimation(true), 50); // Retry if width is not ready
+        if (fullText.trim() === '') {
+            gsap.set(tickerContentEl, { visibility: 'hidden' });
             return;
         }
 
-        // Always start a new loop from off-screen left
-        gsap.set(el, { x: -fullWidth });
-        tickerTween = gsap.to(el, {
+        gsap.set(tickerContentEl, { visibility: 'visible' });
+
+        const elWidth = tickerContentEl.offsetWidth;
+        const containerWidth = tickerContentEl.parentElement.offsetWidth;
+        const speed = 80;
+        const duration = (elWidth + containerWidth) / speed;
+
+        if (duration <= 0.1) {
+             setTimeout(runTicker, 100);
+             return;
+        }
+        
+        // Start from left-off-screen and move to right-off-screen
+        gsap.set(tickerContentEl, {x: -elWidth});
+        tickerTween = gsap.to(tickerContentEl, {
             x: containerWidth,
             duration: duration,
-            ease: "none",
-            onComplete: () => startTickerAnimation(true)
+            ease: 'none',
+            repeat: -1,
         });
     }
 
-    function updateTickerContent() {
-        if (!tickerContentEl) return;
-        const fullText = tickerMessages.map(m => m.message).join('   |   ');
-        tickerContentEl.textContent = fullText;
-
-        if (fullText.trim() === '') {
-            gsap.set(tickerContentEl, { autoAlpha: 0 });
-            if(tickerTween) tickerTween.kill();
-        } else {
-            gsap.set(tickerContentEl, { autoAlpha: 1 });
-            setTimeout(() => startTickerAnimation(true), 10);
-        }
-    }
 
     function addTickerMessage(message, duration, isFunny = false, customId = null) {
         const id = customId || Date.now() + Math.random();
-        tickerMessages = tickerMessages.filter(m => m.id !== id);
-        tickerMessages.unshift({ id, message, isFunny });
         
-        updateTickerContent();
+        tickerMessages = tickerMessages.filter(m => m.id !== id);
+        tickerMessages.push({ id, text: message, isFunny });
+        
+        runTicker();
         
         if (duration) {
             setTimeout(() => {
                 const index = tickerMessages.findIndex(m => m.id === id);
                 if (index > -1) {
                     tickerMessages.splice(index, 1);
-                    updateTickerContent();
+                    runTicker();
                 }
             }, duration);
         }
@@ -934,9 +966,9 @@
         tickerMessages = [];
         if(tickerContentEl) tickerContentEl.textContent = '';
         
-        addTickerMessage("ברוכים הבאים לסימולציה של אוריין אדלני!", 15000);
-        setTimeout(() => addTickerMessage("נסה את המערבולת בעוצמה מקסימלית!", 12000, true), 5000);
-        setTimeout(() => addTickerMessage("אפשר להזיז את מרכז הכבידה בלחיצה על הרקע.", 15000, true), 10000);
+        addTickerMessage("ברוכים הבאים לסימולציה *האינטראקטיבית* של |אוריין אדלני|#ffdd57|! זוהי סביבת ניסויים דינמית לפיזיקה ואינטראקציות, המדגימה תנועה כאוטית ומבוקרת.", 25000);
+        setTimeout(() => addTickerMessage("נסה את מצב |המערבולת|#ff5757| בעוצמה מקסימלית ותראו מה קורה... (על אחריותכם בלבד).", 15000, true), 5000);
+        setTimeout(() => addTickerMessage("אפשר להזיז את *מרכז הכבידה* בלחיצה על הרקע. כל היקום יסתובב סביב הנקודה החדשה.", 20000, true), 10000);
     }
     
     function resetIdleTimer() {
@@ -945,13 +977,13 @@
         const demoMsgIndex = tickerMessages.findIndex(m => m.id === 'demo_mode_msg');
         if (demoMsgIndex > -1) {
             tickerMessages.splice(demoMsgIndex, 1);
-            updateTickerContent();
+            runTicker();
         }
         idleTimeout = setTimeout(startIdleMode, IDLE_TIME_MS);
     }
 
     function startIdleMode() {
-        addTickerMessage("מצב הדגמה הופעל עקב חוסר פעילות. המערכת משתלטת...", null, false, 'demo_mode_msg');
+        addTickerMessage("|מצב הדגמה|#87CEEB| הופעל עקב חוסר פעילות. המערכת משתלטת...", null, false, 'demo_mode_msg');
         runDemoAction();
         demoInterval = setInterval(runDemoAction, Math.random() * 5000 + 5000);
     }
@@ -976,14 +1008,15 @@
     }
 
     // =========================================
-    // 10. Main Animation Loop
+    // 10. Main Animation Loop & HUD
     // =========================================
     function updateHUD() {
-        if (!keyCubes || keyCubes.length === 0) return;
         const objectCountEl = document.getElementById('objectCount');
         const physicsStatusEl = document.getElementById('physicsStatus');
         const mouseCoordsEl = document.getElementById('mouseCoords');
-        
+        const fpsDisplayEl = document.getElementById('fpsDisplay');
+        const energyDisplayEl = document.getElementById('energyDisplay');
+
         if(objectCountEl) objectCountEl.textContent = `אובייקטים: ${keyCubes.length}`;
         if(physicsStatusEl) {
             let gravText = document.querySelector(`#gravity-select option[value="${gravityMode}"]`).textContent;
@@ -992,22 +1025,34 @@
             if(wanderEnabled) status += " | שיטוט";
             physicsStatusEl.textContent = status;
         }
-        if(mouseCoordsEl) {
-            mouseCoordsEl.textContent = `עכבר: (${Math.round(worldMouse.x)}, ${Math.round(worldMouse.y)})`;
-        }
-        // Zoom is updated in its own function on wheel events
+        if(mouseCoordsEl) mouseCoordsEl.textContent = `עכבר: (${Math.round(worldMouse.x)}, ${Math.round(worldMouse.y)})`;
+        if(fpsDisplayEl) fpsDisplayEl.textContent = `FPS: ${fps}`;
+        if(energyDisplayEl) energyDisplayEl.textContent = `אנרגיה: ${Math.round(totalKineticEnergy / 1000)}k`;
     }
-
 
     function animate(timestamp) {
         requestAnimationFrame(animate);
         if(!lastTimestamp) lastTimestamp = timestamp;
         const dt = Math.min(0.033, (timestamp - lastTimestamp) / 1000);
+
+        frameCount++;
+        if (timestamp - lastFpsUpdate > 1000) {
+            fps = frameCount;
+            frameCount = 0;
+            lastFpsUpdate = timestamp;
+        }
+        
         lastTimestamp = timestamp;
 
         springs.forEach(spring => spring.update());
-        keyCubes.forEach(cube => { cube.handleInteractions(keyCubes); });
-        keyCubes.forEach(cube => { cube.update(dt); });
+        
+        totalKineticEnergy = 0;
+        keyCubes.forEach(cube => { 
+            cube.handleInteractions(keyCubes);
+            cube.update(dt); 
+            const vSq = cube.vx * cube.vx + cube.vy * cube.vy;
+            totalKineticEnergy += 0.5 * cube.mass * vSq;
+        });
 
         ctx.clearRect(0, 0, canvas.width, canvas.height);
         ctx.save();
