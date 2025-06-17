@@ -482,12 +482,19 @@
             let barData = { defs: [], rects: [] };
             
             if (view === 'daily') {
+                const blocksOnDay = Object.values(AppData.entities.bookings).filter(b => b.date === date.toISOString().split('T')[0] && b.workTypeId !== 'personal');
+                
                 for (let m = 0; m <= 24 * 60; m += 30) {
-                    const rate = getHourlyRate(date, minutesToTime(m), 'tech_op');
+                    const isBooked = blocksOnDay.some(block => {
+                        const startMins = timeToMinutes(block.start);
+                        const endMins = timeToMinutes(block.end);
+                        return m >= startMins && m < endMins;
+                    });
+                    
+                    const rate = isBooked ? 0 : getHourlyRate(date, minutesToTime(m), 'tech_op');
                     pricePoints.push(rate);
                     if (rate > maxPrice) maxPrice = rate;
                 }
-                const blocksOnDay = Object.values(AppData.entities.bookings).filter(b => b.date === date.toISOString().split('T')[0] && b.workTypeId !== 'personal');
                 
                 barData = blocksOnDay.map(block => {
                     const gradientId = `grad_${block.blockId}`;
@@ -600,10 +607,8 @@
             const { selectedDate } = AppData.ui.modal; 
             const { timeSlots } = DOMElements.modal;
             
-            // Clear previous content
             timeSlots.innerHTML = ''; 
             
-            // Create individual slots for the heatmap background
             const baseRate = AppData.entities.workTypes['tech_op'].baseRate;
             let backgroundHtml = '';
             for (let h = 0; h < 24; h++) {
@@ -611,13 +616,13 @@
                     const time = `${String(h).padStart(2,'0')}:${m===0?'00':'30'}`;
                     const rate = getHourlyRate(selectedDate, time, 'tech_op');
                     const color = rateToColor(rate, baseRate, true);
-                    backgroundHtml += `<div class="time-slot" data-time="${time}" style="background-color: rgba(${color}, 0.45)"></div>`;
+                    // Increased opacity for a stronger heatmap effect
+                    backgroundHtml += `<div class="time-slot" data-time="${time}" style="background-color: rgba(${color}, 0.6)"></div>`;
                 }
             }
             timeSlots.style.background = 'none';
             timeSlots.innerHTML = backgroundHtml;
             
-            // Place other booking blocks
             const dateStr = selectedDate.toISOString().split('T')[0];
             Object.values(AppData.entities.bookings).filter(b => b.date === dateStr).forEach(block => {
                 if (liveBlockState && block.blockId === liveBlockState.blockId) return;
@@ -635,7 +640,6 @@
                 }
             });
 
-            // Place currently selected block
             if (liveBlockState && liveBlockState.start) {
                 const blockEl = document.createElement('div');
                 blockEl.id = 'selected-block-overlay'; blockEl.dataset.blockId = liveBlockState.blockId;
