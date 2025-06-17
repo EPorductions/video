@@ -1,686 +1,1011 @@
-<!DOCTYPE html> 
- <html lang="he" dir="rtl"> 
- <head> 
- 	<meta charset="UTF-8"> 
- 	<title>אוריין אדלני - סימולציה אינטראקטיבית 2D (קובייה נפתחת)</title> 
- 	<meta name="viewport" content="width=device-width, initial-scale=1.0"> 
- 	<style> 
- 		/* --- General Styles --- */ 
- 		* { margin: 0; padding: 0; box-sizing: border-box; } 
- 		html, body { height: 100%; overflow: hidden; } 
- 		body { 
- 			background: linear-gradient(135deg, #1e2023, #3c3f41); 
- 			font-family: 'Segoe UI', Arial, sans-serif; 
- 			user-select: none; 
- 			direction: rtl; 
- 			color: #eee; 
- 			display: flex; 
- 			justify-content: center; 
- 			align-items: center; 
- 		} 
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <title>אוריין אדלני - סימולציה אינטראקטיבית V3.4</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        /* --- General & Reset Styles --- */
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        html, body { height: 100%; overflow: hidden; }
+        body {
+            background: linear-gradient(135deg, #1a1c20, #383b3e);
+            font-family: 'Segoe UI', Arial, sans-serif;
+            user-select: none;
+            direction: rtl;
+            color: #f0f0f0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
 
- 		/* --- Top Navigation Bar --- */ 
- 		header.top-nav-controls { 
- 			position: fixed; top: 0; left: 0; right: 0; 
- 			background-color: rgba(0, 0, 0, 0.85); color: #fff; 
- 			z-index: 10000; height: auto; 
- 			display: flex; flex-wrap: wrap; align-items: center; 
- 			justify-content: center; padding: 8px 15px; gap: 10px; 
- 			border-bottom: 1px solid #444; 
- 		} 
- 		header.top-nav-controls nav { display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; }
- 		header.top-nav-controls nav a { color: #fff; text-decoration: none; font-weight: bold; padding: 6px 10px; border-radius: 4px; font-size: 14px; transition: background-color 0.3s, color 0.3s; cursor: pointer; border: 1px solid transparent; } 
- 		header.top-nav-controls nav a:hover { background-color: rgba(255, 221, 87, 0.2); color: #fff; } 
- 		header.top-nav-controls nav a.active { background-color: #ffdd57; color: #333; border-color: #ffdd57; } 
- 		
-        .controls-separator { border-left: 1px solid #555; padding-left: 10px; margin-left: 10px; }
+        /* --- Top Controls Bar --- */
+        header.top-nav-controls {
+            position: fixed; top: 0; left: 0; right: 0;
+            background-color: rgba(10, 10, 15, 0.85);
+            backdrop-filter: blur(5px);
+            color: #fff;
+            z-index: 10000;
+            height: auto;
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            justify-content: center;
+            padding: 8px 15px;
+            gap: 10px;
+            border-bottom: 1px solid #444;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.3);
+        }
+        header.top-nav-controls nav { display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; }
+        header.top-nav-controls nav a {
+            color: #fff; text-decoration: none; font-weight: bold; padding: 6px 12px;
+            border-radius: 6px; font-size: 14px; transition: all 0.3s ease;
+            cursor: pointer; border: 1px solid transparent;
+        }
+        header.top-nav-controls nav a:hover { background-color: rgba(255, 221, 87, 0.2); border-color: rgba(255, 221, 87, 0.4); }
+        header.top-nav-controls nav a.active { background-color: #ffdd57; color: #111; border-color: #ffdd57; transform: translateY(-1px); box-shadow: 0 2px 5px rgba(255, 221, 87, 0.3); }
 
- 		.controls-group { display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: 8px; }
- 		.controls-group label { font-size: 12px; color: #ccc; }
- 		.controls-group button, .controls-group select { padding: 6px 10px; background: rgba(255,255,255,0.1); color: #eee; border: 1px solid #666; border-radius: 4px; cursor: pointer; font-size: 12px; } 
- 		.controls-group button:hover:not(:disabled) { background: rgba(255, 255, 255, 0.25); } 
- 		.controls-group button:disabled { background: rgba(255,255,255,0.05); color: #888; cursor: not-allowed; border-color: #444; } 
- 		.controls-group button.active, .controls-group select:focus { background: #ffdd57; color: #333; border-color: #ffdd57; outline: none;} 
-        .controls-group input[type="range"] { -webkit-appearance: none; appearance: none; width: 100px; height: 8px; background: #555; border-radius: 5px; outline: none; transition: opacity .2s; cursor: pointer;}
-        .controls-group input[type="range"]::-webkit-slider-thumb { -webkit-appearance: none; appearance: none; width: 16px; height: 16px; background: #ffdd57; border-radius: 50%; cursor: pointer; }
-        .controls-group input[type="range"]::-moz-range-thumb { width: 16px; height: 16px; background: #ffdd57; border-radius: 50%; cursor: pointer; }
+        .controls-separator { border-left: 1px solid #555; padding-left: 12px; margin-left: 12px; }
 
+        .controls-group { display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: 8px; }
+        .controls-group label { font-size: 13px; color: #ccc; }
+        .controls-group button, .controls-group select {
+            padding: 6px 12px; background: rgba(255,255,255,0.1); color: #eee;
+            border: 1px solid #666; border-radius: 6px; cursor: pointer; font-size: 13px;
+            transition: all 0.2s ease;
+        }
+        .controls-group button:hover:not(:disabled) { background: rgba(255, 255, 255, 0.25); border-color: #888; }
+        .controls-group button:disabled { background: rgba(255,255,255,0.05); color: #777; cursor: not-allowed; border-color: #444; }
+        .controls-group button.active { background: #ffdd57; color: #111; border-color: #ffdd57; transform: translateY(-1px); box-shadow: 0 1px 4px rgba(255, 221, 87, 0.2); }
+        .controls-group select:focus { outline: none; border-color: #ffdd57;}
+        .controls-group input[type="range"] { -webkit-appearance: none; appearance: none; width: 120px; height: 8px; background: #444; border-radius: 5px; outline: none; transition: opacity .2s; cursor: pointer;}
+        .controls-group input[type="range"]::-webkit-slider-thumb { -webkit-appearance: none; appearance: none; width: 18px; height: 18px; background: #ffdd57; border-radius: 50%; cursor: pointer; border: 2px solid #333; }
+        .controls-group input[type="range"]::-moz-range-thumb { width: 18px; height: 18px; background: #ffdd57; border-radius: 50%; cursor: pointer; border: 2px solid #333;}
+        .vortex-controls { display: flex; align-items: center; gap: 8px; transition: all 0.5s ease; max-width: 0; opacity: 0; overflow: hidden; }
+        .vortex-controls.visible { max-width: 200px; opacity: 1; }
 
- 		/* --- Canvases --- */ 
- 		canvas { 
- 			display: block; 
- 			position: absolute; 
- 			top: 0; 
- 			left: 0; 
- 		} 
- 		#background-canvas { z-index: 0; } 
- 		#canvas { z-index: 1; background: transparent; } 
+        /* --- Canvases & UI --- */
+        canvas { display: block; position: absolute; top: 0; left: 0; }
+        #canvas { z-index: 1; background: transparent; }
+        #zoomInfo { position: fixed; top: 80px; right: 15px; background: rgba(0,0,0,0.7); color: #ffc107; padding: 5px 10px; font-family: monospace; font-size: 13px; z-index: 1000; border-radius: 5px; }
+        #gravityCenterMarker {
+            position: absolute; width: 24px; height: 24px;
+            border: 3px solid rgba(255, 221, 87, 0.8);
+            border-radius: 50%; transform: translate(-50%, -50%);
+            z-index: 5; pointer-events: none; transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            opacity: 0;
+            background: radial-gradient(circle, rgba(255,221,87,0.4) 0%, rgba(255,221,87,0) 70%);
+        }
 
- 		/* --- UI Info --- */ 
- 		#zoomInfo { position: fixed; top: 70px; right: 10px; background: rgba(0,0,0,0.6); color: #ffc107; padding: 5px 8px; font-family: monospace; font-size: 12px; z-index: 1000; border-radius: 3px; } 
-        #gravityCenterMarker { position: absolute; width: 20px; height: 20px; border: 2px solid rgba(255, 255, 0, 0.7); border-radius: 50%; transform: translate(-50%, -50%); z-index: 5; pointer-events: none; transition: opacity 0.3s, transform 0.3s; opacity: 0;}
- 	</style> 
- 	<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.9.1/gsap.min.js"></script> 
- </head> 
- <body> 
+        /* --- News Ticker --- */
+        #news-ticker-container {
+            position: fixed; bottom: 0; left: 0; width: 100%;
+            background-color: rgba(10, 10, 15, 0.85);
+            backdrop-filter: blur(5px);
+            overflow: hidden; white-space: nowrap; z-index: 10001; /* High z-index */
+            padding: 8px 0; border-top: 1px solid #444;
+            pointer-events: none; /* Make it non-interactive */
+            direction: ltr; /* Container direction is LTR for the animation */
+        }
+        #news-ticker-content {
+            display: inline-block;
+            color: #ffc107; font-size: 15px;
+            text-shadow: 0 0 5px rgba(255,193,7,0.5);
+            will-change: transform;
+            position: absolute; /* Needed for JS transform */
+            white-space: nowrap;
+            /* Animation is now fully controlled by GSAP */
+        }
+    </style>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.9.1/gsap.min.js"></script>
+</head>
+<body>
 
- 	<header class="top-nav-controls"> 
- 		<nav id="mainNav"></nav> 
-        
-        <div class="controls-group controls-separator"> 
-             <label for="layout-select">פריסה:</label>
-             <select id="layout-select">
-                 <option value="circle">מעגל</option>
-                 <option value="grid-4x2">רשת 4x2</option>
-                 <option value="grid-2x4">רשת 2x4</option>
-                 <option value="horizontal">אופקי</option>
-                 <option value="vertical">אנכי</option>
-             </select>
-             <button id="resetViewBtn">איפוס תצוגה</button> 
+    <header class="top-nav-controls">
+        <nav id="mainNav"></nav>
+        <div class="controls-group controls-separator">
+            <label for="layout-select">פריסה:</label>
+            <select id="layout-select">
+                <option value="circle">מעגל</option>
+                <option value="grid-4x2">רשת 4x2</option>
+                <option value="grid-2x4">רשת 2x4</option>
+                <option value="horizontal">אופקי</option>
+                <option value="vertical">אנכי</option>
+            </select>
         </div>
-
- 		<div class="controls-group controls-separator"> 
- 			<button id="toggleWallsBtn">גבולות: ON</button> 
- 			<button id="toggleMagnetBtn">מגנט: ON</button> 
- 			<button id="toggleWanderBtn">שיטוט: OFF</button> 
+        <div class="controls-group controls-separator">
+            <button id="toggleWallsBtn">גבולות: ON</button>
+            <button id="toggleMagnetBtn">מגנט: ON</button>
+            <button id="toggleWanderBtn">שיטוט: OFF</button>
             <button id="toggleOrbitBtn">סיבוב: OFF</button>
- 			<button id="earthquakeBtn">רעידת אדמה</button> 
- 			<button id="windBtn">משב רוח</button> 
- 		</div> 
-        
- 		<div class="controls-group controls-separator"> 
- 			<button id="mousePullBtn">משיכה: OFF</button> 
- 			<button id="mousePushBtn">הדיפה: OFF</button> 
- 		</div> 
-
+            <button id="earthquakeBtn">רעידת אדמה</button>
+            <button id="windBtn">משב רוח</button>
+        </div>
         <div class="controls-group controls-separator">
             <label for="gravity-select">בקרת עולם:</label>
             <select id="gravity-select">
                 <option value="none">ללא</option>
-                <option value="down">גרביטציה מטה</option>
-                <option value="center">גרביטציה למרכז</option>
+                <option value="down">כבידה מטה</option>
+                <option value="center">כבידה למרכז</option>
                 <option value="vortex">מערבולת</option>
             </select>
-            <label for="vortex-slider">עוצמה:</label>
-            <input type="range" id="vortex-slider" min="-100" max="100" value="0">
+            <div id="vortex-controls" class="vortex-controls">
+                <label for="vortex-slider">עוצמה:</label>
+                <input type="range" id="vortex-slider" min="-100" max="100" value="0">
+            </div>
         </div>
- 	</header> 
+    </header>
 
- 	<canvas id="background-canvas"></canvas> 
- 	<canvas id="canvas"></canvas> 
-
- 	<div id="zoomInfo">Zoom: 1.00x</div> 
+    <canvas id="canvas"></canvas>
+    <div id="zoomInfo">Zoom: 1.00x</div>
     <div id="gravityCenterMarker"></div>
+    <div id="news-ticker-container">
+        <div id="news-ticker-content"></div>
+    </div>
 
- 	<script> 
- 		// ========================================= 
- 		// 1. Constants & Global Variables 
- 		// ========================================= 
- 		let canvas, ctx, keyCubes = [], springs = [], worldMouse = { x: 0, y: 0 }, screenMouse = { x: 0, y: 0 }, isMouseDown = false, draggedCube = null, clickStartTime = 0, clickStartPos = {x:0, y:0}; 
- 		let magnetEnabled = true, boundariesEnabled = true, wanderEnabled = false, orbitEnabled = false, physicsRunning = true;
- 		let lastTimestamp = 0, worldWidth, worldHeight, currentStarId = 'star-home', expandedCube = null; 
+    <script>
+    // =========================================
+    // 1. Constants & Global Variables
+    // =========================================
+    // Core Elements & State
+    let canvas, ctx, keyCubes = [], springs = [];
+    let worldMouse = { x: 0, y: 0 }, screenMouse = { x: 0, y: 0 }, isMouseDown = false, draggedCube = null;
+    let clickStartTime = 0, clickStartPos = {x:0, y:0};
+    let lastTimestamp = 0, worldWidth, worldHeight, currentStarId = 'star-home', expandedCube = null;
+    let headerHeight = 70;
 
- 		// Mouse Interaction
- 		let mouseInteractionMode = 'none';
- 		let MOUSE_INTERACTION_STRENGTH = 8; // Increased strength
+    // Viewport
+    let view = { x: 0, y: 0, scale: 1.0, targetScale: 1.0, targetX: 0, targetY: 0, isAnimating: false };
+    const MIN_SCALE = 0.05, MAX_SCALE = 8.0, ZOOM_SENSITIVITY = 0.001, CLICK_THRESHOLD_DIST = 10, CLICK_THRESHOLD_TIME = 300;
+    let viewportAnimation = null;
+    let isPanning = false; let lastPanPos = { x: 0, y: 0 };
 
- 		// Viewport
- 		let view = { x: 0, y: 0, scale: 1.0, targetScale: 1.0, targetX: 0, targetY: 0, isAnimating: false }; 
- 		const MIN_SCALE = 0.05, MAX_SCALE = 8.0, ZOOM_SENSITIVITY = 0.001, CLICK_THRESHOLD_DIST = 10, CLICK_THRESHOLD_TIME = 300; 
- 		let viewportAnimation = null; 
- 		let isPanning = false; let lastPanPos = { x: 0, y: 0 };
+    // Physics & World Control
+    const friction = 0.92; const baseSpringK = 0.02, starSpringK = 0.03, interStarSpringK = 0.005, MAX_VELOCITY = 150;
+    let boundariesEnabled = true, magnetEnabled = true, wanderEnabled = false, orbitEnabled = false;
+    let layoutMode = 'circle', gravityMode = 'none', vortexStrength = 0;
+    let gravityCenter = { x: 0, y: 0 };
 
- 		// Physics
- 		const cubePadding = 15, friction = 0.92, repulsionStrength = 3000, minInteractionDistance = 250; 
-        const baseSpringK = 0.02, starSpringK = 0.03, interStarSpringK = 0.005; 
-        let wanderImpulse = 15; // Increased wander
+    // Interactive Forces
+    let earthquakeLevel = 0, windLevel = 0, lastEarthquakeClick = 0;
 
-        // World Control
-        let gravityMode = 'none';
-        let gravityCenter = { x: 0, y: 0 };
-        let vortexStrength = 0;
-        let layoutMode = 'circle';
-        let earthquakeLevel = 0;
-        let windLevel = 0;
+    // Ticker & Idle Mode
+    let tickerMessages = []; let tickerContentEl, tickerTween = null;
+    let idleTimeout, demoInterval; const IDLE_TIME_MS = 10000;
 
- 		// Layout Constants 
- 		const cardLayoutRadius = 250; 
+    // Data with "Weight"
+    const cubeData = [
+        { id: "star-home", text: "ראשי", type: 'star', weight: 50 }, { id: "star-about", text: "אודות", type: 'star', weight: 45 }, { id: "star-skills", text: "מיומנויות", type: 'star', weight: 80 }, { id: "star-platforms", text: "פלטפורמות", type: 'star', weight: 70 }, { id: "star-live", text: "שירותי Live", type: 'star', weight: 75 }, { id: "star-content", text: "סוגי תוכן", type: 'star', weight: 60 }, { id: "star-contact", text: "צור קשר", type: 'star', weight: 30 },
+        { id: "welcome", text: "ברוכים הבאים", type: 'card', parentId: 'star-home', weight: 10 }, { id: "explore", text: "חקור את האתר", type: 'card', parentId: 'star-home', weight: 12 },
+        { id: "orian", text: "מי אני?", type: 'card', parentId: 'star-about', weight: 20 }, { id: "psycho", text: "PsychoFlash", type: 'card', parentId: 'star-about', weight: 18 }, { id: "volunteer", text: "התנדבות", type: 'card', parentId: 'star-about', weight: 15 },
+        { id: "ps", text: "Photoshop", type: 'skill', parentId: 'star-skills', weight: 10 }, { id: "ae", text: "After Effects", type: 'skill', parentId: 'star-skills', weight: 10 }, { id: "pr", text: "Premiere Pro", type: 'skill', parentId: 'star-skills', weight: 8 }, { id: "animate", text: "Animate", type: 'skill', parentId: 'star-skills', weight: 7 }, { id: "webdev", text: "Web Dev", type: 'skill', parentId: 'star-skills', weight: 15 },
+        { id: "vmix", text: "Vmix Coding", type: 'live', parentId: 'star-live', weight: 22 }, { id: "techConsult", text: "Tech Consulting", type: 'live', parentId: 'star-live', weight: 19 },
+        { id: "email", text: "אימייל", type: 'contact', parentId: 'star-contact', weight: 5 }, { id: "phone", text: "טלפון", type: 'contact', parentId: 'star-contact', weight: 5 }, { id: "facebook", text: "פייסבוק", type: 'contact', parentId: 'star-contact', weight: 5 },
+    ];
 
- 		// --- Cube Data Structure (same as before) --- 
- 		const cubeData = [ 
- 			{ id: "star-home", text: "ראשי", type: 'star' }, { id: "star-about", text: "אודות", type: 'star' }, { id: "star-skills", text: "מיומנויות", type: 'star' }, { id: "star-platforms", text: "פלטפורמות", type: 'star' }, { id: "star-live", text: "שירותי Live", type: 'star' }, { id: "star-content", text: "סוגי תוכן", type: 'star' }, { id: "star-contact", text: "צור קשר", type: 'star' }, 
- 			{ id: "welcome", text: "ברוכים הבאים", type: 'card', parentId: 'star-home' }, { id: "explore", text: "חקור את האתר", type: 'card', parentId: 'star-home' }, 
- 			{ id: "orian", text: "מי אני?", type: 'card', parentId: 'star-about' }, { id: "psycho", text: "PsychoFlash", type: 'card', parentId: 'star-about' }, { id: "volunteer", text: "התנדבות", type: 'card', parentId: 'star-about' }, 
- 			{ id: "ps", text: "Photoshop", type: 'skill', parentId: 'star-skills' }, { id: "ae", text: "After Effects", type: 'skill', parentId: 'star-skills' }, { id: "pr", text: "Premiere Pro", type: 'skill', parentId: 'star-skills' }, { id: "animate", text: "Animate", type: 'skill', parentId: 'star-skills' }, { id: "audition", text: "Audition", type: 'skill', parentId: 'star-skills' }, { id: "lightroom", text: "Lightroom", type: 'skill', parentId: 'star-skills' }, { id: "encoder", text: "Encoder", type: 'skill', parentId: 'star-skills' }, { id: "webdev", text: "Web Dev", type: 'skill', parentId: 'star-skills' }, 
- 			{ id: "zoom", text: "Zoom", type: 'platform', parentId: 'star-platforms' }, { id: "meet", text: "Google Meet", type: 'platform', parentId: 'star-platforms' }, { id: "webinar", text: "Webinar", type: 'platform', parentId: 'star-platforms' }, { id: "conf", text: "Digital Conf", type: 'platform', parentId: 'star-platforms' }, { id: "polls", text: "Live Polls", type: 'platform', parentId: 'star-platforms' }, { id: "games", text: "Interactive Games", type: 'platform', parentId: 'star-platforms' }, 
- 			{ id: "liveSport", text: "LIVE Sports", type: 'live', parentId: 'star-live' }, { id: "liveMusic", text: "LIVE Music", type: 'live', parentId: 'star-live' }, { id: "liveEvent", text: "Live Event Prod", type: 'live', parentId: 'star-live' }, { id: "collab", text: "Collaborate Conf", type: 'live', parentId: 'star-live' }, { id: "vmix", text: "Vmix Coding", type: 'live', parentId: 'star-live' }, { id: "techConsult", text: "Tech Consulting", type: 'live', parentId: 'star-live' }, 
- 			{ id: "musicClips", text: "Music Clips", type: 'content', parentId: 'star-content' }, { id: "videoArt", text: "Video Art", type: 'content', parentId: 'star-content' }, { id: "classical", text: "Classical Music", type: 'content', parentId: 'star-content' }, { id: "showProd", text: "Live Show Prod", type: 'content', parentId: 'star-content' }, { id: "podcast", text: "Podcast Prod", type: 'content', parentId: 'star-content' }, 
- 			{ id: "email", text: "אימייל", type: 'contact', parentId: 'star-contact' }, { id: "phone", text: "טלפון", type: 'contact', parentId: 'star-contact' }, { id: "facebook", text: "פייסבוק", type: 'contact', parentId: 'star-contact' }, 
- 		]; 
+    // =========================================
+    // 2. Utility Functions
+    // =========================================
+    function clamp(v, minv, maxv) { return Math.max(minv, Math.min(maxv, v)); }
+    function screenToWorld(screenX, screenY) { return { x: view.x + screenX / view.scale, y: view.y + screenY / view.scale }; }
+    function worldToScreen(worldX, worldY) { return { x: (worldX - view.x) * view.scale, y: (worldY - view.y) * view.scale }; }
 
- 		// ========================================= 
- 		// 2. Utility Functions 
- 		// ========================================= 
- 		function clamp(v, minv, maxv) { return Math.max(minv, Math.min(maxv, v)); } 
- 		function screenToWorld(screenX, screenY) { return { x: view.x + screenX / view.scale, y: view.y + screenY / view.scale }; } 
- 		function worldToScreen(worldX, worldY) { return { x: (worldX - view.x) * view.scale, y: (worldY - view.y) * view.scale }; } 
+    // =========================================
+    // 3. Core Classes (KeyCube, Spring)
+    // =========================================
+    class KeyCube {
+        constructor(id, text, type, parentId = null, weight = 10) {
+            this.id = id; this.text = text; this.type = type; this.parentId = parentId; this.isStar = (type === 'star'); this.weight = weight;
+            this.x = Math.random() * worldWidth; this.y = Math.random() * worldHeight;
+            this.vx = 0; this.vy = 0;
+            this.gridX = this.x; this.gridY = this.y;
+            this.baseWidth = this.isStar ? 250 : 150; this.baseHeight = this.isStar ? 150 : 100;
+            this.width = this.baseWidth; this.height = this.baseHeight;
+            this.color = this.getColorByType(type); this.textColor = "#ffffff";
+            this.dragging = false;
+            this.mass = this.isStar ? this.weight / 1.5 : this.weight / 5;
+            this.isExpanded = false; this.expandProgress = 0;
+            this.lastRepulsionForce = {x:0, y:0};
+            this.closeButtonRect = null;
+        }
 
- 		// ========================================= 
- 		// 3. Core Classes (KeyCube, Spring) 
- 		// ========================================= 
- 		class KeyCube { 
- 			constructor(id, text, type, parentId = null) { 
- 				this.id = id; this.text = text; this.type = type; this.parentId = parentId; this.isStar = (type === 'star'); 
- 				this.x = Math.random() * worldWidth; this.y = Math.random() * worldHeight; 
- 				this.vx = (Math.random() - 0.5) * 2; this.vy = (Math.random() - 0.5) * 2; 
- 				this.gridX = this.x; this.gridY = this.y; 
- 				this.baseWidth = this.isStar ? 250 : 150; this.baseHeight = this.isStar ? 150 : 100; 
- 				this.width = this.baseWidth; this.height = this.baseHeight; 
- 				this.color = this.getColorByType(type); this.textColor = "#ffffff"; 
- 				this.dragging = false; 
-                this.mass = this.isStar ? 15 + Math.random() * 20 : 1;
- 				this.isExpanded = false; this.expandProgress = 0; 
-                this.lastRepulsionForce = {x:0, y:0};
- 			} 
+        getColorByType(type) {
+            switch (type) { case 'star': return 'rgba(255, 220, 80, 0.9)'; case 'skill': return 'rgba(255, 152, 0, 0.8)'; case 'live': return 'rgba(233, 30, 99, 0.8)'; case 'contact': return 'rgba(60, 80, 200, 0.8)'; default: return 'rgba(120, 120, 120, 0.8)'; }
+        }
 
- 			getColorByType(type) { 
- 				switch (type) { case 'star': return 'rgba(255, 220, 80, 0.9)'; case 'skill': return 'rgba(255, 152, 0, 0.7)'; case 'platform': return 'rgba(76, 175, 80, 0.7)'; case 'live': return 'rgba(233, 30, 99, 0.7)'; case 'content': return 'rgba(156, 39, 176, 0.7)'; case 'contact': return 'rgba(60, 80, 200, 0.8)'; default: return 'rgba(100, 100, 100, 0.7)'; } 
- 			} 
- 			applyForce(fx, fy) { this.vx += fx / this.mass; this.vy += fy / this.mass; } 
+        applyForce(fx, fy) { this.vx += fx / this.mass; this.vy += fy / this.mass; }
 
- 			update(worldWidth, worldHeight, dt) { 
-                const expandSpeed = 0.1;
-                if (this.isExpanded) { this.expandProgress = Math.min(1, this.expandProgress + expandSpeed); } else { this.expandProgress = Math.max(0, this.expandProgress - expandSpeed); }
-                const targetWidth = this.isExpanded ? (canvas.width / view.scale * 0.9) : this.baseWidth;
-                const targetHeight = this.isExpanded ? (canvas.height / view.scale * 0.9) : this.baseHeight;
-                this.width += (targetWidth - this.width) * expandSpeed;
-                this.height += (targetHeight - this.height) * expandSpeed;
+        update(dt) {
+            const expandSpeed = 0.1;
+            if (this.isExpanded) { this.expandProgress = Math.min(1, this.expandProgress + expandSpeed); }
+            else { this.expandProgress = Math.max(0, this.expandProgress - expandSpeed); }
 
- 				let applyPhysics = true; 
- 				if (this.isExpanded && this.expandProgress > 0.95) { 
- 					const targetPos = screenToWorld(canvas.width / 2, canvas.height / 2);
- 					this.x += (targetPos.x - this.x) * 0.2; this.y += (targetPos.y - this.y) * 0.2; 
- 					this.vx *= 0.1; this.vy *= 0.1; 
- 					applyPhysics = false; 
- 				} 
+            const targetWidth = this.isExpanded ? (canvas.width / view.scale * 0.9) : this.baseWidth;
+            const targetHeight = this.isExpanded ? (canvas.height / view.scale * 0.8) : this.baseHeight;
+            this.width += (targetWidth - this.width) * expandSpeed;
+            this.height += (targetHeight - this.height) * expandSpeed;
 
- 				if(applyPhysics && !this.dragging) { 
- 					if (mouseInteractionMode !== 'none' && !isPanning && !expandedCube) { 
- 						const dx = this.x - worldMouse.x; const dy = this.y - worldMouse.y; const dist = Math.hypot(dx, dy); 
- 						if (dist < 300) { 
- 							const forceFactor = Math.pow(1 - dist / 300, 2);
- 							let forceX = (dx / dist) * forceFactor * MOUSE_INTERACTION_STRENGTH; 
- 							let forceY = (dy / dist) * forceFactor * MOUSE_INTERACTION_STRENGTH; 
- 							if (mouseInteractionMode === 'pull') { this.applyForce(-forceX, -forceY); } else { this.applyForce(forceX, forceY); } 
- 						} 
- 					} 
- 					if (magnetEnabled) { const dx = this.gridX - this.x; const dy = this.gridY - this.y; const effStr = this.isStar ? 0.05*1.5 : 0.05; this.applyForce(dx * effStr, dy * effStr); } 
-                    if (wanderEnabled) { const wf = this.isStar ? 0.8 : 1.0; const angle = Math.random()*Math.PI*2; this.applyForce(Math.cos(angle)*wanderImpulse*0.1*wf, Math.sin(angle)*wanderImpulse*0.1*wf); }
+            if (this.isExpanded) {
+                const targetScreenY = headerHeight + (canvas.height - headerHeight) / 2;
+                const targetPos = screenToWorld(canvas.width / 2, targetScreenY);
+                this.x += (targetPos.x - this.x) * 0.2; this.y += (targetPos.y - this.y) * 0.2;
+                this.vx *= 0.1; this.vy *= 0.1;
+                return;
+            }
+
+            if(!this.dragging) {
+                if (magnetEnabled) {
+                    const dx = this.gridX - this.x; const dy = this.gridY - this.y;
+                    const effStr = this.isStar ? 0.05 * 1.5 : 0.05; this.applyForce(dx * effStr, dy * effStr);
+                }
+                if (wanderEnabled) {
+                    const wf = this.isStar ? 1.2 : 1.0;
+                    const wanderImpulse = 0.6 * wf;
+                    this.applyForce((Math.random()-0.5) * wanderImpulse, (Math.random()-0.5) * wanderImpulse);
+                }
+
+                const isOrbiting = orbitEnabled && !this.isStar && this.parentId;
+                if (isOrbiting) {
+                    const parent = keyCubes.find(c => c.id === this.parentId);
+                    if (parent && !parent.isExpanded) {
+                        const odx = parent.x - this.x; const ody = parent.y - this.y;
+                        const odist = Math.hypot(odx, ody);
+                        if(odist > 1) {
+                            const strength = 0.5 + (vortexStrength / 100) * 0.6;
+                            this.applyForce(ody / odist * strength, -odx / odist * strength);
+                        }
+                    }
+                } else {
                     switch(gravityMode) {
-                        case 'down': this.applyForce(0, 0.5 * this.mass); break;
-                        case 'center': 
+                        case 'down': this.applyForce(0, 1.8 * this.mass); break;
+                        case 'center':
                             const dx = gravityCenter.x - this.x; const dy = gravityCenter.y - this.y;
-                            this.applyForce(dx * 0.005, dy * 0.005);
+                            this.applyForce(dx * 0.01, dy * 0.01);
                             break;
                         case 'vortex':
                             const vdx = gravityCenter.x - this.x; const vdy = gravityCenter.y - this.y;
                             const vdist = Math.hypot(vdx, vdy);
                             if (vdist > 10) {
-                                const strength = (vortexStrength / 100) * 0.5;
+                                const strength = (vortexStrength / 100) * 350;
                                 this.applyForce(vdy / vdist * strength, -vdx / vdist * strength);
-                                this.applyForce(vdx * 0.002, vdy * 0.002);
+                                this.applyForce(vdx * 0.003, vdy * 0.003);
                             }
                             break;
                     }
-                    if (orbitEnabled && !this.isStar && this.parentId) {
-                        const parent = keyCubes.find(c => c.id === this.parentId);
-                        if (parent) {
-                            const odx = parent.x - this.x; const ody = parent.y - this.y;
-                            const odist = Math.hypot(odx, ody);
-                            if(odist > 1) {
-                                const strength = (vortexStrength / 100) * 0.3 + 0.05;
-                                this.applyForce(ody / odist * strength, -odx / odist * strength);
-                            }
-                        }
-                    }
- 				} 
- 				
-                if(this.dragging) { this.vx = 0; this.vy = 0; }
-                else {
-                    this.vx *= friction; this.vy *= friction; 
- 				    this.x += this.vx * dt * 60; this.y += this.vy * dt * 60; 
                 }
+            }
 
- 				if (boundariesEnabled) { 
- 					const r = 0.4; const hw = this.width/2; const hh = this.height/2; 
- 					if (this.x < hw) { this.x = hw; this.vx *= -r; } 
- 					else if (this.x > worldWidth - hw) { this.x = worldWidth - hw; this.vx *= -r; } 
- 					if (this.y < hh) { this.y = hh; this.vy *= -r; } 
- 					else if (this.y > worldHeight - hh) { this.y = worldHeight - hh; this.vy *= -r; } 
- 				} 
- 			} 
+            if(this.dragging) {
+                this.x = worldMouse.x; this.y = worldMouse.y;
+                this.vx = 0; this.vy = 0;
+            } else {
+                this.vx = clamp(this.vx * friction, -MAX_VELOCITY, MAX_VELOCITY);
+                this.vy = clamp(this.vy * friction, -MAX_VELOCITY, MAX_VELOCITY);
+                this.x += this.vx * dt * 60; this.y += this.vy * dt * 60;
+            }
 
- 			handleInteractions(others) { 
- 				if (this.dragging || this.isExpanded) return; 
-                this.lastRepulsionForce = {x: 0, y: 0};
- 				others.forEach(other => { if (other === this || other.isExpanded) return; 
- 				    const dx = other.x - this.x; const dy = other.y - this.y; let distSq = dx*dx + dy*dy; 
-                    if (distSq === 0) return;
- 				    const minDist = (this.width + other.width) / 2 + cubePadding; 
-                    if (distSq < minDist * minDist) { 
-                        const dist = Math.sqrt(distSq); 
-                        const overlap = minDist - dist; 
-                        const force = overlap * 0.5; 
-                        const totalMass = this.mass + other.mass;
-                        const forceX = -dx / dist * force * (other.mass / totalMass);
-                        const forceY = -dy / dist * force * (other.mass / totalMass);
-                        this.applyForce(forceX, forceY); 
-                        this.lastRepulsionForce.x += forceX; this.lastRepulsionForce.y += forceY;
- 				    } 
-                }); 
- 			} 
+            if (boundariesEnabled) {
+                const r = 0.5; const hw = this.width/2; const hh = this.height/2;
+                if (this.x < hw) { this.x = hw; this.vx *= -r; }
+                else if (this.x > worldWidth - hw) { this.x = worldWidth - hw; this.vx *= -r; }
+                if (this.y < hh) { this.y = hh; this.vy *= -r; }
+                else if (this.y > worldHeight - hh) { this.y = worldHeight - hh; this.vy *= -r; }
+            }
+        }
 
- 			draw(ctx) {
-                const halfW = this.width / 2, halfH = this.height / 2, left = this.x - halfW, top = this.y - halfH;
-                const alpha = ctx.globalAlpha;
-                if (expandedCube && expandedCube !== this) { ctx.globalAlpha *= (1 - expandedCube.expandProgress) * 0.3; if (ctx.globalAlpha < 0.01) { ctx.globalAlpha = alpha; return; } }
-                
-                if (this.expandProgress > 0) {
-                    ctx.save();
-                    ctx.globalAlpha = this.expandProgress;
-                    const expandedColor = this.getColorByType(this.type).replace(/[\d\.]+\)$/g, '0.95)');
-                    ctx.fillStyle = expandedColor;
-                    ctx.beginPath();
-                    ctx.roundRect(left, top, this.width, this.height, [20]);
-                    ctx.fill();
-
-                    const padding = 30 * this.expandProgress;
-                    ctx.fillStyle = this.textColor;
-                    ctx.textAlign = "right";
-                    ctx.textBaseline = "top";
-                    let titleFontSize = clamp(this.height * 0.05, 20, 40) * this.expandProgress;
-                    ctx.font = `bold ${titleFontSize}px Arial`;
-                    ctx.fillText(this.text, left + this.width - padding, top + padding);
-                    
-                    if (this.expandProgress > 0.5) {
-                        const contentWidth = this.width - padding * 2;
-                        const contentHeight = this.height - padding * 2 - 50;
-                        const contentX = left + padding;
-                        const contentY = top + padding + 50 + titleFontSize;
-                        ctx.save();
-                        ctx.beginPath();
-                        ctx.rect(contentX, contentY, contentWidth, contentHeight);
-                        ctx.clip();
-                        
-                        let bodyFontSize = clamp(this.height * 0.02, 12, 18);
-                        ctx.font = `${bodyFontSize}px Arial`;
-                        const bodyContent = getCubeContent(this.id);
-                        const lines = bodyContent.split('\n');
-                        let currentY = contentY;
-                        for (const line of lines) {
-                            ctx.fillText(line, contentX + contentWidth, currentY);
-                            currentY += bodyFontSize * 1.4;
-                            if (currentY > contentY + contentHeight) break;
-                        }
-                        ctx.restore();
-                    }
-                    
-                    const closeBtnSize = 30 * this.expandProgress;
-                    this.closeButtonRect = { x: left + padding, y: top + padding, w: closeBtnSize, h: closeBtnSize };
-                    ctx.fillStyle = 'rgba(233, 30, 99, 0.8)';
-                    ctx.beginPath();
-                    ctx.roundRect(this.closeButtonRect.x, this.closeButtonRect.y, closeBtnSize, closeBtnSize, [5]);
-                    ctx.fill();
-                    ctx.strokeStyle = '#fff';
-                    ctx.lineWidth = 2;
-                    ctx.beginPath();
-                    const margin = 8 * this.expandProgress;
-                    ctx.moveTo(this.closeButtonRect.x + margin, this.closeButtonRect.y + margin);
-                    ctx.lineTo(this.closeButtonRect.x + closeBtnSize - margin, this.closeButtonRect.y + closeBtnSize - margin);
-                    ctx.moveTo(this.closeButtonRect.x + closeBtnSize - margin, this.closeButtonRect.y + margin);
-                    ctx.lineTo(this.closeButtonRect.x + margin, this.closeButtonRect.y + closeBtnSize - margin);
-                    ctx.stroke();
-                    ctx.restore();
-                    if (this.expandProgress >= 1.0) { ctx.globalAlpha = alpha; return; }
+        handleInteractions(others) {
+            if (this.dragging || this.isExpanded) return;
+            this.lastRepulsionForce = {x: 0, y: 0};
+            others.forEach(other => {
+                if (other === this || other.isExpanded) return;
+                const dx = other.x - this.x; const dy = other.y - this.y;
+                let distSq = dx*dx + dy*dy;
+                if (distSq < 1) distSq=1;
+                const minDist = (this.width + other.width) / 2 + 20;
+                if (distSq < minDist * minDist) {
+                    const dist = Math.sqrt(distSq);
+                    const overlap = minDist - dist;
+                    const force = overlap * 0.6;
+                    const totalMass = this.mass + other.mass;
+                    const forceX = -dx/dist*force*(other.mass/totalMass);
+                    const forceY = -dy/dist*force*(other.mass/totalMass);
+                    this.applyForce(forceX, forceY);
+                    this.lastRepulsionForce.x += forceX;
+                    this.lastRepulsionForce.y += forceY;
                 }
+            });
+        }
 
+        draw(ctx) {
+            const halfW = this.width / 2, halfH = this.height / 2;
+            const left = this.x - halfW, top = this.y - halfH;
+            const alpha = ctx.globalAlpha;
+
+            if (expandedCube && expandedCube !== this) {
+                ctx.globalAlpha *= clamp((1 - expandedCube.expandProgress) * 0.5, 0, 1);
+                if (ctx.globalAlpha < 0.01) { ctx.globalAlpha = alpha; return; }
+            }
+
+            if (this.expandProgress > 0) {
                 ctx.save();
-                ctx.globalAlpha = ctx.globalAlpha * (1 - this.expandProgress);
-                if (ctx.globalAlpha > 0.01) {
-                    const br = this.isStar ? 15 : 10;
-                    ctx.fillStyle = this.color; 
+                ctx.globalAlpha = this.expandProgress;
+                const expandedColor = this.getColorByType(this.type).replace(/[\d\.]+\)$/g, '0.97)');
+                ctx.fillStyle = expandedColor;
+                ctx.shadowColor = 'rgba(0,0,0,0.5)';
+                ctx.shadowBlur = 30 * this.expandProgress;
+                ctx.beginPath();
+                ctx.roundRect(left, top, this.width, this.height, [20]);
+                ctx.fill();
+                ctx.shadowColor = 'transparent';
+
+                const padding = 30 * this.expandProgress;
+                ctx.fillStyle = this.textColor;
+                ctx.textAlign = "right";
+                ctx.textBaseline = "top";
+                let titleFontSize = clamp(this.height * 0.05, 20, 40) * this.expandProgress;
+                ctx.font = `bold ${titleFontSize}px Arial`;
+                ctx.fillText(this.text, left + this.width - padding, top + padding);
+
+                if (this.expandProgress > 0.6) {
+                    const contentWidth = this.width - padding * 2;
+                    const contentHeight = this.height - padding * 2 - 50 - titleFontSize;
+                    const contentX = left + padding;
+                    const contentY = top + padding + titleFontSize + 20;
+                    ctx.save();
                     ctx.beginPath();
-                    ctx.roundRect(left, top, this.width, this.height, [br]);
-                    ctx.fill();
-
-                    ctx.fillStyle=this.textColor; ctx.textAlign="center"; ctx.textBaseline="middle"; let fs = Math.min(this.width/(this.isStar?4:5), this.height/(this.isStar?2.2:2.5), this.isStar?40:24); fs=Math.max(10, fs); ctx.font=`bold ${fs}px Arial`; const tw=this.width*0.85; const words=this.text.split(' '); let lines=[]; let cl=words[0]||""; if (words.length > 0 && words.length > 1 && ctx.measureText(this.text).width > tw) { for(let i=1; i<words.length; i++){ let tl=cl+" "+words[i]; if(ctx.measureText(tl).width<=tw){cl=tl;}else{lines.push(cl);cl=words[i];}} lines.push(cl); } else { lines.push(this.text); } const lh=fs*1.1; const th=lines.length*lh; let sy=this.y-th/2+lh/2; lines.forEach((line,idx)=>{ctx.fillText(line,this.x,sy+idx*lh);}); 
-
-                    if (this.dragging){ ctx.strokeStyle="rgba(255,255,0,0.9)"; ctx.lineWidth=4; ctx.beginPath(); ctx.roundRect(left,top,this.width,this.height,[br]); ctx.stroke(); }
+                    ctx.rect(contentX, contentY, contentWidth, contentHeight);
+                    ctx.clip();
+                    let bodyFontSize = clamp(this.height * 0.025, 12, 22);
+                    ctx.font = `${bodyFontSize}px Arial`;
+                    const bodyContent = getCubeContent(this.id);
+                    const lines = bodyContent.split('\n');
+                    let currentY = contentY;
+                    for (const line of lines) {
+                        ctx.fillText(line, contentX + contentWidth - 10, currentY);
+                        currentY += bodyFontSize * 1.5;
+                        if (currentY > contentY + contentHeight) break;
+                    }
+                    ctx.restore();
                 }
+
+                const closeBtnSize = 35 * this.expandProgress;
+                this.closeButtonRect = { x: left + padding - (closeBtnSize/2), y: top + padding, w: closeBtnSize, h: closeBtnSize };
+                ctx.fillStyle = 'rgba(233, 30, 99, 0.9)';
+                ctx.beginPath();
+                ctx.roundRect(this.closeButtonRect.x, this.closeButtonRect.y, closeBtnSize, closeBtnSize, [8]);
+                ctx.fill();
+                ctx.strokeStyle = '#fff';
+                ctx.lineWidth = 2.5;
+                ctx.beginPath();
+                const margin = 10 * this.expandProgress;
+                ctx.moveTo(this.closeButtonRect.x + margin, this.closeButtonRect.y + margin);
+                ctx.lineTo(this.closeButtonRect.x + closeBtnSize - margin, this.closeButtonRect.y + closeBtnSize - margin);
+                ctx.moveTo(this.closeButtonRect.x + closeBtnSize - margin, this.closeButtonRect.y + margin);
+                ctx.lineTo(this.closeButtonRect.x + margin, this.closeButtonRect.y + closeBtnSize - margin);
+                ctx.stroke();
+
                 ctx.restore();
-                ctx.globalAlpha = alpha;
- 			} 
-            
-            drawForces(ctx) {
-                if (expandedCube || this.expandProgress > 0) return;
-                if (Math.abs(this.lastRepulsionForce.x) > 0.01 || Math.abs(this.lastRepulsionForce.y) > 0.01) {
-                    ctx.beginPath(); ctx.moveTo(this.x, this.y); ctx.lineTo(this.x - this.lastRepulsionForce.x * 50, this.y - this.lastRepulsionForce.y * 50); ctx.strokeStyle = "rgba(255, 50, 50, 0.6)"; ctx.lineWidth = 2; ctx.stroke();
-                }
-                if (mouseInteractionMode !== 'none' && !isPanning && !draggedCube) {
-                     const dx = this.x - worldMouse.x; const dy = this.y - worldMouse.y; const dist = Math.hypot(dx, dy);
-                     if(dist < 300) {
-                        ctx.beginPath(); ctx.moveTo(this.x, this.y); ctx.lineTo(worldMouse.x, worldMouse.y); ctx.strokeStyle = mouseInteractionMode === 'pull' ? "rgba(50, 150, 255, 0.5)" : "rgba(255, 150, 50, 0.5)"; ctx.lineWidth = 1; ctx.stroke();
-                     }
-                }
+                if (this.expandProgress >= 1.0) { ctx.globalAlpha = alpha; return; }
             }
 
- 			isPointInside(px, py) { return px >= this.x - this.width/2 && px <= this.x + this.width/2 && py >= this.y - this.height/2 && py <= this.y + this.height/2; } 
-            isCloseButtonHit(worldX, worldY) {
-                if (!this.isExpanded || !this.closeButtonRect) return false;
-                const rect = this.closeButtonRect;
-                return worldX >= rect.x && worldX <= rect.x + rect.w && worldY >= rect.y && worldY <= rect.y + rect.h;
-            }
- 		} 
+            ctx.save();
+            ctx.globalAlpha = ctx.globalAlpha * (1 - this.expandProgress);
+            if (ctx.globalAlpha > 0.01) {
+                const br = this.isStar ? 15 : 10;
+                ctx.fillStyle = this.color;
+                ctx.shadowColor = 'rgba(0,0,0,0.3)';
+                ctx.shadowBlur = 10;
+                ctx.beginPath(); ctx.roundRect(left, top, this.width, this.height, [br]); ctx.fill();
+                ctx.shadowColor = 'transparent';
 
- 		class Spring { 
- 			constructor(cA, cB, rL, s){this.cubeA=cA;this.cubeB=cB;this.restLength=rL;this.stiffness=s;this.damping=0.15;} 
- 			update(){ if(this.cubeA.isExpanded || this.cubeB.isExpanded) return; const dx=this.cubeB.x-this.cubeA.x;const dy=this.cubeB.y-this.cubeA.y;let d=Math.hypot(dx,dy);if(d<1)d=1;const disp=d-this.restLength;const sFm=disp*this.stiffness;const rVx=this.cubeB.vx-this.cubeA.vx;const rVy=this.cubeB.vy-this.cubeA.vy;const vAS=(rVx*dx+rVy*dy)/d;const dFm=vAS*this.damping;const tFm=sFm+dFm;const fX=(dx/d)*tFm;const fY=(dy/d)*tFm;if(!this.cubeA.dragging)this.cubeA.applyForce(fX,fY);if(!this.cubeB.dragging)this.cubeB.applyForce(-fX,-fY);} 
- 			draw(ctx){
-                if(this.cubeA.isExpanded || this.cubeB.isExpanded || expandedCube) return;
-                const alpha = Math.max(0, 1 - this.cubeA.expandProgress) * Math.max(0, 1 - this.cubeB.expandProgress);
-                if (alpha < 0.1) return;
-                ctx.beginPath(); ctx.moveTo(this.cubeA.x, this.cubeA.y); ctx.lineTo(this.cubeB.x, this.cubeB.y); ctx.strokeStyle = `rgba(255, 255, 255, ${0.1 * alpha})`; ctx.lineWidth = 1; ctx.stroke();
-            } 
- 		} 
+                ctx.fillStyle=this.textColor;
+                ctx.textAlign="center"; ctx.textBaseline="middle";
+                let fs = clamp(this.width/(this.isStar?4:5), 10, this.isStar?40:24);
+                ctx.font=`bold ${fs}px Arial`;
+                ctx.fillText(this.text,this.x,this.y);
 
- 		// ========================================= 
- 		// 4. Setup & Initialization Functions 
- 		// ========================================= 
- 		function init() { 
- 			canvas = document.getElementById('canvas'); ctx = canvas.getContext('2d'); 
-            setupWorld();
-            gravityCenter = { x: worldWidth / 2, y: worldHeight / 2};
- 			keyCubes = []; 
- 			cubeData.forEach(item => { keyCubes.push(new KeyCube(item.id, item.text, item.type, item.parentId)); }); 
- 			populateNav(); 
-            resetPhysics();
- 			setupEventListeners(); 
- 			const homeStar = keyCubes.find(c => c.id === 'star-home'); 
- 			if (homeStar) { centerViewOn(homeStar.x, homeStar.y, 0.8, true); setActiveNav('star-home'); } 
- 			lastTimestamp = performance.now(); 
- 			physicsRunning = true; 
- 			requestAnimationFrame(animate); 
- 		} 
-        
-        function setupWorld() { worldWidth = 5000; worldHeight = 5000; }
-
- 		function populateNav() { 
- 			const navElement = document.getElementById('mainNav'); if (!navElement) return; navElement.innerHTML = ''; keyCubes.filter(cube => cube.isStar).forEach(starCube => { const link = document.createElement('a'); link.href = '#'; link.textContent = starCube.text; link.setAttribute('data-target', starCube.id); link.onclick = (e) => { e.preventDefault(); navigateToStar(starCube.id); }; navElement.appendChild(link); }); 
- 		} 
-
-        function setActiveNav(activeStarId) {
-            document.querySelectorAll('#mainNav a').forEach(link => {
-                link.classList.toggle('active', link.getAttribute('data-target') === activeStarId);
-            });
-            currentStarId = activeStarId;
-        }
-
- 		function resizeCanvas() { 
- 			if (!canvas) return; 
- 			canvas.width = window.innerWidth; canvas.height = window.innerHeight; 
- 			if (worldWidth) { setupWorld(); assignGridPositions(); } 
- 		} 
-
-        function assignGridPositions() {
-            switch(layoutMode) {
-                case 'circle': assignGridPositionsCircle(); break;
-                case 'grid-4x2': assignGridPositionsGrid(4, 2); break;
-                case 'grid-2x4': assignGridPositionsGrid(2, 4); break;
-                case 'horizontal': assignGridPositionsLine(true); break;
-                case 'vertical': assignGridPositionsLine(false); break;
-            }
-        }
-        
-        function assignGridPositionsCircle() {
-             const stars = keyCubes.filter(c => c.isStar); const numStars = stars.length; const starLayoutRadius = Math.min(worldWidth, worldHeight) * 0.35; const angleStepStar = (2 * Math.PI) / numStars; const centerX = worldWidth / 2; const centerY = worldHeight / 2; stars.forEach((star, index) => { const angle = index * angleStepStar - Math.PI / 2; star.gridX = centerX + Math.cos(angle) * starLayoutRadius; star.gridY = centerY + Math.sin(angle) * starLayoutRadius; }); stars.forEach(star => { const childCards = keyCubes.filter(c => c.parentId === star.id); if (childCards.length === 0) return; const angleStepCard = (2 * Math.PI) / childCards.length; childCards.forEach((card, index) => { const angle = index * angleStepCard; const r = cardLayoutRadius * (0.8 + Math.random() * 0.4); card.gridX = star.gridX + Math.cos(angle) * r; card.gridY = star.gridY + Math.sin(angle) * r; }); }); 
-        }
-
-        function assignGridPositionsGrid(cols, rows) {
-            const stars = keyCubes.filter(c => c.isStar); const padding = 800; const cellWidth = (worldWidth - padding) / cols; const cellHeight = (worldHeight - padding) / rows;
-            stars.forEach((star, i) => {
-                const col = i % cols; const row = Math.floor(i / cols);
-                star.gridX = (col + 0.5) * cellWidth + padding / 2; star.gridY = (row + 0.5) * cellHeight + padding / 2;
-                const childCards = keyCubes.filter(c => c.parentId === star.id);
-                childCards.forEach(card => { const angle = Math.random() * Math.PI * 2; card.gridX = star.gridX + Math.cos(angle) * 300; card.gridY = star.gridY + Math.sin(angle) * 300; });
-            });
-        }
-
-        function assignGridPositionsLine(isHorizontal) {
-             const stars = keyCubes.filter(c => c.isStar); const padding = 800; const step = isHorizontal ? (worldWidth - padding) / stars.length : (worldHeight - padding) / stars.length;
-             stars.forEach((star, i) => {
-                 star.gridX = isHorizontal ? (i + 0.5) * step + padding/2 : worldWidth / 2; star.gridY = isHorizontal ? worldHeight / 2 : (i + 0.5) * step + padding/2;
-                 const childCards = keyCubes.filter(c => c.parentId === star.id);
-                 childCards.forEach(card => { const angle = Math.random() * Math.PI * 2; card.gridX = star.gridX + Math.cos(angle) * 300; card.gridY = star.gridY + Math.sin(angle) * 300; });
-             });
-        }
-
- 		function buildSprings() { 
- 			springs = []; const stars = keyCubes.filter(c => c.isStar); keyCubes.forEach(card => { if (!card.isStar && card.parentId) { const parentStar = keyCubes.find(c => c.id === card.parentId); if (parentStar) { const dx = card.gridX - parentStar.gridX; const dy = card.gridY - parentStar.gridY; const restLength = Math.hypot(dx, dy); springs.push(new Spring(card, parentStar, Math.max(50, restLength), starSpringK)); } } }); for (let i = 0; i < stars.length; i++) { for (let j = i + 1; j < stars.length; j++) { const starA = stars[i]; const starB = stars[j]; const dx = starB.gridX - starA.gridX; const dy = starB.gridY - starA.gridY; const restLength = Math.hypot(dx, dy); springs.push(new Spring(starA, starB, restLength, interStarSpringK)); } } 
- 		} 
-        
- 		// ========================================= 
- 		// 5. Viewport Control & Navigation
- 		// ========================================= 
- 		function centerViewOn(worldX, worldY, targetScale = view.targetScale, immediate = false) { 
- 			view.targetScale = clamp(targetScale, MIN_SCALE, MAX_SCALE); view.targetX = worldX - (canvas.width / (2 * view.targetScale)); view.targetY = worldY - (canvas.height / (2 * view.targetScale)); if (immediate) { view.x = view.targetX; view.y = view.targetY; view.scale = view.targetScale; view.isAnimating = false; if (viewportAnimation) viewportAnimation.kill(); } else { animateViewport(); } updateZoomInfo(); 
- 		} 
-
- 		function navigateToStar(starId) { 
- 			if(expandedCube) { expandedCube.isExpanded = false; expandedCube = null; } 
- 			const starCube = keyCubes.find(c => c.id === starId); if (!starCube) return; 
- 			const targetScale = Math.min(MAX_SCALE, Math.max(MIN_SCALE, canvas.width / (starCube.width * 2.5))); 
- 			setActiveNav(starId); centerViewOn(starCube.x, starCube.y, targetScale); 
- 		} 
-
- 		function animateViewport() { 
- 			if (view.isAnimating && viewportAnimation) return; view.isAnimating = true; if (viewportAnimation) viewportAnimation.kill(); 
- 			viewportAnimation = gsap.to(view, { duration: 0.9, x: view.targetX, y: view.targetY, scale: view.targetScale, ease: "power2.inOut", onUpdate: updateZoomInfo, onComplete: () => { view.isAnimating = false; viewportAnimation = null; }, onInterrupt: () => { view.isAnimating = false; viewportAnimation = null; view.targetX = view.x; view.targetY = view.y; view.targetScale = view.scale; } }); 
- 		} 
- 		
-        function updateZoomInfo() { document.getElementById('zoomInfo').textContent = `Zoom: ${view.scale.toFixed(2)}x`; } 
-
-
- 		// ========================================= 
- 		// 6. Event Listeners & Interaction 
- 		// ========================================= 
- 		function setupEventListeners() { 
- 			canvas.addEventListener('mousedown', onPointerDown); canvas.addEventListener('mousemove', onPointerMove); window.addEventListener('mouseup', onPointerUp); canvas.addEventListener('wheel', onWheel, { passive: false });
-            
-            document.getElementById('resetViewBtn')?.addEventListener('click', () => { resetPhysics(); navigateToStar('star-home'); });
- 			document.getElementById('toggleWallsBtn')?.addEventListener('click', (e) => { boundariesEnabled = !boundariesEnabled; e.target.textContent = `גבולות: ${boundariesEnabled ? 'ON' : 'OFF'}`; }); 
- 			document.getElementById('toggleMagnetBtn')?.addEventListener('click', (e) => { magnetEnabled = !magnetEnabled; e.target.textContent = `מגנט: ${magnetEnabled ? 'ON' : 'OFF'}`; }); 
- 			document.getElementById('toggleWanderBtn')?.addEventListener('click', (e) => { wanderEnabled = !wanderEnabled; e.target.textContent = `שיטוט: ${wanderEnabled ? 'ON' : 'OFF'}`; }); 
- 			document.getElementById('toggleOrbitBtn')?.addEventListener('click', (e) => { orbitEnabled = !orbitEnabled; e.target.textContent = `סיבוב: ${orbitEnabled ? 'ON' : 'OFF'}`; }); 
- 			
-            document.getElementById('earthquakeBtn')?.addEventListener('click', () => { 
-                earthquakeLevel++;
-                const strength = 50 * earthquakeLevel; 
-                keyCubes.forEach(cube => { if (!cube.dragging && !cube.isExpanded) cube.applyForce((Math.random() - 0.5) * strength, (Math.random() - 0.5) * strength); });
-                const gravityOptions = ['none', 'down', 'center'];
-                gravityMode = gravityOptions[Math.floor(Math.random() * gravityOptions.length)];
-                document.getElementById('gravity-select').value = gravityMode;
-                updateGravityCenterMarker();
-                setTimeout(() => earthquakeLevel = Math.max(0, earthquakeLevel - 1), 2000);
-            });
- 			
-            document.getElementById('windBtn')?.addEventListener('click', () => { 
-                windLevel++;
-                const baseStrength = 1.5; const angle = Math.random() * Math.PI * 2; 
-                const forceX = Math.cos(angle) * baseStrength * windLevel; const forceY = Math.sin(angle) * baseStrength * windLevel; 
-                keyCubes.forEach(cube => { if (!cube.dragging && !cube.isExpanded) cube.applyForce(forceX, forceY); });
-                setTimeout(() => windLevel = Math.max(0, windLevel - 1), 3000);
-             }); 
-
- 			const pullBtn = document.getElementById('mousePullBtn'), pushBtn = document.getElementById('mousePushBtn'); 
- 			pullBtn.addEventListener('click', () => { mouseInteractionMode = mouseInteractionMode === 'pull' ? 'none' : 'pull'; updateInteractionButtons(); }); 
- 			pushBtn.addEventListener('click', () => { mouseInteractionMode = mouseInteractionMode === 'push' ? 'none' : 'push'; updateInteractionButtons(); }); 
-
-            document.getElementById('gravity-select').addEventListener('change', (e) => { gravityMode = e.target.value; updateGravityCenterMarker(); });
-            document.getElementById('vortex-slider').addEventListener('input', (e) => { vortexStrength = parseInt(e.target.value, 10); });
-            document.getElementById('layout-select').addEventListener('change', (e) => { layoutMode = e.target.value; resetPhysics(); });
- 		} 
-
- 		function updateInteractionButtons() { 
- 			const pullBtn = document.getElementById('mousePullBtn'); const pushBtn = document.getElementById('mousePushBtn'); 
- 			pullBtn.textContent = `משיכה: ${mouseInteractionMode === 'pull' ? 'ON' : 'OFF'}`; 
- 			pushBtn.textContent = `הדיפה: ${mouseInteractionMode === 'push' ? 'ON' : 'OFF'}`; 
- 			pullBtn.classList.toggle('active', mouseInteractionMode === 'pull'); 
- 			pushBtn.classList.toggle('active', mouseInteractionMode === 'push'); 
- 		} 
-        
-        function getEventPos(e) { const rect = canvas.getBoundingClientRect(); return { x: e.clientX - rect.left, y: e.clientY - rect.top }; }
-
-        function onPointerDown(e) { 
-            isMouseDown = true; const pos = getEventPos(e); screenMouse = pos; worldMouse = screenToWorld(pos.x, pos.y); clickStartTime = performance.now(); clickStartPos = { ...worldMouse }; 
-            if (view.isAnimating && viewportAnimation) { viewportAnimation.kill(); view.isAnimating = false; } 
-            draggedCube = null; isPanning = false; 
-
-            if (expandedCube && expandedCube.isCloseButtonHit(worldMouse.x, worldMouse.y)) {
-                expandedCube.isExpanded = false; expandedCube = null; isMouseDown = false; return;
-            }
-            if (!expandedCube) {
-                for (let i = keyCubes.length - 1; i >= 0; i--) { 
-                    const cube = keyCubes[i]; 
-                    if (cube.isPointInside(worldMouse.x, worldMouse.y)) { 
-                        draggedCube = cube; cube.dragging = true; 
-                        keyCubes.splice(i, 1); keyCubes.push(draggedCube); 
-                        break; 
-                    } 
-                } 
-            }
-            if (!draggedCube && !expandedCube) { isPanning = true; lastPanPos = { ...screenMouse }; } 
-        }
-
-        function onPointerMove(e) { 
-            if (!isMouseDown) return; 
-            const pos = getEventPos(e); screenMouse = pos; worldMouse = screenToWorld(pos.x, pos.y); 
-            if (draggedCube) { draggedCube.x = worldMouse.x; draggedCube.y = worldMouse.y; } 
-            else if (isPanning) { 
-                const dx = pos.x - lastPanPos.x; const dy = pos.y - lastPanPos.y;
-                view.x -= dx / view.scale; view.y -= dy / view.scale; 
-            }
-            lastPanPos = pos;
-        }
-
-        function onPointerUp(e) {
-            if (!isMouseDown) return; isMouseDown = false;
-            const timeHeld = performance.now() - clickStartTime;
-            const distMoved = Math.hypot(worldMouse.x - clickStartPos.x, worldMouse.y - clickStartPos.y);
-
-            if (draggedCube) {
-                draggedCube.dragging = false;
-                if (distMoved < CLICK_THRESHOLD_DIST && timeHeld < CLICK_THRESHOLD_TIME) {
-                    handleCubeClick(draggedCube);
-                }
-            } else if (isPanning) {
-                isPanning = false;
-                if (distMoved < CLICK_THRESHOLD_DIST && timeHeld < CLICK_THRESHOLD_TIME) {
-                     gravityCenter = { ...worldMouse }; updateGravityCenterMarker();
-                }
-            } else if (expandedCube) {
-                if (!expandedCube.isPointInside(worldMouse.x, worldMouse.y) && !expandedCube.isCloseButtonHit(worldMouse.x, worldMouse.y)) {
-                    expandedCube.isExpanded = false; expandedCube = null;
+                if (this.dragging){
+                    ctx.strokeStyle="rgba(255,255,0,0.9)"; ctx.lineWidth=4;
+                    ctx.beginPath(); ctx.roundRect(left,top,this.width,this.height,[br]); ctx.stroke();
                 }
             }
-            draggedCube = null;
+            ctx.restore();
+            ctx.globalAlpha = alpha;
         }
 
-        function onWheel(e) { 
-            e.preventDefault(); if (view.isAnimating && viewportAnimation) { viewportAnimation.kill(); view.isAnimating = false; } const wheelDelta = e.deltaY; const zoomFactor = Math.exp(-wheelDelta * ZOOM_SENSITIVITY); const mouseWorldBefore = screenToWorld(screenMouse.x, screenMouse.y); view.scale = clamp(view.scale * zoomFactor, MIN_SCALE, MAX_SCALE); view.x = mouseWorldBefore.x - (screenMouse.x / view.scale); view.y = mouseWorldBefore.y - (screenMouse.y / view.scale); updateZoomInfo();
-        }
+        isPointInside(px, py) { return px >= this.x - this.width/2 && px <= this.x + this.width/2 && py >= this.y - this.height/2 && py <= this.y + this.height/2; }
 
-        function updateGravityCenterMarker() {
-            const marker = document.getElementById('gravityCenterMarker');
-            if(gravityMode === 'center' || gravityMode === 'vortex') {
-                const screenPos = worldToScreen(gravityCenter.x, gravityCenter.y);
-                marker.style.left = `${screenPos.x}px`; marker.style.top = `${screenPos.y}px`; marker.style.opacity = '1';
-                const scale = Math.max(0.5, Math.min(2, 1 / view.scale));
-                marker.style.transform = `translate(-50%, -50%) scale(${scale})`;
-            } else {
-                marker.style.opacity = '0';
+        isCloseButtonHit(worldX, worldY) {
+            if (!this.isExpanded || !this.closeButtonRect) return false;
+            const rect = this.closeButtonRect;
+            return worldX >= rect.x && worldX <= rect.x + rect.w &&
+                   worldY >= rect.y && worldY <= rect.y + rect.h;
+        }
+    }
+
+    class Spring {
+        constructor(cA, cB, rL, s){this.cubeA=cA;this.cubeB=cB;this.restLength=rL;this.stiffness=s;this.damping=0.15;}
+        update(){
+            if(!this.cubeA || !this.cubeB || this.cubeA.isExpanded || this.cubeB.isExpanded) return;
+            const dx=this.cubeB.x-this.cubeA.x;const dy=this.cubeB.y-this.cubeA.y;let d=Math.hypot(dx,dy);if(d<1)d=1;
+            const disp=d-this.restLength;const sFm=disp*this.stiffness;
+            const rVx=this.cubeB.vx-this.cubeA.vx;const rVy=this.cubeB.vy-this.cubeA.vy;
+            const vAS=(rVx*dx+rVy*dy)/d;const dFm=vAS*this.damping;
+            const tFm=sFm+dFm;
+            const fX=(dx/d)*tFm;const fY=(dy/d)*tFm;
+            if(!this.cubeA.dragging)this.cubeA.applyForce(fX,fY);
+            if(!this.cubeB.dragging)this.cubeB.applyForce(-fX,-fY);
+        }
+        draw(ctx){
+            if(!this.cubeA || !this.cubeB || this.cubeA.isExpanded || this.cubeB.isExpanded || expandedCube) return;
+            const alpha = Math.max(0, 1 - this.cubeA.expandProgress) * Math.max(0, 1 - this.cubeB.expandProgress);
+            if (alpha < 0.1) return;
+            ctx.beginPath(); ctx.moveTo(this.cubeA.x, this.cubeA.y); ctx.lineTo(this.cubeB.x, this.cubeB.y);
+            ctx.strokeStyle = `rgba(255, 255, 255, ${0.12 * alpha})`; ctx.lineWidth = 1.5; ctx.stroke();
+        }
+    }
+
+    // =========================================
+    // 4. Setup & Initialization Functions
+    // =========================================
+    function init() {
+        canvas = document.getElementById('canvas'); ctx = canvas.getContext('2d');
+        tickerContentEl = document.getElementById('news-ticker-content');
+        headerHeight = document.querySelector('header.top-nav-controls')?.offsetHeight || 70;
+        setupWorld();
+        gravityCenter = { x: worldWidth / 2, y: worldHeight / 2};
+        keyCubes = cubeData.map(item => new KeyCube(item.id, item.text, item.type, item.parentId, item.weight));
+        populateNav();
+        resetPhysics(true);
+        setupEventListeners();
+        const homeStar = keyCubes.find(c => c.id === 'star-home');
+        if (homeStar) { centerViewOn(homeStar.x, homeStar.y, 0.8, true); setActiveNav('star-home'); }
+        initTicker();
+        resetIdleTimer();
+        lastTimestamp = performance.now();
+        requestAnimationFrame(animate);
+    }
+
+    function setupWorld() { worldWidth = 5000; worldHeight = 5000; resizeCanvas(); }
+
+    function populateNav() {
+        const navElement = document.getElementById('mainNav');
+        navElement.innerHTML = '';
+        keyCubes.filter(cube => cube.isStar).forEach(starCube => {
+            const link = document.createElement('a');
+            link.href = '#';
+            link.textContent = starCube.text;
+            link.setAttribute('data-target', starCube.id);
+            link.onclick = (e) => { e.preventDefault(); navigateToStar(starCube.id); };
+            navElement.appendChild(link);
+        });
+    }
+
+    function setActiveNav(activeStarId) {
+        document.querySelectorAll('#mainNav a').forEach(link => {
+            link.classList.toggle('active', link.getAttribute('data-target') === activeStarId);
+        });
+        currentStarId = activeStarId;
+    }
+
+    function resizeCanvas() { if (!canvas) return; canvas.width = window.innerWidth; canvas.height = window.innerHeight; headerHeight = document.querySelector('header.top-nav-controls')?.offsetHeight || 70;}
+
+    function assignGridPositions() {
+        switch(layoutMode) {
+            case 'circle': assignGridPositionsCircle(); break;
+            case 'grid-4x2': assignGridPositionsGrid(4, 2); break;
+            case 'grid-2x4': assignGridPositionsGrid(2, 4); break;
+            case 'horizontal': assignGridPositionsLine(true); break;
+            case 'vertical': assignGridPositionsLine(false); break;
+        }
+    }
+
+    function assignGridPositionsCircle() {
+        const stars = keyCubes.filter(c => c.isStar);
+        const starLayoutRadius = Math.min(worldWidth, worldHeight) * 0.35;
+        const angleStepStar = (2 * Math.PI) / stars.length;
+        stars.forEach((star, index) => {
+            const angle = index * angleStepStar - Math.PI / 2;
+            star.gridX = worldWidth / 2 + Math.cos(angle) * starLayoutRadius;
+            star.gridY = worldHeight / 2 + Math.sin(angle) * starLayoutRadius;
+            setChildCardPositions(star);
+        });
+    }
+
+    function assignGridPositionsGrid(cols, rows) {
+        const stars = keyCubes.filter(c => c.isStar);
+        const padding = 1000;
+        const cellWidth = (worldWidth - padding) / cols;
+        const cellHeight = (worldHeight - padding) / rows;
+        stars.forEach((star, i) => {
+            const col = i % cols;
+            const row = Math.floor(i / cols);
+            star.gridX = (col + 0.5) * cellWidth + padding / 2;
+            star.gridY = (row + 0.5) * cellHeight + padding / 2;
+            setChildCardPositions(star);
+        });
+    }
+
+    function assignGridPositionsLine(isHorizontal) {
+        const stars = keyCubes.filter(c => c.isStar);
+        const padding = 1000;
+        const count = stars.length || 1;
+        const step = isHorizontal ? (worldWidth - padding) / count : (worldHeight - padding) / count;
+        stars.forEach((star, i) => {
+            star.gridX = isHorizontal ? (i + 0.5) * step + padding/2 : worldWidth / 2;
+            star.gridY = isHorizontal ? worldHeight / 2 : (i + 0.5) * step + padding/2;
+            setChildCardPositions(star);
+        });
+    }
+
+    function setChildCardPositions(star) {
+        const childCards = keyCubes.filter(c => c.parentId === star.id);
+        if (childCards.length === 0) return;
+        const angleStepCard = (2 * Math.PI) / childCards.length;
+        childCards.forEach((card, index) => {
+            const angle = index * angleStepCard;
+            const baseDist = 150 + (star.weight * 1.5) + (card.weight * 4);
+            const r = baseDist * (0.9 + Math.random() * 0.2);
+            card.gridX = star.gridX + Math.cos(angle) * r;
+            card.gridY = star.gridY + Math.sin(angle) * r;
+        });
+    }
+
+    function buildSprings() {
+        springs = [];
+        const stars = keyCubes.filter(c => c.isStar);
+        keyCubes.forEach(card => {
+            if (!card.isStar && card.parentId) {
+                const parentStar = keyCubes.find(c => c.id === card.parentId);
+                if (parentStar) {
+                    const baseDist = 150 + (parentStar.weight * 1.5) + (card.weight * 8);
+                    const restLength = baseDist * (0.9 + Math.random() * 0.2);
+                    springs.push(new Spring(card, parentStar, restLength, starSpringK));
+                }
+            }
+        });
+        for (let i = 0; i < stars.length; i++) {
+            for (let j = i + 1; j < stars.length; j++) {
+                const starA = stars[i]; const starB = stars[j];
+                const restLength = Math.hypot(starB.gridX - starA.gridX, starB.gridY - starA.gridY);
+                springs.push(new Spring(starA, starB, restLength, interStarSpringK));
             }
         }
-        
- 		// ========================================= 
- 		// 7. Cube Content & Click Handling
- 		// ========================================= 
- 		function handleCubeClick(cube) {
-            if (cube.isStar) {
-                navigateToStar(cube.id);
-            } else {
-                expandedCube = cube;
-                cube.isExpanded = true;
-                centerViewOn(cube.x, cube.y, 1.2, false);
-            }
-        }
+    }
 
-        function getCubeContent(cubeId) {
-            const cube = keyCubes.find(c => c.id === cubeId);
-            if (!cube) return "";
-            switch(cubeId) {
-                case 'orian': return `אוריין אדלני, יליד 1990.\nCreative Visionary.\nמתכנת, מעצב, מודליסט, אנימטור.\nפרילנסר מאז 2004.`;
-                case 'psycho': return `בעל חברת הפקות וידאו PsychoFlash מאז 2011.\nניסיון בניהול, ניתוב, בימוי, הפקה, עריכה, ייעוץ טכני.`;
-                case 'ps': return `עיבוד תמונה\nריטוש\nעיצוב גרפי לדפוס ולאינטרנט`;
-                case 'ae': return `אנימציה (Motion Graphics)\nקומפוזיטינג\nVFX (אפקטים ויזואליים)`;
-                case 'vmix': return `תכנות ואוטומציה\nניתוב ובקרה\nהפעלה בשידור חי`;
-                case 'email': return `EdelenviProductions@gmail.com`;
-                case 'phone': return `054-255-9027`;
-                default: return `פרטים עבור: ${cube.text}\n(${cube.type})`;
-            }
-        }
 
- 		// ========================================= 
- 		// 8. Physics & Simulation Helpers 
- 		// ========================================= 
- 		function resetPhysics() { 
- 			if (expandedCube) { expandedCube.isExpanded = false; expandedCube = null; } 
-            assignGridPositions(); 
+    // =========================================
+    // 5. Viewport Control & Navigation
+    // =========================================
+    function centerViewOn(worldX, worldY, targetScale = view.targetScale, immediate = false) {
+        view.targetScale = clamp(targetScale, MIN_SCALE, MAX_SCALE);
+        view.targetX = worldX - (canvas.width / (2 * view.targetScale));
+        view.targetY = worldY - (canvas.height / (2 * view.targetScale));
+        if (immediate) {
+            view.x = view.targetX; view.y = view.targetY; view.scale = view.targetScale;
+            view.isAnimating = false; if (viewportAnimation) viewportAnimation.kill();
+        } else { animateViewport(); }
+        updateZoomInfo();
+    }
+
+    function navigateToStar(starId) {
+        if(expandedCube) { expandedCube.isExpanded = false; expandedCube = null; }
+        const starCube = keyCubes.find(c => c.id === starId);
+        if (!starCube) return;
+        const targetScale = Math.min(MAX_SCALE, Math.max(MIN_SCALE, canvas.width / (starCube.width * 3.5)));
+        setActiveNav(starId);
+        centerViewOn(starCube.x, starCube.y, targetScale);
+    }
+
+    function animateViewport() {
+        if (view.isAnimating && viewportAnimation) return;
+        view.isAnimating = true; if (viewportAnimation) viewportAnimation.kill();
+        viewportAnimation = gsap.to(view, {
+            duration: 1.2, x: view.targetX, y: view.targetY, scale: view.targetScale,
+            ease: "power3.inOut",
+            onUpdate: updateZoomInfo,
+            onComplete: () => { view.isAnimating = false; viewportAnimation = null; },
+            onInterrupt: () => { view.isAnimating = false; viewportAnimation = null; view.targetX = view.x; view.targetY = view.y; view.targetScale = view.scale; }
+        });
+    }
+
+    function updateZoomInfo() { document.getElementById('zoomInfo').textContent = `Zoom: ${view.scale.toFixed(2)}x`; }
+
+
+    // =========================================
+    // 6. Event Listeners & Interaction
+    // =========================================
+    function setupEventListeners() {
+        canvas.addEventListener('mousedown', onPointerDown);
+        canvas.addEventListener('mousemove', onPointerMove);
+        window.addEventListener('mouseup', onPointerUp);
+        canvas.addEventListener('wheel', onWheel, { passive: false });
+        window.addEventListener('resize', setupWorld);
+
+        document.getElementById('layout-select').addEventListener('change', (e) => {
+            layoutMode = e.target.value;
+            addTickerMessage(`פריסה משתנה ל: ${e.target.options[e.target.selectedIndex].text}...`, 3000);
+            assignGridPositions();
             buildSprings();
-            keyCubes.forEach(cube => { 
-                cube.x = cube.gridX + (Math.random() - 0.5) * 5; cube.y = cube.gridY + (Math.random() - 0.5) * 5; 
-                cube.vx = 0; cube.vy = 0; cube.dragging = false;
-            }); 
- 		} 
+        });
 
- 		// ========================================= 
- 		// 9. Main Animation Loop 
- 		// ========================================= 
- 		function animate(timestamp) { 
- 			requestAnimationFrame(animate);
- 			const dt = Math.min(0.033, (timestamp - lastTimestamp) / 1000); 
- 			lastTimestamp = timestamp; 
+        document.getElementById('toggleWallsBtn')?.addEventListener('click', (e) => { boundariesEnabled = !boundariesEnabled; e.target.textContent = `גבולות: ${boundariesEnabled ? 'ON' : 'OFF'}`; e.target.classList.toggle('active', boundariesEnabled) });
+        document.getElementById('toggleMagnetBtn')?.addEventListener('click', (e) => { magnetEnabled = !magnetEnabled; e.target.textContent = `מגנט: ${magnetEnabled ? 'ON' : 'OFF'}`; e.target.classList.toggle('active', magnetEnabled)});
+        document.getElementById('toggleWanderBtn')?.addEventListener('click', (e) => { wanderEnabled = !wanderEnabled; e.target.textContent = `שיטוט: ${wanderEnabled ? 'ON' : 'OFF'}`; e.target.classList.toggle('active', wanderEnabled) });
+        document.getElementById('toggleOrbitBtn')?.addEventListener('click', (e) => { orbitEnabled = !orbitEnabled; e.target.textContent = `סיבוב: ${orbitEnabled ? 'ON' : 'OFF'}`; e.target.classList.toggle('active', orbitEnabled) });
 
- 			springs.forEach(spring => spring.update()); 
- 			keyCubes.forEach(cube => { cube.handleInteractions(keyCubes); }); 
- 			keyCubes.forEach(cube => { cube.update(worldWidth, worldHeight, dt); }); 
- 			
- 			ctx.clearRect(0, 0, canvas.width, canvas.height); 
- 			ctx.save(); 
- 			
-            // Correct transformation order
- 			ctx.scale(view.scale, view.scale);
- 			ctx.translate(-view.x, -view.y);
+        document.getElementById('earthquakeBtn')?.addEventListener('click', () => {
+            const now = performance.now();
+            if (now - lastEarthquakeClick < 1500 && earthquakeLevel > 0) {
+                 addTickerMessage(`נראה שהמשתמש כועס... מגביר רעידת אדמה!`, 4000, true);
+            }
+            lastEarthquakeClick = now;
 
-            springs.forEach(spring => spring.draw(ctx));
-            keyCubes.forEach(cube => cube.drawForces(ctx));
+            earthquakeLevel++;
+            addTickerMessage(`הופעלה רעידת אדמה בעוצמה ${earthquakeLevel}!`, 5000);
+            const strength = (180 + (Math.random() - 0.5) * 80) * earthquakeLevel;
+            keyCubes.forEach(cube => {
+                if (!cube.dragging && !cube.isExpanded) {
+                    const angle = Math.random() * Math.PI * 2;
+                    cube.applyForce(Math.cos(angle) * strength, Math.sin(angle) * strength + (cube.mass * -45));
+                }
+            });
+            if(earthquakeLevel > 1) {
+                for(let i = 1; i < earthquakeLevel; i++) {
+                    setTimeout(() => {
+                        addTickerMessage(`רעד משנה מורגש...`, 2000);
+                        keyCubes.forEach(c => c.applyForce((Math.random()-0.5)*strength*0.4, (Math.random()-0.5)*strength*0.4));
+                    }, i * (500 + Math.random() * 400) );
+                }
+            }
+            setTimeout(() => earthquakeLevel = Math.max(0, earthquakeLevel - 1), 6000);
+        });
 
- 			keyCubes.sort((a,b) => a.isExpanded ? 1 : b.isExpanded ? -1 : 0).forEach(cube => { cube.draw(ctx); }); 
+        document.getElementById('windBtn')?.addEventListener('click', () => {
+            windLevel++;
+            const duration = 2000 + windLevel * 800;
+            addTickerMessage(`משב רוח אדיר בעוצמה ${windLevel}!`, duration);
+            const baseStrength = 12.0 * windLevel * (0.8 + Math.random() * 0.4);
+            const angle = Math.random() * Math.PI * 2;
+            const windForce = { x: Math.cos(angle) * baseStrength, y: Math.sin(angle) * baseStrength };
+            let windInterval = setInterval(() => {
+                 keyCubes.forEach(cube => {
+                    if (!cube.dragging && !cube.isExpanded) cube.applyForce(windForce.x * (Math.random() * 0.5 + 0.5), windForce.y * (Math.random() * 0.5 + 0.5));
+                });
+            }, 100);
+            setTimeout(() => {
+                clearInterval(windInterval);
+                addTickerMessage(`הרוח נרגעה.`, 3000);
+                windLevel = Math.max(0, windLevel - 1);
+            }, duration);
+        });
 
- 			ctx.restore(); 
+        document.getElementById('gravity-select').addEventListener('change', (e) => {
+            gravityMode = e.target.value;
+            document.getElementById('vortex-controls').classList.toggle('visible', gravityMode === 'vortex');
             updateGravityCenterMarker();
- 		} 
+        });
+        document.getElementById('vortex-slider').addEventListener('input', (e) => { vortexStrength = parseInt(e.target.value, 10); });
 
- 		window.onload = init; 
- 	</script> 
- </body> 
- </html>
+        ['mousedown', 'mousemove', 'wheel', 'keydown', 'touchstart'].forEach(evt => document.addEventListener(evt, resetIdleTimer, false));
+    }
+
+    function getEventPos(e) {
+        const rect = canvas.getBoundingClientRect();
+        const touch = e.touches ? e.touches[0] : e;
+        return { x: touch.clientX - rect.left, y: touch.clientY - rect.top };
+    }
+
+    function onPointerDown(e) {
+        isMouseDown = true;
+        const pos = getEventPos(e);
+        screenMouse = pos;
+        worldMouse = screenToWorld(pos.x, pos.y);
+        clickStartTime = performance.now();
+        clickStartPos = { ...worldMouse };
+        if (view.isAnimating && viewportAnimation) { viewportAnimation.kill(); view.isAnimating = false; }
+        draggedCube = null; isPanning = false;
+
+        if (expandedCube) {
+            if (expandedCube.isCloseButtonHit(worldMouse.x, worldMouse.y)) {
+                expandedCube.isExpanded = false;
+                expandedCube = null;
+            }
+            isMouseDown = false;
+            return;
+        }
+
+        for (let i = keyCubes.length - 1; i >= 0; i--) {
+            const cube = keyCubes[i];
+            if (cube.isPointInside(worldMouse.x, worldMouse.y)) {
+                draggedCube = cube;
+                cube.dragging = true;
+                keyCubes.splice(i, 1);
+                keyCubes.push(draggedCube);
+                break;
+            }
+        }
+        if (!draggedCube && !expandedCube) { isPanning = true; lastPanPos = { ...screenMouse }; }
+    }
+
+    function onPointerMove(e) {
+        if (!isMouseDown || expandedCube) return;
+        const pos = getEventPos(e);
+        screenMouse = pos;
+        worldMouse = screenToWorld(pos.x, pos.y);
+        if (isPanning) {
+            const dx = pos.x - lastPanPos.x; const dy = pos.y - lastPanPos.y;
+            view.x -= dx / view.scale; view.y -= dy / view.scale;
+            view.targetX = view.x; view.targetY = view.y;
+        }
+        lastPanPos = pos;
+    }
+
+    function onPointerUp(e) {
+        if (!isMouseDown) return;
+        isMouseDown = false;
+        const timeHeld = performance.now() - clickStartTime;
+        const distMoved = Math.hypot(worldMouse.x - clickStartPos.x, worldMouse.y - clickStartPos.y);
+
+        if (expandedCube) {
+            if (!expandedCube.isPointInside(worldMouse.x, worldMouse.y) && !expandedCube.isCloseButtonHit(worldMouse.x, worldMouse.y)) {
+                expandedCube.isExpanded = false;
+                expandedCube = null;
+            }
+        } else if (draggedCube) {
+            draggedCube.dragging = false;
+            if (distMoved < CLICK_THRESHOLD_DIST && timeHeld < CLICK_THRESHOLD_TIME) {
+                handleCubeClick(draggedCube);
+            }
+        } else if (isPanning && distMoved < CLICK_THRESHOLD_DIST && timeHeld < CLICK_THRESHOLD_TIME) {
+            gravityCenter = { ...worldMouse };
+            addTickerMessage("מרכז הכבידה זז!", 2000);
+            updateGravityCenterMarker();
+        }
+        draggedCube = null; isPanning = false;
+    }
+
+    function onWheel(e) {
+        e.preventDefault();
+        if (expandedCube) return;
+        if (view.isAnimating && viewportAnimation) { viewportAnimation.kill(); view.isAnimating = false; }
+        const wheelDelta = e.deltaY;
+        const zoomFactor = Math.exp(-wheelDelta * ZOOM_SENSITIVITY);
+        const mouseWorldBefore = screenToWorld(screenMouse.x, screenMouse.y);
+        view.scale = clamp(view.scale * zoomFactor, MIN_SCALE, MAX_SCALE);
+        view.x = mouseWorldBefore.x - (screenMouse.x / view.scale);
+        view.y = mouseWorldBefore.y - (screenMouse.y / view.scale);
+        view.targetX = view.x; view.targetY = view.y; view.targetScale = view.scale;
+        updateZoomInfo();
+    }
+
+    function updateGravityCenterMarker() {
+        const marker = document.getElementById('gravityCenterMarker');
+        if(gravityMode === 'center' || gravityMode === 'vortex') {
+            const screenPos = worldToScreen(gravityCenter.x, gravityCenter.y);
+            marker.style.left = `${screenPos.x}px`;
+            marker.style.top = `${screenPos.y}px`;
+            marker.style.opacity = '1';
+            const scale = clamp(1 / view.scale, 0.5, 2);
+            marker.style.transform = `translate(-50%, -50%) scale(${scale})`;
+        } else {
+            marker.style.opacity = '0';
+        }
+    }
+
+
+    // =========================================
+    // 7. Cube Content & Click Handling
+    // =========================================
+    function handleCubeClick(cube) {
+        if (cube.isStar) {
+            navigateToStar(cube.id);
+        } else {
+            if (expandedCube) expandedCube.isExpanded = false;
+            expandedCube = cube;
+            cube.isExpanded = true;
+            centerViewOn(cube.x, cube.y, 1.2, false);
+        }
+    }
+
+    function getCubeContent(cubeId) {
+        const cube = cubeData.find(c => c.id === cubeId);
+        if (!cube) return "";
+        switch(cubeId) {
+            case 'orian': return `אוריין אדלני, יליד 1990.\nCreative Visionary.\nמתכנת, מעצב, מודליסט, אנימטור.\nפרילנסר מאז 2004.`;
+            case 'psycho': return `בעל חברת הפקות וידאו PsychoFlash מאז 2011.\nניסיון בניהול, ניתוב, בימוי, הפקה, עריכה, ייעוץ טכני.`;
+            case 'ps': return `עיבוד תמונה\nריטוש\nעיצוב גרפי לדפוס ולאינטרנט`;
+            case 'ae': return `אנימציה (Motion Graphics)\nקומפוזיטינג\nVFX (אפקטים ויזואליים)`;
+            case 'vmix': return `תכנות ואוטומציה\nניתוב ובקרה\nהפעלה בשידור חי`;
+            case 'email': return `EdelenviProductions@gmail.com`;
+            case 'phone': return `054-255-9027`;
+            case 'facebook': return `חפשו "Orian Edlenvi" בפייסבוק`;
+            default: return `פרטים עבור: ${cube.text}\n(${cube.type})\n\n...בקרוב יוזן תוכן נוסף...`;
+        }
+    }
+
+    // =========================================
+    // 8. Physics & Simulation Helpers
+    // =========================================
+    function resetPhysics(hardReset = false) {
+        if (expandedCube) { expandedCube.isExpanded = false; expandedCube = null; }
+        assignGridPositions();
+        buildSprings();
+        if(hardReset) {
+            keyCubes.forEach(cube => {
+                cube.x = cube.gridX + (Math.random() - 0.5) * 10;
+                cube.y = cube.gridY + (Math.random() - 0.5) * 10;
+                cube.vx = 0; cube.vy = 0; cube.dragging = false;
+            });
+        }
+    }
+
+    // =========================================
+    // 9. Ticker and Idle Mode (REBUILT)
+    // =========================================
+    
+    // This function STARTS a loop from the beginning.
+    function loopTicker() {
+        if (!tickerContentEl || !canvas || tickerMessages.length === 0) {
+            if(tickerContentEl) tickerContentEl.textContent = "";
+            return;
+        }
+        const el = tickerContentEl;
+        const fullWidth = el.offsetWidth;
+        const containerWidth = canvas.width;
+        const speed = 80;
+        const duration = (fullWidth + containerWidth) / speed;
+    
+        if (duration <= 0.1) {
+            // Failsafe if width is 0, wait and try again.
+            setTimeout(updateTickerOnContentChange, 100);
+            return;
+        }
+    
+        gsap.set(el, { x: -fullWidth });
+        tickerTween = gsap.to(el, {
+            x: containerWidth,
+            duration: duration,
+            ease: "none",
+            onComplete: loopTicker
+        });
+    }
+
+    // This function is called ONLY when the message list changes.
+    function updateTickerOnContentChange() {
+        if (!tickerContentEl || !canvas) return;
+        
+        if (tickerTween) {
+            tickerTween.kill();
+        }
+
+        const el = tickerContentEl;
+        const oldWidth = el.offsetWidth;
+        const currentX = gsap.getProperty(el, "x") || 0;
+
+        const fullText = tickerMessages.map(m => m.message).join('   |   ');
+        el.textContent = fullText;
+
+        if (fullText.trim() === '') {
+            gsap.set(el, { autoAlpha: 0 });
+            return;
+        }
+        gsap.set(el, { autoAlpha: 1 });
+
+        const newWidth = el.offsetWidth;
+        const deltaWidth = newWidth - oldWidth;
+        const adjustedX = currentX - deltaWidth;
+        gsap.set(el, { x: adjustedX });
+        
+        const containerWidth = canvas.width;
+        const speed = 80;
+        const remainingDistance = containerWidth - adjustedX;
+        const remainingDuration = remainingDistance / speed;
+
+        if (remainingDuration <= 0) {
+            loopTicker();
+        } else {
+            tickerTween = gsap.to(el, {
+                x: containerWidth,
+                duration: remainingDuration,
+                ease: "none",
+                onComplete: loopTicker
+            });
+        }
+    }
+
+    function addTickerMessage(message, duration, isFunny = false, customId = null) {
+        const id = customId || Date.now() + Math.random();
+        tickerMessages = tickerMessages.filter(m => m.id !== id);
+        tickerMessages.unshift({ id, message, isFunny });
+        
+        updateTickerOnContentChange();
+        
+        if (duration) {
+            setTimeout(() => {
+                const index = tickerMessages.findIndex(m => m.id === id);
+                if (index > -1) {
+                    tickerMessages.splice(index, 1);
+                    updateTickerOnContentChange();
+                }
+            }, duration);
+        }
+    }
+
+    function initTicker() {
+        if (!tickerContentEl) return;
+        tickerContentEl.textContent = '';
+        tickerMessages = [];
+        if(tickerTween) tickerTween.kill();
+
+        addTickerMessage("ברוכים הבאים לסימולציה של אוריין אדלני!", 10000);
+        addTickerMessage("נסה את המערבולת בעוצמה מקסימלית!", 12000, true);
+        addTickerMessage("אפשר להזיז את מרכז הכבידה בלחיצה על הרקע.", 15000, true);
+        addTickerMessage("האתר הזה בנוי על קפאין ופיזיקה כאוטית.", 18000, true);
+    }
+    
+    function resetIdleTimer() {
+        clearTimeout(idleTimeout);
+        clearInterval(demoInterval);
+        const demoMsgIndex = tickerMessages.findIndex(m => m.id === 'demo_mode_msg');
+        if (demoMsgIndex > -1) {
+            tickerMessages.splice(demoMsgIndex, 1);
+            updateTickerOnContentChange();
+        }
+        idleTimeout = setTimeout(startIdleMode, IDLE_TIME_MS);
+    }
+
+    function startIdleMode() {
+        addTickerMessage("מצב הדגמה הופעל עקב חוסר פעילות. המערכת משתלטת...", null, false, 'demo_mode_msg');
+        runDemoAction();
+        demoInterval = setInterval(runDemoAction, Math.random() * 5000 + 5000);
+    }
+
+    function runDemoAction() {
+        const starCubes = keyCubes.filter(c => c.isStar);
+        const actions = [
+            () => { const randomStar = starCubes[Math.floor(Math.random() * starCubes.length)]; if(randomStar) navigateToStar(randomStar.id); },
+            () => document.getElementById('earthquakeBtn').click(),
+            () => { document.getElementById('earthquakeBtn').click(); setTimeout(() => document.getElementById('earthquakeBtn').click(), 500) },
+            () => document.getElementById('windBtn').click(),
+            () => { const sel = document.getElementById('layout-select'); sel.selectedIndex = Math.floor(Math.random() * sel.options.length); sel.dispatchEvent(new Event('change')); },
+            () => document.getElementById('toggleOrbitBtn').click(),
+            () => document.getElementById('toggleWanderBtn').click(),
+        ];
+        if (expandedCube) {
+            expandedCube.isExpanded = false; expandedCube = null;
+        } else {
+             const randomAction = actions[Math.floor(Math.random() * actions.length)];
+             randomAction();
+        }
+    }
+
+    // =========================================
+    // 10. Main Animation Loop
+    // =========================================
+    function animate(timestamp) {
+        requestAnimationFrame(animate);
+        if(!lastTimestamp) lastTimestamp = timestamp;
+        const dt = Math.min(0.033, (timestamp - lastTimestamp) / 1000);
+        lastTimestamp = timestamp;
+
+        springs.forEach(spring => spring.update());
+        keyCubes.forEach(cube => { cube.handleInteractions(keyCubes); });
+        keyCubes.forEach(cube => { cube.update(dt); });
+
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        ctx.save();
+        ctx.scale(view.scale, view.scale);
+        ctx.translate(-view.x, -view.y);
+
+        springs.forEach(spring => spring.draw(ctx));
+        keyCubes.sort((a,b) => a.expandProgress - b.expandProgress).forEach(cube => { cube.draw(ctx); });
+
+        ctx.restore();
+        updateGravityCenterMarker();
+    }
+
+    window.onload = init;
+    </script>
+</body>
+</html>
