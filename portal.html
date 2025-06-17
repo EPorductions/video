@@ -22,11 +22,27 @@
             --danger: #ef4444;
             --danger-scream: #ff1111;
         }
+        html, body {
+            height: 100%;
+            overflow: hidden; /* Prevent body scroll, manage scrolling inside containers */
+        }
         body { 
             font-family: 'Assistant', sans-serif; 
             background-color: var(--bg-light); 
-            color: var(--text-dark); 
-            padding-bottom: 270px; 
+            color: var(--text-dark);
+            display: flex;
+            flex-direction: column;
+        }
+        #main-wrapper {
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+            width: 100%;
+        }
+        .scrollable-content {
+            flex-grow: 1;
+            overflow-y: auto;
+            padding: 1.5rem;
         }
         .hidden { display: none; }
         .dashboard-grid { display: grid; grid-template-columns: repeat(12, 1fr); gap: 1.5rem; }
@@ -50,27 +66,70 @@
         .day-events { display: flex; justify-content: center; align-items: center; gap: 4px; position: absolute; top: 35px; left: 0; right: 0; }
         .event-chip { width: 9px; height: 9px; border-radius: 50%; border: 1px solid rgba(0,0,0,0.3); }
 
-        .sticky-footer-histogram {
-            position: fixed;
-            bottom: 0;
-            left: 0;
-            right: 0;
+        .graph-footer-container {
+            flex-shrink: 0; /* Prevent the footer from shrinking */
             z-index: 60;
             border-top: 2px solid var(--border-color);
             border-radius: 16px 16px 0 0;
             box-shadow: 0 -5px 25px rgba(0,0,0,0.1);
             background-color: rgba(255, 255, 255, 0.95);
             backdrop-filter: blur(8px);
+            transition: height 0.35s ease-in-out;
             height: 250px; 
-            padding-left: 1.5rem;
-            padding-right: 1.5rem;
+            padding: 0 1.5rem;
+            cursor: pointer;
+        }
+        .graph-footer-container.minimized {
+            height: 60px;
+            cursor: pointer;
         }
 
-        #graph-container {
-            height: 200px;
-            padding: 1rem 0.5rem;
+        #histogram-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding-top: 0.75rem;
+            padding-bottom: 0.5rem;
             position: relative;
         }
+        
+        #graph-container {
+            height: calc(100% - 50px);
+            position: relative;
+        }
+        
+        .graph-footer-container.minimized #histogram-header {
+            height: 100%;
+            cursor: pointer;
+            border-radius: 16px 16px 0 0;
+            overflow: hidden;
+        }
+        .graph-footer-container.minimized #histogram-title {
+            color: white;
+            text-shadow: 0 1px 3px rgba(0,0,0,0.5);
+            width: 100%;
+            text-align: center;
+            position: absolute;
+            left: 50%;
+            top: 50%;
+            transform: translate(-50%, -50%);
+            margin: 0;
+            padding: 0;
+            border: none;
+            z-index: 10;
+        }
+        .graph-footer-container.minimized #toggle-graph-btn {
+            position: absolute;
+            top: 50%;
+            right: 0;
+            transform: translateY(-50%);
+            z-index: 15;
+        }
+
+        .graph-footer-container.minimized #graph-container {
+            display: none;
+        }
+
         #expanded-graph {
             width: 100%;
             height: 100%;
@@ -91,14 +150,8 @@
             fill: var(--primary-purple);
             opacity: 0.3;
         }
-        .axis-line {
-            stroke: var(--border-color);
-            stroke-width: 1;
-        }
-        .axis-label {
-            font-size: 10px;
-            fill: #64748b;
-        }
+        .axis-line { stroke: var(--border-color); stroke-width: 1; }
+        .axis-label { font-size: 10px; fill: #64748b; }
 
         .calendar-header { display: flex; justify-content: space-between; align-items: center; padding: 0.5rem 0; font-size: 1.25rem; font-weight: 700;}
         .calendar-container { padding: 1rem; }
@@ -122,39 +175,47 @@
         .resize-handle.bottom { bottom: -5px; cursor: s-resize; }
         .form-label { display: block; margin-bottom: 0.5rem; font-weight: 600; color: var(--primary-dark); }
         .form-select, .form-input { width: 100%; padding: 0.5rem 0.75rem; border: 1px solid var(--border-color); border-radius: 8px; background-color: var(--bg-white); }
+        .toggle-graph-btn { background: #e2e8f0; border-radius: 50%; width: 28px; height: 28px; display: flex; align-items: center; justify-content: center; font-size: 1rem; transition: all 0.2s; }
+        .toggle-graph-btn:hover { background: #cbd5e1; }
     </style>
 </head>
-<body class="p-4 md:p-8">
-
-    <div id="dashboard-view">
-        <header class="flex justify-between items-center mb-6 pb-4 border-b">
-            <div><h1 class="text-3xl font-extrabold text-primary-dark">אזור הלקוח</h1><p id="user-greeting" class="text-slate-600">שלום, לקוח יקר!</p></div>
-        </header>
-        <div class="dashboard-grid">
-            <main class="main-content flex flex-col gap-6">
-                 <div class="card">
-                    <h2 class="card-title">זמינות ותמחור דינמי</h2>
-                    <p class="mb-4 text-slate-600">לחצ/י על תאריך כדי לפתוח את יומן השעות. הנקודות הצבעוניות מייצגות אירועים קיימים. גוון היום משתנה בהתאם לעומס ולתמחור.</p>
-                    <div id="calendar-container" class="calendar-container"></div>
-                </div>
-                 <div class="card">
-                    <h2 class="card-title">ההזמנות שלי</h2>
-                    <div id="bookings-table-container" class="overflow-x-auto"></div>
-                </div>
-            </main>
-            <aside id="sidebar" class="sidebar flex flex-col gap-6"></aside>
-        </div>
-        <div id="graph-footer" class="card mt-6 col-span-12 sticky-footer-histogram">
-            <div id="histogram-header" class="flex justify-between items-center">
-                <h2 id="histogram-title" class="card-title" style="margin-bottom:0; border-bottom:0;">גרף עומסים</h2>
+<body class="p-0">
+<div id="main-wrapper">
+    <div class="scrollable-content">
+        <div id="dashboard-view">
+            <header class="flex justify-between items-center mb-6 pb-4 border-b">
+                <div><h1 class="text-3xl font-extrabold text-primary-dark">אזור הלקוח</h1><p id="user-greeting" class="text-slate-600">שלום, לקוח יקר!</p></div>
+            </header>
+            <div class="dashboard-grid">
+                <main class="main-content flex flex-col gap-6">
+                    <div class="card">
+                        <h2 class="card-title">זמינות ותמחור דינמי</h2>
+                        <p class="mb-4 text-slate-600">לחצ/י על תאריך כדי לפתוח את יומן השעות. הנקודות הצבעוניות מייצגות אירועים קיימים. גוון היום משתנה בהתאם לעומס ולתמחור.</p>
+                        <div id="calendar-container" class="calendar-container"></div>
+                    </div>
+                    <div class="card">
+                        <h2 class="card-title">ההזמנות שלי</h2>
+                        <div id="bookings-table-container" class="overflow-x-auto"></div>
+                    </div>
+                </main>
+                <aside id="sidebar" class="sidebar flex flex-col gap-6"></aside>
             </div>
-             <div id="graph-container">
-                 <div id="expanded-graph">
-                    <svg id="histogram-svg"></svg>
-                 </div>
-             </div>
         </div>
     </div>
+    <div id="graph-footer" class="graph-footer-container">
+        <div id="histogram-header">
+            <h2 id="histogram-title" class="card-title">גרף עומסים</h2>
+            <button id="toggle-graph-btn" class="toggle-graph-btn" title="מזער/הרחב גרף">
+                <i class="fas fa-chevron-down"></i>
+            </button>
+        </div>
+        <div id="graph-container">
+            <div id="expanded-graph">
+                <svg id="histogram-svg"></svg>
+            </div>
+        </div>
+    </div>
+</div>
     
     <!-- Modals -->
     <div id="booking-modal" class="modal-overlay">
@@ -231,7 +292,7 @@
                 currentDate: new Date(2025, 5, 1), 
                 modal: { isOpen: false, selectedDate: null, editingBlockId: null, isDirty: false, interaction: null }, 
                 activeProdId: null, 
-                graph: { view: 'monthly', day: null } 
+                graph: { view: 'monthly', day: null, isExpanded: true } 
             },
             pricing: { cache: {} }
         };
@@ -247,17 +308,20 @@
             FATIGUE_MULTIPLIER_MAX: 2.5,
             PROXIMITY_CONFIG: {
                 WINDOW_MINUTES: 180, 
-                MAX_MULTIPLIER: 2.5   
+                MAX_MULTIPLIER: 4.5   
             }
         };
 
         const DOMElements = {
+            body: document.body,
             calendarContainer: document.getElementById('calendar-container'), bookingsTable: document.getElementById('bookings-table-container'), sidebar: document.getElementById('sidebar'),
             graphFooter: document.getElementById('graph-footer'),
             graphContainer: document.getElementById('graph-container'),
+            histogramHeader: document.getElementById('histogram-header'),
             expandedGraph: document.getElementById('expanded-graph'),
             histogramSvg: document.getElementById('histogram-svg'),
             histogramTitle: document.getElementById('histogram-title'), 
+            toggleGraphBtn: document.getElementById('toggle-graph-btn'),
             modal: {
                 overlay: document.getElementById('booking-modal'), title: document.getElementById('modal-title'), closeBtn: document.getElementById('modal-close-btn'), formTitle: document.getElementById('block-form-title'),
                 blockNameInput: document.getElementById('block-name'), prodIdSelect: document.getElementById('block-prod-id'),
@@ -416,7 +480,13 @@
         }
 
         // --- RENDER FUNCTIONS ---
-        function renderAll() { AppData.pricing.cache = {}; renderCalendar(); renderBookingsTable(); renderSidebar(); renderGraph(); }
+        function renderAll() { 
+            AppData.pricing.cache = {}; 
+            renderCalendar(); 
+            renderBookingsTable(); 
+            renderSidebar(); 
+            renderGraph();
+        }
         
         function renderCalendar() {
             const { currentDate } = AppData.ui; const year = currentDate.getFullYear(), month = currentDate.getMonth();
@@ -462,6 +532,52 @@
         }
         
         function renderGraph() {
+            DOMElements.graphFooter.classList.toggle('minimized', !AppData.ui.graph.isExpanded);
+            const icon = DOMElements.toggleGraphBtn.querySelector('i');
+            icon.classList.toggle('fa-chevron-down', AppData.ui.graph.isExpanded);
+            icon.classList.toggle('fa-chevron-up', !AppData.ui.graph.isExpanded);
+
+            DOMElements.histogramHeader.style.background = 'none';
+            DOMElements.histogramTitle.style.position = 'static';
+            DOMElements.histogramTitle.style.transform = 'none';
+            DOMElements.histogramTitle.style.color = 'var(--primary-dark)';
+            DOMElements.histogramTitle.style.textShadow = 'none';
+
+            if (AppData.ui.graph.isExpanded) {
+                DOMElements.graphContainer.classList.remove('hidden');
+                renderExpandedGraph();
+            } else {
+                DOMElements.graphContainer.classList.add('hidden');
+                renderMinimizedGraph();
+            }
+        }
+
+        function renderMinimizedGraph() {
+            const { currentDate } = AppData.ui;
+            const year = currentDate.getFullYear(), month = currentDate.getMonth();
+            const daysInMonth = new Date(year, month + 1, 0).getDate();
+            const baseRate = AppData.entities.workTypes['tech_op'].baseRate;
+
+            const colorStops = [];
+            for (let i = 1; i <= daysInMonth; i++) {
+                const date = new Date(year, month, i);
+                let dayPrice = 0;
+                for (let h = 8; h < 19; h++) dayPrice += getHourlyRate(date, `${h}:00`, 'tech_op');
+                const avgRateForDay = dayPrice / PRICING_CONFIG.BASE_WORK_HOURS;
+                colorStops.push(rateToColor(avgRateForDay, baseRate));
+            }
+            
+            DOMElements.histogramHeader.style.background = `linear-gradient(to left, ${colorStops.join(', ')})`;
+            DOMElements.histogramTitle.textContent = `עומס חודשי - ${currentDate.toLocaleDateString('he-IL', {month:'long', year:'numeric'})}`;
+            DOMElements.histogramTitle.style.position = 'absolute';
+            DOMElements.histogramTitle.style.left = '50%';
+            DOMElements.histogramTitle.style.top = '50%';
+            DOMElements.histogramTitle.style.transform = 'translate(-50%, -50%)';
+            DOMElements.histogramTitle.style.color = 'white';
+            DOMElements.histogramTitle.style.textShadow = '0 1px 3px rgba(0,0,0,0.6)';
+        }
+        
+        function renderExpandedGraph() {
             const { view, day } = AppData.ui.graph;
             const date = (view === 'daily' && day) 
                 ? new Date(AppData.ui.currentDate.getFullYear(), AppData.ui.currentDate.getMonth(), day)
@@ -565,6 +681,9 @@
         function openModal(date, blockId = null) {
             AppData.ui.graph.view = 'daily';
             AppData.ui.graph.day = date.getDate();
+            if(!AppData.ui.graph.isExpanded) {
+                AppData.ui.graph.isExpanded = true;
+            }
             renderGraph();
 
             AppData.ui.modal.isOpen = true; AppData.ui.modal.selectedDate = date; AppData.ui.modal.editingBlockId = blockId;
@@ -616,7 +735,6 @@
                     const time = `${String(h).padStart(2,'0')}:${m===0?'00':'30'}`;
                     const rate = getHourlyRate(selectedDate, time, 'tech_op');
                     const color = rateToColor(rate, baseRate, true);
-                    // Increased opacity for a stronger heatmap effect
                     backgroundHtml += `<div class="time-slot" data-time="${time}" style="background-color: rgba(${color}, 0.6)"></div>`;
                 }
             }
@@ -696,6 +814,23 @@
             generateRandomErrands(currentDate.getFullYear(), currentDate.getMonth());
             renderAll();
             
+            DOMElements.toggleGraphBtn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                AppData.ui.graph.isExpanded = !AppData.ui.graph.isExpanded;
+                if (!AppData.ui.graph.isExpanded) {
+                    AppData.ui.graph.view = 'monthly';
+                }
+                renderGraph();
+            });
+            
+            DOMElements.histogramHeader.addEventListener('click', () => {
+                 if(!AppData.ui.graph.isExpanded) {
+                    AppData.ui.graph.isExpanded = true;
+                    renderGraph();
+                 }
+            });
+
+
             DOMElements.calendarContainer.addEventListener('click', e => {
                 const dayEl = e.target.closest('.calendar-day:not(.other-month)'), navEl = e.target.closest('[data-nav]');
                 if(dayEl) openModal(new Date(currentDate.getFullYear(), currentDate.getMonth(), parseInt(dayEl.dataset.day)));
@@ -761,7 +896,7 @@
 
             window.addEventListener('mouseup', () => { AppData.ui.modal.interaction = null; });
             
-            new ResizeObserver(renderGraph).observe(DOMElements.graphContainer);
+            new ResizeObserver(renderExpandedGraph).observe(DOMElements.expandedGraph);
         }
         
         init();
