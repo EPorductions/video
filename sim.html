@@ -2,7 +2,7 @@
 <html lang="he" dir="rtl">
 <head>
     <meta charset="UTF-8">
-    <title>אוריין אדלני - סימולציה אינטראקטיבית V3.4</title>
+    <title>אוריין אדלני - סימולציה אינטראקטיבית V3.5</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <style>
         /* --- General & Reset Styles --- */
@@ -67,7 +67,23 @@
         /* --- Canvases & UI --- */
         canvas { display: block; position: absolute; top: 0; left: 0; }
         #canvas { z-index: 1; background: transparent; }
-        #zoomInfo { position: fixed; top: 80px; right: 15px; background: rgba(0,0,0,0.7); color: #ffc107; padding: 5px 10px; font-family: monospace; font-size: 13px; z-index: 1000; border-radius: 5px; }
+        #hudContainer {
+            position: fixed;
+            top: 80px;
+            right: 15px;
+            background: rgba(0,0,0,0.7);
+            color: #ffc107;
+            padding: 10px 15px;
+            font-family: monospace;
+            font-size: 13px;
+            z-index: 1000;
+            border-radius: 8px;
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+            text-align: right;
+            min-width: 180px;
+        }
         #gravityCenterMarker {
             position: absolute; width: 24px; height: 24px;
             border: 3px solid rgba(255, 221, 87, 0.8);
@@ -137,7 +153,12 @@
     </header>
 
     <canvas id="canvas"></canvas>
-    <div id="zoomInfo">Zoom: 1.00x</div>
+    <div id="hudContainer">
+        <div id="zoomInfo">Zoom: 1.00x</div>
+        <div id="objectCount"></div>
+        <div id="physicsStatus"></div>
+        <div id="mouseCoords"></div>
+    </div>
     <div id="gravityCenterMarker"></div>
     <div id="news-ticker-container">
         <div id="news-ticker-content"></div>
@@ -609,7 +630,10 @@
         });
     }
 
-    function updateZoomInfo() { document.getElementById('zoomInfo').textContent = `Zoom: ${view.scale.toFixed(2)}x`; }
+    function updateZoomInfo() {
+        const el = document.getElementById('zoomInfo');
+        if(el) el.textContent = `זום: ${view.scale.toFixed(2)}x`;
+    }
 
 
     // =========================================
@@ -843,74 +867,47 @@
     // =========================================
     // 9. Ticker and Idle Mode (REBUILT)
     // =========================================
-    
-    // This function STARTS a loop from the beginning.
-    function loopTicker() {
+    function startTickerAnimation(isLoop = false) {
         if (!tickerContentEl || !canvas || tickerMessages.length === 0) {
-            if(tickerContentEl) tickerContentEl.textContent = "";
+            if (tickerTween) tickerTween.kill();
+            if (tickerContentEl) tickerContentEl.textContent = "";
             return;
         }
+
+        if (tickerTween) tickerTween.kill();
+
         const el = tickerContentEl;
         const fullWidth = el.offsetWidth;
         const containerWidth = canvas.width;
         const speed = 80;
         const duration = (fullWidth + containerWidth) / speed;
-    
+
         if (duration <= 0.1) {
-            // Failsafe if width is 0, wait and try again.
-            setTimeout(updateTickerOnContentChange, 100);
+            setTimeout(() => startTickerAnimation(true), 50); // Retry if width is not ready
             return;
         }
-    
+
+        // Always start a new loop from off-screen left
         gsap.set(el, { x: -fullWidth });
         tickerTween = gsap.to(el, {
             x: containerWidth,
             duration: duration,
             ease: "none",
-            onComplete: loopTicker
+            onComplete: () => startTickerAnimation(true)
         });
     }
 
-    // This function is called ONLY when the message list changes.
-    function updateTickerOnContentChange() {
-        if (!tickerContentEl || !canvas) return;
-        
-        if (tickerTween) {
-            tickerTween.kill();
-        }
-
-        const el = tickerContentEl;
-        const oldWidth = el.offsetWidth;
-        const currentX = gsap.getProperty(el, "x") || 0;
-
+    function updateTickerContent() {
+        if (!tickerContentEl) return;
         const fullText = tickerMessages.map(m => m.message).join('   |   ');
-        el.textContent = fullText;
+        tickerContentEl.textContent = fullText;
 
         if (fullText.trim() === '') {
-            gsap.set(el, { autoAlpha: 0 });
-            return;
-        }
-        gsap.set(el, { autoAlpha: 1 });
-
-        const newWidth = el.offsetWidth;
-        const deltaWidth = newWidth - oldWidth;
-        const adjustedX = currentX - deltaWidth;
-        gsap.set(el, { x: adjustedX });
-        
-        const containerWidth = canvas.width;
-        const speed = 80;
-        const remainingDistance = containerWidth - adjustedX;
-        const remainingDuration = remainingDistance / speed;
-
-        if (remainingDuration <= 0) {
-            loopTicker();
+            gsap.set(tickerContentEl, { autoAlpha: 0 });
+            if(tickerTween) tickerTween.kill();
         } else {
-            tickerTween = gsap.to(el, {
-                x: containerWidth,
-                duration: remainingDuration,
-                ease: "none",
-                onComplete: loopTicker
-            });
+            gsap.set(tickerContentEl, { autoAlpha: 1 });
+            setTimeout(() => startTickerAnimation(true), 10);
         }
     }
 
@@ -919,29 +916,27 @@
         tickerMessages = tickerMessages.filter(m => m.id !== id);
         tickerMessages.unshift({ id, message, isFunny });
         
-        updateTickerOnContentChange();
+        updateTickerContent();
         
         if (duration) {
             setTimeout(() => {
                 const index = tickerMessages.findIndex(m => m.id === id);
                 if (index > -1) {
                     tickerMessages.splice(index, 1);
-                    updateTickerOnContentChange();
+                    updateTickerContent();
                 }
             }, duration);
         }
     }
 
     function initTicker() {
-        if (!tickerContentEl) return;
-        tickerContentEl.textContent = '';
-        tickerMessages = [];
         if(tickerTween) tickerTween.kill();
-
-        addTickerMessage("ברוכים הבאים לסימולציה של אוריין אדלני!", 10000);
-        addTickerMessage("נסה את המערבולת בעוצמה מקסימלית!", 12000, true);
-        addTickerMessage("אפשר להזיז את מרכז הכבידה בלחיצה על הרקע.", 15000, true);
-        addTickerMessage("האתר הזה בנוי על קפאין ופיזיקה כאוטית.", 18000, true);
+        tickerMessages = [];
+        if(tickerContentEl) tickerContentEl.textContent = '';
+        
+        addTickerMessage("ברוכים הבאים לסימולציה של אוריין אדלני!", 15000);
+        setTimeout(() => addTickerMessage("נסה את המערבולת בעוצמה מקסימלית!", 12000, true), 5000);
+        setTimeout(() => addTickerMessage("אפשר להזיז את מרכז הכבידה בלחיצה על הרקע.", 15000, true), 10000);
     }
     
     function resetIdleTimer() {
@@ -950,7 +945,7 @@
         const demoMsgIndex = tickerMessages.findIndex(m => m.id === 'demo_mode_msg');
         if (demoMsgIndex > -1) {
             tickerMessages.splice(demoMsgIndex, 1);
-            updateTickerOnContentChange();
+            updateTickerContent();
         }
         idleTimeout = setTimeout(startIdleMode, IDLE_TIME_MS);
     }
@@ -983,6 +978,27 @@
     // =========================================
     // 10. Main Animation Loop
     // =========================================
+    function updateHUD() {
+        if (!keyCubes || keyCubes.length === 0) return;
+        const objectCountEl = document.getElementById('objectCount');
+        const physicsStatusEl = document.getElementById('physicsStatus');
+        const mouseCoordsEl = document.getElementById('mouseCoords');
+        
+        if(objectCountEl) objectCountEl.textContent = `אובייקטים: ${keyCubes.length}`;
+        if(physicsStatusEl) {
+            let gravText = document.querySelector(`#gravity-select option[value="${gravityMode}"]`).textContent;
+            let status = `כבידה: ${gravText}`;
+            if(orbitEnabled) status += " | סיבוב";
+            if(wanderEnabled) status += " | שיטוט";
+            physicsStatusEl.textContent = status;
+        }
+        if(mouseCoordsEl) {
+            mouseCoordsEl.textContent = `עכבר: (${Math.round(worldMouse.x)}, ${Math.round(worldMouse.y)})`;
+        }
+        // Zoom is updated in its own function on wheel events
+    }
+
+
     function animate(timestamp) {
         requestAnimationFrame(animate);
         if(!lastTimestamp) lastTimestamp = timestamp;
@@ -1003,6 +1019,7 @@
 
         ctx.restore();
         updateGravityCenterMarker();
+        updateHUD();
     }
 
     window.onload = init;
