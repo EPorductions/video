@@ -2,7 +2,7 @@
 <html lang="he" dir="rtl">
 <head>
     <meta charset="UTF-8">
-    <title>אוריין אדלני - סימולציה אינטראקטיבית V3.8 (טיקר משולב)</title>
+    <title>אוריין אדלני - סימולציה אינטראקטיבית V4.1 (מתוקן)</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <style>
         /* --- General & Reset Styles --- */
@@ -32,7 +32,7 @@
             align-items: center;
             justify-content: center;
             padding: 8px 15px;
-            gap: 10px;
+            gap: 15px; /* Increased gap */
             border-bottom: 1px solid #444;
             box-shadow: 0 2px 10px rgba(0,0,0,0.3);
         }
@@ -45,16 +45,16 @@
         header.top-nav-controls nav a:hover { background-color: rgba(255, 221, 87, 0.2); border-color: rgba(255, 221, 87, 0.4); }
         header.top-nav-controls nav a.active { background-color: #ffdd57; color: #111; border-color: #ffdd57; transform: translateY(-1px); box-shadow: 0 2px 5px rgba(255, 221, 87, 0.3); }
 
-        .controls-separator { border-left: 1px solid #555; padding-left: 12px; margin-left: 12px; }
+        .controls-separator { border-left: 1px solid #555; padding-left: 15px; margin-left: 15px; }
 
         .controls-group { display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: 8px; }
         .controls-group label { font-size: 13px; color: #ccc; }
-        .controls-group button, .controls-group select, .controls-group input[type="text"], #ticker-controls button {
+        .controls-group button, .controls-group select {
             padding: 6px 12px; background: rgba(255,255,255,0.1); color: #eee;
             border: 1px solid #666; border-radius: 6px; cursor: pointer; font-size: 13px;
             transition: all 0.2s ease;
         }
-        .controls-group button:hover:not(:disabled), #ticker-controls button:hover { background: rgba(255, 255, 255, 0.25); border-color: #888; }
+        .controls-group button:hover:not(:disabled) { background: rgba(255, 255, 255, 0.25); border-color: #888; }
         .controls-group button:disabled { background: rgba(255,255,255,0.05); color: #777; cursor: not-allowed; border-color: #444; }
         .controls-group button.active { background: #ffdd57; color: #111; border-color: #ffdd57; transform: translateY(-1px); box-shadow: 0 1px 4px rgba(255, 221, 87, 0.2); }
         .controls-group select:focus { outline: none; border-color: #ffdd57;}
@@ -63,25 +63,13 @@
         .controls-group input[type="range"]::-moz-range-thumb { width: 18px; height: 18px; background: #ffdd57; border-radius: 50%; cursor: pointer; border: 2px solid #333;}
         .vortex-controls { display: flex; align-items: center; gap: 8px; transition: all 0.5s ease; max-width: 0; opacity: 0; overflow: hidden; }
         .vortex-controls.visible { max-width: 200px; opacity: 1; }
-        
-        #ticker-controls input[type="text"] { width: 180px; }
-        #ticker-controls input[type="text"]::placeholder { color: #999; }
-        #ticker-controls label { display: flex; align-items: center; gap: 4px; font-size: 13px; color: #ccc; cursor: pointer; padding: 5px; border-radius: 4px; transition: background-color 0.2s;}
-        #ticker-controls label:hover { background-color: rgba(255,255,255,0.1); }
-        #ticker-controls input[type="color"] {
-            width: 32px; height: 32px; padding: 2px; border: 1px solid #666;
-            border-radius: 6px; cursor: pointer; background: transparent;
-        }
-        #ticker-controls input[type="color"]::-webkit-color-swatch-wrapper { padding: 0; }
-        #ticker-controls input[type="color"]::-webkit-color-swatch { border: none; border-radius: 4px;}
-
 
         /* --- Canvases & UI --- */
         canvas { display: block; position: absolute; top: 0; left: 0; }
         #canvas { z-index: 1; background: transparent; }
         #hudContainer {
             position: fixed;
-            top: 150px; /* Adjusted for larger header */
+            top: 100px; /* Adjusted for smaller header */
             right: 15px;
             background: rgba(0,0,0,0.7);
             color: #ffc107;
@@ -151,14 +139,6 @@
                 <input type="range" id="vortex-slider" min="-100" max="100" value="0">
             </div>
         </div>
-         <div class="controls-group controls-separator" id="ticker-controls">
-            <input type="text" id="news-input" placeholder="הקלד ידיעה חדשה">
-            <input type="text" id="details-input" placeholder="טקסט מורחב (אופציונלי)">
-            <input type="color" id="color-input" value="#ffffff" title="צבע טקסט">
-            <label><input type="checkbox" id="bold-input"> הדגשה</label>
-            <button id="add-news-btn">הוסף ידיעה</button>
-            <button id="add-timer-btn">טיימר 2 דק׳</button>
-        </div>
     </header>
 
     <canvas id="canvas"></canvas>
@@ -215,6 +195,7 @@
     // Ticker & Idle Mode
     let feedToTicker; // Will be assigned by the ticker init function
     let idleTimeout, demoInterval; const IDLE_TIME_MS = 10000;
+    const tickerMessageCooldowns = new Map();
 
     // Data with "Weight"
     const cubeData = [
@@ -634,6 +615,11 @@
         const targetScale = Math.min(MAX_SCALE, Math.max(MIN_SCALE, canvas.width / (starCube.width * 3.5)));
         setActiveNav(starId);
         centerViewOn(starCube.x, starCube.y, targetScale);
+        feedToTicker({
+            type: 'navigation',
+            text: `ניווט אל: ${starCube.text}`,
+            options: { color: '#87CEEB', lifetime: 'single' }
+        });
     }
 
     function animateViewport() {
@@ -666,7 +652,7 @@
 
         document.getElementById('layout-select').addEventListener('change', (e) => {
             layoutMode = e.target.value;
-            if (feedToTicker) feedToTicker({text: `פריסה שונתה ל: ${e.target.options[e.target.selectedIndex].text}`, options:{color:'#ffdd57'}});
+            feedToTicker({ type: 'layout_change', text: `פריסה שונתה ל: ${e.target.options[e.target.selectedIndex].text}`, options:{color:'#ffdd57', lifetime: 5000}});
             assignGridPositions();
             buildSprings();
         });
@@ -679,12 +665,12 @@
         document.getElementById('earthquakeBtn')?.addEventListener('click', () => {
             const now = performance.now();
             if (now - lastEarthquakeClick < 1500 && earthquakeLevel > 0) {
-                 if (feedToTicker) feedToTicker({text: `נראה שהמשתמש כועס... מגביר רעידת אדמה!`, options:{color:'#e91e63', bold:true, hold:true}});
+                 feedToTicker({type: 'user_rage', text: `נראה שהמשתמש כועס... מגביר רעידת אדמה!`, options:{color:'#e91e63', bold:true, hold:true, lifetime: 'single'}});
             }
             lastEarthquakeClick = now;
 
             earthquakeLevel++;
-            if (feedToTicker) feedToTicker({text: `הופעלה רעידת אדמה בעוצמה ${earthquakeLevel}!`, options:{color:'#ff9800', bold:true}});
+            feedToTicker({type: 'earthquake', text: `הופעלה רעידת אדמה בעוצמה ${earthquakeLevel}!`, options:{color:'#ff9800', bold:true, lifetime: 6000}});
             const strength = (180 + (Math.random() - 0.5) * 80) * earthquakeLevel;
             keyCubes.forEach(cube => {
                 if (!cube.dragging && !cube.isExpanded) {
@@ -695,7 +681,7 @@
             if(earthquakeLevel > 1) {
                 for(let i = 1; i < earthquakeLevel; i++) {
                     setTimeout(() => {
-                        if (feedToTicker) feedToTicker({text: `רעד משנה מורגש...`, options:{color:'#ffc107'}});
+                        feedToTicker({type: 'aftershock', text: `רעד משנה מורגש...`, options:{color:'#ffc107', lifetime: 2000}});
                         keyCubes.forEach(c => c.applyForce((Math.random()-0.5)*strength*0.4, (Math.random()-0.5)*strength*0.4));
                     }, i * (500 + Math.random() * 400) );
                 }
@@ -706,7 +692,7 @@
         document.getElementById('windBtn')?.addEventListener('click', () => {
             windLevel++;
             const duration = 2000 + windLevel * 800;
-            if (feedToTicker) feedToTicker({text: `משב רוח אדיר בעוצמה ${windLevel}!`, options:{color:'#03a9f4', bold: true}});
+            feedToTicker({type: 'wind', text: `משב רוח אדיר בעוצמה ${windLevel}!`, options:{color:'#03a9f4', bold: true, lifetime: duration}});
             const baseStrength = 12.0 * windLevel * (0.8 + Math.random() * 0.4);
             const angle = Math.random() * Math.PI * 2;
             const windForce = { x: Math.cos(angle) * baseStrength, y: Math.sin(angle) * baseStrength };
@@ -717,7 +703,7 @@
             }, 100);
             setTimeout(() => {
                 clearInterval(windInterval);
-                if (feedToTicker) feedToTicker({text: `הרוח נרגעה.`, options:{color:'#b3e5fc'}});
+                feedToTicker({type: 'wind_end', text: `הרוח נרגעה.`, options:{color:'#b3e5fc', lifetime: 3000}});
                 windLevel = Math.max(0, windLevel - 1);
             }, duration);
         });
@@ -764,6 +750,11 @@
                 cube.dragging = true;
                 keyCubes.splice(i, 1);
                 keyCubes.push(draggedCube);
+                feedToTicker({
+                    type: 'drag_start',
+                    text: () => draggedCube ? `גורר את: ${draggedCube.text}` : '',
+                    options: { color: '#ffee58', lifetime: 'event', eventId: 'drag' }
+                });
                 break;
             }
         }
@@ -796,12 +787,13 @@
             }
         } else if (draggedCube) {
             draggedCube.dragging = false;
+            // The 'drag_end' is handled by the event-based lifetime in the ticker logic
             if (distMoved < CLICK_THRESHOLD_DIST && timeHeld < CLICK_THRESHOLD_TIME) {
                 handleCubeClick(draggedCube);
             }
         } else if (isPanning && distMoved < CLICK_THRESHOLD_DIST && timeHeld < CLICK_THRESHOLD_TIME) {
             gravityCenter = { ...worldMouse };
-            if (feedToTicker) feedToTicker({text: "מרכז הכבידה הוזז!", options:{color:'#8bc34a'}});
+            feedToTicker({type: 'gravity_move', text: "מרכז הכבידה הוזז!", options:{color:'#8bc34a', lifetime: 3000}});
             updateGravityCenterMarker();
         }
         draggedCube = null; isPanning = false;
@@ -895,14 +887,16 @@
         const popup = document.getElementById('popup');
         const popupContent = document.getElementById('popup-content');
         const popupClose = document.getElementById('popup-close');
-        const newsInp = document.getElementById('news-input');
-        const detailsInp = document.getElementById('details-input');
-        const colInp = document.getElementById('color-input');
-        const boldInp = document.getElementById('bold-input');
-        const addBtn = document.getElementById('add-news-btn');
-        const timerBtn = document.getElementById('add-timer-btn');
 
-        let labelW = 0; const MASK = 40;
+        // --- FIX START: Hoist variables to the top of the function scope ---
+        const queue = [];
+        const active = [];
+        let isDrag = false, startX = 0, vel = 0, startT = 0, paused = false;
+        let last = 0, running = false;
+        const BASE_SPD = 60, MASK = 40, GAP = 0;
+        let labelW = 0;
+        // --- FIX END ---
+        
         function resize() {
             if (!label || !container || !canvas) return;
             labelW = label.clientWidth;
@@ -916,12 +910,15 @@
         resize();
 
         const ease = t => t < .5 ? 2 * t * t : -1 + (4 - 2 * t) * t;
-        const fmt = ms => { const s = Math.max(0, Math.floor(ms / 1000)); return `${String(Math.floor(s / 60)).padStart(2, '0')}:${String(s % 60).padStart(2, '0')}`; };
 
         class Msg {
-            constructor(text, opt = {}) {
+            constructor(text, options = {}) {
+                this.id = Math.random();
                 this.src = text;
-                this.opt = { color: '#fff', bold: false, hold: false, spacer: false, details: opt.details ?? null, ...opt };
+                this.opt = { color: '#fff', bold: false, hold: false, spacer: false, details: null, lifetime: Infinity, type: 'generic', ...options };
+                if (typeof this.opt.lifetime === 'number') {
+                    this.expireTime = performance.now() + this.opt.lifetime;
+                }
                 this.txt = this._val(); this._measure();
                 this.x = -18; this.ease = false; this.sx = 0; this.tx = 0; this.es = 0; this.ed = 400; this.first = true;
                 this.sep = this.txt === '|' || this.opt.spacer;
@@ -933,21 +930,34 @@
             start(tgt, now, d = 400) { this.ease = true; this.sx = this.x; this.tx = tgt; this.es = now; this.ed = d; }
             step(now) { const t = Math.min((now - this.es) / this.ed, 1); this.x = this.sx + (this.tx - this.sx) * ease(t); if (t >= 1) this.ease = false; }
             extended() { return this.opt.details || this.txt; }
+            isExpired(now) {
+                 if (this.opt.lifetime === 'event' && this.opt.eventId === 'drag' && !draggedCube) return true;
+                 if (this.expireTime && now > this.expireTime) return true;
+                 return false;
+            }
         }
-
-        const queue = [
-            { text: 'ברוכים הבאים לסימולציה האינטראקטיבית', options: { color: '#4caf50', details: 'עדכון קצר – פרטים נוספים על האירוע המתרחש ברגעים אלה' } },
-            { text: 'נסו לגרור את הריבועים ולשחק עם הכפתורים', options: { color: '#03a9f4' } },
-            { text: '', options: { spacer: true } },
-            { text: 'הודעה ארוכה במיוחד שמתארת אירוע מפורט עם נתונים דינמיים ודגשים שונים', options: { bold: true, hold: true, color: '#ffeb3b', details: 'הרחבה: כאן מופיעה גרסה מלאה של ההודעה הארוכה, כולל קישורים וסטטיסטיקות' } },
-            { text: 'חדשות בזק', options: { color: '#e91e63' } },
-        ];
-        const active = []; const GAP = 0;
         
-        feedToTicker = def => { queue.push(def); if (!running) start(); };
+        function start() { if(running) return; running = true; last = performance.now(); requestAnimationFrame(frame); } 
 
-        let isDrag = false, startX = 0, vel = 0, startT = 0, paused = false;
-        const FR = .92;
+        feedToTicker = ({ type, text, options }) => {
+            const now = performance.now();
+            const cooldown = tickerMessageCooldowns.get(type) || 0;
+            if (now < cooldown) return; // Cooldown active
+
+            // Set cooldown for this message type
+            tickerMessageCooldowns.set(type, now + (options.cooldown || 2000));
+            
+            // Prevent duplicate event-based messages
+            if(options.lifetime === 'event' && active.some(m => m.opt.eventId === options.eventId)) return;
+
+            queue.push({ text, options: { ...options, type } });
+            if (!running) start();
+        };
+
+        // Populate initial messages
+        feedToTicker({ type: 'welcome', text: 'ברוכים הבאים לסימולציה האינטראקטיבית', options: { color: '#4caf50', details: 'גרסה 4.1 - טיקר דינמי מגיב לאירועים בזמן אמת. נסו את הכפתורים!' } });
+        feedToTicker({ type: 'instructions', text: 'גררו ריבועים, לחצו על כפתורים, ושחקו עם הפיזיקה', options: { color: '#03a9f4' } });
+        
         const ptrX = e => e.clientX ?? e.touches[0].clientX;
 
         const shift = dx => active.forEach(m => m.x += dx);
@@ -967,69 +977,71 @@
         popup.addEventListener('click', e => { if (e.target === popup) close(); });
 
         container.addEventListener('click', e => {
-            if (Math.abs(vel) > 0.05) return;
+            if (Math.abs(vel) > 0.1) return;
             const rect = canvas.getBoundingClientRect();
             const lx = e.clientX - rect.left;
             if (lx < 0 || lx > canvas.width) return;
             for (let i = active.length - 1; i >= 0; i--) {
                 const m = active[i];
                 if (m.sep) continue;
-                if (lx >= m.left && lx <= m.right) {
-                    open(m.extended());
-                    return;
-                }
+                if (lx >= m.left && lx <= m.right) { open(m.extended()); return; }
             }
         });
 
         const holdable = m => !m.sep && (m.opt.hold || m.tw > 450);
-        const recycle = m => { if (!m.sep) feedToTicker({ text: m.src, options: m.opt }); };
+        const recycle = m => {
+            if (m.opt.lifetime !== 'single' && m.opt.lifetime !== 'event' && typeof m.opt.lifetime !== 'number') {
+                feedToTicker({ type: m.opt.type, text: m.src, options: m.opt });
+            }
+        };
 
-        let last = 0, running = false; const SPD = 60;
         const make = d => d instanceof Msg ? d : new Msg(d.text ?? d, d.options ?? {});
 
         function frame(ts) {
-            if (!canvas.width || !canvas.height) { // Ensure canvas is ready
-                 if(running) requestAnimationFrame(frame);
-                 return;
-            }
+            const now = performance.now();
             const dt = (ts - last) / 1000; last = ts;
             if (!active.length && queue.length) active.push(make(queue.shift()));
-            if (!isDrag && Math.abs(vel) > 0.0001) { shift(vel * dt * 1000); vel *= FR; }
+            if (!isDrag && Math.abs(vel) > 0.0001) { shift(vel * dt * 1000); vel *= 0.92; } // friction
 
             ctx.clearRect(0, 0, canvas.width, canvas.height);
+            let currentSpeed = BASE_SPD * (1 + Math.min(queue.length, 5) * 0.5); // Speed up based on queue length
+
             for (const m of active) {
                 ctx.font = `${m.opt.bold ? 'bold ' : ''}16px sans-serif`;
                 const nt = m._val(); if (nt !== m.txt) { m._measure(); }
-                if (m.first) { m.x += SPD * dt * 2; if (m.right >= -GAP) m.first = false; }
-                else if (m.ease) { m.step(ts); } else if (!isDrag && !paused) { m.x += SPD * dt; }
+                if (m.first) { m.x += currentSpeed * dt * 2; if (m.right >= -GAP) m.first = false; }
+                else if (m.ease) { m.step(ts); } else if (!isDrag && !paused) { m.x += currentSpeed * dt; }
                 ctx.fillStyle = m.opt.color; ctx.fillText(m.txt, m.x + 18, canvas.height / 2);
             }
 
             for (let i = 1; i < active.length; i++) { const p = active[i - 1], c = active[i]; const maxR = p.left - GAP; if (c.right > maxR) c.x = maxR - 18; }
             if (active.length === 1 && !queue.length) { const m = active[0]; if (holdable(m) && !m.ease && !isDrag && !paused) { const c = (canvas.width + m.w) / 2; if (Math.abs(m.right - c) > 1) m.start(c, ts, 600); } }
 
-            if (active.length && active[0].left > canvas.width + MASK) { recycle(active.shift()); }
-            if (active.length && active[active.length - 1].right < -MASK) { recycle(active.pop()); }
+            // Check for expired and off-screen messages
+            for (let i = active.length - 1; i >= 0; i--) {
+                const m = active[i];
+                if (m.isExpired(now) || m.left > canvas.width + MASK) {
+                    const [removed] = active.splice(i, 1);
+                    if(!removed.isExpired(now)) recycle(removed);
+                }
+            }
+            if (active.length && active[active.length-1].right < -MASK) { recycle(active.pop()); }
+            
+            while (queue.length) {
+                 if (active.length && !active[active.length - 1].sep) active.push(new Msg('|', { color: '#aaa', lifetime: 'single' }));
+                 active.push(make(queue.shift()));
+            }
 
-            while (queue.length) { if (active.length && !active[active.length - 1].sep) active.push(new Msg('|', { color: '#aaa' })); active.push(make(queue.shift())); }
-
-            if (active.length || queue.length) requestAnimationFrame(frame); else running = false;
+            if (active.length || queue.length) requestAnimationFrame(frame); else {
+                running = false;
+                // If queue becomes empty, add a default message to keep it alive
+                setTimeout(() => {
+                    if (!active.length && !queue.length) {
+                        feedToTicker({ type: 'idle', text: 'המערכת ממתינה לפעולה...', options: { color: '#999' } });
+                    }
+                }, 5000);
+            }
         }
-        function start() { if(running) return; running = true; last = performance.now(); requestAnimationFrame(frame); } 
-        start();
-
-        addBtn.addEventListener('click', () => {
-            const t = newsInp.value.trim();
-            if (!t) return;
-            feedToTicker({ text: t, options: { color: colInp.value, bold: boldInp.checked, details: detailsInp.value.trim() || null } });
-            newsInp.value = ''; detailsInp.value = ''; newsInp.focus();
-        });
-        newsInp.addEventListener('keyup', e => { if (e.key === 'Enter') addBtn.click(); });
-        detailsInp.addEventListener('keyup', e => { if (e.key === 'Enter') addBtn.click(); });
-        timerBtn.addEventListener('click', () => {
-            const end = Date.now() + 120000;
-            feedToTicker({ text: () => `האירוע מסתיים בעוד ${fmt(end - Date.now())}`, options: { color: '#ff4080', bold: true, hold: true, details: 'ספירה לאחור חיה לשתי דקות הקרובות' } });
-        });
     }
 
     // =========================================
@@ -1042,7 +1054,7 @@
     }
 
     function startIdleMode() {
-        if (feedToTicker) feedToTicker({text: "מצב הדגמה הופעל. המערכת משתלטת...", options:{color:'#87CEEB', bold:true, hold:true}});
+        feedToTicker({type: 'demo_mode', text: "מצב הדגמה הופעל. המערכת משתלטת...", options:{color:'#87CEEB', bold:true, hold:true, lifetime: 'single'}});
         runDemoAction();
         demoInterval = setInterval(runDemoAction, Math.random() * 5000 + 5000);
     }
@@ -1065,9 +1077,39 @@
              randomAction();
         }
     }
+    
+    // =========================================
+    // 11. Live Data Ticker Updates
+    // =========================================
+    function updateTickerWithLiveData() {
+        // Energy Level
+        if (totalKineticEnergy > 600000) {
+            feedToTicker({
+                type: 'high_energy',
+                text: `רמת אנרגיה גבוהה: ${Math.round(totalKineticEnergy / 1000)}k`,
+                options: { color: '#f44336', bold: true, cooldown: 5000 }
+            });
+        } else if (totalKineticEnergy < 1000 && !isMouseDown) {
+            feedToTicker({
+                type: 'low_energy',
+                text: 'המערכת רגועה...',
+                options: { color: '#4caf50', cooldown: 10000 }
+            });
+        }
+        
+        // Gravity Mode specific
+        if (gravityMode === 'vortex') {
+             feedToTicker({
+                type: 'vortex_active',
+                text: () => `עוצמת מערבולת: ${vortexStrength}`,
+                options: { color: '#9c27b0', cooldown: 3000 }
+            });
+        }
+    }
+
 
     // =========================================
-    // 11. Main Animation Loop & HUD
+    // 12. Main Animation Loop & HUD
     // =========================================
     function updateHUD() {
         const objectCountEl = document.getElementById('objectCount');
@@ -1099,6 +1141,7 @@
             fps = frameCount;
             frameCount = 0;
             lastFpsUpdate = timestamp;
+            updateTickerWithLiveData(); // Update ticker once per second
         }
         
         lastTimestamp = timestamp;
