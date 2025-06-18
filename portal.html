@@ -177,7 +177,7 @@
         .toggle-graph-btn { background: #e2e8f0; border-radius: 50%; width: 28px; height: 28px; display: flex; align-items: center; justify-content: center; font-size: 1rem; transition: all 0.2s; }
         .toggle-graph-btn:hover { background: #cbd5e1; }
     </style>
-
+    
     <script type="module">
         // --- GOOGLE CALENDAR INTEGRATION ---
         const GOOGLE_CLIENT_ID = '982729388928-29tg2cribbd0o3j6mj5rsheets0qri6p.apps.googleusercontent.com';
@@ -189,7 +189,8 @@
         let gisInited = false;
         let googleSyncCompleted = false;
 
-        function initializeGisClient() {
+        // Expose functions to the global window object so the script onload callbacks can find them
+        window.gisLoaded = () => {
             tokenClient = google.accounts.oauth2.initTokenClient({
                 client_id: GOOGLE_CLIENT_ID,
                 scope: SCOPES,
@@ -197,22 +198,27 @@
             });
             gisInited = true;
             checkReadyAndEnableButton();
-        }
-
-        async function initializeGapiClient() {
-            await gapi.client.init({
-                apiKey: GOOGLE_API_KEY,
-                discoveryDocs: ['https://www.googleapis.com/discovery/v1/apis/calendar/v3/rest'],
+        };
+        
+        window.gapiLoaded = () => {
+             gapi.load('client', async () => {
+                await gapi.client.init({
+                    apiKey: GOOGLE_API_KEY,
+                    discoveryDocs: ['https://www.googleapis.com/discovery/v1/apis/calendar/v3/rest'],
+                });
+                gapiInited = true;
+                checkReadyAndEnableButton();
             });
-            gapiInited = true;
-            checkReadyAndEnableButton();
-        }
+        };
 
         function checkReadyAndEnableButton() {
+            // This function is called by both loaders. It will only proceed when both are ready.
             if (gapiInited && gisInited) {
-                const btn = DOMElements.googleAuthBtn;
-                btn.disabled = false;
-                btn.querySelector('span').textContent = 'סנכרון עם יומן גוגל';
+                // Ensure DOM elements are available before trying to access them
+                if (DOMElements.googleAuthBtn) {
+                     DOMElements.googleAuthBtn.disabled = false;
+                     DOMElements.googleAuthBtn.querySelector('span').textContent = 'סנכרון עם יומן גוגל';
+                }
             }
         }
 
@@ -255,9 +261,25 @@
                     'orderBy': 'startTime'
                 });
                 
+                console.log("Full response from Google Calendar API:", response);
                 const events = response.result.items;
 
-                // Clear existing personal/random/google events before adding new ones
+                DOMElements.googleEventsDebugCard.classList.remove('hidden');
+                let debugHtml = '<p>לא נמצאו אירועים בחודש זה.</p>';
+                if (events && events.length > 0) {
+                    debugHtml = '<table class="w-full text-left"><thead><tr><th class="p-1 border-b">כותרת</th><th class="p-1 border-b">התחלה</th><th class="p-1 border-b">סיום</th><th class="p-1 border-b">סטטוס</th></tr></thead><tbody>';
+                    events.forEach(event => {
+                         debugHtml += `<tr>
+                            <td class="p-1 border-b">${event.summary || '(ללא כותרת)'}</td>
+                            <td class="p-1 border-b">${event.start.dateTime || event.start.date}</td>
+                            <td class="p-1 border-b">${event.end.dateTime || event.end.date}</td>
+                            <td class="p-1 border-b">${event.status}</td>
+                         </tr>`;
+                    });
+                    debugHtml += '</tbody></table>';
+                }
+                DOMElements.googleEventsDebugContainer.innerHTML = debugHtml;
+
                 Object.keys(AppData.entities.bookings).forEach(key => {
                     if (AppData.entities.bookings[key].prodId === 'prod_personal' || AppData.entities.bookings[key].isGoogleEvent) {
                         delete AppData.entities.bookings[key];
@@ -266,7 +288,10 @@
 
                 if (events && events.length > 0) {
                     events.forEach(event => {
-                        if (!event.start.dateTime || !event.end.dateTime) return; // Skip all-day events
+                        if (!event.start.dateTime || !event.end.dateTime) {
+                            console.log("Skipping all-day event:", event.summary);
+                            return; 
+                        }
 
                         const startDate = new Date(event.start.dateTime);
                         const endDate = new Date(event.end.dateTime);
@@ -284,8 +309,6 @@
                             isGoogleEvent: true
                         };
                     });
-                } else {
-                    console.log('No upcoming events found in Google Calendar for this month.');
                 }
                 googleSyncCompleted = true;
                 renderAll();
@@ -318,7 +341,7 @@
                 bookings: {} 
             },
             ui: { 
-                currentDate: new Date(2025, 5, 1), 
+                currentDate: new Date(2025, 4, 1), // Set to May 2025
                 modal: { isOpen: false, selectedDate: null, editingBlockId: null, isDirty: false, interaction: null }, 
                 activeProdId: null, 
                 graph: { view: 'monthly', day: null, isExpanded: true } 
@@ -341,27 +364,7 @@
             }
         };
 
-        const DOMElements = {
-            body: document.body,
-            googleAuthBtn: document.getElementById('google-auth-btn'),
-            calendarContainer: document.getElementById('calendar-container'), bookingsTable: document.getElementById('bookings-table-container'), sidebar: document.getElementById('sidebar'),
-            graphFooter: document.getElementById('graph-footer'),
-            graphContainer: document.getElementById('graph-container'),
-            histogramHeader: document.getElementById('histogram-header'),
-            expandedGraph: document.getElementById('expanded-graph'),
-            histogramSvg: document.getElementById('histogram-svg'),
-            histogramTitle: document.getElementById('histogram-title'), 
-            toggleGraphBtn: document.getElementById('toggle-graph-btn'),
-            modal: {
-                overlay: document.getElementById('booking-modal'), title: document.getElementById('modal-title'), closeBtn: document.getElementById('modal-close-btn'), formTitle: document.getElementById('block-form-title'),
-                blockNameInput: document.getElementById('block-name'), prodIdSelect: document.getElementById('block-prod-id'),
-                manualPriceInput: document.getElementById('block-manual-price'), dynamicPricingFields: document.getElementById('dynamic-pricing-fields'),
-                workTypeSelect: document.getElementById('block-work-type'), equipmentContainer: document.getElementById('block-equipment'), suppliersContainer: document.getElementById('block-suppliers'),
-                summaryDetails: document.getElementById('summary-details'), saveBtn: document.getElementById('save-block-btn'), saveBtnLabel: document.querySelector('#save-block-btn span'), deleteBtn: document.getElementById('delete-block-btn'), 
-                hourLabels: document.getElementById('hour-labels'), timeSlots: document.getElementById('time-slots'),
-            },
-            confirmModal: { overlay: document.getElementById('confirm-modal'), discardBtn: document.getElementById('confirm-discard-btn'), cancelBtn: document.getElementById('confirm-cancel-btn') }
-        };
+        let DOMElements = {};
         let liveBlockState = null;
 
         // --- HELPER & UTILITY FUNCTIONS ---
@@ -841,6 +844,33 @@
         function handleFormChange() { AppData.ui.modal.isDirty = true; const changes = getBlockStateFromUI(); liveBlockState={...liveBlockState, ...changes}; updateModalForm(); }
         
         function init() {
+            // Populate DOMElements object once the DOM is ready
+            DOMElements = {
+                body: document.body,
+                googleAuthBtn: document.getElementById('google-auth-btn'),
+                calendarContainer: document.getElementById('calendar-container'),
+                bookingsTable: document.getElementById('bookings-table-container'),
+                sidebar: document.getElementById('sidebar'),
+                googleEventsDebugCard: document.getElementById('google-events-debug-card'),
+                googleEventsDebugContainer: document.getElementById('google-events-debug-container'),
+                graphFooter: document.getElementById('graph-footer'),
+                graphContainer: document.getElementById('graph-container'),
+                histogramHeader: document.getElementById('histogram-header'),
+                expandedGraph: document.getElementById('expanded-graph'),
+                histogramSvg: document.getElementById('histogram-svg'),
+                histogramTitle: document.getElementById('histogram-title'), 
+                toggleGraphBtn: document.getElementById('toggle-graph-btn'),
+                modal: {
+                    overlay: document.getElementById('booking-modal'), title: document.getElementById('modal-title'), closeBtn: document.getElementById('modal-close-btn'), formTitle: document.getElementById('block-form-title'),
+                    blockNameInput: document.getElementById('block-name'), prodIdSelect: document.getElementById('block-prod-id'),
+                    manualPriceInput: document.getElementById('block-manual-price'), dynamicPricingFields: document.getElementById('dynamic-pricing-fields'),
+                    workTypeSelect: document.getElementById('block-work-type'), equipmentContainer: document.getElementById('block-equipment'), suppliersContainer: document.getElementById('block-suppliers'),
+                    summaryDetails: document.getElementById('summary-details'), saveBtn: document.getElementById('save-block-btn'), saveBtnLabel: document.querySelector('#save-block-btn span'), deleteBtn: document.getElementById('delete-block-btn'), 
+                    hourLabels: document.getElementById('hour-labels'), timeSlots: document.getElementById('time-slots'),
+                },
+                confirmModal: { overlay: document.getElementById('confirm-modal'), discardBtn: document.getElementById('confirm-discard-btn'), cancelBtn: document.getElementById('confirm-cancel-btn') }
+            };
+
             const { currentDate } = AppData.ui;
             if (!googleSyncCompleted) {
                  generateRandomErrands(currentDate.getFullYear(), currentDate.getMonth());
@@ -976,11 +1006,8 @@
             window.addEventListener('mouseup', () => { AppData.ui.modal.interaction = null; });
             
             new ResizeObserver(renderExpandedGraph).observe(DOMElements.expandedGraph);
+            checkReadyAndEnableButton(); // Also check readiness when DOM is loaded
         }
-
-        // Expose gapi/gis load handlers to global scope
-        window.gapiLoaded = () => gapi.load('client', initializeGapiClient);
-        window.gisLoaded = initializeGisClient;
         
         document.addEventListener('DOMContentLoaded', init);
     </script>
@@ -1010,6 +1037,10 @@
                         <h2 class="card-title">זמינות ותמחור דינמי</h2>
                         <p class="mb-4 text-slate-600">לחצ/י על תאריך כדי לפתוח את יומן השעות. הנקודות הצבעוניות מייצגות אירועים קיימים. גוון היום משתנה בהתאם לעומס ולתמחור.</p>
                         <div id="calendar-container" class="calendar-container"></div>
+                    </div>
+                     <div id="google-events-debug-card" class="card hidden">
+                        <h2 class="card-title">נתוני יומן גולמיים (לניפוי באגים)</h2>
+                        <div id="google-events-debug-container" class="text-xs overflow-auto max-h-64"></div>
                     </div>
                     <div class="card">
                         <h2 class="card-title">ההזמנות שלי</h2>
