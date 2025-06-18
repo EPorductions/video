@@ -7,7 +7,7 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Assistant:wght@400;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-
+    
     <style>
         :root {
             --primary-dark: #003f5c;
@@ -77,7 +77,6 @@
             transition: height 0.35s ease-in-out;
             height: 250px; 
             padding: 0 1.5rem;
-            cursor: pointer;
         }
         .graph-footer-container.minimized {
             height: 60px;
@@ -155,7 +154,7 @@
 
         .calendar-header { display: flex; justify-content: space-between; align-items: center; padding: 0.5rem 0; font-size: 1.25rem; font-weight: 700;}
         .calendar-container { padding: 1rem; }
-        .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.65); z-index: 50; display: flex; align-items: center; justify-content: center; opacity: 0; visibility: hidden; transition: opacity 0.3s ease, visibility 0.3s; }
+        .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.65); z-index: 100; display: flex; align-items: center; justify-content: center; opacity: 0; visibility: hidden; transition: opacity 0.3s ease, visibility 0.3s; }
         .modal-overlay.active { opacity: 1; visibility: visible; }
         .modal-container { background: var(--bg-white); border-radius: 15px; width: 90%; max-width: 1100px; max-height: 90vh; display: flex; flex-direction: column; transform: scale(0.95); transition: transform 0.3s ease; box-shadow: 0 10px 30px rgba(0,0,0,0.2); }
         .modal-overlay.active .modal-container { transform: scale(1); }
@@ -165,8 +164,8 @@
         .time-slots { position: relative; border-radius: 8px; overflow: hidden; background-color: #f8fafc; }
         .time-slot { height: 20px; border-bottom: 1px dashed #e2e8f0a0; cursor: crosshair; position: relative; z-index: 5;}
         #selected-block-overlay { position: absolute; width: 100%; border-radius: 8px; z-index: 10; cursor: grab; display: flex; flex-direction: column; align-items: center; justify-content: center; color: white; font-weight: bold; padding: 4px; line-height: 1.2;}
-        .other-booking-block { position: absolute; width: 100%; border-radius: 8px; z-index: 8; display: flex; flex-direction: column; align-items: center; justify-content: center; color: var(--text-dark); background-color: rgba(209, 213, 219, 0.7); border: 2px solid #9ca3af; cursor: pointer; padding: 4px; line-height: 1.2; }
-        .other-booking-block:hover { background-color: rgba(156, 163, 175, 0.7); border-color: #6b7280; }
+        .other-booking-block { position: absolute; width: 100%; border-radius: 8px; z-index: 8; display: flex; flex-direction: column; align-items: center; justify-content: center; color: white; cursor: pointer; padding: 4px; line-height: 1.2; text-shadow: 0 1px 2px rgba(0,0,0,0.5); }
+        .other-booking-block:hover { filter: brightness(1.1); }
         #selected-block-overlay:active { cursor: grabbing; }
         #block-name-label, .block-name-label { font-size: 0.85rem; font-weight: bold; }
         #block-time-label, .block-time-label { font-size: 0.75rem; opacity: 0.9; }
@@ -178,96 +177,126 @@
         .toggle-graph-btn { background: #e2e8f0; border-radius: 50%; width: 28px; height: 28px; display: flex; align-items: center; justify-content: center; font-size: 1rem; transition: all 0.2s; }
         .toggle-graph-btn:hover { background: #cbd5e1; }
     </style>
-</head>
-<body class="p-0">
-<div id="main-wrapper">
-    <div class="scrollable-content">
-        <div id="dashboard-view">
-            <header class="flex justify-between items-center mb-6 pb-4 border-b">
-                <div><h1 class="text-3xl font-extrabold text-primary-dark">אזור הלקוח</h1><p id="user-greeting" class="text-slate-600">שלום, לקוח יקר!</p></div>
-            </header>
-            <div class="dashboard-grid">
-                <main class="main-content flex flex-col gap-6">
-                    <div class="card">
-                        <h2 class="card-title">זמינות ותמחור דינמי</h2>
-                        <p class="mb-4 text-slate-600">לחצ/י על תאריך כדי לפתוח את יומן השעות. הנקודות הצבעוניות מייצגות אירועים קיימים. גוון היום משתנה בהתאם לעומס ולתמחור.</p>
-                        <div id="calendar-container" class="calendar-container"></div>
-                    </div>
-                    <div class="card">
-                        <h2 class="card-title">ההזמנות שלי</h2>
-                        <div id="bookings-table-container" class="overflow-x-auto"></div>
-                    </div>
-                </main>
-                <aside id="sidebar" class="sidebar flex flex-col gap-6"></aside>
-            </div>
-        </div>
-    </div>
-    <div id="graph-footer" class="graph-footer-container">
-        <div id="histogram-header">
-            <h2 id="histogram-title" class="card-title">גרף עומסים</h2>
-            <button id="toggle-graph-btn" class="toggle-graph-btn" title="מזער/הרחב גרף">
-                <i class="fas fa-chevron-down"></i>
-            </button>
-        </div>
-        <div id="graph-container">
-            <div id="expanded-graph">
-                <svg id="histogram-svg"></svg>
-            </div>
-        </div>
-    </div>
-</div>
-    
-    <!-- Modals -->
-    <div id="booking-modal" class="modal-overlay">
-        <div class="modal-container">
-            <header class="p-4 border-b flex justify-between items-center bg-slate-50 rounded-t-lg"><h3 id="modal-title" class="text-xl font-bold text-primary-dark"></h3><button id="modal-close-btn" class="text-2xl text-slate-500 hover:text-danger">&times;</button></header>
-            <div class="p-6 grid grid-cols-1 md:grid-cols-3 gap-6 overflow-y-auto">
-                <div class="md:col-span-2">
-                    <h4 class="font-bold text-lg mb-2">בחירת שעות</h4>
-                    <p class="text-sm text-slate-500 mb-4">לחצ/י וגרר/י ליצירת בלוק חדש. לחץ על בלוק קיים כדי לערוך אותו.</p>
-                    <div class="timeline">
-                        <div class="hour-labels" id="hour-labels"></div>
-                        <div class="time-slots" id="time-slots"></div>
-                    </div>
-                </div>
-                <div class="md:col-span-1 flex flex-col gap-4">
-                     <div class="card bg-slate-50 p-4">
-                        <h4 class="font-bold text-lg mb-3" id="block-form-title">פרטי בלוק</h4>
-                        <div class="space-y-4">
-                             <div><label for="block-name" class="form-label">שם הבלוק (אופציונלי)</label><input type="text" id="block-name" class="form-input"></div>
-                             <div><label for="block-prod-id" class="form-label">שיוך להפקה</label><select id="block-prod-id" class="form-select"></select></div>
-                             <div><label for="block-manual-price" class="form-label">תמחור ידני (₪)</label><input type="number" id="block-manual-price" class="form-input" placeholder="אוטומטי לפי שעות"></div>
-                             <div id="dynamic-pricing-fields">
-                                 <div><label for="block-work-type" class="form-label">סוג עבודה</label><select id="block-work-type" class="form-select"></select></div>
-                                 <div><h5 class="form-label">ציוד נלווה</h5><div id="block-equipment" class="space-y-2 max-h-24 overflow-y-auto p-2 bg-white rounded-md border"></div></div>
-                            </div>
-                             <div><h5 class="form-label">ספקים נוספים</h5><div id="block-suppliers" class="space-y-2 max-h-24 overflow-y-auto p-2 bg-white rounded-md border"></div></div>
-                             <hr>
-                             <div id="summary-details" class="space-y-2 text-sm"></div>
-                        </div>
-                        <div class="flex items-center gap-2 mt-4">
-                            <button id="save-block-btn" class="flex-grow w-full bg-green-600 text-white font-bold py-2 px-4 rounded-lg transition-colors duration-300 hover:bg-green-700 disabled:bg-gray-400"><i class="fas fa-check mr-2"></i><span>שמור בלוק</span></button>
-                            <button id="delete-block-btn" class="hidden w-auto bg-danger text-white font-bold py-2 px-4 rounded-lg transition hover:bg-red-700"><i class="fas fa-trash"></i></button>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-    <div id="confirm-modal" class="modal-overlay">
-        <div class="modal-container" style="max-width: 400px;">
-            <div class="p-6 text-center">
-                <i class="fas fa-exclamation-triangle text-4xl text-yellow-500 mb-4"></i><h3 class="text-xl font-bold text-primary-dark mb-2">שינויים שלא נשמרו</h3>
-                <p class="text-slate-600 mb-6">ישנם שינויים שלא נשמרו. האם להמשיך ולבטל אותם?</p>
-                <div class="flex justify-center gap-4">
-                    <button id="confirm-discard-btn" class="bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-6 rounded-lg">בטל שינויים</button>
-                    <button id="confirm-cancel-btn" class="bg-gray-300 hover:bg-gray-400 text-gray-800 font-bold py-2 px-6 rounded-lg">המשך עריכה</button>
-                </div>
-            </div>
-        </div>
-    </div>
 
     <script type="module">
+        // --- GOOGLE CALENDAR INTEGRATION ---
+        const GOOGLE_CLIENT_ID = '982729388928-29tg2cribbd0o3j6mj5rsheets0qri6p.apps.googleusercontent.com';
+        const GOOGLE_API_KEY = 'AIzaSyAE49A5E6GNK8sgnCMyk9o-1W-mxJtflTI';
+        const SCOPES = 'https://www.googleapis.com/auth/calendar.events.readonly https://www.googleapis.com/auth/calendar.readonly';
+
+        let tokenClient;
+        let gapiInited = false;
+        let gisInited = false;
+        let googleSyncCompleted = false;
+
+        function initializeGisClient() {
+            tokenClient = google.accounts.oauth2.initTokenClient({
+                client_id: GOOGLE_CLIENT_ID,
+                scope: SCOPES,
+                callback: '', // Callback is set per-request
+            });
+            gisInited = true;
+            checkReadyAndEnableButton();
+        }
+
+        async function initializeGapiClient() {
+            await gapi.client.init({
+                apiKey: GOOGLE_API_KEY,
+                discoveryDocs: ['https://www.googleapis.com/discovery/v1/apis/calendar/v3/rest'],
+            });
+            gapiInited = true;
+            checkReadyAndEnableButton();
+        }
+
+        function checkReadyAndEnableButton() {
+            if (gapiInited && gisInited) {
+                const btn = DOMElements.googleAuthBtn;
+                btn.disabled = false;
+                btn.querySelector('span').textContent = 'סנכרון עם יומן גוגל';
+            }
+        }
+
+        function handleAuthClick() {
+            tokenClient.callback = async (resp) => {
+                if (resp.error !== undefined) {
+                    console.error('Google Auth Error:', resp);
+                    DOMElements.googleAuthBtn.querySelector('span').textContent = 'שגיאת אימות';
+                    throw (resp);
+                }
+                DOMElements.googleAuthBtn.querySelector('span').textContent = 'מסנכרן...';
+                DOMElements.googleAuthBtn.disabled = true;
+                await fetchAndProcessGoogleEvents();
+                DOMElements.googleAuthBtn.querySelector('span').textContent = 'סונכרן בהצלחה';
+                
+            };
+
+            if (gapi.client.getToken() === null) {
+                tokenClient.requestAccessToken({prompt: 'consent'});
+            } else {
+                tokenClient.requestAccessToken({prompt: ''});
+            }
+        }
+        
+        async function fetchAndProcessGoogleEvents() {
+            try {
+                const { currentDate } = AppData.ui;
+                const year = currentDate.getFullYear();
+                const month = currentDate.getMonth();
+
+                const timeMin = new Date(year, month, 1).toISOString();
+                const timeMax = new Date(year, month + 1, 0, 23, 59, 59).toISOString();
+
+                const response = await gapi.client.calendar.events.list({
+                    'calendarId': 'primary',
+                    'timeMin': timeMin,
+                    'timeMax': timeMax,
+                    'showDeleted': false,
+                    'singleEvents': true,
+                    'orderBy': 'startTime'
+                });
+                
+                const events = response.result.items;
+
+                // Clear existing personal/random/google events before adding new ones
+                Object.keys(AppData.entities.bookings).forEach(key => {
+                    if (AppData.entities.bookings[key].prodId === 'prod_personal' || AppData.entities.bookings[key].isGoogleEvent) {
+                        delete AppData.entities.bookings[key];
+                    }
+                });
+
+                if (events && events.length > 0) {
+                    events.forEach(event => {
+                        if (!event.start.dateTime || !event.end.dateTime) return; // Skip all-day events
+
+                        const startDate = new Date(event.start.dateTime);
+                        const endDate = new Date(event.end.dateTime);
+
+                        const blockId = `b_google_${event.id}`;
+                        AppData.entities.bookings[blockId] = {
+                            blockId,
+                            name: `(יומן) ${event.summary}`,
+                            date: startDate.toISOString().split('T')[0],
+                            prodId: 'prod_personal',
+                            workTypeId: 'personal',
+                            equipmentIds: [], supplierIds:[], manualPrice: null,
+                            start: minutesToTime(startDate.getHours() * 60 + startDate.getMinutes()),
+                            end: minutesToTime(endDate.getHours() * 60 + endDate.getMinutes()),
+                            isGoogleEvent: true
+                        };
+                    });
+                } else {
+                    console.log('No upcoming events found in Google Calendar for this month.');
+                }
+                googleSyncCompleted = true;
+                renderAll();
+
+            } catch (err) {
+                console.error("Error fetching Google Calendar events:", err);
+                DOMElements.googleAuthBtn.querySelector('span').textContent = 'שגיאה בסנכרון';
+                DOMElements.googleAuthBtn.disabled = false;
+            }
+        }
+
         // --- DATA STORE & CONFIG ---
         const AppData = {
             entities: {
@@ -314,6 +343,7 @@
 
         const DOMElements = {
             body: document.body,
+            googleAuthBtn: document.getElementById('google-auth-btn'),
             calendarContainer: document.getElementById('calendar-container'), bookingsTable: document.getElementById('bookings-table-container'), sidebar: document.getElementById('sidebar'),
             graphFooter: document.getElementById('graph-footer'),
             graphContainer: document.getElementById('graph-container'),
@@ -516,7 +546,7 @@
 
         function renderBookingsTable() { 
             let html = `<table class="w-full text-sm text-gray-500"><thead class="text-xs text-gray-700 uppercase bg-gray-50 rounded-t-lg"><tr><th class="px-6 py-3">שם/הפקה</th><th class="px-6 py-3">תאריך</th><th class="px-6 py-3">שעות</th><th class="px-6 py-3">פעולות</th></tr></thead><tbody>`;
-            const allBookings = Object.values(AppData.entities.bookings).sort((a,b) => new Date(a.date) - new Date(b.date));
+            const allBookings = Object.values(AppData.entities.bookings).sort((a,b) => new Date(a.date + 'T' + a.start) - new Date(b.date + 'T' + b.start));
             if (allBookings.length === 0) html += '<tr><td colspan="4" class="text-center p-8 text-slate-500">אין עדיין הזמנות.</td></tr>';
             else for (const block of allBookings) { const production = AppData.entities.productions[block.prodId]; html += `<tr class="bg-white border-b hover:bg-gray-50 cursor-pointer" data-block-id="${block.blockId}" data-prod-id="${block.prodId}"><td class="px-6 py-4 font-semibold">${block.name || `<em>${production?.name || ''}</em>`}</td><td class="px-6 py-4">${new Date(block.date + 'T00:00:00').toLocaleDateString('he-IL', {day:'2-digit', month:'2-digit'})}</td><td class="px-6 py-4">${block.start || ''} - ${block.end || ''}</td><td class="px-6 py-4"><button class="text-blue-600 hover:underline" data-action="edit" data-block-id="${block.blockId}">ערוך</button></td></tr>`; }
             html += `</tbody></table>`;
@@ -595,7 +625,8 @@
             
             const pricePoints = [];
             let maxPrice = baseRate * 1.5;
-            let barData = { defs: [], rects: [] };
+            let barHtml = '';
+            let axisHtml = '';
             
             if (view === 'daily') {
                 const blocksOnDay = Object.values(AppData.entities.bookings).filter(b => b.date === date.toISOString().split('T')[0] && b.workTypeId !== 'personal');
@@ -612,25 +643,21 @@
                     if (rate > maxPrice) maxPrice = rate;
                 }
                 
-                barData = blocksOnDay.map(block => {
-                    const gradientId = `grad_${block.blockId}`;
-                    const startRate = getHourlyRate(date, block.start, block.workTypeId);
-                    const endRate = getHourlyRate(date, timeAdd(block.end, -30), block.workTypeId);
-                    const startColor = rateToColor(startRate, baseRate);
-                    const endColor = rateToColor(endRate, baseRate);
-                    
-                    const def = `<linearGradient id="${gradientId}" x1="0" x2="1" y1="0" y2="0"><stop offset="0%" stop-color="${startColor}"/><stop offset="100%" stop-color="${endColor}"/></linearGradient>`;
-                    
+                barHtml = blocksOnDay.map(block => {
+                    const workType = AppData.entities.workTypes[block.workTypeId];
+                    const color = workType ? workType.color.replace(/, 0\.\d+\)/, ', 1)') : '#a0aec0';
                     const x = (timeToMinutes(block.start) / (24 * 60)) * width;
                     const w = ((timeToMinutes(block.end) - timeToMinutes(block.start)) / (24 * 60)) * width;
-                    const rect = `<rect fill="url(#${gradientId})" opacity="0.85" x="${x}" y="0" width="${w}" height="${height}"></rect>`;
-                    
-                    return { def, rect };
-                }).reduce((acc, curr) => {
-                    acc.defs.push(curr.def);
-                    acc.rects.push(curr.rect);
-                    return acc;
-                }, { defs: [], rects: [] });
+                    return `<rect fill="${color}" opacity="0.85" x="${x}" y="0" width="${w}" height="${height}"></rect>`;
+                }).join('');
+
+                for (let h = 0; h <= 24; h += 4) {
+                    const x = (h / 24) * width;
+                    axisHtml += `<line x1="${x}" y1="${height}" x2="${x}" y2="${height + 5}" class="axis-line" stroke-width="1.5" />`;
+                    if (h < 24) {
+                        axisHtml += `<text x="${x + 5}" y="${height + 15}" text-anchor="start" class="axis-label">${String(h).padStart(2, '0')}:00</text>`;
+                    }
+                }
 
             } else { // Monthly view
                 const daysInMonth = new Date(date.getFullYear(), date.getMonth() + 1, 0).getDate();
@@ -649,12 +676,12 @@
                 }
 
                  const barWidth = width / (daysInMonth * 2);
-                 barData.rects = dailyHours.map((hours, i) => {
+                 barHtml = dailyHours.map((hours, i) => {
                     if (hours === 0) return '';
                     const barHeight = (hours / maxHours) * height;
                     const x = ((i * 2 + 0.5) * barWidth);
                     return `<rect class="monthly-hours-bar" x="${x}" y="${height - barHeight}" width="${barWidth}" height="${barHeight}"></rect>`;
-                 });
+                 }).join('');
             }
 
             const toPath = (p, isArea) => {
@@ -672,9 +699,9 @@
             const areaString = toPath(pricePoints, true);
             const pathString = toPath(pricePoints, false);
 
-            const defs = `<defs>${barData.defs.join('')}<linearGradient id="price-gradient" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="var(--warning)" stop-opacity="0.4"/><stop offset="100%" stop-color="var(--warning)" stop-opacity="0.05"/></linearGradient></defs>`;
+            const defs = `<defs><linearGradient id="price-gradient" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="var(--warning)" stop-opacity="0.4"/><stop offset="100%" stop-color="var(--warning)" stop-opacity="0.05"/></linearGradient></defs>`;
             
-            svg.innerHTML = defs + barData.rects.join('') + `<path class="price-path" d="${areaString}"></path>` + `<path class="price-path" d="${pathString}" fill="none"></path>`;
+            svg.innerHTML = defs + barHtml + `<path class="price-path" d="${areaString}"></path>` + `<path class="price-path" d="${pathString}" fill="none"></path>` + axisHtml;
         }
         
         // --- MODAL & INTERACTION ---
@@ -746,14 +773,18 @@
                 if (liveBlockState && block.blockId === liveBlockState.blockId) return;
                 if (!block.start || !block.end) return;
                 const blockEl = document.createElement('div');
-                blockEl.className = 'other-booking-block'; blockEl.dataset.blockId = block.blockId;
+                blockEl.className = 'other-booking-block';
+                blockEl.dataset.blockId = block.blockId;
                 blockEl.innerHTML = `<span class="block-name-label">${block.name||'...'}</span><span class="block-time-label">${block.start} - ${block.end}</span>`;
                 const startSlot = timeSlots.querySelector(`[data-time="${block.start}"]`), endSlot = timeSlots.querySelector(`[data-time="${timeAdd(block.end,-30)}"]`);
                 if(startSlot && endSlot) {
                     blockEl.style.top = `${startSlot.offsetTop}px`;
                     blockEl.style.height = `${(endSlot.offsetTop + endSlot.offsetHeight) - startSlot.offsetTop}px`;
                     const workType = AppData.entities.workTypes[block.workTypeId];
-                    if(workType) blockEl.style.borderColor = workType.color.replace(/, 0\.\d+\)/, ', 1)');
+                    if(workType) {
+                        blockEl.style.backgroundColor = workType.color;
+                        blockEl.style.borderColor = workType.color.replace(/, 0\.\d+\)/, ', 1)');
+                    }
                     timeSlots.appendChild(blockEl);
                 }
             });
@@ -811,9 +842,13 @@
         
         function init() {
             const { currentDate } = AppData.ui;
-            generateRandomErrands(currentDate.getFullYear(), currentDate.getMonth());
+            if (!googleSyncCompleted) {
+                 generateRandomErrands(currentDate.getFullYear(), currentDate.getMonth());
+            }
             renderAll();
             
+            DOMElements.googleAuthBtn.addEventListener('click', handleAuthClick);
+
             DOMElements.toggleGraphBtn.addEventListener('click', (e) => {
                 e.stopPropagation();
                 AppData.ui.graph.isExpanded = !AppData.ui.graph.isExpanded;
@@ -830,16 +865,42 @@
                  }
             });
 
-
             DOMElements.calendarContainer.addEventListener('click', e => {
                 const dayEl = e.target.closest('.calendar-day:not(.other-month)'), navEl = e.target.closest('[data-nav]');
-                if(dayEl) openModal(new Date(currentDate.getFullYear(), currentDate.getMonth(), parseInt(dayEl.dataset.day)));
-                if(navEl) { currentDate.setMonth(currentDate.getMonth() + (navEl.dataset.nav === 'next' ? 1 : -1)); AppData.entities.bookings = {}; generateRandomErrands(currentDate.getFullYear(), currentDate.getMonth()); renderAll(); }
+                if(dayEl) openModal(new Date(AppData.ui.currentDate.getFullYear(), AppData.ui.currentDate.getMonth(), parseInt(dayEl.dataset.day)));
+                if(navEl) { 
+                    AppData.ui.currentDate.setMonth(AppData.ui.currentDate.getMonth() + (navEl.dataset.nav === 'next' ? 1 : -1)); 
+                    if (googleSyncCompleted) {
+                        DOMElements.googleAuthBtn.querySelector('span').textContent = 'מסנכרן מחדש...';
+                        DOMElements.googleAuthBtn.disabled = true;
+                        fetchAndProcessGoogleEvents();
+                    } else {
+                        AppData.entities.bookings = {}; 
+                        generateRandomErrands(AppData.ui.currentDate.getFullYear(), AppData.ui.currentDate.getMonth()); 
+                        renderAll(); 
+                    }
+                }
             });
 
             DOMElements.bookingsTable.addEventListener('click', e => {
                 const editBtn = e.target.closest('[data-action="edit"]'), row = e.target.closest('tr[data-block-id]');
-                if (editBtn) { const { blockId } = editBtn.dataset; const blockToEdit = AppData.entities.bookings[blockId]; if (blockToEdit) openModal(new Date(blockToEdit.date + 'T12:00:00'), blockId); }
+                if (editBtn) { 
+                    const { blockId } = editBtn.dataset; 
+                    const blockToEdit = AppData.entities.bookings[blockId]; 
+                    if (blockToEdit) {
+                        if(blockToEdit.isGoogleEvent) {
+                            // Using a custom modal instead of alert
+                            const confirmModal = DOMElements.confirmModal.overlay;
+                            confirmModal.querySelector('h3').textContent = "אירוע מסונכרן";
+                            confirmModal.querySelector('p').textContent = "לא ניתן לערוך אירועים שסונכרנו מיומן גוגל ישירות דרך המערכת. ניתן למחוק אותם מהיומן ולסנכרן מחדש.";
+                            DOMElements.confirmModal.discardBtn.classList.add('hidden');
+                            DOMElements.confirmModal.cancelBtn.textContent = "הבנתי";
+                            confirmModal.classList.add('active');
+                            return;
+                        }
+                        openModal(new Date(blockToEdit.date + 'T12:00:00'), blockId)
+                    }; 
+                }
                 else if (row) { AppData.ui.activeProdId = row.dataset.prodId; renderSidebar(); }
             });
 
@@ -851,8 +912,22 @@
             [DOMElements.modal.manualPriceInput, DOMElements.modal.blockNameInput, DOMElements.modal.prodIdSelect, DOMElements.modal.workTypeSelect].forEach(el => el.addEventListener('input', handleFormChange));
             [DOMElements.modal.equipmentContainer, DOMElements.modal.suppliersContainer].forEach(el => el.addEventListener('change', handleFormChange));
 
-            DOMElements.confirmModal.cancelBtn.addEventListener('click', () => DOMElements.confirmModal.overlay.classList.remove('active'));
-            DOMElements.confirmModal.discardBtn.addEventListener('click', () => { DOMElements.confirmModal.overlay.classList.remove('active'); if (DOMElements.confirmModal.discardBtn.onclick) { DOMElements.confirmModal.discardBtn.onclick(); DOMElements.confirmModal.discardBtn.onclick = null; } else { forceCloseModal(); } });
+            DOMElements.confirmModal.cancelBtn.addEventListener('click', () => {
+                DOMElements.confirmModal.overlay.classList.remove('active');
+                // Restore original confirm modal state
+                DOMElements.confirmModal.overlay.querySelector('h3').textContent = "שינויים שלא נשמרו";
+                DOMElements.confirmModal.overlay.querySelector('p').textContent = "ישנם שינויים שלא נשמרו. האם להמשיך ולבטל אותם?";
+                DOMElements.confirmModal.discardBtn.classList.remove('hidden');
+                DOMElements.confirmModal.cancelBtn.textContent = "המשך עריכה";
+            });
+            DOMElements.confirmModal.discardBtn.addEventListener('click', () => { 
+                DOMElements.confirmModal.overlay.classList.remove('active'); 
+                if (DOMElements.confirmModal.discardBtn.onclick) { 
+                    DOMElements.confirmModal.discardBtn.onclick(); DOMElements.confirmModal.discardBtn.onclick = null; 
+                } else { 
+                    forceCloseModal(); 
+                } 
+            });
 
             const timeSlotsContainer = DOMElements.modal.timeSlots;
             timeSlotsContainer.addEventListener('mousedown', e => {
@@ -860,6 +935,10 @@
                 let interactionType;
                 const targettedBlock = e.target.closest('#selected-block-overlay, .other-booking-block');
                 if (targettedBlock) {
+                    const blockId = targettedBlock.dataset.blockId;
+                    const blockData = AppData.entities.bookings[blockId] || liveBlockState;
+                    if(blockData && blockData.isGoogleEvent) return; // Prevent interaction with google events in timeline
+
                     if (targettedBlock.id === 'selected-block-overlay') interactionType = e.target.classList.contains('resize-handle') ? (e.target.classList.contains('top') ? 'resize-start' : 'resize-end') : 'drag';
                     else { switchActiveBlock(targettedBlock.dataset.blockId); return; }
                 } else if (e.target.classList.contains('time-slot')) interactionType = 'create-drag'; 
@@ -898,8 +977,112 @@
             
             new ResizeObserver(renderExpandedGraph).observe(DOMElements.expandedGraph);
         }
+
+        // Expose gapi/gis load handlers to global scope
+        window.gapiLoaded = () => gapi.load('client', initializeGapiClient);
+        window.gisLoaded = initializeGisClient;
         
-        init();
+        document.addEventListener('DOMContentLoaded', init);
     </script>
+    
+    <script async defer src="https://apis.google.com/js/api.js" onload="gapiLoaded()"></script>
+    <script async defer src="https://accounts.google.com/gsi/client" onload="gisLoaded()"></script>
+</head>
+<body class="p-0">
+<div id="main-wrapper">
+    <div class="scrollable-content">
+        <div id="dashboard-view">
+            <header class="flex justify-between items-center mb-6 pb-4 border-b">
+                 <div>
+                    <h1 class="text-3xl font-extrabold text-primary-dark">אזור הלקוח</h1>
+                    <p class="text-slate-600">ניהול הזמנות, זמינות ותמחור</p>
+                </div>
+                <div class="flex items-center gap-4">
+                    <button id="google-auth-btn" disabled class="bg-white border border-slate-300 text-slate-700 font-bold py-2 px-4 rounded-lg transition-all hover:shadow-md flex items-center gap-2 disabled:opacity-50 disabled:cursor-wait">
+                        <svg class="w-5 h-5" viewBox="0 0 48 48" ><path fill="#FFC107" d="M43.611,20.083H42V20H24v8h11.303c-1.649,4.657-6.08,8-11.303,8c-6.627,0-12-5.373-12-12c0-6.627,5.373-12,12-12c3.059,0,5.842,1.154,7.961,3.039l5.657-5.657C34.046,6.053,29.268,4,24,4C12.955,4,4,12.955,4,24c0,11.045,8.955,20,20,20c11.045,0,20-8.955,20-20C44,22.659,43.862,21.35,43.611,20.083z"></path><path fill="#FF3D00" d="M6.306,14.691l6.571,4.819C14.655,15.108,18.961,12,24,12c3.059,0,5.842,1.154,7.961,3.039l5.657-5.657C34.046,6.053,29.268,4,24,4C16.318,4,9.656,8.337,6.306,14.691z"></path><path fill="#4CAF50" d="M24,44c5.166,0,9.86-1.977,13.409-5.192l-6.19-5.238C29.211,35.091,26.715,36,24,36c-5.202,0-9.619-3.317-11.283-7.946l-6.522,5.025C9.505,39.556,16.227,44,24,44z"></path><path fill="#1976D2" d="M43.611,20.083H42V20H24v8h11.303c-0.792,2.237-2.231,4.166-4.087,5.574l6.19,5.238C42.022,35.244,44,30.038,44,24C44,22.659,43.862,21.35,43.611,20.083z"></path></svg>
+                        <span>טוען API...</span>
+                    </button>
+                </div>
+            </header>
+            <div class="dashboard-grid">
+                <main class="main-content flex flex-col gap-6">
+                    <div class="card">
+                        <h2 class="card-title">זמינות ותמחור דינמי</h2>
+                        <p class="mb-4 text-slate-600">לחצ/י על תאריך כדי לפתוח את יומן השעות. הנקודות הצבעוניות מייצגות אירועים קיימים. גוון היום משתנה בהתאם לעומס ולתמחור.</p>
+                        <div id="calendar-container" class="calendar-container"></div>
+                    </div>
+                    <div class="card">
+                        <h2 class="card-title">ההזמנות שלי</h2>
+                        <div id="bookings-table-container" class="overflow-x-auto"></div>
+                    </div>
+                </main>
+                <aside id="sidebar" class="sidebar flex flex-col gap-6"></aside>
+            </div>
+        </div>
+    </div>
+    <div id="graph-footer" class="graph-footer-container">
+        <div id="histogram-header">
+            <h2 id="histogram-title" class="card-title">גרף עומסים</h2>
+            <button id="toggle-graph-btn" class="toggle-graph-btn" title="מזער/הרחב גרף">
+                <i class="fas fa-chevron-down"></i>
+            </button>
+        </div>
+        <div id="graph-container">
+            <div id="expanded-graph">
+                <svg id="histogram-svg"></svg>
+            </div>
+        </div>
+    </div>
+</div>
+    
+    <!-- Modals -->
+    <div id="booking-modal" class="modal-overlay">
+        <div class="modal-container">
+            <header class="p-4 border-b flex justify-between items-center bg-slate-50 rounded-t-lg"><h3 id="modal-title" class="text-xl font-bold text-primary-dark"></h3><button id="modal-close-btn" class="text-2xl text-slate-500 hover:text-danger">&times;</button></header>
+            <div class="p-6 grid grid-cols-1 md:grid-cols-3 gap-6 overflow-y-auto">
+                <div class="md:col-span-2">
+                    <h4 class="font-bold text-lg mb-2">בחירת שעות</h4>
+                    <p class="text-sm text-slate-500 mb-4">לחצ/י וגרר/י ליצירת בלוק חדש. לחץ על בלוק קיים כדי לערוך אותו.</p>
+                    <div class="timeline">
+                        <div class="hour-labels" id="hour-labels"></div>
+                        <div class="time-slots" id="time-slots"></div>
+                    </div>
+                </div>
+                <div class="md:col-span-1 flex flex-col gap-4">
+                     <div class="card bg-slate-50 p-4">
+                        <h4 class="font-bold text-lg mb-3" id="block-form-title">פרטי בלוק</h4>
+                        <div class="space-y-4">
+                             <div><label for="block-name" class="form-label">שם הבלוק (אופציונלי)</label><input type="text" id="block-name" class="form-input"></div>
+                             <div><label for="block-prod-id" class="form-label">שיוך להפקה</label><select id="block-prod-id" class="form-select"></select></div>
+                             <div><label for="block-manual-price" class="form-label">תמחור ידני (₪)</label><input type="number" id="block-manual-price" class="form-input" placeholder="אוטומטי לפי שעות"></div>
+                             <div id="dynamic-pricing-fields">
+                                 <div><label for="block-work-type" class="form-label">סוג עבודה</label><select id="block-work-type" class="form-select"></select></div>
+                                 <div><h5 class="form-label">ציוד נלווה</h5><div id="block-equipment" class="space-y-2 max-h-24 overflow-y-auto p-2 bg-white rounded-md border"></div></div>
+                            </div>
+                             <div><h5 class="form-label">ספקים נוספים</h5><div id="block-suppliers" class="space-y-2 max-h-24 overflow-y-auto p-2 bg-white rounded-md border"></div></div>
+                             <hr>
+                             <div id="summary-details" class="space-y-2 text-sm"></div>
+                        </div>
+                        <div class="flex items-center gap-2 mt-4">
+                            <button id="save-block-btn" class="flex-grow w-full bg-green-600 text-white font-bold py-2 px-4 rounded-lg transition-colors duration-300 hover:bg-green-700 disabled:bg-gray-400"><i class="fas fa-check mr-2"></i><span>שמור בלוק</span></button>
+                            <button id="delete-block-btn" class="hidden w-auto bg-danger text-white font-bold py-2 px-4 rounded-lg transition hover:bg-red-700"><i class="fas fa-trash"></i></button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div id="confirm-modal" class="modal-overlay">
+        <div class="modal-container" style="max-width: 400px;">
+            <div class="p-6 text-center">
+                <i class="fas fa-exclamation-triangle text-4xl text-yellow-500 mb-4"></i><h3 class="text-xl font-bold text-primary-dark mb-2">שינויים שלא נשמרו</h3>
+                <p class="text-slate-600 mb-6">ישנם שינויים שלא נשמרו. האם להמשיך ולבטל אותם?</p>
+                <div class="flex justify-center gap-4">
+                    <button id="confirm-discard-btn" class="bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-6 rounded-lg">בטל שינויים</button>
+                    <button id="confirm-cancel-btn" class="bg-gray-300 hover:bg-gray-400 text-gray-800 font-bold py-2 px-6 rounded-lg">המשך עריכה</button>
+                </div>
+            </div>
+        </div>
+    </div>
 </body>
 </html>
