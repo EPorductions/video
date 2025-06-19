@@ -2,7 +2,7 @@
 <html lang="he" dir="rtl">
 <head>
     <meta charset="UTF-8">
-    <title>אוריין אדלני - סימולציה אינטראקטיבית V4.1 (מתוקן)</title>
+    <title>אוריין אדלני - סימולציה אינטראקטיבית V11.1 (טיקר מתוקן)</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <style>
         /* --- General & Reset Styles --- */
@@ -19,33 +19,78 @@
             align-items: center;
         }
 
-        /* --- Top Controls Bar --- */
+        /* --- Top Controls Bar (Collapsible) --- */
         header.top-nav-controls {
             position: fixed; top: 0; left: 0; right: 0;
             background-color: rgba(10, 10, 15, 0.85);
             backdrop-filter: blur(5px);
             color: #fff;
             z-index: 10000;
-            height: auto;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 8px 15px;
+            border-bottom: 1px solid #444;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.3);
+            flex-wrap: nowrap;
+            min-height: 50px;
+            transition: height 0.3s ease;
+        }
+        
+        #mainNav {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 8px;
+            flex-grow: 1;
+            overflow: hidden;
+        }
+
+        #mainNav a {
+            color: #fff; text-decoration: none; font-weight: bold; padding: 6px 12px;
+            border-radius: 6px; font-size: 14px; transition: all 0.3s ease;
+            cursor: pointer; border: 1px solid transparent;
+            white-space: nowrap;
+        }
+        #mainNav a:hover { background-color: rgba(255, 221, 87, 0.2); border-color: rgba(255, 221, 87, 0.4); }
+        #mainNav a.active { background-color: #ffdd57; color: #111; border-color: #ffdd57; transform: translateY(-1px); box-shadow: 0 2px 5px rgba(255, 221, 87, 0.3); }
+        #mainNav a.off-screen {
+            opacity: 0.5;
+            color: #aaa;
+        }
+        #mainNav a.off-screen:hover {
+            opacity: 1;
+            background-color: rgba(170, 170, 170, 0.2);
+            color: #ddd;
+        }
+
+        #controls-toggle {
+            display: none; /* Hidden by default on large screens */
+            background: none;
+            border: 1px solid #888;
+            border-radius: 5px;
+            cursor: pointer;
+            padding: 8px;
+            margin-left: 10px;
+        }
+        #controls-toggle .bar {
+            display: block;
+            width: 22px;
+            height: 2px;
+            background-color: #fff;
+            margin: 4px 0;
+            transition: 0.4s;
+        }
+
+        #controls-wrapper {
             display: flex;
             flex-wrap: wrap;
             align-items: center;
             justify-content: center;
-            padding: 8px 15px;
-            gap: 15px; /* Increased gap */
-            border-bottom: 1px solid #444;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.3);
+            gap: 15px;
         }
-        header.top-nav-controls nav { display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; }
-        header.top-nav-controls nav a {
-            color: #fff; text-decoration: none; font-weight: bold; padding: 6px 12px;
-            border-radius: 6px; font-size: 14px; transition: all 0.3s ease;
-            cursor: pointer; border: 1px solid transparent;
-        }
-        header.top-nav-controls nav a:hover { background-color: rgba(255, 221, 87, 0.2); border-color: rgba(255, 221, 87, 0.4); }
-        header.top-nav-controls nav a.active { background-color: #ffdd57; color: #111; border-color: #ffdd57; transform: translateY(-1px); box-shadow: 0 2px 5px rgba(255, 221, 87, 0.3); }
 
-        .controls-separator { border-left: 1px solid #555; padding-left: 15px; margin-left: 15px; }
+        .controls-separator { border-left: 1px solid #555; padding-left: 15px; margin-left: 0; }
 
         .controls-group { display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: 8px; }
         .controls-group label { font-size: 13px; color: #ccc; }
@@ -54,22 +99,41 @@
             border: 1px solid #666; border-radius: 6px; cursor: pointer; font-size: 13px;
             transition: all 0.2s ease;
         }
+        .controls-group select option {
+            background: #fff;
+            color: #000;
+        }
         .controls-group button:hover:not(:disabled) { background: rgba(255, 255, 255, 0.25); border-color: #888; }
         .controls-group button:disabled { background: rgba(255,255,255,0.05); color: #777; cursor: not-allowed; border-color: #444; }
         .controls-group button.active { background: #ffdd57; color: #111; border-color: #ffdd57; transform: translateY(-1px); box-shadow: 0 1px 4px rgba(255, 221, 87, 0.2); }
         .controls-group select:focus { outline: none; border-color: #ffdd57;}
-        .controls-group input[type="range"] { -webkit-appearance: none; appearance: none; width: 120px; height: 8px; background: #444; border-radius: 5px; outline: none; transition: opacity .2s; cursor: pointer;}
-        .controls-group input[type="range"]::-webkit-slider-thumb { -webkit-appearance: none; appearance: none; width: 18px; height: 18px; background: #ffdd57; border-radius: 50%; cursor: pointer; border: 2px solid #333; }
-        .controls-group input[type="range"]::-moz-range-thumb { width: 18px; height: 18px; background: #ffdd57; border-radius: 50%; cursor: pointer; border: 2px solid #333;}
+        .controls-group input[type="range"] { width: 120px; }
         .vortex-controls { display: flex; align-items: center; gap: 8px; transition: all 0.5s ease; max-width: 0; opacity: 0; overflow: hidden; }
         .vortex-controls.visible { max-width: 200px; opacity: 1; }
+
+        @media (max-width: 1200px) {
+            header.top-nav-controls { flex-wrap: wrap; }
+            #controls-toggle { display: block; }
+            #controls-wrapper {
+                display: none;
+                flex-basis: 100%;
+                flex-direction: column;
+                align-items: stretch;
+                gap: 12px;
+                padding-top: 15px;
+            }
+            #controls-wrapper.open { display: flex; }
+            .controls-separator { border-left: none; padding-left: 0; margin-left: 0; border-top: 1px solid #555; padding-top: 12px; }
+            .controls-group { justify-content: space-between; }
+        }
+
 
         /* --- Canvases & UI --- */
         canvas { display: block; position: absolute; top: 0; left: 0; }
         #canvas { z-index: 1; background: transparent; }
         #hudContainer {
             position: fixed;
-            top: 100px; /* Adjusted for smaller header */
+            top: 70px;
             right: 15px;
             background: rgba(0,0,0,0.7);
             color: #ffc107;
@@ -82,7 +146,8 @@
             flex-direction: column;
             gap: 5px;
             text-align: right;
-            min-width: 200px;
+            min-width: 220px;
+            transition: top 0.3s ease;
         }
         #gravityCenterMarker {
             position: absolute; width: 24px; height: 24px;
@@ -93,14 +158,73 @@
             background: radial-gradient(circle, rgba(255,221,87,0.4) 0%, rgba(255,221,87,0) 70%);
         }
         
-        /* --- NEW TICKER --- */
-        #ticker-container{position:fixed;bottom:0;left:0;width:100%;height:50px;background:#1c1e21;color:#fff;border-top:1px solid #3e4042;display:flex;align-items:center;overflow:hidden;user-select:none;touch-action:pan-y;cursor:pointer; z-index: 10001;}
-        .ticker-label{background:#e4a80a;color:#1c1e21;padding:0 25px;font-weight:bold;font-size:18px;flex-shrink:0;height:100%;display:flex;align-items:center;z-index:2;}
-        #ticker-canvas{flex-grow:1;height:100%;background:transparent;}
-        /* Pop‑Up */
-        .popup-overlay{position:fixed;inset:0;background:rgba(0,0,0,.55);display:none;align-items:center;justify-content:center;z-index:10002;}
-        .popup-box{background:#fff;color:#333;max-width:600px;padding:30px;border-radius:8px;box-shadow:0 4px 20px rgba(0,0,0,.3);font-size:18px;line-height:1.6;direction:rtl;position:relative;}
-        .popup-close{position:absolute;top:10px;left:10px;font-size:24px;font-weight:bold;color:#999;cursor:pointer;}
+        /* --- TICKER STYLES --- */
+        #ticker-container{
+            position:fixed;
+            bottom:0;
+            left:0;
+            width:100%;
+            height:50px;
+            background:#1c1e21;
+            color:#fff;
+            border-top:1px solid #3e4042;
+            display:flex;
+            align-items:center;
+            overflow:hidden;
+            user-select:none;
+            touch-action:pan-y;
+            cursor:pointer; 
+            z-index: 10001;
+        }
+        .ticker-label{
+            background:#e4a80a;
+            color:#1c1e21;
+            padding:0 25px;
+            font-weight:bold;
+            font-size:18px;
+            flex-shrink:0;
+            height:100%;
+            display:flex;
+            align-items:center;
+            z-index:2;
+        }
+        #ticker-canvas{
+            flex-grow:1;
+            height:100%;
+            background:transparent;
+        }
+        
+        /* --- POPUP STYLES --- */
+        .popup-overlay{
+            position:fixed;
+            inset:0;
+            background:rgba(0,0,0,.55);
+            display:none;
+            align-items:center;
+            justify-content:center;
+            z-index:10002;
+        }
+        .popup-box{
+            background:#fff;
+            color:#333;
+            max-width:600px;
+            padding:30px;
+            border-radius:8px;
+            box-shadow:0 4px 20px rgba(0,0,0,.3);
+            font-size:18px;
+            line-height:1.6;
+            direction:rtl;
+            position:relative;
+        }
+        .popup-close{
+            position:absolute;
+            top:10px;
+            left:10px;
+            font-size:24px;
+            font-weight:bold;
+            color:#999;
+            cursor:pointer;
+        }
     </style>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.9.1/gsap.min.js"></script>
 </head>
@@ -108,35 +232,40 @@
 
     <header class="top-nav-controls">
         <nav id="mainNav"></nav>
-        <div class="controls-group controls-separator">
-            <label for="layout-select">פריסה:</label>
-            <select id="layout-select">
-                <option value="circle">מעגל</option>
-                <option value="grid-4x2">רשת 4x2</option>
-                <option value="grid-2x4">רשת 2x4</option>
-                <option value="horizontal">אופקי</option>
-                <option value="vertical">אנכי</option>
-            </select>
-        </div>
-        <div class="controls-group controls-separator">
-            <button id="toggleWallsBtn">גבולות: ON</button>
-            <button id="toggleMagnetBtn">מגנט: ON</button>
-            <button id="toggleWanderBtn">שיטוט: OFF</button>
-            <button id="toggleOrbitBtn">סיבוב: OFF</button>
-            <button id="earthquakeBtn">רעידת אדמה</button>
-            <button id="windBtn">משב רוח</button>
-        </div>
-        <div class="controls-group controls-separator">
-            <label for="gravity-select">בקרת עולם:</label>
-            <select id="gravity-select">
-                <option value="none">ללא</option>
-                <option value="down">כבידה מטה</option>
-                <option value="center">כבידה למרכז</option>
-                <option value="vortex">מערבולת</option>
-            </select>
-            <div id="vortex-controls" class="vortex-controls">
-                <label for="vortex-slider">עוצמה:</label>
-                <input type="range" id="vortex-slider" min="-100" max="100" value="0">
+        <button id="controls-toggle">
+            <span class="bar"></span><span class="bar"></span><span class="bar"></span>
+        </button>
+        <div id="controls-wrapper">
+            <div class="controls-group controls-separator">
+                <label for="layout-select">פריסה:</label>
+                <select id="layout-select">
+                    <option value="circle">מעגל</option>
+                    <option value="grid-4x2">רשת 4x2</option>
+                    <option value="grid-2x4">רשת 2x4</option>
+                    <option value="horizontal">אופקי</option>
+                    <option value="vertical">אנכי</option>
+                </select>
+            </div>
+            <div class="controls-group controls-separator">
+                <button id="toggleWallsBtn">גבולות: ON</button>
+                <button id="toggleMagnetBtn">מגנט: ON</button>
+                <button id="toggleWanderBtn">שיטוט: OFF</button>
+                <button id="toggleOrbitBtn">סיבוב: OFF</button>
+                <button id="earthquakeBtn">רעידת אדמה</button>
+                <button id="windBtn">משב רוח</button>
+            </div>
+            <div class="controls-group controls-separator">
+                <label for="gravity-select">בקרת עולם:</label>
+                <select id="gravity-select">
+                    <option value="none">ללא</option>
+                    <option value="down">כבידה מטה</option>
+                    <option value="center">כבידה למרכז</option>
+                    <option value="vortex">מערבולת</option>
+                </select>
+                <div id="vortex-controls" class="vortex-controls">
+                    <label for="vortex-slider">עוצמה:</label>
+                    <input type="range" id="vortex-slider" min="-100" max="100" value="0">
+                </div>
             </div>
         </div>
     </header>
@@ -144,6 +273,8 @@
     <canvas id="canvas"></canvas>
     <div id="hudContainer">
         <div id="zoomInfo">זום: 1.00x</div>
+        <div id="cameraPos"></div>
+        <div id="viewBounds"></div>
         <div id="objectCount"></div>
         <div id="physicsStatus"></div>
         <div id="mouseCoords"></div>
@@ -152,7 +283,6 @@
     </div>
     <div id="gravityCenterMarker"></div>
 
-    <!-- NEW TICKER HTML -->
     <div id="ticker-container">
         <div class="ticker-label">מבזקים</div>
         <canvas id="ticker-canvas"></canvas>
@@ -164,7 +294,6 @@
         </div>
     </div>
 
-
     <script>
     // =========================================
     // 1. Constants & Global Variables
@@ -173,7 +302,7 @@
     let canvas, ctx, keyCubes = [], springs = [];
     let worldMouse = { x: 0, y: 0 }, screenMouse = { x: 0, y: 0 }, isMouseDown = false, draggedCube = null;
     let clickStartTime = 0, clickStartPos = {x:0, y:0};
-    let lastTimestamp = 0, worldWidth, worldHeight, currentStarId = 'star-home', expandedCube = null;
+    let lastTimestamp = 0, worldWidth, worldHeight, currentStarId = 'star-home', expandedCube = null, followedCube = null;
     let headerHeight = 70;
 
     // Viewport
@@ -181,6 +310,7 @@
     const MIN_SCALE = 0.05, MAX_SCALE = 8.0, ZOOM_SENSITIVITY = 0.001, CLICK_THRESHOLD_DIST = 10, CLICK_THRESHOLD_TIME = 300;
     let viewportAnimation = null;
     let isPanning = false; let lastPanPos = { x: 0, y: 0 };
+    let lastNavCheck = 0; 
 
     // Physics & World Control
     const friction = 0.92; const baseSpringK = 0.02, starSpringK = 0.03, interStarSpringK = 0.005, MAX_VELOCITY = 150;
@@ -193,17 +323,16 @@
     let frameCount = 0, lastFpsUpdate = 0, fps = 0, totalKineticEnergy = 0;
 
     // Ticker & Idle Mode
-    let feedToTicker; // Will be assigned by the ticker init function
-    let idleTimeout, demoInterval; const IDLE_TIME_MS = 10000;
-    const tickerMessageCooldowns = new Map();
+    let addTickerMessage; 
+    let idleTimeout, demoInterval; const IDLE_TIME_MS = 15000;
 
-    // Data with "Weight"
     const cubeData = [
         { id: "star-home", text: "ראשי", type: 'star', weight: 50 }, { id: "star-about", text: "אודות", type: 'star', weight: 45 }, { id: "star-skills", text: "מיומנויות", type: 'star', weight: 80 }, { id: "star-platforms", text: "פלטפורמות", type: 'star', weight: 70 }, { id: "star-live", text: "שירותי Live", type: 'star', weight: 75 }, { id: "star-content", text: "סוגי תוכן", type: 'star', weight: 60 }, { id: "star-contact", text: "צור קשר", type: 'star', weight: 30 },
         { id: "welcome", text: "ברוכים הבאים", type: 'card', parentId: 'star-home', weight: 10 }, { id: "explore", text: "חקור את האתר", type: 'card', parentId: 'star-home', weight: 12 },
         { id: "orian", text: "מי אני?", type: 'card', parentId: 'star-about', weight: 20 }, { id: "psycho", text: "PsychoFlash", type: 'card', parentId: 'star-about', weight: 18 }, { id: "volunteer", text: "התנדבות", type: 'card', parentId: 'star-about', weight: 15 },
         { id: "ps", text: "Photoshop", type: 'skill', parentId: 'star-skills', weight: 10 }, { id: "ae", text: "After Effects", type: 'skill', parentId: 'star-skills', weight: 10 }, { id: "pr", text: "Premiere Pro", type: 'skill', parentId: 'star-skills', weight: 8 }, { id: "animate", text: "Animate", type: 'skill', parentId: 'star-skills', weight: 7 }, { id: "webdev", text: "Web Dev", type: 'skill', parentId: 'star-skills', weight: 15 },
-        { id: "vmix", text: "Vmix Coding", type: 'live', parentId: 'star-live', weight: 22 }, { id: "techConsult", text: "Tech Consulting", type: 'live', parentId: 'star-live', weight: 19 },
+        { id: "vmix", text: "Vmix Coding", type: 'live', parentId: 'star-live', weight: 22, youtubeId: 'B7_34tBi8eA' }, 
+        { id: "techConsult", text: "Tech Consulting", type: 'live', parentId: 'star-live', weight: 19 },
         { id: "email", text: "אימייל", type: 'contact', parentId: 'star-contact', weight: 5 }, { id: "phone", text: "טלפון", type: 'contact', parentId: 'star-contact', weight: 5 }, { id: "facebook", text: "פייסבוק", type: 'contact', parentId: 'star-contact', weight: 5 },
     ];
 
@@ -213,13 +342,24 @@
     function clamp(v, minv, maxv) { return Math.max(minv, Math.min(maxv, v)); }
     function screenToWorld(screenX, screenY) { return { x: view.x + screenX / view.scale, y: view.y + screenY / view.scale }; }
     function worldToScreen(worldX, worldY) { return { x: (worldX - view.x) * view.scale, y: (worldY - view.y) * view.scale }; }
+    function getBoundingBox(cubes) {
+        if (!cubes || cubes.length === 0) return null;
+        let minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity;
+        cubes.forEach(c => {
+            minX = Math.min(minX, c.x - c.width / 2);
+            minY = Math.min(minY, c.y - c.height / 2);
+            maxX = Math.max(maxX, c.x + c.width / 2);
+            maxY = Math.max(maxY, c.y + c.height / 2);
+        });
+        return { minX, minY, maxX, maxY, width: maxX - minX, height: maxY - minY };
+    }
 
     // =========================================
     // 3. Core Classes (KeyCube, Spring)
     // =========================================
     class KeyCube {
-        constructor(id, text, type, parentId = null, weight = 10) {
-            this.id = id; this.text = text; this.type = type; this.isStar = (type === 'star'); this.weight = weight;
+        constructor(id, text, type, parentId = null, weight = 10, youtubeId = null) {
+            this.id = id; this.text = text; this.type = type; this.isStar = (type === 'star'); this.weight = weight; this.youtubeId = youtubeId;
             this.parentId = parentId;
             this.x = Math.random() * worldWidth; this.y = Math.random() * worldHeight;
             this.vx = 0; this.vy = 0;
@@ -289,9 +429,10 @@
                             const vdx = gravityCenter.x - this.x; const vdy = gravityCenter.y - this.y;
                             const vdist = Math.hypot(vdx, vdy);
                             if (vdist > 10) {
-                                const strength = (vortexStrength / 100) * 350;
-                                this.applyForce(vdy / vdist * strength, -vdx / vdist * strength);
-                                this.applyForce(vdx * 0.003, vdy * 0.003);
+                                const tangentialStrength = (vortexStrength / 100) * 350;
+                                this.applyForce(vdy / vdist * tangentialStrength, -vdx / vdist * tangentialStrength);
+                                const pullStrength = 0.02 * (Math.abs(vortexStrength) / 100 + 0.1);
+                                this.applyForce(vdx * pullStrength, vdy * pullStrength);
                             }
                             break;
                     }
@@ -366,26 +507,30 @@
                 let titleFontSize = clamp(this.height * 0.05, 20, 40) * this.expandProgress;
                 ctx.font = `bold ${titleFontSize}px Arial`;
                 ctx.fillText(this.text, left + this.width - padding, top + padding);
-
-                if (this.expandProgress > 0.6) {
-                    const contentWidth = this.width - padding * 2;
-                    const contentHeight = this.height - padding * 2 - 50 - titleFontSize;
-                    const contentX = left + padding;
-                    const contentY = top + padding + titleFontSize + 20;
+                
+                if (this.youtubeId && this.expandProgress > 0.8) {
+                    const videoY = top + padding + titleFontSize + 20;
+                    const videoHeight = this.height - (padding * 2) - titleFontSize - 30;
+                    const videoWidth = videoHeight * 16 / 9;
+                    const videoX = left + (this.width - videoWidth) / 2;
+                    
                     ctx.save();
+                    ctx.globalAlpha = (this.expandProgress - 0.8) / 0.2;
+                    ctx.fillStyle = "rgba(0, 0, 0, 0.8)";
                     ctx.beginPath();
-                    ctx.rect(contentX, contentY, contentWidth, contentHeight);
-                    ctx.clip();
-                    let bodyFontSize = clamp(this.height * 0.025, 12, 22);
-                    ctx.font = `${bodyFontSize}px Arial`;
-                    const bodyContent = getCubeContent(this.id);
-                    const lines = bodyContent.split('\n');
-                    let currentY = contentY;
-                    for (const line of lines) {
-                        ctx.fillText(line, contentX + contentWidth - 10, currentY);
-                        currentY += bodyFontSize * 1.5;
-                        if (currentY > contentY + contentHeight) break;
-                    }
+                    ctx.roundRect(videoX, videoY, videoWidth, videoHeight, [10]);
+                    ctx.fill();
+                    
+                    ctx.fillStyle = "#FFF";
+                    ctx.beginPath();
+                    const iconSize = Math.min(60, videoHeight * 0.4);
+                    const centerX = videoX + videoWidth/2;
+                    const centerY = videoY + videoHeight/2;
+                    ctx.moveTo(centerX - iconSize/2, centerY - iconSize/2);
+                    ctx.lineTo(centerX - iconSize/2, centerY + iconSize/2);
+                    ctx.lineTo(centerX + iconSize/2, centerY);
+                    ctx.closePath();
+                    ctx.fill();
                     ctx.restore();
                 }
 
@@ -435,7 +580,6 @@
         }
 
         isPointInside(px, py) { return px >= this.x - this.width/2 && px <= this.x + this.width/2 && py >= this.y - this.height/2 && py <= this.y + this.height/2; }
-
         isCloseButtonHit(worldX, worldY) {
             if (!this.isExpanded || !this.closeButtonRect) return false;
             const rect = this.closeButtonRect;
@@ -471,14 +615,14 @@
     // =========================================
     function init() {
         canvas = document.getElementById('canvas'); ctx = canvas.getContext('2d');
-        headerHeight = document.querySelector('header.top-nav-controls')?.offsetHeight || 70;
         setupWorld();
         gravityCenter = { x: worldWidth / 2, y: worldHeight / 2};
-        keyCubes = cubeData.map(item => new KeyCube(item.id, item.text, item.type, item.parentId, item.weight));
+        keyCubes = cubeData.map(item => new KeyCube(item.id, item.text, item.type, item.parentId, item.weight, item.youtubeId));
         populateNav();
         resetPhysics(true);
-        initNewTicker(); // Initialize the new ticker
+        initEnhancedTicker(); // Initialize the new ticker
         setupEventListeners();
+        updateAllButtonStates();
         const homeStar = keyCubes.find(c => c.id === 'star-home');
         if (homeStar) { centerViewOn(homeStar.x, homeStar.y, 0.8, true); setActiveNav('star-home'); }
         resetIdleTimer();
@@ -502,13 +646,21 @@
     }
 
     function setActiveNav(activeStarId) {
+        if (!activeStarId || activeStarId === currentStarId) return;
         document.querySelectorAll('#mainNav a').forEach(link => {
             link.classList.toggle('active', link.getAttribute('data-target') === activeStarId);
         });
         currentStarId = activeStarId;
     }
 
-    function resizeCanvas() { if (!canvas) return; canvas.width = window.innerWidth; canvas.height = window.innerHeight; headerHeight = document.querySelector('header.top-nav-controls')?.offsetHeight || 70;}
+    function resizeCanvas() { 
+        if (!canvas) return; 
+        canvas.width = window.innerWidth; 
+        canvas.height = window.innerHeight;
+        const header = document.querySelector('header.top-nav-controls');
+        headerHeight = header ? header.offsetHeight : 70;
+        document.getElementById('hudContainer').style.top = `${headerHeight + 15}px`;
+    }
 
     function assignGridPositions() {
         switch(layoutMode) {
@@ -519,7 +671,7 @@
             case 'vertical': assignGridPositionsLine(false); break;
         }
     }
-
+        
     function assignGridPositionsCircle() {
         const stars = keyCubes.filter(c => c.isStar);
         const starLayoutRadius = Math.min(worldWidth, worldHeight) * 0.35;
@@ -593,44 +745,64 @@
         }
     }
 
-
     // =========================================
     // 5. Viewport Control & Navigation
     // =========================================
-    function centerViewOn(worldX, worldY, targetScale = view.targetScale, immediate = false) {
+    function centerViewOn(worldX, worldY, targetScale = view.targetScale, immediate = false, onComplete) {
+        setFollowedCube(null);
+        if (view.isAnimating && viewportAnimation) { viewportAnimation.kill(); }
         view.targetScale = clamp(targetScale, MIN_SCALE, MAX_SCALE);
         view.targetX = worldX - (canvas.width / (2 * view.targetScale));
-        view.targetY = worldY - (canvas.height / (2 * view.targetScale));
+        view.targetY = worldY - ((headerHeight / view.targetScale) + (canvas.height - (headerHeight / view.targetScale)) / 2);
+        
         if (immediate) {
             view.x = view.targetX; view.y = view.targetY; view.scale = view.targetScale;
-            view.isAnimating = false; if (viewportAnimation) viewportAnimation.kill();
-        } else { animateViewport(); }
-        updateZoomInfo();
+            view.isAnimating = false; 
+            updateZoomInfo();
+            if (onComplete) onComplete();
+        } else { animateViewport(onComplete); }
     }
 
     function navigateToStar(starId) {
+        if (followedCube && followedCube.id === starId) return;
         if(expandedCube) { expandedCube.isExpanded = false; expandedCube = null; }
+        
         const starCube = keyCubes.find(c => c.id === starId);
         if (!starCube) return;
-        const targetScale = Math.min(MAX_SCALE, Math.max(MIN_SCALE, canvas.width / (starCube.width * 3.5)));
+        
         setActiveNav(starId);
-        centerViewOn(starCube.x, starCube.y, targetScale);
-        feedToTicker({
-            type: 'navigation',
-            text: `ניווט אל: ${starCube.text}`,
-            options: { color: '#87CEEB', lifetime: 'single' }
-        });
+        setFollowedCube(starCube);
+    }
+    
+    function setFollowedCube(cube) {
+        if (view.isAnimating && viewportAnimation) { viewportAnimation.kill(); }
+        if (followedCube && !cube) {
+             addTickerMessage(`מעקב הסתיים אחר: ${followedCube.text}`, { color: '#ff9800', icon: '🔚' });
+        }
+        followedCube = cube;
+        if (cube) {
+            addTickerMessage(`עוקב אחר: ${cube.text}`, { color: '#03a9f4', icon: '🎯' });
+        }
     }
 
-    function animateViewport() {
-        if (view.isAnimating && viewportAnimation) return;
-        view.isAnimating = true; if (viewportAnimation) viewportAnimation.kill();
+    function animateViewport(onCompleteCallback) {
+        if (view.isAnimating && viewportAnimation) { viewportAnimation.kill(); }
+        view.isAnimating = true;
         viewportAnimation = gsap.to(view, {
             duration: 1.2, x: view.targetX, y: view.targetY, scale: view.targetScale,
             ease: "power3.inOut",
             onUpdate: updateZoomInfo,
-            onComplete: () => { view.isAnimating = false; viewportAnimation = null; },
-            onInterrupt: () => { view.isAnimating = false; viewportAnimation = null; view.targetX = view.x; view.targetY = view.y; view.targetScale = view.scale; }
+            onComplete: () => { 
+                view.isAnimating = false; 
+                viewportAnimation = null; 
+                if (onCompleteCallback) onCompleteCallback();
+            },
+            onInterrupt: () => { 
+                view.isAnimating = false; 
+                viewportAnimation = null;
+                view.targetX = view.x; view.targetY = view.y; view.targetScale = view.scale; 
+                setFollowedCube(null);
+            }
         });
     }
 
@@ -650,27 +822,26 @@
         canvas.addEventListener('wheel', onWheel, { passive: false });
         window.addEventListener('resize', setupWorld);
 
+        document.getElementById('controls-toggle').addEventListener('click', (e) => {
+            e.currentTarget.classList.toggle('open');
+            document.getElementById('controls-wrapper').classList.toggle('open');
+            setTimeout(resizeCanvas, 350); 
+        });
+
         document.getElementById('layout-select').addEventListener('change', (e) => {
+            setFollowedCube(null);
             layoutMode = e.target.value;
-            feedToTicker({ type: 'layout_change', text: `פריסה שונתה ל: ${e.target.options[e.target.selectedIndex].text}`, options:{color:'#ffdd57', lifetime: 5000}});
             assignGridPositions();
             buildSprings();
         });
 
-        document.getElementById('toggleWallsBtn')?.addEventListener('click', (e) => { boundariesEnabled = !boundariesEnabled; e.target.textContent = `גבולות: ${boundariesEnabled ? 'ON' : 'OFF'}`; e.target.classList.toggle('active', boundariesEnabled) });
-        document.getElementById('toggleMagnetBtn')?.addEventListener('click', (e) => { magnetEnabled = !magnetEnabled; e.target.textContent = `מגנט: ${magnetEnabled ? 'ON' : 'OFF'}`; e.target.classList.toggle('active', magnetEnabled)});
-        document.getElementById('toggleWanderBtn')?.addEventListener('click', (e) => { wanderEnabled = !wanderEnabled; e.target.textContent = `שיטוט: ${wanderEnabled ? 'ON' : 'OFF'}`; e.target.classList.toggle('active', wanderEnabled) });
-        document.getElementById('toggleOrbitBtn')?.addEventListener('click', (e) => { orbitEnabled = !orbitEnabled; e.target.textContent = `סיבוב: ${orbitEnabled ? 'ON' : 'OFF'}`; e.target.classList.toggle('active', orbitEnabled) });
-
+        document.getElementById('toggleWallsBtn')?.addEventListener('click', () => { boundariesEnabled = !boundariesEnabled; updateAllButtonStates();});
+        document.getElementById('toggleMagnetBtn')?.addEventListener('click', () => { magnetEnabled = !magnetEnabled; updateAllButtonStates();});
+        document.getElementById('toggleWanderBtn')?.addEventListener('click', () => { wanderEnabled = !wanderEnabled; updateAllButtonStates();});
+        document.getElementById('toggleOrbitBtn')?.addEventListener('click', () => { orbitEnabled = !orbitEnabled; updateAllButtonStates();});
+        
         document.getElementById('earthquakeBtn')?.addEventListener('click', () => {
-            const now = performance.now();
-            if (now - lastEarthquakeClick < 1500 && earthquakeLevel > 0) {
-                 feedToTicker({type: 'user_rage', text: `נראה שהמשתמש כועס... מגביר רעידת אדמה!`, options:{color:'#e91e63', bold:true, hold:true, lifetime: 'single'}});
-            }
-            lastEarthquakeClick = now;
-
             earthquakeLevel++;
-            feedToTicker({type: 'earthquake', text: `הופעלה רעידת אדמה בעוצמה ${earthquakeLevel}!`, options:{color:'#ff9800', bold:true, lifetime: 6000}});
             const strength = (180 + (Math.random() - 0.5) * 80) * earthquakeLevel;
             keyCubes.forEach(cube => {
                 if (!cube.dragging && !cube.isExpanded) {
@@ -678,21 +849,12 @@
                     cube.applyForce(Math.cos(angle) * strength, Math.sin(angle) * strength + (cube.mass * -45));
                 }
             });
-            if(earthquakeLevel > 1) {
-                for(let i = 1; i < earthquakeLevel; i++) {
-                    setTimeout(() => {
-                        feedToTicker({type: 'aftershock', text: `רעד משנה מורגש...`, options:{color:'#ffc107', lifetime: 2000}});
-                        keyCubes.forEach(c => c.applyForce((Math.random()-0.5)*strength*0.4, (Math.random()-0.5)*strength*0.4));
-                    }, i * (500 + Math.random() * 400) );
-                }
-            }
             setTimeout(() => earthquakeLevel = Math.max(0, earthquakeLevel - 1), 6000);
         });
 
         document.getElementById('windBtn')?.addEventListener('click', () => {
             windLevel++;
             const duration = 2000 + windLevel * 800;
-            feedToTicker({type: 'wind', text: `משב רוח אדיר בעוצמה ${windLevel}!`, options:{color:'#03a9f4', bold: true, lifetime: duration}});
             const baseStrength = 12.0 * windLevel * (0.8 + Math.random() * 0.4);
             const angle = Math.random() * Math.PI * 2;
             const windForce = { x: Math.cos(angle) * baseStrength, y: Math.sin(angle) * baseStrength };
@@ -701,11 +863,7 @@
                     if (!cube.dragging && !cube.isExpanded) cube.applyForce(windForce.x * (Math.random() * 0.5 + 0.5), windForce.y * (Math.random() * 0.5 + 0.5));
                 });
             }, 100);
-            setTimeout(() => {
-                clearInterval(windInterval);
-                feedToTicker({type: 'wind_end', text: `הרוח נרגעה.`, options:{color:'#b3e5fc', lifetime: 3000}});
-                windLevel = Math.max(0, windLevel - 1);
-            }, duration);
+            setTimeout(() => { clearInterval(windInterval); windLevel = Math.max(0, windLevel - 1); }, duration);
         });
 
         document.getElementById('gravity-select').addEventListener('change', (e) => {
@@ -716,6 +874,17 @@
         document.getElementById('vortex-slider').addEventListener('input', (e) => { vortexStrength = parseInt(e.target.value, 10); });
 
         ['mousedown', 'mousemove', 'wheel', 'keydown', 'touchstart'].forEach(evt => document.addEventListener(evt, resetIdleTimer, false));
+    }
+
+    function updateAllButtonStates() {
+        document.getElementById('toggleWallsBtn').textContent = `גבולות: ${boundariesEnabled ? 'ON' : 'OFF'}`;
+        document.getElementById('toggleWallsBtn').classList.toggle('active', boundariesEnabled);
+        document.getElementById('toggleMagnetBtn').textContent = `מגנט: ${magnetEnabled ? 'ON' : 'OFF'}`;
+        document.getElementById('toggleMagnetBtn').classList.toggle('active', magnetEnabled);
+        document.getElementById('toggleWanderBtn').textContent = `שיטוט: ${wanderEnabled ? 'ON' : 'OFF'}`;
+        document.getElementById('toggleWanderBtn').classList.toggle('active', wanderEnabled);
+        document.getElementById('toggleOrbitBtn').textContent = `סיבוב: ${orbitEnabled ? 'ON' : 'OFF'}`;
+        document.getElementById('toggleOrbitBtn').classList.toggle('active', orbitEnabled);
     }
 
     function getEventPos(e) {
@@ -731,16 +900,14 @@
         worldMouse = screenToWorld(pos.x, pos.y);
         clickStartTime = performance.now();
         clickStartPos = { ...worldMouse };
-        if (view.isAnimating && viewportAnimation) { viewportAnimation.kill(); view.isAnimating = false; }
+        if (view.isAnimating && viewportAnimation) { viewportAnimation.kill(); }
         draggedCube = null; isPanning = false;
 
         if (expandedCube) {
             if (expandedCube.isCloseButtonHit(worldMouse.x, worldMouse.y)) {
-                expandedCube.isExpanded = false;
-                expandedCube = null;
+                expandedCube.isExpanded = false; expandedCube = null;
             }
-            isMouseDown = false;
-            return;
+            isMouseDown = false; return;
         }
 
         for (let i = keyCubes.length - 1; i >= 0; i--) {
@@ -748,25 +915,23 @@
             if (cube.isPointInside(worldMouse.x, worldMouse.y)) {
                 draggedCube = cube;
                 cube.dragging = true;
-                keyCubes.splice(i, 1);
-                keyCubes.push(draggedCube);
-                feedToTicker({
-                    type: 'drag_start',
-                    text: () => draggedCube ? `גורר את: ${draggedCube.text}` : '',
-                    options: { color: '#ffee58', lifetime: 'event', eventId: 'drag' }
-                });
+                keyCubes.splice(i, 1); keyCubes.push(draggedCube);
                 break;
             }
         }
-        if (!draggedCube && !expandedCube) { isPanning = true; lastPanPos = { ...screenMouse }; }
+        if (!draggedCube && !expandedCube) { 
+            isPanning = true; 
+            lastPanPos = { ...screenMouse }; 
+            if(followedCube) setFollowedCube(null);
+        }
     }
 
     function onPointerMove(e) {
         if (!isMouseDown || expandedCube) return;
-        const pos = getEventPos(e);
-        screenMouse = pos;
+        const pos = getEventPos(e); screenMouse = pos;
         worldMouse = screenToWorld(pos.x, pos.y);
         if (isPanning) {
+            if(followedCube) setFollowedCube(null);
             const dx = pos.x - lastPanPos.x; const dy = pos.y - lastPanPos.y;
             view.x -= dx / view.scale; view.y -= dy / view.scale;
             view.targetX = view.x; view.targetY = view.y;
@@ -782,27 +947,30 @@
 
         if (expandedCube) {
             if (!expandedCube.isPointInside(worldMouse.x, worldMouse.y) && !expandedCube.isCloseButtonHit(worldMouse.x, worldMouse.y)) {
-                expandedCube.isExpanded = false;
-                expandedCube = null;
+                expandedCube.isExpanded = false; expandedCube = null;
             }
         } else if (draggedCube) {
             draggedCube.dragging = false;
-            // The 'drag_end' is handled by the event-based lifetime in the ticker logic
-            if (distMoved < CLICK_THRESHOLD_DIST && timeHeld < CLICK_THRESHOLD_TIME) {
-                handleCubeClick(draggedCube);
-            }
+            if (distMoved < CLICK_THRESHOLD_DIST && timeHeld < CLICK_THRESHOLD_TIME) { handleCubeClick(draggedCube); }
         } else if (isPanning && distMoved < CLICK_THRESHOLD_DIST && timeHeld < CLICK_THRESHOLD_TIME) {
-            gravityCenter = { ...worldMouse };
-            feedToTicker({type: 'gravity_move', text: "מרכז הכבידה הוזז!", options:{color:'#8bc34a', lifetime: 3000}});
-            updateGravityCenterMarker();
+             const distToCenter = Math.hypot(worldMouse.x - gravityCenter.x, worldMouse.y - gravityCenter.y);
+            const clickRadius = 50 / view.scale; // 50px radius in screen space
+
+            if ((gravityMode === 'vortex' || gravityMode === 'center') && distToCenter < clickRadius) {
+                createRippleEffect(gravityCenter.x, gravityCenter.y);
+            } else {
+                gravityCenter = { ...worldMouse };
+                updateGravityCenterMarker();
+            }
         }
         draggedCube = null; isPanning = false;
     }
 
     function onWheel(e) {
         e.preventDefault();
+        if (followedCube) setFollowedCube(null);
         if (expandedCube) return;
-        if (view.isAnimating && viewportAnimation) { viewportAnimation.kill(); view.isAnimating = false; }
+        if (view.isAnimating && viewportAnimation) { viewportAnimation.kill(); }
         const wheelDelta = e.deltaY;
         const zoomFactor = Math.exp(-wheelDelta * ZOOM_SENSITIVITY);
         const mouseWorldBefore = screenToWorld(screenMouse.x, screenMouse.y);
@@ -822,63 +990,105 @@
             marker.style.opacity = '1';
             const scale = clamp(1 / view.scale, 0.5, 2);
             marker.style.transform = `translate(-50%, -50%) scale(${scale})`;
-        } else {
-            marker.style.opacity = '0';
-        }
+        } else { marker.style.opacity = '0'; }
     }
+    
+    function createRippleEffect(originX, originY) {
+        addTickerMessage('אדווה במרכז הכובד!', { 
+            color: '#2196F3', 
+            icon: '🌊',
+            onClickAction: () => {
+                createRippleEffect(originX, originY);
+            }
+        });
+        const rippleStrength = 40000; 
+        keyCubes.forEach(cube => {
+            if (cube.isExpanded) return;
+            const dx = cube.x - originX;
+            const dy = cube.y - originY;
+            const dist = Math.hypot(dx, dy);
 
+            if (dist < 1) return; 
+
+            // Force weakens with distance
+            const force = rippleStrength / (dist + 50); 
+            const forceX = (dx / dist) * force;
+            const forceY = (dy / dist) * force;
+
+            cube.applyForce(forceX, forceY);
+        });
+    }
 
     // =========================================
     // 7. Cube Content & Click Handling
     // =========================================
     function handleCubeClick(cube) {
-        if (cube.isStar) {
-            navigateToStar(cube.id);
+        if (cube.isStar) { 
+            navigateToStar(cube.id); 
         } else {
+            if (followedCube) setFollowedCube(null);
             if (expandedCube) expandedCube.isExpanded = false;
-            expandedCube = cube;
-            cube.isExpanded = true;
-            centerViewOn(cube.x, cube.y, 1.2, false);
+            expandedCube = cube; cube.isExpanded = true;
+            centerViewOn(cube.x, cube.y, view.scale); 
         }
     }
-
-    function getCubeContent(cubeId) {
-        const cube = cubeData.find(c => c.id === cubeId);
-        if (!cube) return "";
-        switch(cubeId) {
-            case 'orian': return `אוריין אדלני, יליד 1990.\nCreative Visionary.\nמתכנת, מעצב, מודליסט, אנימטור.\nפרילנסר מאז 2004.`;
-            case 'psycho': return `בעל חברת הפקות וידאו PsychoFlash מאז 2011.\nניסיון בניהול, ניתוב, בימוי, הפקה, עריכה, ייעוץ טכני.`;
-            case 'ps': return `עיבוד תמונה\nריטוש\nעיצוב גרפי לדפוס ולאינטרנט`;
-            case 'ae': return `אנימציה (Motion Graphics)\nקומפוזיטינג\nVFX (אפקטים ויזואליים)`;
-            case 'vmix': return `תכנות ואוטומציה\nניתוב ובקרה\nהפעלה בשידור חי`;
-            case 'email': return `EdelenviProductions@gmail.com`;
-            case 'phone': return `054-255-9027`;
-            case 'facebook': return `חפשו "Orian Edlenvi" בפייסבוק`;
-            default: return `פרטים עבור: ${cube.text}\n(${cube.type})\n\n...בקרוב יוזן תוכן נוסף...`;
-        }
-    }
-
+    
     // =========================================
-    // 8. Physics & Simulation Helpers
+    // 8. Physics & Viewport Helpers
     // =========================================
-    function resetPhysics(hardReset = false) {
-        if (expandedCube) { expandedCube.isExpanded = false; expandedCube = null; }
-        assignGridPositions();
+    function resetPhysics(hardReset=false) {
+        if(followedCube) setFollowedCube(null);
+        if(expandedCube){expandedCube.isExpanded=false;expandedCube=null;} 
+        assignGridPositions(); 
         buildSprings();
-        if(hardReset) {
-            keyCubes.forEach(cube => {
-                cube.x = cube.gridX + (Math.random() - 0.5) * 10;
-                cube.y = cube.gridY + (Math.random() - 0.5) * 10;
-                cube.vx = 0; cube.vy = 0;
-                cube.dragging = false;
-            });
+        if(hardReset)keyCubes.forEach(c=>{c.x=c.gridX+(Math.random()-.5)*10;c.y=c.gridY+(Math.random()-.5)*10;c.vx=0;c.vy=0;c.dragging=false;});
+    }
+
+    function updateActiveNavFromView() {
+        if (isPanning || isMouseDown || view.isAnimating || expandedCube || followedCube) return;
+        const viewCenterX = canvas.width / 2;
+        const viewCenterY = headerHeight + (canvas.height - headerHeight) / 2;
+        let closestStar = null;
+        let minDistance = Infinity;
+
+        keyCubes.filter(c => c.isStar).forEach(star => {
+            const screenPos = worldToScreen(star.x, star.y);
+            if (screenPos.x > 0 && screenPos.x < canvas.width && screenPos.y > headerHeight && screenPos.y < canvas.height) {
+                const distance = Math.hypot(screenPos.x - viewCenterX, screenPos.y - viewCenterY);
+                if (distance < minDistance) {
+                    minDistance = distance;
+                    closestStar = star;
+                }
+            }
+        });
+
+        if (closestStar && closestStar.id !== currentStarId) {
+            if (minDistance < Math.min(canvas.width, canvas.height) * 0.35) {
+                 setActiveNav(closestStar.id);
+            }
         }
+    }
+    
+    function updateNavItemsState() {
+        const navElement = document.getElementById('mainNav');
+        if (navElement.children.length === 0) populateNav();
+
+        const viewTopLeft = screenToWorld(0, 0);
+        const viewBottomRight = screenToWorld(canvas.width, canvas.height);
+
+        navElement.querySelectorAll('a').forEach(link => {
+            const star = keyCubes.find(c => c.id === link.dataset.target);
+            if(star) {
+                const isVisible = star.x + star.width/2 > viewTopLeft.x && star.x - star.width/2 < viewBottomRight.x && star.y + star.height/2 > viewTopLeft.y && star.y - star.height/2 < viewBottomRight.y;
+                link.classList.toggle('off-screen', !isVisible);
+            }
+        });
     }
 
     // =========================================
-    // 9. NEW TICKER LOGIC
+    // 9. ENHANCED TICKER LOGIC
     // =========================================
-    function initNewTicker() {
+    function initEnhancedTicker() {
         const canvas = document.getElementById('ticker-canvas');
         if (!canvas) return;
         const ctx = canvas.getContext('2d');
@@ -888,14 +1098,12 @@
         const popupContent = document.getElementById('popup-content');
         const popupClose = document.getElementById('popup-close');
 
-        // --- FIX START: Hoist variables to the top of the function scope ---
         const queue = [];
         const active = [];
         let isDrag = false, startX = 0, vel = 0, startT = 0, paused = false;
         let last = 0, running = false;
         const BASE_SPD = 60, MASK = 40, GAP = 0;
         let labelW = 0;
-        // --- FIX END ---
         
         function resize() {
             if (!label || !container || !canvas) return;
@@ -911,224 +1119,208 @@
 
         const ease = t => t < .5 ? 2 * t * t : -1 + (4 - 2 * t) * t;
 
+        /**
+         * Represents a single message in the ticker.
+         */
         class Msg {
             constructor(text, options = {}) {
-                this.id = Math.random();
                 this.src = text;
-                this.opt = { color: '#fff', bold: false, hold: false, spacer: false, details: null, lifetime: Infinity, type: 'generic', ...options };
-                if (typeof this.opt.lifetime === 'number') {
-                    this.expireTime = performance.now() + this.opt.lifetime;
-                }
-                this.txt = this._val(); this._measure();
-                this.x = -18; this.ease = false; this.sx = 0; this.tx = 0; this.es = 0; this.ed = 400; this.first = true;
-                this.sep = this.txt === '|' || this.opt.spacer;
+                this.opt = { 
+                    color: '#fff', 
+                    bold: false, 
+                    hold: false,
+                    details: null,
+                    icon: null,          // NEW: Icon (e.g., emoji) to display next to the text
+                    onClickAction: null, // NEW: Custom function to run on click
+                    ...options 
+                };
+                
+                this.displayText = this.opt.icon ? `${this.opt.icon} ${this.src}` : this.src;
+                this._measure();
+                this.x = -18;
+                this.ease = false;
+                this.sx = 0; this.tx = 0; this.es = 0; this.ed = 400;
+                this.first = true;
+                this.sep = this.src === '|';
             }
-            _val() { return typeof this.src === 'function' ? this.src() : this.src; }
-            _measure() { ctx.font = `${this.opt.bold ? 'bold ' : ''}16px sans-serif`; this.txt = this._val(); this.w = (this.opt.spacer ? 0 : ctx.measureText(this.txt).width) + 36; this.tw = this.w - 36; }
+            _measure() { 
+                ctx.font = `${this.opt.bold ? 'bold ' : ''}16px sans-serif`; 
+                this.w = ctx.measureText(this.displayText).width + 36;
+                this.tw = this.w - 36;
+            }
             get right() { return this.x + 18; }
             get left() { return this.right - this.w; }
             start(tgt, now, d = 400) { this.ease = true; this.sx = this.x; this.tx = tgt; this.es = now; this.ed = d; }
             step(now) { const t = Math.min((now - this.es) / this.ed, 1); this.x = this.sx + (this.tx - this.sx) * ease(t); if (t >= 1) this.ease = false; }
-            extended() { return this.opt.details || this.txt; }
-            isExpired(now) {
-                 if (this.opt.lifetime === 'event' && this.opt.eventId === 'drag' && !draggedCube) return true;
-                 if (this.expireTime && now > this.expireTime) return true;
-                 return false;
-            }
+            extended() { return this.opt.details || this.src; }
         }
         
-        function start() { if(running) return; running = true; last = performance.now(); requestAnimationFrame(frame); } 
-
-        feedToTicker = ({ type, text, options }) => {
-            const now = performance.now();
-            const cooldown = tickerMessageCooldowns.get(type) || 0;
-            if (now < cooldown) return; // Cooldown active
-
-            // Set cooldown for this message type
-            tickerMessageCooldowns.set(type, now + (options.cooldown || 2000));
-            
-            // Prevent duplicate event-based messages
-            if(options.lifetime === 'event' && active.some(m => m.opt.eventId === options.eventId)) return;
-
-            queue.push({ text, options: { ...options, type } });
+        /**
+         * The main public function to add a new message to the ticker.
+         */
+        addTickerMessage = (text, options) => {
+            // Prevent adding empty, null, or non-string messages
+            if (!text || typeof text !== 'string' || text.trim() === '') {
+                return;
+            }
+            // Prevent adding a message if it's identical to the last one queued
+            const lastQueued = queue.length > 0 ? queue[queue.length - 1] : null;
+            if (lastQueued && lastQueued.text === text) {
+                return;
+            }
+            queue.push({ text, options });
             if (!running) start();
         };
 
-        // Populate initial messages
-        feedToTicker({ type: 'welcome', text: 'ברוכים הבאים לסימולציה האינטראקטיבית', options: { color: '#4caf50', details: 'גרסה 4.1 - טיקר דינמי מגיב לאירועים בזמן אמת. נסו את הכפתורים!' } });
-        feedToTicker({ type: 'instructions', text: 'גררו ריבועים, לחצו על כפתורים, ושחקו עם הפיזיקה', options: { color: '#03a9f4' } });
-        
+        // --- Interaction Listeners ---
         const ptrX = e => e.clientX ?? e.touches[0].clientX;
-
         const shift = dx => active.forEach(m => m.x += dx);
         container.addEventListener('wheel', e => { shift(-(e.deltaY || e.deltaX)); e.preventDefault(); }, { passive: false });
-
         container.addEventListener('pointerdown', e => { isDrag = true; vel = 0; startX = ptrX(e); startT = e.timeStamp; container.setPointerCapture(e.pointerId); });
-        const end = e => { if (!isDrag) return; isDrag = false; container.releasePointerCapture(e.pointerId); };
-        container.addEventListener('pointerup', end); container.addEventListener('pointercancel', end);
+        const endDrag = e => { if (!isDrag) return; isDrag = false; container.releasePointerCapture(e.pointerId); };
+        container.addEventListener('pointerup', endDrag);
+        container.addEventListener('pointercancel', endDrag);
         container.addEventListener('pointermove', e => { if (isDrag) { const x = ptrX(e), dx = x - startX; shift(dx); const dt = e.timeStamp - startT; if (dt > 0) vel = dx / dt; startX = x; startT = e.timeStamp; } });
-
         container.addEventListener('pointerenter', () => paused = true);
         container.addEventListener('pointerleave', () => paused = false);
 
-        const open = t => { popupContent.textContent = t; popup.style.display = 'flex'; paused = true; };
-        const close = () => { popup.style.display = 'none'; paused = false; };
-        popupClose.addEventListener('click', close);
-        popup.addEventListener('click', e => { if (e.target === popup) close(); });
+        // --- Popup & Click Logic ---
+        const openPopup = t => { popupContent.textContent = t; popup.style.display = 'flex'; paused = true; };
+        const closePopup = () => { popup.style.display = 'none'; paused = false; };
+        popupClose.addEventListener('click', closePopup);
+        popup.addEventListener('click', e => { if (e.target === popup) closePopup(); });
 
         container.addEventListener('click', e => {
-            if (Math.abs(vel) > 0.1) return;
+            if (Math.abs(vel) > 0.1) return; // It was a drag, not a click
             const rect = canvas.getBoundingClientRect();
-            const lx = e.clientX - rect.left;
-            if (lx < 0 || lx > canvas.width) return;
+            const clickX = e.clientX - rect.left;
+            
             for (let i = active.length - 1; i >= 0; i--) {
-                const m = active[i];
-                if (m.sep) continue;
-                if (lx >= m.left && lx <= m.right) { open(m.extended()); return; }
+                const msg = active[i];
+                if (msg.sep) continue;
+                if (clickX >= msg.left && clickX <= msg.right) {
+                    // Check for custom click action first
+                    if (typeof msg.opt.onClickAction === 'function') {
+                        msg.opt.onClickAction(msg); // Execute the special command
+                    } else {
+                        openPopup(msg.extended()); // Default behavior: open popup
+                    }
+                    return; // Stop after handling the first clicked message
+                }
             }
         });
 
+        // --- Animation Loop ---
         const holdable = m => !m.sep && (m.opt.hold || m.tw > 450);
+        
+        // Simplified recycle function: always requeue
         const recycle = m => {
-            if (m.opt.lifetime !== 'single' && m.opt.lifetime !== 'event' && typeof m.opt.lifetime !== 'number') {
-                feedToTicker({ type: m.opt.type, text: m.src, options: m.opt });
-            }
+            addTickerMessage(m.src, m.opt);
         };
 
-        const make = d => d instanceof Msg ? d : new Msg(d.text ?? d, d.options ?? {});
+        const make = d => d instanceof Msg ? d : new Msg(d.text, d.options);
 
         function frame(ts) {
-            const now = performance.now();
             const dt = (ts - last) / 1000; last = ts;
             if (!active.length && queue.length) active.push(make(queue.shift()));
-            if (!isDrag && Math.abs(vel) > 0.0001) { shift(vel * dt * 1000); vel *= 0.92; } // friction
+            if (!isDrag && Math.abs(vel) > 0.0001) { shift(vel * dt * 1000); vel *= 0.92; }
 
             ctx.clearRect(0, 0, canvas.width, canvas.height);
-            let currentSpeed = BASE_SPD * (1 + Math.min(queue.length, 5) * 0.5); // Speed up based on queue length
+            let currentSpeed = BASE_SPD * (1 + Math.min(queue.length, 5) * 0.5);
 
             for (const m of active) {
-                ctx.font = `${m.opt.bold ? 'bold ' : ''}16px sans-serif`;
-                const nt = m._val(); if (nt !== m.txt) { m._measure(); }
                 if (m.first) { m.x += currentSpeed * dt * 2; if (m.right >= -GAP) m.first = false; }
-                else if (m.ease) { m.step(ts); } else if (!isDrag && !paused) { m.x += currentSpeed * dt; }
-                ctx.fillStyle = m.opt.color; ctx.fillText(m.txt, m.x + 18, canvas.height / 2);
+                else if (m.ease) { m.step(ts); }
+                else if (!isDrag && !paused) { m.x += currentSpeed * dt; }
+                
+                ctx.font = `${m.opt.bold ? 'bold ' : ''}16px sans-serif`;
+                ctx.fillStyle = m.opt.color;
+                ctx.fillText(m.displayText, m.x + 18, canvas.height / 2);
             }
 
             for (let i = 1; i < active.length; i++) { const p = active[i - 1], c = active[i]; const maxR = p.left - GAP; if (c.right > maxR) c.x = maxR - 18; }
             if (active.length === 1 && !queue.length) { const m = active[0]; if (holdable(m) && !m.ease && !isDrag && !paused) { const c = (canvas.width + m.w) / 2; if (Math.abs(m.right - c) > 1) m.start(c, ts, 600); } }
 
-            // Check for expired and off-screen messages
-            for (let i = active.length - 1; i >= 0; i--) {
-                const m = active[i];
-                if (m.isExpired(now) || m.left > canvas.width + MASK) {
-                    const [removed] = active.splice(i, 1);
-                    if(!removed.isExpired(now)) recycle(removed);
+            // Recycle messages that go off-screen
+            if (active.length && active[0].left > canvas.width + MASK) {
+                recycle(active.shift());
+            }
+            if (active.length && active[active.length - 1].right < -MASK) {
+                recycle(active.pop());
+            }
+            
+            // Add new messages from queue if there's space
+            if (queue.length > 0) {
+                const lastMsg = active[active.length - 1];
+                if (!lastMsg || lastMsg.right < canvas.width - 50) {
+                    if (lastMsg && !lastMsg.sep) {
+                        active.push(make({ text: '|', options: { color: '#aaa' } }));
+                    }
+                    active.push(make(queue.shift()));
                 }
             }
-            if (active.length && active[active.length-1].right < -MASK) { recycle(active.pop()); }
             
-            while (queue.length) {
-                 if (active.length && !active[active.length - 1].sep) active.push(new Msg('|', { color: '#aaa', lifetime: 'single' }));
-                 active.push(make(queue.shift()));
-            }
-
-            if (active.length || queue.length) requestAnimationFrame(frame); else {
-                running = false;
-                // If queue becomes empty, add a default message to keep it alive
-                setTimeout(() => {
-                    if (!active.length && !queue.length) {
-                        feedToTicker({ type: 'idle', text: 'המערכת ממתינה לפעולה...', options: { color: '#999' } });
-                    }
-                }, 5000);
-            }
+            requestAnimationFrame(frame);
         }
-    }
 
+        function start() {
+            if (running) return;
+            running = true;
+            last = performance.now();
+            requestAnimationFrame(frame);
+        }
+
+        // --- Add initial messages ---
+        addTickerMessage('ברוכים הבאים לסימולציה האינטראקטיבית!', { 
+            color: '#4caf50', 
+            details: 'זוהי גרסה 11.1 עם מערכת טיקר מתוקנת.' 
+        });
+        addTickerMessage('לחצו על קטגוריה למעקב או על הודעה בטיקר לפעולה', {
+            color: '#03a9f4',
+            bold: true,
+            icon: '👆'
+        });
+
+        start();
+    }
+    
     // =========================================
     // 10. Idle Mode & Demo
     // =========================================
-    function resetIdleTimer() {
-        clearTimeout(idleTimeout);
-        clearInterval(demoInterval);
-        idleTimeout = setTimeout(startIdleMode, IDLE_TIME_MS);
-    }
-
+    function resetIdleTimer() { clearTimeout(idleTimeout); clearInterval(demoInterval); idleTimeout = setTimeout(startIdleMode, IDLE_TIME_MS); }
     function startIdleMode() {
-        feedToTicker({type: 'demo_mode', text: "מצב הדגמה הופעל. המערכת משתלטת...", options:{color:'#87CEEB', bold:true, hold:true, lifetime: 'single'}});
-        runDemoAction();
-        demoInterval = setInterval(runDemoAction, Math.random() * 5000 + 5000);
+        runDemoAction(); demoInterval = setInterval(runDemoAction, Math.random() * 4000 + 5000);
     }
-
     function runDemoAction() {
+        setFollowedCube(null);
         const starCubes = keyCubes.filter(c => c.isStar);
         const actions = [
             () => { const randomStar = starCubes[Math.floor(Math.random() * starCubes.length)]; if(randomStar) navigateToStar(randomStar.id); },
             () => document.getElementById('earthquakeBtn').click(),
-            () => { document.getElementById('earthquakeBtn').click(); setTimeout(() => document.getElementById('earthquakeBtn').click(), 500) },
             () => document.getElementById('windBtn').click(),
             () => { const sel = document.getElementById('layout-select'); sel.selectedIndex = Math.floor(Math.random() * sel.options.length); sel.dispatchEvent(new Event('change')); },
             () => document.getElementById('toggleOrbitBtn').click(),
             () => document.getElementById('toggleWanderBtn').click(),
         ];
-        if (expandedCube) {
-            expandedCube.isExpanded = false; expandedCube = null;
-        } else {
-             const randomAction = actions[Math.floor(Math.random() * actions.length)];
-             randomAction();
-        }
+        if (expandedCube) { expandedCube.isExpanded = false; expandedCube = null; } 
+        else { actions[Math.floor(Math.random() * actions.length)](); }
     }
     
     // =========================================
-    // 11. Live Data Ticker Updates
-    // =========================================
-    function updateTickerWithLiveData() {
-        // Energy Level
-        if (totalKineticEnergy > 600000) {
-            feedToTicker({
-                type: 'high_energy',
-                text: `רמת אנרגיה גבוהה: ${Math.round(totalKineticEnergy / 1000)}k`,
-                options: { color: '#f44336', bold: true, cooldown: 5000 }
-            });
-        } else if (totalKineticEnergy < 1000 && !isMouseDown) {
-            feedToTicker({
-                type: 'low_energy',
-                text: 'המערכת רגועה...',
-                options: { color: '#4caf50', cooldown: 10000 }
-            });
-        }
-        
-        // Gravity Mode specific
-        if (gravityMode === 'vortex') {
-             feedToTicker({
-                type: 'vortex_active',
-                text: () => `עוצמת מערבולת: ${vortexStrength}`,
-                options: { color: '#9c27b0', cooldown: 3000 }
-            });
-        }
-    }
-
-
-    // =========================================
-    // 12. Main Animation Loop & HUD
+    // 11. Main Animation Loop & HUD
     // =========================================
     function updateHUD() {
-        const objectCountEl = document.getElementById('objectCount');
-        const physicsStatusEl = document.getElementById('physicsStatus');
-        const mouseCoordsEl = document.getElementById('mouseCoords');
-        const fpsDisplayEl = document.getElementById('fpsDisplay');
-        const energyDisplayEl = document.getElementById('energyDisplay');
-
-        if(objectCountEl) objectCountEl.textContent = `אובייקטים: ${keyCubes.length}`;
-        if(physicsStatusEl) {
-            let gravText = document.querySelector(`#gravity-select option[value="${gravityMode}"]`).textContent;
-            let status = `כבידה: ${gravText}`;
-            if(orbitEnabled) status += " | סיבוב";
-            if(wanderEnabled) status += " | שיטוט";
-            physicsStatusEl.textContent = status;
-        }
-        if(mouseCoordsEl) mouseCoordsEl.textContent = `עכבר: (${Math.round(worldMouse.x)}, ${Math.round(worldMouse.y)})`;
-        if(fpsDisplayEl) fpsDisplayEl.textContent = `FPS: ${fps}`;
-        if(energyDisplayEl) energyDisplayEl.textContent = `אנרגיה: ${Math.round(totalKineticEnergy / 1000)}k`;
+        document.getElementById('objectCount').textContent=`אובייקטים: ${keyCubes.length}`;
+        let gravText=document.querySelector(`#gravity-select option[value="${gravityMode}"]`).textContent;
+        let status=`כבידה: ${gravText}`; if(orbitEnabled)status+=" | סיבוב"; if(wanderEnabled)status+=" | שיטוט";
+        document.getElementById('physicsStatus').textContent=status;
+        document.getElementById('mouseCoords').textContent=`עכבר: (${Math.round(worldMouse.x)}, ${Math.round(worldMouse.y)})`;
+        document.getElementById('fpsDisplay').textContent=`FPS: ${fps}`;
+        document.getElementById('energyDisplay').textContent=`אנרגיה: ${Math.round(totalKineticEnergy/1E3)}k`;
+        document.getElementById('cameraPos').textContent = `מצלמה: (${Math.round(view.x)}, ${Math.round(view.y)})`;
+        const topLeft = screenToWorld(0, 0);
+        document.getElementById('viewBounds').textContent = `תצוגה: [${Math.round(topLeft.x)}, ${Math.round(topLeft.y)}]`;
+        updateZoomInfo();
     }
 
     function animate(timestamp) {
@@ -1136,13 +1328,40 @@
         if(!lastTimestamp) lastTimestamp = timestamp;
         const dt = Math.min(0.033, (timestamp - lastTimestamp) / 1000);
 
-        frameCount++;
-        if (timestamp - lastFpsUpdate > 1000) {
-            fps = frameCount;
-            frameCount = 0;
-            lastFpsUpdate = timestamp;
-            updateTickerWithLiveData(); // Update ticker once per second
+        if(followedCube && !isPanning && !isMouseDown) {
+            const cubesToFit = [followedCube, ...keyCubes.filter(c => c.parentId === followedCube.id)];
+            const box = getBoundingBox(cubesToFit);
+
+            if (box) {
+                const padding = 1.35; 
+                const boxWidth = box.maxX - box.minX;
+                const boxHeight = box.maxY - box.minY;
+
+                const targetScaleX = canvas.width / (boxWidth * padding);
+                const targetScaleY = (canvas.height - headerHeight) / (boxHeight * padding);
+                let targetScale = clamp(Math.min(targetScaleX, targetScaleY), MIN_SCALE, MAX_SCALE);
+                
+                const boxCenterX = (box.minX + box.maxX) / 2;
+                const boxCenterY = (box.minY + box.maxY) / 2;
+                
+                const targetViewX = boxCenterX - (canvas.width / (2 * targetScale));
+                const screenCenterY = headerHeight + (canvas.height - headerHeight) / 2;
+                const targetViewY = boxCenterY - (screenCenterY / targetScale);
+
+                const followFactor = 0.05; 
+                view.x += (targetViewX - view.x) * followFactor;
+                view.y += (targetViewY - view.y) * followFactor;
+                view.scale += (targetScale - view.scale) * followFactor;
+                
+                view.targetX = view.x;
+                view.targetY = view.y;
+                view.targetScale = view.scale;
+            }
         }
+
+        frameCount++;
+        if (timestamp - lastFpsUpdate > 1000) { fps = frameCount; frameCount = 0; lastFpsUpdate = timestamp; }
+        if (timestamp - lastNavCheck > 300) { updateActiveNavFromView(); updateNavItemsState(); lastNavCheck = timestamp; }
         
         lastTimestamp = timestamp;
 
@@ -1162,7 +1381,7 @@
         ctx.translate(-view.x, -view.y);
 
         springs.forEach(spring => spring.draw(ctx));
-        keyCubes.sort((a,b) => a.expandProgress - b.expandProgress).forEach(cube => { cube.draw(ctx); });
+        keyCubes.sort((a,b) => a.expandProgress - b.expandProgress).forEach(cube => cube.draw(ctx));
 
         ctx.restore();
         updateGravityCenterMarker();
