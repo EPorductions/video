@@ -110,9 +110,9 @@
         const { useState, useEffect, useRef } = React;
 
         // --- CONFIGURATION ---
-        // הכנס את ה-API KEY וה-Spreadsheet ID שלך כאן
-        const GOOGLE_API_KEY = ''; // <-- הכנס כאן את המפתח
-        const SPREADSHEET_ID = ''; // <-- הכנס כאן את מזהה הגיליון
+        // מפתח API ומזהה גיליון - כפי שסיפקת
+        const GOOGLE_API_KEY = 'AIzaSyCmnriYz5_rQfTNk8YmyvW0wfQN_96LJ6A'; 
+        const SPREADSHEET_ID = '1RMatyMjsFM35grZTRSoslKN04cTdUy7km4I8clyVil4'; 
 
         // --- Lucide-style Icons Components (Recreated as SVGs) ---
         const Layout = ({size=24, className, strokeWidth=2}) => (
@@ -332,7 +332,8 @@
                                     task_he: row[1],
                                     task_en: row[2],
                                     desc_he: row[3],
-                                    desc_en: row[4]
+                                    desc_en: row[4],
+                                    link: row[5] || "#" // Link is expected in Column F (index 5)
                                 }));
                                 setDeliverablesData(formattedDeliv);
                             }
@@ -345,7 +346,8 @@
                                     topic_he: row[1],
                                     topic_en: row[2],
                                     expert_he: row[3],
-                                    expert_en: row[4]
+                                    expert_en: row[4],
+                                    email: row[5] || "" // Email is expected in Column F (index 5)
                                 }));
                                 setOfficeHoursData(formattedOffice);
                             }
@@ -401,31 +403,31 @@
                 setAgendaData(defaultAgenda);
 
                 setDeliverablesData([
-                    { week: 1, task_he: "גילוי בעיות וראיונות", task_en: "Problem Discovery & Interviews", desc_he: "Problem Discovery", desc_en: "Problem Discovery" },
-                    { week: 2, task_he: "טיוטת פתרון", task_en: "Solution Draft", desc_he: "Solution draft", desc_en: "Solution draft" },
-                    { week: 3, task_he: "הגדרת MVP", task_en: "MVP Definition", desc_he: "MVP definition", desc_en: "MVP definition" },
-                    { week: 4, task_he: "מחקר שוק", task_en: "Market Research", desc_he: "Market research", desc_en: "Market research" },
-                    { week: 5, task_he: "פיצ'ים לקבלה", task_en: "Selection Pitches", desc_he: "Pitching event", desc_en: "Pitching event" },
-                    { week: 6, task_he: "צוות ומנטורינג", task_en: "Team & Mentoring", desc_he: "Team & Needs", desc_en: "Team & Needs" },
-                    { week: 7, task_he: "Lean Canvas", task_en: "Lean Canvas", desc_he: "One-Pager", desc_en: "One-Pager" },
-                    { week: 8, task_he: "הגדרת מוצר", task_en: "Product Definition", desc_he: "Product Definition", desc_en: "Product Definition" },
-                    { week: 9, task_he: "מדדי KPI", task_en: "KPI Metrics", desc_he: "Metrics", desc_en: "Metrics" },
-                    { week: 10, task_he: "פרסונות", task_en: "Personas", desc_he: "User Personas", desc_en: "User Personas" },
-                    { week: 11, task_he: "לקוחות יעד", task_en: "Target Customers", desc_he: "Target Customers", desc_en: "Target Customers" },
-                    { week: 12, task_he: "זרימת משתמש", task_en: "User Flow", desc_he: "User Flow", desc_en: "User Flow" },
-                    { week: 13, task_he: "פיתוח עסקי", task_en: "Business Dev", desc_he: "BD Plan", desc_en: "BD Plan" },
-                    { week: 14, task_he: "גיוס כספים", task_en: "Fundraising", desc_he: "Funding Strategy", desc_en: "Funding Strategy" },
-                    { week: 15, task_he: "Data Room", task_en: "Data Room", desc_he: "Investor Deck", desc_en: "Investor Deck" },
-                    { week: 16, task_he: "מצגת דמו", task_en: "Demo Deck", desc_he: "Demo Presentation", desc_en: "Demo Presentation" },
-                    { week: 17, task_he: "פיץ' סופי", task_en: "Final Pitch", desc_he: "Final Pitch", desc_en: "Final Pitch" }
+                    { week: 1, task_he: "גילוי בעיות וראיונות", task_en: "Problem Discovery & Interviews", desc_he: "Problem Discovery", desc_en: "Problem Discovery", link: "#" },
+                    { week: 2, task_he: "טיוטת פתרון", task_en: "Solution Draft", desc_he: "Solution draft", desc_en: "Solution draft", link: "#" },
+                    { week: 3, task_he: "הגדרת MVP", task_en: "MVP Definition", desc_he: "MVP definition", desc_en: "MVP definition", link: "#" },
+                    { week: 4, task_he: "מחקר שוק", task_en: "Market Research", desc_he: "Market research", desc_en: "Market research", link: "#" },
+                    { week: 5, task_he: "פיצ'ים לקבלה", task_en: "Selection Pitches", desc_he: "Pitching event", desc_en: "Pitching event", link: "#" },
+                    { week: 6, task_he: "צוות ומנטורינג", task_en: "Team & Mentoring", desc_he: "Team & Needs", desc_en: "Team & Needs", link: "#" },
+                    { week: 7, task_he: "Lean Canvas", task_en: "Lean Canvas", desc_he: "One-Pager", desc_en: "One-Pager", link: "#" },
+                    { week: 8, task_he: "הגדרת מוצר", task_en: "Product Definition", desc_he: "Product Definition", desc_en: "Product Definition", link: "#" },
+                    { week: 9, task_he: "מדדי KPI", task_en: "KPI Metrics", desc_he: "Metrics", desc_en: "Metrics", link: "#" },
+                    { week: 10, task_he: "פרסונות", task_en: "Personas", desc_he: "User Personas", desc_en: "User Personas", link: "#" },
+                    { week: 11, task_he: "לקוחות יעד", task_en: "Target Customers", desc_he: "Target Customers", desc_en: "Target Customers", link: "#" },
+                    { week: 12, task_he: "זרימת משתמש", task_en: "User Flow", desc_he: "User Flow", desc_en: "User Flow", link: "#" },
+                    { week: 13, task_he: "פיתוח עסקי", task_en: "Business Dev", desc_he: "BD Plan", desc_en: "BD Plan", link: "#" },
+                    { week: 14, task_he: "גיוס כספים", task_en: "Fundraising", desc_he: "Funding Strategy", desc_en: "Funding Strategy", link: "#" },
+                    { week: 15, task_he: "Data Room", task_en: "Data Room", desc_he: "Investor Deck", desc_en: "Investor Deck", link: "#" },
+                    { week: 16, task_he: "מצגת דמו", task_en: "Demo Deck", desc_he: "Demo Presentation", desc_en: "Demo Presentation", link: "#" },
+                    { week: 17, task_he: "פיץ' סופי", task_en: "Final Pitch", desc_he: "Final Pitch", desc_en: "Final Pitch", link: "#" }
                 ]);
 
                 setOfficeHoursData([
-                     { week: 6, topic_he: "אימון פיצ'ים", topic_en: "Pitch Training", expert_he: "מומחה Storytelling", expert_en: "Storytelling Expert" },
-                     { week: 11, topic_he: "UX/UI Design", topic_en: "UX/UI Design", expert_he: "מעצב מוצר בכיר", expert_en: "Senior Product Designer" },
-                     { week: 12, topic_he: "מודלים עסקיים", topic_en: "Business Models", expert_he: "יועץ אסטרטגי", expert_en: "Strategy Consultant" },
-                     { week: 16, topic_he: "Tech Validation", topic_en: "Tech Validation", expert_he: "CTO מלווה", expert_en: "Advisory CTO" },
-                     { week: "18-19", topic_he: "סטוריטלינג", topic_en: "Storytelling", expert_he: "מומחה סטוריטלינג", expert_en: "Storytelling Expert" }
+                     { week: 6, topic_he: "אימון פיצ'ים", topic_en: "Pitch Training", expert_he: "מומחה Storytelling", expert_en: "Storytelling Expert", email: "expert@innovet.com" },
+                     { week: 11, topic_he: "UX/UI Design", topic_en: "UX/UI Design", expert_he: "מעצב מוצר בכיר", expert_en: "Senior Product Designer", email: "design@innovet.com" },
+                     { week: 12, topic_he: "מודלים עסקיים", topic_en: "Business Models", expert_he: "יועץ אסטרטגי", expert_en: "Strategy Consultant", email: "biz@innovet.com" },
+                     { week: 16, topic_he: "Tech Validation", topic_en: "Tech Validation", expert_he: "CTO מלווה", expert_en: "Advisory CTO", email: "tech@innovet.com" },
+                     { week: "18-19", topic_he: "סטוריטלינג", topic_en: "Storytelling", expert_he: "מומחה סטוריטלינג", expert_en: "Storytelling Expert", email: "story@innovet.com" }
                 ]);
 
                 setCalendarHighlights([
@@ -582,9 +584,9 @@
                                         <td className="px-8 py-6 text-xl font-bold">{lang === 'he' ? item.task_he : item.task_en}</td>
                                         <td className="px-8 py-6 text-lg font-light text-gray-600 font-sans">{lang === 'he' ? item.desc_he : item.desc_en}</td>
                                         <td className="px-8 py-6">
-                                            <button className="flex items-center gap-2 text-sm font-bold uppercase tracking-wider hover:text-innovet-yellow transition-colors">
+                                            <a href={item.link} target="_blank" className="flex items-center gap-2 text-sm font-bold uppercase tracking-wider hover:text-innovet-yellow transition-colors">
                                                 {t.download} <Download size={16}/>
-                                            </button>
+                                            </a>
                                         </td>
                                     </tr>
                                 ))}
@@ -613,9 +615,9 @@
                             <p className="text-xl text-gray-500 mb-8 font-light">
                                 {t.with} {lang === 'he' ? item.expert_he : item.expert_en}
                             </p>
-                            <button className="w-full py-4 bg-innovet-bg text-innovet-black font-bold text-lg uppercase hover:bg-innovet-yellow transition-colors flex justify-center items-center gap-2">
+                            <a href={`mailto:${item.email}?subject=Innovet Office Hours: ${item.topic_en}`} className="w-full py-4 bg-innovet-bg text-innovet-black font-bold text-lg uppercase hover:bg-innovet-yellow transition-colors flex justify-center items-center gap-2">
                                 {t.book} <ArrowIcon size={20} />
-                            </button>
+                            </a>
                         </div>
                     ))}
                 </div>
