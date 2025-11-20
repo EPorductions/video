@@ -86,49 +86,42 @@
             display: inline-block;
         }
         
-        /* Glitch Effect - One Time Only */
+        /* Glitch Effect - Continuous Infinite Loop */
         .glitch-text { position: relative; }
         .glitch-text::before, .glitch-text::after {
             content: attr(data-text);
             position: absolute;
             top: 0; left: 0;
             width: 100%; height: 100%;
-            background: var(--bg-color);
-            opacity: 0; 
+            background: var(--bg-color); /* Matches bg to hide original */
         }
-        /* Run animation once for 2s then stop (opacity 0) */
-        .glitch-text.animate::before {
+        .glitch-text::before {
             left: 2px;
             text-shadow: -1px 0 var(--secondary);
             clip: rect(44px, 450px, 56px, 0);
-            animation: glitch-anim 2s 1 normal forwards;
-            opacity: 1;
+            animation: glitch-anim 5s infinite linear alternate-reverse;
         }
-        .glitch-text.animate::after {
+        .glitch-text::after {
             left: -2px;
             text-shadow: -1px 0 var(--primary);
             clip: rect(44px, 450px, 56px, 0);
-            animation: glitch-anim2 2s 1 normal forwards;
-            opacity: 1;
+            animation: glitch-anim2 5s infinite linear alternate-reverse;
         }
-
         @keyframes glitch-anim {
-            0% { clip: rect(33px, 9999px, 11px, 0); opacity: 1; }
+            0% { clip: rect(33px, 9999px, 11px, 0); }
             20% { clip: rect(89px, 9999px, 13px, 0); }
             40% { clip: rect(12px, 9999px, 86px, 0); }
             60% { clip: rect(45px, 9999px, 22px, 0); }
             80% { clip: rect(4px, 9999px, 99px, 0); }
-            99% { clip: rect(67px, 9999px, 3px, 0); opacity: 1; }
-            100% { opacity: 0; display: none;}
+            100% { clip: rect(67px, 9999px, 3px, 0); }
         }
         @keyframes glitch-anim2 {
-            0% { clip: rect(2px, 9999px, 44px, 0); opacity: 1; }
+            0% { clip: rect(2px, 9999px, 44px, 0); }
             20% { clip: rect(12px, 9999px, 88px, 0); }
             40% { clip: rect(76px, 9999px, 11px, 0); }
             60% { clip: rect(32px, 9999px, 55px, 0); }
             80% { clip: rect(90px, 9999px, 4px, 0); }
-            99% { clip: rect(12px, 9999px, 22px, 0); opacity: 1; }
-            100% { opacity: 0; display: none;}
+            100% { clip: rect(12px, 9999px, 22px, 0); }
         }
 
         /* Backgrounds */
@@ -638,7 +631,7 @@
         <!-- Contact -->
         <section id="contact" class="py-20">
             <div class="glass-card max-w-3xl mx-auto text-center">
-                <h2 class="text-5xl font-bold mb-6" data-key="contact_title">בואו ניצור משהו מדהים</h2>
+                <h2 class="text-5xl font-bold mb-6 glitch-text" data-text="בואו ניצור משהו מדהים" data-key="contact_title">בואו ניצור משהו מדהים</h2>
                 <p class="text-xl text-muted-custom mb-12" data-key="contact_desc">
                     יש לכם חזון? לנו יש את הכלים להגשים אותו.
                 </p>
@@ -669,7 +662,7 @@
     <footer class="text-center text-gray-600 text-sm relative z-10 bg-black py-8 border-t border-white/10">
         <div class="flex justify-center gap-6 mb-4">
             <a href="#" class="hover:text-white transition-colors"><svg width="24" height="24" fill="currentColor" viewBox="0 0 24 24"><path d="M24 4.557c-.883.392-1.832.656-2.828.775 1.017-.609 1.798-1.574 2.165-2.724-.951.564-2.005.974-3.127 1.195-.897-.957-2.178-1.555-3.594-1.555-3.179 0-5.515 2.966-4.797 6.045-4.091-.205-7.719-2.165-10.148-5.144-1.29 2.213-.669 5.108 1.523 6.574-.806-.026-1.566-.247-2.229-.616-.054 2.281 1.581 4.415 3.949 4.89-.693.188-1.452.232-2.224.084.626 1.956 2.444 3.379 4.6 3.419-2.07 1.623-4.678 2.348-7.29 2.04 2.179 1.397 4.768 2.212 7.548 2.212 9.142 0 14.307-7.721 13.995-14.646.962-.695 1.797-1.562 2.457-2.549z"/></svg></a>
-            <a href="#" class="hover:text-white transition-colors"><svg width="24" height="24" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/></svg></a>
+            <a href="#" class="hover:text-white transition-colors"><svg width="24" height="24" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/></svg></a>
         </div>
         <p>&copy; 2024 PsychoFlash Productions. All rights reserved.</p>
     </footer>
@@ -705,10 +698,10 @@
                 pkg_tech: "מפעיל טכני", pkg_tech_price: "₪2,500+", pkg_tech_desc: "פתרון נקודתי להפקות קיימות", pkg_tech_li1: "✓ Broadcast system operation", pkg_tech_li2: "✓ Integration with existing gear", pkg_tech_li3: "✓ Setup and dismantle", btn_order: "Book Now",
                 pkg_director: "Technical Director", pkg_director_price: "₪4,500+", pkg_director_desc: "Full event management in real-time", pkg_director_li1: "✓ Camera routing", pkg_director_li2: "✓ Line-up management", pkg_director_li3: "✓ Crew communication", pkg_rec: "Recommended",
                 pkg_pm: "ניהול פרויקט", pkg_pm_price: "מותאם אישית", pkg_pm_desc: "פתרון מקצה לקצה", pkg_pm_li1: "✓ אפיון טכני מלא", pkg_pm_li2: "✓ בניית צוות הפקה", pkg_pm_li3: "✓ אחריות כוללת", btn_contact: "צור קשר",
-                contact_title: "Let's Create Magic", contact_desc: "Have a vision? We have the tools to make it happen.", btn_email: "Send Email", contact_name: "Orian Edelenyi"
+                contact_title: "בואו ניצור משהו מדהים", contact_desc: "יש לכם חזון? לנו יש את הכלים להגשים אותו.", btn_email: "שלחו מייל", contact_name: "אוריין אדלני"
             },
             en: {
-                nav_home: "Home", nav_about: "About", nav_work: "Work", nav_services: "Services", nav_packages: "Packages", nav_contact: "Contact", nav_process: "Process", nav_recommendations: "Testimonials",
+                nav_home: "Home", nav_about: "About", nav_work: "Work", nav_services: "Services", nav_packages: "Packages", nav_contact: "Contact", btn_talk: "Let's Talk",
                 hero_title: "The Perfect Combo", hero_subtitle: "Between Technical Execution & Creative Innovation", hero_desc: "From video productions and live broadcasts to software and AI solutions. We are here to turn your vision into an impressive, smooth, and flawless reality.", hero_cta_start: "Start a Project", hero_cta_work: "View Work",
                 stat_productions: "Successful Productions", stat_countries: "Countries Worldwide", stat_support: "Support & Service",
                 about_title: "About Us", about_subtitle: "Technology & Emotion is our DNA", about_text: "With years of experience in the broadcast and production industry, we combine deep technical knowledge with creative understanding.", about_text2: "We don't just push buttons; we engineer experiences.",
@@ -999,12 +992,6 @@
             }
             logos.forEach(l => track.appendChild(createLogo(l)));
             logos.forEach(l => track.appendChild(createLogo(l)));
-            
-            // Trigger Glitch Animation Once
-            setTimeout(() => {
-                const glitch = document.querySelector('.glitch-text');
-                if(glitch) glitch.classList.add('animate');
-            }, 500);
         });
 
     </script>
