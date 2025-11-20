@@ -61,6 +61,11 @@
         .animate-fadeIn {
             animation: fadeIn 0.5s cubic-bezier(0.4, 0, 0.2, 1) forwards;
         }
+
+        /* Dropdown Hover Logic */
+        .group:hover .group-hover\:block {
+            display: block;
+        }
     </style>
     <script>
         tailwind.config = {
@@ -89,7 +94,7 @@
     <div id="root"></div>
 
     <script type="text/babel">
-        const { useState, useEffect } = React;
+        const { useState, useEffect, useRef } = React;
 
         // --- Lucide-style Icons Components (Recreated as SVGs) ---
         const Layout = ({size=24, className, strokeWidth=2}) => (
@@ -131,6 +136,9 @@
         const Globe = ({size=24, className, strokeWidth=2}) => (
             <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={strokeWidth} strokeLinecap="round" strokeLinejoin="round" className={className}><circle cx="12" cy="12" r="10"/><line x1="2" x2="22" y1="12" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
         );
+        const ChevronDown = ({size=24, className, strokeWidth=2}) => (
+            <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={strokeWidth} strokeLinecap="round" strokeLinejoin="round" className={className}><polyline points="6 9 12 15 18 9"></polyline></svg>
+        );
 
         // --- Translations & Constants ---
         const UI_TEXT = {
@@ -146,7 +154,7 @@
                 heroDesc: 'מבט כולל על 19 שבועות של יזמות, משלב הרעיון ועד ל-Demo Day. השתמשו בכלי ה-AI המומלצים בכל שלב.',
                 tabAgenda: 'מטריצת התוכנית',
                 tabDeliverables: 'תוצרים ומטלות',
-                tabOfficeHours: 'מומחים ושעות קבלה',
+                tabOfficeHours: 'מומחים וסדנאות',
                 tabCalendar: 'לוח אירועים',
                 sectionJourney: 'מסע היזם (The Journey)',
                 sectionStudent: 'חובות הסטודנט',
@@ -166,6 +174,7 @@
                 book: 'שריין מקום',
                 with: 'עם',
                 rights: '© 2025 כל הזכויות שמורות',
+                builtBy: 'נבנה ע"י PsychoFlash',
                 phases: {
                     ideation: "שלב האידאציה (Ideation)",
                     accelerator: "אקסלרטור (Accelerator)",
@@ -184,7 +193,7 @@
                 heroDesc: 'A comprehensive view of 19 weeks of entrepreneurship, from Ideation to Demo Day. Use the recommended AI tools at each stage.',
                 tabAgenda: 'Program Matrix',
                 tabDeliverables: 'Deliverables',
-                tabOfficeHours: 'Office Hours',
+                tabOfficeHours: 'Experts & Workshops',
                 tabCalendar: 'Events Calendar',
                 sectionJourney: 'The Journey',
                 sectionStudent: 'Student Deliverables',
@@ -204,6 +213,7 @@
                 book: 'Book Slot',
                 with: 'With',
                 rights: '© 2025 All Rights Reserved',
+                builtBy: 'Built by PsychoFlash',
                 phases: {
                     ideation: "Ideation Phase",
                     accelerator: "Accelerator Phase",
@@ -218,12 +228,28 @@
             const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
             const [lang, setLang] = useState('he'); // 'he' or 'en'
 
+            const mainContentRef = useRef(null);
+
             const toggleMobileMenu = () => setIsMobileMenuOpen(!isMobileMenuOpen);
             const toggleLang = () => setLang(lang === 'he' ? 'en' : 'he');
 
             const t = UI_TEXT[lang];
             const isRTL = lang === 'he';
             const ArrowIcon = isRTL ? ArrowLeft : ArrowRight;
+
+            // Scroll Handling
+            const scrollToTop = () => window.scrollTo({ top: 0, behavior: 'smooth' });
+            const scrollToContent = () => {
+                if (mainContentRef.current) {
+                    mainContentRef.current.scrollIntoView({ behavior: 'smooth' });
+                }
+            };
+            
+            const handleNavClick = (tabId) => {
+                setActiveTab(tabId);
+                scrollToContent();
+                setIsMobileMenuOpen(false);
+            };
 
             // Update document dir
             useEffect(() => {
@@ -340,7 +366,7 @@
                 { week: "18-19", topic: lang === 'he' ? "סטוריטלינג" : "Storytelling", expert: lang === 'he' ? "מומחה סטוריטלינג" : "Storytelling Expert" }
             ];
 
-            // Date logic fix: If date has dots (04.01), split by dot and get first part. If just text (WEEK 5), keep as is.
+            // Date logic fix
             const getDayFromDate = (dateStr) => {
                 if (dateStr.includes('.')) {
                     return dateStr.split('.')[0];
@@ -379,7 +405,7 @@
 
             const TabButton = ({ id, label, icon: Icon }) => (
                 <button
-                    onClick={() => setActiveTab(id)}
+                    onClick={() => handleNavClick(id)}
                     className={`relative px-4 md:px-8 py-5 text-base md:text-xl font-bold transition-all duration-200 uppercase tracking-tight border-b-4 flex-1 md:flex-none whitespace-nowrap ${
                         activeTab === id
                             ? 'bg-white text-black border-innovet-yellow'
@@ -554,7 +580,6 @@
                     {calendarHighlights.map((event, index) => (
                         <div key={index} className="flex flex-col md:flex-row bg-innovet-dark text-white border-b border-gray-800 hover:bg-[#1F1F1F] transition-colors group">
                             <div className={`md:w-48 p-8 ${isRTL ? 'md:border-l' : 'md:border-r'} border-gray-800 flex flex-col justify-center items-center md:items-start text-innovet-yellow`}>
-                                {/* FIXED DATE LOGIC: Displays '04' instead of '0401' */}
                                 <span className="text-4xl font-black">{getDayFromDate(event.date)}</span>
                                 <span className="text-xl font-bold uppercase">{event.date.includes('WEEK') || event.date.includes('שבוע') ? 'WEEK' : 'JAN'}</span>
                             </div>
@@ -586,19 +611,47 @@
                     {/* Header */}
                     <header className="bg-white sticky top-0 z-50 border-b border-innovet-gray">
                         <div className="max-w-[1600px] mx-auto px-6 h-24 flex items-center justify-between">
-                            <div className="flex items-center gap-6">
+                            <div className="flex items-center gap-6 h-full">
                                 {/* Text Logo */}
-                                <div className="flex flex-col">
+                                <div className="flex flex-col cursor-pointer" onClick={scrollToTop}>
                                     <span className="text-3xl font-black tracking-tighter leading-none">INNOVET</span>
                                     <span className="text-sm font-bold text-innovet-blue tracking-widest uppercase">Cohort 2</span>
                                 </div>
                                 
                                 <div className="hidden md:block h-8 w-px bg-innovet-gray"></div>
                                 
-                                <nav className="hidden md:flex gap-8">
-                                    <a href="#" className="text-lg font-bold hover:text-innovet-blue transition-colors">{t.home}</a>
-                                    <a href="#" className="text-lg font-bold hover:text-innovet-blue transition-colors">{t.program}</a>
-                                    <a href="#" className="text-lg font-bold text-innovet-blue transition-colors">{t.schedule}</a>
+                                {/* Desktop Nav */}
+                                <nav className="hidden md:flex gap-8 h-full items-center">
+                                    <button onClick={scrollToTop} className="text-lg font-bold hover:text-innovet-blue transition-colors">{t.home}</button>
+                                    <button onClick={scrollToTop} className="text-lg font-bold hover:text-innovet-blue transition-colors">{t.program}</button>
+                                    
+                                    {/* Subcategories Dropdown */}
+                                    <div className="relative group h-full flex items-center">
+                                        <button 
+                                            onClick={() => handleNavClick('agenda')}
+                                            className="text-lg font-bold text-innovet-blue transition-colors flex items-center gap-1 py-8"
+                                        >
+                                            {t.schedule} <ChevronDown size={16} />
+                                        </button>
+                                        
+                                        {/* Dropdown Content */}
+                                        <div className="absolute top-[95%] right-0 w-64 bg-white shadow-xl border border-innovet-gray hidden group-hover:block animate-fadeIn z-50">
+                                             <div className="py-2">
+                                                <button onClick={(e) => { e.stopPropagation(); handleNavClick('agenda'); }} className="block w-full text-right px-6 py-3 text-base font-bold hover:bg-innovet-bg hover:text-innovet-blue transition-colors border-b border-gray-100">
+                                                    {t.tabAgenda}
+                                                </button>
+                                                <button onClick={(e) => { e.stopPropagation(); handleNavClick('deliverables'); }} className="block w-full text-right px-6 py-3 text-base font-bold hover:bg-innovet-bg hover:text-innovet-blue transition-colors border-b border-gray-100">
+                                                    {t.tabDeliverables}
+                                                </button>
+                                                <button onClick={(e) => { e.stopPropagation(); handleNavClick('office-hours'); }} className="block w-full text-right px-6 py-3 text-base font-bold hover:bg-innovet-yellow hover:text-black transition-colors border-b border-gray-100">
+                                                    {t.tabOfficeHours}
+                                                </button>
+                                                <button onClick={(e) => { e.stopPropagation(); handleNavClick('calendar'); }} className="block w-full text-right px-6 py-3 text-base font-bold hover:bg-innovet-bg hover:text-innovet-blue transition-colors">
+                                                    {t.tabCalendar}
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
                                 </nav>
                             </div>
 
@@ -621,9 +674,17 @@
                         {isMobileMenuOpen && (
                             <div className="md:hidden bg-white border-t border-innovet-gray animate-fadeIn absolute w-full shadow-xl">
                                 <nav className="flex flex-col p-6 gap-4 text-center">
-                                    <a href="#" className="text-xl font-bold hover:text-innovet-blue transition-colors py-2">{t.home}</a>
-                                    <a href="#" className="text-xl font-bold hover:text-innovet-blue transition-colors py-2">{t.program}</a>
-                                    <a href="#" className="text-xl font-bold text-innovet-blue py-2 bg-gray-50">{t.schedule}</a>
+                                    <button onClick={scrollToTop} className="text-xl font-bold hover:text-innovet-blue transition-colors py-2">{t.home}</button>
+                                    <button onClick={scrollToTop} className="text-xl font-bold hover:text-innovet-blue transition-colors py-2">{t.program}</button>
+                                    <div className="bg-gray-50 py-2 rounded-lg">
+                                        <div className="text-xl font-bold text-innovet-blue mb-2">{t.schedule}</div>
+                                        <div className="flex flex-col gap-2">
+                                             <button onClick={() => handleNavClick('agenda')} className="text-sm font-bold text-gray-600">{t.tabAgenda}</button>
+                                             <button onClick={() => handleNavClick('deliverables')} className="text-sm font-bold text-gray-600">{t.tabDeliverables}</button>
+                                             <button onClick={() => handleNavClick('office-hours')} className="text-sm font-bold text-innovet-yellow bg-black/5 py-1 mx-10 rounded">{t.tabOfficeHours}</button>
+                                             <button onClick={() => handleNavClick('calendar')} className="text-sm font-bold text-gray-600">{t.tabCalendar}</button>
+                                        </div>
+                                    </div>
                                 </nav>
                             </div>
                         )}
@@ -651,7 +712,7 @@
                     </div>
 
                     {/* Main Content */}
-                    <main className="max-w-[1600px] mx-auto px-6 py-16 relative -mt-12">
+                    <main ref={mainContentRef} className="max-w-[1600px] mx-auto px-6 py-16 relative -mt-12">
                         
                         {/* Navigation Tabs */}
                         <div className="bg-white p-2 shadow-lg mb-12 flex flex-wrap md:inline-flex gap-2">
@@ -698,8 +759,7 @@
                                 <p className="text-gray-500">{t.rights}</p>
                             </div>
                             <div className="flex gap-8">
-                                <a href="#" className="text-gray-400 hover:text-innovet-yellow font-bold transition-colors">{t.contact}</a>
-                                <a href="#" className="text-gray-400 hover:text-innovet-yellow font-bold transition-colors">{t.privacy}</a>
+                                <span className="text-gray-400 font-bold uppercase tracking-wider">{t.builtBy}</span>
                             </div>
                         </div>
                     </footer>
