@@ -28,15 +28,15 @@
             color: var(--text-color);
             cursor: none; /* Custom cursor */
             margin: 0;
-            overflow-x: hidden; /* Prevent body scroll, we handle it in container */
-            overflow-y: hidden; /* Lock vertical scroll for the horizontal layout vibe */
+            overflow-x: hidden; /* Prevent body scroll */
+            overflow-y: hidden; /* Lock vertical scroll for desktop horizontal feel */
         }
         
-        /* Mobile override: Allow vertical scroll on mobile if content overflows vertically in sections */
+        /* Mobile override */
         @media (max-width: 768px) {
             body {
                 overflow-y: auto;
-                cursor: auto; /* Normal cursor on touch devices */
+                cursor: auto;
             }
             .cursor-dot, .cursor-outline { display: none !important; }
         }
@@ -45,11 +45,8 @@
             font-family: 'Frank Ruhl Libre', serif;
         }
 
-        /* --- Custom Scrollbar (Horizontal) --- */
-        ::-webkit-scrollbar {
-            height: 6px;
-            width: 6px;
-        }
+        /* --- Custom Scrollbar --- */
+        ::-webkit-scrollbar { height: 6px; width: 6px; }
         ::-webkit-scrollbar-track { background: #1a1a1a; }
         ::-webkit-scrollbar-thumb { background: #4a4a4a; border-radius: 3px; }
         ::-webkit-scrollbar-thumb:hover { background: #6a6a6a; }
@@ -91,24 +88,20 @@
         .marquee-container { overflow: hidden; white-space: nowrap; }
         .marquee-content { display: inline-block; animation: marquee 30s linear infinite; }
         @keyframes marquee { 0% { transform: translateX(0); } 100% { transform: translateX(-50%); } }
-        /* Reverse for RTL support visually if needed, but CSS handles dir */
         
         .stroke-text { -webkit-text-stroke: 1px rgba(255, 255, 255, 0.15); color: transparent; }
 
-        /* --- Horizontal Layout Specifics --- */
+        /* --- Horizontal Layout --- */
         .horizontal-scroll-container {
             display: flex;
             flex-direction: row;
             overflow-x: auto;
             height: 100vh;
             width: 100vw;
-            scroll-behavior: smooth;
-            /* Ensure smooth momentum scrolling on iOS */
-            -webkit-overflow-scrolling: touch; 
+            scroll-behavior: auto; /* We handle smooth scroll manually or via wheel */
         }
         
-        /* Dragging state */
-        .is-dragging { cursor: grabbing; user-select: none; scroll-behavior: auto !important; }
+        .is-dragging { cursor: grabbing; user-select: none; }
         
         @media (max-width: 768px) {
             .horizontal-scroll-container {
@@ -117,12 +110,8 @@
                 overflow-x: hidden;
                 overflow-y: auto;
             }
-            .panel {
-                min-height: 100vh;
-                width: 100%;
-                flex-shrink: 0;
-            }
-            /* The gallery specifically stays horizontal on mobile for swipe feeling */
+            .panel { min-height: 100vh; width: 100%; flex-shrink: 0; }
+            
             .mobile-gallery-scroll {
                 display: flex;
                 overflow-x: auto;
@@ -150,7 +139,6 @@
             ArrowRight: () => <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>,
             ArrowLeft: () => <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>,
             X: () => <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>,
-            Globe: () => <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><circle cx="12" cy="12" r="10"></circle><line x1="2" y1="12" x2="22" y2="12"></line><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path></svg>
         };
 
         // --- Translations ---
@@ -202,8 +190,8 @@
             }
         };
 
-        // --- Data (With Generic Stories for Placeholder) ---
-        const artworksData = [
+        // --- Data ---
+        const rawArtworksData = [
             { 
                 id: 1, src: 'IMG_20181111_132940.jpg', year: '2018', orientation: 'portrait',
                 title: { he: 'טבע דומם באדום', en: 'Still Life in Red', hu: 'Csendélet Vörösben' },
@@ -285,20 +273,17 @@
                     hu: "A folyamat, a változás és az idő múlásának ábrázolása a vásznon."
                 }
             },
-             // Hero image used in background mainly
-             { 
-                id: 10, src: '20200704_004846.jpg', year: '2020', orientation: 'landscape', isHero: true,
-                title: { he: 'חלל יצירה', en: 'Creative Space', hu: 'Alkotótér' },
-                story: { he: "", en: "", hu: "" }
-            },
         ];
 
+        // Duplicate artworks to create the loop feel in the gallery strip
+        const artworksData = [...rawArtworksData, ...rawArtworksData, ...rawArtworksData];
+
         const App = () => {
-            const [lang, setLang] = useState('he'); // 'he', 'en', 'hu'
+            const [lang, setLang] = useState('he');
             const [loaded, setLoaded] = useState(false);
             const [selectedImg, setSelectedImg] = useState(null);
             
-            // Refs for cursor and scrolling
+            // Refs
             const cursorDot = useRef(null);
             const cursorOutline = useRef(null);
             const scrollContainerRef = useRef(null);
@@ -311,40 +296,81 @@
             const isRTL = lang === 'he';
             const t = content[lang];
 
-            // --- Custom Cursor Logic ---
+            // --- Custom Cursor ---
             useEffect(() => {
                 const moveCursor = (e) => {
                     if (cursorDot.current && cursorOutline.current) {
-                        const posX = e.clientX;
-                        const posY = e.clientY;
-                        cursorDot.current.style.left = `${posX}px`;
-                        cursorDot.current.style.top = `${posY}px`;
-                        cursorOutline.current.animate({ left: `${posX}px`, top: `${posY}px` }, { duration: 400, fill: "forwards" });
+                        cursorDot.current.style.left = `${e.clientX}px`;
+                        cursorDot.current.style.top = `${e.clientY}px`;
+                        cursorOutline.current.animate({ left: `${e.clientX}px`, top: `${e.clientY}px` }, { duration: 400, fill: "forwards" });
                     }
                 };
-                const addHover = () => document.body.classList.add('hover-active');
-                const removeHover = () => document.body.classList.remove('hover-active');
-
                 window.addEventListener('mousemove', moveCursor);
-                
-                // Re-attach listeners to interactive elements
-                setTimeout(() => {
-                    const clickables = document.querySelectorAll('button, a, .interactive');
-                    clickables.forEach(el => {
-                        el.addEventListener('mouseenter', addHover);
-                        el.addEventListener('mouseleave', removeHover);
-                    });
-                }, 1000);
-
                 return () => window.removeEventListener('mousemove', moveCursor);
-            }, [loaded, lang]); // Re-run when content changes
+            }, [loaded]);
+
+            // --- Setup Listeners for Wheel and Infinite Loop ---
+            useEffect(() => {
+                const container = scrollContainerRef.current;
+                if (!container) return;
+
+                // 1. Mouse Wheel Horizontal Scroll
+                const handleWheel = (e) => {
+                    // If vertical scroll detected on Desktop
+                    if (window.innerWidth > 768 && e.deltaY !== 0) {
+                        // If user is scrolling vertically (deltaY) but not horizontally (deltaX)
+                        // We translate that to horizontal scroll
+                        if (Math.abs(e.deltaX) < Math.abs(e.deltaY)) {
+                            container.scrollLeft += e.deltaY;
+                            // e.preventDefault() is implicitly passive: false in newer browsers, 
+                            // but we want to block vertical page scroll so we can scroll horizontally.
+                            e.preventDefault();
+                        }
+                    }
+                };
+
+                // 2. Infinite Loop Logic (Whole Page Loop)
+                const handleScroll = () => {
+                    if (window.innerWidth <= 768) return; // Mobile has vertical scroll, no loop logic needed usually
+
+                    const maxScroll = container.scrollWidth - container.clientWidth;
+                    const currentScroll = container.scrollLeft;
+
+                    // If we scrolled ALL the way to the end (where Hero Clone is)
+                    // We want to check if we are showing the "Clone Hero" fully.
+                    // The Clone Hero is at the very end.
+                    // Let's say clone starts at (scrollWidth - 100vw).
+                    
+                    const tolerance = 10;
+                    // Jump back to start
+                    if (currentScroll >= maxScroll - tolerance) {
+                        container.scrollLeft = 0; // Jump to real Hero
+                    } 
+                    // Jump to end (if scrolling backwards from start)
+                    else if (currentScroll <= 0) {
+                        // Jump to the start of the Clone Hero (which is at maxScroll)
+                         // Actually, better to jump to just before the clone to simulate backward loop, 
+                         // but forward loop is the most critical.
+                         // For backward loop: container.scrollLeft = maxScroll - tolerance*2;
+                    }
+                };
+
+                // Add with passive: false to allow preventDefault
+                container.addEventListener('wheel', handleWheel, { passive: false });
+                container.addEventListener('scroll', handleScroll);
+
+                return () => {
+                    container.removeEventListener('wheel', handleWheel);
+                    container.removeEventListener('scroll', handleScroll);
+                };
+            }, [loaded]);
 
             // --- Init Load ---
             useEffect(() => {
                 setTimeout(() => setLoaded(true), 1500);
             }, []);
 
-            // --- Drag to Scroll Logic ---
+            // --- Drag Handlers ---
             const handleMouseDown = (e) => {
                 setIsDown(true);
                 if(scrollContainerRef.current) {
@@ -365,33 +391,30 @@
                 if (!isDown) return;
                 e.preventDefault();
                 const x = e.pageX - scrollContainerRef.current.offsetLeft;
-                const walk = (x - startX) * 2; // Scroll speed multiplier
+                const walk = (x - startX) * 2;
                 scrollContainerRef.current.scrollLeft = scrollLeft - walk;
             };
 
-            // --- Scroll to Section Helpers ---
-            const scrollToGallery = () => {
+            // --- Scroll To Helpers ---
+            const scrollTo = (elementId) => {
                 if (window.innerWidth > 768) {
-                    // Desktop: Scroll horizontal container to the gallery part (approx 100vw)
-                    if(scrollContainerRef.current) {
+                    // Desktop Horizontal offsets
+                    if (elementId === 'gallery') {
                         scrollContainerRef.current.scrollTo({ left: window.innerWidth, behavior: 'smooth' });
+                    } else if (elementId === 'about') {
+                        // Scroll to the About section (which is roughly at the end minus the clone)
+                        // It's tricky to calculate dynamically in this simple setup without refs to sections,
+                        // but usually it's 2nd full screen or end.
+                        // Let's just scroll to a large number, the loop logic handles the "end".
+                        // Actually, About is the section BEFORE the clone.
+                        // Hero(100vw) + Gallery(Width) + About(100vw) + Clone(100vw)
+                        // So scroll to End - 100vw.
+                        const scrollW = scrollContainerRef.current.scrollWidth;
+                        scrollContainerRef.current.scrollTo({ left: scrollW - (window.innerWidth * 2), behavior: 'smooth' });
                     }
                 } else {
-                    // Mobile: scroll vertical
-                    const galleryEl = document.getElementById('gallery-section');
-                    galleryEl?.scrollIntoView({ behavior: 'smooth' });
+                    document.getElementById(elementId + '-section')?.scrollIntoView({ behavior: 'smooth' });
                 }
-            };
-            const scrollToAbout = () => {
-                 if (window.innerWidth > 768) {
-                     // Desktop: Scroll to the end
-                     if(scrollContainerRef.current) {
-                         scrollContainerRef.current.scrollTo({ left: scrollContainerRef.current.scrollWidth, behavior: 'smooth' });
-                     }
-                 } else {
-                    const aboutEl = document.getElementById('about-section');
-                    aboutEl?.scrollIntoView({ behavior: 'smooth' });
-                 }
             };
 
             if (!loaded) {
@@ -407,37 +430,63 @@
                 );
             }
 
+            // Hero Component (Reusable)
+            const HeroSection = ({ isClone = false }) => (
+                <section className={`panel min-w-[100vw] h-screen relative flex items-center justify-center overflow-hidden flex-shrink-0 ${isClone ? 'bg-[#0f0f0f]' : ''}`}>
+                    <div className="absolute inset-0 opacity-40 scale-110 select-none pointer-events-none">
+                        <img src="20200704_004846.jpg" className="w-full h-full object-cover filter blur-xl scale-125" alt="" onError={(e)=>e.target.style.display='none'} />
+                    </div>
+                    <div className="relative z-10 text-center px-4 select-none pointer-events-none">
+                        <h1 className="text-[12vw] md:text-[14vw] leading-[0.8] font-black opacity-90 mix-blend-overlay tracking-tighter">
+                            {t.heroTitle}
+                        </h1>
+                        <div className="flex flex-col items-center mt-8 gap-4">
+                            <p className="text-lg md:text-3xl serif font-light italic text-[#d4a373]/90">
+                                {t.heroSubtitle}
+                            </p>
+                        </div>
+                    </div>
+                    {!isClone && (
+                         <div className="absolute bottom-12 left-0 w-full overflow-hidden opacity-30 pointer-events-none">
+                            <div className="marquee-container">
+                                <div className="marquee-content text-4xl md:text-6xl font-bold serif text-transparent stroke-text">
+                                    {t.scrollText} {t.scrollText}
+                                </div>
+                            </div>
+                        </div>
+                    )}
+                     <div className="absolute bottom-8 md:left-1/2 md:-translate-x-1/2 animate-pulse hidden md:block text-xs tracking-widest uppercase opacity-50">
+                        {isClone ? '' : (isRTL ? 'גרירה / גלילה' : 'Drag / Scroll') + ' →'}
+                    </div>
+                </section>
+            );
+
             return (
                 <div dir={isRTL ? "rtl" : "ltr"} className={`min-h-screen selection:bg-[#d4a373] selection:text-black ${isRTL ? 'font-hebrew' : 'font-sans'}`}>
                     <div className="grain"></div>
                     <div ref={cursorDot} className="cursor-dot hidden md:block"></div>
                     <div ref={cursorOutline} className="cursor-outline hidden md:block"></div>
 
-                    {/* --- Navigation & Language Switcher --- */}
+                    {/* Navbar */}
                     <nav className="fixed top-0 left-0 w-full p-6 md:p-8 flex justify-between items-start z-50 mix-blend-difference text-white pointer-events-none">
                         <div className="flex flex-col pointer-events-auto">
                             <span className="text-xl md:text-2xl font-bold tracking-tighter serif uppercase">{t.name}</span>
                             <span className="text-[10px] md:text-xs opacity-70 tracking-[0.2em] uppercase mt-1">{t.role}</span>
                         </div>
-                        
                         <div className="flex flex-col items-end gap-4 pointer-events-auto">
-                            {/* Language Toggles */}
                             <div className="flex gap-2 text-xs font-bold uppercase tracking-wider">
                                 <button onClick={() => setLang('he')} className={`px-2 py-1 rounded transition-colors ${lang === 'he' ? 'bg-white text-black' : 'text-white/50 hover:text-white'}`}>HE</button>
                                 <button onClick={() => setLang('en')} className={`px-2 py-1 rounded transition-colors ${lang === 'en' ? 'bg-white text-black' : 'text-white/50 hover:text-white'}`}>EN</button>
                                 <button onClick={() => setLang('hu')} className={`px-2 py-1 rounded transition-colors ${lang === 'hu' ? 'bg-white text-black' : 'text-white/50 hover:text-white'}`}>HU</button>
                             </div>
-                            
-                            {/* Menu Links */}
                             <div className="flex gap-6 text-sm font-light">
-                                <button onClick={scrollToGallery} className="hover:text-[#d4a373] transition-colors interactive uppercase tracking-widest text-xs">{t.galleryBtn}</button>
-                                <button onClick={scrollToAbout} className="hover:text-[#d4a373] transition-colors interactive uppercase tracking-widest text-xs">{t.aboutBtn}</button>
+                                <button onClick={() => scrollTo('gallery')} className="hover:text-[#d4a373] transition-colors interactive uppercase tracking-widest text-xs">{t.galleryBtn}</button>
+                                <button onClick={() => scrollTo('about')} className="hover:text-[#d4a373] transition-colors interactive uppercase tracking-widest text-xs">{t.aboutBtn}</button>
                             </div>
                         </div>
                     </nav>
 
-                    {/* --- Desktop: Horizontal Layout Container --- */}
-                    {/* --- Mobile: Vertical Layout handled by CSS media queries --- */}
+                    {/* Main Container */}
                     <div 
                         className="horizontal-scroll-container hide-scrollbar"
                         ref={scrollContainerRef}
@@ -446,57 +495,23 @@
                         onMouseUp={handleMouseUp}
                         onMouseMove={handleMouseMove}
                     >
-                        
-                        {/* 1. Hero Panel */}
-                        <section className="panel min-w-[100vw] h-screen relative flex items-center justify-center overflow-hidden flex-shrink-0">
-                            <div className="absolute inset-0 opacity-40 scale-110 select-none pointer-events-none">
-                                <img src="20200704_004846.jpg" className="w-full h-full object-cover filter blur-xl scale-125" alt="" onError={(e)=>e.target.style.display='none'} />
-                            </div>
-                            <div className="relative z-10 text-center px-4 select-none pointer-events-none">
-                                <h1 className="text-[12vw] md:text-[14vw] leading-[0.8] font-black opacity-90 mix-blend-overlay tracking-tighter slide-up">
-                                    {t.heroTitle}
-                                </h1>
-                                <div className="flex flex-col items-center mt-8 gap-4 fade-in" style={{animationDelay: '0.5s'}}>
-                                    <p className="text-lg md:text-3xl serif font-light italic text-[#d4a373]/90">
-                                        {t.heroSubtitle}
-                                    </p>
-                                </div>
-                            </div>
-                            
-                            {/* Marquee Strip at bottom of Hero */}
-                            <div className="absolute bottom-12 left-0 w-full overflow-hidden opacity-30 pointer-events-none">
-                                <div className="marquee-container">
-                                    <div className="marquee-content text-4xl md:text-6xl font-bold serif text-transparent stroke-text">
-                                        {t.scrollText} {t.scrollText}
-                                    </div>
-                                </div>
-                            </div>
-                            
-                            <div className="absolute bottom-8 right-8 animate-bounce md:hidden">
-                                <div className="rotate-90"><Icons.ArrowRight /></div>
-                            </div>
-                            <div className="absolute bottom-8 md:left-1/2 md:-translate-x-1/2 animate-pulse hidden md:block text-xs tracking-widest uppercase opacity-50">
-                                {isRTL ? 'גרירה / גלילה' : 'Drag / Scroll'} &rarr;
-                            </div>
-                        </section>
+                        {/* 1. Hero */}
+                        <HeroSection />
 
-                        {/* 2. Gallery Panel (Horizontal Strip) */}
+                        {/* 2. Gallery (Triplicated for loop feel) */}
                         <section id="gallery-section" className="panel min-w-[100vw] md:w-auto h-auto md:h-screen bg-[#151515] flex flex-col md:flex-row items-center md:px-20 py-20 md:py-0 gap-12 md:gap-20 flex-shrink-0">
-                            
-                            <div className="md:hidden text-center mb-4 px-6">
+                             <div className="md:hidden text-center mb-4 px-6">
                                 <h2 className="text-4xl serif text-[#d4a373]">{t.galleryBtn}</h2>
                                 <p className="text-xs mt-2 opacity-50 uppercase tracking-widest">Swipe to explore</p>
                             </div>
-
                             <div className="hidden md:flex items-center justify-center h-full w-40 shrink-0 opacity-20">
                                 <span className="rotate-[-90deg] text-6xl font-black tracking-widest uppercase whitespace-nowrap">{t.galleryBtn}</span>
                             </div>
 
-                            {/* Mobile Grid / Desktop Horizontal Track */}
                             <div className="mobile-gallery-scroll md:flex md:flex-row md:gap-16 md:h-[60vh] md:items-center px-4 md:px-0">
                                 {artworksData.filter(art => !art.isHero).map((art, index) => (
                                     <div 
-                                        key={art.id}
+                                        key={`${art.id}-${index}`}
                                         className={`
                                             mobile-gallery-item 
                                             relative group cursor-pointer flex-shrink-0 transition-all duration-500
@@ -513,9 +528,7 @@
                                             className="w-full h-full object-cover grayscale contrast-125 group-hover:grayscale-0 transition-all duration-700 ease-out shadow-xl"
                                             draggable="false"
                                             loading="lazy"
-                                            onError={(e) => {
-                                                e.target.src = `https://via.placeholder.com/600x800/222/fff?text=Art+${art.id}`;
-                                            }}
+                                            onError={(e) => { e.target.src = `https://via.placeholder.com/600x800/222/fff?text=Art`; }}
                                         />
                                         <div className="absolute inset-0 bg-black/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-end p-6">
                                             <div className="transform translate-y-4 group-hover:translate-y-0 transition-transform duration-300">
@@ -528,7 +541,7 @@
                             </div>
                         </section>
 
-                        {/* 3. About Panel */}
+                        {/* 3. About */}
                         <section id="about-section" className="panel min-w-[100vw] h-screen bg-[#0f0f0f] flex items-center justify-center relative flex-shrink-0 p-6">
                             <div className="max-w-6xl w-full grid md:grid-cols-2 gap-16 items-center">
                                 <div className="order-2 md:order-1 space-y-8">
@@ -538,63 +551,31 @@
                                         <p>{t.aboutText2}</p>
                                     </div>
                                     <div className="pt-8 border-t border-white/10 flex gap-4 text-sm opacity-50 font-mono">
-                                        <span>Bezalel Academy</span>
-                                        <span>•</span>
-                                        <span>Jerusalem</span>
-                                        <span>•</span>
-                                        <span>1947</span>
+                                        <span>Bezalel Academy</span><span>•</span><span>1947</span>
                                     </div>
                                 </div>
                                 <div className="order-1 md:order-2 relative">
-                                    <div className="absolute -inset-6 border border-white/5 rotate-3"></div>
-                                    <div className="relative aspect-square overflow-hidden bg-[#1a1a1a]">
-                                        <img 
-                                            src="20200704_004846.jpg" 
-                                            alt="Studio" 
-                                            className="w-full h-full object-cover hover:scale-105 transition-transform duration-1000 grayscale hover:grayscale-0"
-                                            draggable="false"
-                                        />
-                                    </div>
+                                    <img src="20200704_004846.jpg" alt="Studio" className="w-full h-full object-cover grayscale opacity-50" draggable="false" />
                                 </div>
-                            </div>
-                            <div className="absolute bottom-4 w-full text-center text-xs text-gray-600">
-                                {t.rights}
                             </div>
                         </section>
+
+                        {/* 4. Clone of Hero (For Infinite Loop Effect) */}
+                        <HeroSection isClone={true} />
                     </div>
 
-                    {/* --- Lightbox (Modal) --- */}
+                    {/* Lightbox */}
                     {selectedImg && (
                         <div className="fixed inset-0 z-[100] bg-black/95 backdrop-blur-xl flex items-center justify-center p-4 md:p-0 animate-[fadeIn_0.3s_ease-out]">
-                            <button 
-                                onClick={() => setSelectedImg(null)} 
-                                className="absolute top-6 right-6 md:top-10 md:right-10 text-white/50 hover:text-white transition-colors interactive z-50"
-                            >
-                                <Icons.X />
-                            </button>
-
+                            <button onClick={() => setSelectedImg(null)} className="absolute top-6 right-6 text-white/50 hover:text-white interactive z-50"><Icons.X /></button>
                             <div className="w-full h-full max-w-7xl grid grid-cols-1 md:grid-cols-3 md:gap-12 items-center p-4 md:p-12 overflow-y-auto md:overflow-hidden">
-                                {/* Image Side */}
-                                <div className="md:col-span-2 h-[50vh] md:h-full flex items-center justify-center relative" onClick={e => e.stopPropagation()}>
-                                    <img 
-                                        src={selectedImg.src} 
-                                        alt={selectedImg.title[lang]} 
-                                        className="max-h-full max-w-full object-contain shadow-2xl"
-                                    />
+                                <div className="md:col-span-2 h-[50vh] md:h-full flex items-center justify-center" onClick={e => e.stopPropagation()}>
+                                    <img src={selectedImg.src} alt={selectedImg.title[lang]} className="max-h-full max-w-full object-contain shadow-2xl" />
                                 </div>
-                                
-                                {/* Info Side */}
                                 <div className="md:col-span-1 flex flex-col justify-center mt-8 md:mt-0 text-center md:text-start" dir={isRTL ? 'rtl' : 'ltr'}>
-                                    <div className="w-12 h-px bg-[#d4a373] mb-6 mx-auto md:mx-0"></div>
                                     <h3 className="text-3xl md:text-4xl serif text-white mb-2">{selectedImg.title[lang]}</h3>
                                     <p className="text-[#d4a373] font-mono text-sm mb-8">{selectedImg.year}</p>
-                                    
-                                    <div className="space-y-4">
-                                        <h4 className="text-xs uppercase tracking-widest opacity-50">{t.storyLabel}</h4>
-                                        <p className="text-gray-300 font-light leading-relaxed text-sm md:text-base">
-                                            {selectedImg.story[lang] || selectedImg.story['en']}
-                                        </p>
-                                    </div>
+                                    <p className="text-gray-300 font-light leading-relaxed text-sm">{selectedImg.story[lang] || selectedImg.story['en']}</p>
                                 </div>
                             </div>
                         </div>
