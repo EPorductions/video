@@ -178,7 +178,15 @@
         ];
 
         const App = () => {
-            const [lang, setLang] = useState('he');
+            // --- Language Initialization from URL ---
+            const getInitialLang = () => {
+                const url = window.location.href;
+                if (url.includes('/hu') || url.includes('lang=hu')) return 'hu';
+                if (url.includes('/en') || url.includes('lang=en')) return 'en';
+                return 'he'; // Default
+            };
+
+            const [lang, setLang] = useState(getInitialLang());
             const [loaded, setLoaded] = useState(false);
             const [selectedImg, setSelectedImg] = useState(null);
             const scrollContainerRef = useRef(null);
@@ -196,6 +204,33 @@
             const t = content[lang];
             const isRTL = lang === 'he';
             const data = getCategoriesData(t);
+
+            // --- Helper: Scroll to Home ---
+            const scrollToHome = () => {
+                if (heroRef.current && scrollContainerRef.current) {
+                    const heroLeft = heroRef.current.offsetLeft;
+                    const heroWidth = heroRef.current.offsetWidth;
+                    const containerWidth = window.innerWidth;
+                    const centerPos = heroLeft - (containerWidth / 2) + (heroWidth / 2);
+                    
+                    scrollContainerRef.current.scrollTo({
+                        left: centerPos,
+                        behavior: 'smooth'
+                    });
+                }
+            };
+
+            // --- Language Change Handler ---
+            const handleLangChange = (newLang) => {
+                setLang(newLang);
+                // Optional: update URL history without reload
+                const url = new URL(window.location);
+                url.searchParams.set('lang', newLang);
+                window.history.pushState({}, '', url);
+                
+                // Scroll back to Home
+                scrollToHome();
+            };
 
             // --- Initial Centering (Start at Home) ---
             useLayoutEffect(() => {
@@ -227,7 +262,6 @@
                     const heroWidth = heroRef.current.offsetWidth;
                     
                     // Detect when we hit the "Clone" Hero at the far END
-                    // endLoopRef is placed at the start of the Right Clone Hero
                     const endTrigger = endLoopRef.current.offsetLeft;
                     if (currentScroll > endTrigger - 50) { // buffer
                         // Jump back to real Hero center
@@ -235,7 +269,6 @@
                     }
 
                     // Detect when we hit the "Clone" Hero at the far START
-                    // startLoopRef is placed at the end of the Left Clone Hero
                     const startTrigger = startLoopRef.current.offsetLeft + startLoopRef.current.offsetWidth;
                     if (currentScroll < startTrigger - containerWidth + 50) {
                          // Jump back to real Hero center
@@ -397,23 +430,13 @@
                         <div className="flex flex-col items-end gap-4 pointer-events-auto">
                             {/* Language Switcher */}
                             <div className="flex gap-2 text-xs font-bold uppercase tracking-wider">
-                                <button onClick={() => setLang('he')} className={`px-2 py-1 rounded transition-colors ${lang === 'he' ? 'bg-white text-black' : 'text-white/50 hover:text-white'}`}>HE</button>
-                                <button onClick={() => setLang('en')} className={`px-2 py-1 rounded transition-colors ${lang === 'en' ? 'bg-white text-black' : 'text-white/50 hover:text-white'}`}>EN</button>
-                                <button onClick={() => setLang('hu')} className={`px-2 py-1 rounded transition-colors ${lang === 'hu' ? 'bg-white text-black' : 'text-white/50 hover:text-white'}`}>HU</button>
+                                <button onClick={() => handleLangChange('he')} className={`px-2 py-1 rounded transition-colors ${lang === 'he' ? 'bg-white text-black' : 'text-white/50 hover:text-white'}`}>HE</button>
+                                <button onClick={() => handleLangChange('en')} className={`px-2 py-1 rounded transition-colors ${lang === 'en' ? 'bg-white text-black' : 'text-white/50 hover:text-white'}`}>EN</button>
+                                <button onClick={() => handleLangChange('hu')} className={`px-2 py-1 rounded transition-colors ${lang === 'hu' ? 'bg-white text-black' : 'text-white/50 hover:text-white'}`}>HU</button>
                             </div>
                             {/* Nav Buttons */}
                             <div className="flex gap-4 md:gap-6 text-sm font-light">
-                                <button onClick={() => {
-                                    if (heroRef.current) {
-                                        const heroLeft = heroRef.current.offsetLeft;
-                                        const heroWidth = heroRef.current.offsetWidth;
-                                        const containerWidth = window.innerWidth;
-                                        scrollContainerRef.current.scrollTo({
-                                            left: heroLeft - (containerWidth / 2) + (heroWidth / 2),
-                                            behavior: 'smooth'
-                                        });
-                                    }
-                                }} className="hover:text-[#d4a373] transition-colors interactive uppercase tracking-widest text-xs">Home</button>
+                                <button onClick={scrollToHome} className="hover:text-[#d4a373] transition-colors interactive uppercase tracking-widest text-xs">Home</button>
                             </div>
                         </div>
                     </nav>
