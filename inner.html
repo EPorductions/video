@@ -1,0 +1,889 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>InnerVerse - נשימה לרווחה</title>
+    <meta name="description" content="גלו כיצד נשימה מודעת יכולה לשחרר מתח ולהחזיר אתכם לאיזון ב-InnerVerse.">
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Three.js -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Rubik:wght@300;400;500;700&display=swap" rel="stylesheet">
+    
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Rubik', 'sans-serif'],
+                        headline: ['Rubik', 'sans-serif'],
+                    },
+                    colors: {
+                        teal: {
+                            50: '#f0fdfa',
+                            100: '#ccfbf1',
+                            500: '#14b8a6',
+                            600: '#0d9488',
+                            700: '#0f766e',
+                            800: '#115e59',
+                            900: '#134e4a',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar { width: 10px; }
+        ::-webkit-scrollbar-track { background: #f8fafc; }
+        .dark ::-webkit-scrollbar-track { background: #1e293b; }
+        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 5px; }
+        ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+
+        /* Animations */
+        .fade-in-up {
+            animation: fadeInUp 1s ease-out forwards;
+            opacity: 0;
+            transform: translateY(20px);
+        }
+        .delay-100 { animation-delay: 0.1s; }
+        .delay-200 { animation-delay: 0.2s; }
+        
+        @keyframes fadeInUp {
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Glassmorphism */
+        .glassmorphic-card {
+            background: rgba(255, 255, 255, 0.75); /* More transparent/lighter */
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid rgba(255, 255, 255, 0.6);
+            border-radius: 1rem;
+            box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.07);
+        }
+        .dark .glassmorphic-card {
+            background: rgba(15, 23, 42, 0.65);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        /* Canvas Background - Particles */
+        #canvas-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            pointer-events: none;
+            /* Blur effect as requested */
+            filter: blur(6px); 
+            opacity: 0.6;
+            transition: all 0.5s ease;
+        }
+
+        .active-nav {
+            color: #0d9488;
+            font-weight: 700;
+        }
+        .dark .active-nav { color: #2dd4bf; }
+    </style>
+</head>
+<body class="bg-slate-50 text-slate-800 dark:bg-slate-900 dark:text-slate-100 transition-colors duration-300 antialiased page-home">
+
+    <!-- 3D Background (Always visible now) -->
+    <div id="canvas-container"></div>
+
+    <!-- Navigation -->
+    <nav class="fixed w-full z-50 top-0 start-0 border-b border-slate-200/50 dark:border-slate-800/50 bg-white/80 dark:bg-slate-900/80 backdrop-blur-md transition-colors duration-300">
+        <div class="max-w-7xl mx-auto flex flex-wrap items-center justify-between p-4">
+            <a href="#" onclick="router.navigate('home')" class="flex items-center space-x-3 space-x-reverse rtl:space-x-reverse">
+                <span class="self-center text-2xl font-bold whitespace-nowrap text-teal-700 dark:text-teal-400">InnerVerse</span>
+            </a>
+            
+            <div class="flex md:order-2 space-x-3 space-x-reverse md:space-x-0 rtl:space-x-reverse items-center">
+                <button id="theme-toggle" type="button" class="text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-700 focus:outline-none rounded-lg text-sm p-2.5 mr-2 transition-all">
+                    <i class="fas fa-moon hidden dark:block"></i>
+                    <i class="fas fa-sun block dark:hidden text-yellow-500"></i>
+                </button>
+
+                <div id="auth-buttons" class="hidden md:block">
+                    <!-- Injected via JS -->
+                </div>
+
+                <button data-collapse-toggle="navbar-sticky" type="button" class="inline-flex items-center p-2 w-10 h-10 justify-center text-sm text-slate-500 rounded-lg md:hidden hover:bg-slate-100 focus:outline-none" aria-controls="navbar-sticky" aria-expanded="false" id="menu-toggle">
+                    <span class="sr-only">פתח תפריט</span>
+                    <i class="fas fa-bars text-xl"></i>
+                </button>
+            </div>
+
+            <div class="items-center justify-between hidden w-full md:flex md:w-auto md:order-1" id="navbar-sticky">
+                <ul class="flex flex-col p-4 md:p-0 mt-4 font-medium border border-slate-100 rounded-lg bg-slate-50 md:space-x-8 rtl:space-x-reverse md:flex-row md:mt-0 md:border-0 md:bg-transparent dark:bg-slate-800 md:dark:bg-transparent dark:border-slate-700" id="nav-links">
+                    <!-- Links Injected via JS -->
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main id="app-root" class="min-h-screen relative">
+        <!-- Dynamic Content -->
+    </main>
+
+    <!-- Modal Overlay -->
+    <div id="modal-overlay" class="fixed inset-0 bg-black/60 z-[60] hidden flex items-center justify-center backdrop-blur-sm p-4 animate-fade-in">
+        <div id="modal-content" class="relative w-full max-w-2xl"></div>
+    </div>
+
+    <!-- Logic Script -->
+    <script>
+        /** 1. DATA & CONFIGURATION */
+        const issueData = {
+            anxiety: {
+                key: 'anxiety',
+                title: "חרדה",
+                subtitle: "להרגיע את הסערה הפנימית ולמצוא עוגן של שקט.",
+                iconClass: "fa-wind",
+                colorClass: "text-teal-600 dark:text-teal-400",
+                bgClass: "bg-teal-50 dark:bg-teal-900/30",
+                borderHover: "hover:border-teal-200 dark:hover:border-teal-800",
+                lead: `התחושה הזו, שהלב דופק מהר והמחשבות רצות בלופים – היא סימן שהמערכת שלך ב״צבירת יתר״.`,
+                fullContent: `התחושה הזו, שהלב דופק קצת יותר מדי מהר, שהמחשבות רצות בלופים והדאגה קיימת כל הזמן - היא סימן. סימן שהמערכת שלך נמצאת ״בצבירת יתר״. למדנו לעצור את הנשימה ברגעי מתח, וכך 'כלאנו' את החרדה ואת הרגשות שאינם יכולים לקבל ביטוי בקלות בתוך הגוף שלנו.`
+            },
+            stuck: {
+                key: 'stuck',
+                title: "תקיעות וחוסר כיוון",
+                subtitle: "להפוך קיפאון לתנועה וליצור בהירות.",
+                iconClass: "fa-compass",
+                colorClass: "text-blue-600 dark:text-blue-400",
+                bgClass: "bg-blue-50 dark:bg-blue-900/30",
+                borderHover: "hover:border-blue-200 dark:hover:border-blue-800",
+                lead: `תחושת התקיעות היא כמו נהר שקפא. אתה יודע שאתה רוצה להתקדם, אבל משהו עוצר.`,
+                fullContent: `להפוך תקיעות לתנועה. תחושת התקיעות היא כמו לנסות לשחות בנהר שקפא. אתה יודע שאתה רוצה להתקדם, אבל משהו עוצר בעדך. התחושה הזו היא סימן שאנרגיית החיים שלך לא זורמת בחופשיות.`
+            },
+            burnout: {
+                key: 'burnout',
+                title: "עייפות ושחיקה",
+                subtitle: "להטעין מצברים ולהחזיר את החיוניות לגוף ולנפש.",
+                iconClass: "fa-battery-quarter",
+                colorClass: "text-amber-600 dark:text-amber-400",
+                bgClass: "bg-amber-50 dark:bg-amber-900/30",
+                borderHover: "hover:border-amber-200 dark:hover:border-amber-800",
+                lead: `החיים המערביים תחת עומס גורמים לנו לנשום בצורה שטחית, רק כדי 'לשרוד'.`,
+                fullContent: `להטעין מחדש את מצברי הנפש. אנחנו בני האדם המערביים חיים תחת עומס ולחץ אינסופי. חוסר החמצן התמידי הזה גורם לשחיקה פנימית.`
+            },
+            relations: {
+                key: 'relations',
+                title: "מערכות יחסים",
+                subtitle: "לפתוח את הלב לתקשורת וחיבור עמוק יותר.",
+                iconClass: "fa-heart",
+                colorClass: "text-rose-500 dark:text-rose-400",
+                bgClass: "bg-rose-50 dark:bg-rose-900/30",
+                borderHover: "hover:border-rose-200 dark:hover:border-rose-800",
+                lead: `אם את/ה חוזר/ת על אותם דפוסים כואבים, הסיבה נעוצה לרוב ב'שריון' שבנינו סביב הלב.`,
+                fullContent: `לנשום אל הלב ולייצר ריפוי בקשרים. השריון שבנינו מגן עלינו, אך לעיתים חוסם.`
+            },
+            pain: {
+                key: 'pain',
+                title: "כאב פיזי",
+                subtitle: "לשחרר את הגוף מכאב דרך הרפיה ונשימה.",
+                iconClass: "fa-spa",
+                colorClass: "text-indigo-600 dark:text-indigo-400",
+                bgClass: "bg-indigo-50 dark:bg-indigo-900/30",
+                borderHover: "hover:border-indigo-200 dark:hover:border-indigo-800",
+                lead: `כאבים כרוניים ומתח פיזי הם לעתים קרובות הדרך של הגוף לצעוק את מה שהנפש לוחשת.`,
+                fullContent: `לנשום אל תוך הכאב ולשחרר אותו. כאבים כרוניים ומתח פיזי הם לעתים קרובות הדרך של הגוף שלנו לצעוק את מה שהנפש לוחשת.`
+            }
+        };
+
+        const breathingLibrary = {
+            anxiety: [
+                { id: 'coherent46', name: 'נשימה קוהרנטית 6-4', pattern: [{ phase: 'inhale', secs: 4, cue: 'שאיפה' }, { phase: 'hold', secs: 2, cue: 'החזקה' }, { phase: 'exhale', secs: 6, cue: 'נשיפה' }, { phase: 'hold', secs: 2, cue: 'החזקה' }], cycles: 10, description: 'תרגול להרגעה והורדת דופק.' },
+                { id: '478', name: 'תרגיל 8-7-4', pattern: [{ phase: 'inhale', secs: 4, cue: 'שאיפה' }, { phase: 'hold', secs: 7, cue: 'החזקה' }, { phase: 'exhale', secs: 8, cue: 'נשיפה' }, { phase: 'hold', secs: 2, cue: 'החזקה' }], cycles: 4, description: 'פרוטוקול קצר להרגעה מהירה.' }
+            ],
+            stuck: [
+                { id: 'power30', name: 'נשימת כוח × 30', pattern: [{ phase: 'inhale', secs: 1, cue: 'שאיפה' }, { phase: 'exhale', secs: 1, cue: 'נשיפה' }], cycles: 30, description: 'תרגול מעורר ואנרגטי.' },
+                { id: 'reset55', name: 'איזון 5-5', pattern: [{ phase: 'inhale', secs: 5, cue: 'שאיפה' }, { phase: 'hold', secs: 2, cue: 'החזקה' }, { phase: 'exhale', secs: 5, cue: 'נשיפה' }, { phase: 'hold', secs: 2, cue: 'החזקה' }], cycles: 15, description: 'נשימה מאוזנת לריכוז וקרקוע.' }
+            ],
+            default: [
+                { id: 'connected', name: "נשימה מחוברת", pattern: [{ phase: 'inhale', secs: 3, cue: 'שאיפה' }, { phase: 'exhale', secs: 3, cue: 'נשיפה' }], cycles: 40, description: 'נשימה מעגלית לניקוי עמוק.' }
+            ]
+        };
+
+        const mockUsers = {
+            'demo@user.com': { name: "משתמש הדגמה", email: 'demo@user.com', password: '123', appointments: [{ id: 1, date: '2024-09-10T10:00:00', topic: 'חרדה' }] },
+            'admin@user.com': { name: "אדמין", email: 'admin@user.com', password: '123', appointments: [] },
+        };
+
+        const allAppointmentsAdmin = [
+            { id: 1, name: "ישראל ישראלי", email: "israel@example.com", date: '2024-08-15T10:00:00', topic: 'חרדה' },
+            { id: 2, name: "דנה כהן", email: "dana@example.com", date: '2024-08-22T14:30:00', topic: 'שחיקה' },
+        ];
+
+        /** 2. APP STORE */
+        const store = {
+            page: 'home',
+            user: null,
+            theme: 'light',
+            exerciseState: { isRunning: false, progress: 0, phase: 'inhale', currentExercise: breathingLibrary.anxiety[0], phaseIndex: 0 },
+            animationParams: { exhaleForce: 0.008, inhaleForce: 0.01, velocityDampening: 0.98, particleSize: 0.04, spikeValue: 0.03, spikeDuration: 3, calmDuration: 15 }
+        };
+
+        /** 3. THREE.JS BACKGROUND (Breathing Particles) */
+        const initThreeJS = () => {
+            const container = document.getElementById('canvas-container');
+            const scene = new THREE.Scene();
+            const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+            const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+            renderer.setSize(window.innerWidth, window.innerHeight);
+            renderer.setPixelRatio(window.devicePixelRatio);
+            container.appendChild(renderer.domElement);
+            camera.position.z = 5;
+
+            // Particles
+            const geometry = new THREE.BufferGeometry();
+            const count = 2500; // More particles for fuller effect
+            const positions = new Float32Array(count * 3);
+            const colors = new Float32Array(count * 3);
+            const originalPositions = new Float32Array(count * 3); // Store original to breathe from
+
+            // Lighter Palette Colors (Teal, Light Blue, White)
+            const colorPalette = [
+                new THREE.Color('#ccfbf1'), // Teal 100
+                new THREE.Color('#99f6e4'), // Teal 200
+                new THREE.Color('#f0f9ff'), // Sky 50
+                new THREE.Color('#e2e8f0')  // Slate 200
+            ];
+
+            for(let i=0; i<count; i++) {
+                // Spread particles in a sphere-ish cloud
+                const r = (Math.random() * 7) + 1; 
+                const theta = Math.random() * Math.PI * 2;
+                const phi = Math.acos((Math.random() * 2) - 1);
+                
+                const x = r * Math.sin(phi) * Math.cos(theta);
+                const y = r * Math.sin(phi) * Math.sin(theta);
+                const z = r * Math.cos(phi);
+
+                positions[i*3] = x;
+                positions[i*3+1] = y;
+                positions[i*3+2] = z;
+
+                originalPositions[i*3] = x;
+                originalPositions[i*3+1] = y;
+                originalPositions[i*3+2] = z;
+
+                const color = colorPalette[Math.floor(Math.random() * colorPalette.length)];
+                colors[i*3] = color.r;
+                colors[i*3+1] = color.g;
+                colors[i*3+2] = color.b;
+            }
+
+            geometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+            geometry.setAttribute('color', new THREE.BufferAttribute(colors, 3));
+
+            // Softer, more transparent material
+            const material = new THREE.PointsMaterial({ 
+                size: 0.06, 
+                vertexColors: true, 
+                transparent: true, 
+                opacity: 0.6,
+                sizeAttenuation: true
+            });
+            
+            const points = new THREE.Points(geometry, material);
+            scene.add(points);
+
+            // Animation State
+            let generalBreathingTime = 0;
+
+            const animate = () => {
+                requestAnimationFrame(animate);
+                
+                // Determine Breathing Scale factor
+                let targetScale = 1.0;
+                
+                if (store.exerciseState.isRunning) {
+                    // Explicit Exercise Breathing
+                    const progress = store.exerciseState.progress; // 0 to 1
+                    
+                    if (store.exerciseState.phase === 'inhale') {
+                        // Inhale -> Move Inwards (Scale Down)
+                        // Map progress 0->1 to Scale 1.0 -> 0.5
+                        targetScale = 1.0 - (progress * 0.4); 
+                    } else if (store.exerciseState.phase === 'exhale') {
+                        // Exhale -> Move Outwards (Scale Up)
+                        // Map progress 0->1 to Scale 0.5 -> 1.2
+                        targetScale = 0.6 + (progress * 0.6);
+                    } else {
+                        // Hold
+                        targetScale = store.exerciseState.phase === 'inhale' ? 0.6 : 1.2; // Stay at end state
+                    }
+                } else {
+                    // General Background Breathing (Gentle Sine Wave)
+                    generalBreathingTime += 0.008;
+                    // Oscillate between 0.9 and 1.1 slowly
+                    targetScale = 1.0 + Math.sin(generalBreathingTime) * 0.15; 
+                }
+
+                // Smoothly interpolate current scale to target scale
+                const currentScale = points.scale.x;
+                const smoothScale = currentScale + (targetScale - currentScale) * 0.05;
+
+                points.scale.set(smoothScale, smoothScale, smoothScale);
+                
+                // Gentle Rotation always active
+                points.rotation.y += 0.0008;
+                points.rotation.z += 0.0004;
+
+                renderer.render(scene, camera);
+            };
+            animate();
+
+            window.addEventListener('resize', () => {
+                camera.aspect = window.innerWidth / window.innerHeight;
+                camera.updateProjectionMatrix();
+                renderer.setSize(window.innerWidth, window.innerHeight);
+            });
+        };
+
+        /** 4. ROUTER & RENDERERS */
+        const router = {
+            navigate: (pageName) => {
+                store.page = pageName;
+                if (pageName === 'home') document.body.classList.add('page-home');
+                else document.body.classList.remove('page-home');
+                renderUI();
+                window.scrollTo(0,0);
+            }
+        };
+
+        const renderUI = () => {
+            const root = document.getElementById('app-root');
+            renderNav();
+            root.innerHTML = '';
+            
+            switch(store.page) {
+                case 'home': renderHomePage(root); break;
+                case 'articles': renderArticlesPage(root); break;
+                case 'journal': renderJournalPage(root); break;
+                case 'booking': renderBookingPage(root); break;
+                case 'contact': renderContactPage(root); break;
+                case 'login': renderLoginPage(root); break;
+                case 'my_appointments': renderMyAppointmentsPage(root); break;
+                case 'admin': renderAdminPage(root); break;
+                case 'breathing-exercise': renderBreathingPage(root); break;
+                default: renderHomePage(root);
+            }
+        };
+
+        const renderNav = () => {
+            const navContainer = document.getElementById('nav-links');
+            const authContainer = document.getElementById('auth-buttons');
+            
+            const links = [
+                { id: 'home', label: 'בית' },
+                { id: 'articles', label: 'מאמרים' },
+                { id: 'journal', label: 'יומן' },
+                { id: 'breathing-exercise', label: 'תרגול נשימה' },
+                { id: 'booking', label: 'הזמנת מפגש' },
+                { id: 'contact', label: 'צור קשר' },
+            ];
+
+            if (store.user) {
+                links.push({ id: 'my_appointments', label: 'הפגישות שלי' });
+                if (store.user.email === 'admin@user.com') links.push({ id: 'admin', label: 'ניהול' });
+            }
+
+            navContainer.innerHTML = links.map(link => `
+                <li>
+                    <a href="#" onclick="router.navigate('${link.id}')" 
+                       class="block py-2 px-3 rounded hover:bg-slate-100 md:hover:bg-transparent md:hover:text-teal-600 dark:text-white dark:hover:bg-slate-700 md:dark:hover:bg-transparent ${store.page === link.id ? 'active-nav' : ''}">
+                       ${link.label}
+                    </a>
+                </li>
+            `).join('');
+
+            if (store.user) {
+                authContainer.innerHTML = `
+                    <span class="text-sm font-semibold ml-2">היי, ${store.user.name}</span>
+                    <button onclick="auth.logout()" class="text-sm font-bold text-red-500 hover:underline">התנתק</button>
+                `;
+            } else {
+                authContainer.innerHTML = `
+                    <a href="#" onclick="router.navigate('login')" class="text-white bg-teal-600 hover:bg-teal-700 font-medium rounded-lg text-sm px-4 py-2 text-center dark:bg-teal-600 dark:hover:bg-teal-700 transition-colors">כניסה</a>
+                `;
+            }
+        };
+
+        // --- PAGES ---
+
+        const renderHomePage = (container) => {
+            // Hero Section + Focus Areas + About + Footer (Classic Landing Page Structure)
+            container.innerHTML = `
+                <!-- Hero -->
+                <section class="relative h-screen min-h-[600px] flex items-center justify-center overflow-hidden">
+                    <!-- Image with heavy fade to reveal particles -->
+                    <div class="absolute inset-0 z-0">
+                        <img src="https://images.unsplash.com/photo-1506126613408-eca07ce68773?ixlib=rb-4.0.3&auto=format&fit=crop&w=1920&q=80" alt="Background Nature" class="w-full h-full object-cover opacity-30"> <!-- Reduced Opacity -->
+                        <div class="absolute inset-0 bg-gradient-to-b from-white/60 via-white/40 to-white/90 dark:from-slate-900/80 dark:via-slate-900/60 dark:to-slate-900"></div>
+                    </div>
+                    <div class="relative z-10 text-center px-4 max-w-4xl mx-auto mt-16">
+                        <h1 class="fade-in-up text-4xl md:text-6xl font-bold text-slate-900 dark:text-white mb-6 tracking-tight leading-tight">
+                            הנשימה היא המפתח <br><span class="text-teal-600 dark:text-teal-400">לשקט הפנימי</span>
+                        </h1>
+                        <p class="fade-in-up delay-100 text-lg md:text-xl text-slate-700 dark:text-slate-200 mb-10 max-w-2xl mx-auto leading-relaxed">
+                            גלו כיצד נשימה מודעת יכולה לשחרר מתח, להפחית חרדה, ולהחזיר אתכם לאיזון.
+                        </p>
+                        <div class="fade-in-up delay-200">
+                            <button onclick="document.getElementById('focus-areas').scrollIntoView({behavior: 'smooth'})" class="inline-flex items-center justify-center px-8 py-4 text-base font-medium text-white bg-teal-600 rounded-full hover:bg-teal-700 transition-all shadow-lg hover:shadow-xl transform hover:-translate-y-1">
+                                גלה איך להתחיל
+                                <i class="fas fa-arrow-down mr-2 text-sm"></i>
+                            </button>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Focus Areas -->
+                <section id="focus-areas" class="py-20 bg-white/80 dark:bg-slate-900/80 transition-colors duration-300 backdrop-blur-sm">
+                    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                        <div class="text-center mb-16">
+                            <h2 class="text-3xl md:text-4xl font-bold text-slate-900 dark:text-white mb-4">במה תרצו להתמקד היום?</h2>
+                            <p class="text-lg text-slate-600 dark:text-slate-400">בחרו את התחום שמהדהד לכם ביותר כדי להתחיל את המסע.</p>
+                        </div>
+                        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                            ${Object.values(issueData).map(issue => `
+                                <div onclick="ui.openTopicModal('${issue.key}')" class="group bg-slate-50 dark:bg-slate-800 rounded-2xl p-8 shadow-sm hover:shadow-xl transition-all duration-300 border border-slate-100 dark:border-slate-700 ${issue.borderHover} transform hover:-translate-y-1 cursor-pointer">
+                                    <div class="w-14 h-14 ${issue.bgClass} rounded-xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-300">
+                                        <i class="fas ${issue.iconClass} text-2xl ${issue.colorClass}"></i>
+                                    </div>
+                                    <h3 class="text-xl font-bold text-slate-900 dark:text-white mb-2">${issue.title}</h3>
+                                    <p class="text-slate-600 dark:text-slate-400">${issue.subtitle}</p>
+                                </div>
+                            `).join('')}
+                        </div>
+                    </div>
+                </section>
+
+                <!-- About -->
+                <section id="about" class="py-20 bg-teal-50/80 dark:bg-slate-800/50 transition-colors duration-300 backdrop-blur-sm">
+                    <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col md:flex-row items-center gap-12">
+                        <div class="w-full md:w-1/2">
+                             <img src="https://images.unsplash.com/photo-1515023115689-589c33041697?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80" alt="Meditation" class="rounded-2xl shadow-lg w-full h-auto transform md:rotate-2 hover:rotate-0 transition-transform duration-500">
+                        </div>
+                        <div class="w-full md:w-1/2 text-center md:text-right">
+                            <h2 class="text-3xl font-bold text-slate-900 dark:text-white mb-6 relative inline-block">
+                                קצת על InnerVerse
+                                <span class="absolute bottom-0 right-0 w-full h-2 bg-teal-200 dark:bg-teal-800 opacity-50 -mb-1"></span>
+                            </h2>
+                            <div class="space-y-4 text-lg text-slate-700 dark:text-slate-300 leading-relaxed">
+                                <p>InnerVerse הוא מרחב שנועד לעזור לכם לגלות מחדש את כוחה המרפא של הנשימה.</p>
+                                <p>באמצעות טכניקת ריברסינג, אנו מציעים כלים מעשיים לשחרור מתחים וחיבור עמוק לעצמכם.</p>
+                            </div>
+                            <div class="mt-8">
+                                <a href="#" onclick="router.navigate('contact')" class="text-teal-600 dark:text-teal-400 font-semibold hover:text-teal-800 dark:hover:text-teal-200 transition-colors inline-flex items-center">
+                                    צור קשר
+                                    <i class="fas fa-arrow-left mr-2 text-sm"></i>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Footer -->
+                <footer class="bg-slate-900 text-slate-300 py-12 border-t border-slate-800 relative z-10">
+                    <div class="max-w-7xl mx-auto px-4">
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-8 text-center md:text-right">
+                            <div>
+                                <h3 class="text-2xl font-bold text-white mb-4">InnerVerse</h3>
+                                <p class="text-slate-400 mb-4">נשימה לרווחה</p>
+                            </div>
+                            <div>
+                                <h4 class="text-lg font-semibold text-white mb-4">קישורים מהירים</h4>
+                                <ul class="space-y-2">
+                                    <li><a href="#" onclick="router.navigate('articles')" class="hover:text-teal-400">מאמרים</a></li>
+                                    <li><a href="#" onclick="router.navigate('journal')" class="hover:text-teal-400">יומן</a></li>
+                                    <li><a href="#" onclick="router.navigate('booking')" class="hover:text-teal-400">הזמנת מפגש</a></li>
+                                </ul>
+                            </div>
+                            <div>
+                                <h4 class="text-lg font-semibold text-white mb-4">צור קשר</h4>
+                                <ul class="space-y-3">
+                                    <li><a href="mailto:pozso@breathing.co.il" class="hover:text-white">pozso@breathing.co.il</a></li>
+                                    <li><a href="tel:052-1234567" class="hover:text-white">052-1234567</a></li>
+                                </ul>
+                            </div>
+                        </div>
+                        <div class="border-t border-slate-800 mt-12 pt-8 text-center text-sm text-slate-500">
+                            &copy; 2023 InnerVerse. כל הזכויות שמורות.
+                        </div>
+                    </div>
+                </footer>
+            `;
+        };
+
+        const renderArticlesPage = (container) => {
+            container.innerHTML = `
+                <div class="pt-24 px-4 max-w-4xl mx-auto fade-in-up">
+                    <h1 class="text-4xl font-bold text-center mb-4">מאמרים ומחשבות</h1>
+                    <p class="text-center text-slate-500 mb-12">מרחב של ידע והשראה</p>
+                    <div class="grid gap-6 md:grid-cols-2">
+                        ${Object.values(issueData).map(issue => `
+                            <div class="glassmorphic-card p-6 flex flex-col">
+                                <h3 class="text-2xl font-bold mb-3">${issue.title}</h3>
+                                <div class="text-sm text-slate-600 dark:text-slate-300 mb-4 flex-grow">
+                                    ${issue.fullContent.substring(0, 100)}...
+                                </div>
+                                <button onclick="ui.openTopicModal('${issue.key}')" class="text-teal-600 hover:underline font-semibold mt-auto text-right">
+                                    קרא עוד ונסה תרגיל
+                                </button>
+                            </div>
+                        `).join('')}
+                    </div>
+                </div>
+            `;
+        };
+
+        const renderJournalPage = (container) => {
+            container.innerHTML = `
+                <div class="pt-24 px-4 max-w-4xl mx-auto text-center fade-in-up">
+                    <h1 class="text-4xl font-bold mb-4">יומן ומחשבות</h1>
+                    <div class="glassmorphic-card p-6 text-right mt-8">
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                            <div class="space-y-4">
+                                <h3 class="font-bold text-lg">כתוב/י כאן</h3>
+                                <textarea id="journal-entry" rows="10" class="w-full p-3 rounded-lg bg-white/50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 focus:ring-2 focus:ring-teal-500 outline-none"></textarea>
+                                <button onclick="ui.saveJournal()" class="bg-teal-600 text-white px-4 py-2 rounded hover:bg-teal-700">שמירה</button>
+                                <span id="save-status" class="text-green-600 text-sm opacity-0 transition">נשמר!</span>
+                            </div>
+                            <div class="flex flex-col h-[400px]">
+                                <h3 class="font-bold text-lg mb-4">שיחה עם המדריך הפנימי</h3>
+                                <div id="chat-history" class="flex-grow overflow-y-auto bg-slate-50/50 dark:bg-slate-800/50 rounded-lg p-4 mb-4 space-y-3 border border-slate-200 dark:border-slate-700">
+                                    <div class="bg-slate-200 dark:bg-slate-700 p-3 rounded-lg rounded-br-none self-end max-w-[85%]">שלום, אני כאן כדי להקשיב.</div>
+                                </div>
+                                <div class="flex gap-2">
+                                    <input type="text" id="chat-input" class="flex-grow p-2 rounded border" placeholder="הודעה..." onkeypress="if(event.key === 'Enter') ui.sendChat()">
+                                    <button onclick="ui.sendChat()" class="bg-teal-600 text-white px-4 rounded"><i class="fas fa-paper-plane"></i></button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+        };
+
+        const renderBreathingPage = (container) => {
+            container.innerHTML = `
+                <div class="flex flex-col items-center justify-center h-screen w-full relative fade-in-up">
+                    <div class="text-center z-10 mb-20">
+                        <h2 id="breath-cue" class="text-4xl md:text-6xl font-bold mb-2 transition-all duration-500 transform">התכונן...</h2>
+                        <div id="breath-timer" class="text-6xl font-mono font-thin tabular-nums">0</div>
+                    </div>
+                    <div class="absolute bottom-0 left-0 w-full glassmorphic-card rounded-b-none p-6 flex flex-col md:flex-row items-center justify-between gap-6">
+                        <button onclick="breathing.toggle()" id="breath-control-btn" class="w-16 h-16 rounded-full bg-white dark:bg-slate-800 border-2 border-teal-500 flex items-center justify-center text-teal-600 shadow-lg">
+                            <i class="fas fa-play text-xl ml-1"></i>
+                        </button>
+                        <div class="flex-grow max-w-md w-full text-right">
+                            <label class="text-sm text-slate-500 mb-1 block">בחר תרגיל</label>
+                            <select id="exercise-select" onchange="breathing.changeExercise(this.value)" class="w-full p-2 rounded bg-slate-100 dark:bg-slate-800 border">
+                                ${Object.entries(breathingLibrary).map(([cat, exercises]) => `
+                                    <optgroup label="${cat}">
+                                        ${exercises.map(ex => `<option value="${ex.id}">${ex.name}</option>`).join('')}
+                                    </optgroup>
+                                `).join('')}
+                            </select>
+                        </div>
+                    </div>
+                </div>
+            `;
+            breathing.init();
+        };
+
+        const renderLoginPage = (container) => {
+            container.innerHTML = `
+                <div class="flex items-center justify-center min-h-screen fade-in-up px-4">
+                    <div class="glassmorphic-card p-8 w-full max-w-md">
+                        <h2 class="text-3xl font-bold text-center mb-2">כניסה למערכת</h2>
+                        <form onsubmit="auth.login(event)" class="space-y-4 mt-6">
+                            <div>
+                                <label class="block text-sm font-medium mb-1">אימייל</label>
+                                <input type="email" id="login-email" value="demo@user.com" class="w-full p-2 rounded border bg-transparent">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium mb-1">סיסמה</label>
+                                <input type="password" id="login-pass" value="123" class="w-full p-2 rounded border bg-transparent">
+                            </div>
+                            <button type="submit" class="w-full bg-teal-600 text-white py-2 rounded hover:bg-teal-700 font-bold">התחבר</button>
+                        </form>
+                        <p id="login-error" class="text-red-500 text-sm text-center mt-2 hidden">שגיאה בפרטי ההתחברות</p>
+                    </div>
+                </div>
+            `;
+        };
+        
+        const renderBookingPage = (container) => {
+            container.innerHTML = `
+                <div class="pt-24 px-4 max-w-2xl mx-auto fade-in-up">
+                    <h1 class="text-4xl font-bold text-center mb-4">הזמנת מפגש</h1>
+                    <div class="glassmorphic-card p-8 mt-8">
+                        <form class="space-y-4 text-right">
+                            <div class="grid md:grid-cols-2 gap-4">
+                                <div><label class="block text-sm mb-1">שם מלא</label><input type="text" class="w-full p-2 rounded border bg-transparent"></div>
+                                <div><label class="block text-sm mb-1">אימייל</label><input type="email" class="w-full p-2 rounded border bg-transparent"></div>
+                            </div>
+                            <div>
+                                <label class="block text-sm mb-1">נושא</label>
+                                <select class="w-full p-2 rounded border bg-transparent">
+                                    ${Object.values(issueData).map(i => `<option value="${i.key}">${i.title}</option>`).join('')}
+                                </select>
+                            </div>
+                            <button type="button" onclick="alert('הטופס נשלח בהצלחה (הדגמה)')" class="w-full bg-teal-600 text-white py-2 rounded hover:bg-teal-700">שלח בקשה</button>
+                        </form>
+                    </div>
+                </div>
+            `;
+        };
+
+        const renderContactPage = (container) => {
+            container.innerHTML = `
+                <div class="pt-24 px-4 max-w-4xl mx-auto fade-in-up text-center">
+                    <h1 class="text-4xl font-bold mb-8">צור קשר</h1>
+                    <div class="grid md:grid-cols-2 gap-8">
+                        <div class="glassmorphic-card p-8 text-right">
+                            <h3 class="text-xl font-bold mb-4">פרטי התקשרות</h3>
+                            <p class="mb-2">pozso@breathing.co.il <i class="fas fa-envelope ml-2 text-teal-500"></i></p>
+                            <p>052-1234567 <i class="fas fa-phone ml-2 text-teal-500"></i></p>
+                        </div>
+                        <div class="glassmorphic-card p-8">
+                             <h3 class="text-xl font-bold mb-4">שלח הודעה</h3>
+                             <form class="space-y-3">
+                                <input type="text" placeholder="שם" class="w-full p-2 border rounded bg-transparent">
+                                <button type="button" onclick="alert('נשלח!')" class="w-full bg-teal-600 text-white py-2 rounded">שלח</button>
+                             </form>
+                        </div>
+                    </div>
+                </div>
+            `;
+        };
+
+        const renderMyAppointmentsPage = (container) => {
+            const apps = store.user.appointments || [];
+            container.innerHTML = `
+                <div class="pt-24 px-4 max-w-3xl mx-auto fade-in-up">
+                    <h1 class="text-3xl font-bold text-center mb-8">הפגישות שלי</h1>
+                    <div class="space-y-4">
+                        ${apps.length > 0 ? apps.map(app => `
+                            <div class="glassmorphic-card p-6 flex justify-between items-center">
+                                <div>
+                                    <h3 class="font-bold text-lg">מפגש בנושא: ${app.topic}</h3>
+                                    <div class="text-sm text-slate-500 mt-1">
+                                        <i class="far fa-calendar ml-1"></i> ${new Date(app.date).toLocaleDateString('he-IL')}
+                                    </div>
+                                </div>
+                                <button class="border border-slate-300 px-3 py-1 rounded text-sm">הכנה</button>
+                            </div>
+                        `).join('') : `<div class="text-center p-8 glassmorphic-card">אין פגישות קרובות</div>`}
+                    </div>
+                </div>
+            `;
+        };
+
+        const renderAdminPage = (container) => {
+            if (!store.user || store.user.email !== 'admin@user.com') { router.navigate('home'); return; }
+            container.innerHTML = `
+                <div class="pt-24 px-4 max-w-4xl mx-auto fade-in-up">
+                    <h1 class="text-3xl font-bold text-center mb-8">פאנל ניהול</h1>
+                    <div class="glassmorphic-card overflow-hidden">
+                        <table class="w-full text-right">
+                            <thead class="bg-slate-100 dark:bg-slate-800">
+                                <tr><th class="p-3">שם</th><th class="p-3">אימייל</th><th class="p-3">נושא</th></tr>
+                            </thead>
+                            <tbody>
+                                ${allAppointmentsAdmin.map(app => `
+                                    <tr class="border-b border-slate-200 dark:border-slate-700">
+                                        <td class="p-3">${app.name}</td>
+                                        <td class="p-3">${app.email}</td>
+                                        <td class="p-3"><span class="bg-slate-200 dark:bg-slate-700 px-2 py-1 rounded text-xs">${app.topic}</span></td>
+                                    </tr>
+                                `).join('')}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            `;
+        };
+
+        /** 5. LOGIC MODULES */
+        const ui = {
+            openTopicModal: (key) => {
+                const data = issueData[key];
+                const overlay = document.getElementById('modal-overlay');
+                const content = document.getElementById('modal-content');
+                content.innerHTML = `
+                    <div class="glassmorphic-card p-8 relative bg-white dark:bg-slate-900">
+                        <button onclick="document.getElementById('modal-overlay').classList.add('hidden')" class="absolute top-4 left-4 text-slate-500 hover:text-red-500"><i class="fas fa-times text-xl"></i></button>
+                        <h2 class="text-2xl font-bold mb-2 text-teal-600">${data.title}</h2>
+                        <div class="prose dark:prose-invert max-w-none mb-6">
+                            <p class="text-lg font-medium mb-4">${data.lead}</p>
+                            <p class="text-slate-600 dark:text-slate-300 leading-relaxed">${data.fullContent}</p>
+                        </div>
+                        <div class="text-center">
+                            <button onclick="ui.startPracticeFromModal()" class="bg-teal-600 hover:bg-teal-700 text-white font-bold py-2 px-6 rounded-full"><i class="fas fa-wind ml-2"></i> בוא נתרגל</button>
+                        </div>
+                    </div>
+                `;
+                overlay.classList.remove('hidden');
+            },
+            startPracticeFromModal: () => {
+                document.getElementById('modal-overlay').classList.add('hidden');
+                router.navigate('breathing-exercise');
+            },
+            saveJournal: () => {
+                const txt = document.getElementById('journal-entry').value;
+                if(!txt) return;
+                const status = document.getElementById('save-status');
+                status.classList.remove('opacity-0');
+                setTimeout(() => status.classList.add('opacity-0'), 2000);
+            },
+            sendChat: () => {
+                const input = document.getElementById('chat-input');
+                const txt = input.value.trim();
+                if(!txt) return;
+                const history = document.getElementById('chat-history');
+                history.innerHTML += `<div class="bg-teal-600 text-white p-3 rounded-lg rounded-bl-none self-start max-w-[85%] mb-2">${txt}</div>`;
+                input.value = '';
+                history.scrollTop = history.scrollHeight;
+                let reply = 'אני מקשיב. ספר לי עוד.';
+                if(txt.includes('חרד')) reply = 'נשום עמוק. נסה נשיפה ארוכה.';
+                setTimeout(() => {
+                    history.innerHTML += `<div class="bg-slate-200 dark:bg-slate-700 p-3 rounded-lg rounded-br-none self-end max-w-[85%] mb-2 fade-in-up">${reply}</div>`;
+                    history.scrollTop = history.scrollHeight;
+                }, 1000);
+            }
+        };
+
+        const auth = {
+            login: (e) => {
+                e.preventDefault();
+                const email = document.getElementById('login-email').value;
+                const pass = document.getElementById('login-pass').value;
+                const user = mockUsers[email];
+                if(user && user.password === pass) {
+                    store.user = user;
+                    localStorage.setItem('user', JSON.stringify(user));
+                    const target = email === 'admin@user.com' ? 'admin' : 'my_appointments';
+                    router.navigate(target);
+                } else {
+                    document.getElementById('login-error').classList.remove('hidden');
+                }
+            },
+            logout: () => {
+                store.user = null;
+                localStorage.removeItem('user');
+                router.navigate('home');
+            }
+        };
+
+        const breathing = {
+            interval: null,
+            init: () => {
+                store.exerciseState.isRunning = false;
+                store.exerciseState.phaseIndex = 0;
+                const exId = document.getElementById('exercise-select').value;
+                breathing.loadExercise(exId);
+            },
+            loadExercise: (id) => {
+                const exercise = Object.values(breathingLibrary).flat().find(e => e.id === id);
+                store.exerciseState.currentExercise = exercise;
+                store.exerciseState.phase = exercise.pattern[0].phase;
+                document.getElementById('breath-cue').innerText = "מוכן?";
+                document.getElementById('breath-timer').innerText = exercise.pattern[0].secs;
+            },
+            changeExercise: (val) => { breathing.stop(); breathing.loadExercise(val); },
+            toggle: () => { if(store.exerciseState.isRunning) breathing.stop(); else breathing.start(); },
+            start: () => {
+                store.exerciseState.isRunning = true;
+                document.getElementById('breath-control-btn').innerHTML = '<i class="fas fa-pause text-xl"></i>';
+                let phaseStart = Date.now();
+                const exercise = store.exerciseState.currentExercise;
+                breathing.interval = setInterval(() => {
+                    const now = Date.now();
+                    const currentPattern = exercise.pattern[store.exerciseState.phaseIndex];
+                    const elapsed = (now - phaseStart) / 1000;
+                    const remaining = Math.max(0, Math.ceil(currentPattern.secs - elapsed));
+                    const totalSecs = currentPattern.secs;
+                    
+                    // Calculate progress 0 to 1 for animation
+                    store.exerciseState.progress = Math.min(elapsed / totalSecs, 1.0);
+                    store.exerciseState.phase = currentPattern.phase;
+
+                    document.getElementById('breath-timer').innerText = remaining;
+                    document.getElementById('breath-cue').innerText = currentPattern.cue;
+                    
+                    // Visual Updates
+                    const cueEl = document.getElementById('breath-cue');
+                    if(currentPattern.phase === 'inhale') cueEl.className = "text-4xl md:text-6xl font-bold mb-2 text-teal-500 transform scale-110 transition-all duration-1000";
+                    else if(currentPattern.phase === 'exhale') cueEl.className = "text-4xl md:text-6xl font-bold mb-2 text-blue-500 transform scale-90 transition-all duration-1000";
+                    else cueEl.className = "text-4xl md:text-6xl font-bold mb-2 text-slate-500 transition-all duration-500";
+
+                    if (elapsed >= currentPattern.secs) {
+                        store.exerciseState.phaseIndex = (store.exerciseState.phaseIndex + 1) % exercise.pattern.length;
+                        phaseStart = Date.now();
+                    }
+                }, 50); // Faster update for smoother animation
+            },
+            stop: () => {
+                store.exerciseState.isRunning = false;
+                clearInterval(breathing.interval);
+                document.getElementById('breath-control-btn').innerHTML = '<i class="fas fa-play text-xl ml-1"></i>';
+                document.getElementById('breath-cue').innerText = "הושהה";
+            }
+        };
+
+        /** 6. INIT */
+        window.onload = () => {
+            const savedUser = localStorage.getItem('user');
+            if(savedUser) store.user = JSON.parse(savedUser);
+            
+            if(localStorage.getItem('color-theme') === 'dark') {
+                document.documentElement.classList.add('dark');
+                store.theme = 'dark';
+            }
+            
+            initThreeJS();
+            
+            document.getElementById('theme-toggle').addEventListener('click', () => {
+                const html = document.documentElement;
+                if (html.classList.contains('dark')) {
+                    html.classList.remove('dark');
+                    localStorage.setItem('color-theme', 'light');
+                    store.theme = 'light';
+                } else {
+                    html.classList.add('dark');
+                    localStorage.setItem('color-theme', 'dark');
+                    store.theme = 'dark';
+                }
+            });
+            
+            document.getElementById('menu-toggle').addEventListener('click', () => {
+                document.getElementById('navbar-sticky').classList.toggle('hidden');
+            });
+
+            router.navigate('home');
+        };
+    </script>
+</body>
+</html>
