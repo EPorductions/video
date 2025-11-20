@@ -27,13 +27,13 @@
             background-color: #F1F1F1;
             color: #191B1D;
             -webkit-font-smoothing: antialiased;
-            overflow-x: hidden; /* Prevent horizontal scroll on body */
+            overflow-x: hidden;
             width: 100%;
         }
 
         /* Custom Scrollbar */
         .custom-scrollbar::-webkit-scrollbar {
-            height: 8px; /* Thinner for mobile aesthetics */
+            height: 8px;
             width: 8px;
         }
         .custom-scrollbar::-webkit-scrollbar-track {
@@ -128,7 +128,8 @@
 
         // --- HOOKS ---
         
-        // Custom Hook for Drag-to-Scroll
+        // Custom Hook for Drag-to-Scroll (Desktop Only)
+        // Allows dragging unless on text/interactive elements
         const useDraggableScroll = (ref) => {
             useEffect(() => {
                 const el = ref.current;
@@ -139,6 +140,20 @@
                 let scrollLeft;
 
                 const onMouseDown = (e) => {
+                    // Only allow left click
+                    if (e.button !== 0) return;
+
+                    // Check if user is clicking on text directly or interactive elements
+                    const target = e.target;
+                    const tagName = target.tagName;
+                    
+                    // If interactive element, ignore
+                    if (['A', 'BUTTON', 'INPUT', 'TEXTAREA', 'SELECT'].includes(tagName)) return;
+
+                    // If cursor is 'text', likely over text user wants to select -> ignore drag
+                    const computedCursor = window.getComputedStyle(target).cursor;
+                    if (computedCursor === 'text') return;
+
                     isDown = true;
                     el.classList.add('cursor-grabbing');
                     el.classList.remove('cursor-grab');
@@ -160,7 +175,7 @@
 
                 const onMouseMove = (e) => {
                     if (!isDown) return;
-                    e.preventDefault(); // Prevent text selection while dragging
+                    e.preventDefault(); // Prevent selection dragging while we scroll
                     const x = e.pageX - el.offsetLeft;
                     const walk = (x - startX) * 1.5; // Scroll speed multiplier
                     el.scrollLeft = scrollLeft - walk;
@@ -169,6 +184,7 @@
                 // Add initial class
                 el.classList.add('cursor-grab');
 
+                // Mouse events only (Touch handled natively by CSS overflow)
                 el.addEventListener('mousedown', onMouseDown);
                 el.addEventListener('mouseleave', onMouseLeave);
                 el.addEventListener('mouseup', onMouseUp);
@@ -646,8 +662,8 @@
             const AgendaMatrixView = () => (
                 <div className="bg-white border border-innovet-gray shadow-sm">
                     {/* Wrapped in overflow-x-auto and ref attached here for drag */}
-                    <div ref={agendaRef} className={`overflow-x-auto custom-scrollbar touch-pan-x`} dir={isRTL ? 'rtl' : 'ltr'}>
-                        <table className={`w-full border-collapse ${isRTL ? 'text-right' : 'text-left'} min-w-[800px] select-none`}>
+                    <div ref={agendaRef} className={`overflow-x-auto custom-scrollbar`} dir={isRTL ? 'rtl' : 'ltr'}>
+                        <table className={`w-full border-collapse ${isRTL ? 'text-right' : 'text-left'} min-w-[800px]`}>
                             <thead>
                                 <tr className="bg-innovet-dark text-white">
                                     <th className={`sticky ${isRTL ? 'right-0' : 'left-0'} z-20 bg-innovet-dark p-6 text-2xl font-bold ${isRTL ? 'border-l' : 'border-r'} border-gray-700 min-w-[220px]`}>
@@ -726,8 +742,8 @@
             // DELIVERABLES VIEW
             const TableDeliverables = () => (
                 <div className="bg-white border-t-4 border-innovet-blue shadow-sm">
-                    <div ref={deliverablesRef} className="overflow-x-auto custom-scrollbar touch-pan-x">
-                        <table className={`w-full ${isRTL ? 'text-right' : 'text-left'} border-collapse min-w-[600px] select-none`}>
+                    <div ref={deliverablesRef} className="overflow-x-auto custom-scrollbar">
+                        <table className={`w-full ${isRTL ? 'text-right' : 'text-left'} border-collapse min-w-[600px]`}>
                             <thead className="bg-innovet-bg text-innovet-black">
                                 <tr>
                                     <th className="px-8 py-6 text-lg font-bold border-b-2 border-innovet-black w-32">{t.week}</th>
