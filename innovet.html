@@ -62,6 +62,14 @@
             animation: fadeIn 0.5s cubic-bezier(0.4, 0, 0.2, 1) forwards;
         }
 
+        @keyframes spin-slow {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+        .animate-spin-slow {
+            animation: spin-slow 20s linear infinite;
+        }
+
         /* Dropdown Hover Logic */
         .group:hover .group-hover\:block {
             display: block;
@@ -612,10 +620,22 @@
                     <header className="bg-white sticky top-0 z-50 border-b border-innovet-gray">
                         <div className="max-w-[1600px] mx-auto px-6 h-24 flex items-center justify-between">
                             <div className="flex items-center gap-6 h-full">
-                                {/* Text Logo */}
-                                <div className="flex flex-col cursor-pointer" onClick={scrollToTop}>
-                                    <span className="text-3xl font-black tracking-tighter leading-none">INNOVET</span>
-                                    <span className="text-sm font-bold text-innovet-blue tracking-widest uppercase">Cohort 2</span>
+                                {/* Logo Image */}
+                                <div className="cursor-pointer" onClick={scrollToTop}>
+                                    <img 
+                                        src="./INNOVET_LOGO_HOR_NEG-02-2.svg" 
+                                        alt="Innovet Logo" 
+                                        className="h-12 md:h-16 w-auto object-contain" 
+                                        onError={(e) => {
+                                            e.target.style.display = 'none'; 
+                                            e.target.nextSibling.style.display = 'flex';
+                                        }} 
+                                    />
+                                    {/* Fallback if Image Fails */}
+                                    <div className="flex-col hidden">
+                                        <span className="text-3xl font-black tracking-tighter leading-none">INNOVET</span>
+                                        <span className="text-sm font-bold text-innovet-blue tracking-widest uppercase">Cohort 2</span>
+                                    </div>
                                 </div>
                                 
                                 <div className="hidden md:block h-8 w-px bg-innovet-gray"></div>
@@ -691,8 +711,18 @@
                     </header>
 
                     {/* Hero / Page Title */}
-                    <div className="bg-innovet-dark text-white py-24">
-                        <div className="max-w-[1600px] mx-auto px-6">
+                    <div className="bg-innovet-dark text-white py-24 relative overflow-hidden">
+                        {/* Background Image (Vector-2.svg) */}
+                        <div className="absolute inset-0 z-0 opacity-10 pointer-events-none">
+                            <img src="./Vector-2.svg" alt="" className="w-full h-full object-cover" />
+                        </div>
+
+                        {/* Starburst Decoration */}
+                        <div className="absolute -right-20 -top-20 z-0 opacity-10 pointer-events-none animate-spin-slow">
+                             <img src="./Starburst-Logo-White-svg-1.svg" alt="" className="w-[600px] h-[600px]" />
+                        </div>
+
+                        <div className="max-w-[1600px] mx-auto px-6 relative z-10">
                             <div className="flex flex-col md:flex-row justify-between items-end gap-10">
                                 <div>
                                     <span className="text-innovet-yellow font-bold text-xl tracking-widest uppercase mb-4 block">
@@ -715,7 +745,7 @@
                     <main ref={mainContentRef} className="max-w-[1600px] mx-auto px-6 py-16 relative -mt-12">
                         
                         {/* Navigation Tabs */}
-                        <div className="bg-white p-2 shadow-lg mb-12 flex flex-wrap md:inline-flex gap-2">
+                        <div className="bg-white p-2 shadow-lg mb-12 flex flex-wrap md:inline-flex gap-2 relative z-20">
                             <TabButton id="agenda" label={t.tabAgenda} icon={Layout} />
                             <TabButton id="deliverables" label={t.tabDeliverables} icon={CheckSquare} />
                             <TabButton id="office-hours" label={t.tabOfficeHours} icon={Users} />
@@ -752,7 +782,7 @@
                     </main>
 
                     {/* Footer */}
-                    <footer className="bg-innovet-dark text-white py-16 border-t border-gray-800">
+                    <footer className="bg-innovet-dark text-white py-16 border-t border-gray-800 relative z-10">
                         <div className="max-w-[1600px] mx-auto px-6 flex flex-col md:flex-row justify-between items-center">
                             <div className={`text-center ${isRTL ? 'md:text-right' : 'md:text-left'} mb-8 md:mb-0`}>
                                 <h2 className="text-4xl font-black mb-2">INNOVET</h2>
