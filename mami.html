@@ -1,0 +1,396 @@
+import React, { useState, useEffect, useRef } from 'react';
+import { ArrowDown, X, Info, Grid, Maximize2, Instagram } from 'lucide-react';
+
+// Custom CSS for animations and cursor
+const customStyles = `
+  @import url('https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;700;900&family=Frank+Ruhl+Libre:wght@300;500;700&display=swap');
+
+  /* Custom Scrollbar */
+  ::-webkit-scrollbar {
+      width: 8px;
+  }
+  ::-webkit-scrollbar-track {
+      background: #1a1a1a;
+  }
+  ::-webkit-scrollbar-thumb {
+      background: #4a4a4a;
+      border-radius: 4px;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+      background: #6a6a6a;
+  }
+
+  /* Typography */
+  body {
+      font-family: 'Heebo', sans-serif;
+      background-color: #0f0f0f;
+      color: #e5e5e5;
+      cursor: none; /* Hide default cursor for custom one */
+      overflow-x: hidden;
+  }
+  
+  h1, h2, h3, .serif {
+      font-family: 'Frank Ruhl Libre', serif;
+  }
+
+  /* Custom Cursor */
+  .cursor-dot,
+  .cursor-outline {
+      position: fixed;
+      top: 0;
+      left: 0;
+      transform: translate(-50%, -50%);
+      border-radius: 50%;
+      z-index: 9999;
+      pointer-events: none;
+  }
+  .cursor-dot {
+      width: 8px;
+      height: 8px;
+      background-color: white;
+  }
+  .cursor-outline {
+      width: 40px;
+      height: 40px;
+      border: 1px solid rgba(255, 255, 255, 0.5);
+      transition: width 0.2s, height 0.2s, background-color 0.2s;
+  }
+  
+  /* Hover states for cursor */
+  body:hover .cursor-outline.hovered {
+      width: 80px;
+      height: 80px;
+      background-color: rgba(255, 255, 255, 0.1);
+      border-color: transparent;
+      backdrop-filter: invert(1);
+  }
+
+  /* Smooth Image Reveal */
+  .reveal-image {
+      opacity: 0;
+      transform: translateY(30px) scale(0.95);
+      transition: all 1s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+  .reveal-image.visible {
+      opacity: 1;
+      transform: translateY(0) scale(1);
+  }
+
+  /* Grain Texture Overlay */
+  .grain {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      z-index: 50;
+      opacity: 0.05;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 400 400' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
+  }
+
+  /* Marquee Animation */
+  .marquee-container {
+      overflow: hidden;
+      white-space: nowrap;
+  }
+  .marquee-content {
+      display: inline-block;
+      animation: marquee 20s linear infinite;
+  }
+  @keyframes marquee {
+      0% { transform: translateX(0); }
+      100% { transform: translateX(50%); }
+  }
+  
+  .stroke-text {
+      -webkit-text-stroke: 1px rgba(255, 255, 255, 0.2);
+  }
+  
+  .animate-pulse-slow {
+      animation: pulse 8s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+  }
+  
+  @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: .8; }
+  }
+  
+  .animate-loading-bar {
+      animation: loading 1.5s infinite ease-in-out;
+  }
+  
+  @keyframes loading {
+      0% { transform: translateX(-100%); }
+      100% { transform: translateX(100%); }
+  }
+`;
+
+// The list of artworks exactly as named in your folder
+const artworks = [
+    { id: 1, src: 'IMG_20181111_132940.jpg', title: 'טבע דומם באדום', year: '2018', orientation: 'portrait' },
+    { id: 2, src: 'IMG_20181111_133126.jpg', title: 'רישום מופשט', year: '2018', orientation: 'portrait' },
+    { id: 3, src: 'IMG_20181111_133313.jpg', title: 'דמות וצל', year: '2018', orientation: 'portrait' },
+    { id: 4, src: 'IMG_20181111_133319.jpg', title: 'כד ומים', year: '2018', orientation: 'portrait' },
+    { id: 5, src: 'IMG_20181111_133334.jpg', title: 'יד מושטת', year: '2018', orientation: 'portrait' },
+    { id: 6, src: 'IMG_20181111_133357.jpg', title: 'קומפוזיציה בצבע', year: '2018', orientation: 'landscape' },
+    { id: 7, src: 'IMG_20181111_133407.jpg', title: 'העורב', year: '2018', orientation: 'landscape' },
+    { id: 8, src: 'IMG_20181111_133411.jpg', title: 'פורטרט פנימי', year: '2018', orientation: 'portrait' },
+    { id: 9, src: 'IMG_20200510_132359.jpg', title: 'שלושה שלבים', year: '2020', orientation: 'landscape' },
+    { id: 10, src: '20200704_004846.jpg', title: 'חלל יצירה', year: '2020', orientation: 'landscape', isHero: true }, // Living room shot
+];
+
+const App = () => {
+    const [loaded, setLoaded] = useState(false);
+    const [selectedImg, setSelectedImg] = useState(null);
+    const cursorDot = useRef(null);
+    const cursorOutline = useRef(null);
+    
+    // Mouse movement for custom cursor
+    useEffect(() => {
+        const moveCursor = (e) => {
+            const posX = e.clientX;
+            const posY = e.clientY;
+            
+            if (cursorDot.current && cursorOutline.current) {
+                cursorDot.current.style.left = `${posX}px`;
+                cursorDot.current.style.top = `${posY}px`;
+                
+                // Add a little lag to the outline for that "fluid" feel
+                cursorOutline.current.animate({
+                    left: `${posX}px`,
+                    top: `${posY}px`
+                }, { duration: 500, fill: "forwards" });
+            }
+        };
+        
+        // Add hover effect listeners
+        const addHoverClass = () => cursorOutline.current?.classList.add('hovered');
+        const removeHoverClass = () => cursorOutline.current?.classList.remove('hovered');
+
+        // We need to re-attach listeners when content changes or loads
+        const attachListeners = () => {
+             const clickables = document.querySelectorAll('a, button, .interactive-img');
+             clickables.forEach(el => {
+                el.addEventListener('mouseenter', addHoverClass);
+                el.addEventListener('mouseleave', removeHoverClass);
+            });
+        };
+
+        window.addEventListener('mousemove', moveCursor);
+        
+        // Initial attach
+        if (loaded) {
+            attachListeners();
+        }
+        
+        // Observer for scroll animations
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('visible');
+                }
+            });
+        }, { threshold: 0.1 });
+
+        if (loaded) {
+             document.querySelectorAll('.reveal-image').forEach(img => observer.observe(img));
+        }
+
+        // Clean up
+        return () => {
+            window.removeEventListener('mousemove', moveCursor);
+            const clickables = document.querySelectorAll('a, button, .interactive-img');
+            clickables.forEach(el => {
+                el.removeEventListener('mouseenter', addHoverClass);
+                el.removeEventListener('mouseleave', removeHoverClass);
+            });
+        };
+    }, [loaded]);
+
+    // Intro Animation
+    useEffect(() => {
+        const timer = setTimeout(() => setLoaded(true), 1000);
+        return () => clearTimeout(timer);
+    }, []);
+
+    if (!loaded) {
+        return (
+            <>
+                <style>{customStyles}</style>
+                <div className="h-screen w-full flex items-center justify-center bg-black text-white" dir="rtl">
+                    <div className="flex flex-col items-center animate-pulse">
+                        <span className="text-xl serif italic mb-4">בצלאל '47</span>
+                        <div className="w-32 h-0.5 bg-white/20 overflow-hidden">
+                            <div className="w-full h-full bg-white animate-loading-bar"></div>
+                        </div>
+                    </div>
+                </div>
+            </>
+        );
+    }
+
+    return (
+        <div className="min-h-screen bg-[#0f0f0f] text-[#e5e5e5] overflow-x-hidden selection:bg-orange-500 selection:text-white" dir="rtl">
+            <style>{customStyles}</style>
+
+            {/* Grain Overlay */}
+            <div className="grain"></div>
+
+            {/* Custom Cursor */}
+            <div ref={cursorDot} className="cursor-dot hidden md:block"></div>
+            <div ref={cursorOutline} className="cursor-outline hidden md:block"></div>
+
+            {/* Navigation / Header */}
+            <nav className="fixed top-0 left-0 w-full p-8 flex justify-between items-start z-40 mix-blend-difference">
+                <div className="flex flex-col">
+                    <span className="text-2xl font-bold tracking-tighter serif">אמא</span>
+                    <span className="text-xs opacity-60 tracking-widest uppercase">Artist Portfolio</span>
+                </div>
+                <div className="flex gap-6 text-sm font-light">
+                    <button onClick={() => window.scrollTo({top: document.body.scrollHeight, behavior: 'smooth'})} className="hover:opacity-50 transition-opacity">אודות</button>
+                    <button onClick={() => window.scrollTo({top: window.innerHeight, behavior: 'smooth'})} className="hover:opacity-50 transition-opacity">גלריה</button>
+                </div>
+            </nav>
+
+            {/* Hero Section */}
+            <header className="relative h-screen w-full flex items-center justify-center overflow-hidden">
+                {/* Background blurred abstractly */}
+                <div className="absolute inset-0 opacity-30 scale-110">
+                     <img 
+                        src="20200704_004846.jpg" 
+                        className="w-full h-full object-cover filter blur-xl scale-125 animate-pulse-slow"
+                        alt="Background Atmosphere"
+                        onError={(e) => e.target.style.display = 'none'}
+                    />
+                </div>
+                
+                <div className="relative z-10 text-center px-4">
+                    <h1 className="text-[15vw] leading-[0.8] font-black opacity-90 mix-blend-overlay tracking-tighter">
+                        יְצִירָה
+                    </h1>
+                    <div className="flex flex-col items-center mt-8 gap-4">
+                        <p className="text-xl md:text-3xl serif font-light italic text-orange-200/80">
+                            מסע של צבע ורגש לאורך שנים
+                        </p>
+                        <div className="w-px h-24 bg-gradient-to-b from-transparent via-white/50 to-transparent mt-8"></div>
+                    </div>
+                </div>
+
+                <div className="absolute bottom-10 left-1/2 translate-x-1/2 animate-bounce opacity-50">
+                    <ArrowDown size={24} />
+                </div>
+            </header>
+
+            {/* Scrolling Marquee Text */}
+            <div className="py-12 border-y border-white/5 bg-[#151515] overflow-hidden">
+                <div className="marquee-container">
+                    <div className="marquee-content text-8xl font-bold opacity-10 serif text-transparent stroke-text">
+                        בצלאל 1947 • רישום • צבע • קומפוזיציה • רגש • אמנות ישראלית • 
+                        בצלאל 1947 • רישום • צבע • קומפוזיציה • רגש • אמנות ישראלית •
+                    </div>
+                </div>
+            </div>
+
+            {/* Main Gallery Grid */}
+            <main className="container mx-auto px-4 py-24 z-10 relative">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-12 md:gap-24">
+                    {artworks.filter(art => !art.isHero).map((art, index) => (
+                        <div 
+                            key={art.id} 
+                            className={`reveal-image interactive-img group relative cursor-pointer ${art.orientation === 'landscape' ? 'md:col-span-2 aspect-[16/9]' : 'aspect-[3/4]'} ${index % 2 === 0 ? 'mt-0' : 'md:mt-24'}`}
+                            onClick={() => setSelectedImg(art)}
+                        >
+                            <div className="absolute inset-0 bg-gray-800 animate-pulse" /> {/* Loading placeholder */}
+                            <img 
+                                src={art.src} 
+                                alt={art.title}
+                                className="w-full h-full object-cover transition-all duration-700 group-hover:scale-105 group-hover:opacity-80 grayscale group-hover:grayscale-0"
+                                loading="lazy"
+                                onError={(e) => {
+                                    e.target.src = `https://via.placeholder.com/800x1000/222/fff?text=${encodeURIComponent(art.src)}`;
+                                }}
+                            />
+                            
+                            {/* Hover Info */}
+                            <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300 bg-black/40 backdrop-blur-sm">
+                                <div className="text-center transform translate-y-4 group-hover:translate-y-0 transition-transform duration-300">
+                                    <h3 className="text-3xl serif mb-2">{art.title}</h3>
+                                    <p className="text-sm font-mono text-orange-300">{art.year}</p>
+                                    <span className="inline-block mt-4 px-4 py-1 border border-white/30 rounded-full text-xs uppercase tracking-wider hover:bg-white hover:text-black transition-colors">
+                                        הצג יצירה
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+                    ))}
+                </div>
+            </main>
+
+            {/* About Section */}
+            <section className="min-h-[70vh] bg-[#1a1a1a] relative flex items-center py-20 overflow-hidden">
+                <div className="container mx-auto px-4 grid md:grid-cols-2 gap-16 items-center relative z-10">
+                    <div className="reveal-image order-2 md:order-1">
+                        <h2 className="text-5xl md:text-7xl serif mb-8 text-orange-100">האמנית</h2>
+                        <div className="space-y-6 text-lg font-light text-gray-300 leading-relaxed max-w-xl">
+                            <p>
+                                ילידת 1947, בוגרת המחלקה לאמנות בבצלאל.
+                            </p>
+                            <p>
+                                במשך עשרות שנים יצרה בשקט, בסטודיו הביתי, מתוך צורך פנימי עמוק וללא כוונה להציג.
+                                עבודותיה מתאפיינות בקו רגיש, בחיפוש מתמיד אחר הקומפוזיציה המדויקת, ובדיאלוג בין הפיגורטיבי למופשט.
+                            </p>
+                            <p>
+                                האתר הזה הוא הצצה ראשונה לארכיב עשיר ומרגש, המאגד בתוכו רגעים של התבוננות, טבע דומם ופורטרטים מלאי הבעה.
+                            </p>
+                        </div>
+                    </div>
+                    <div className="reveal-image order-1 md:order-2 relative">
+                        <div className="absolute -inset-4 border border-white/10 rotate-3 transform"></div>
+                        <div className="absolute -inset-4 border border-orange-500/20 -rotate-2 transform"></div>
+                        <img 
+                            src="20200704_004846.jpg" 
+                            alt="Studio Wall" 
+                            className="w-full h-auto object-cover grayscale contrast-125 hover:grayscale-0 transition-all duration-1000"
+                            onError={(e) => {
+                                    e.target.src = 'https://via.placeholder.com/800x600/222/fff?text=Studio+Wall';
+                            }}
+                        />
+                    </div>
+                </div>
+            </section>
+
+            {/* Footer */}
+            <footer className="py-12 text-center text-gray-600 text-sm border-t border-white/5">
+                <p>© 2025 כל הזכויות שמורות לאמנית</p>
+                <p className="mt-2 text-xs">נבנה באהבה</p>
+            </footer>
+
+            {/* Lightbox Modal */}
+            {selectedImg && (
+                <div className="fixed inset-0 z-[100] bg-black/95 backdrop-blur-md flex items-center justify-center p-4 md:p-12" onClick={() => setSelectedImg(null)}>
+                    <button className="absolute top-8 right-8 text-white hover:rotate-90 transition-transform">
+                        <X size={40} strokeWidth={1} />
+                    </button>
+                    
+                    <div className="relative max-w-7xl max-h-full w-full flex flex-col items-center" onClick={e => e.stopPropagation()}>
+                        <img 
+                            src={selectedImg.src} 
+                            alt={selectedImg.title}
+                            className="max-h-[80vh] w-auto shadow-2xl shadow-orange-900/20"
+                            onError={(e) => {
+                                    e.target.src = `https://via.placeholder.com/1200x800/222/fff?text=${encodeURIComponent(selectedImg.src)}`;
+                            }}
+                        />
+                        <div className="mt-6 text-center">
+                            <h3 className="text-3xl serif text-white">{selectedImg.title}</h3>
+                            <p className="text-gray-400 font-mono mt-2">{selectedImg.year}</p>
+                        </div>
+                    </div>
+                </div>
+            )}
+        </div>
+    );
+};
+
+export default App;
