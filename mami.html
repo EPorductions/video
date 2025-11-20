@@ -112,8 +112,10 @@
                 scrollHint: "גלילה לכל כיוון",
                 aboutTitle: "האמנית",
                 aboutText1: "ילידת 1947, בוגרת המחלקה לאמנות בבצלאל.",
-                aboutText2: "במשך עשרות שנים יצרה בשקט, בסטודיו הביתי, מתוך צורך פנימי עמוק וללא כוונה להציג. עבודותיה מתאפיינות בקו רגיש ובדיאלוג בין הפיגורטיבי למופשט.",
-                academy: "בצלאל 1947",
+                aboutText2: "במשך עשרות שנים יצרה בשקט, בסטודיו הביתי, מתוך צורך פנימי עמוק וללא כוונה להציג. עבודותיה מתאפיינות בקו רגיש, בחיפוש מתמיד אחר הקומפוזיציה המדויקת, ובדיאלוג בין הפיגורטיבי למופשט.",
+                aboutText3: "האתר הזה הוא הצצה ראשונה לארכיב עשיר ומרגש, המאגד בתוכו רגעים של התבוננות, טבע דומם ופורטרטים מלאי הבעה.",
+                rights: "© 2025 כל הזכויות שמורות לאמנית",
+                credits: "נבנה באהבה ע\"י בנה אוריין אדלני - PsychoFlash",
                 categories: { still: "דומם וטבע", portrait: "דיוקן ונפש", abstract: "הפשטה וצבע" }
             },
             en: {
@@ -126,8 +128,10 @@
                 scrollHint: "Scroll Any Direction",
                 aboutTitle: "The Artist",
                 aboutText1: "Born in 1947, a graduate of the Bezalel Academy of Arts.",
-                aboutText2: "For decades she created quietly in her home studio, driven by a deep internal need rather than public display. Her works are characterized by sensitive lines and a dialogue between the figurative and the abstract.",
-                academy: "Bezalel 1947",
+                aboutText2: "For decades she created quietly in her home studio, driven by a deep internal need rather than public display. Her works are characterized by sensitive lines, a constant search for precise composition, and a dialogue between the figurative and the abstract.",
+                aboutText3: "This website is a first glimpse into a rich and moving archive, bringing together moments of observation, still life, and expressive portraits.",
+                rights: "© 2025 All Rights Reserved",
+                credits: "Built with love by her son Orian Edelenyi - PsychoFlash",
                 categories: { still: "Nature & Still", portrait: "Portrait & Soul", abstract: "Abstract & Color" }
             },
             hu: {
@@ -140,8 +144,10 @@
                 scrollHint: "Görgessen bármerre",
                 aboutTitle: "A Művész",
                 aboutText1: "1947-ben született, a Bezalel Művészeti Akadémia végzettje.",
-                aboutText2: "Évtizedekig csendben alkotott otthoni műtermében, mély belső késztetéstől vezérelve. Munkáit érzékeny vonalvezetés és a figuratív, valamint az absztrakt közötti párbeszéd jellemzi.",
-                academy: "Bezalel 1947",
+                aboutText2: "Évtizedekig csendben alkotott otthoni műtermében, mély belső késztetéstől vezérelve. Munkáit érzékeny vonalvezetés, a pontos kompozíció állandó keresése és a figuratív, valamint az absztrakt közötti párbeszéd jellemzi.",
+                aboutText3: "Ez a weboldal első bepillantást enged egy gazdag és megindító archívumba, amely a megfigyelés pillanatait, csendéleteket és kifejező portrékat egyesít.",
+                rights: "© 2025 Minden jog fenntartva",
+                credits: "Szeretettel készítette fia, Orian Edelenyi - PsychoFlash",
                 categories: { still: "Csendélet", portrait: "Portré", abstract: "Absztrakt" }
             }
         };
@@ -180,9 +186,13 @@
         const App = () => {
             // --- Language Initialization from URL ---
             const getInitialLang = () => {
-                const url = window.location.href;
-                if (url.includes('/hu') || url.includes('lang=hu')) return 'hu';
-                if (url.includes('/en') || url.includes('lang=en')) return 'en';
+                try {
+                    const url = window.location.href;
+                    if (url.includes('/hu') || url.includes('lang=hu')) return 'hu';
+                    if (url.includes('/en') || url.includes('lang=en')) return 'en';
+                } catch (e) {
+                    console.log("Cannot read URL for lang init");
+                }
                 return 'he'; // Default
             };
 
@@ -223,27 +233,26 @@
             // --- Language Change Handler ---
             const handleLangChange = (newLang) => {
                 setLang(newLang);
-                // Optional: update URL history without reload
-                const url = new URL(window.location);
-                url.searchParams.set('lang', newLang);
-                window.history.pushState({}, '', url);
-                
-                // Scroll back to Home
+                try {
+                    const url = new URL(window.location);
+                    url.searchParams.set('lang', newLang);
+                    window.history.pushState({}, '', url);
+                } catch (e) {
+                    // Silently fail in environments blocking history API (like iframes/blobs)
+                    console.warn("History API update blocked, language changed in app state only.");
+                }
                 scrollToHome();
             };
 
             // --- Initial Centering (Start at Home) ---
             useLayoutEffect(() => {
                 if (heroRef.current && scrollContainerRef.current) {
-                    // Force scroll to center (Home) immediately
                     const heroLeft = heroRef.current.offsetLeft;
                     const heroWidth = heroRef.current.offsetWidth;
                     const containerWidth = window.innerWidth;
                     const centerPos = heroLeft - (containerWidth / 2) + (heroWidth / 2);
                     
                     scrollContainerRef.current.scrollLeft = centerPos;
-                    
-                    // Reveal content after positioning to avoid flicker
                     setTimeout(() => setLoaded(true), 150);
                 }
             }, []);
@@ -261,17 +270,13 @@
                     const heroPos = heroRef.current.offsetLeft;
                     const heroWidth = heroRef.current.offsetWidth;
                     
-                    // Detect when we hit the "Clone" Hero at the far END
                     const endTrigger = endLoopRef.current.offsetLeft;
-                    if (currentScroll > endTrigger - 50) { // buffer
-                        // Jump back to real Hero center
+                    if (currentScroll > endTrigger - 50) { 
                         container.scrollLeft = heroPos - (containerWidth / 2) + (heroWidth / 2);
                     }
 
-                    // Detect when we hit the "Clone" Hero at the far START
                     const startTrigger = startLoopRef.current.offsetLeft + startLoopRef.current.offsetWidth;
                     if (currentScroll < startTrigger - containerWidth + 50) {
-                         // Jump back to real Hero center
                          container.scrollLeft = heroPos - (containerWidth / 2) + (heroWidth / 2);
                     }
                 };
@@ -358,9 +363,11 @@
                             <div className="space-y-6 text-lg md:text-xl font-light text-gray-300 leading-relaxed">
                                 <p>{t.aboutText1}</p>
                                 <p>{t.aboutText2}</p>
+                                <p>{t.aboutText3}</p>
                             </div>
-                            <div className="pt-8 border-t border-white/10 flex justify-center md:justify-start gap-4 text-sm opacity-50 font-mono">
-                                <span>{t.academy}</span>
+                            <div className="pt-8 border-t border-white/10 flex flex-col gap-2 text-sm opacity-50 font-mono">
+                                <span>{t.rights}</span>
+                                <span className="text-xs opacity-70">{t.credits}</span>
                             </div>
                         </div>
                         <div className="order-1 md:order-2 relative h-[50vh] w-full">
