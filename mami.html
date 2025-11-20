@@ -214,7 +214,7 @@
                 } catch (e) {
                     console.log("Cannot read URL for lang init");
                 }
-                return 'hu'; // Default
+                return 'hu'; 
             };
 
             const [lang, setLang] = useState(getInitialLang());
@@ -262,13 +262,12 @@
                     url.searchParams.set('lang', newLang);
                     window.history.pushState({}, '', url);
                 } catch (e) {
-                    // Silently fail in environments blocking history API (like iframes/blobs)
-                    console.warn("History API update blocked, language changed in app state only.");
+                    console.warn("History API update blocked");
                 }
                 scrollToSection(heroRef);
             };
 
-            // --- Initial Centering (Start at Home) ---
+            // --- Initial Centering ---
             useLayoutEffect(() => {
                 if (heroRef.current && scrollContainerRef.current) {
                     const heroLeft = heroRef.current.offsetLeft;
@@ -281,7 +280,7 @@
                 }
             }, []);
 
-            // --- Infinite Loop Logic ---
+            // --- Infinite Loop Logic (Improved) ---
             useEffect(() => {
                 const container = scrollContainerRef.current;
                 if (!container) return;
@@ -290,18 +289,39 @@
                     if (!heroRef.current || !startLoopRef.current || !endLoopRef.current) return;
 
                     const currentScroll = container.scrollLeft;
-                    const containerWidth = container.clientWidth;
-                    const heroPos = heroRef.current.offsetLeft;
-                    const heroWidth = heroRef.current.offsetWidth;
+                    const mainHeroLeft = heroRef.current.offsetLeft;
+
+                    // 1. Right Side Loop (Entering the Right Clone)
+                    const rightCloneLeft = endLoopRef.current.offsetLeft;
                     
-                    const endTrigger = endLoopRef.current.offsetLeft;
-                    if (currentScroll > endTrigger - 50) { 
-                        container.scrollLeft = heroPos - (containerWidth / 2) + (heroWidth / 2);
+                    // If we have reached the start of the Right Clone
+                    if (currentScroll >= rightCloneLeft) {
+                        // How far into the clone are we?
+                        const offset = currentScroll - rightCloneLeft;
+                        // Jump to Main Hero start + offset
+                        container.scrollLeft = mainHeroLeft + offset;
                     }
 
-                    const startTrigger = startLoopRef.current.offsetLeft + startLoopRef.current.offsetWidth;
-                    if (currentScroll < startTrigger - containerWidth + 50) {
-                         container.scrollLeft = heroPos - (containerWidth / 2) + (heroWidth / 2);
+                    // 2. Left Side Loop (Entering the Left Clone)
+                    // We check if the viewport's LEFT edge is BEFORE the Left Clone's RIGHT edge
+                    // (Meaning we are viewing the Left Clone)
+                    const leftCloneLeft = startLoopRef.current.offsetLeft;
+                    const leftCloneWidth = startLoopRef.current.offsetWidth;
+                    const leftCloneRight = leftCloneLeft + leftCloneWidth;
+
+                    // If we have scrolled far enough LEFT that we are "inside" the left clone
+                    // (Allow a small buffer or check if we are near the left edge of it)
+                    // Actually, since the structure mirrors:
+                    // LeftClone position is roughly 0 to 100vw.
+                    // If scrollLeft < LeftCloneRight - windowWidth...
+                    // Better logic: relative offset again.
+                    
+                    if (currentScroll <= leftCloneLeft + leftCloneWidth * 0.1) { // If we are mostly inside the left clone
+                         // We are at position X inside Left Clone.
+                         // Position relative to LeftClone Left: currentScroll - leftCloneLeft.
+                         // Jump to Main Hero Left + that relative position.
+                         const offset = currentScroll - leftCloneLeft;
+                         container.scrollLeft = mainHeroLeft + offset;
                     }
                 };
 
@@ -353,7 +373,7 @@
             const Hero = ({ isRef = false, isClone = false, refProp = null }) => (
                 <section 
                     ref={refProp || (isRef ? heroRef : null)}
-                    className="snap-center min-w-[100vw] h-screen relative flex items-center justify-center overflow-hidden flex-shrink-0 bg-[#121212] z-20 shadow-2xl"
+                    className="snap-center min-w-[100vw] h-screen relative flex items-center justify-center overflow-hidden flex-shrink-0 bg-[#121212] z-20 shadow-2xl border-l border-r border-white/5"
                 >
                     <div className="absolute inset-0 opacity-30 select-none pointer-events-none">
                         <img src="20200704_004846.jpg" className="w-full h-full object-cover filter blur-lg scale-110" alt="" onError={(e)=>e.target.style.display='none'} />
@@ -525,7 +545,18 @@
                         onMouseMove={handleMouseMove}
                         dir="ltr"
                     >
-                        {/* === LEFT SIDE (Clone/Mirror for loop) === */}
+                        {/* === LEFT LOOP STRUCTURE ===
+                           Order (Left to Right):
+                           Hero(Clone) -> Contact -> About -> [Abstract -> Portrait -> Still] -> MainHero
+                           
+                           Scroll Logic (Going Left from MainHero):
+                           1. Still (Cat 1)
+                           2. Portrait (Cat 2)
+                           3. Abstract (Cat 3)
+                           4. About
+                           5. Contact
+                           6. Hero(Clone) -> Loop
+                        */}
                         <Hero isClone={true} refProp={startLoopRef} />
                         <ContactSection />
                         <AboutSection />
@@ -536,7 +567,18 @@
                         {/* === CENTER (Main) === */}
                         <Hero isRef={true} />
 
-                        {/* === RIGHT SIDE (Main/Mirror for loop) === */}
+                        {/* === RIGHT LOOP STRUCTURE ===
+                           Order (Left to Right):
+                           MainHero -> [Still -> Portrait -> Abstract] -> About -> Contact -> Hero(Clone)
+                           
+                           Scroll Logic (Going Right from MainHero):
+                           1. Still (Cat 1)
+                           2. Portrait (Cat 2)
+                           3. Abstract (Cat 3)
+                           4. About
+                           5. Contact
+                           6. Hero(Clone) -> Loop
+                        */}
                         {data.map((cat) => (
                             <CategoryCluster key={`right-${cat.id}`} category={cat} />
                         ))}
