@@ -1,0 +1,746 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PsychoFlash Productions | הנדסת תוכן בעידן אינטליגנטי</title>
+    <meta name="description" content="פתרונות הפקה טכניים ויצירתיים | Technical and Creative Production Solutions">
+
+    <!-- Favicons -->
+    <link rel="icon" sizes="192x192" href="https://static.wixstatic.com/media/4deb30_9c287599475f42f289b71ce6f5bfa0de%7Emv2.png/v1/fill/w_192%2Ch_192%2Clg_1%2Cusm_0.66_1.00_0.01/4deb30_9c287599475f42f289b71ce6f5bfa0de%7Emv2.png" type="image/png">
+    <link rel="shortcut icon" href="https://static.wixstatic.com/media/4deb30_9c287599475f42f289b71ce6f5bfa0de%7Emv2.png/v1/fill/w_32%2Ch_32%2Clg_1%2Cusm_0.66_1.00_0.01/4deb30_9c287599475f42f289b71ce6f5bfa0de%7Emv2.png" type="image/png">
+    <link rel="apple-touch-icon" href="https://static.wixstatic.com/media/4deb30_9c287599475f42f289b71ce6f5bfa0de%7Emv2.png/v1/fill/w_180%2Ch_180%2Clg_1%2Cusm_0.66_1.00_0.01/4deb30_9c287599475f42f289b71ce6f5bfa0de%7Emv2.png" type="image/png">
+
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@100;300;400;500;700;800;900&family=Teko:wght@600;700&display=swap" rel="stylesheet">
+
+    <!-- Custom Styles -->
+    <style>
+        :root {
+            /* Light Mode */
+            --background: #ffffff;
+            --card-bg: rgba(255, 255, 255, 0.15);
+            --text-primary: #1a202c;
+            --text-secondary: #4a5568;
+            --accent1: #007BFF;
+            --accent2: #8A2BE2;
+            --border: rgba(0, 0, 0, 0.1);
+            --header-bg: rgba(255, 255, 255, 0.8);
+        }
+
+        html.dark {
+            /* Dark Mode */
+            --background: #010414;
+            --card-bg: rgba(22, 32, 57, 0.2); /* More transparency for glass effect */
+            --text-primary: #ffffff;
+            --text-secondary: #c8d0e5;
+            --accent1: #00bfff;
+            --accent2: #c624ff;
+            --border: rgba(255, 255, 255, 0.1);
+            --header-bg: rgba(1, 4, 20, 0.8);
+        }
+
+        html { scroll-behavior: smooth; }
+        body {
+            margin: 0;
+            font-family: 'Heebo', sans-serif;
+            background-color: var(--background);
+            color: var(--text-primary);
+            overflow-x: hidden;
+            transition: background-color 0.3s, color 0.3s;
+        }
+
+        /* Headings */
+        h1, h2, h3, h4, .logo, .nav-link { font-family: 'Heebo', sans-serif; }
+        .section-title { font-family: 'Teko', sans-serif; text-transform: uppercase; letter-spacing: 0.05em; }
+
+        /* Dynamic Background (RF Spectrum Style - No Grid) */
+        #dynamic-background {
+            position: fixed; inset: 0; z-index: -15;
+            transition: background 0.5s ease-in-out;
+        }
+        
+        html:not(.dark) #dynamic-background {
+            background: 
+                radial-gradient(ellipse 80% 80% at 50% -20%, rgba(0, 123, 255, 0.15), transparent 50%),
+                radial-gradient(ellipse 80% 80% at 50% 120%, rgba(138, 43, 226, 0.15), transparent 50%),
+                linear-gradient(180deg, #f8f9fa 0%, #e9ecef 100%);
+        }
+
+        html.dark #dynamic-background {
+             background: 
+                radial-gradient(ellipse 80% 80% at 50% -20%, rgba(0, 191, 255, 0.15), transparent 50%),
+                radial-gradient(ellipse 80% 80% at 50% 120%, rgba(198, 36, 255, 0.15), transparent 50%),
+                linear-gradient(180deg, #010414 0%, #050b1e 100%);
+        }
+
+        /* Swirls / Lights */
+        #swirl-container { position: fixed; inset: 0; z-index: -10; pointer-events: none; overflow: hidden; }
+        .swirl { position: absolute; border-radius: 50%; filter: blur(120px); transition: opacity 0.8s ease-in-out; }
+        
+        /* Swirl Animations */
+        .swirl1 { width: 600px; height: 600px; background: radial-gradient(circle, var(--accent2), transparent 70%); animation: move1 20s infinite alternate; opacity: 0; }
+        .swirl2 { width: 700px; height: 700px; background: radial-gradient(circle, var(--accent1), transparent 70%); animation: move2 25s infinite alternate; opacity: 0; }
+        .swirl3 { width: 500px; height: 500px; background: radial-gradient(circle, #ff00ff, transparent 60%); animation: move3 22s infinite alternate; opacity: 0; }
+        .swirl4 { width: 600px; height: 600px; background: radial-gradient(circle, #00ffff, transparent 60%); animation: move4 18s infinite alternate; opacity: 0; }
+
+        @keyframes move1 { from { transform: translate(-30%, -30%); } to { transform: translate(30%, 30%); } }
+        @keyframes move2 { from { transform: translate(30%, -30%); } to { transform: translate(-30%, 30%); } }
+        @keyframes move3 { from { transform: translate(-20%, 40%); } to { transform: translate(20%, -40%); } }
+        @keyframes move4 { from { transform: translate(40%, 40%); } to { transform: translate(-40%, -40%); } }
+
+        /* Video Player Background - FIXED and Always Visible (Faded) */
+        #player-wrapper { 
+            position: fixed; 
+            inset: 0; 
+            z-index: -20; 
+            opacity: 0.2; /* Default faint opacity for content sections */
+            transition: opacity 0.8s ease-in-out;
+            pointer-events: none;
+        }
+        html.dark #player-wrapper { opacity: 0.4; } 
+        
+        /* Hero specific opacity - More visible */
+        body.hero-active #player-wrapper { opacity: 0.8; }
+        html.dark body.hero-active #player-wrapper { opacity: 0.6; }
+
+        #player-wrapper .player-instance { 
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%; 
+            transition: opacity 1.5s ease-in-out; 
+        }
+        
+        /* Crop video to remove black bars and center */
+        #player-wrapper .player-instance iframe { 
+            position: absolute; 
+            top: 50%; left: 50%; 
+            min-width: 120vw; min-height: 120vh; 
+            width: auto; height: auto; 
+            transform: translate(-50%, -50%); 
+            object-fit: cover;
+        }
+
+        /* Content Wrapper */
+        .content-wrapper { position: relative; z-index: 1; }
+
+        /* Header & Nav */
+        header {
+            position: fixed; top: 0; right: 0; left: 0;
+            background: var(--header-bg);
+            display: flex; justify-content: space-between; align-items: center;
+            padding: 15px 40px; z-index: 1000;
+            backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
+            border-bottom: 1px solid var(--border);
+            transition: top 0.3s, background-color 0.3s;
+        }
+        .logo { font-size: 1.8rem; font-weight: 800; color: var(--text-primary); letter-spacing: -0.5px; }
+        .logo span { color: var(--accent1); }
+        
+        nav a { color: var(--text-secondary); text-decoration: none; font-weight: 500; position: relative; transition: color 0.3s ease; }
+        nav a:hover, nav a.active-link { color: var(--accent1); font-weight: 700; }
+        nav a:hover::after, nav a.active-link::after { content: ''; position: absolute; bottom: -6px; right: 0; width: 100%; height: 2px; background: var(--accent1); }
+
+        /* Typography & Layout */
+        main > section {
+            padding: 80px 20px;
+            max-width: 1280px; margin: 0 auto;
+            position: relative; opacity: 0; transform: translateY(40px);
+            transition: opacity 0.8s ease-out, transform 0.8s ease-out;
+        }
+        main > section.visible { opacity: 1; transform: translateY(0); }
+
+        .section-title { font-size: 3.5rem; text-align: center; margin-bottom: 1.5rem; font-weight: 700; background: linear-gradient(90deg, var(--accent1), var(--accent2)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        .section-subtitle { text-align: center; max-width: 800px; margin: -1rem auto 3rem auto; color: var(--text-secondary); font-size: 1.1rem; }
+
+        /* Hero Specifics */
+        .hero { min-height: 100vh; display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; padding: 0 20px; }
+        .hero h1 { font-size: clamp(3rem, 6vw, 5.5rem); line-height: 1.1; margin: 0; max-width: 1000px; font-weight: 900; color: #FFFFFF; text-shadow: 0 10px 30px rgba(0,0,0,0.5); }
+        .hero h1 span { color: var(--accent2); -webkit-text-fill-color: initial; background: none; }
+        .hero p { max-width: 700px; margin-top: 20px; color: #e0e0e0; font-size: 1.25rem; font-weight: 300; text-shadow: 0 2px 10px rgba(0,0,0,0.5); }
+        
+        .cta-btn { margin-top: 40px; padding: 14px 40px; border-radius: 8px; background: var(--accent1); color: #000; text-decoration: none; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; transition: all 0.3s ease; display: inline-block; box-shadow: 0 4px 15px rgba(0,0,0,0.2); }
+        .cta-btn:hover { transform: translateY(-2px); box-shadow: 0 0 25px var(--accent1); background: #fff; }
+
+        /* Glass Cards (Frosted Effect) */
+        .card, .pricing-card, .process-card, .stat-item {
+            background: var(--card-bg);
+            padding: 2rem; border-radius: 12px;
+            border: 1px solid var(--border);
+            backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
+            transition: transform 0.3s ease, border-color 0.3s, box-shadow 0.3s;
+            text-align: center;
+        }
+        .card:hover, .pricing-card:hover { transform: translateY(-5px); border-color: var(--accent1); box-shadow: 0 10px 40px -10px rgba(0,0,0,0.1); }
+        
+        .card h3 { margin: 15px 0 10px; color: var(--text-primary); font-size: 1.3rem; font-weight: 700; }
+        .card p { color: var(--text-secondary); font-size: 0.95rem; line-height: 1.5; }
+        .card img { width: 50px; height: 50px; margin: 0 auto; filter: grayscale(100%); opacity: 0.7; transition: all 0.3s; }
+        html.dark .card img { filter: invert(1) opacity(0.8); }
+        .card:hover img { filter: none; opacity: 1; transform: scale(1.1); }
+
+        /* Service Rows (Alternating) */
+        .service-row { display: flex; flex-direction: column; gap: 2rem; margin-bottom: 4rem; align-items: center; }
+        @media (min-width: 768px) { .service-row { flex-direction: row; gap: 4rem; } .service-row.reverse { flex-direction: row-reverse; } }
+        .service-text { flex: 1; text-align: right; }
+        .service-text h3 { color: var(--accent1); font-size: 2rem; margin-bottom: 1rem; font-weight: 700; }
+        .service-text p { color: var(--text-secondary); font-size: 1.05rem; line-height: 1.7; }
+        .service-image { flex: 1; width: 100%; overflow: hidden; border-radius: 12px; box-shadow: 0 20px 40px -10px rgba(0,0,0,0.3); }
+        .service-image img { width: 100%; height: 100%; object-fit: cover; transition: transform 0.5s ease; }
+        .service-row:hover .service-image img { transform: scale(1.05); }
+
+        /* Work Grid (Gallery) */
+        .work-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1.5rem; }
+        .work-item { position: relative; aspect-ratio: 16 / 9; border-radius: 12px; overflow: hidden; background-size: cover; background-position: center; cursor: pointer; }
+        .work-overlay { 
+            position: absolute; inset: 0; background: linear-gradient(to top, rgba(0,0,0,0.9) 0%, transparent 80%); 
+            display: flex; flex-direction: column; justify-content: flex-end; padding: 1.5rem; 
+            opacity: 0; transition: opacity 0.3s ease; 
+        }
+        .work-item:hover .work-overlay { opacity: 1; }
+        .work-overlay h3 { color: #fff; font-size: 1.5rem; font-weight: 700; margin: 0; }
+        .work-overlay p { color: rgba(255,255,255,0.8); font-size: 0.9rem; margin: 5px 0 0; }
+
+        /* Footer */
+        footer { background: #0b0c10; padding: 4rem 1rem; border-top: 1px solid rgba(255,255,255,0.05); color: #9ca3af; font-size: 0.9rem; }
+        .footer-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 2rem; max-width: 1280px; margin: 0 auto; text-align: right; }
+        .footer-col h5 { color: #fff; font-weight: 700; font-size: 1.1rem; margin-bottom: 1.5rem; }
+        .footer-col ul { list-style: none; padding: 0; space-y: 0.8rem; }
+        .footer-col a { color: #9ca3af; transition: color 0.3s; }
+        .footer-col a:hover { color: var(--accent1); }
+
+        /* Scrollbar */
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: var(--background); }
+        ::-webkit-scrollbar-thumb { background: #333; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: var(--accent2); }
+        
+        /* Marquee */
+        @keyframes scroll { 0% { transform: translateX(0); } 100% { transform: translateX(-100%); } }
+        .scrolling-logos { animation: scroll 40s linear infinite; }
+        html.dark .scrolling-logos img { filter: brightness(0) invert(1); opacity: 0.6; }
+        html:not(.dark) .scrolling-logos img { filter: grayscale(1); opacity: 0.6; }
+        
+        /* Mute Button */
+        #mute-btn { z-index: 2000; }
+    </style>
+</head>
+
+<body>
+    <!-- Background Elements -->
+    <div id="dynamic-background"></div>
+    
+    <!-- Swirls (Lights) -->
+    <div id="swirl-container">
+        <div class="swirl swirl1"></div>
+        <div class="swirl swirl2"></div>
+        <div class="swirl swirl3"></div>
+        <div class="swirl swirl4"></div>
+    </div>
+
+    <!-- Smart Video Player (Background - Fixed) -->
+    <div id="player-wrapper">
+        <div id="player-container-a" class="player-instance" style="opacity: 0;"></div>
+        <div id="player-container-b" class="player-instance" style="opacity: 0;"></div>
+        <!-- Overlay to darken video for text readability -->
+        <div class="absolute inset-0 bg-black/40 z-10"></div> 
+    </div>
+
+    <div class="content-wrapper">
+        <!-- Header -->
+        <header id="header">
+            <div class="w-full max-w-7xl mx-auto flex justify-between items-center">
+                <a href="#home" class="logo">PsychoFlash<span>.</span></a>
+                <nav class="hidden lg:flex items-center gap-6">
+                    <a href="#home" data-navlink="home" class="nav-link">ראשי</a>
+                    <a href="#showreel" data-navlink="showreel" class="nav-link">עבודות</a>
+                    <a href="#dna" data-navlink="dna" class="nav-link">DNA</a>
+                    <a href="#process" data-navlink="process" class="nav-link">התהליך</a>
+                    <a href="#what-we-do" data-navlink="what-we-do" class="nav-link">פתרונות</a>
+                    <a href="#services" data-navlink="services" class="nav-link">חבילות</a>
+                    <a href="#contact" data-navlink="contact" class="nav-link">צור קשר</a>
+                </nav>
+                <div class="flex items-center gap-4">
+                    <div class="language-select hidden md:flex gap-2">
+                        <img src="https://flagcdn.com/w20/us.png" alt="English" title="English" class="cursor-pointer opacity-70 hover:opacity-100 transition-opacity">
+                        <img src="https://flagcdn.com/w20/il.png" alt="עברית" title="עברית" class="cursor-pointer opacity-70 hover:opacity-100 transition-opacity">
+                    </div>
+                    <button id="theme-toggle" class="p-2 rounded-full text-primary hover:bg-black/5 transition-colors" aria-label="Toggle Theme">
+                        <svg id="theme-icon-sun" class="h-5 w-5 hidden" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M12 12a5 5 0 100-10 5 5 0 000 10z"></path></svg>
+                        <svg id="theme-icon-moon" class="h-5 w-5 hidden" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"></path></svg>
+                    </button>
+                    <button id="mobile-menu-btn" class="lg:hidden p-2 rounded-full text-primary">
+                        <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path></svg>
+                    </button>
+                </div>
+            </div>
+        </header>
+        
+        <!-- Mobile Menu -->
+        <div id="mobile-menu-content" class="hidden fixed inset-0 bg-background z-50 p-4 flex flex-col">
+            <div class="flex justify-end mb-8">
+                 <button id="mobile-menu-close-btn" class="p-2 rounded-full text-primary">
+                    <svg class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                </button>
+            </div>
+            <nav class="flex flex-col items-center gap-6 text-xl font-bold">
+               <a href="#home" data-navlink-mobile="home">ראשי</a>
+               <a href="#showreel" data-navlink-mobile="showreel">עבודות</a>
+               <a href="#dna" data-navlink-mobile="dna">DNA</a>
+               <a href="#process" data-navlink-mobile="process">התהליך</a>
+               <a href="#what-we-do" data-navlink-mobile="what-we-do">פתרונות</a>
+               <a href="#services" data-navlink-mobile="services">חבילות</a>
+               <a href="#contact" data-navlink-mobile="contact">צור קשר</a>
+            </nav>
+        </div>
+
+        <!-- Content -->
+        <main>
+            <section class="hero" id="home">
+                <h1>השילוב המושלם בין <span>ביצוע טכני</span> לחדשנות יצירתית</h1>
+                <p>מהפקות וידאו ושידורים חיים ועד פיתוח פתרונות תוכנה ו-AI, אנחנו כאן כדי להפוך את החזון שלכם למציאות מרשימה, חלקה ונטולת תקלות.</p>
+                <a href="#contact" class="cta-btn">צרו קשר</a>
+            </section>
+            
+            <section id="stats">
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                    <div class="stat-item">
+                        <h3 class="text-[var(--accent1)]">1,200+</h3>
+                        <p>הפקות מוצלחות</p>
+                    </div>
+                    <div class="stat-item">
+                        <h3 class="text-[var(--accent2)]">25+</h3>
+                        <p>מדינות ברחבי העולם</p>
+                    </div>
+                    <div class="stat-item">
+                        <h3 class="text-[var(--accent1)]">24/7</h3>
+                        <p>תמיכה ושירות</p>
+                    </div>
+                </div>
+            </section>
+
+            <section id="clients">
+                 <div class="relative w-full overflow-hidden max-w-7xl mx-auto">
+                    <div class="flex w-max">
+                        <div id="logo-container" class="flex scrolling-logos"></div>
+                    </div>
+                </div>
+            </section>
+
+            <section id="showreel">
+                <h2 class="section-title">נבחרת העבודות</h2>
+                <p class="section-subtitle">מאירועי ספורט עולמיים ועד הפקות בידור וירטואליות</p>
+                <div class="work-grid">
+                    <div class="work-item" style="background-image: url('https://images.unsplash.com/photo-1541532713592-79a0317b6b77?q=80&w=1000&auto=format&fit=crop');">
+                        <div class="work-overlay">
+                            <h3>WRC All Live</h3>
+                            <p>שידור חי | ספורט</p>
+                        </div>
+                    </div>
+                    <div class="work-item" style="background-image: url('https://images.unsplash.com/photo-1587329310686-94756011cdead?q=80&w=1000&auto=format&fit=crop');">
+                        <div class="work-overlay">
+                            <h3>Wimbledon</h3>
+                            <p>שידור חי | ספורט</p>
+                        </div>
+                    </div>
+                    <div class="work-item" style="background-image: url('https://images.unsplash.com/photo-1516321318423-f06f85e504b3?q=80&w=1000&auto=format&fit=crop');">
+                        <div class="work-overlay">
+                            <h3>Seven Network</h3>
+                            <p>שידור | IP</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section id="dna">
+                <h2 class="section-title">פרופיל לקוח</h2>
+                <p class="section-subtitle">התאמת פתרונות מדויקת לצרכים שלכם</p>
+                <div id="persona-selector" class="cards-grid">
+                    <div class="card" data-persona="production">
+                        <img src="https://img.icons8.com/ios-filled/50/000000/clapperboard.png" alt="icon">
+                        <h3>חברות הפקה</h3>
+                        <p>ניהול טכני מלא להפקות ואירועים גדולים.</p>
+                    </div>
+                    <div class="card" data-persona="media">
+                        <img src="https://img.icons8.com/ios-filled/50/000000/studio.png" alt="icon">
+                        <h3>גופי שידור</h3>
+                        <p>תמיכה מלאה בשידורים ואולפנים מקצועיים.</p>
+                    </div>
+                    <div class="card" data-persona="brands">
+                        <img src="https://img.icons8.com/ios-filled/50/000000/store.png" alt="icon">
+                        <h3>מותגים</h3>
+                        <p>שיווק וסיפור מותג בעזרת וידאו יצירתי.</p>
+                    </div>
+                    <div class="card" data-persona="public">
+                        <img src="https://img.icons8.com/ios-filled/50/000000/university.png" alt="icon">
+                        <h3>ציבורי ואקדמי</h3>
+                        <p>הפקות תוכן לחינוך, מוסדות ציבור ומדע.</p>
+                    </div>
+                    <div class="card" data-persona="creators">
+                        <img src="https://img.icons8.com/ios-filled/50/000000/rocket.png" alt="icon">
+                        <h3>סטארטאפים</h3>
+                        <p>פתרונות יצירתיים ליזמים ותוכן חדשני.</p>
+                    </div>
+                </div>
+            </section>
+            
+            <section id="process">
+                <h2 class="section-title">איך אנחנו עובדים</h2>
+                 <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                    <div class="process-card text-right">
+                        <div class="numeral">01</div>
+                        <h3>אסטרטגיה</h3>
+                        <p>הגדרת מטרות, הבנת הקהל ופיתוח קונספט.</p>
+                    </div>
+                    <div class="process-card text-right">
+                        <div class="numeral">02</div>
+                        <h3>הפקה</h3>
+                        <p>ניהול טכני ולוגיסטי של יום הצילום.</p>
+                    </div>
+                    <div class="process-card text-right">
+                        <div class="numeral">03</div>
+                        <h3>פוסט</h3>
+                        <p>עריכה, גרפיקה, אנימציה וגימור.</p>
+                    </div>
+                    <div class="process-card text-right">
+                        <div class="numeral">04</div>
+                        <h3>הפצה</h3>
+                        <p>שידור וניתוח ביצועים למקסום השפעה.</p>
+                    </div>
+                 </div>
+            </section>
+
+            <section id="what-we-do">
+                <h2 class="section-title">פתרונות מתקדמים</h2>
+                <div class="space-y-20">
+                    <div class="service-row">
+                        <div class="service-text">
+                            <h3>הפקות וידאו ושידורים חיים</h3>
+                            <p>שידור חי, המצולם ומשודר בו-זמנית, הוא התקדמות טכנולוגית מדהימה. עם ניסיון של אלפי שעות שידור, אנו מביאים את היכולות של עולם הטלוויזיה לכל פלטפורמה, ומאפשרים לכם להעביר את התוכן שלכם בצורה אופטימלית.</p>
+                        </div>
+                        <div class="service-image">
+                            <img src="https://images.unsplash.com/photo-1516961642265-531546e84af2?q=80&w=1000&auto=format&fit=crop" alt="הפקת וידאו בשידור חי">
+                        </div>
+                    </div>
+
+                    <div class="service-row reverse">
+                         <div class="service-text">
+                            <h3>הפקות Multi-Camera וניידת שידור</h3>
+                            <p>יש אירועים הדורשים הפקה מורכבת. אנו מתמחים בהפקות מרובות מצלמות המאפשרות נקודות מבט מרובות. ניידת השידור המודולרית שלנו מצוידת במערכות בקרת וידאו מתקדמות לשידור באיכות 4K.</p>
+                        </div>
+                        <div class="service-image">
+                            <img src="https://images.unsplash.com/photo-1492691527719-9d1e07e534b4?q=80&w=1000&auto=format&fit=crop" alt="ניידת שידור">
+                        </div>
+                    </div>
+                    
+                    <div class="service-row">
+                        <div class="service-text">
+                            <h3>כנסים וירטואליים ואולפנים ניידים</h3>
+                            <p>אנו חלוצים בתחום הכנסים הווירטואליים. בנוסף, אולפן השידורים שלנו יכול להגיע אליכם – למשרד, הביתה או לכל מקום אחר, עם כל הציוד המקצועי הנדרש.</p>
+                        </div>
+                        <div class="service-image">
+                            <img src="https://images.unsplash.com/photo-1531482615713-2afd69097998?q=80&w=1000&auto=format&fit=crop" alt="כנס וירטואלי באולפן נייד">
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section id="services">
+                <h2 class="section-title">חבילות שירות</h2>
+                <div data-persona-content="production" class="active">
+                    <div class="pricing-grid">
+                        <div class="pricing-card">
+                            <h3>מפעיל טכני מומחה</h3>
+                            <div class="price">החל מ-2,500 ₪</div>
+                            <ul>
+                                <li>פתרון להפקות עם מנהל קיים</li>
+                                <li>ביצוע טכני מדויק ואמין</li>
+                                <li>שירות פרטני ותפעול שוטף</li>
+                            </ul>
+                            <a href="#contact" class="cta-btn">צור קשר</a>
+                        </div>
+                        <div class="pricing-card" style="border-color: var(--accent1);">
+                            <h3>מפיק / במאי טכני</h3>
+                            <div class="price">החל מ-4,500 ₪</div>
+                            <ul>
+                                <li>אחריות מלאה על ניהול השידור</li>
+                                <li>תכנון ביצוע להפקות מורכבות</li>
+                                <li>שילוב אוטומציה וניתוב</li>
+                            </ul>
+                            <a href="#contact" class="cta-btn">צור קשר</a>
+                        </div>
+                        <div class="pricing-card">
+                            <h3>מנהל טכני / יועץ</h3>
+                            <div class="price">תמחור פרויקטלי</div>
+                            <ul>
+                                <li>שותפות אסטרטגית מלאה</li>
+                                <li>תכנון אינטגרטיבי מקיף</li>
+                                <li>ייעוץ ובקרת איכות</li>
+                            </ul>
+                            <a href="#contact" class="cta-btn">צור קשר</a>
+                        </div>
+                    </div>
+                </div>
+            </section>
+            
+            <section id="contact">
+                <h2 class="section-title">בואו נדבר</h2>
+                <p class="section-subtitle">מוכנים לשמוע על האתגרים שלכם ולהציע פתרונות שישדרגו לכם את האירוע.</p>
+                <div class="text-center mt-8">
+                     <p class="text-2xl font-bold mb-2 text-[var(--text-primary)]">אוריין אדלני</p>
+                     <div class="flex justify-center gap-6 text-lg mb-6">
+                        <a href="tel:054-255-9027" class="hover:text-[var(--accent1)] transition-colors text-[var(--text-secondary)]">054-255-9027</a>
+                        <a href="mailto:EdelenviProductions@gmail.com" class="hover:text-[var(--accent1)] transition-colors text-[var(--text-secondary)]">EdelenviProductions@gmail.com</a>
+                     </div>
+                    <a href="mailto:EdelenviProductions@gmail.com" class="cta-btn">שלחו לנו מייל</a>
+                </div>
+            </section>
+        </main>
+
+        <footer>
+            <div class="footer-grid">
+              <div class="footer-col">
+                <h5>PsychoFlash</h5>
+                <p>חברה להפקות מדיה, שידורים חיים ופיתוח טכנולוגיות. אנו משלבים יצירתיות, איכות טכנית וחזון עתידי בכל פרויקט.</p>
+              </div>
+              <div class="footer-col">
+                <h5>ניווט מהיר</h5>
+                <ul>
+                  <li><a href="#home">ראשי</a></li>
+                  <li><a href="#work">עבודות</a></li>
+                  <li><a href="#services">שירותים</a></li>
+                  <li><a href="#contact">צור קשר</a></li>
+                </ul>
+              </div>
+              <div class="footer-col">
+                <h5>שירותים</h5>
+                <ul>
+                  <li>שידור חי</li>
+                  <li>הפקות וידאו</li>
+                  <li>אולפני XR</li>
+                  <li>השכרת ציוד</li>
+                </ul>
+              </div>
+              <div class="footer-col">
+                <h5>מדיניות</h5>
+                <ul>
+                  <li><a href="#">פרטיות</a></li>
+                  <li><a href="#">תנאי שימוש</a></li>
+                </ul>
+              </div>
+            </div>
+            <div class="text-center mt-10 pt-6 border-t border-[rgba(255,255,255,0.1)]">
+                <p>&copy; <span id="footer-year"></span> PsychoFlash Productions. כל הזכויות שמורות.</p>
+            </div>
+        </footer>
+    </div>
+
+    <!-- Mute Button -->
+     <button id="mute-btn" class="fixed bottom-8 left-8 bg-black/60 rounded-full p-3 text-white hover:bg-black/80 transition-colors border border-white/10 backdrop-blur">
+        <svg id="volume-icon" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon><path d="M15.54 8.46a5 5 0 0 1 0 7.07"></path><path d="M19.07 4.93a10 10 0 0 1 0 14.14"></path></svg>
+        <svg id="volume-x-icon" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="hidden"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon><line x1="22" x2="16" y1="9" y2="15"></line><line x1="16" x2="22" y1="9" y2="15"></line></svg>
+    </button>
+
+    <!-- Scripts -->
+    <script src="https://www.youtube.com/iframe_api"></script>
+    <script>
+        let isMuted = true;
+        let playerA, playerB, activePlayer = 'A', transitionTimeout;
+        let isPlayerAReady = false, isPlayerBReady = false, isSequenceStarted = false;
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const state = { activeSection: 'home', activePersona: 'production' };
+            const muteBtn = document.getElementById('mute-btn');
+            const volumeIcon = document.getElementById('volume-icon');
+            const volumeXIcon = document.getElementById('volume-x-icon');
+            const playerWrapper = document.getElementById('player-wrapper');
+            const personaSelector = document.getElementById('persona-selector');
+            const themeToggleBtn = document.getElementById('theme-toggle');
+            const sunIcon = document.getElementById('theme-icon-sun');
+            const moonIcon = document.getElementById('theme-icon-moon');
+            const htmlEl = document.documentElement;
+            const mobileMenuBtn = document.getElementById('mobile-menu-btn');
+            const mobileMenuCloseBtn = document.getElementById('mobile-menu-close-btn');
+            const mobileMenuContent = document.getElementById('mobile-menu-content');
+            
+            // Video Database
+            const videoPool = [
+                 { videoId: '_rv2sMdyCpg', duration: 258 }, 
+                 { videoId: 'Z3oO_GmtFfg', duration: 112 },
+                 { videoId: 'px7UwM8QDDU', duration: 133 }, 
+                 { videoId: 'd2_lJ42GuZ0', duration: 153 },
+                 { videoId: 'pMhajv-n9K8', duration: 139 },
+                 { videoId: '2w2GvxyIlt4', duration: 111 },
+                 { videoId: 'WY1tpqlikfw', duration: 133 }
+            ];
+
+            const swirls = {
+                s1: document.querySelector('.swirl1'),
+                s2: document.querySelector('.swirl2'),
+                s3: document.querySelector('.swirl3'),
+                s4: document.querySelector('.swirl4'),
+            };
+
+            const updateSwirlsVisibility = (sectionId) => {
+                Object.values(swirls).forEach(swirl => swirl.style.opacity = '0');
+                switch (sectionId) {
+                    case 'home': swirls.s1.style.opacity = '0.8'; swirls.s2.style.opacity = '0.6'; break;
+                    case 'clients': case 'stats': swirls.s3.style.opacity = '0.15'; break;
+                    case 'dna': swirls.s3.style.opacity = '0.2'; break;
+                    case 'process': swirls.s1.style.opacity = '0.15'; swirls.s4.style.opacity = '0.15'; break;
+                    case 'what-we-do': swirls.s2.style.opacity = '0.15'; swirls.s3.style.opacity = '0.15'; break;
+                    case 'services': swirls.s4.style.opacity = '0.2'; break;
+                    case 'contact': swirls.s1.style.opacity = '0.15'; break;
+                }
+            };
+
+            // Theme Logic
+            const applyTheme = (theme) => {
+                if (theme === 'dark') {
+                    htmlEl.classList.add('dark');
+                    sunIcon.classList.remove('hidden');
+                    moonIcon.classList.add('hidden');
+                } else {
+                    htmlEl.classList.remove('dark');
+                    sunIcon.classList.add('hidden');
+                    moonIcon.classList.remove('hidden');
+                }
+            };
+
+            const toggleTheme = () => {
+                const newTheme = htmlEl.classList.contains('dark') ? 'light' : 'dark';
+                applyTheme(newTheme);
+                localStorage.setItem('theme', newTheme);
+            };
+            
+            themeToggleBtn.addEventListener('click', toggleTheme);
+            const storedTheme = localStorage.getItem('theme');
+            const isNight = new Date().getHours() < 6 || new Date().getHours() > 18;
+            applyTheme(storedTheme || (isNight ? 'dark' : 'light'));
+            
+            // Mobile Menu
+            mobileMenuBtn.addEventListener('click', () => mobileMenuContent.classList.remove('hidden'));
+            mobileMenuCloseBtn.addEventListener('click', () => mobileMenuContent.classList.add('hidden'));
+            document.querySelectorAll('[data-navlink-mobile]').forEach(link => {
+                link.addEventListener('click', () => mobileMenuContent.classList.add('hidden'));
+            });
+            
+            // Player Controls
+            muteBtn.addEventListener('click', () => {
+                isMuted = !isMuted;
+                volumeIcon.classList.toggle('hidden', isMuted);
+                volumeXIcon.classList.toggle('hidden', !isMuted);
+                if (playerA && typeof playerA.mute === 'function') isMuted ? playerA.mute() : playerA.unMute();
+                if (playerB && typeof playerB.mute === 'function') isMuted ? playerB.mute() : playerB.unMute();
+            });
+
+            // Intersection Observer
+            const updateActiveNavlinkUI = () => {
+                document.querySelectorAll('a[data-navlink]').forEach(link => {
+                    link.classList.toggle('active-link', link.dataset.navlink === state.activeSection);
+                });
+            };
+
+            const sectionObserver = new IntersectionObserver(entries => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        entry.target.classList.add('visible');
+                        
+                        if (state.activeSection !== entry.target.id) {
+                            state.activeSection = entry.target.id;
+                            updateActiveNavlinkUI();
+                            updateSwirlsVisibility(entry.target.id);
+                            
+                            // Trigger transition on section change
+                            if (isSequenceStarted) performTransition();
+
+                            // Adjust player opacity
+                            if (entry.target.id === 'home') {
+                                document.body.classList.add('hero-active');
+                            } else {
+                                document.body.classList.remove('hero-active');
+                            }
+                        }
+                    }
+                });
+            }, { rootMargin: "-40% 0px -40% 0px", threshold: 0.1 });
+             
+            document.querySelectorAll('main > section[id]').forEach(section => sectionObserver.observe(section));
+            
+            document.getElementById('footer-year').textContent = new Date().getFullYear();
+            
+            // Populate Logos
+            const clients = [
+                 { logo: 'https://go-live.co.il/wp-content/uploads/2021/11/logo-strauss2.png' }, 
+                 { logo: 'https://go-live.co.il/wp-content/uploads/2021/11/%D7%9C%D7%95%D7%92%D7%95-%D7%9E%D7%95%D7%91%D7%99%D7%9C%D7%90%D7%99-1.png' },
+                 { logo: 'https://go-live.co.il/wp-content/uploads/2021/11/Wix.com_Logo-1.png' }, 
+                 { logo: 'https://go-live.co.il/wp-content/uploads/2021/11/Microsoft_logo_2012.svg_-1.png' },
+                 { logo: 'https://go-live.co.il/wp-content/uploads/2021/11/1280px-Poalim2018.svg_-1.png' },
+                 { logo: 'https://go-live.co.il/wp-content/uploads/2021/11/2560px-ShufersalLogo.svg_-1.png' },
+                 { logo: 'https://go-live.co.il/wp-content/uploads/2021/11/assuta_logo-1.png' }
+            ];
+            const logoContainer = document.getElementById('logo-container');
+            if (logoContainer) {
+                const createLogo = (url) => {
+                    const img = document.createElement('img');
+                    img.src = url; img.className = 'mx-8 h-12 object-contain transition-all duration-300';
+                    return img;
+                };
+                clients.forEach(c => logoContainer.appendChild(createLogo(c.logo)));
+                clients.forEach(c => logoContainer.appendChild(createLogo(c.logo))); // Duplicate for scroll
+            }
+            
+            // YouTube Logic
+            window.onYouTubeIframeAPIReady = () => {
+                const playerVars = { autoplay: 1, controls: 0, showinfo: 0, rel: 0, modestbranding: 1, loop: 1, playsinline: 1, disablekb: 1, fs: 0, mute: 1 };
+                playerA = new YT.Player('player-container-a', { playerVars, events: { onReady: onPlayerReady, onStateChange: onPlayerStateChange } });
+                playerB = new YT.Player('player-container-b', { playerVars, events: { onReady: onPlayerReady, onStateChange: onPlayerStateChange } });
+            };
+
+            window.onPlayerReady = (event) => {
+                event.target.mute();
+                if (event.target === playerA) isPlayerAReady = true;
+                if (event.target === playerB) isPlayerBReady = true;
+                if (isPlayerAReady && isPlayerBReady && !isSequenceStarted) {
+                     isSequenceStarted = true;
+                     loadNextVideo(playerA);
+                     loadNextVideo(playerB);
+                     playerA.getIframe().parentElement.style.opacity = 1;
+                }
+            };
+
+            window.onPlayerStateChange = (event) => {
+                // Ensure looping
+                if (event.data === YT.PlayerState.ENDED) {
+                    event.target.playVideo();
+                }
+            };
+
+            window.loadNextVideo = (player) => {
+                const clip = videoPool[Math.floor(Math.random() * videoPool.length)];
+                const start = 10; 
+                const end = start + 15; // 15s clips
+                player.loadVideoById({ videoId: clip.videoId, startSeconds: start, endSeconds: end });
+            };
+
+            window.performTransition = () => {
+                const active = activePlayer === 'A' ? playerA : playerB;
+                const next = activePlayer === 'A' ? playerB : playerA;
+                const nextDiv = activePlayer === 'A' ? 'player-container-b' : 'player-container-a';
+                const currDiv = activePlayer === 'A' ? 'player-container-a' : 'player-container-b';
+                
+                loadNextVideo(next);
+                // Simple crossfade
+                document.getElementById(nextDiv).style.opacity = 1;
+                document.getElementById(currDiv).style.opacity = 0;
+                
+                activePlayer = activePlayer === 'A' ? 'B' : 'A';
+            };
+        });
+    </script>
+</body>
+</html>
