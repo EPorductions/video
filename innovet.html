@@ -67,7 +67,7 @@
             to { transform: rotate(360deg); }
         }
         .animate-spin-slow {
-            animation: spin-slow 20s linear infinite;
+            animation: spin-slow 60s linear infinite;
         }
 
         /* Dropdown Hover Logic */
@@ -103,8 +103,14 @@
         }
     </script>
 </head>
-<body class="antialiased">
-    <div id="root"></div>
+<body class="antialiased flex flex-col min-h-screen relative">
+    
+    <!-- Static Background Image -->
+    <div class="fixed inset-0 z-0 flex items-center justify-center pointer-events-none overflow-hidden">
+        <img src="./INNOVET_ICON-05linear-1.webp" alt="" class="w-[120vw] max-w-none opacity-5 grayscale" />
+    </div>
+
+    <div id="root" class="flex flex-col min-h-screen z-10 relative"></div>
 
     <script type="text/babel">
         const { useState, useEffect, useRef } = React;
@@ -149,9 +155,6 @@
         );
         const Download = ({size=24, className, strokeWidth=2}) => (
             <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={strokeWidth} strokeLinecap="round" strokeLinejoin="round" className={className}><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" x2="12" y1="15" y2="3"/></svg>
-        );
-        const Globe = ({size=24, className, strokeWidth=2}) => (
-            <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={strokeWidth} strokeLinecap="round" strokeLinejoin="round" className={className}><circle cx="12" cy="12" r="10"/><line x1="2" x2="22" y1="12" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
         );
         const ChevronDown = ({size=24, className, strokeWidth=2}) => (
             <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={strokeWidth} strokeLinecap="round" strokeLinejoin="round" className={className}><polyline points="6 9 12 15 18 9"></polyline></svg>
@@ -318,10 +321,10 @@
                         setLoading(true);
                         try {
                             const SHEET_NAMES = {
-                                agendaEn: 'Agenda ', // Space at end is crucial based on files
+                                agendaEn: 'Agenda ',
                                 agendaHe: 'Agenda_he',
-                                delivEn: 'Deliverabels', // Typo in file name
-                                delivHe: 'Deliverabels_he', // Typo in file name
+                                delivEn: 'Deliverabels',
+                                delivHe: 'Deliverabels_he',
                                 officeEn: 'Office Hours',
                                 officeHe: 'Office Hours_he',
                                 calEn: 'Calendar',
@@ -349,18 +352,9 @@
                                 const mergedAgenda = [];
                                 const maxRows = Math.max(agendaEnT.length, agendaHeT.length);
                                 
-                                // Skip row 0 (Headers: Week 1, Week 2...)
                                 for (let i = 1; i < maxRows; i++) {
                                     const rowEn = agendaEnT[i] || [];
                                     const rowHe = agendaHeT[i] || [];
-                                    
-                                    // Structure based on CSV provided:
-                                    // Row 0: Week # (Header)
-                                    // Row 1: Phase (Ideation month...)
-                                    // Row 2: Subject
-                                    // Row 3: Goal
-                                    // Row 4: Tools
-                                    // Row 5: Milestone
                                     
                                     if (!rowEn[2] && !rowHe[2]) continue;
 
@@ -384,21 +378,25 @@
                             if (delivEnRaw && delivHeRaw) {
                                 const mergedDeliv = [];
                                 const maxRows = Math.max(delivEnRaw.length, delivHeRaw.length);
-                                // Skip header row
                                 for (let i = 1; i < maxRows; i++) {
                                     const rowEn = delivEnRaw[i] || [];
                                     const rowHe = delivHeRaw[i] || [];
                                     
-                                    // CSV Structure from file: Deliverables(A), Due Date(B), Materials(C), Empty(D), Links(E)
                                     if (!rowEn[0] && !rowHe[0]) continue;
 
+                                    let link = rowEn[4] || rowHe[4] || "#";
+                                    if (!link.startsWith("http")) {
+                                         if (rowEn[5] && rowEn[5].startsWith("http")) link = rowEn[5];
+                                         else if (rowHe[5] && rowHe[5].startsWith("http")) link = rowHe[5];
+                                    }
+
                                     mergedDeliv.push({
-                                        week: rowEn[1] || rowHe[1] || "", // Week in Col B
-                                        task_en: rowEn[0] || "", // Task Name in Col A
+                                        week: rowEn[1] || rowHe[1] || "", 
+                                        task_en: rowEn[0] || "", 
                                         task_he: rowHe[0] || "",
-                                        desc_en: rowEn[0] || "", // Description is same as task name usually
+                                        desc_en: rowEn[0] || "", 
                                         desc_he: rowHe[0] || "",
-                                        link: rowEn[4] || rowHe[4] || "#" // Links in Col E (Index 4)
+                                        link: link
                                     });
                                 }
                                 if (mergedDeliv.length > 0) setDeliverablesData(mergedDeliv);
@@ -411,28 +409,25 @@
                             if (officeEnRaw && officeHeRaw) {
                                 const mergedOffice = [];
                                 const maxRows = Math.max(officeEnRaw.length, officeHeRaw.length);
-                                // Skip header
                                 for (let i = 1; i < maxRows; i++) {
                                     const rowEn = officeEnRaw[i] || [];
                                     const rowHe = officeHeRaw[i] || [];
                                     
-                                    // CSV Structure: Name(A), Expertise(B), Linkedin(C), Dates(D), Reg(E), Email(F), Due Date(G)
                                     if (!rowEn[1] && !rowHe[1]) continue;
 
                                     mergedOffice.push({
-                                        week: rowEn[6] || rowHe[6] || "", // Week in Col G (Index 6)
-                                        topic_en: rowEn[1] || "", // Expertise in Col B
+                                        week: rowEn[6] || rowHe[6] || "", 
+                                        topic_en: rowEn[1] || "", 
                                         topic_he: rowHe[1] || "",
-                                        expert_en: rowEn[0] || "Expert", // Name in Col A
+                                        expert_en: rowEn[0] || "Expert", 
                                         expert_he: rowHe[0] || "מומחה",
-                                        email: rowEn[5] || rowHe[5] || "" // Email in Col F (Index 5)
+                                        email: rowEn[5] || rowHe[5] || "" 
                                     });
                                 }
                                 if (mergedOffice.length > 0) setOfficeHoursData(mergedOffice);
                             }
 
                             // --- Step D: Calendar ---
-                            // Advanced Grid Parser
                             const calEnRaw = await fetchSheetData(SHEET_NAMES.calEn);
                             const calHeRaw = await fetchSheetData(SHEET_NAMES.calHe);
 
@@ -443,44 +438,57 @@
                                     let currentMonth = "";
                                     const events = [];
                                     
+                                    const getVal = (r, c) => (rows[r] && rows[r][c]) ? rows[r][c].toString().trim() : "";
+
                                     for (let r = 0; r < rows.length; r++) {
                                         const row = rows[r];
-                                        // Try to detect Month Header row (usually spans across or is single cell)
                                         const rowStr = row.join(' ').trim();
-                                        if (rowStr.includes('202') && (rowStr.length < 30)) { 
-                                            // Likely a month header like "January 2026"
-                                            currentMonth = rowStr; 
-                                            continue;
+                                        
+                                        if (rowStr.includes('202') && (rowStr.length < 40)) {
+                                            const monthMatch = rowStr.match(/([a-zA-Z\u0590-\u05FF]+)\s+202\d/);
+                                            if (monthMatch) {
+                                                currentMonth = monthMatch[0]; 
+                                                continue;
+                                            }
+                                            
+                                            // FIXED SECTION FROM HERE
+                                            if (rowStr.match(/\d{4}-\d{2}-\d{2}/)) {
+                                                 const date = new Date(rowStr.match(/\d{4}-\d{2}-\d{2}/)[0]);
+                                                 currentMonth = date.toLocaleString(isHebrew ? 'he-IL' : 'en-US', { month: 'long', year: 'numeric' });
+                                                 continue;
+                                            }
                                         }
                                         
                                         for (let c = 0; c < row.length; c++) {
                                             const cell = row[c];
                                             if (!cell) continue;
                                             
-                                            // Detect Event Cell (Contains time or text)
-                                            // We look for a day number nearby to associate
-                                            // Rule: Day number is usually in the same cell index but row-1, or cell index-1 same row
+                                            const isDayNumber = !isNaN(parseInt(cell)) && cell.trim().length < 3;
+                                            const isWeekday = /Sunday|Monday|Tuesday|Wednesday|Thursday|Friday|Saturday|ראשון|שני|שלישי|רביעי|חמישי|שישי|שבת/i.test(cell);
                                             
-                                            // Simple heuristic: If cell has text but is not a number and not a weekday name
-                                            const isDayName = /Sunday|Monday|Tuesday|Wednesday|Thursday|Friday|Saturday|ראשון|שני|שלישי|רביעי|חמישי|שישי|שבת/i.test(cell);
-                                            const isNumber = !isNaN(parseInt(cell)) && cell.trim().length < 3;
-                                            
-                                            if (!isDayName && !isNumber && cell.length > 2) {
-                                                // Found potential event text
+                                            if (!isDayNumber && !isWeekday && cell.length > 3) {
                                                 let day = "";
-                                                // Check row above for day number
-                                                if (r > 0 && rows[r-1][c] && !isNaN(parseInt(rows[r-1][c]))) {
-                                                    day = rows[r-1][c];
+                                                let time = "";
+                                                
+                                                const cellAbove = getVal(r-1, c);
+                                                if (!isNaN(parseInt(cellAbove)) && cellAbove.length < 3) {
+                                                    day = cellAbove;
                                                 }
                                                 
-                                                if (day || cell.toLowerCase().includes('kickoff') || cell.includes('פתיחה')) {
-                                                     // Extract time if present
-                                                     const timeMatch = cell.match(/\d{1,2}:\d{2}/);
-                                                     const time = timeMatch ? timeMatch[0] : "";
-                                                     
+                                                const timeMatch = cell.match(/\d{1,2}:\d{2}/);
+                                                time = timeMatch ? timeMatch[0] : "";
+
+                                                if (day) {
+                                                     events.push({
+                                                         month: currentMonth || "TBD",
+                                                         day: day,
+                                                         event: cell,
+                                                         time: time
+                                                     });
+                                                } else if (cell.toLowerCase().includes("kickoff") || cell.includes("פתיחה")) {
                                                      events.push({
                                                          month: currentMonth || "JAN",
-                                                         day: day || "TBD",
+                                                         day: "4", 
                                                          event: cell,
                                                          time: time
                                                      });
@@ -494,24 +502,24 @@
                                 const enEvents = parseCalendarGrid(calEnRaw, false);
                                 const heEvents = parseCalendarGrid(calHeRaw, true);
                                 
-                                // Merge lists
                                 const maxEv = Math.max(enEvents.length, heEvents.length);
                                 for(let k=0; k<maxEv; k++) {
                                      const eEn = enEvents[k] || {};
                                      const eHe = heEvents[k] || {};
                                      
-                                     // Format Month/Day
-                                     let dateDisplay = "TBD";
-                                     if (eEn.day) {
-                                         const m = eEn.month ? eEn.month.split(' ')[0].substring(0,3).toUpperCase() : "JAN";
-                                         dateDisplay = `${eEn.day} ${m}`;
+                                     let monthDisplay = "JAN";
+                                     const rawMonth = eEn.month || eHe.month;
+                                     if (rawMonth) {
+                                         monthDisplay = rawMonth.split(' ')[0].substring(0,3).toUpperCase();
+                                         if (/[א-ת]/.test(monthDisplay)) monthDisplay = "HOD"; 
                                      }
 
                                      mergedCal.push({
-                                        date: dateDisplay,
+                                        date: `${eEn.day || eHe.day || "?"}`,
+                                        month: rawMonth,
                                         event_en: eEn.event || "",
                                         event_he: eHe.event || "",
-                                        time: eEn.time || "",
+                                        time: eEn.time || eHe.time || "",
                                         details_en: eEn.event || "",
                                         details_he: eHe.event || ""
                                      });
@@ -533,8 +541,7 @@
 
             // Fallback Data
             const initDefaultData = () => {
-                 // ... (Same fallback data as before for safety) ...
-                 // Kept brief here to save space, but it's fully implemented in logic above
+                 // Fallback placeholder
             };
 
             // ---------------- UI COMPONENTS ----------------
@@ -653,7 +660,6 @@
                                 <tr>
                                     <th className="px-8 py-6 text-lg font-bold border-b-2 border-innovet-black w-32">{t.week}</th>
                                     <th className="px-8 py-6 text-lg font-bold border-b-2 border-innovet-black">{t.task}</th>
-                                    <th className="px-8 py-6 text-lg font-bold border-b-2 border-innovet-black">{t.details}</th>
                                     <th className="px-8 py-6 text-lg font-bold border-b-2 border-innovet-black w-48">{t.status}</th>
                                 </tr>
                             </thead>
@@ -662,14 +668,15 @@
                                     <tr key={index} className="border-b border-innovet-gray hover:bg-[#FAFAFA] transition-colors">
                                         <td className="px-8 py-6 font-black text-2xl text-innovet-blue">{item.week}</td>
                                         <td className="px-8 py-6 text-xl font-bold">{lang === 'he' ? item.task_he : item.task_en}</td>
-                                        <td className="px-8 py-6 text-lg font-light text-gray-600 font-sans">{lang === 'he' ? item.desc_he : item.desc_en}</td>
                                         <td className="px-8 py-6">
-                                            {item.link && item.link !== "#" ? (
+                                            {item.link && item.link.startsWith('http') ? (
                                                 <a href={item.link} target="_blank" className="flex items-center gap-2 text-sm font-bold uppercase tracking-wider hover:text-innovet-yellow transition-colors">
                                                     {t.download} <Download size={16}/>
                                                 </a>
                                             ) : (
-                                                <span className="text-sm text-gray-400 font-bold uppercase tracking-wider">--</span>
+                                                <span className="text-sm text-gray-400 font-bold uppercase tracking-wider cursor-not-allowed opacity-50">
+                                                    {t.download} <Download size={16}/>
+                                                </span>
                                             )}
                                         </td>
                                     </tr>
@@ -720,8 +727,10 @@
                     {calendarHighlights.map((event, index) => (
                         <div key={index} className="flex flex-col md:flex-row bg-innovet-dark text-white border-b border-gray-800 hover:bg-[#1F1F1F] transition-colors group">
                             <div className={`md:w-48 p-8 ${isRTL ? 'md:border-l' : 'md:border-r'} border-gray-800 flex flex-col justify-center items-center md:items-start text-innovet-yellow text-center md:text-start`}>
-                                <span className="text-3xl md:text-5xl font-black leading-none block">{event.date ? event.date.split(' ')[0] : ""}</span>
-                                <span className="text-lg md:text-xl font-bold uppercase tracking-widest mt-2 block text-gray-500">{event.date ? event.date.split(' ')[1] : ""}</span>
+                                <span className="text-3xl md:text-5xl font-black leading-none block">{event.date}</span>
+                                <span className="text-lg md:text-xl font-bold uppercase tracking-widest mt-2 block text-gray-500">
+                                    {event.month ? event.month.split(' ')[0].substring(0,3).toUpperCase() : "JAN"}
+                                </span>
                             </div>
                             <div className="flex-grow p-8 flex flex-col justify-center">
                                 <div className="flex items-center gap-4 mb-2">
@@ -747,7 +756,7 @@
             );
 
             return (
-                <div className="min-h-screen bg-innovet-bg font-sans text-innovet-black">
+                <div className="min-h-screen font-sans text-innovet-black flex flex-col z-10 relative">
                     
                     {/* Header */}
                     <header className="bg-white sticky top-0 z-50 border-b border-innovet-gray">
@@ -774,7 +783,6 @@
                                 
                                 {/* Desktop Nav */}
                                 <nav className="hidden md:flex gap-8 h-full items-center">
-                                    <button onClick={scrollToTop} className="text-lg font-bold hover:text-innovet-blue transition-colors">{t.home}</button>
                                     <button onClick={scrollToTop} className="text-lg font-bold hover:text-innovet-blue transition-colors">{t.program}</button>
                                     
                                     {/* Subcategories Dropdown */}
@@ -808,9 +816,14 @@
                             </div>
 
                             <div className="flex items-center gap-4">
-                                {/* Language Toggle */}
-                                <button onClick={toggleLang} className="flex items-center gap-2 px-4 py-2 bg-innovet-bg hover:bg-gray-200 transition rounded-full font-bold text-sm uppercase">
-                                    <Globe size={18}/> {lang === 'he' ? 'EN' : 'HE'}
+                                {/* Language Toggle with Flags */}
+                                <button onClick={toggleLang} className="flex items-center gap-2 px-2 py-2 bg-innovet-bg hover:bg-gray-200 transition rounded-full font-bold text-sm uppercase">
+                                    <img 
+                                        src={lang === 'he' ? "./united-states.png" : "./israel.png"} 
+                                        alt={lang === 'he' ? "English" : "Hebrew"}
+                                        className="w-6 h-6 object-contain"
+                                    />
+                                    <span>{lang === 'he' ? 'EN' : 'HE'}</span>
                                 </button>
 
                                 {/* Mobile Menu Button */}
@@ -849,8 +862,8 @@
                             <img src="./INNOVET_LOGO_HOR_NEG-02-2.svg" alt="" className="w-full h-full object-cover" />
                         </div>
 
-                        {/* Starburst Decoration (Spinning) */}
-                        <div className="absolute -right-20 -top-20 z-0 opacity-80 pointer-events-none animate-spin-slow">
+                        {/* Starburst Decoration (Spinning) - High Opacity as requested */}
+                        <div className="absolute -right-20 -top-20 z-0 opacity-80 pointer-events-none animate-spin-slow mix-blend-overlay">
                              <img src="./INNOVET_ICON-05linear-1.webp" alt="" className="w-[600px] h-[600px]" />
                         </div>
 
@@ -874,7 +887,7 @@
                     </div>
 
                     {/* Main Content */}
-                    <main ref={mainContentRef} className="max-w-[1600px] mx-auto px-6 py-16 relative -mt-12">
+                    <main ref={mainContentRef} className="max-w-[1600px] mx-auto px-6 py-16 relative -mt-12 flex-grow">
                         
                         {/* Navigation Tabs */}
                         <div className="bg-white p-2 shadow-lg mb-12 flex flex-wrap md:inline-flex gap-2 relative z-20">
@@ -922,7 +935,7 @@
                     </main>
 
                     {/* Footer */}
-                    <footer className="bg-innovet-dark text-white py-16 border-t border-gray-800 relative z-10">
+                    <footer className="bg-innovet-dark text-white py-16 border-t border-gray-800 relative z-10 mt-auto">
                         <div className="max-w-[1600px] mx-auto px-6 flex flex-col md:flex-row justify-between items-center">
                             <div className={`text-center ${isRTL ? 'md:text-right' : 'md:text-left'} mb-8 md:mb-0`}>
                                 <h2 className="text-4xl font-black mb-2">INNOVET</h2>
