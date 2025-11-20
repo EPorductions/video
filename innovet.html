@@ -86,7 +86,7 @@
                     colors: {
                         innovet: {
                             black: '#191B1D',
-                            dark: '#17191A',
+                            dark: '#17191A', 
                             yellow: '#FFC700',
                             blue: '#1F63C7',
                             bg: '#F1F1F1',
@@ -103,6 +103,11 @@
 
     <script type="text/babel">
         const { useState, useEffect, useRef } = React;
+
+        // --- CONFIGURATION ---
+        // הכנס את ה-API KEY וה-Spreadsheet ID שלך כאן
+        const GOOGLE_API_KEY = ''; // <-- הכנס כאן את המפתח
+        const SPREADSHEET_ID = ''; // <-- הכנס כאן את מזהה הגיליון
 
         // --- Lucide-style Icons Components (Recreated as SVGs) ---
         const Layout = ({size=24, className, strokeWidth=2}) => (
@@ -235,6 +240,13 @@
             const [activeTab, setActiveTab] = useState('agenda');
             const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
             const [lang, setLang] = useState('he'); // 'he' or 'en'
+            const [loading, setLoading] = useState(false);
+            
+            // Data States
+            const [agendaData, setAgendaData] = useState([]);
+            const [deliverablesData, setDeliverablesData] = useState([]);
+            const [officeHoursData, setOfficeHoursData] = useState([]);
+            const [calendarHighlights, setCalendarHighlights] = useState([]);
 
             const mainContentRef = useRef(null);
 
@@ -265,149 +277,171 @@
                 document.documentElement.lang = lang;
             }, [lang, isRTL]);
 
-            // ---------------- DATA WITH TRANSLATIONS ----------------
-            const agendaMatrix = Array.from({ length: 19 }, (_, i) => {
-                const weekNum = i + 1;
-                let phase = t.phases.ideation;
-                if (weekNum >= 5) phase = t.phases.accelerator;
-                if (weekNum >= 16) phase = t.phases.launch;
 
-                let data = {
-                    week: weekNum,
-                    phase: phase,
-                    subject: "",
-                    tools: [],
-                    milestone: ""
+            // --- DATA FETCHING LOGIC ---
+
+            // Fetch data helper
+            const fetchSheetData = async (sheetName) => {
+                if (!GOOGLE_API_KEY || !SPREADSHEET_ID) return null;
+                try {
+                    const response = await fetch(`https://sheets.googleapis.com/v4/spreadsheets/${SPREADSHEET_ID}/values/${sheetName}?key=${GOOGLE_API_KEY}`);
+                    const data = await response.json();
+                    return data.values; // Returns array of arrays
+                } catch (error) {
+                    console.error(`Error fetching ${sheetName}:`, error);
+                    return null;
+                }
+            };
+
+            // Initialize Data (Fallback + Fetch)
+            useEffect(() => {
+                const loadData = async () => {
+                    // 1. Load Default (Hardcoded) Data FIRST (So UI isn't empty)
+                    initDefaultData();
+
+                    // 2. Attempt to Fetch from Google Sheets
+                    if (GOOGLE_API_KEY && SPREADSHEET_ID) {
+                        setLoading(true);
+                        try {
+                            // Agenda
+                            const agendaRaw = await fetchSheetData('Agenda');
+                            if (agendaRaw && agendaRaw.length > 1) {
+                                const rows = agendaRaw.slice(1);
+                                const formattedAgenda = rows.map(row => ({
+                                    week: row[0],
+                                    phase_he: row[1],
+                                    phase_en: row[2],
+                                    subject_he: row[3],
+                                    subject_en: row[4],
+                                    tools: row[5] ? row[5].split(',').map(s => s.trim()) : [],
+                                    milestone: row[6] || ""
+                                }));
+                                setAgendaData(formattedAgenda);
+                            }
+
+                            // Deliverables
+                            const delivRaw = await fetchSheetData('Deliverables');
+                            if (delivRaw && delivRaw.length > 1) {
+                                const formattedDeliv = delivRaw.slice(1).map(row => ({
+                                    week: row[0],
+                                    task_he: row[1],
+                                    task_en: row[2],
+                                    desc_he: row[3],
+                                    desc_en: row[4]
+                                }));
+                                setDeliverablesData(formattedDeliv);
+                            }
+
+                            // Office Hours
+                            const officeRaw = await fetchSheetData('OfficeHours');
+                            if (officeRaw && officeRaw.length > 1) {
+                                const formattedOffice = officeRaw.slice(1).map(row => ({
+                                    week: row[0],
+                                    topic_he: row[1],
+                                    topic_en: row[2],
+                                    expert_he: row[3],
+                                    expert_en: row[4]
+                                }));
+                                setOfficeHoursData(formattedOffice);
+                            }
+
+                            // Calendar
+                            const calRaw = await fetchSheetData('Calendar');
+                            if (calRaw && calRaw.length > 1) {
+                                const formattedCal = calRaw.slice(1).map(row => ({
+                                    date: row[0],
+                                    event_he: row[1],
+                                    event_en: row[2],
+                                    time: row[3],
+                                    details_he: row[4],
+                                    details_en: row[5]
+                                }));
+                                setCalendarHighlights(formattedCal);
+                            }
+
+                        } catch (e) {
+                            console.error("Error syncing with Google Sheets", e);
+                        } finally {
+                            setLoading(false);
+                        }
+                    }
                 };
 
-                // Bilingual Data Population
-                if (weekNum === 1) {
-                    data.subject = lang === 'he' ? "הגדרת ערך ליבה וזרימת משתמש" : "Core Value Definition & User Flow";
-                    data.tools = ["ChatGPT", "Perplexity"];
-                } else if (weekNum === 2) {
-                    data.subject = lang === 'he' ? "תעדוף פיצ'רים והיקף MVP" : "Feature Prioritization & MVP Scope";
-                    data.tools = ["Perplexity", "Semrush"];
-                } else if (weekNum === 3) {
-                    data.subject = lang === 'he' ? "ארכיטקטורה ותכנון מערכת" : "System Architecture & Planning";
-                    data.tools = ["Notion AI", "Miro AI"];
-                } else if (weekNum === 4) {
-                    data.subject = lang === 'he' ? "בנייה וחיזוק פונקציונליות" : "Building & Strengthening Functionality";
-                    data.tools = ["Gemini", "Perplexity"];
-                } else if (weekNum === 5) {
-                    data.subject = lang === 'he' ? "תיקונים, יציבות ובדיקות" : "Fixes, Stability & Testing";
-                    data.milestone = "Selection Pitch";
-                    data.tools = ["ChatGPT", "Figma AI"];
-                } else if (weekNum === 6) {
-                    data.subject = lang === 'he' ? "קידום ה-MVP" : "MVP Promotion";
-                    data.tools = ["Gemini"];
-                } else if (weekNum === 7) {
-                    data.subject = lang === 'he' ? "מודל עסקי וקניין רוחני" : "Business Model & IP";
-                    data.tools = ["Figma AI"];
-                } else if (weekNum === 8) {
-                    data.subject = lang === 'he' ? "מודלים אסטרטגיים" : "Strategic Models";
-                    data.tools = ["Notion AI", "Jira AI"];
-                } else if (weekNum === 9) {
-                    data.subject = lang === 'he' ? "ניהול ספרינטים" : "Sprint Management";
-                    data.tools = ["Figma AI", "Perplexity"];
-                } else if (weekNum === 10) {
-                    data.subject = lang === 'he' ? "עיצוב הצעת ערך" : "Value Proposition Design";
-                    data.tools = ["Excel Copilot"];
-                } else if (weekNum === 11) {
-                    data.subject = lang === 'he' ? "ניתוח שוק ומודל הכנסות" : "Market Analysis & Revenue Model";
-                    data.tools = ["Semrush", "ChatGPT"];
-                } else if (weekNum === 12) {
-                    data.subject = lang === 'he' ? "ניתוח מתחרים" : "Competitor Analysis";
-                    data.tools = ["Perplexity", "SimilarWeb"];
-                } else if (weekNum === 13) {
-                    data.subject = lang === 'he' ? "קידום MVP מתקדם" : "Advanced MVP Promotion";
-                    data.tools = ["GitHub Copilot", "v0.dev"];
-                } else if (weekNum === 14) {
-                    data.subject = lang === 'he' ? "יסודות המודל העסקי" : "Business Model Fundamentals";
-                    data.tools = ["ChatGPT"];
-                } else if (weekNum === 15) {
-                    data.subject = lang === 'he' ? "פיתוח עסקי ותקציב" : "Business Development & Budget";
-                    data.tools = ["Excel AI", "Claude"];
-                } else if (weekNum === 16) {
-                    data.subject = lang === 'he' ? "סיום פיתוח MVP" : "Finalizing MVP Development";
-                    data.tools = ["ChatGPT"];
-                    data.milestone = "Final Sprint";
-                } else if (weekNum === 17) {
-                    data.subject = lang === 'he' ? "מיתוג ומצגות משקיעים" : "Branding & Investor Decks";
-                    data.tools = ["Midjourney", "Gamma"];
-                } else if (weekNum === 18) {
-                    data.subject = lang === 'he' ? "סטוריטלינג ופיץ' סופי" : "Storytelling & Final Pitch";
-                    data.tools = ["Poised AI"];
-                } else if (weekNum === 19) {
-                    data.subject = lang === 'he' ? "יום הדמו (Demo Day)" : "Demo Day";
-                    data.milestone = "Demo Day";
-                    data.tools = [];
-                }
+                loadData();
+            }, []);
 
-                return data;
-            });
+            // Fallback Data Initialization (FULL CONTENT)
+            const initDefaultData = () => {
+                 const defaultAgenda = [
+                    { week: 1, phase_he: "שלב האידאציה (Ideation)", phase_en: "Ideation Phase", subject_he: "הגדרת ערך ליבה וזרימת משתמש", subject_en: "Core Value Definition & User Flow", tools: ["ChatGPT", "Perplexity"], milestone: "" },
+                    { week: 2, phase_he: "שלב האידאציה (Ideation)", phase_en: "Ideation Phase", subject_he: "תעדוף פיצ'רים והיקף MVP", subject_en: "Feature Prioritization & MVP Scope", tools: ["Perplexity", "Semrush"], milestone: "" },
+                    { week: 3, phase_he: "שלב האידאציה (Ideation)", phase_en: "Ideation Phase", subject_he: "ארכיטקטורה ותכנון מערכת", subject_en: "System Architecture & Planning", tools: ["Notion AI", "Miro AI"], milestone: "" },
+                    { week: 4, phase_he: "שלב האידאציה (Ideation)", phase_en: "Ideation Phase", subject_he: "בנייה וחיזוק פונקציונליות", subject_en: "Building & Strengthening Functionality", tools: ["Gemini", "Perplexity"], milestone: "" },
+                    { week: 5, phase_he: "אקסלרטור (Accelerator)", phase_en: "Accelerator Phase", subject_he: "תיקונים, יציבות ובדיקות", subject_en: "Fixes, Stability & Testing", tools: ["ChatGPT", "Figma AI"], milestone: "Selection Pitch" },
+                    { week: 6, phase_he: "אקסלרטור (Accelerator)", phase_en: "Accelerator Phase", subject_he: "קידום ה-MVP", subject_en: "MVP Promotion", tools: ["Gemini"], milestone: "" },
+                    { week: 7, phase_he: "אקסלרטור (Accelerator)", phase_en: "Accelerator Phase", subject_he: "מודל עסקי וקניין רוחני", subject_en: "Business Model & IP", tools: ["Figma AI"], milestone: "" },
+                    { week: 8, phase_he: "אקסלרטור (Accelerator)", phase_en: "Accelerator Phase", subject_he: "מודלים אסטרטגיים", subject_en: "Strategic Models", tools: ["Notion AI", "Jira AI"], milestone: "" },
+                    { week: 9, phase_he: "אקסלרטור (Accelerator)", phase_en: "Accelerator Phase", subject_he: "ניהול ספרינטים", subject_en: "Sprint Management", tools: ["Figma AI", "Perplexity"], milestone: "" },
+                    { week: 10, phase_he: "אקסלרטור (Accelerator)", phase_en: "Accelerator Phase", subject_he: "עיצוב הצעת ערך", subject_en: "Value Proposition Design", tools: ["Excel Copilot"], milestone: "" },
+                    { week: 11, phase_he: "אקסלרטור (Accelerator)", phase_en: "Accelerator Phase", subject_he: "ניתוח שוק ומודל הכנסות", subject_en: "Market Analysis & Revenue Model", tools: ["Semrush", "ChatGPT"], milestone: "" },
+                    { week: 12, phase_he: "אקסלרטור (Accelerator)", phase_en: "Accelerator Phase", subject_he: "ניתוח מתחרים", subject_en: "Competitor Analysis", tools: ["Perplexity", "SimilarWeb"], milestone: "" },
+                    { week: 13, phase_he: "אקסלרטור (Accelerator)", phase_en: "Accelerator Phase", subject_he: "קידום MVP מתקדם", subject_en: "Advanced MVP Promotion", tools: ["GitHub Copilot", "v0.dev"], milestone: "" },
+                    { week: 14, phase_he: "אקסלרטור (Accelerator)", phase_en: "Accelerator Phase", subject_he: "יסודות המודל העסקי", subject_en: "Business Model Fundamentals", tools: ["ChatGPT"], milestone: "" },
+                    { week: 15, phase_he: "אקסלרטור (Accelerator)", phase_en: "Accelerator Phase", subject_he: "פיתוח עסקי ותקציב", subject_en: "Business Development & Budget", tools: ["Excel AI", "Claude"], milestone: "" },
+                    { week: 16, phase_he: "השקה (Launch)", phase_en: "Launch Phase", subject_he: "סיום פיתוח MVP", subject_en: "Finalizing MVP Development", tools: ["ChatGPT"], milestone: "Final Sprint" },
+                    { week: 17, phase_he: "השקה (Launch)", phase_en: "Launch Phase", subject_he: "מיתוג ומצגות משקיעים", subject_en: "Branding & Investor Decks", tools: ["Midjourney", "Gamma"], milestone: "" },
+                    { week: 18, phase_he: "השקה (Launch)", phase_en: "Launch Phase", subject_he: "סטוריטלינג ופיץ' סופי", subject_en: "Storytelling & Final Pitch", tools: ["Poised AI"], milestone: "" },
+                    { week: 19, phase_he: "השקה (Launch)", phase_en: "Launch Phase", subject_he: "יום הדמו (Demo Day)", subject_en: "Demo Day", tools: [], milestone: "Demo Day" }
+                ];
+                setAgendaData(defaultAgenda);
 
-            const deliverablesData = [
-                { week: 1, task: lang === 'he' ? "גילוי בעיות וראיונות" : "Problem Discovery & Interviews", description: "Problem Discovery" },
-                { week: 2, task: lang === 'he' ? "טיוטת פתרון" : "Solution Draft", description: "Solution draft" },
-                { week: 3, task: lang === 'he' ? "הגדרת MVP" : "MVP Definition", description: "MVP definition" },
-                { week: 4, task: lang === 'he' ? "מחקר שוק" : "Market Research", description: "Market research" },
-                { week: 5, task: lang === 'he' ? "פיצ'ים לקבלה" : "Selection Pitches", description: "Pitching event" },
-                { week: 6, task: lang === 'he' ? "צוות ומנטורינג" : "Team & Mentoring", description: "Team & Needs" },
-                { week: 7, task: lang === 'he' ? "Lean Canvas" : "Lean Canvas", description: "One-Pager" },
-                { week: 8, task: lang === 'he' ? "הגדרת מוצר" : "Product Definition", description: "Product Definition" },
-                { week: 9, task: lang === 'he' ? "מדדי KPI" : "KPI Metrics", description: "Metrics" },
-                { week: 10, task: lang === 'he' ? "פרסונות" : "Personas", description: "User Personas" },
-                { week: 11, task: lang === 'he' ? "לקוחות יעד" : "Target Customers", description: "Target Customers" },
-                { week: 12, task: lang === 'he' ? "זרימת משתמש" : "User Flow", description: "User Flow" },
-                { week: 13, task: lang === 'he' ? "פיתוח עסקי" : "Business Dev", description: "BD Plan" },
-                { week: 14, task: lang === 'he' ? "גיוס כספים" : "Fundraising", description: "Funding Strategy" },
-                { week: 15, task: lang === 'he' ? "Data Room" : "Data Room", description: "Investor Deck" },
-                { week: 16, task: lang === 'he' ? "מצגת דמו" : "Demo Deck", description: "Demo Presentation" },
-                { week: 17, task: lang === 'he' ? "פיץ' סופי" : "Final Pitch", description: "Final Pitch" }
-            ];
+                setDeliverablesData([
+                    { week: 1, task_he: "גילוי בעיות וראיונות", task_en: "Problem Discovery & Interviews", desc_he: "Problem Discovery", desc_en: "Problem Discovery" },
+                    { week: 2, task_he: "טיוטת פתרון", task_en: "Solution Draft", desc_he: "Solution draft", desc_en: "Solution draft" },
+                    { week: 3, task_he: "הגדרת MVP", task_en: "MVP Definition", desc_he: "MVP definition", desc_en: "MVP definition" },
+                    { week: 4, task_he: "מחקר שוק", task_en: "Market Research", desc_he: "Market research", desc_en: "Market research" },
+                    { week: 5, task_he: "פיצ'ים לקבלה", task_en: "Selection Pitches", desc_he: "Pitching event", desc_en: "Pitching event" },
+                    { week: 6, task_he: "צוות ומנטורינג", task_en: "Team & Mentoring", desc_he: "Team & Needs", desc_en: "Team & Needs" },
+                    { week: 7, task_he: "Lean Canvas", task_en: "Lean Canvas", desc_he: "One-Pager", desc_en: "One-Pager" },
+                    { week: 8, task_he: "הגדרת מוצר", task_en: "Product Definition", desc_he: "Product Definition", desc_en: "Product Definition" },
+                    { week: 9, task_he: "מדדי KPI", task_en: "KPI Metrics", desc_he: "Metrics", desc_en: "Metrics" },
+                    { week: 10, task_he: "פרסונות", task_en: "Personas", desc_he: "User Personas", desc_en: "User Personas" },
+                    { week: 11, task_he: "לקוחות יעד", task_en: "Target Customers", desc_he: "Target Customers", desc_en: "Target Customers" },
+                    { week: 12, task_he: "זרימת משתמש", task_en: "User Flow", desc_he: "User Flow", desc_en: "User Flow" },
+                    { week: 13, task_he: "פיתוח עסקי", task_en: "Business Dev", desc_he: "BD Plan", desc_en: "BD Plan" },
+                    { week: 14, task_he: "גיוס כספים", task_en: "Fundraising", desc_he: "Funding Strategy", desc_en: "Funding Strategy" },
+                    { week: 15, task_he: "Data Room", task_en: "Data Room", desc_he: "Investor Deck", desc_en: "Investor Deck" },
+                    { week: 16, task_he: "מצגת דמו", task_en: "Demo Deck", desc_he: "Demo Presentation", desc_en: "Demo Presentation" },
+                    { week: 17, task_he: "פיץ' סופי", task_en: "Final Pitch", desc_he: "Final Pitch", desc_en: "Final Pitch" }
+                ]);
 
-            const officeHoursData = [
-                { week: 6, topic: lang === 'he' ? "אימון פיצ'ים" : "Pitch Training", expert: lang === 'he' ? "מומחה Storytelling" : "Storytelling Expert" },
-                { week: 11, topic: lang === 'he' ? "UX/UI Design" : "UX/UI Design", expert: lang === 'he' ? "מעצב מוצר בכיר" : "Senior Product Designer" },
-                { week: 12, topic: lang === 'he' ? "מודלים עסקיים" : "Business Models", expert: lang === 'he' ? "יועץ אסטרטגי" : "Strategy Consultant" },
-                { week: 16, topic: lang === 'he' ? "Tech Validation" : "Tech Validation", expert: lang === 'he' ? "CTO מלווה" : "Advisory CTO" },
-                { week: "18-19", topic: lang === 'he' ? "סטוריטלינג" : "Storytelling", expert: lang === 'he' ? "מומחה סטוריטלינג" : "Storytelling Expert" }
-            ];
+                setOfficeHoursData([
+                     { week: 6, topic_he: "אימון פיצ'ים", topic_en: "Pitch Training", expert_he: "מומחה Storytelling", expert_en: "Storytelling Expert" },
+                     { week: 11, topic_he: "UX/UI Design", topic_en: "UX/UI Design", expert_he: "מעצב מוצר בכיר", expert_en: "Senior Product Designer" },
+                     { week: 12, topic_he: "מודלים עסקיים", topic_en: "Business Models", expert_he: "יועץ אסטרטגי", expert_en: "Strategy Consultant" },
+                     { week: 16, topic_he: "Tech Validation", topic_en: "Tech Validation", expert_he: "CTO מלווה", expert_en: "Advisory CTO" },
+                     { week: "18-19", topic_he: "סטוריטלינג", topic_en: "Storytelling", expert_he: "מומחה סטוריטלינג", expert_en: "Storytelling Expert" }
+                ]);
 
+                setCalendarHighlights([
+                    { date: "04.01", event_he: "KICKOFF EVENT", event_en: "KICKOFF EVENT", time: "16:00 - 21:00", details_he: "אירוע פתיחה חגיגי, פאנל מייסדים וחלוקה לצוותים.", details_en: "Opening event, founders panel and team formation." },
+                    { date: "14.01", event_he: "TEAM FORMATION", event_en: "TEAM FORMATION", time: "14:00", details_he: "סדנת גיבוש צוותים ורעיונות ראשוניים.", details_en: "Team building workshop and initial ideas." },
+                    { date: "WEEK 5", event_he: "SELECTION DAY", event_en: "SELECTION DAY", time: "TBD", details_he: "יום המיונים לכניסה לשלב האקסלרטור.", details_en: "Selection day for the accelerator phase." },
+                    { date: "WEEK 19", event_he: "DEMO DAY", event_en: "DEMO DAY", time: "18:00", details_he: "אירוע הסיום והצגת המיזמים למשקיעים.", details_en: "Final event and presenting ventures to investors." }
+                ]);
+            };
+
+            // --- RENDER HELPERS ---
+            
             // Date logic fix
             const getDayFromDate = (dateStr) => {
+                if (!dateStr) return "";
                 if (dateStr.includes('.')) {
                     return dateStr.split('.')[0];
                 }
                 return dateStr.replace(/\D/g,'');
             };
 
-            const calendarHighlights = [
-                { 
-                    date: "04.01", 
-                    event: lang === 'he' ? "KICKOFF EVENT" : "KICKOFF EVENT", 
-                    time: "16:00 - 21:00", 
-                    details: lang === 'he' ? "אירוע פתיחה חגיגי, פאנל מייסדים וחלוקה לצוותים." : "Opening event, founders panel and team formation." 
-                },
-                { 
-                    date: "14.01", 
-                    event: lang === 'he' ? "TEAM FORMATION" : "TEAM FORMATION", 
-                    time: "14:00", 
-                    details: lang === 'he' ? "סדנת גיבוש צוותים ורעיונות ראשוניים." : "Team building workshop and initial ideas." 
-                },
-                { 
-                    date: "WEEK 5", 
-                    event: lang === 'he' ? "SELECTION DAY" : "SELECTION DAY", 
-                    time: "TBD", 
-                    details: lang === 'he' ? "יום המיונים לכניסה לשלב האקסלרטור." : "Selection day for the accelerator phase." 
-                },
-                { 
-                    date: "WEEK 19", 
-                    event: lang === 'he' ? "DEMO DAY" : "DEMO DAY", 
-                    time: "18:00", 
-                    details: lang === 'he' ? "אירוע הסיום והצגת המיזמים למשקיעים." : "Final event and presenting ventures to investors." 
-                }
-            ];
 
             // ---------------- UI COMPONENTS ----------------
 
@@ -446,7 +480,7 @@
                                     <th className={`sticky ${isRTL ? 'right-0' : 'left-0'} z-20 bg-innovet-dark p-6 text-2xl font-bold ${isRTL ? 'border-l' : 'border-r'} border-gray-700 min-w-[220px]`}>
                                         {t.week} / {t.category}
                                     </th>
-                                    {agendaMatrix.map((item) => (
+                                    {agendaData.map((item) => (
                                         <th key={item.week} className={`p-4 text-center min-w-[180px] ${isRTL ? 'border-l' : 'border-r'} border-gray-700`}>
                                             <div className="flex flex-col items-center">
                                                 <span className="text-innovet-yellow text-sm font-bold uppercase tracking-widest mb-1">{t.week}</span>
@@ -462,9 +496,9 @@
                                     <td className={`sticky ${isRTL ? 'right-0' : 'left-0'} z-10 bg-innovet-bg p-6 text-xl font-bold text-innovet-blue ${isRTL ? 'border-l' : 'border-r'} border-b border-[#D1D1D1]`}>
                                         {t.phase}
                                     </td>
-                                    {agendaMatrix.map((item, idx) => (
+                                    {agendaData.map((item, idx) => (
                                         <td key={idx} className={`p-4 text-sm font-bold text-innovet-blue text-center ${isRTL ? 'border-l' : 'border-r'} border-b border-[#D1D1D1]`}>
-                                            {item.phase}
+                                            {lang === 'he' ? item.phase_he : item.phase_en}
                                         </td>
                                     ))}
                                 </tr>
@@ -474,9 +508,9 @@
                                     <td className={`sticky ${isRTL ? 'right-0' : 'left-0'} z-10 bg-white group-hover:bg-[#FAFAFA] p-6 text-xl font-bold text-innovet-black ${isRTL ? 'border-l' : 'border-r'} border-innovet-gray`}>
                                         {t.subject}
                                     </td>
-                                    {agendaMatrix.map((item, idx) => (
+                                    {agendaData.map((item, idx) => (
                                         <td key={idx} className={`p-5 text-lg font-medium text-innovet-black ${isRTL ? 'border-l' : 'border-r'} border-innovet-gray align-top`}>
-                                            {item.subject}
+                                            {lang === 'he' ? item.subject_he : item.subject_en}
                                         </td>
                                     ))}
                                 </tr>
@@ -486,10 +520,10 @@
                                     <td className={`sticky ${isRTL ? 'right-0' : 'left-0'} z-10 bg-white group-hover:bg-[#FAFAFA] p-6 text-xl font-bold text-innovet-black ${isRTL ? 'border-l' : 'border-r'} border-innovet-gray`}>
                                         {t.tools}
                                     </td>
-                                    {agendaMatrix.map((item, idx) => (
+                                    {agendaData.map((item, idx) => (
                                         <td key={idx} className={`p-5 ${isRTL ? 'border-l' : 'border-r'} border-innovet-gray align-top`}>
                                             <div className="flex flex-wrap gap-2">
-                                                {item.tools.map((t, i) => (
+                                                {item.tools && item.tools.map((t, i) => (
                                                     <span key={i} className="inline-block px-2 py-1 bg-innovet-black text-white text-xs font-bold uppercase tracking-wide">
                                                         {t}
                                                     </span>
@@ -504,7 +538,7 @@
                                     <td className={`sticky ${isRTL ? 'right-0' : 'left-0'} z-10 bg-[#FFF8E1] p-6 text-xl font-bold text-innovet-black ${isRTL ? 'border-l' : 'border-r'} border-innovet-gray`}>
                                         {t.milestones}
                                     </td>
-                                    {agendaMatrix.map((item, idx) => (
+                                    {agendaData.map((item, idx) => (
                                         <td key={idx} className={`p-5 ${isRTL ? 'border-l' : 'border-r'} border-innovet-gray align-top h-full`}>
                                             {item.milestone && (
                                                 <div className="p-3 bg-innovet-yellow text-black text-sm font-bold text-center shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] border border-black">
@@ -540,8 +574,8 @@
                                 {deliverablesData.map((item, index) => (
                                     <tr key={index} className="border-b border-innovet-gray hover:bg-[#FAFAFA] transition-colors">
                                         <td className="px-8 py-6 font-black text-2xl text-innovet-blue">{item.week}</td>
-                                        <td className="px-8 py-6 text-xl font-bold">{item.task}</td>
-                                        <td className="px-8 py-6 text-lg font-light text-gray-600 font-sans">{item.description}</td>
+                                        <td className="px-8 py-6 text-xl font-bold">{lang === 'he' ? item.task_he : item.task_en}</td>
+                                        <td className="px-8 py-6 text-lg font-light text-gray-600 font-sans">{lang === 'he' ? item.desc_he : item.desc_en}</td>
                                         <td className="px-8 py-6">
                                             <button className="flex items-center gap-2 text-sm font-bold uppercase tracking-wider hover:text-innovet-yellow transition-colors">
                                                 {t.download} <Download size={16}/>
@@ -569,10 +603,10 @@
                                 </div>
                             </div>
                             <h3 className="text-3xl font-bold text-innovet-black mb-2 group-hover:text-innovet-blue transition-colors">
-                                {item.topic}
+                                {lang === 'he' ? item.topic_he : item.topic_en}
                             </h3>
                             <p className="text-xl text-gray-500 mb-8 font-light">
-                                {t.with} {item.expert}
+                                {t.with} {lang === 'he' ? item.expert_he : item.expert_en}
                             </p>
                             <button className="w-full py-4 bg-innovet-bg text-innovet-black font-bold text-lg uppercase hover:bg-innovet-yellow transition-colors flex justify-center items-center gap-2">
                                 {t.book} <ArrowIcon size={20} />
@@ -594,12 +628,12 @@
                             <div className="flex-grow p-8 flex flex-col justify-center">
                                 <div className="flex items-center gap-4 mb-2">
                                     <h3 className="text-3xl font-bold uppercase tracking-wide group-hover:text-innovet-yellow transition-colors">
-                                        {event.event}
+                                        {lang === 'he' ? event.event_he : event.event_en}
                                     </h3>
                                     {index === 0 && <span className="bg-innovet-blue px-2 py-0.5 text-xs font-bold uppercase">{t.upcoming}</span>}
                                 </div>
                                 <p className="text-gray-400 text-lg font-light font-sans max-w-2xl">
-                                    {event.details}
+                                    {lang === 'he' ? event.details_he : event.details_en}
                                 </p>
                             </div>
                             <div className={`p-8 flex items-center justify-end md:w-64`}>
@@ -754,28 +788,36 @@
 
                         {/* Dynamic Content */}
                         <div className="animate-fadeIn">
-                            {activeTab === 'agenda' && (
+                            {loading ? (
+                                <div className="flex justify-center items-center h-64">
+                                    <div className="animate-spin rounded-full h-16 w-16 border-t-4 border-b-4 border-innovet-blue"></div>
+                                </div>
+                            ) : (
                                 <>
-                                    <SectionTitle title={t.sectionJourney} icon={Target} />
-                                    <AgendaMatrixView />
-                                </>
-                            )}
-                            {activeTab === 'deliverables' && (
-                                <>
-                                    <SectionTitle title={t.sectionStudent} icon={CheckSquare} />
-                                    <TableDeliverables />
-                                </>
-                            )}
-                            {activeTab === 'office-hours' && (
-                                <>
-                                    <SectionTitle title={t.sectionExperts} icon={Users} />
-                                    <TableOfficeHours />
-                                </>
-                            )}
-                            {activeTab === 'calendar' && (
-                                <>
-                                    <SectionTitle title={t.sectionEvents} icon={Calendar} />
-                                    <CalendarView />
+                                    {activeTab === 'agenda' && (
+                                        <>
+                                            <SectionTitle title={t.sectionJourney} icon={Target} />
+                                            <AgendaMatrixView />
+                                        </>
+                                    )}
+                                    {activeTab === 'deliverables' && (
+                                        <>
+                                            <SectionTitle title={t.sectionStudent} icon={CheckSquare} />
+                                            <TableDeliverables />
+                                        </>
+                                    )}
+                                    {activeTab === 'office-hours' && (
+                                        <>
+                                            <SectionTitle title={t.sectionExperts} icon={Users} />
+                                            <TableOfficeHours />
+                                        </>
+                                    )}
+                                    {activeTab === 'calendar' && (
+                                        <>
+                                            <SectionTitle title={t.sectionEvents} icon={Calendar} />
+                                            <CalendarView />
+                                        </>
+                                    )}
                                 </>
                             )}
                         </div>
