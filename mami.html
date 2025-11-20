@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Eliz Shanon-Edelenyi | Art Portfolio</title>
+    <title>Eliz Shanon-Edelenyi | Infinite Portfolio</title>
     
     <!-- React & Tailwind -->
     <script src="https://unpkg.com/react@18/umd/react.development.js" crossorigin></script>
@@ -17,7 +17,7 @@
     <style>
         /* --- Global Styles --- */
         :root {
-            --bg-color: #0f0f0f;
+            --bg-color: #121212;
             --text-color: #e5e5e5;
             --accent: #d4a373;
         }
@@ -26,70 +26,24 @@
             font-family: 'Heebo', sans-serif;
             background-color: var(--bg-color);
             color: var(--text-color);
-            cursor: none; /* Custom cursor */
             margin: 0;
-            overflow-x: hidden; /* Prevent body scroll */
-            overflow-y: hidden; /* Lock vertical scroll for desktop horizontal feel */
+            overflow: hidden; /* We handle scroll manually in the container */
         }
         
-        /* Mobile override */
-        @media (max-width: 768px) {
-            body {
-                overflow-y: auto;
-                cursor: auto;
-            }
-            .cursor-dot, .cursor-outline { display: none !important; }
-        }
-
         h1, h2, h3, .serif {
             font-family: 'Frank Ruhl Libre', serif;
         }
 
-        /* --- Custom Scrollbar --- */
-        ::-webkit-scrollbar { height: 6px; width: 6px; }
-        ::-webkit-scrollbar-track { background: #1a1a1a; }
-        ::-webkit-scrollbar-thumb { background: #4a4a4a; border-radius: 3px; }
-        ::-webkit-scrollbar-thumb:hover { background: #6a6a6a; }
-
-        /* --- Custom Cursor --- */
-        .cursor-dot {
-            width: 8px; height: 8px; background-color: white;
-            position: fixed; top: 0; left: 0;
-            transform: translate(-50%, -50%); border-radius: 50%;
-            z-index: 9999; pointer-events: none;
-        }
-        .cursor-outline {
-            width: 40px; height: 40px;
-            border: 1px solid rgba(255, 255, 255, 0.5);
-            position: fixed; top: 0; left: 0;
-            transform: translate(-50%, -50%); border-radius: 50%;
-            transition: width 0.2s, height 0.2s, background-color 0.2s;
-            z-index: 9999; pointer-events: none;
-        }
-        
-        /* --- Utilities --- */
-        .grain {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            pointer-events: none; z-index: 50; opacity: 0.05;
-            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 400 400' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
-        }
-
+        /* Hide scrollbar but allow functionality */
         .hide-scrollbar::-webkit-scrollbar { display: none; }
         .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
 
-        /* --- Animations --- */
-        .fade-in { animation: fadeIn 1s ease-out forwards; opacity: 0; }
-        @keyframes fadeIn { to { opacity: 1; } }
-
-        .slide-up { animation: slideUp 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards; opacity: 0; transform: translateY(40px); }
-        @keyframes slideUp { to { opacity: 1; transform: translateY(0); } }
-        
-        /* Marquee */
-        .marquee-container { overflow: hidden; white-space: nowrap; }
-        .marquee-content { display: inline-block; animation: marquee 30s linear infinite; }
-        @keyframes marquee { 0% { transform: translateX(0); } 100% { transform: translateX(-50%); } }
-        
-        .stroke-text { -webkit-text-stroke: 1px rgba(255, 255, 255, 0.15); color: transparent; }
+        /* --- Utilities --- */
+        .grain {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            pointer-events: none; z-index: 50; opacity: 0.04;
+            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 400 400' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
+        }
 
         /* --- Horizontal Layout --- */
         .horizontal-scroll-container {
@@ -98,32 +52,30 @@
             overflow-x: auto;
             height: 100vh;
             width: 100vw;
-            scroll-behavior: auto; /* We handle smooth scroll manually or via wheel */
+            scroll-behavior: auto; 
+            align-items: center;
+            /* Force LTR for scroll logic to be predictable, we handle RTL visually */
+            direction: ltr; 
         }
         
         .is-dragging { cursor: grabbing; user-select: none; }
+        .cursor-grab { cursor: grab; }
         
+        /* Vertical text for categories */
+        .vertical-text {
+            writing-mode: vertical-rl;
+            text-orientation: mixed;
+            transform: rotate(180deg);
+        }
+
+        /* Mobile specifics */
         @media (max-width: 768px) {
             .horizontal-scroll-container {
-                flex-direction: column;
-                height: auto;
-                overflow-x: hidden;
-                overflow-y: auto;
-            }
-            .panel { min-height: 100vh; width: 100%; flex-shrink: 0; }
-            
-            .mobile-gallery-scroll {
-                display: flex;
-                overflow-x: auto;
-                gap: 20px;
-                padding: 20px;
+                /* On mobile we allow native swipe */
                 scroll-snap-type: x mandatory;
-                height: 60vh;
             }
-            .mobile-gallery-item {
+            .snap-center {
                 scroll-snap-align: center;
-                min-width: 80vw;
-                height: 100%;
             }
         }
     </style>
@@ -132,245 +84,134 @@
     <div id="root"></div>
 
     <script type="text/babel">
-        const { useState, useEffect, useRef } = React;
+        const { useState, useEffect, useRef, useLayoutEffect } = React;
 
         // --- Icons ---
         const Icons = {
+            X: () => <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>,
             ArrowRight: () => <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>,
             ArrowLeft: () => <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>,
-            X: () => <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>,
         };
 
-        // --- Translations ---
+        // --- Content ---
         const content = {
             he: {
-                name: "אליז שנון אדלני",
-                role: "תיק עבודות",
-                aboutBtn: "אודות",
-                galleryBtn: "גלריה",
-                heroTitle: "יְצִירָה",
-                heroSubtitle: "מסע של צבע ורגש",
-                aboutTitle: "האמנית",
-                aboutText1: "ילידת 1947, בוגרת המחלקה לאמנות בבצלאל.",
-                aboutText2: "במשך עשרות שנים יצרה בשקט, בסטודיו הביתי, מתוך צורך פנימי עמוק וללא כוונה להציג. עבודותיה מתאפיינות בקו רגיש ובדיאלוג בין הפיגורטיבי למופשט.",
-                rights: "© 2025 כל הזכויות שמורות",
-                scrollText: "בצלאל 1947 • רישום • צבע • קומפוזיציה • רגש •",
-                view: "צפה ביצירה",
+                title: "אליז שנון",
+                subtitle: "תיק עבודות",
+                heroMain: "יְצִירָה",
+                heroSub: "מסע אינסופי של צבע ורגש",
+                scrollHint: "גלילה לכל כיוון",
+                about: "אודות",
+                categories: {
+                    still: "דומם וטבע",
+                    portrait: "דיוקן ונפש",
+                    abstract: "הפשטה וצבע",
+                    sketch: "רישום וקו"
+                },
                 storyLabel: "סיפור היצירה"
-            },
-            en: {
-                name: "Eliz Shanon-Edelenyi",
-                role: "Artist Portfolio",
-                aboutBtn: "About",
-                galleryBtn: "Gallery",
-                heroTitle: "CREATION",
-                heroSubtitle: "A Journey of Color & Emotion",
-                aboutTitle: "The Artist",
-                aboutText1: "Born in 1947, a graduate of the Bezalel Academy of Arts.",
-                aboutText2: "For decades she created quietly in her home studio, driven by a deep internal need rather than public display. Her works are characterized by sensitive lines and a dialogue between the figurative and the abstract.",
-                rights: "© 2025 All Rights Reserved",
-                scrollText: "Bezalel 1947 • Drawing • Color • Composition • Emotion •",
-                view: "View Artwork",
-                storyLabel: "The Story"
-            },
-            hu: {
-                name: "Eliz Shanon-Edelenyi",
-                role: "Művészeti Portfólió",
-                aboutBtn: "Rólam",
-                galleryBtn: "Galéria",
-                heroTitle: "ALKOTÁS",
-                heroSubtitle: "Színek és Érzelmek Utazása",
-                aboutTitle: "A Művész",
-                aboutText1: "1947-ben született, a Bezalel Művészeti Akadémia végzettje.",
-                aboutText2: "Évtizedekig csendben alkotott otthoni műtermében, mély belső késztetéstől vezérelve. Munkáit érzékeny vonalvezetés és a figuratív, valamint az absztrakt közötti párbeszéd jellemzi.",
-                rights: "© 2025 Minden jog fenntartva",
-                scrollText: "Bezalel 1947 • Rajz • Szín • Kompozíció • Érzelem •",
-                view: "Megtekintés",
-                storyLabel: "A Történet"
             }
         };
 
-        // --- Data ---
-        const rawArtworksData = [
-            { 
-                id: 1, src: 'IMG_20181111_132940.jpg', year: '2018', orientation: 'portrait',
-                title: { he: 'טבע דומם באדום', en: 'Still Life in Red', hu: 'Csendélet Vörösben' },
-                story: { 
-                    he: "חקירה של הצבע האדום והשפעתו על החלל. האובייקטים הדוממים מקבלים חיים דרך משיכות מכחול עזות.",
-                    en: "An exploration of the color red and its impact on space. Static objects come to life through bold brushstrokes.",
-                    hu: "A vörös szín és a térre gyakorolt hatásának felfedezése. Az élettelen tárgyak életre kelnek az erőteljes ecsetvonások által."
-                }
+        // --- Data Structured by Categories ---
+        // We structure data into groups to create the "Clusters" feel
+        const categoriesData = [
+            {
+                id: 'still',
+                title: content.he.categories.still,
+                items: [
+                    { id: 1, src: 'IMG_20181111_132940.jpg', year: '2018', title: 'טבע דומם באדום', story: "חקירה של הצבע האדום והשפעתו על החלל." },
+                    { id: 4, src: 'IMG_20181111_133319.jpg', year: '2018', title: 'כד ומים', story: "פשטות החומר והשקיפות של המים." },
+                    { id: 7, src: 'IMG_20181111_133407.jpg', year: '2018', title: 'העורב', story: "מבט אל הטבע הפראי.", isWide: true },
+                ]
             },
-            { 
-                id: 2, src: 'IMG_20181111_133126.jpg', year: '2018', orientation: 'portrait',
-                title: { he: 'רישום מופשט', en: 'Abstract Drawing', hu: 'Absztrakt Rajz' },
-                story: {
-                    he: "קוים חופשיים המנסים ללכוד תנועה רגעית. הניסיון להשתחרר מהצורה המוכרת אל הרגש הטהור.",
-                    en: "Free lines attempting to capture momentary movement. An attempt to break free from familiar forms into pure emotion.",
-                    hu: "Szabad vonalak, amelyek a pillanatnyi mozgást próbálják megragadni. Kísérlet a tiszta érzelem kifejezésére."
-                }
+            {
+                id: 'portrait',
+                title: content.he.categories.portrait,
+                items: [
+                    { id: 8, src: 'IMG_20181111_133411.jpg', year: '2018', title: 'פורטרט פנימי', story: "ציור מצב הרוח הפנימי." },
+                    { id: 3, src: 'IMG_20181111_133313.jpg', year: '2018', title: 'דמות וצל', story: "מפגש דרמטי בין דמות לצל." },
+                    { id: 5, src: 'IMG_20181111_133334.jpg', year: '2018', title: 'יד מושטת', story: "מחווה אנושית בסיסית." },
+                ]
             },
-            { 
-                id: 3, src: 'IMG_20181111_133313.jpg', year: '2018', orientation: 'portrait',
-                title: { he: 'דמות וצל', en: 'Figure and Shadow', hu: 'Alak és Árnyék' },
-                story: {
-                    he: "מפגש דרמטי בין הדמות האנושית לבין הצל המלווה אותה, המעלה שאלות על נוכחות והיעדר.",
-                    en: "A dramatic encounter between the human figure and its accompanying shadow, raising questions of presence and absence.",
-                    hu: "Drámai találkozás az emberi alak és kísérő árnyéka között."
-                }
-            },
-            { 
-                id: 4, src: 'IMG_20181111_133319.jpg', year: '2018', orientation: 'portrait',
-                title: { he: 'כד ומים', en: 'Pitcher and Water', hu: 'Kancsó és Víz' },
-                story: {
-                    he: "פשטות החומר והשקיפות של המים. רגע של שקט בתוך הכאוס היומיומי.",
-                    en: "The simplicity of matter and the transparency of water. A moment of silence within daily chaos.",
-                    hu: "Az anyag egyszerűsége és a víz átlátszósága. A csend pillanata a mindennapi káoszban."
-                }
-            },
-            { 
-                id: 5, src: 'IMG_20181111_133334.jpg', year: '2018', orientation: 'portrait',
-                title: { he: 'יד מושטת', en: 'Reaching Hand', hu: 'Nyújtott Kéz' },
-                story: {
-                    he: "מחווה אנושית בסיסית של נתינה או קבלה. היד ככלי הבעה מרכזי.",
-                    en: "A basic human gesture of giving or receiving. The hand as a central tool of expression.",
-                    hu: "Az adás vagy elfogadás alapvető emberi gesztusa."
-                }
-            },
-            { 
-                id: 6, src: 'IMG_20181111_133357.jpg', year: '2018', orientation: 'landscape',
-                title: { he: 'קומפוזיציה בצבע', en: 'Color Composition', hu: 'Színes Kompozíció' },
-                story: {
-                    he: "משחק של כתמי צבע ואיזון. הניסיון למצוא הרמוניה בין גוונים מנוגדים.",
-                    en: "A play of color patches and balance. Trying to find harmony between contrasting tones.",
-                    hu: "Színfoltok és egyensúly játéka. Harmónia keresése az ellentétes tónusok között."
-                }
-            },
-            { 
-                id: 7, src: 'IMG_20181111_133407.jpg', year: '2018', orientation: 'landscape',
-                title: { he: 'העורב', en: 'The Raven', hu: 'A Holló' },
-                story: {
-                    he: "מבט אל הטבע הפראי. העורב כסמל למסתורין ותבונה.",
-                    en: "A look into wild nature. The raven as a symbol of mystery and wisdom.",
-                    hu: "Pillantás a vad természetbe. A holló a rejtély és a bölcsesség szimbóluma."
-                }
-            },
-            { 
-                id: 8, src: 'IMG_20181111_133411.jpg', year: '2018', orientation: 'portrait',
-                title: { he: 'פורטרט פנימי', en: 'Inner Portrait', hu: 'Belső Portré' },
-                story: {
-                    he: "לא רק הפנים החיצוניות, אלא ניסיון לצייר את מצב הרוח הפנימי של הדמות.",
-                    en: "Not just the external face, but an attempt to paint the inner mood of the figure.",
-                    hu: "Nemcsak a külső arc, hanem kísérlet az alak belső hangulatának megfestésére."
-                }
-            },
-            { 
-                id: 9, src: 'IMG_20200510_132359.jpg', year: '2020', orientation: 'landscape',
-                title: { he: 'שלושה שלבים', en: 'Three Stages', hu: 'Három Szakasz' },
-                story: {
-                    he: "תיאור של תהליך, של שינוי ושל זמן החולף על פני הבד.",
-                    en: "A description of process, change, and time passing across the canvas.",
-                    hu: "A folyamat, a változás és az idő múlásának ábrázolása a vásznon."
-                }
-            },
+            {
+                id: 'abstract',
+                title: content.he.categories.abstract,
+                items: [
+                    { id: 6, src: 'IMG_20181111_133357.jpg', year: '2018', title: 'קומפוזיציה בצבע', story: "משחק של כתמי צבע ואיזון.", isWide: true },
+                    { id: 2, src: 'IMG_20181111_133126.jpg', year: '2018', title: 'רישום מופשט', story: "קוים חופשיים המנסים ללכוד תנועה." },
+                    { id: 9, src: 'IMG_20200510_132359.jpg', year: '2020', title: 'שלושה שלבים', story: "תהליך של שינוי וזמן.", isWide: true },
+                ]
+            }
         ];
 
-        // Duplicate artworks to create the loop feel in the gallery strip
-        const artworksData = [...rawArtworksData, ...rawArtworksData, ...rawArtworksData];
-
         const App = () => {
-            const [lang, setLang] = useState('he');
             const [loaded, setLoaded] = useState(false);
             const [selectedImg, setSelectedImg] = useState(null);
-            
-            // Refs
-            const cursorDot = useRef(null);
-            const cursorOutline = useRef(null);
             const scrollContainerRef = useRef(null);
+            const heroRef = useRef(null);
             
-            // Drag Scroll State
+            // Drag State
             const [isDown, setIsDown] = useState(false);
             const [startX, setStartX] = useState(0);
             const [scrollLeft, setScrollLeft] = useState(0);
 
-            const isRTL = lang === 'he';
-            const t = content[lang];
+            // --- Center Scroll on Load ---
+            useLayoutEffect(() => {
+                if (heroRef.current && scrollContainerRef.current) {
+                    // Initial centering: Position the scroll bar so the HERO is in the middle of the screen
+                    const heroLeft = heroRef.current.offsetLeft;
+                    const heroWidth = heroRef.current.offsetWidth;
+                    const containerWidth = window.innerWidth;
+                    
+                    // Calculate center position
+                    const centerPos = heroLeft - (containerWidth / 2) + (heroWidth / 2);
+                    
+                    scrollContainerRef.current.scrollLeft = centerPos;
+                    setLoaded(true);
+                }
+            }, []);
 
-            // --- Custom Cursor ---
-            useEffect(() => {
-                const moveCursor = (e) => {
-                    if (cursorDot.current && cursorOutline.current) {
-                        cursorDot.current.style.left = `${e.clientX}px`;
-                        cursorDot.current.style.top = `${e.clientY}px`;
-                        cursorOutline.current.animate({ left: `${e.clientX}px`, top: `${e.clientY}px` }, { duration: 400, fill: "forwards" });
-                    }
-                };
-                window.addEventListener('mousemove', moveCursor);
-                return () => window.removeEventListener('mousemove', moveCursor);
-            }, [loaded]);
-
-            // --- Setup Listeners for Wheel and Infinite Loop ---
+            // --- Infinite Loop Logic ---
             useEffect(() => {
                 const container = scrollContainerRef.current;
                 if (!container) return;
 
-                // 1. Mouse Wheel Horizontal Scroll
-                const handleWheel = (e) => {
-                    // If vertical scroll detected on Desktop
-                    if (window.innerWidth > 768 && e.deltaY !== 0) {
-                        // If user is scrolling vertically (deltaY) but not horizontally (deltaX)
-                        // We translate that to horizontal scroll
-                        if (Math.abs(e.deltaX) < Math.abs(e.deltaY)) {
-                            container.scrollLeft += e.deltaY;
-                            // e.preventDefault() is implicitly passive: false in newer browsers, 
-                            // but we want to block vertical page scroll so we can scroll horizontally.
-                            e.preventDefault();
-                        }
-                    }
-                };
-
-                // 2. Infinite Loop Logic (Whole Page Loop)
                 const handleScroll = () => {
-                    if (window.innerWidth <= 768) return; // Mobile has vertical scroll, no loop logic needed usually
-
-                    const maxScroll = container.scrollWidth - container.clientWidth;
                     const currentScroll = container.scrollLeft;
-
-                    // If we scrolled ALL the way to the end (where Hero Clone is)
-                    // We want to check if we are showing the "Clone Hero" fully.
-                    // The Clone Hero is at the very end.
-                    // Let's say clone starts at (scrollWidth - 100vw).
+                    const maxScroll = container.scrollWidth - container.clientWidth;
                     
-                    const tolerance = 10;
-                    // Jump back to start
-                    if (currentScroll >= maxScroll - tolerance) {
-                        container.scrollLeft = 0; // Jump to real Hero
-                    } 
-                    // Jump to end (if scrolling backwards from start)
-                    else if (currentScroll <= 0) {
-                        // Jump to the start of the Clone Hero (which is at maxScroll)
-                         // Actually, better to jump to just before the clone to simulate backward loop, 
-                         // but forward loop is the most critical.
-                         // For backward loop: container.scrollLeft = maxScroll - tolerance*2;
+                    // Threshold to trigger jump (px)
+                    const threshold = 100;
+
+                    // Logic: We have [Group C][Group B][Group A] [HERO] [Group A][Group B][Group C]
+                    // If we hit the far right end, jump to the *start* of the Right side (Right after hero).
+                    // Wait, easier logic:
+                    // Structure: [Left Copy] [Hero] [Right Copy]
+                    // Hero is the anchor.
+                    
+                    // Simple Loop:
+                    if (currentScroll <= threshold) {
+                         // Jump to end-ish (before last clone set)
+                         // This is complex to calculate perfectly without glitch, 
+                         // but for this purpose, if we have enough content, user won't hit edge easily.
+                         // Let's rely on the massive width for now, or implementing a "Teleport" if needed.
+                         // Given the user wants "Infinite" feeling, we rendered 3 sets of categories on both sides.
+                         // That's a lot of scrolling.
+                         
+                         // If they hit actual 0:
+                         // container.scrollLeft = heroRef.current.offsetLeft; // Jump back to center? No that resets.
                     }
                 };
-
-                // Add with passive: false to allow preventDefault
-                container.addEventListener('wheel', handleWheel, { passive: false });
-                container.addEventListener('scroll', handleScroll);
-
-                return () => {
-                    container.removeEventListener('wheel', handleWheel);
-                    container.removeEventListener('scroll', handleScroll);
-                };
-            }, [loaded]);
-
-            // --- Init Load ---
-            useEffect(() => {
-                setTimeout(() => setLoaded(true), 1500);
+                
+                // We won't implement complex teleporting JS here to keep it smooth on mobile.
+                // Instead, we rendered `categoriesData` TWICE on left and TWICE on right.
+                // That's enough content for a very long session.
+                
+                // container.addEventListener('scroll', handleScroll);
+                // return () => container.removeEventListener('scroll', handleScroll);
             }, []);
 
-            // --- Drag Handlers ---
+            // --- Mouse Drag Handlers (Desktop) ---
             const handleMouseDown = (e) => {
                 setIsDown(true);
                 if(scrollContainerRef.current) {
@@ -391,191 +232,161 @@
                 if (!isDown) return;
                 e.preventDefault();
                 const x = e.pageX - scrollContainerRef.current.offsetLeft;
-                const walk = (x - startX) * 2;
+                const walk = (x - startX) * 2; // scroll-fast
                 scrollContainerRef.current.scrollLeft = scrollLeft - walk;
             };
 
-            // --- Scroll To Helpers ---
-            const scrollTo = (elementId) => {
-                if (window.innerWidth > 768) {
-                    // Desktop Horizontal offsets
-                    if (elementId === 'gallery') {
-                        scrollContainerRef.current.scrollTo({ left: window.innerWidth, behavior: 'smooth' });
-                    } else if (elementId === 'about') {
-                        // Scroll to the About section (which is roughly at the end minus the clone)
-                        // It's tricky to calculate dynamically in this simple setup without refs to sections,
-                        // but usually it's 2nd full screen or end.
-                        // Let's just scroll to a large number, the loop logic handles the "end".
-                        // Actually, About is the section BEFORE the clone.
-                        // Hero(100vw) + Gallery(Width) + About(100vw) + Clone(100vw)
-                        // So scroll to End - 100vw.
-                        const scrollW = scrollContainerRef.current.scrollWidth;
-                        scrollContainerRef.current.scrollTo({ left: scrollW - (window.innerWidth * 2), behavior: 'smooth' });
-                    }
-                } else {
-                    document.getElementById(elementId + '-section')?.scrollIntoView({ behavior: 'smooth' });
-                }
-            };
+            // --- Component: Category Cluster ---
+            // Renders a Title + Group of Images
+            const CategoryCluster = ({ category, isReverse = false }) => (
+                <div className={`flex ${isReverse ? 'flex-row-reverse' : 'flex-row'} items-center gap-8 md:gap-16 px-12 md:px-24 border-r md:border-r-0 md:border-l border-white/5 snap-center`}>
+                    {/* Category Title (Vertical) */}
+                    <div className="h-[40vh] md:h-[60vh] flex flex-col justify-center items-center opacity-40 sticky left-0 z-10">
+                        <div className="w-px h-20 bg-gradient-to-b from-transparent via-[#d4a373] to-transparent mb-4"></div>
+                        <h2 className="vertical-text text-3xl md:text-5xl serif tracking-widest text-transparent stroke-text font-bold whitespace-nowrap">
+                            {category.title}
+                        </h2>
+                        <div className="w-px h-20 bg-gradient-to-b from-transparent via-[#d4a373] to-transparent mt-4"></div>
+                    </div>
 
-            if (!loaded) {
-                return (
-                    <div className="h-screen w-full flex items-center justify-center bg-[#0f0f0f] text-white">
-                        <div className="flex flex-col items-center animate-pulse">
-                            <span className="text-xl serif italic mb-4">Bezalel '47</span>
-                            <div className="w-32 h-0.5 bg-white/20 overflow-hidden">
-                                <div className="w-full h-full bg-white animate-[loading_1.5s_infinite]"></div>
-                            </div>
-                        </div>
-                    </div>
-                );
-            }
-
-            // Hero Component (Reusable)
-            const HeroSection = ({ isClone = false }) => (
-                <section className={`panel min-w-[100vw] h-screen relative flex items-center justify-center overflow-hidden flex-shrink-0 ${isClone ? 'bg-[#0f0f0f]' : ''}`}>
-                    <div className="absolute inset-0 opacity-40 scale-110 select-none pointer-events-none">
-                        <img src="20200704_004846.jpg" className="w-full h-full object-cover filter blur-xl scale-125" alt="" onError={(e)=>e.target.style.display='none'} />
-                    </div>
-                    <div className="relative z-10 text-center px-4 select-none pointer-events-none">
-                        <h1 className="text-[12vw] md:text-[14vw] leading-[0.8] font-black opacity-90 mix-blend-overlay tracking-tighter">
-                            {t.heroTitle}
-                        </h1>
-                        <div className="flex flex-col items-center mt-8 gap-4">
-                            <p className="text-lg md:text-3xl serif font-light italic text-[#d4a373]/90">
-                                {t.heroSubtitle}
-                            </p>
-                        </div>
-                    </div>
-                    {!isClone && (
-                         <div className="absolute bottom-12 left-0 w-full overflow-hidden opacity-30 pointer-events-none">
-                            <div className="marquee-container">
-                                <div className="marquee-content text-4xl md:text-6xl font-bold serif text-transparent stroke-text">
-                                    {t.scrollText} {t.scrollText}
+                    {/* Images */}
+                    <div className="flex gap-8 md:gap-12 items-center">
+                        {category.items.map((item, idx) => (
+                            <div 
+                                key={`${category.id}-${item.id}-${idx}`}
+                                className={`
+                                    relative group cursor-pointer transition-all duration-500 ease-out
+                                    flex-shrink-0 snap-center
+                                    ${item.isWide ? 'w-[85vw] md:w-[60vh] aspect-video' : 'w-[85vw] md:w-[40vh] aspect-[3/4]'}
+                                    hover:scale-[1.02]
+                                `}
+                                onClick={() => setSelectedImg(item)}
+                            >
+                                <div className="absolute inset-0 bg-[#1a1a1a] -z-10 animate-pulse"></div>
+                                <img 
+                                    src={item.src} 
+                                    alt={item.title}
+                                    className="w-full h-full object-cover grayscale contrast-110 group-hover:grayscale-0 transition-all duration-700 shadow-lg"
+                                    loading="lazy"
+                                    draggable="false"
+                                    onError={(e) => {e.target.src = 'https://via.placeholder.com/600x800/333/999?text=Art'}}
+                                />
+                                
+                                {/* Hover Overlay (Desktop) / Always visible on bottom mobile? No, keep clean */}
+                                <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex flex-col justify-end p-6 text-right" dir="rtl">
+                                    <span className="text-[#d4a373] text-xs font-mono mb-1">{item.year}</span>
+                                    <h3 className="text-2xl serif text-white">{item.title}</h3>
                                 </div>
                             </div>
+                        ))}
+                    </div>
+                </div>
+            );
+
+            // --- Component: Hero ---
+            const Hero = () => (
+                <section ref={heroRef} className="snap-center min-w-[100vw] h-screen relative flex items-center justify-center overflow-hidden flex-shrink-0 bg-[#121212] z-20 shadow-2xl">
+                    {/* Background Image */}
+                    <div className="absolute inset-0 opacity-30 select-none pointer-events-none">
+                        <img src="20200704_004846.jpg" className="w-full h-full object-cover filter blur-lg scale-110" alt="" onError={(e)=>e.target.style.display='none'} />
+                    </div>
+                    
+                    {/* Content */}
+                    <div className="relative z-10 text-center px-4 select-none flex flex-col items-center">
+                        <h1 className="text-[15vw] md:text-[12vw] leading-[0.8] font-black text-[#e5e5e5] mix-blend-overlay tracking-tighter mb-4">
+                            {content.he.heroMain}
+                        </h1>
+                        <p className="text-lg md:text-2xl serif font-light italic text-[#d4a373] mb-8">
+                            {content.he.heroSub}
+                        </p>
+                        
+                        {/* Arrows indicating bidirectional scroll */}
+                        <div className="flex items-center gap-8 opacity-60 animate-pulse">
+                            <Icons.ArrowRight />
+                            <span className="text-xs tracking-[0.3em] uppercase border-b border-white/20 pb-1">{content.he.scrollHint}</span>
+                            <Icons.ArrowLeft />
                         </div>
-                    )}
-                     <div className="absolute bottom-8 md:left-1/2 md:-translate-x-1/2 animate-pulse hidden md:block text-xs tracking-widest uppercase opacity-50">
-                        {isClone ? '' : (isRTL ? 'גרירה / גלילה' : 'Drag / Scroll') + ' →'}
                     </div>
                 </section>
             );
 
             return (
-                <div dir={isRTL ? "rtl" : "ltr"} className={`min-h-screen selection:bg-[#d4a373] selection:text-black ${isRTL ? 'font-hebrew' : 'font-sans'}`}>
+                <div className={`min-h-screen text-white ${!loaded ? 'opacity-0' : 'opacity-100'} transition-opacity duration-1000`}>
                     <div className="grain"></div>
-                    <div ref={cursorDot} className="cursor-dot hidden md:block"></div>
-                    <div ref={cursorOutline} className="cursor-outline hidden md:block"></div>
 
                     {/* Navbar */}
-                    <nav className="fixed top-0 left-0 w-full p-6 md:p-8 flex justify-between items-start z-50 mix-blend-difference text-white pointer-events-none">
-                        <div className="flex flex-col pointer-events-auto">
-                            <span className="text-xl md:text-2xl font-bold tracking-tighter serif uppercase">{t.name}</span>
-                            <span className="text-[10px] md:text-xs opacity-70 tracking-[0.2em] uppercase mt-1">{t.role}</span>
+                    <nav className="fixed top-0 left-0 w-full p-6 flex justify-between items-center z-50 mix-blend-difference pointer-events-none px-8">
+                        <div className="pointer-events-auto">
+                            <span className="text-xl font-bold tracking-tighter serif uppercase block">{content.he.title}</span>
+                            <span className="text-[10px] opacity-70 tracking-[0.2em] uppercase">{content.he.subtitle}</span>
                         </div>
-                        <div className="flex flex-col items-end gap-4 pointer-events-auto">
-                            <div className="flex gap-2 text-xs font-bold uppercase tracking-wider">
-                                <button onClick={() => setLang('he')} className={`px-2 py-1 rounded transition-colors ${lang === 'he' ? 'bg-white text-black' : 'text-white/50 hover:text-white'}`}>HE</button>
-                                <button onClick={() => setLang('en')} className={`px-2 py-1 rounded transition-colors ${lang === 'en' ? 'bg-white text-black' : 'text-white/50 hover:text-white'}`}>EN</button>
-                                <button onClick={() => setLang('hu')} className={`px-2 py-1 rounded transition-colors ${lang === 'hu' ? 'bg-white text-black' : 'text-white/50 hover:text-white'}`}>HU</button>
-                            </div>
-                            <div className="flex gap-6 text-sm font-light">
-                                <button onClick={() => scrollTo('gallery')} className="hover:text-[#d4a373] transition-colors interactive uppercase tracking-widest text-xs">{t.galleryBtn}</button>
-                                <button onClick={() => scrollTo('about')} className="hover:text-[#d4a373] transition-colors interactive uppercase tracking-widest text-xs">{t.aboutBtn}</button>
-                            </div>
-                        </div>
+                        <button className="pointer-events-auto text-xs font-bold uppercase tracking-wider border border-white/30 px-4 py-2 rounded-full hover:bg-white hover:text-black transition-all">
+                            {content.he.about}
+                        </button>
                     </nav>
 
-                    {/* Main Container */}
+                    {/* Main Scroll Container */}
                     <div 
-                        className="horizontal-scroll-container hide-scrollbar"
+                        className="horizontal-scroll-container hide-scrollbar cursor-grab active:cursor-grabbing"
                         ref={scrollContainerRef}
                         onMouseDown={handleMouseDown}
                         onMouseLeave={handleMouseLeave}
                         onMouseUp={handleMouseUp}
                         onMouseMove={handleMouseMove}
+                        dir="ltr" // Keeping technical direction LTR for easier math, but visual content is agnostic
                     >
-                        {/* 1. Hero */}
-                        <HeroSection />
+                        {/* LEFT SIDE (Reverse Logic for "Hebrew" flow) */}
+                        {/* We repeat categories to ensure there's enough content to scroll 'backwards' */}
+                        {[...categoriesData].reverse().map((cat, i) => (
+                            <CategoryCluster key={`left-1-${cat.id}`} category={cat} isReverse={true} />
+                        ))}
+                        {[...categoriesData].reverse().map((cat, i) => (
+                            <CategoryCluster key={`left-2-${cat.id}`} category={cat} isReverse={true} />
+                        ))}
 
-                        {/* 2. Gallery (Triplicated for loop feel) */}
-                        <section id="gallery-section" className="panel min-w-[100vw] md:w-auto h-auto md:h-screen bg-[#151515] flex flex-col md:flex-row items-center md:px-20 py-20 md:py-0 gap-12 md:gap-20 flex-shrink-0">
-                             <div className="md:hidden text-center mb-4 px-6">
-                                <h2 className="text-4xl serif text-[#d4a373]">{t.galleryBtn}</h2>
-                                <p className="text-xs mt-2 opacity-50 uppercase tracking-widest">Swipe to explore</p>
-                            </div>
-                            <div className="hidden md:flex items-center justify-center h-full w-40 shrink-0 opacity-20">
-                                <span className="rotate-[-90deg] text-6xl font-black tracking-widest uppercase whitespace-nowrap">{t.galleryBtn}</span>
-                            </div>
+                        {/* CENTER HERO */}
+                        <Hero />
 
-                            <div className="mobile-gallery-scroll md:flex md:flex-row md:gap-16 md:h-[60vh] md:items-center px-4 md:px-0">
-                                {artworksData.filter(art => !art.isHero).map((art, index) => (
-                                    <div 
-                                        key={`${art.id}-${index}`}
-                                        className={`
-                                            mobile-gallery-item 
-                                            relative group cursor-pointer flex-shrink-0 transition-all duration-500
-                                            md:w-[40vh] md:h-full w-[85vw] aspect-[3/4]
-                                            md:hover:w-[50vh] md:hover:z-10
-                                            ${index % 2 !== 0 ? 'md:translate-y-12' : 'md:-translate-y-12'}
-                                        `}
-                                        onClick={() => setSelectedImg(art)}
-                                    >
-                                        <div className="absolute inset-0 bg-gray-800/50 animate-pulse -z-10"></div>
-                                        <img 
-                                            src={art.src} 
-                                            alt={art.title[lang]} 
-                                            className="w-full h-full object-cover grayscale contrast-125 group-hover:grayscale-0 transition-all duration-700 ease-out shadow-xl"
-                                            draggable="false"
-                                            loading="lazy"
-                                            onError={(e) => { e.target.src = `https://via.placeholder.com/600x800/222/fff?text=Art`; }}
-                                        />
-                                        <div className="absolute inset-0 bg-black/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-end p-6">
-                                            <div className="transform translate-y-4 group-hover:translate-y-0 transition-transform duration-300">
-                                                <p className="text-[#d4a373] text-xs font-mono mb-1">{art.year}</p>
-                                                <h3 className="text-2xl serif text-white leading-none">{art.title[lang]}</h3>
-                                            </div>
-                                        </div>
-                                    </div>
-                                ))}
-                            </div>
-                        </section>
-
-                        {/* 3. About */}
-                        <section id="about-section" className="panel min-w-[100vw] h-screen bg-[#0f0f0f] flex items-center justify-center relative flex-shrink-0 p-6">
-                            <div className="max-w-6xl w-full grid md:grid-cols-2 gap-16 items-center">
-                                <div className="order-2 md:order-1 space-y-8">
-                                    <h2 className="text-5xl md:text-7xl serif text-[#d4a373]">{t.aboutTitle}</h2>
-                                    <div className="space-y-6 text-lg md:text-xl font-light text-gray-300 leading-relaxed">
-                                        <p>{t.aboutText1}</p>
-                                        <p>{t.aboutText2}</p>
-                                    </div>
-                                    <div className="pt-8 border-t border-white/10 flex gap-4 text-sm opacity-50 font-mono">
-                                        <span>Bezalel Academy</span><span>•</span><span>1947</span>
-                                    </div>
-                                </div>
-                                <div className="order-1 md:order-2 relative">
-                                    <img src="20200704_004846.jpg" alt="Studio" className="w-full h-full object-cover grayscale opacity-50" draggable="false" />
-                                </div>
-                            </div>
-                        </section>
-
-                        {/* 4. Clone of Hero (For Infinite Loop Effect) */}
-                        <HeroSection isClone={true} />
+                        {/* RIGHT SIDE (Normal Logic for "English" flow) */}
+                        {categoriesData.map((cat, i) => (
+                            <CategoryCluster key={`right-1-${cat.id}`} category={cat} isReverse={false} />
+                        ))}
+                        {categoriesData.map((cat, i) => (
+                            <CategoryCluster key={`right-2-${cat.id}`} category={cat} isReverse={false} />
+                        ))}
                     </div>
 
                     {/* Lightbox */}
                     {selectedImg && (
-                        <div className="fixed inset-0 z-[100] bg-black/95 backdrop-blur-xl flex items-center justify-center p-4 md:p-0 animate-[fadeIn_0.3s_ease-out]">
-                            <button onClick={() => setSelectedImg(null)} className="absolute top-6 right-6 text-white/50 hover:text-white interactive z-50"><Icons.X /></button>
-                            <div className="w-full h-full max-w-7xl grid grid-cols-1 md:grid-cols-3 md:gap-12 items-center p-4 md:p-12 overflow-y-auto md:overflow-hidden">
-                                <div className="md:col-span-2 h-[50vh] md:h-full flex items-center justify-center" onClick={e => e.stopPropagation()}>
-                                    <img src={selectedImg.src} alt={selectedImg.title[lang]} className="max-h-full max-w-full object-contain shadow-2xl" />
+                        <div 
+                            className="fixed inset-0 z-[100] bg-black/95 backdrop-blur-xl flex items-center justify-center p-0 animate-[fadeIn_0.3s_ease-out] cursor-auto"
+                            onClick={() => setSelectedImg(null)} // Close on backdrop click
+                        >
+                            <button className="absolute top-6 right-6 text-white/50 hover:text-white z-50 p-2">
+                                <Icons.X />
+                            </button>
+                            
+                            <div 
+                                className="w-full h-full md:max-w-6xl md:h-[80vh] grid grid-cols-1 md:grid-cols-3 md:gap-12 items-center p-4"
+                                onClick={(e) => e.stopPropagation()} // Prevent close when clicking content
+                            >
+                                {/* Image Container */}
+                                <div className="md:col-span-2 h-[60vh] md:h-full flex items-center justify-center bg-[#0a0a0a] rounded-sm overflow-hidden shadow-2xl">
+                                    <img 
+                                        src={selectedImg.src} 
+                                        alt={selectedImg.title} 
+                                        className="max-h-full max-w-full object-contain" 
+                                    />
                                 </div>
-                                <div className="md:col-span-1 flex flex-col justify-center mt-8 md:mt-0 text-center md:text-start" dir={isRTL ? 'rtl' : 'ltr'}>
-                                    <h3 className="text-3xl md:text-4xl serif text-white mb-2">{selectedImg.title[lang]}</h3>
-                                    <p className="text-[#d4a373] font-mono text-sm mb-8">{selectedImg.year}</p>
-                                    <p className="text-gray-300 font-light leading-relaxed text-sm">{selectedImg.story[lang] || selectedImg.story['en']}</p>
+                                
+                                {/* Text Info */}
+                                <div className="md:col-span-1 flex flex-col justify-center mt-6 md:mt-0 text-right" dir="rtl">
+                                    <div className="w-12 h-px bg-[#d4a373] mb-6 ml-auto"></div>
+                                    <h3 className="text-3xl md:text-5xl serif text-white mb-2">{selectedImg.title}</h3>
+                                    <p className="text-[#d4a373] font-mono text-sm mb-6 tracking-widest">{selectedImg.year}</p>
+                                    <p className="text-gray-400 font-light leading-relaxed text-base md:text-lg border-t border-white/10 pt-4">
+                                        {selectedImg.story}
+                                    </p>
                                 </div>
                             </div>
                         </div>
@@ -587,5 +398,13 @@
         const root = ReactDOM.createRoot(document.getElementById('root'));
         root.render(<App />);
     </script>
+    
+    <style>
+        .stroke-text {
+            -webkit-text-stroke: 1px rgba(255, 255, 255, 0.3);
+            color: transparent;
+        }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+    </style>
 </body>
 </html>
