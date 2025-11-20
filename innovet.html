@@ -29,6 +29,7 @@
             -webkit-font-smoothing: antialiased;
         }
 
+        /* Custom Scrollbar */
         .custom-scrollbar::-webkit-scrollbar {
             height: 10px;
             width: 10px;
@@ -39,7 +40,20 @@
         .custom-scrollbar::-webkit-scrollbar-thumb {
             background: #C1C1C1;
         }
-        
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+            background: #A8A8A8;
+        }
+
+        /* Hide scrollbar for clean tab navigation */
+        .hide-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+        .hide-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+
+        /* Animations */
         @keyframes fadeIn {
             from { opacity: 0; transform: translateY(20px); }
             to { opacity: 1; transform: translateY(0); }
@@ -56,10 +70,12 @@
             animation: spin-slow 20s linear infinite;
         }
 
+        /* Dropdown Hover Logic */
         .group:hover .group-hover\:block {
             display: block;
         }
         
+        /* Black Filter for Icon */
         .icon-black {
             filter: grayscale(100%) brightness(0);
         }
@@ -97,42 +113,62 @@
         const GOOGLE_API_KEY = 'AIzaSyCmnriYz5_rQfTNk8YmyvW0wfQN_96LJ6A'; 
         const SPREADSHEET_ID = '1RMatyMjsFM35grZTRSoslKN04cTdUy7km4I8clyVil4'; 
 
-        // שמות הגיליונות (רגיש לאותיות גדולות/קטנות)
-        const SHEET_NAMES = {
-            AGENDA_EN: 'Agenda',
-            AGENDA_HE: 'Agenda_he',
-            DELIVERABLES_EN: 'Deliverabels', 
-            DELIVERABLES_HE: 'Deliverabels_he',
-            OFFICE_HOURS_EN: 'Office Hours',
-            OFFICE_HOURS_HE: 'Office Hours_he',
-            CALENDAR_EN: 'Calendar',
-            CALENDAR_HE: 'Calendar_he'
-        };
+        // --- Lucide-style Icons Components (Recreated as SVGs) ---
+        const Layout = ({size=24, className, strokeWidth=2}) => (
+            <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={strokeWidth} strokeLinecap="round" strokeLinejoin="round" className={className}><rect width="18" height="18" x="3" y="3" rx="2" ry="2"/><line x1="3" x2="21" y1="9" y2="9"/><line x1="9" x2="9" y1="21" y2="9"/></svg>
+        );
+        const Target = ({size=24, className, strokeWidth=2}) => (
+            <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={strokeWidth} strokeLinecap="round" strokeLinejoin="round" className={className}><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg>
+        );
+        const Calendar = ({size=24, className, strokeWidth=2}) => (
+            <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={strokeWidth} strokeLinecap="round" strokeLinejoin="round" className={className}><rect width="18" height="18" x="3" y="4" rx="2" ry="2"/><line x1="16" x2="16" y1="2" y2="6"/><line x1="8" x2="8" y1="2" y2="6"/><line x1="3" x2="21" y1="10" y2="10"/></svg>
+        );
+        const Clock = ({size=24, className, strokeWidth=2}) => (
+            <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={strokeWidth} strokeLinecap="round" strokeLinejoin="round" className={className}><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+        );
+        const CheckSquare = ({size=24, className, strokeWidth=2}) => (
+            <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={strokeWidth} strokeLinecap="round" strokeLinejoin="round" className={className}><polyline points="9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+        );
+        const Users = ({size=24, className, strokeWidth=2}) => (
+            <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={strokeWidth} strokeLinecap="round" strokeLinejoin="round" className={className}><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+        );
+        const Menu = ({size=24, className, strokeWidth=2}) => (
+            <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={strokeWidth} strokeLinecap="round" strokeLinejoin="round" className={className}><line x1="3" y1="12" x2="21" y2="12"></line><line x1="3" y1="6" x2="21" y2="6"></line><line x1="3" y1="18" x2="21" y2="18"></line></svg>
+        );
+        const X = ({size=24, className, strokeWidth=2}) => (
+            <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={strokeWidth} strokeLinecap="round" strokeLinejoin="round" className={className}><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+        );
+        const ArrowLeft = ({size=24, className, strokeWidth=2}) => (
+            <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={strokeWidth} strokeLinecap="round" strokeLinejoin="round" className={className}><path d="m12 19-7-7 7-7"/><path d="M19 12H5"/></svg>
+        );
+        const ArrowRight = ({size=24, className, strokeWidth=2}) => (
+            <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={strokeWidth} strokeLinecap="round" strokeLinejoin="round" className={className}><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
+        );
+        const Star = ({size=24, className, strokeWidth=2}) => (
+             <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={strokeWidth} strokeLinecap="round" strokeLinejoin="round" className={className}><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" /></svg>
+        );
+        const Download = ({size=24, className, strokeWidth=2}) => (
+            <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={strokeWidth} strokeLinecap="round" strokeLinejoin="round" className={className}><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" x2="12" y1="15" y2="3"/></svg>
+        );
+        const Globe = ({size=24, className, strokeWidth=2}) => (
+            <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={strokeWidth} strokeLinecap="round" strokeLinejoin="round" className={className}><circle cx="12" cy="12" r="10"/><line x1="2" x2="22" y1="12" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
+        );
+        const ChevronDown = ({size=24, className, strokeWidth=2}) => (
+            <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={strokeWidth} strokeLinecap="round" strokeLinejoin="round" className={className}><polyline points="6 9 12 15 18 9"></polyline></svg>
+        );
 
-        // --- Icons ---
-        const Layout = ({size=24, className}) => <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><rect width="18" height="18" x="3" y="3" rx="2" ry="2"/><line x1="3" x2="21" y1="9" y2="9"/><line x1="9" x2="9" y1="21" y2="9"/></svg>;
-        const Target = ({size=24, className}) => <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg>;
-        const Calendar = ({size=24, className}) => <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><rect width="18" height="18" x="3" y="4" rx="2" ry="2"/><line x1="16" x2="16" y1="2" y2="6"/><line x1="8" x2="8" y1="2" y2="6"/><line x1="3" x2="21" y1="10" y2="10"/></svg>;
-        const CheckSquare = ({size=24, className}) => <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><polyline points="9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>;
-        const Users = ({size=24, className}) => <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>;
-        const Menu = ({size=24, className}) => <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><line x1="3" y1="12" x2="21" y2="12"></line><line x1="3" y1="6" x2="21" y2="6"></line><line x1="3" y1="18" x2="21" y2="18"></line></svg>;
-        const X = ({size=24, className}) => <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>;
-        const ArrowLeft = ({size=24, className}) => <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><path d="m12 19-7-7 7-7"/><path d="M19 12H5"/></svg>;
-        const ArrowRight = ({size=24, className}) => <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>;
-        const Star = ({size=24, className}) => <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" /></svg>;
-        const Download = ({size=24, className}) => <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" x2="12" y1="15" y2="3"/></svg>;
-        const Globe = ({size=24, className}) => <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><circle cx="12" cy="12" r="10"/><line x1="2" x2="22" y1="12" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>;
-        const ChevronDown = ({size=24, className}) => <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><polyline points="6 9 12 15 18 9"></polyline></svg>;
-        const Clock = ({size=24, className}) => <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>;
-
-        // --- Constants ---
+        // --- Translations & Constants ---
         const UI_TEXT = {
             he: {
+                home: 'בית',
+                program: 'התוכנית',
                 schedule: 'לו"ז ומטלות',
+                contact: 'צור קשר',
+                privacy: 'מדיניות פרטיות',
                 heroTitle: 'תוכנית',
                 heroTitle2: 'העבודה',
                 heroSubtitle: 'Program Schedule & Resources',
-                heroDesc: 'מבט כולל על 19 שבועות של יזמות, משלב הרעיון ועד ל-Demo Day.',
+                heroDesc: 'מבט כולל על 19 שבועות של יזמות, משלב הרעיון ועד ל-Demo Day. השתמשו בכלי ה-AI המומלצים בכל שלב.',
                 tabAgenda: 'מטריצת התוכנית',
                 tabDeliverables: 'תוצרים ומטלות',
                 tabOfficeHours: 'מומחים וסדנאות',
@@ -143,24 +179,35 @@
                 sectionEvents: 'אירועי מפתח',
                 week: 'שבוע',
                 category: 'קטגוריה',
-                phase: 'שלב',
-                subject: 'נושא',
+                phase: 'שלב בתוכנית',
+                subject: 'נושא שבועי',
                 tools: 'AI Tools',
                 milestones: 'אבני דרך',
                 task: 'מטלה / תוצר',
                 details: 'פירוט',
-                download: 'הורד / צפה',
+                status: 'סטטוס',
+                download: 'הורד הנחיות',
+                upcoming: 'Upcoming',
                 book: 'שריין מקום',
                 with: 'עם',
                 rights: '© 2025 כל הזכויות שמורות',
-                builtBy: 'נבנה ע"י PsychoFlash'
+                builtBy: 'נבנה ע"י PsychoFlash',
+                phases: {
+                    ideation: "שלב האידאציה (Ideation)",
+                    accelerator: "אקסלרטור (Accelerator)",
+                    launch: "השקה (Launch)"
+                }
             },
             en: {
+                home: 'Home',
+                program: 'Program',
                 schedule: 'Schedule & Tasks',
+                contact: 'Contact',
+                privacy: 'Privacy Policy',
                 heroTitle: 'WORK',
                 heroTitle2: 'PLAN',
                 heroSubtitle: 'Program Schedule & Resources',
-                heroDesc: 'A comprehensive view of 19 weeks of entrepreneurship.',
+                heroDesc: 'A comprehensive view of 19 weeks of entrepreneurship, from Ideation to Demo Day. Use the recommended AI tools at each stage.',
                 tabAgenda: 'Program Matrix',
                 tabDeliverables: 'Deliverables',
                 tabOfficeHours: 'Experts & Workshops',
@@ -172,210 +219,547 @@
                 week: 'WEEK',
                 category: 'Category',
                 phase: 'Phase',
-                subject: 'Subject',
+                subject: 'Weekly Subject',
                 tools: 'AI Tools',
                 milestones: 'Milestones',
                 task: 'Task / Deliverable',
                 details: 'Details',
-                download: 'Download / View',
+                status: 'Status',
+                download: 'Download Guide',
+                upcoming: 'Upcoming',
                 book: 'Book Slot',
                 with: 'With',
                 rights: '© 2025 All Rights Reserved',
-                builtBy: 'Built by PsychoFlash'
+                builtBy: 'Built by PsychoFlash',
+                phases: {
+                    ideation: "Ideation Phase",
+                    accelerator: "Accelerator Phase",
+                    launch: "Launch Phase"
+                }
             }
         };
 
+        // --- Main App Component ---
         const App = () => {
             const [activeTab, setActiveTab] = useState('agenda');
             const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-            const [lang, setLang] = useState('he');
+            const [lang, setLang] = useState('he'); // 'he' or 'en'
             const [loading, setLoading] = useState(false);
             
+            // Data States
             const [agendaData, setAgendaData] = useState([]);
             const [deliverablesData, setDeliverablesData] = useState([]);
             const [officeHoursData, setOfficeHoursData] = useState([]);
             const [calendarHighlights, setCalendarHighlights] = useState([]);
 
             const mainContentRef = useRef(null);
+
             const toggleMobileMenu = () => setIsMobileMenuOpen(!isMobileMenuOpen);
             const toggleLang = () => setLang(lang === 'he' ? 'en' : 'he');
+
             const t = UI_TEXT[lang];
             const isRTL = lang === 'he';
             const ArrowIcon = isRTL ? ArrowLeft : ArrowRight;
 
+            // Scroll Handling
             const scrollToTop = () => window.scrollTo({ top: 0, behavior: 'smooth' });
+            const scrollToContent = () => {
+                if (mainContentRef.current) {
+                    mainContentRef.current.scrollIntoView({ behavior: 'smooth' });
+                }
+            };
+            
             const handleNavClick = (tabId) => {
                 setActiveTab(tabId);
-                if(mainContentRef.current) mainContentRef.current.scrollIntoView({ behavior: 'smooth' });
+                scrollToContent();
                 setIsMobileMenuOpen(false);
             };
 
+            // Update document dir
             useEffect(() => {
                 document.documentElement.dir = isRTL ? 'rtl' : 'ltr';
                 document.documentElement.lang = lang;
             }, [lang, isRTL]);
 
-            // --- DATA FETCHING ---
+
+            // --- DATA FETCHING LOGIC ---
+
+            // Fetch data helper
             const fetchSheetData = async (sheetName) => {
                 if (!GOOGLE_API_KEY || !SPREADSHEET_ID) return null;
+                // URL Encode the sheet name to handle spaces and special chars
+                const encodedName = encodeURIComponent(sheetName);
                 try {
-                    const url = `https://sheets.googleapis.com/v4/spreadsheets/${SPREADSHEET_ID.trim()}/values/${encodeURIComponent(sheetName)}?key=${GOOGLE_API_KEY.trim()}`;
-                    const response = await fetch(url);
-                    if (!response.ok) return [];
+                    const response = await fetch(`https://sheets.googleapis.com/v4/spreadsheets/${SPREADSHEET_ID}/values/${encodedName}?key=${GOOGLE_API_KEY}`);
                     const data = await response.json();
-                    return data.values || [];
+                    if (data.error) {
+                         console.error(`Error from Google Sheets API for ${sheetName}:`, data.error);
+                         return null;
+                    }
+                    return data.values;
                 } catch (error) {
                     console.error(`Error fetching ${sheetName}:`, error);
-                    return [];
+                    return null;
                 }
             };
 
-            const loadAllData = async () => {
-                setLoading(true);
-                try {
-                    const [agendaEn, agendaHe, delivEn, delivHe, officeEn, officeHe, calEn, calHe] = await Promise.all([
-                        fetchSheetData(SHEET_NAMES.AGENDA_EN),
-                        fetchSheetData(SHEET_NAMES.AGENDA_HE),
-                        fetchSheetData(SHEET_NAMES.DELIVERABLES_EN),
-                        fetchSheetData(SHEET_NAMES.DELIVERABLES_HE),
-                        fetchSheetData(SHEET_NAMES.OFFICE_HOURS_EN),
-                        fetchSheetData(SHEET_NAMES.OFFICE_HOURS_HE),
-                        fetchSheetData(SHEET_NAMES.CALENDAR_EN),
-                        fetchSheetData(SHEET_NAMES.CALENDAR_HE)
-                    ]);
+            // Helper to Transpose Data (Rows to Columns or Vice Versa)
+            // Agenda data in the sheet is transposed (Weeks as columns)
+            const transpose = (matrix) => {
+                if (!matrix || matrix.length === 0) return [];
+                return matrix[0].map((_, colIndex) => matrix.map(row => row[colIndex]));
+            };
 
-                    // 1. Parse Agenda (Transposed Logic)
-                    // In Agenda sheet, Columns are Weeks (Start from Col 1), Rows are categories.
-                    // We need to find which row is "Subject", "Tools", etc.
-                    const processAgenda = (data) => {
-                        if (!data || data.length < 2) return [];
-                        
-                        // Helper to find row index by first cell content (approximate)
-                        const findRowIndex = (keyword) => data.findIndex(row => row[0] && row[0].toLowerCase().includes(keyword.toLowerCase()));
-                        
-                        const weekRowIdx = 0; // Usually row 0 has "Week 1, Week 2..."
-                        const phaseRowIdx = 1; // Usually row 1 has "Ideation..."
-                        const subjectRowIdx = findRowIndex('Subject') !== -1 ? findRowIndex('Subject') : 2; // Fallback to 2
-                        // For Hebrew 'Subject' might be 'נושא'
-                        const heSubjectRowIdx = findRowIndex('נושא') !== -1 ? findRowIndex('נושא') : 2;
+            // Initialize Data
+            useEffect(() => {
+                const loadData = async () => {
+                    // 1. Load Default (Hardcoded) Data FIRST (Fallback)
+                    initDefaultData();
 
-                        const rowSubject = lang === 'he' ? heSubjectRowIdx : subjectRowIdx;
-                        
-                        // Tools might be labeled "AI Tools" or similar
-                        const toolsRowIdx = findRowIndex('Tool') !== -1 ? findRowIndex('Tool') : findRowIndex('AI') !== -1 ? findRowIndex('AI') : 5; 
-                        const milestoneRowIdx = findRowIndex('Milestone') !== -1 ? findRowIndex('Milestone') : 7;
+                    // 2. Attempt to Fetch from Google Sheets
+                    if (GOOGLE_API_KEY && SPREADSHEET_ID) {
+                        setLoading(true);
+                        try {
+                            // Define Exact Sheet Names based on user provided screenshot
+                            const SHEET_NAMES = {
+                                agendaEn: 'Agenda ', // Note space at end
+                                agendaHe: 'Agenda_he',
+                                delivEn: 'Deliverabels', // Typo
+                                delivHe: 'Deliverabels_he', // Typo
+                                officeEn: 'Office Hours',
+                                officeHe: 'Office Hours_he',
+                                calEn: 'Calendar',
+                                calHe: 'Calendar_he'
+                            };
 
-                        const weeks = [];
-                        // Iterate columns starting from 1 (since 0 is header)
-                        const maxCols = data[0].length;
-                        for (let i = 1; i < maxCols; i++) {
-                            const weekNum = data[weekRowIdx][i];
-                            if (!weekNum) continue;
-
-                            weeks.push({
-                                week: weekNum,
-                                phase: data[phaseRowIdx] ? data[phaseRowIdx][i] : "",
-                                subject: data[rowSubject] ? data[rowSubject][i] : "",
-                                tools: data[toolsRowIdx] ? (data[toolsRowIdx][i] || "").split('\n') : [],
-                                milestone: data[milestoneRowIdx] ? data[milestoneRowIdx][i] : ""
-                            });
-                        }
-                        return weeks;
-                    };
-                    
-                    // Use the correct dataset based on lang for the categories, but we might need to merge structure if one is empty
-                    // For simplicity, we re-process based on current lang or fallback
-                    const agendaRaw = lang === 'he' && agendaHe.length ? agendaHe : agendaEn;
-                    const processedAgenda = processAgenda(agendaRaw);
-                    if(processedAgenda.length) setAgendaData(processedAgenda);
-
-
-                    // 2. Parse Deliverables
-                    // Row-based. Col 0: Name, Col 1: Week (Due Date), Col 5: Link
-                    const processDeliverables = (data) => {
-                        if (!data || data.length < 2) return [];
-                        return data.slice(1).map(row => ({
-                            task: row[0] || "",
-                            week: row[1] || "", // Due Date column
-                            desc: row[2] || "",
-                            link: row[5] || ""  // Link column
-                        })).filter(item => item.task);
-                    };
-                    const delivRaw = lang === 'he' && delivHe.length ? delivHe : delivEn;
-                    setDeliverablesData(processDeliverables(delivRaw));
-
-
-                    // 3. Parse Office Hours
-                    // Row-based. Col 0: Name, Col 1: Topic, Col 6: Due Date (Week)
-                    const processOfficeHours = (data) => {
-                        if (!data || data.length < 2) return [];
-                        return data.slice(1).map(row => ({
-                            expert: row[0] || "",
-                            topic: row[1] || "",
-                            week: row[6] || "", // Column G is Index 6
-                            link: row[4] || ""  // Registration is Col E (Index 4)
-                        })).filter(item => item.expert || item.topic);
-                    };
-                    const officeRaw = lang === 'he' && officeHe.length ? officeHe : officeEn;
-                    setOfficeHoursData(processOfficeHours(officeRaw));
-
-
-                    // 4. Parse Calendar
-                    // Complex grid parsing. Strategy: Look for rows where Col 0 is a number (Day) and Col 1 has text (Event)
-                    const processCalendar = (data) => {
-                        if (!data || data.length < 10) return [];
-                        const events = [];
-                        let currentMonth = "";
-
-                        data.forEach((row, idx) => {
-                            // Try to detect month header e.g. "2026-01-01" or "ינואר"
-                            if (row[0] && (row[0].includes('202') || row[0].length > 10)) {
-                                // simplistic month detection
-                                // currentMonth = row[0]; 
-                            }
+                            // --- Step A: Agenda (Transposed Structure) ---
+                            const agendaEnRaw = await fetchSheetData(SHEET_NAMES.agendaEn);
+                            const agendaHeRaw = await fetchSheetData(SHEET_NAMES.agendaHe);
                             
-                            // Check if Col 0 is a day number (1-31)
-                            const dayNum = parseInt(row[0]);
-                            if (!isNaN(dayNum) && dayNum > 0 && dayNum <= 31) {
-                                // Check Col 1 for event name
-                                if (row[1] && row[1].trim().length > 0) {
-                                    // Found an event
-                                    // Check next row for time?
-                                    let time = "";
-                                    let details = "";
-                                    if (data[idx+1]) {
-                                        // Often time is in the next row col 0 or col 1
-                                        const nextRow = data[idx+1];
-                                        if (nextRow[0] && (nextRow[0].includes(':') || nextRow[0].includes('-'))) {
-                                            time = nextRow[0];
-                                            details = nextRow[0]; // Often mapped together
-                                        }
-                                    }
+                            if (agendaEnRaw && agendaHeRaw) {
+                                // The sheet has Weeks as headers (Cols) and Attributes as Rows. We need to transpose it.
+                                // First, normalize rows to have same length
+                                const normalize = (data) => {
+                                     const maxLen = Math.max(...data.map(r => r.length));
+                                     return data.map(r => {
+                                         const newR = [...r];
+                                         while (newR.length < maxLen) newR.push("");
+                                         return newR;
+                                     });
+                                };
+                                
+                                const agendaEnT = transpose(normalize(agendaEnRaw));
+                                const agendaHeT = transpose(normalize(agendaHeRaw));
 
-                                    events.push({
-                                        date: dayNum,
-                                        event: row[1],
-                                        time: time,
-                                        details: details
+                                // Now agendaEnT should be: [ ["Week 1", "Ideation", ...], ["Week 2", ...] ]
+                                // Row 0 is headers usually, but here Col A was headers, so now Row 0 is labels.
+                                // We skip the first row (labels) and start from 1 (Week 1)
+
+                                const mergedAgenda = [];
+                                const maxRows = Math.max(agendaEnT.length, agendaHeT.length);
+                                
+                                for (let i = 1; i < maxRows; i++) {
+                                    const rowEn = agendaEnT[i] || [];
+                                    const rowHe = agendaHeT[i] || [];
+                                    // Logic based on provided csv structure:
+                                    // Col 0: Week # (header in original) -> ignore, use index
+                                    // Col 1: Phase (Ideation/Accelerator...)
+                                    // Col 2: Subject
+                                    // Col 3: Goal/Desc
+                                    // Col 4: Tools (AI Tools)
+                                    // Col 5: Milestone (Program Milestone)
+                                    
+                                    // Only add if meaningful content
+                                    if (!rowEn[2] && !rowHe[2]) continue;
+
+                                    mergedAgenda.push({
+                                        week: i, // Just use index as week number
+                                        phase_en: rowEn[1] || "",
+                                        phase_he: rowHe[1] || "",
+                                        subject_en: rowEn[2] || "",
+                                        subject_he: rowHe[2] || "",
+                                        tools: (rowEn[4] || rowHe[4]) ? (rowEn[4] || rowHe[4]).split('\n').map(s => s.trim()) : [],
+                                        milestone: rowEn[5] || "" 
                                     });
                                 }
+                                setAgendaData(mergedAgenda);
                             }
-                        });
-                        return events;
-                    };
-                    const calRaw = lang === 'he' && calHe.length ? calHe : calEn;
-                    setCalendarHighlights(processCalendar(calRaw));
 
-                } catch (e) {
-                    console.error("Data processing error:", e);
-                } finally {
-                    setLoading(false);
-                }
+                            // --- Step B: Deliverables ---
+                            const delivEnRaw = await fetchSheetData(SHEET_NAMES.delivEn);
+                            const delivHeRaw = await fetchSheetData(SHEET_NAMES.delivHe);
+
+                            if (delivEnRaw && delivHeRaw) {
+                                const mergedDeliv = [];
+                                const maxRows = Math.max(delivEnRaw.length, delivHeRaw.length);
+                                // Start from 1 to skip header
+                                for (let i = 1; i < maxRows; i++) {
+                                    const rowEn = delivEnRaw[i] || [];
+                                    const rowHe = delivHeRaw[i] || [];
+                                    // CSV Structure: Deliverables(A), Due Date(B), Materials(C), empty(D), links(E)
+                                    if (!rowEn[0]) continue;
+
+                                    mergedDeliv.push({
+                                        week: rowEn[1] || "", // Week is in Col B
+                                        task_en: rowEn[0] || "", // Task Name in Col A
+                                        task_he: rowHe[0] || "",
+                                        desc_en: rowEn[0] || "", // Description effectively same as task in this simple sheet
+                                        desc_he: rowHe[0] || "",
+                                        link: rowEn[4] || "#" // Links in Col E (index 4)
+                                    });
+                                }
+                                setDeliverablesData(mergedDeliv);
+                            }
+
+                            // --- Step C: Office Hours ---
+                            const officeEnRaw = await fetchSheetData(SHEET_NAMES.officeEn);
+                            const officeHeRaw = await fetchSheetData(SHEET_NAMES.officeHe);
+
+                            if (officeEnRaw && officeHeRaw) {
+                                const mergedOffice = [];
+                                const maxRows = Math.max(officeEnRaw.length, officeHeRaw.length);
+                                for (let i = 1; i < maxRows; i++) {
+                                    const rowEn = officeEnRaw[i] || [];
+                                    const rowHe = officeHeRaw[i] || [];
+                                    // CSV: Name(A), Expertise(B), Linkedin(C), Dates(D), Reg(E), Email(F), DueDate(G)
+                                    if (!rowEn[1]) continue; // Skip if no expertise listed
+
+                                    mergedOffice.push({
+                                        week: rowEn[6] || "", // Week in Col G (index 6)
+                                        topic_en: rowEn[1] || "", // Expertise in Col B
+                                        topic_he: rowHe[1] || "",
+                                        expert_en: rowEn[0] || "Expert", // Name in Col A
+                                        expert_he: rowHe[0] || "מומחה",
+                                        email: rowEn[5] || "" // Email in Col F (index 5)
+                                    });
+                                }
+                                setOfficeHoursData(mergedOffice);
+                            }
+
+                            // --- Step D: Calendar ---
+                            // The calendar sheet is unstructured (visual grid). We need a custom parser.
+                            const calEnRaw = await fetchSheetData(SHEET_NAMES.calEn);
+                            const calHeRaw = await fetchSheetData(SHEET_NAMES.calHe);
+
+                            if (calEnRaw && calHeRaw) {
+                                const mergedCal = [];
+                                // Simple parser: Look for cells that look like events (contain time or specific keywords)
+                                // This is a heuristic since the sheet is a monthly grid
+                                
+                                const scanGrid = (rows, lang) => {
+                                    const events = [];
+                                    let currentMonth = "";
+                                    
+                                    rows.forEach((row, rIndex) => {
+                                        row.forEach((cell, cIndex) => {
+                                            if (!cell) return;
+                                            // Check if cell contains time (e.g. 16:00) or keywords
+                                            if (cell.match(/\d{1,2}:\d{2}/) || cell.toLowerCase().includes('kickoff') || cell.includes('בעיטת הפתיחה')) {
+                                                // Try to find the day number nearby (usually in the row above or same row prev col)
+                                                // This is very specific to the exact visual layout provided
+                                                let day = "";
+                                                // Look at previous row for day number
+                                                if (rIndex > 0 && rows[rIndex-1][cIndex] && !isNaN(rows[rIndex-1][cIndex])) {
+                                                    day = rows[rIndex-1][cIndex];
+                                                }
+                                                // Or same row, prev cell
+                                                else if (cIndex > 0 && rows[rIndex][cIndex-1] && !isNaN(rows[rIndex][cIndex-1])) {
+                                                    day = rows[rIndex][cIndex-1];
+                                                }
+                                                
+                                                if (day || cell.toLowerCase().includes('kickoff')) {
+                                                     events.push({
+                                                         date: day ? `${day}` : "TBD",
+                                                         event: cell,
+                                                         time: cell.match(/\d{1,2}:\d{2}/)?.[0] || ""
+                                                     });
+                                                }
+                                            }
+                                        });
+                                    });
+                                    return events;
+                                };
+                                
+                                const enEvents = scanGrid(calEnRaw);
+                                const heEvents = scanGrid(calHeRaw);
+                                
+                                // Merge loosely by index
+                                const maxEv = Math.max(enEvents.length, heEvents.length);
+                                for(let k=0; k<maxEv; k++) {
+                                     const eEn = enEvents[k] || {};
+                                     const eHe = heEvents[k] || {};
+                                     mergedCal.push({
+                                        date: eEn.date || eHe.date,
+                                        event_en: eEn.event ? eEn.event.split('\n')[0] : "", // Take first line as title
+                                        event_he: eHe.event ? eHe.event.split('\n')[0] : "",
+                                        time: eEn.time || "",
+                                        details_en: eEn.event || "",
+                                        details_he: eHe.event || ""
+                                     });
+                                }
+                                
+                                if (mergedCal.length > 0) setCalendarHighlights(mergedCal);
+                            }
+
+                        } catch (e) {
+                            console.error("Error processing Google Sheets data:", e);
+                        } finally {
+                            setLoading(false);
+                        }
+                    }
+                };
+
+                loadData();
+            }, []);
+
+            // Fallback Data Initialization
+            const initDefaultData = () => {
+                 const defaultAgenda = [
+                    { week: 1, phase_he: "שלב האידאציה (Ideation)", phase_en: "Ideation Phase", subject_he: "הגדרת ערך ליבה וזרימת משתמש", subject_en: "Core Value Definition & User Flow", tools: ["ChatGPT", "Perplexity"], milestone: "" },
+                    { week: 2, phase_he: "שלב האידאציה (Ideation)", phase_en: "Ideation Phase", subject_he: "תעדוף פיצ'רים והיקף MVP", subject_en: "Feature Prioritization & MVP Scope", tools: ["Perplexity", "Semrush"], milestone: "" },
+                    { week: 3, phase_he: "שלב האידאציה (Ideation)", phase_en: "Ideation Phase", subject_he: "ארכיטקטורה ותכנון מערכת", subject_en: "System Architecture & Planning", tools: ["Notion AI", "Miro AI"], milestone: "" },
+                    { week: 5, phase_he: "אקסלרטור (Accelerator)", phase_en: "Accelerator Phase", subject_he: "תיקונים, יציבות ובדיקות", subject_en: "Fixes, Stability & Testing", tools: ["ChatGPT", "Figma AI"], milestone: "Selection Pitch" },
+                    { week: 19, phase_he: "השקה (Launch)", phase_en: "Launch Phase", subject_he: "יום הדמו (Demo Day)", subject_en: "Demo Day", tools: [], milestone: "Demo Day" }
+                ];
+                setAgendaData(defaultAgenda);
+
+                setDeliverablesData([
+                    { week: 1, task_he: "גילוי בעיות וראיונות", task_en: "Problem Discovery & Interviews", desc_he: "Problem Discovery", desc_en: "Problem Discovery", link: "#" },
+                    { week: 19, task_he: "פיץ' סופי", task_en: "Final Pitch", desc_he: "Final Pitch", desc_en: "Final Pitch", link: "#" }
+                ]);
+
+                setOfficeHoursData([
+                     { week: 6, topic_he: "אימון פיצ'ים", topic_en: "Pitch Training", expert_he: "מומחה Storytelling", expert_en: "Storytelling Expert", email: "expert@innovet.com" }
+                ]);
+
+                setCalendarHighlights([
+                    { date: "04.01", event_he: "KICKOFF EVENT", event_en: "KICKOFF EVENT", time: "16:00 - 21:00", details_he: "אירוע פתיחה חגיגי...", details_en: "Opening event..." }
+                ]);
             };
 
-            useEffect(() => {
-                loadAllData();
-            }, [lang]); // Re-fetch/re-process when language changes
+            // --- RENDER HELPERS ---
+            const getDayFromDate = (dateStr) => {
+                if (!dateStr) return "";
+                if (dateStr.toString().includes('.')) return dateStr.split('.')[0];
+                return dateStr.toString().replace(/\D/g,'');
+            };
+
+            // ---------------- UI COMPONENTS ----------------
+
+            const TabButton = ({ id, label, icon: Icon }) => (
+                <button
+                    onClick={() => handleNavClick(id)}
+                    className={`relative px-4 md:px-8 py-5 text-base md:text-xl font-bold transition-all duration-200 uppercase tracking-tight border-b-4 flex-1 md:flex-none whitespace-nowrap ${
+                        activeTab === id
+                            ? 'bg-white text-black border-innovet-yellow'
+                            : 'bg-transparent text-innovet-black border-transparent hover:text-innovet-blue hover:bg-white/50'
+                    }`}
+                >
+                    <div className="flex items-center justify-center gap-3">
+                        <Icon size={22} className={activeTab === id ? 'text-innovet-blue' : 'text-innovet-black opacity-50'} strokeWidth={2} />
+                        {label}
+                    </div>
+                </button>
+            );
+
+            const SectionTitle = ({ title, icon: Icon }) => (
+                <div className="mb-10 flex items-center gap-4 border-b-2 border-innovet-black pb-6">
+                    {Icon && <div className="bg-innovet-yellow p-2 text-black"><Icon size={32} strokeWidth={2.5} /></div>}
+                    <h2 className="text-3xl md:text-5xl font-black text-[#080610] uppercase tracking-tighter leading-[0.8]">
+                        {title}
+                    </h2>
+                </div>
+            );
+
+            // MATRIX VIEW
+            const AgendaMatrixView = () => (
+                <div className="bg-white border border-innovet-gray shadow-sm">
+                    <div className={`overflow-x-auto custom-scrollbar`} dir={isRTL ? 'rtl' : 'ltr'}>
+                        <table className={`w-full border-collapse ${isRTL ? 'text-right' : 'text-left'} min-w-[800px]`}>
+                            <thead>
+                                <tr className="bg-innovet-dark text-white">
+                                    <th className={`sticky ${isRTL ? 'right-0' : 'left-0'} z-20 bg-innovet-dark p-6 text-2xl font-bold ${isRTL ? 'border-l' : 'border-r'} border-gray-700 min-w-[220px]`}>
+                                        {t.week} / {t.category}
+                                    </th>
+                                    {agendaData.map((item) => (
+                                        <th key={item.week} className={`p-4 text-center min-w-[180px] ${isRTL ? 'border-l' : 'border-r'} border-gray-700`}>
+                                            <div className="flex flex-col items-center">
+                                                <span className="text-innovet-yellow text-sm font-bold uppercase tracking-widest mb-1">{t.week}</span>
+                                                <span className="text-4xl font-black">{item.week}</span>
+                                            </div>
+                                        </th>
+                                    ))}
+                                </tr>
+                            </thead>
+                            <tbody className="divide-y divide-innovet-gray">
+                                {/* Phase Row */}
+                                <tr className="bg-innovet-bg">
+                                    <td className={`sticky ${isRTL ? 'right-0' : 'left-0'} z-10 bg-innovet-bg p-6 text-xl font-bold text-innovet-blue ${isRTL ? 'border-l' : 'border-r'} border-b border-[#D1D1D1]`}>
+                                        {t.phase}
+                                    </td>
+                                    {agendaData.map((item, idx) => (
+                                        <td key={idx} className={`p-4 text-sm font-bold text-innovet-blue text-center ${isRTL ? 'border-l' : 'border-r'} border-b border-[#D1D1D1]`}>
+                                            {lang === 'he' ? item.phase_he : item.phase_en}
+                                        </td>
+                                    ))}
+                                </tr>
+
+                                {/* Subject Row */}
+                                <tr className="group hover:bg-[#FAFAFA]">
+                                    <td className={`sticky ${isRTL ? 'right-0' : 'left-0'} z-10 bg-white group-hover:bg-[#FAFAFA] p-6 text-xl font-bold text-innovet-black ${isRTL ? 'border-l' : 'border-r'} border-innovet-gray`}>
+                                        {t.subject}
+                                    </td>
+                                    {agendaData.map((item, idx) => (
+                                        <td key={idx} className={`p-5 text-lg font-medium text-innovet-black ${isRTL ? 'border-l' : 'border-r'} border-innovet-gray align-top`}>
+                                            {lang === 'he' ? item.subject_he : item.subject_en}
+                                        </td>
+                                    ))}
+                                </tr>
+
+                                {/* Tools Row */}
+                                <tr className="group hover:bg-[#FAFAFA]">
+                                    <td className={`sticky ${isRTL ? 'right-0' : 'left-0'} z-10 bg-white group-hover:bg-[#FAFAFA] p-6 text-xl font-bold text-innovet-black ${isRTL ? 'border-l' : 'border-r'} border-innovet-gray`}>
+                                        {t.tools}
+                                    </td>
+                                    {agendaData.map((item, idx) => (
+                                        <td key={idx} className={`p-5 ${isRTL ? 'border-l' : 'border-r'} border-innovet-gray align-top`}>
+                                            <div className="flex flex-wrap gap-2">
+                                                {item.tools && item.tools.map((t, i) => (
+                                                    <span key={i} className="inline-block px-2 py-1 bg-innovet-black text-white text-xs font-bold uppercase tracking-wide">
+                                                        {t}
+                                                    </span>
+                                                ))}
+                                            </div>
+                                        </td>
+                                    ))}
+                                </tr>
+
+                                {/* Milestone Row */}
+                                <tr className="bg-innovet-yellow/10">
+                                    <td className={`sticky ${isRTL ? 'right-0' : 'left-0'} z-10 bg-[#FFF8E1] p-6 text-xl font-bold text-innovet-black ${isRTL ? 'border-l' : 'border-r'} border-innovet-gray`}>
+                                        {t.milestones}
+                                    </td>
+                                    {agendaData.map((item, idx) => (
+                                        <td key={idx} className={`p-5 ${isRTL ? 'border-l' : 'border-r'} border-innovet-gray align-top h-full`}>
+                                            {item.milestone && (
+                                                <div className="p-3 bg-innovet-yellow text-black text-sm font-bold text-center shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] border border-black">
+                                                    <div className="flex justify-center mb-1 text-black">
+                                                        <Star size={16} className="fill-black" />
+                                                    </div>
+                                                    {item.milestone}
+                                                </div>
+                                            )}
+                                        </td>
+                                    ))}
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            );
+
+            // DELIVERABLES VIEW
+            const TableDeliverables = () => (
+                <div className="bg-white border-t-4 border-innovet-blue shadow-sm">
+                    <div className="overflow-x-auto">
+                        <table className={`w-full ${isRTL ? 'text-right' : 'text-left'} border-collapse min-w-[600px]`}>
+                            <thead className="bg-innovet-bg text-innovet-black">
+                                <tr>
+                                    <th className="px-8 py-6 text-lg font-bold border-b-2 border-innovet-black w-32">{t.week}</th>
+                                    <th className="px-8 py-6 text-lg font-bold border-b-2 border-innovet-black">{t.task}</th>
+                                    <th className="px-8 py-6 text-lg font-bold border-b-2 border-innovet-black">{t.details}</th>
+                                    <th className="px-8 py-6 text-lg font-bold border-b-2 border-innovet-black w-48">{t.status}</th>
+                                </tr>
+                            </thead>
+                            <tbody className="text-innovet-black">
+                                {deliverablesData.map((item, index) => (
+                                    <tr key={index} className="border-b border-innovet-gray hover:bg-[#FAFAFA] transition-colors">
+                                        <td className="px-8 py-6 font-black text-2xl text-innovet-blue">{item.week}</td>
+                                        <td className="px-8 py-6 text-xl font-bold">{lang === 'he' ? item.task_he : item.task_en}</td>
+                                        <td className="px-8 py-6 text-lg font-light text-gray-600 font-sans">{lang === 'he' ? item.desc_he : item.desc_en}</td>
+                                        <td className="px-8 py-6">
+                                            {item.link && item.link !== "#" ? (
+                                                <a href={item.link} target="_blank" className="flex items-center gap-2 text-sm font-bold uppercase tracking-wider hover:text-innovet-yellow transition-colors">
+                                                    {t.download} <Download size={16}/>
+                                                </a>
+                                            ) : (
+                                                <span className="text-sm text-gray-400 font-bold uppercase tracking-wider">--</span>
+                                            )}
+                                        </td>
+                                    </tr>
+                                ))}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            );
+
+            // OFFICE HOURS VIEW
+            const TableOfficeHours = () => (
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                    {officeHoursData.map((item, index) => (
+                        <div key={index} className="bg-white border-2 border-innovet-bg hover:border-innovet-blue transition-all duration-300 p-8 group">
+                            <div className="flex justify-between items-start mb-6">
+                                <div className="bg-innovet-black text-white px-4 py-1 text-sm font-bold uppercase tracking-wider">
+                                    {item.week} {/* Display Raw Week String */}
+                                </div>
+                                <div className="text-innovet-yellow">
+                                    <Users size={28} strokeWidth={2} />
+                                </div>
+                            </div>
+                            <h3 className="text-3xl font-bold text-innovet-black mb-2 group-hover:text-innovet-blue transition-colors">
+                                {lang === 'he' ? item.topic_he : item.topic_en}
+                            </h3>
+                            <p className="text-xl text-gray-500 mb-8 font-light">
+                                {t.with} {lang === 'he' ? item.expert_he : item.expert_en}
+                            </p>
+                            
+                            {item.email ? (
+                                <a href={`mailto:${item.email}?subject=Innovet Office Hours: ${item.topic_en}`} className="w-full py-4 bg-innovet-bg text-innovet-black font-bold text-lg uppercase hover:bg-innovet-yellow transition-colors flex justify-center items-center gap-2">
+                                    {t.book} <ArrowIcon size={20} />
+                                </a>
+                            ) : (
+                                <button disabled className="w-full py-4 bg-gray-100 text-gray-400 font-bold text-lg uppercase cursor-not-allowed flex justify-center items-center gap-2">
+                                    {t.book} <ArrowIcon size={20} />
+                                </button>
+                            )}
+                        </div>
+                    ))}
+                </div>
+            );
+
+            // CALENDAR VIEW
+            const CalendarView = () => (
+                <div className="space-y-0">
+                    {calendarHighlights.map((event, index) => (
+                        <div key={index} className="flex flex-col md:flex-row bg-innovet-dark text-white border-b border-gray-800 hover:bg-[#1F1F1F] transition-colors group">
+                            <div className={`md:w-48 p-8 ${isRTL ? 'md:border-l' : 'md:border-r'} border-gray-800 flex flex-col justify-center items-center md:items-start text-innovet-yellow`}>
+                                <span className="text-4xl font-black">{getDayFromDate(event.date)}</span>
+                                <span className="text-xl font-bold uppercase">JAN</span>
+                            </div>
+                            <div className="flex-grow p-8 flex flex-col justify-center">
+                                <div className="flex items-center gap-4 mb-2">
+                                    <h3 className="text-3xl font-bold uppercase tracking-wide group-hover:text-innovet-yellow transition-colors">
+                                        {lang === 'he' ? event.event_he : event.event_en}
+                                    </h3>
+                                    {index === 0 && <span className="bg-innovet-blue px-2 py-0.5 text-xs font-bold uppercase">{t.upcoming}</span>}
+                                </div>
+                                <p className="text-gray-400 text-lg font-light font-sans max-w-2xl" style={{whiteSpace: 'pre-line'}}>
+                                    {lang === 'he' ? event.details_he : event.details_en}
+                                </p>
+                            </div>
+                            <div className={`p-8 flex items-center justify-end md:w-64`}>
+                                {event.time && (
+                                    <div className="flex items-center gap-3 text-xl font-bold">
+                                        <Clock size={24} className="text-innovet-yellow" />
+                                        {event.time}
+                                    </div>
+                                )}
+                            </div>
+                        </div>
+                    ))}
+                </div>
+            );
 
             return (
                 <div className="min-h-screen bg-innovet-bg font-sans text-innovet-black">
@@ -384,34 +768,66 @@
                     <header className="bg-white sticky top-0 z-50 border-b border-innovet-gray">
                         <div className="max-w-[1600px] mx-auto px-6 h-24 flex items-center justify-between">
                             <div className="flex items-center gap-6 h-full">
+                                {/* Logo Image */}
                                 <div className="cursor-pointer flex items-center gap-4" onClick={scrollToTop}>
-                                    <img src="./INNOVET_ICON-05-1.svg" alt="Innovet Logo" className="h-12 md:h-16 w-auto object-contain icon-black" />
+                                    <img 
+                                        src="./INNOVET_ICON-05-1.svg" 
+                                        alt="Innovet Logo" 
+                                        className="h-12 md:h-16 w-auto object-contain icon-black" 
+                                        onError={(e) => {
+                                            e.target.style.display = 'none'; 
+                                        }} 
+                                    />
+                                    
                                     <div className="flex flex-col">
                                         <span className="text-3xl font-black tracking-tighter leading-none">INNOVET</span>
                                         <span className="text-sm font-bold text-innovet-blue tracking-widest uppercase">Cohort 2</span>
                                     </div>
                                 </div>
+                                
                                 <div className="hidden md:block h-8 w-px bg-innovet-gray"></div>
+                                
+                                {/* Desktop Nav */}
                                 <nav className="hidden md:flex gap-8 h-full items-center">
+                                    <button onClick={scrollToTop} className="text-lg font-bold hover:text-innovet-blue transition-colors">{t.program}</button>
+                                    
+                                    {/* Subcategories Dropdown */}
                                     <div className="relative group h-full flex items-center">
-                                        <button onClick={() => handleNavClick('agenda')} className="text-lg font-bold text-innovet-blue transition-colors flex items-center gap-1 py-8">
+                                        <button 
+                                            onClick={() => handleNavClick('agenda')}
+                                            className="text-lg font-bold text-innovet-blue transition-colors flex items-center gap-1 py-8"
+                                        >
                                             {t.schedule} <ChevronDown size={16} />
                                         </button>
+                                        
+                                        {/* Dropdown Content */}
                                         <div className="absolute top-[95%] right-0 w-64 bg-white shadow-xl border border-innovet-gray hidden group-hover:block animate-fadeIn z-50">
                                              <div className="py-2">
-                                                <button onClick={(e) => { e.stopPropagation(); handleNavClick('agenda'); }} className="block w-full text-right px-6 py-3 text-base font-bold hover:bg-innovet-bg hover:text-innovet-blue transition-colors border-b border-gray-100">{t.tabAgenda}</button>
-                                                <button onClick={(e) => { e.stopPropagation(); handleNavClick('deliverables'); }} className="block w-full text-right px-6 py-3 text-base font-bold hover:bg-innovet-bg hover:text-innovet-blue transition-colors border-b border-gray-100">{t.tabDeliverables}</button>
-                                                <button onClick={(e) => { e.stopPropagation(); handleNavClick('office-hours'); }} className="block w-full text-right px-6 py-3 text-base font-bold hover:bg-innovet-yellow hover:text-black transition-colors border-b border-gray-100">{t.tabOfficeHours}</button>
-                                                <button onClick={(e) => { e.stopPropagation(); handleNavClick('calendar'); }} className="block w-full text-right px-6 py-3 text-base font-bold hover:bg-innovet-bg hover:text-innovet-blue transition-colors">{t.tabCalendar}</button>
+                                                <button onClick={(e) => { e.stopPropagation(); handleNavClick('agenda'); }} className="block w-full text-right px-6 py-3 text-base font-bold hover:bg-innovet-bg hover:text-innovet-blue transition-colors border-b border-gray-100">
+                                                    {t.tabAgenda}
+                                                </button>
+                                                <button onClick={(e) => { e.stopPropagation(); handleNavClick('deliverables'); }} className="block w-full text-right px-6 py-3 text-base font-bold hover:bg-innovet-bg hover:text-innovet-blue transition-colors border-b border-gray-100">
+                                                    {t.tabDeliverables}
+                                                </button>
+                                                <button onClick={(e) => { e.stopPropagation(); handleNavClick('office-hours'); }} className="block w-full text-right px-6 py-3 text-base font-bold hover:bg-innovet-yellow hover:text-black transition-colors border-b border-gray-100">
+                                                    {t.tabOfficeHours}
+                                                </button>
+                                                <button onClick={(e) => { e.stopPropagation(); handleNavClick('calendar'); }} className="block w-full text-right px-6 py-3 text-base font-bold hover:bg-innovet-bg hover:text-innovet-blue transition-colors">
+                                                    {t.tabCalendar}
+                                                </button>
                                             </div>
                                         </div>
                                     </div>
                                 </nav>
                             </div>
+
                             <div className="flex items-center gap-4">
+                                {/* Language Toggle */}
                                 <button onClick={toggleLang} className="flex items-center gap-2 px-4 py-2 bg-innovet-bg hover:bg-gray-200 transition rounded-full font-bold text-sm uppercase">
                                     <Globe size={18}/> {lang === 'he' ? 'EN' : 'HE'}
                                 </button>
+
+                                {/* Mobile Menu Button */}
                                 <div className="md:hidden">
                                     <button onClick={toggleMobileMenu} className="text-black hover:text-innovet-blue transition-colors">
                                         {isMobileMenuOpen ? <X size={28} /> : <Menu size={28} />}
@@ -419,24 +835,53 @@
                                 </div>
                             </div>
                         </div>
+
+                        {/* Mobile Menu Dropdown */}
+                        {isMobileMenuOpen && (
+                            <div className="md:hidden bg-white border-t border-innovet-gray animate-fadeIn absolute w-full shadow-xl">
+                                <nav className="flex flex-col p-6 gap-4 text-center">
+                                    <button onClick={scrollToTop} className="text-xl font-bold hover:text-innovet-blue transition-colors py-2">{t.home}</button>
+                                    <button onClick={scrollToTop} className="text-xl font-bold hover:text-innovet-blue transition-colors py-2">{t.program}</button>
+                                    <div className="bg-gray-50 py-2 rounded-lg">
+                                        <div className="text-xl font-bold text-innovet-blue mb-2">{t.schedule}</div>
+                                        <div className="flex flex-col gap-2">
+                                             <button onClick={() => handleNavClick('agenda')} className="text-sm font-bold text-gray-600">{t.tabAgenda}</button>
+                                             <button onClick={() => handleNavClick('deliverables')} className="text-sm font-bold text-gray-600">{t.tabDeliverables}</button>
+                                             <button onClick={() => handleNavClick('office-hours')} className="text-sm font-bold text-innovet-yellow bg-black/5 py-1 mx-10 rounded">{t.tabOfficeHours}</button>
+                                             <button onClick={() => handleNavClick('calendar')} className="text-sm font-bold text-gray-600">{t.tabCalendar}</button>
+                                        </div>
+                                    </div>
+                                </nav>
+                            </div>
+                        )}
                     </header>
 
-                    {/* Hero */}
+                    {/* Hero / Page Title */}
                     <div className="bg-innovet-dark text-white py-24 relative overflow-hidden">
+                        {/* Background Image (INNOVET_LOGO_HOR_NEG-02-2.svg) */}
                         <div className="absolute inset-0 z-0 pointer-events-none opacity-10">
                             <img src="./INNOVET_LOGO_HOR_NEG-02-2.svg" alt="" className="w-full h-full object-cover" />
                         </div>
+
+                        {/* Starburst Decoration (Spinning) */}
                         <div className="absolute -right-20 -top-20 z-0 opacity-10 pointer-events-none animate-spin-slow">
                              <img src="./INNOVET_ICON-05linear-1.webp" alt="" className="w-[600px] h-[600px]" />
                         </div>
+
                         <div className="max-w-[1600px] mx-auto px-6 relative z-10">
                             <div className="flex flex-col md:flex-row justify-between items-end gap-10">
                                 <div>
-                                    <span className="text-innovet-yellow font-bold text-xl tracking-widest uppercase mb-4 block">{t.heroSubtitle}</span>
-                                    <h1 className="text-7xl md:text-8xl font-black uppercase leading-[0.85] tracking-tight">{t.heroTitle} <br/> {t.heroTitle2}</h1>
+                                    <span className="text-innovet-yellow font-bold text-xl tracking-widest uppercase mb-4 block">
+                                        {t.heroSubtitle}
+                                    </span>
+                                    <h1 className="text-7xl md:text-8xl font-black uppercase leading-[0.85] tracking-tight">
+                                        {t.heroTitle} <br/> {t.heroTitle2}
+                                    </h1>
                                 </div>
                                 <div className="md:max-w-xl mb-2">
-                                    <p className="text-xl md:text-2xl font-light text-gray-300 leading-relaxed">{t.heroDesc}</p>
+                                    <p className="text-xl md:text-2xl font-light text-gray-300 leading-relaxed">
+                                        {t.heroDesc}
+                                    </p>
                                 </div>
                             </div>
                         </div>
@@ -444,13 +889,16 @@
 
                     {/* Main Content */}
                     <main ref={mainContentRef} className="max-w-[1600px] mx-auto px-6 py-16 relative -mt-12">
+                        
+                        {/* Navigation Tabs */}
                         <div className="bg-white p-2 shadow-lg mb-12 flex flex-wrap md:inline-flex gap-2 relative z-20">
-                            <TabButton id="agenda" label={t.tabAgenda} icon={Layout} activeTab={activeTab} onClick={handleNavClick} />
-                            <TabButton id="deliverables" label={t.tabDeliverables} icon={CheckSquare} activeTab={activeTab} onClick={handleNavClick} />
-                            <TabButton id="office-hours" label={t.tabOfficeHours} icon={Users} activeTab={activeTab} onClick={handleNavClick} />
-                            <TabButton id="calendar" label={t.tabCalendar} icon={Calendar} activeTab={activeTab} onClick={handleNavClick} />
+                            <TabButton id="agenda" label={t.tabAgenda} icon={Layout} />
+                            <TabButton id="deliverables" label={t.tabDeliverables} icon={CheckSquare} />
+                            <TabButton id="office-hours" label={t.tabOfficeHours} icon={Users} />
+                            <TabButton id="calendar" label={t.tabCalendar} icon={Calendar} />
                         </div>
 
+                        {/* Dynamic Content */}
                         <div className="animate-fadeIn">
                             {loading ? (
                                 <div className="flex justify-center items-center h-64">
@@ -460,129 +908,26 @@
                                 <>
                                     {activeTab === 'agenda' && (
                                         <>
-                                            <div className="mb-8 border-b-2 border-black pb-4"><h2 className="text-4xl font-black uppercase">{t.sectionJourney}</h2></div>
-                                            <div className="overflow-x-auto custom-scrollbar pb-4">
-                                                <div className="inline-flex gap-4 min-w-full">
-                                                    {agendaData.map((item, idx) => (
-                                                        <div key={idx} className="w-72 flex-shrink-0 bg-white border border-gray-200 p-6 hover:shadow-lg transition-shadow flex flex-col">
-                                                            <div className="text-innovet-blue font-bold text-sm mb-2">{item.phase}</div>
-                                                            <div className="text-4xl font-black mb-4 text-gray-200">{item.week}</div>
-                                                            <h3 className="text-xl font-bold leading-tight mb-4 min-h-[3rem]">{item.subject}</h3>
-                                                            
-                                                            {item.tools && item.tools.length > 0 && item.tools[0] !== "" && (
-                                                                <div className="mb-4 flex-grow">
-                                                                    <div className="text-xs font-bold uppercase tracking-wider text-gray-400 mb-2">{t.tools}</div>
-                                                                    <div className="flex flex-wrap gap-2">
-                                                                        {item.tools.map((tool, tIdx) => (
-                                                                            <span key={tIdx} className="px-2 py-1 bg-gray-100 text-xs font-medium rounded">{tool}</span>
-                                                                        ))}
-                                                                    </div>
-                                                                </div>
-                                                            )}
-                                                            
-                                                            {item.milestone && (
-                                                                <div className="mt-auto pt-4 border-t border-gray-100">
-                                                                    <div className="flex items-center gap-2 text-innovet-yellow font-bold text-sm">
-                                                                        <Star size={16} className="fill-current" />
-                                                                        {item.milestone}
-                                                                    </div>
-                                                                </div>
-                                                            )}
-                                                        </div>
-                                                    ))}
-                                                </div>
-                                            </div>
+                                            <SectionTitle title={t.sectionJourney} icon={Target} />
+                                            <AgendaMatrixView />
                                         </>
                                     )}
-
                                     {activeTab === 'deliverables' && (
                                         <>
-                                            <div className="mb-8 border-b-2 border-black pb-4"><h2 className="text-4xl font-black uppercase">{t.sectionStudent}</h2></div>
-                                            <div className="grid grid-cols-1 gap-4">
-                                                {deliverablesData.map((item, index) => (
-                                                    <div key={index} className="bg-white p-6 border-l-4 border-innovet-blue shadow-sm flex flex-col md:flex-row justify-between items-center gap-6 hover:bg-gray-50 transition-colors">
-                                                        <div className="flex-1">
-                                                            <div className="flex items-center gap-3 mb-1">
-                                                                <span className="bg-innovet-black text-white px-2 py-0.5 text-xs font-bold uppercase">{item.week}</span>
-                                                            </div>
-                                                            <h3 className="text-xl font-bold">{item.task}</h3>
-                                                            {item.desc && <p className="text-gray-500 text-sm mt-1">{item.desc}</p>}
-                                                        </div>
-                                                        <div>
-                                                            {item.link ? (
-                                                                <a href={item.link} target="_blank" className="flex items-center gap-2 px-6 py-3 bg-white border-2 border-black text-black font-bold uppercase hover:bg-innovet-yellow transition-colors text-sm">
-                                                                    {t.download} <Download size={16}/>
-                                                                </a>
-                                                            ) : (
-                                                                <span className="flex items-center gap-2 px-6 py-3 border-2 border-gray-200 text-gray-300 font-bold uppercase text-sm cursor-not-allowed">
-                                                                    {t.download} <Download size={16}/>
-                                                                </span>
-                                                            )}
-                                                        </div>
-                                                    </div>
-                                                ))}
-                                            </div>
+                                            <SectionTitle title={t.sectionStudent} icon={CheckSquare} />
+                                            <TableDeliverables />
                                         </>
                                     )}
-
                                     {activeTab === 'office-hours' && (
                                         <>
-                                            <div className="mb-8 border-b-2 border-black pb-4"><h2 className="text-4xl font-black uppercase">{t.sectionExperts}</h2></div>
-                                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                                                {officeHoursData.map((item, index) => (
-                                                    <div key={index} className="bg-white border border-gray-200 p-6 flex flex-col relative overflow-hidden group">
-                                                        <div className="absolute top-0 right-0 w-16 h-16 bg-innovet-yellow/20 rounded-bl-full -mr-8 -mt-8 z-0"></div>
-                                                        <div className="relative z-10">
-                                                            <div className="text-sm font-bold text-innovet-blue mb-1">{item.week}</div>
-                                                            <h3 className="text-2xl font-bold mb-2">{item.topic}</h3>
-                                                            <p className="text-gray-500 mb-6 flex items-center gap-2">
-                                                                <Users size={16} /> {item.expert}
-                                                            </p>
-                                                            
-                                                            {item.link ? (
-                                                                <a href={item.link} target="_blank" className="block w-full py-3 text-center bg-innovet-black text-white font-bold uppercase text-sm hover:bg-innovet-blue transition-colors">
-                                                                    {t.book}
-                                                                </a>
-                                                            ) : (
-                                                                <button disabled className="block w-full py-3 text-center bg-gray-100 text-gray-400 font-bold uppercase text-sm cursor-not-allowed">
-                                                                    {t.book}
-                                                                </button>
-                                                            )}
-                                                        </div>
-                                                    </div>
-                                                ))}
-                                            </div>
+                                            <SectionTitle title={t.sectionExperts} icon={Users} />
+                                            <TableOfficeHours />
                                         </>
                                     )}
-
                                     {activeTab === 'calendar' && (
                                         <>
-                                            <div className="mb-8 border-b-2 border-black pb-4"><h2 className="text-4xl font-black uppercase">{t.sectionEvents}</h2></div>
-                                            <div className="space-y-2">
-                                                {calendarHighlights.map((event, index) => (
-                                                    <div key={index} className="bg-white border border-gray-200 p-6 flex flex-row gap-6 items-center hover:border-innovet-yellow transition-colors">
-                                                        <div className="flex flex-col items-center justify-center w-20 text-center border-l-2 border-gray-100 pl-4">
-                                                            <span className="text-4xl font-black text-innovet-black">{event.date}</span>
-                                                        </div>
-                                                        <div className="flex-1">
-                                                            <h3 className="text-xl font-bold">{event.event}</h3>
-                                                            {event.details && <p className="text-gray-500 text-sm mt-1">{event.details}</p>}
-                                                        </div>
-                                                        <div className="text-right min-w-[100px]">
-                                                            {event.time && (
-                                                                <div className="flex items-center justify-end gap-2 text-innovet-blue font-bold">
-                                                                    <Clock size={16} /> {event.time}
-                                                                </div>
-                                                            )}
-                                                        </div>
-                                                    </div>
-                                                ))}
-                                                {calendarHighlights.length === 0 && (
-                                                    <div className="text-center py-12 text-gray-400">
-                                                        לא נמצאו אירועים קרובים / No events found
-                                                    </div>
-                                                )}
-                                            </div>
+                                            <SectionTitle title={t.sectionEvents} icon={Calendar} />
+                                            <CalendarView />
                                         </>
                                     )}
                                 </>
@@ -590,6 +935,7 @@
                         </div>
                     </main>
 
+                    {/* Footer */}
                     <footer className="bg-innovet-dark text-white py-16 border-t border-gray-800 relative z-10">
                         <div className="max-w-[1600px] mx-auto px-6 flex flex-col md:flex-row justify-between items-center">
                             <div className={`text-center ${isRTL ? 'md:text-right' : 'md:text-left'} mb-8 md:mb-0`}>
@@ -605,20 +951,6 @@
                 </div>
             );
         };
-
-        const TabButton = ({ id, label, icon: Icon, activeTab, onClick }) => (
-            <button
-                onClick={() => onClick(id)}
-                className={`relative px-6 py-4 text-lg font-bold transition-all duration-200 uppercase tracking-tight border-b-4 flex-1 md:flex-none whitespace-nowrap flex items-center gap-3 ${
-                    activeTab === id
-                        ? 'bg-white text-black border-innovet-yellow'
-                        : 'bg-transparent text-innovet-black border-transparent hover:bg-white/50'
-                }`}
-            >
-                <Icon size={20} className={activeTab === id ? 'text-innovet-blue' : 'opacity-50'} />
-                {label}
-            </button>
-        );
 
         const root = ReactDOM.createRoot(document.getElementById('root'));
         root.render(<App />);
