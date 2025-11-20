@@ -74,6 +74,11 @@
         .group:hover .group-hover\:block {
             display: block;
         }
+        
+        /* Black Filter for Icon */
+        .icon-black {
+            filter: grayscale(100%) brightness(0);
+        }
     </style>
     <script>
         tailwind.config = {
@@ -655,18 +660,18 @@
                         <div className="max-w-[1600px] mx-auto px-6 h-24 flex items-center justify-between">
                             <div className="flex items-center gap-6 h-full">
                                 {/* Logo Image */}
-                                <div className="cursor-pointer" onClick={scrollToTop}>
+                                <div className="cursor-pointer flex items-center gap-4" onClick={scrollToTop}>
                                     <img 
                                         src="./INNOVET_ICON-05-1.svg" 
                                         alt="Innovet Logo" 
-                                        className="h-12 md:h-16 w-auto object-contain" 
+                                        className="h-12 md:h-16 w-auto object-contain icon-black" 
                                         onError={(e) => {
                                             e.target.style.display = 'none'; 
-                                            e.target.nextSibling.style.display = 'flex';
+                                            // Fallback logic handled by parent flex container
                                         }} 
                                     />
-                                    {/* Fallback if Image Fails */}
-                                    <div className="flex-col hidden">
+                                    
+                                    <div className="flex flex-col">
                                         <span className="text-3xl font-black tracking-tighter leading-none">INNOVET</span>
                                         <span className="text-sm font-bold text-innovet-blue tracking-widest uppercase">Cohort 2</span>
                                     </div>
@@ -676,7 +681,6 @@
                                 
                                 {/* Desktop Nav */}
                                 <nav className="hidden md:flex gap-8 h-full items-center">
-                                    <button onClick={scrollToTop} className="text-lg font-bold hover:text-innovet-blue transition-colors">{t.home}</button>
                                     <button onClick={scrollToTop} className="text-lg font-bold hover:text-innovet-blue transition-colors">{t.program}</button>
                                     
                                     {/* Subcategories Dropdown */}
@@ -728,7 +732,6 @@
                         {isMobileMenuOpen && (
                             <div className="md:hidden bg-white border-t border-innovet-gray animate-fadeIn absolute w-full shadow-xl">
                                 <nav className="flex flex-col p-6 gap-4 text-center">
-                                    <button onClick={scrollToTop} className="text-xl font-bold hover:text-innovet-blue transition-colors py-2">{t.home}</button>
                                     <button onClick={scrollToTop} className="text-xl font-bold hover:text-innovet-blue transition-colors py-2">{t.program}</button>
                                     <div className="bg-gray-50 py-2 rounded-lg">
                                         <div className="text-xl font-bold text-innovet-blue mb-2">{t.schedule}</div>
@@ -746,14 +749,14 @@
 
                     {/* Hero / Page Title */}
                     <div className="bg-innovet-dark text-white py-24 relative overflow-hidden">
-                        {/* Background Image (Vector-2.svg) */}
-                        <div className="absolute inset-0 z-0 opacity-10 pointer-events-none">
-                            <img src="./Vector-2.svg" alt="" className="w-full h-full object-cover" />
+                        {/* Background Image (INNOVET_LOGO_HOR_NEG-02-2.svg) */}
+                        <div className="absolute inset-0 z-0 pointer-events-none opacity-10">
+                            <img src="./INNOVET_LOGO_HOR_NEG-02-2.svg" alt="" className="w-full h-full object-cover" />
                         </div>
 
-                        {/* Starburst Decoration */}
+                        {/* Starburst Decoration (Spinning) */}
                         <div className="absolute -right-20 -top-20 z-0 opacity-10 pointer-events-none animate-spin-slow">
-                             <img src="./Starburst-Logo-White-svg-1.svg" alt="" className="w-[600px] h-[600px]" />
+                             <img src="./INNOVET_ICON-05linear-1.webp" alt="" className="w-[600px] h-[600px]" />
                         </div>
 
                         <div className="max-w-[1600px] mx-auto px-6 relative z-10">
@@ -830,8 +833,9 @@
                                 <h2 className="text-4xl font-black mb-2">INNOVET</h2>
                                 <p className="text-gray-500">{t.rights}</p>
                             </div>
-                            <div className="flex gap-8">
+                            <div className="flex gap-8 items-center">
                                 <span className="text-gray-400 font-bold uppercase tracking-wider">{t.builtBy}</span>
+                                <img src="./Starburst-Logo-White-svg-1.webp" alt="Starburst Logo" className="h-8 opacity-70 hover:opacity-100 transition-opacity" />
                             </div>
                         </div>
                     </footer>
