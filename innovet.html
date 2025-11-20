@@ -1,0 +1,714 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Innovet Cohort 2 - Program Schedule</title>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- React & ReactDOM -->
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+    
+    <!-- Babel for JSX -->
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;700;900&display=swap" rel="stylesheet">
+
+    <!-- Custom Styles -->
+    <style>
+        body {
+            font-family: 'Heebo', sans-serif;
+            background-color: #F1F1F1;
+            color: #191B1D;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        /* Custom Scrollbar */
+        .custom-scrollbar::-webkit-scrollbar {
+            height: 10px;
+            width: 10px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: #F1F1F1;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: #C1C1C1;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+            background: #A8A8A8;
+        }
+
+        /* Hide scrollbar for clean tab navigation */
+        .hide-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+        .hide-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+
+        /* Animations */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .animate-fadeIn {
+            animation: fadeIn 0.5s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+        }
+    </style>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Heebo', 'sans-serif'],
+                    },
+                    colors: {
+                        innovet: {
+                            black: '#191B1D',
+                            dark: '#17191A',
+                            yellow: '#FFC700',
+                            blue: '#1F63C7',
+                            bg: '#F1F1F1',
+                            gray: '#E3E3E3'
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="antialiased">
+    <div id="root"></div>
+
+    <script type="text/babel">
+        const { useState, useEffect } = React;
+
+        // --- Lucide-style Icons Components (Recreated as SVGs) ---
+        const Layout = ({size=24, className, strokeWidth=2}) => (
+            <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={strokeWidth} strokeLinecap="round" strokeLinejoin="round" className={className}><rect width="18" height="18" x="3" y="3" rx="2" ry="2"/><line x1="3" x2="21" y1="9" y2="9"/><line x1="9" x2="9" y1="21" y2="9"/></svg>
+        );
+        const Target = ({size=24, className, strokeWidth=2}) => (
+            <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={strokeWidth} strokeLinecap="round" strokeLinejoin="round" className={className}><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg>
+        );
+        const Calendar = ({size=24, className, strokeWidth=2}) => (
+            <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={strokeWidth} strokeLinecap="round" strokeLinejoin="round" className={className}><rect width="18" height="18" x="3" y="4" rx="2" ry="2"/><line x1="16" x2="16" y1="2" y2="6"/><line x1="8" x2="8" y1="2" y2="6"/><line x1="3" x2="21" y1="10" y2="10"/></svg>
+        );
+        const Clock = ({size=24, className, strokeWidth=2}) => (
+            <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={strokeWidth} strokeLinecap="round" strokeLinejoin="round" className={className}><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+        );
+        const CheckSquare = ({size=24, className, strokeWidth=2}) => (
+            <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={strokeWidth} strokeLinecap="round" strokeLinejoin="round" className={className}><polyline points="9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+        );
+        const Users = ({size=24, className, strokeWidth=2}) => (
+            <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={strokeWidth} strokeLinecap="round" strokeLinejoin="round" className={className}><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+        );
+        const Menu = ({size=24, className, strokeWidth=2}) => (
+            <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={strokeWidth} strokeLinecap="round" strokeLinejoin="round" className={className}><line x1="3" y1="12" x2="21" y2="12"></line><line x1="3" y1="6" x2="21" y2="6"></line><line x1="3" y1="18" x2="21" y2="18"></line></svg>
+        );
+        const X = ({size=24, className, strokeWidth=2}) => (
+            <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={strokeWidth} strokeLinecap="round" strokeLinejoin="round" className={className}><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+        );
+        const ArrowLeft = ({size=24, className, strokeWidth=2}) => (
+            <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={strokeWidth} strokeLinecap="round" strokeLinejoin="round" className={className}><path d="m12 19-7-7 7-7"/><path d="M19 12H5"/></svg>
+        );
+        const ArrowRight = ({size=24, className, strokeWidth=2}) => (
+            <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={strokeWidth} strokeLinecap="round" strokeLinejoin="round" className={className}><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
+        );
+        const Star = ({size=24, className, strokeWidth=2}) => (
+             <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={strokeWidth} strokeLinecap="round" strokeLinejoin="round" className={className}><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" /></svg>
+        );
+        const Download = ({size=24, className, strokeWidth=2}) => (
+            <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={strokeWidth} strokeLinecap="round" strokeLinejoin="round" className={className}><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" x2="12" y1="15" y2="3"/></svg>
+        );
+        const Globe = ({size=24, className, strokeWidth=2}) => (
+            <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={strokeWidth} strokeLinecap="round" strokeLinejoin="round" className={className}><circle cx="12" cy="12" r="10"/><line x1="2" x2="22" y1="12" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
+        );
+
+        // --- Translations & Constants ---
+        const UI_TEXT = {
+            he: {
+                home: 'בית',
+                program: 'התוכנית',
+                schedule: 'לו"ז ומטלות',
+                contact: 'צור קשר',
+                privacy: 'מדיניות פרטיות',
+                heroTitle: 'תוכנית',
+                heroTitle2: 'העבודה',
+                heroSubtitle: 'Program Schedule & Resources',
+                heroDesc: 'מבט כולל על 19 שבועות של יזמות, משלב הרעיון ועד ל-Demo Day. השתמשו בכלי ה-AI המומלצים בכל שלב.',
+                tabAgenda: 'מטריצת התוכנית',
+                tabDeliverables: 'תוצרים ומטלות',
+                tabOfficeHours: 'מומחים ושעות קבלה',
+                tabCalendar: 'לוח אירועים',
+                sectionJourney: 'מסע היזם (The Journey)',
+                sectionStudent: 'חובות הסטודנט',
+                sectionExperts: 'מפגשי מומחים',
+                sectionEvents: 'אירועי מפתח',
+                week: 'שבוע',
+                category: 'קטגוריה',
+                phase: 'שלב בתוכנית',
+                subject: 'נושא שבועי',
+                tools: 'AI Tools',
+                milestones: 'אבני דרך',
+                task: 'מטלה / תוצר',
+                details: 'פירוט',
+                status: 'סטטוס',
+                download: 'הורד הנחיות',
+                upcoming: 'Upcoming',
+                book: 'שריין מקום',
+                with: 'עם',
+                rights: '© 2025 כל הזכויות שמורות',
+                phases: {
+                    ideation: "שלב האידאציה (Ideation)",
+                    accelerator: "אקסלרטור (Accelerator)",
+                    launch: "השקה (Launch)"
+                }
+            },
+            en: {
+                home: 'Home',
+                program: 'Program',
+                schedule: 'Schedule & Tasks',
+                contact: 'Contact',
+                privacy: 'Privacy Policy',
+                heroTitle: 'WORK',
+                heroTitle2: 'PLAN',
+                heroSubtitle: 'Program Schedule & Resources',
+                heroDesc: 'A comprehensive view of 19 weeks of entrepreneurship, from Ideation to Demo Day. Use the recommended AI tools at each stage.',
+                tabAgenda: 'Program Matrix',
+                tabDeliverables: 'Deliverables',
+                tabOfficeHours: 'Office Hours',
+                tabCalendar: 'Events Calendar',
+                sectionJourney: 'The Journey',
+                sectionStudent: 'Student Deliverables',
+                sectionExperts: 'Expert Sessions',
+                sectionEvents: 'Key Events',
+                week: 'WEEK',
+                category: 'Category',
+                phase: 'Phase',
+                subject: 'Weekly Subject',
+                tools: 'AI Tools',
+                milestones: 'Milestones',
+                task: 'Task / Deliverable',
+                details: 'Details',
+                status: 'Status',
+                download: 'Download Guide',
+                upcoming: 'Upcoming',
+                book: 'Book Slot',
+                with: 'With',
+                rights: '© 2025 All Rights Reserved',
+                phases: {
+                    ideation: "Ideation Phase",
+                    accelerator: "Accelerator Phase",
+                    launch: "Launch Phase"
+                }
+            }
+        };
+
+        // --- Main App Component ---
+        const App = () => {
+            const [activeTab, setActiveTab] = useState('agenda');
+            const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+            const [lang, setLang] = useState('he'); // 'he' or 'en'
+
+            const toggleMobileMenu = () => setIsMobileMenuOpen(!isMobileMenuOpen);
+            const toggleLang = () => setLang(lang === 'he' ? 'en' : 'he');
+
+            const t = UI_TEXT[lang];
+            const isRTL = lang === 'he';
+            const ArrowIcon = isRTL ? ArrowLeft : ArrowRight;
+
+            // Update document dir
+            useEffect(() => {
+                document.documentElement.dir = isRTL ? 'rtl' : 'ltr';
+                document.documentElement.lang = lang;
+            }, [lang, isRTL]);
+
+            // ---------------- DATA WITH TRANSLATIONS ----------------
+            const agendaMatrix = Array.from({ length: 19 }, (_, i) => {
+                const weekNum = i + 1;
+                let phase = t.phases.ideation;
+                if (weekNum >= 5) phase = t.phases.accelerator;
+                if (weekNum >= 16) phase = t.phases.launch;
+
+                let data = {
+                    week: weekNum,
+                    phase: phase,
+                    subject: "",
+                    tools: [],
+                    milestone: ""
+                };
+
+                // Bilingual Data Population
+                if (weekNum === 1) {
+                    data.subject = lang === 'he' ? "הגדרת ערך ליבה וזרימת משתמש" : "Core Value Definition & User Flow";
+                    data.tools = ["ChatGPT", "Perplexity"];
+                } else if (weekNum === 2) {
+                    data.subject = lang === 'he' ? "תעדוף פיצ'רים והיקף MVP" : "Feature Prioritization & MVP Scope";
+                    data.tools = ["Perplexity", "Semrush"];
+                } else if (weekNum === 3) {
+                    data.subject = lang === 'he' ? "ארכיטקטורה ותכנון מערכת" : "System Architecture & Planning";
+                    data.tools = ["Notion AI", "Miro AI"];
+                } else if (weekNum === 4) {
+                    data.subject = lang === 'he' ? "בנייה וחיזוק פונקציונליות" : "Building & Strengthening Functionality";
+                    data.tools = ["Gemini", "Perplexity"];
+                } else if (weekNum === 5) {
+                    data.subject = lang === 'he' ? "תיקונים, יציבות ובדיקות" : "Fixes, Stability & Testing";
+                    data.milestone = "Selection Pitch";
+                    data.tools = ["ChatGPT", "Figma AI"];
+                } else if (weekNum === 6) {
+                    data.subject = lang === 'he' ? "קידום ה-MVP" : "MVP Promotion";
+                    data.tools = ["Gemini"];
+                } else if (weekNum === 7) {
+                    data.subject = lang === 'he' ? "מודל עסקי וקניין רוחני" : "Business Model & IP";
+                    data.tools = ["Figma AI"];
+                } else if (weekNum === 8) {
+                    data.subject = lang === 'he' ? "מודלים אסטרטגיים" : "Strategic Models";
+                    data.tools = ["Notion AI", "Jira AI"];
+                } else if (weekNum === 9) {
+                    data.subject = lang === 'he' ? "ניהול ספרינטים" : "Sprint Management";
+                    data.tools = ["Figma AI", "Perplexity"];
+                } else if (weekNum === 10) {
+                    data.subject = lang === 'he' ? "עיצוב הצעת ערך" : "Value Proposition Design";
+                    data.tools = ["Excel Copilot"];
+                } else if (weekNum === 11) {
+                    data.subject = lang === 'he' ? "ניתוח שוק ומודל הכנסות" : "Market Analysis & Revenue Model";
+                    data.tools = ["Semrush", "ChatGPT"];
+                } else if (weekNum === 12) {
+                    data.subject = lang === 'he' ? "ניתוח מתחרים" : "Competitor Analysis";
+                    data.tools = ["Perplexity", "SimilarWeb"];
+                } else if (weekNum === 13) {
+                    data.subject = lang === 'he' ? "קידום MVP מתקדם" : "Advanced MVP Promotion";
+                    data.tools = ["GitHub Copilot", "v0.dev"];
+                } else if (weekNum === 14) {
+                    data.subject = lang === 'he' ? "יסודות המודל העסקי" : "Business Model Fundamentals";
+                    data.tools = ["ChatGPT"];
+                } else if (weekNum === 15) {
+                    data.subject = lang === 'he' ? "פיתוח עסקי ותקציב" : "Business Development & Budget";
+                    data.tools = ["Excel AI", "Claude"];
+                } else if (weekNum === 16) {
+                    data.subject = lang === 'he' ? "סיום פיתוח MVP" : "Finalizing MVP Development";
+                    data.tools = ["ChatGPT"];
+                    data.milestone = "Final Sprint";
+                } else if (weekNum === 17) {
+                    data.subject = lang === 'he' ? "מיתוג ומצגות משקיעים" : "Branding & Investor Decks";
+                    data.tools = ["Midjourney", "Gamma"];
+                } else if (weekNum === 18) {
+                    data.subject = lang === 'he' ? "סטוריטלינג ופיץ' סופי" : "Storytelling & Final Pitch";
+                    data.tools = ["Poised AI"];
+                } else if (weekNum === 19) {
+                    data.subject = lang === 'he' ? "יום הדמו (Demo Day)" : "Demo Day";
+                    data.milestone = "Demo Day";
+                    data.tools = [];
+                }
+
+                return data;
+            });
+
+            const deliverablesData = [
+                { week: 1, task: lang === 'he' ? "גילוי בעיות וראיונות" : "Problem Discovery & Interviews", description: "Problem Discovery" },
+                { week: 2, task: lang === 'he' ? "טיוטת פתרון" : "Solution Draft", description: "Solution draft" },
+                { week: 3, task: lang === 'he' ? "הגדרת MVP" : "MVP Definition", description: "MVP definition" },
+                { week: 4, task: lang === 'he' ? "מחקר שוק" : "Market Research", description: "Market research" },
+                { week: 5, task: lang === 'he' ? "פיצ'ים לקבלה" : "Selection Pitches", description: "Pitching event" },
+                { week: 6, task: lang === 'he' ? "צוות ומנטורינג" : "Team & Mentoring", description: "Team & Needs" },
+                { week: 7, task: lang === 'he' ? "Lean Canvas" : "Lean Canvas", description: "One-Pager" },
+                { week: 8, task: lang === 'he' ? "הגדרת מוצר" : "Product Definition", description: "Product Definition" },
+                { week: 9, task: lang === 'he' ? "מדדי KPI" : "KPI Metrics", description: "Metrics" },
+                { week: 10, task: lang === 'he' ? "פרסונות" : "Personas", description: "User Personas" },
+                { week: 11, task: lang === 'he' ? "לקוחות יעד" : "Target Customers", description: "Target Customers" },
+                { week: 12, task: lang === 'he' ? "זרימת משתמש" : "User Flow", description: "User Flow" },
+                { week: 13, task: lang === 'he' ? "פיתוח עסקי" : "Business Dev", description: "BD Plan" },
+                { week: 14, task: lang === 'he' ? "גיוס כספים" : "Fundraising", description: "Funding Strategy" },
+                { week: 15, task: lang === 'he' ? "Data Room" : "Data Room", description: "Investor Deck" },
+                { week: 16, task: lang === 'he' ? "מצגת דמו" : "Demo Deck", description: "Demo Presentation" },
+                { week: 17, task: lang === 'he' ? "פיץ' סופי" : "Final Pitch", description: "Final Pitch" }
+            ];
+
+            const officeHoursData = [
+                { week: 6, topic: lang === 'he' ? "אימון פיצ'ים" : "Pitch Training", expert: lang === 'he' ? "מומחה Storytelling" : "Storytelling Expert" },
+                { week: 11, topic: lang === 'he' ? "UX/UI Design" : "UX/UI Design", expert: lang === 'he' ? "מעצב מוצר בכיר" : "Senior Product Designer" },
+                { week: 12, topic: lang === 'he' ? "מודלים עסקיים" : "Business Models", expert: lang === 'he' ? "יועץ אסטרטגי" : "Strategy Consultant" },
+                { week: 16, topic: lang === 'he' ? "Tech Validation" : "Tech Validation", expert: lang === 'he' ? "CTO מלווה" : "Advisory CTO" },
+                { week: "18-19", topic: lang === 'he' ? "סטוריטלינג" : "Storytelling", expert: lang === 'he' ? "מומחה סטוריטלינג" : "Storytelling Expert" }
+            ];
+
+            // Date logic fix: If date has dots (04.01), split by dot and get first part. If just text (WEEK 5), keep as is.
+            const getDayFromDate = (dateStr) => {
+                if (dateStr.includes('.')) {
+                    return dateStr.split('.')[0];
+                }
+                return dateStr.replace(/\D/g,'');
+            };
+
+            const calendarHighlights = [
+                { 
+                    date: "04.01", 
+                    event: lang === 'he' ? "KICKOFF EVENT" : "KICKOFF EVENT", 
+                    time: "16:00 - 21:00", 
+                    details: lang === 'he' ? "אירוע פתיחה חגיגי, פאנל מייסדים וחלוקה לצוותים." : "Opening event, founders panel and team formation." 
+                },
+                { 
+                    date: "14.01", 
+                    event: lang === 'he' ? "TEAM FORMATION" : "TEAM FORMATION", 
+                    time: "14:00", 
+                    details: lang === 'he' ? "סדנת גיבוש צוותים ורעיונות ראשוניים." : "Team building workshop and initial ideas." 
+                },
+                { 
+                    date: "WEEK 5", 
+                    event: lang === 'he' ? "SELECTION DAY" : "SELECTION DAY", 
+                    time: "TBD", 
+                    details: lang === 'he' ? "יום המיונים לכניסה לשלב האקסלרטור." : "Selection day for the accelerator phase." 
+                },
+                { 
+                    date: "WEEK 19", 
+                    event: lang === 'he' ? "DEMO DAY" : "DEMO DAY", 
+                    time: "18:00", 
+                    details: lang === 'he' ? "אירוע הסיום והצגת המיזמים למשקיעים." : "Final event and presenting ventures to investors." 
+                }
+            ];
+
+            // ---------------- UI COMPONENTS ----------------
+
+            const TabButton = ({ id, label, icon: Icon }) => (
+                <button
+                    onClick={() => setActiveTab(id)}
+                    className={`relative px-4 md:px-8 py-5 text-base md:text-xl font-bold transition-all duration-200 uppercase tracking-tight border-b-4 flex-1 md:flex-none whitespace-nowrap ${
+                        activeTab === id
+                            ? 'bg-white text-black border-innovet-yellow'
+                            : 'bg-transparent text-innovet-black border-transparent hover:text-innovet-blue hover:bg-white/50'
+                    }`}
+                >
+                    <div className="flex items-center justify-center gap-3">
+                        <Icon size={22} className={activeTab === id ? 'text-innovet-blue' : 'text-innovet-black opacity-50'} strokeWidth={2} />
+                        {label}
+                    </div>
+                </button>
+            );
+
+            const SectionTitle = ({ title, icon: Icon }) => (
+                <div className="mb-10 flex items-center gap-4 border-b-2 border-innovet-black pb-6">
+                    {Icon && <div className="bg-innovet-yellow p-2 text-black"><Icon size={32} strokeWidth={2.5} /></div>}
+                    <h2 className="text-3xl md:text-5xl font-black text-[#080610] uppercase tracking-tighter leading-[0.8]">
+                        {title}
+                    </h2>
+                </div>
+            );
+
+            // MATRIX VIEW
+            const AgendaMatrixView = () => (
+                <div className="bg-white border border-innovet-gray shadow-sm">
+                    <div className={`overflow-x-auto custom-scrollbar`} dir={isRTL ? 'rtl' : 'ltr'}>
+                        <table className={`w-full border-collapse ${isRTL ? 'text-right' : 'text-left'} min-w-[800px]`}>
+                            <thead>
+                                <tr className="bg-innovet-dark text-white">
+                                    <th className={`sticky ${isRTL ? 'right-0' : 'left-0'} z-20 bg-innovet-dark p-6 text-2xl font-bold ${isRTL ? 'border-l' : 'border-r'} border-gray-700 min-w-[220px]`}>
+                                        {t.week} / {t.category}
+                                    </th>
+                                    {agendaMatrix.map((item) => (
+                                        <th key={item.week} className={`p-4 text-center min-w-[180px] ${isRTL ? 'border-l' : 'border-r'} border-gray-700`}>
+                                            <div className="flex flex-col items-center">
+                                                <span className="text-innovet-yellow text-sm font-bold uppercase tracking-widest mb-1">{t.week}</span>
+                                                <span className="text-4xl font-black">{item.week}</span>
+                                            </div>
+                                        </th>
+                                    ))}
+                                </tr>
+                            </thead>
+                            <tbody className="divide-y divide-innovet-gray">
+                                {/* Phase Row */}
+                                <tr className="bg-innovet-bg">
+                                    <td className={`sticky ${isRTL ? 'right-0' : 'left-0'} z-10 bg-innovet-bg p-6 text-xl font-bold text-innovet-blue ${isRTL ? 'border-l' : 'border-r'} border-b border-[#D1D1D1]`}>
+                                        {t.phase}
+                                    </td>
+                                    {agendaMatrix.map((item, idx) => (
+                                        <td key={idx} className={`p-4 text-sm font-bold text-innovet-blue text-center ${isRTL ? 'border-l' : 'border-r'} border-b border-[#D1D1D1]`}>
+                                            {item.phase}
+                                        </td>
+                                    ))}
+                                </tr>
+
+                                {/* Subject Row */}
+                                <tr className="group hover:bg-[#FAFAFA]">
+                                    <td className={`sticky ${isRTL ? 'right-0' : 'left-0'} z-10 bg-white group-hover:bg-[#FAFAFA] p-6 text-xl font-bold text-innovet-black ${isRTL ? 'border-l' : 'border-r'} border-innovet-gray`}>
+                                        {t.subject}
+                                    </td>
+                                    {agendaMatrix.map((item, idx) => (
+                                        <td key={idx} className={`p-5 text-lg font-medium text-innovet-black ${isRTL ? 'border-l' : 'border-r'} border-innovet-gray align-top`}>
+                                            {item.subject}
+                                        </td>
+                                    ))}
+                                </tr>
+
+                                {/* Tools Row */}
+                                <tr className="group hover:bg-[#FAFAFA]">
+                                    <td className={`sticky ${isRTL ? 'right-0' : 'left-0'} z-10 bg-white group-hover:bg-[#FAFAFA] p-6 text-xl font-bold text-innovet-black ${isRTL ? 'border-l' : 'border-r'} border-innovet-gray`}>
+                                        {t.tools}
+                                    </td>
+                                    {agendaMatrix.map((item, idx) => (
+                                        <td key={idx} className={`p-5 ${isRTL ? 'border-l' : 'border-r'} border-innovet-gray align-top`}>
+                                            <div className="flex flex-wrap gap-2">
+                                                {item.tools.map((t, i) => (
+                                                    <span key={i} className="inline-block px-2 py-1 bg-innovet-black text-white text-xs font-bold uppercase tracking-wide">
+                                                        {t}
+                                                    </span>
+                                                ))}
+                                            </div>
+                                        </td>
+                                    ))}
+                                </tr>
+
+                                {/* Milestone Row */}
+                                <tr className="bg-innovet-yellow/10">
+                                    <td className={`sticky ${isRTL ? 'right-0' : 'left-0'} z-10 bg-[#FFF8E1] p-6 text-xl font-bold text-innovet-black ${isRTL ? 'border-l' : 'border-r'} border-innovet-gray`}>
+                                        {t.milestones}
+                                    </td>
+                                    {agendaMatrix.map((item, idx) => (
+                                        <td key={idx} className={`p-5 ${isRTL ? 'border-l' : 'border-r'} border-innovet-gray align-top h-full`}>
+                                            {item.milestone && (
+                                                <div className="p-3 bg-innovet-yellow text-black text-sm font-bold text-center shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] border border-black">
+                                                    <div className="flex justify-center mb-1 text-black">
+                                                        <Star size={16} className="fill-black" />
+                                                    </div>
+                                                    {item.milestone}
+                                                </div>
+                                            )}
+                                        </td>
+                                    ))}
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            );
+
+            // DELIVERABLES VIEW
+            const TableDeliverables = () => (
+                <div className="bg-white border-t-4 border-innovet-blue shadow-sm">
+                    <div className="overflow-x-auto">
+                        <table className={`w-full ${isRTL ? 'text-right' : 'text-left'} border-collapse min-w-[600px]`}>
+                            <thead className="bg-innovet-bg text-innovet-black">
+                                <tr>
+                                    <th className="px-8 py-6 text-lg font-bold border-b-2 border-innovet-black w-32">{t.week}</th>
+                                    <th className="px-8 py-6 text-lg font-bold border-b-2 border-innovet-black">{t.task}</th>
+                                    <th className="px-8 py-6 text-lg font-bold border-b-2 border-innovet-black">{t.details}</th>
+                                    <th className="px-8 py-6 text-lg font-bold border-b-2 border-innovet-black w-48">{t.status}</th>
+                                </tr>
+                            </thead>
+                            <tbody className="text-innovet-black">
+                                {deliverablesData.map((item, index) => (
+                                    <tr key={index} className="border-b border-innovet-gray hover:bg-[#FAFAFA] transition-colors">
+                                        <td className="px-8 py-6 font-black text-2xl text-innovet-blue">{item.week}</td>
+                                        <td className="px-8 py-6 text-xl font-bold">{item.task}</td>
+                                        <td className="px-8 py-6 text-lg font-light text-gray-600 font-sans">{item.description}</td>
+                                        <td className="px-8 py-6">
+                                            <button className="flex items-center gap-2 text-sm font-bold uppercase tracking-wider hover:text-innovet-yellow transition-colors">
+                                                {t.download} <Download size={16}/>
+                                            </button>
+                                        </td>
+                                    </tr>
+                                ))}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            );
+
+            // OFFICE HOURS VIEW
+            const TableOfficeHours = () => (
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                    {officeHoursData.map((item, index) => (
+                        <div key={index} className="bg-white border-2 border-innovet-bg hover:border-innovet-blue transition-all duration-300 p-8 group">
+                            <div className="flex justify-between items-start mb-6">
+                                <div className="bg-innovet-black text-white px-4 py-1 text-sm font-bold uppercase tracking-wider">
+                                    {t.week} {item.week}
+                                </div>
+                                <div className="text-innovet-yellow">
+                                    <Users size={28} strokeWidth={2} />
+                                </div>
+                            </div>
+                            <h3 className="text-3xl font-bold text-innovet-black mb-2 group-hover:text-innovet-blue transition-colors">
+                                {item.topic}
+                            </h3>
+                            <p className="text-xl text-gray-500 mb-8 font-light">
+                                {t.with} {item.expert}
+                            </p>
+                            <button className="w-full py-4 bg-innovet-bg text-innovet-black font-bold text-lg uppercase hover:bg-innovet-yellow transition-colors flex justify-center items-center gap-2">
+                                {t.book} <ArrowIcon size={20} />
+                            </button>
+                        </div>
+                    ))}
+                </div>
+            );
+
+            // CALENDAR VIEW
+            const CalendarView = () => (
+                <div className="space-y-0">
+                    {calendarHighlights.map((event, index) => (
+                        <div key={index} className="flex flex-col md:flex-row bg-innovet-dark text-white border-b border-gray-800 hover:bg-[#1F1F1F] transition-colors group">
+                            <div className={`md:w-48 p-8 ${isRTL ? 'md:border-l' : 'md:border-r'} border-gray-800 flex flex-col justify-center items-center md:items-start text-innovet-yellow`}>
+                                {/* FIXED DATE LOGIC: Displays '04' instead of '0401' */}
+                                <span className="text-4xl font-black">{getDayFromDate(event.date)}</span>
+                                <span className="text-xl font-bold uppercase">{event.date.includes('WEEK') || event.date.includes('שבוע') ? 'WEEK' : 'JAN'}</span>
+                            </div>
+                            <div className="flex-grow p-8 flex flex-col justify-center">
+                                <div className="flex items-center gap-4 mb-2">
+                                    <h3 className="text-3xl font-bold uppercase tracking-wide group-hover:text-innovet-yellow transition-colors">
+                                        {event.event}
+                                    </h3>
+                                    {index === 0 && <span className="bg-innovet-blue px-2 py-0.5 text-xs font-bold uppercase">{t.upcoming}</span>}
+                                </div>
+                                <p className="text-gray-400 text-lg font-light font-sans max-w-2xl">
+                                    {event.details}
+                                </p>
+                            </div>
+                            <div className={`p-8 flex items-center justify-end md:w-64`}>
+                                <div className="flex items-center gap-3 text-xl font-bold">
+                                    <Clock size={24} className="text-innovet-yellow" />
+                                    {event.time}
+                                </div>
+                            </div>
+                        </div>
+                    ))}
+                </div>
+            );
+
+            return (
+                <div className="min-h-screen bg-innovet-bg font-sans text-innovet-black">
+                    
+                    {/* Header */}
+                    <header className="bg-white sticky top-0 z-50 border-b border-innovet-gray">
+                        <div className="max-w-[1600px] mx-auto px-6 h-24 flex items-center justify-between">
+                            <div className="flex items-center gap-6">
+                                {/* Text Logo */}
+                                <div className="flex flex-col">
+                                    <span className="text-3xl font-black tracking-tighter leading-none">INNOVET</span>
+                                    <span className="text-sm font-bold text-innovet-blue tracking-widest uppercase">Cohort 2</span>
+                                </div>
+                                
+                                <div className="hidden md:block h-8 w-px bg-innovet-gray"></div>
+                                
+                                <nav className="hidden md:flex gap-8">
+                                    <a href="#" className="text-lg font-bold hover:text-innovet-blue transition-colors">{t.home}</a>
+                                    <a href="#" className="text-lg font-bold hover:text-innovet-blue transition-colors">{t.program}</a>
+                                    <a href="#" className="text-lg font-bold text-innovet-blue transition-colors">{t.schedule}</a>
+                                </nav>
+                            </div>
+
+                            <div className="flex items-center gap-4">
+                                {/* Language Toggle */}
+                                <button onClick={toggleLang} className="flex items-center gap-2 px-4 py-2 bg-innovet-bg hover:bg-gray-200 transition rounded-full font-bold text-sm uppercase">
+                                    <Globe size={18}/> {lang === 'he' ? 'EN' : 'HE'}
+                                </button>
+
+                                {/* Mobile Menu Button */}
+                                <div className="md:hidden">
+                                    <button onClick={toggleMobileMenu} className="text-black hover:text-innovet-blue transition-colors">
+                                        {isMobileMenuOpen ? <X size={28} /> : <Menu size={28} />}
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* Mobile Menu Dropdown */}
+                        {isMobileMenuOpen && (
+                            <div className="md:hidden bg-white border-t border-innovet-gray animate-fadeIn absolute w-full shadow-xl">
+                                <nav className="flex flex-col p-6 gap-4 text-center">
+                                    <a href="#" className="text-xl font-bold hover:text-innovet-blue transition-colors py-2">{t.home}</a>
+                                    <a href="#" className="text-xl font-bold hover:text-innovet-blue transition-colors py-2">{t.program}</a>
+                                    <a href="#" className="text-xl font-bold text-innovet-blue py-2 bg-gray-50">{t.schedule}</a>
+                                </nav>
+                            </div>
+                        )}
+                    </header>
+
+                    {/* Hero / Page Title */}
+                    <div className="bg-innovet-dark text-white py-24">
+                        <div className="max-w-[1600px] mx-auto px-6">
+                            <div className="flex flex-col md:flex-row justify-between items-end gap-10">
+                                <div>
+                                    <span className="text-innovet-yellow font-bold text-xl tracking-widest uppercase mb-4 block">
+                                        {t.heroSubtitle}
+                                    </span>
+                                    <h1 className="text-7xl md:text-8xl font-black uppercase leading-[0.85] tracking-tight">
+                                        {t.heroTitle} <br/> {t.heroTitle2}
+                                    </h1>
+                                </div>
+                                <div className="md:max-w-xl mb-2">
+                                    <p className="text-xl md:text-2xl font-light text-gray-300 leading-relaxed">
+                                        {t.heroDesc}
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* Main Content */}
+                    <main className="max-w-[1600px] mx-auto px-6 py-16 relative -mt-12">
+                        
+                        {/* Navigation Tabs */}
+                        <div className="bg-white p-2 shadow-lg mb-12 flex flex-wrap md:inline-flex gap-2">
+                            <TabButton id="agenda" label={t.tabAgenda} icon={Layout} />
+                            <TabButton id="deliverables" label={t.tabDeliverables} icon={CheckSquare} />
+                            <TabButton id="office-hours" label={t.tabOfficeHours} icon={Users} />
+                            <TabButton id="calendar" label={t.tabCalendar} icon={Calendar} />
+                        </div>
+
+                        {/* Dynamic Content */}
+                        <div className="animate-fadeIn">
+                            {activeTab === 'agenda' && (
+                                <>
+                                    <SectionTitle title={t.sectionJourney} icon={Target} />
+                                    <AgendaMatrixView />
+                                </>
+                            )}
+                            {activeTab === 'deliverables' && (
+                                <>
+                                    <SectionTitle title={t.sectionStudent} icon={CheckSquare} />
+                                    <TableDeliverables />
+                                </>
+                            )}
+                            {activeTab === 'office-hours' && (
+                                <>
+                                    <SectionTitle title={t.sectionExperts} icon={Users} />
+                                    <TableOfficeHours />
+                                </>
+                            )}
+                            {activeTab === 'calendar' && (
+                                <>
+                                    <SectionTitle title={t.sectionEvents} icon={Calendar} />
+                                    <CalendarView />
+                                </>
+                            )}
+                        </div>
+                    </main>
+
+                    {/* Footer */}
+                    <footer className="bg-innovet-dark text-white py-16 border-t border-gray-800">
+                        <div className="max-w-[1600px] mx-auto px-6 flex flex-col md:flex-row justify-between items-center">
+                            <div className={`text-center ${isRTL ? 'md:text-right' : 'md:text-left'} mb-8 md:mb-0`}>
+                                <h2 className="text-4xl font-black mb-2">INNOVET</h2>
+                                <p className="text-gray-500">{t.rights}</p>
+                            </div>
+                            <div className="flex gap-8">
+                                <a href="#" className="text-gray-400 hover:text-innovet-yellow font-bold transition-colors">{t.contact}</a>
+                                <a href="#" className="text-gray-400 hover:text-innovet-yellow font-bold transition-colors">{t.privacy}</a>
+                            </div>
+                        </div>
+                    </footer>
+                </div>
+            );
+        };
+
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(<App />);
+    </script>
+</body>
+</html>
