@@ -2,7 +2,7 @@
 <html lang="he" dir="rtl">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Innovet Cohort 2 - Program Schedule</title>
     
     <!-- Tailwind CSS -->
@@ -27,18 +27,21 @@
             background-color: #F1F1F1;
             color: #191B1D;
             -webkit-font-smoothing: antialiased;
+            overflow-x: hidden; /* Prevent horizontal scroll on body */
+            width: 100%;
         }
 
         /* Custom Scrollbar */
         .custom-scrollbar::-webkit-scrollbar {
-            height: 10px;
-            width: 10px;
+            height: 8px; /* Thinner for mobile aesthetics */
+            width: 8px;
         }
         .custom-scrollbar::-webkit-scrollbar-track {
             background: #F1F1F1;
         }
         .custom-scrollbar::-webkit-scrollbar-thumb {
             background: #C1C1C1;
+            border-radius: 4px;
         }
         .custom-scrollbar::-webkit-scrollbar-thumb:hover {
             background: #A8A8A8;
@@ -52,6 +55,10 @@
             -ms-overflow-style: none;
             scrollbar-width: none;
         }
+
+        /* Draggable Cursor Classes */
+        .cursor-grab { cursor: grab; }
+        .cursor-grabbing { cursor: grabbing; }
 
         /* Animations */
         @keyframes fadeIn {
@@ -103,14 +110,14 @@
         }
     </script>
 </head>
-<body class="antialiased flex flex-col min-h-screen relative">
+<body class="antialiased flex flex-col min-h-screen relative w-full overflow-x-hidden">
     
     <!-- Static Background Image -->
     <div class="fixed inset-0 z-0 flex items-center justify-center pointer-events-none overflow-hidden">
         <img src="./INNOVET_ICON-05linear-1.webp" alt="" class="w-[120vw] max-w-none opacity-5 grayscale" />
     </div>
 
-    <div id="root" class="flex flex-col min-h-screen z-10 relative"></div>
+    <div id="root" class="flex flex-col min-h-screen z-10 relative w-full"></div>
 
     <script type="text/babel">
         const { useState, useEffect, useRef } = React;
@@ -118,6 +125,63 @@
         // --- CONFIGURATION ---
         const GOOGLE_API_KEY = 'AIzaSyCmnriYz5_rQfTNk8YmyvW0wfQN_96LJ6A'; 
         const SPREADSHEET_ID = '1RMatyMjsFM35grZTRSoslKN04cTdUy7km4I8clyVil4'; 
+
+        // --- HOOKS ---
+        
+        // Custom Hook for Drag-to-Scroll
+        const useDraggableScroll = (ref) => {
+            useEffect(() => {
+                const el = ref.current;
+                if (!el) return;
+
+                let isDown = false;
+                let startX;
+                let scrollLeft;
+
+                const onMouseDown = (e) => {
+                    isDown = true;
+                    el.classList.add('cursor-grabbing');
+                    el.classList.remove('cursor-grab');
+                    startX = e.pageX - el.offsetLeft;
+                    scrollLeft = el.scrollLeft;
+                };
+
+                const onMouseLeave = () => {
+                    isDown = false;
+                    el.classList.remove('cursor-grabbing');
+                    el.classList.add('cursor-grab');
+                };
+
+                const onMouseUp = () => {
+                    isDown = false;
+                    el.classList.remove('cursor-grabbing');
+                    el.classList.add('cursor-grab');
+                };
+
+                const onMouseMove = (e) => {
+                    if (!isDown) return;
+                    e.preventDefault(); // Prevent text selection while dragging
+                    const x = e.pageX - el.offsetLeft;
+                    const walk = (x - startX) * 1.5; // Scroll speed multiplier
+                    el.scrollLeft = scrollLeft - walk;
+                };
+
+                // Add initial class
+                el.classList.add('cursor-grab');
+
+                el.addEventListener('mousedown', onMouseDown);
+                el.addEventListener('mouseleave', onMouseLeave);
+                el.addEventListener('mouseup', onMouseUp);
+                el.addEventListener('mousemove', onMouseMove);
+
+                return () => {
+                    el.removeEventListener('mousedown', onMouseDown);
+                    el.removeEventListener('mouseleave', onMouseLeave);
+                    el.removeEventListener('mouseup', onMouseUp);
+                    el.removeEventListener('mousemove', onMouseMove);
+                };
+            }, [ref]);
+        };
 
         // --- Lucide-style Icons Components (Recreated as SVGs) ---
         const Layout = ({size=24, className, strokeWidth=2}) => (
@@ -256,6 +320,14 @@
             const [calendarHighlights, setCalendarHighlights] = useState([]);
 
             const mainContentRef = useRef(null);
+            
+            // Refs for Draggable Tables
+            const agendaRef = useRef(null);
+            const deliverablesRef = useRef(null);
+
+            // Apply Drag Hook
+            useDraggableScroll(agendaRef);
+            useDraggableScroll(deliverablesRef);
 
             const toggleMobileMenu = () => setIsMobileMenuOpen(!isMobileMenuOpen);
             const toggleLang = () => setLang(lang === 'he' ? 'en' : 'he');
@@ -451,7 +523,6 @@
                                                 continue;
                                             }
                                             
-                                            // FIXED SECTION FROM HERE
                                             if (rowStr.match(/\d{4}-\d{2}-\d{2}/)) {
                                                  const date = new Date(rowStr.match(/\d{4}-\d{2}-\d{2}/)[0]);
                                                  currentMonth = date.toLocaleString(isHebrew ? 'he-IL' : 'en-US', { month: 'long', year: 'numeric' });
@@ -574,8 +645,9 @@
             // MATRIX VIEW
             const AgendaMatrixView = () => (
                 <div className="bg-white border border-innovet-gray shadow-sm">
-                    <div className={`overflow-x-auto custom-scrollbar`} dir={isRTL ? 'rtl' : 'ltr'}>
-                        <table className={`w-full border-collapse ${isRTL ? 'text-right' : 'text-left'} min-w-[800px]`}>
+                    {/* Wrapped in overflow-x-auto and ref attached here for drag */}
+                    <div ref={agendaRef} className={`overflow-x-auto custom-scrollbar touch-pan-x`} dir={isRTL ? 'rtl' : 'ltr'}>
+                        <table className={`w-full border-collapse ${isRTL ? 'text-right' : 'text-left'} min-w-[800px] select-none`}>
                             <thead>
                                 <tr className="bg-innovet-dark text-white">
                                     <th className={`sticky ${isRTL ? 'right-0' : 'left-0'} z-20 bg-innovet-dark p-6 text-2xl font-bold ${isRTL ? 'border-l' : 'border-r'} border-gray-700 min-w-[220px]`}>
@@ -654,8 +726,8 @@
             // DELIVERABLES VIEW
             const TableDeliverables = () => (
                 <div className="bg-white border-t-4 border-innovet-blue shadow-sm">
-                    <div className="overflow-x-auto">
-                        <table className={`w-full ${isRTL ? 'text-right' : 'text-left'} border-collapse min-w-[600px]`}>
+                    <div ref={deliverablesRef} className="overflow-x-auto custom-scrollbar touch-pan-x">
+                        <table className={`w-full ${isRTL ? 'text-right' : 'text-left'} border-collapse min-w-[600px] select-none`}>
                             <thead className="bg-innovet-bg text-innovet-black">
                                 <tr>
                                     <th className="px-8 py-6 text-lg font-bold border-b-2 border-innovet-black w-32">{t.week}</th>
@@ -756,26 +828,26 @@
             );
 
             return (
-                <div className="min-h-screen font-sans text-innovet-black flex flex-col z-10 relative">
+                <div className="min-h-screen font-sans text-innovet-black flex flex-col z-10 relative w-full overflow-x-hidden">
                     
                     {/* Header */}
-                    <header className="bg-white sticky top-0 z-50 border-b border-innovet-gray">
-                        <div className="max-w-[1600px] mx-auto px-6 h-24 flex items-center justify-between">
-                            <div className="flex items-center gap-6 h-full">
+                    <header className="bg-white sticky top-0 z-50 border-b border-innovet-gray w-full">
+                        <div className="max-w-[1600px] mx-auto px-4 md:px-6 h-24 flex items-center justify-between">
+                            <div className="flex items-center gap-4 md:gap-6 h-full">
                                 {/* Logo Image */}
-                                <div className="cursor-pointer flex items-center gap-4" onClick={scrollToTop}>
+                                <div className="cursor-pointer flex items-center gap-2 md:gap-4" onClick={scrollToTop}>
                                     <img 
                                         src="./INNOVET_ICON-05-1.svg" 
                                         alt="Innovet Logo" 
-                                        className="h-12 md:h-16 w-auto object-contain icon-black" 
+                                        className="h-10 md:h-16 w-auto object-contain icon-black" 
                                         onError={(e) => {
                                             e.target.style.display = 'none'; 
                                         }} 
                                     />
                                     
                                     <div className="flex flex-col">
-                                        <span className="text-3xl font-black tracking-tighter leading-none">INNOVET</span>
-                                        <span className="text-sm font-bold text-innovet-blue tracking-widest uppercase">Cohort 2</span>
+                                        <span className="text-2xl md:text-3xl font-black tracking-tighter leading-none">INNOVET</span>
+                                        <span className="text-xs md:text-sm font-bold text-innovet-blue tracking-widest uppercase">Cohort 2</span>
                                     </div>
                                 </div>
                                 
@@ -815,7 +887,7 @@
                                 </nav>
                             </div>
 
-                            <div className="flex items-center gap-4">
+                            <div className="flex items-center gap-2 md:gap-4">
                                 {/* Language Toggle with Flags */}
                                 <button onClick={toggleLang} className="flex items-center gap-2 px-2 py-2 bg-innovet-bg hover:bg-gray-200 transition rounded-full font-bold text-sm uppercase">
                                     <img 
@@ -856,7 +928,7 @@
                     </header>
 
                     {/* Hero / Page Title */}
-                    <div className="bg-innovet-dark text-white py-24 relative overflow-hidden">
+                    <div className="bg-innovet-dark text-white py-24 relative overflow-hidden w-full">
                         {/* Background Image (INNOVET_LOGO_HOR_NEG-02-2.svg) */}
                         <div className="absolute inset-0 z-0 pointer-events-none opacity-10">
                             <img src="./INNOVET_LOGO_HOR_NEG-02-2.svg" alt="" className="w-full h-full object-cover" />
@@ -873,12 +945,12 @@
                                     <span className="text-innovet-yellow font-bold text-xl tracking-widest uppercase mb-4 block">
                                         {t.heroSubtitle}
                                     </span>
-                                    <h1 className="text-7xl md:text-8xl font-black uppercase leading-[0.85] tracking-tight">
+                                    <h1 className="text-6xl md:text-8xl font-black uppercase leading-[0.85] tracking-tight">
                                         {t.heroTitle} <br/> {t.heroTitle2}
                                     </h1>
                                 </div>
                                 <div className="md:max-w-xl mb-2">
-                                    <p className="text-xl md:text-2xl font-light text-gray-300 leading-relaxed">
+                                    <p className="text-lg md:text-2xl font-light text-gray-300 leading-relaxed">
                                         {t.heroDesc}
                                     </p>
                                 </div>
@@ -887,10 +959,10 @@
                     </div>
 
                     {/* Main Content */}
-                    <main ref={mainContentRef} className="max-w-[1600px] mx-auto px-6 py-16 relative -mt-12 flex-grow">
+                    <main ref={mainContentRef} className="max-w-[1600px] mx-auto px-4 md:px-6 py-16 relative -mt-12 flex-grow w-full">
                         
-                        {/* Navigation Tabs */}
-                        <div className="bg-white p-2 shadow-lg mb-12 flex flex-wrap md:inline-flex gap-2 relative z-20">
+                        {/* Navigation Tabs - STICKY & SCROLLABLE ON MOBILE */}
+                        <div className="bg-white p-2 shadow-lg mb-12 flex overflow-x-auto hide-scrollbar sticky top-24 z-40 transition-all w-full md:w-auto md:inline-flex gap-2 relative">
                             <TabButton id="agenda" label={t.tabAgenda} icon={Layout} />
                             <TabButton id="deliverables" label={t.tabDeliverables} icon={CheckSquare} />
                             <TabButton id="office-hours" label={t.tabOfficeHours} icon={Users} />
@@ -898,7 +970,7 @@
                         </div>
 
                         {/* Dynamic Content */}
-                        <div className="animate-fadeIn">
+                        <div className="animate-fadeIn w-full">
                             {loading ? (
                                 <div className="flex justify-center items-center h-64">
                                     <div className="animate-spin rounded-full h-16 w-16 border-t-4 border-b-4 border-innovet-blue"></div>
@@ -935,7 +1007,7 @@
                     </main>
 
                     {/* Footer */}
-                    <footer className="bg-innovet-dark text-white py-16 border-t border-gray-800 relative z-10 mt-auto">
+                    <footer className="bg-innovet-dark text-white py-16 border-t border-gray-800 relative z-10 mt-auto w-full">
                         <div className="max-w-[1600px] mx-auto px-6 flex flex-col md:flex-row justify-between items-center">
                             <div className={`text-center ${isRTL ? 'md:text-right' : 'md:text-left'} mb-8 md:mb-0`}>
                                 <h2 className="text-4xl font-black mb-2">INNOVET</h2>
