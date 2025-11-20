@@ -23,25 +23,48 @@
 
     <style>
         :root {
-            --primary: #00f2ff;
+            /* Default / Light Mode Variables */
+            --primary: #0070f3; /* Darker blue for light mode readability */
+            --secondary: #7928ca;
+            --bg-color: #f0f2f5;
+            --text-color: #1a1a1a;
+            --text-muted: #555555;
+            --glass-border: rgba(0, 0, 0, 0.1);
+            --glass-bg: rgba(255, 255, 255, 0.7);
+            --nav-bg: rgba(255, 255, 255, 0.8);
+            --nav-text: #333;
+            --nav-active: #000;
+            --card-shadow: 0 15px 35px rgba(0,0,0,0.1);
+        }
+
+        /* Dark Mode Overrides */
+        html.dark {
+            --primary: #00f2ff; /* Cyan neon for dark mode */
             --secondary: #bd00ff;
-            --dark-bg: #030305;
+            --bg-color: #030305;
+            --text-color: #ffffff;
+            --text-muted: #a0a0a0;
             --glass-border: rgba(255, 255, 255, 0.08);
             --glass-bg: rgba(10, 10, 15, 0.6);
+            --nav-bg: rgba(3, 3, 5, 0.7);
+            --nav-text: #a0a0a0;
+            --nav-active: #fff;
+            --card-shadow: 0 15px 35px rgba(0,0,0,0.3);
         }
 
         html {
             scroll-behavior: smooth;
-            background-color: var(--dark-bg);
+            background-color: var(--bg-color);
+            transition: background-color 0.5s ease;
         }
 
         body {
             margin: 0;
             font-family: 'Heebo', sans-serif;
-            color: #ffffff;
+            color: var(--text-color);
             overflow-x: hidden;
-            /* Standard cursor restored */
-            cursor: auto; 
+            cursor: auto;
+            transition: color 0.5s ease;
         }
 
         /* Typography */
@@ -55,33 +78,32 @@
             text-transform: uppercase;
             line-height: 0.9;
             margin-bottom: 2rem;
-            background: linear-gradient(to left, #ffffff, #a0a0a0);
+            /* Dynamic Gradient Text */
+            background: linear-gradient(to left, var(--text-color), var(--text-muted));
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             position: relative;
             display: inline-block;
         }
         
-        /* Glitch Effect */
-        .glitch-text {
-            position: relative;
-        }
+        /* Glitch Effect - Updated colors for themes */
+        .glitch-text { position: relative; }
         .glitch-text::before, .glitch-text::after {
             content: attr(data-text);
             position: absolute;
             top: 0; left: 0;
             width: 100%; height: 100%;
-            background: var(--dark-bg);
+            background: var(--bg-color); /* Matches bg to hide original */
         }
         .glitch-text::before {
             left: 2px;
-            text-shadow: -1px 0 #ff00c1;
+            text-shadow: -1px 0 var(--secondary);
             clip: rect(44px, 450px, 56px, 0);
             animation: glitch-anim 5s infinite linear alternate-reverse;
         }
         .glitch-text::after {
             left: -2px;
-            text-shadow: -1px 0 #00fff9;
+            text-shadow: -1px 0 var(--primary);
             clip: rect(44px, 450px, 56px, 0);
             animation: glitch-anim2 5s infinite linear alternate-reverse;
         }
@@ -104,25 +126,23 @@
 
         /* Backgrounds */
         #webgl-container {
-            position: fixed;
-            top: 0; left: 0;
-            width: 100%; height: 100%;
-            z-index: -1;
-            opacity: 0.6;
-            pointer-events: none;
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            z-index: -1; opacity: 0.6; pointer-events: none;
         }
         
         #video-bg-wrapper {
             position: fixed; inset: 0; z-index: -2;
-            opacity: 0.4; /* Blends with WebGL */
+            opacity: 0.2; /* Lower opacity for better readability in both modes */
             transition: opacity 1s ease;
             filter: grayscale(100%) contrast(1.2);
         }
-        body.hero-active #video-bg-wrapper { opacity: 0.6; }
+        html.dark #video-bg-wrapper { opacity: 0.4; } /* Dark mode can handle more video opacity */
+        body.hero-active #video-bg-wrapper { opacity: 0.5; } /* More visible in hero */
         
         .gradient-overlay {
             position: fixed; inset: 0; z-index: -1;
-            background: radial-gradient(circle at 50% 50%, rgba(3,3,5,0) 0%, rgba(3,3,5,0.8) 80%, rgba(3,3,5,1) 100%);
+            /* Radial gradient adjusted for theme */
+            background: radial-gradient(circle at 50% 50%, transparent 0%, var(--bg-color) 90%);
             pointer-events: none;
         }
 
@@ -131,37 +151,28 @@
             position: fixed; top: 0; width: 100%; z-index: 100;
             padding: 20px 40px;
             display: flex; justify-content: space-between; align-items: center;
-            background: rgba(3, 3, 5, 0.7);
+            background: var(--nav-bg);
             backdrop-filter: blur(10px);
-            border-bottom: 1px solid rgba(255,255,255,0.05);
+            border-bottom: 1px solid var(--glass-border);
             transition: all 0.4s ease;
         }
-        header.scrolled { padding: 10px 40px; background: rgba(3, 3, 5, 0.95); }
+        header.scrolled { padding: 10px 40px; box-shadow: 0 5px 20px rgba(0,0,0,0.1); }
 
         .nav-link {
-            position: relative;
-            font-weight: 500;
-            color: #a0a0a0;
-            transition: color 0.3s;
-            text-transform: uppercase;
-            font-size: 0.9rem;
-            letter-spacing: 1px;
+            position: relative; font-weight: 500; color: var(--nav-text);
+            transition: color 0.3s; text-transform: uppercase; font-size: 0.9rem; letter-spacing: 1px;
         }
         .nav-link::before {
-            content: ''; position: absolute; bottom: -5px; right: 0; /* Default right for RTL */
+            content: ''; position: absolute; bottom: -5px; right: 0;
             width: 0%; height: 2px; background: var(--primary);
             transition: width 0.3s ease;
         }
-        
-        html[dir="ltr"] .nav-link::before { right: auto; left: 0; } /* Left for LTR */
-
-        .nav-link:hover, .nav-link.active { color: #fff; }
+        html[dir="ltr"] .nav-link::before { right: auto; left: 0; }
+        .nav-link:hover, .nav-link.active { color: var(--nav-active); }
         .nav-link:hover::before, .nav-link.active::before { width: 100%; }
 
         main > section {
-            position: relative;
-            padding: 120px 20px;
-            max-width: 1400px; margin: 0 auto;
+            position: relative; padding: 120px 20px; max-width: 1400px; margin: 0 auto;
         }
 
         /* 3D Cards (Tilt Effect) */
@@ -173,42 +184,37 @@
             backdrop-filter: blur(20px);
             transform-style: preserve-3d;
             transform: perspective(1000px);
-            transition: transform 0.1s;
-            box-shadow: 0 15px 35px rgba(0,0,0,0.2);
+            transition: transform 0.1s, background 0.3s, border-color 0.3s;
+            box-shadow: var(--card-shadow);
         }
         
         .glass-card h3 {
             transform: translateZ(20px);
-            color: #fff; font-size: 1.5rem; font-weight: 700; margin-bottom: 1rem;
+            color: var(--text-color); font-size: 1.5rem; font-weight: 700; margin-bottom: 1rem;
         }
         .glass-card p {
             transform: translateZ(10px);
-            color: #ccc; line-height: 1.6;
+            color: var(--text-muted); line-height: 1.6;
         }
         .glass-card-icon {
-            transform: translateZ(30px);
-            margin-bottom: 1.5rem;
+            transform: translateZ(30px); margin-bottom: 1.5rem;
             filter: drop-shadow(0 0 10px var(--primary));
         }
+        /* In light mode, drop shadow might need adjustment */
+        html:not(.dark) .glass-card-icon { filter: drop-shadow(0 0 5px rgba(0,112,243,0.5)); }
 
         /* Buttons */
         .cyber-btn {
-            position: relative;
-            padding: 12px 35px;
-            background: transparent;
-            color: var(--primary);
+            position: relative; padding: 12px 35px;
+            background: transparent; color: var(--primary);
             border: 1px solid var(--primary);
-            font-family: 'Orbitron', sans-serif;
-            text-transform: uppercase;
-            font-weight: 700;
-            letter-spacing: 2px;
-            overflow: hidden;
-            transition: all 0.4s ease;
+            font-family: 'Orbitron', sans-serif; text-transform: uppercase; font-weight: 700; letter-spacing: 2px;
+            overflow: hidden; transition: all 0.4s ease;
             clip-path: polygon(10px 0, 100% 0, 100% calc(100% - 10px), calc(100% - 10px) 100%, 0 100%, 0 10px);
         }
         .cyber-btn:hover {
             background: var(--primary);
-            color: #000;
+            color: #fff; /* White text on hover is usually safe for primary colors */
             box-shadow: 0 0 30px var(--primary);
         }
 
@@ -220,61 +226,60 @@
             transition: all 0.8s cubic-bezier(0.16, 1, 0.3, 1);
         }
         .service-block.visible { opacity: 1; transform: translateY(0); }
-        
         @media (min-width: 992px) {
             .service-block { grid-template-columns: 1fr 1fr; }
             .service-block.alt { direction: ltr; }
             .service-block.alt .service-content { text-align: left; direction: rtl; } 
-            
-            /* LTR Support fixes */
             html[dir="ltr"] .service-block.alt { direction: rtl; }
             html[dir="ltr"] .service-block.alt .service-content { text-align: left; direction: ltr; }
         }
         
         .service-img-wrapper {
-            position: relative;
-            border-radius: 4px;
-            overflow: hidden;
-            box-shadow: 0 20px 50px rgba(0,0,0,0.5);
+            position: relative; border-radius: 4px; overflow: hidden;
+            box-shadow: var(--card-shadow);
         }
         .service-img-wrapper::after {
             content: ''; position: absolute; inset: 0;
-            background: linear-gradient(45deg, rgba(0, 242, 255, 0.2), transparent);
-            z-index: 1;
+            background: linear-gradient(45deg, var(--primary), transparent);
+            opacity: 0.2; z-index: 1;
         }
-        .service-img {
-            width: 100%; height: auto; display: block;
-            transition: transform 0.7s ease;
-        }
+        .service-img { width: 100%; height: auto; display: block; transition: transform 0.7s ease; }
         .service-block:hover .service-img { transform: scale(1.05); }
 
         /* Stats */
         .stat-number {
             font-family: 'Orbitron', sans-serif;
             font-size: 4rem; font-weight: 900;
-            background: -webkit-linear-gradient(#fff, #888);
+            background: linear-gradient(to bottom, var(--text-color), var(--text-muted));
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
         }
 
         /* Footer */
-        footer { background: #000; border-top: 1px solid #222; padding: 80px 20px; }
+        footer { background: #000; border-top: 1px solid #222; padding: 80px 20px; color: #888; }
 
         /* Mobile Menu */
         #mobile-menu {
-            position: fixed; inset: 0; background: rgba(0,0,0,0.95); z-index: 900;
+            position: fixed; inset: 0; background: var(--bg-color); z-index: 900;
             display: flex; flex-direction: column; justify-content: center; align-items: center;
             transform: translateX(100%); transition: transform 0.4s ease;
         }
         html[dir="ltr"] #mobile-menu { transform: translateX(-100%); }
-
         #mobile-menu.open { transform: translateX(0); }
 
-        /* Language Switcher */
-        .lang-btn {
-            opacity: 0.5; transition: opacity 0.3s; cursor: pointer;
-        }
-        .lang-btn:hover, .lang-btn.active { opacity: 1; transform: scale(1.1); }
+        /* Language & Theme Switcher */
+        .lang-btn, .theme-btn { opacity: 0.5; transition: opacity 0.3s; cursor: pointer; }
+        .lang-btn:hover, .lang-btn.active, .theme-btn:hover { opacity: 1; transform: scale(1.1); }
+
+        .text-gradient-primary { color: var(--primary); }
+        .text-muted-custom { color: var(--text-muted); }
+
+        /* Invert logos in light mode for visibility */
+        html:not(.dark) #logo-track img { filter: grayscale(1) brightness(0); opacity: 0.6; }
+        html:not(.dark) #logo-track img:hover { filter: none; opacity: 1; }
+        
+        /* Logo text color adaptation */
+        .logo { color: var(--text-color); }
 
     </style>
 </head>
@@ -306,13 +311,23 @@
         </nav>
 
         <div class="flex items-center gap-4">
-            <!-- Language Switcher Desktop -->
-            <div class="hidden md:flex gap-2 items-center border-l border-white/20 pl-4 ml-2 rtl:border-r rtl:border-l-0 rtl:pr-4 rtl:mr-2 rtl:pl-0">
-                <img src="https://flagcdn.com/w40/il.png" class="w-6 h-4 lang-btn active" data-lang="he" alt="Hebrew">
-                <img src="https://flagcdn.com/w40/us.png" class="w-6 h-4 lang-btn" data-lang="en" alt="English">
+            <!-- Desktop Controls -->
+            <div class="hidden md:flex gap-4 items-center border-l border-white/20 pl-4 ml-2 rtl:border-r rtl:border-l-0 rtl:pr-4 rtl:mr-2 rtl:pl-0">
+                <!-- Lang -->
+                <div class="flex gap-2">
+                    <img src="https://flagcdn.com/w40/il.png" class="w-6 h-4 lang-btn active" data-lang="he" alt="Hebrew">
+                    <img src="https://flagcdn.com/w40/us.png" class="w-6 h-4 lang-btn" data-lang="en" alt="English">
+                </div>
+                <!-- Theme Toggle -->
+                <button id="theme-toggle" class="theme-btn text-[var(--text-color)]" aria-label="Toggle Theme">
+                    <!-- Sun Icon (For Dark Mode) -->
+                    <svg id="icon-sun" class="w-6 h-6 hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M12 12a5 5 0 100-10 5 5 0 000 10z"></path></svg>
+                    <!-- Moon Icon (For Light Mode) -->
+                    <svg id="icon-moon" class="w-6 h-6 hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"></path></svg>
+                </button>
             </div>
 
-            <button class="lg:hidden text-white hover-trigger" id="menu-btn">
+            <button class="lg:hidden text-[var(--text-color)] hover-trigger" id="menu-btn">
                 <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="12" x2="21" y2="12"></line><line x1="3" y1="6" x2="21" y2="6"></line><line x1="3" y1="18" x2="21" y2="18"></line></svg>
             </button>
             <a href="#contact" class="hidden md:inline-block cyber-btn text-sm hover-trigger" data-key="btn_talk">דברו איתנו</a>
@@ -321,20 +336,25 @@
 
     <!-- Mobile Menu -->
     <div id="mobile-menu">
-        <button id="close-menu" class="absolute top-8 left-8 text-white rtl:left-8 rtl:right-auto ltr:right-8 ltr:left-auto">
+        <button id="close-menu" class="absolute top-8 left-8 text-[var(--text-color)] rtl:left-8 rtl:right-auto ltr:right-8 ltr:left-auto">
             <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
         </button>
-        <nav class="flex flex-col items-center gap-8 text-2xl">
+        <nav class="flex flex-col items-center gap-8 text-2xl text-[var(--text-color)]">
             <a href="#home" class="hover:text-[var(--primary)] transition-colors mobile-link" data-key="nav_home">ראשי</a>
             <a href="#showreel" class="hover:text-[var(--primary)] transition-colors mobile-link" data-key="nav_work">עבודות</a>
             <a href="#dna" class="hover:text-[var(--primary)] transition-colors mobile-link" data-key="nav_dna">DNA</a>
             <a href="#what-we-do" class="hover:text-[var(--primary)] transition-colors mobile-link" data-key="nav_solutions">פתרונות</a>
             <a href="#contact" class="hover:text-[var(--primary)] transition-colors mobile-link" data-key="nav_contact">צור קשר</a>
             
-            <!-- Mobile Lang Switcher -->
-            <div class="flex gap-4 mt-4">
-                <img src="https://flagcdn.com/w40/il.png" class="w-8 h-6 lang-btn active" data-lang="he" alt="Hebrew">
-                <img src="https://flagcdn.com/w40/us.png" class="w-8 h-6 lang-btn" data-lang="en" alt="English">
+            <!-- Mobile Controls -->
+            <div class="flex gap-6 mt-8 items-center">
+                <div class="flex gap-4">
+                    <img src="https://flagcdn.com/w40/il.png" class="w-8 h-6 lang-btn active" data-lang="he" alt="Hebrew">
+                    <img src="https://flagcdn.com/w40/us.png" class="w-8 h-6 lang-btn" data-lang="en" alt="English">
+                </div>
+                <button id="theme-toggle-mobile" class="theme-btn text-[var(--text-color)] p-2 border border-[var(--glass-border)] rounded-full">
+                     <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M12 12a5 5 0 100-10 5 5 0 000 10z"></path></svg>
+                </button>
             </div>
         </nav>
     </div>
@@ -345,15 +365,15 @@
             <h1 class="text-6xl md:text-8xl font-black mb-6 tracking-tight leading-none glitch-text" data-key="hero_title" data-text="השילוב המושלם">
                 השילוב <span style="color:transparent; -webkit-text-stroke: 2px var(--primary);">המושלם</span>
             </h1>
-            <h2 class="text-4xl md:text-6xl font-bold mb-8 text-gray-300" data-key="hero_subtitle">
+            <h2 class="text-4xl md:text-6xl font-bold mb-8 text-muted-custom" data-key="hero_subtitle">
                 בין ביצוע טכני לחדשנות יצירתית
             </h2>
-            <p class="max-w-2xl text-lg text-gray-400 mb-12 leading-relaxed" data-key="hero_desc">
+            <p class="max-w-2xl text-lg text-muted-custom mb-12 leading-relaxed opacity-80" data-key="hero_desc">
                 מהפקות וידאו ושידורים חיים ועד פיתוח פתרונות תוכנה ו-AI. אנחנו כאן כדי להפוך את החזון שלכם למציאות מרשימה, חלקה ונטולת תקלות.
             </p>
             <div class="flex gap-6">
                 <a href="#contact" class="cyber-btn hover-trigger" data-key="hero_cta_start">התחילו פרויקט</a>
-                <a href="#showreel" class="cyber-btn hover-trigger" style="border-color: #fff; color: #fff;" data-key="hero_cta_work">צפו בעבודות</a>
+                <a href="#showreel" class="cyber-btn hover-trigger" style="border-color: var(--text-color); color: var(--text-color);" data-key="hero_cta_work">צפו בעבודות</a>
             </div>
         </section>
 
@@ -362,24 +382,24 @@
             <div class="grid grid-cols-1 md:grid-cols-3 gap-12 text-center">
                 <div class="tilt-card hover-trigger">
                     <div class="stat-number">1,200+</div>
-                    <p class="text-primary tracking-widest uppercase mt-2" data-key="stat_productions">הפקות מוצלחות</p>
+                    <p class="text-gradient-primary tracking-widest uppercase mt-2 font-bold" data-key="stat_productions">הפקות מוצלחות</p>
                 </div>
                 <div class="tilt-card hover-trigger">
                     <div class="stat-number">25+</div>
-                    <p class="text-secondary tracking-widest uppercase mt-2" data-key="stat_countries">מדינות בעולם</p>
+                    <p class="text-[var(--secondary)] tracking-widest uppercase mt-2 font-bold" data-key="stat_countries">מדינות בעולם</p>
                 </div>
                 <div class="tilt-card hover-trigger">
                     <div class="stat-number">24/7</div>
-                    <p class="text-primary tracking-widest uppercase mt-2" data-key="stat_support">תמיכה ושירות</p>
+                    <p class="text-gradient-primary tracking-widest uppercase mt-2 font-bold" data-key="stat_support">תמיכה ושירות</p>
                 </div>
             </div>
         </section>
 
         <!-- Clients Marquee -->
-        <section id="clients" class="py-10 border-y border-white/5 bg-black/30 backdrop-blur-sm overflow-hidden">
+        <section id="clients" class="py-10 border-y border-[var(--glass-border)] bg-[var(--glass-bg)] backdrop-blur-sm overflow-hidden">
             <div class="flex w-max scrolling-logos">
                 <!-- Logos injected via JS -->
-                <div id="logo-track" class="flex gap-16 items-center opacity-60 grayscale hover:grayscale-0 transition-all duration-500"></div>
+                <div id="logo-track" class="flex gap-16 items-center transition-all duration-500"></div>
             </div>
         </section>
 
@@ -388,27 +408,27 @@
             <h2 class="section-title text-center w-full" data-key="section_work">נבחרת העבודות</h2>
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mt-12">
                 <!-- Work Item 1 -->
-                <div class="group relative aspect-video rounded-lg overflow-hidden border border-white/10 hover-trigger">
+                <div class="group relative aspect-video rounded-lg overflow-hidden border border-[var(--glass-border)] hover-trigger">
                     <img src="https://images.unsplash.com/photo-1541532713592-79a0317b6b77?q=80&w=1000&auto=format&fit=crop" class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" alt="WRC">
                     <div class="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex flex-col justify-center items-center p-4 text-center">
                         <h3 class="text-3xl font-bold text-white mb-2">WRC All Live</h3>
-                        <p class="text-primary" data-key="work_live_sport">שידור חי | ספורט</p>
+                        <p class="text-[var(--primary)]" data-key="work_live_sport">שידור חי | ספורט</p>
                     </div>
                 </div>
                 <!-- Work Item 2 -->
-                <div class="group relative aspect-video rounded-lg overflow-hidden border border-white/10 hover-trigger">
+                <div class="group relative aspect-video rounded-lg overflow-hidden border border-[var(--glass-border)] hover-trigger">
                     <img src="https://images.unsplash.com/photo-1587329310686-94756011cdead?q=80&w=1000&auto=format&fit=crop" class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" alt="Wimbledon">
                     <div class="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex flex-col justify-center items-center p-4 text-center">
                         <h3 class="text-3xl font-bold text-white mb-2">Wimbledon</h3>
-                        <p class="text-secondary" data-key="work_live_sport">שידור חי | ספורט</p>
+                        <p class="text-[var(--secondary)]" data-key="work_live_sport">שידור חי | ספורט</p>
                     </div>
                 </div>
                 <!-- Work Item 3 -->
-                <div class="group relative aspect-video rounded-lg overflow-hidden border border-white/10 hover-trigger">
+                <div class="group relative aspect-video rounded-lg overflow-hidden border border-[var(--glass-border)] hover-trigger">
                     <img src="https://images.unsplash.com/photo-1516321318423-f06f85e504b3?q=80&w=1000&auto=format&fit=crop" class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" alt="Seven Network">
                     <div class="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex flex-col justify-center items-center p-4 text-center">
                         <h3 class="text-3xl font-bold text-white mb-2">Seven Network</h3>
-                        <p class="text-primary" data-key="work_broadcast_ip">שידור | IP</p>
+                        <p class="text-[var(--primary)]" data-key="work_broadcast_ip">שידור | IP</p>
                     </div>
                 </div>
             </div>
@@ -418,7 +438,7 @@
         <section id="dna">
             <div class="text-center mb-16">
                 <h2 class="section-title" data-key="section_dna">פרופיל לקוח</h2>
-                <p class="text-gray-400" data-key="dna_subtitle">התאמת פתרונות מדויקת לצרכים שלכם</p>
+                <p class="text-muted-custom" data-key="dna_subtitle">התאמת פתרונות מדויקת לצרכים שלכם</p>
             </div>
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 perspective-container">
                 
@@ -459,23 +479,23 @@
             <h2 class="section-title text-center mb-16" data-key="section_process">התהליך שלנו</h2>
             <div class="flex flex-wrap justify-center gap-8">
                 <div class="w-full md:w-1/5 glass-card text-center hover-trigger">
-                    <div class="text-6xl font-black text-white/10 mb-4 orbitron-font">01</div>
-                    <h3 class="text-xl font-bold text-primary" data-key="process_1">אסטרטגיה</h3>
+                    <div class="text-6xl font-black text-[var(--glass-border)] mb-4 orbitron-font">01</div>
+                    <h3 class="text-xl font-bold text-[var(--primary)]" data-key="process_1">אסטרטגיה</h3>
                     <p class="text-sm mt-2" data-key="process_1_desc">פיצוח הקונספט והגדרת יעדים</p>
                 </div>
                 <div class="w-full md:w-1/5 glass-card text-center hover-trigger">
-                    <div class="text-6xl font-black text-white/10 mb-4 orbitron-font">02</div>
-                    <h3 class="text-xl font-bold text-secondary" data-key="process_2">הפקה</h3>
+                    <div class="text-6xl font-black text-[var(--glass-border)] mb-4 orbitron-font">02</div>
+                    <h3 class="text-xl font-bold text-[var(--secondary)]" data-key="process_2">הפקה</h3>
                     <p class="text-sm mt-2" data-key="process_2_desc">יום צילום, ניהול וביצוע טכני</p>
                 </div>
                 <div class="w-full md:w-1/5 glass-card text-center hover-trigger">
-                    <div class="text-6xl font-black text-white/10 mb-4 orbitron-font">03</div>
-                    <h3 class="text-xl font-bold text-primary" data-key="process_3">פוסט</h3>
+                    <div class="text-6xl font-black text-[var(--glass-border)] mb-4 orbitron-font">03</div>
+                    <h3 class="text-xl font-bold text-[var(--primary)]" data-key="process_3">פוסט</h3>
                     <p class="text-sm mt-2" data-key="process_3_desc">עריכה, אנימציה וצבע</p>
                 </div>
                 <div class="w-full md:w-1/5 glass-card text-center hover-trigger">
-                    <div class="text-6xl font-black text-white/10 mb-4 orbitron-font">04</div>
-                    <h3 class="text-xl font-bold text-secondary" data-key="process_4">הפצה</h3>
+                    <div class="text-6xl font-black text-[var(--glass-border)] mb-4 orbitron-font">04</div>
+                    <h3 class="text-xl font-bold text-[var(--secondary)]" data-key="process_4">הפצה</h3>
                     <p class="text-sm mt-2" data-key="process_4_desc">שידור וקידום התוכן</p>
                 </div>
             </div>
@@ -487,13 +507,13 @@
 
             <div class="service-block scroll-reveal">
                 <div class="service-content">
-                    <h3 class="text-4xl font-bold mb-6 text-white" data-key="sol_live_title">הפקות וידאו ושידורים חיים</h3>
-                    <p class="text-gray-400 text-lg leading-relaxed mb-6" data-key="sol_live_desc">
+                    <h3 class="text-4xl font-bold mb-6 text-[var(--text-color)]" data-key="sol_live_title">הפקות וידאו ושידורים חיים</h3>
+                    <p class="text-muted-custom text-lg leading-relaxed mb-6" data-key="sol_live_desc">
                         שידור חי הוא אומנות של שניות. עם ניסיון של אלפי שעות שידור, אנו מביאים את היכולות של עולם הטלוויזיה לכל פלטפורמה דיגיטלית. איכות שידור ללא פשרות, גיבוי מלא וניהול בזמן אמת.
                     </p>
-                    <ul class="space-y-2 text-gray-500">
-                        <li class="flex items-center gap-2"><span class="w-2 h-2 bg-primary rounded-full"></span> <span data-key="sol_live_li1">שידור רב-מוקדי</span></li>
-                        <li class="flex items-center gap-2"><span class="w-2 h-2 bg-primary rounded-full"></span> <span data-key="sol_live_li2">גרפיקה בזמן אמת</span></li>
+                    <ul class="space-y-2 text-muted-custom">
+                        <li class="flex items-center gap-2"><span class="w-2 h-2 bg-[var(--primary)] rounded-full"></span> <span data-key="sol_live_li1">שידור רב-מוקדי</span></li>
+                        <li class="flex items-center gap-2"><span class="w-2 h-2 bg-[var(--primary)] rounded-full"></span> <span data-key="sol_live_li2">גרפיקה בזמן אמת</span></li>
                     </ul>
                 </div>
                 <div class="service-img-wrapper hover-trigger">
@@ -503,8 +523,8 @@
 
             <div class="service-block alt scroll-reveal">
                 <div class="service-content">
-                    <h3 class="text-4xl font-bold mb-6 text-white" data-key="sol_ob_title">ניידת שידור ו-Multi Camera</h3>
-                    <p class="text-gray-400 text-lg leading-relaxed mb-6" data-key="sol_ob_desc">
+                    <h3 class="text-4xl font-bold mb-6 text-[var(--text-color)]" data-key="sol_ob_title">ניידת שידור ו-Multi Camera</h3>
+                    <p class="text-muted-custom text-lg leading-relaxed mb-6" data-key="sol_ob_desc">
                         מערך צילום מרובה מצלמות שמאפשר לספר את הסיפור מכל הזוויות. ניידת השידור המודולרית שלנו מצוידת בטכנולוגיות 4K, מערכות ניתוב מתקדמות ויכולות הקלטה בסטנדרט בינלאומי.
                     </p>
                 </div>
@@ -515,8 +535,8 @@
 
             <div class="service-block scroll-reveal">
                 <div class="service-content">
-                    <h3 class="text-4xl font-bold mb-6 text-white" data-key="sol_virtual_title">כנסים וירטואליים</h3>
-                    <p class="text-gray-400 text-lg leading-relaxed mb-6" data-key="sol_virtual_desc">
+                    <h3 class="text-4xl font-bold mb-6 text-[var(--text-color)]" data-key="sol_virtual_title">כנסים וירטואליים</h3>
+                    <p class="text-muted-custom text-lg leading-relaxed mb-6" data-key="sol_virtual_desc">
                         העתיד של הכנסים כבר כאן. אנו יוצרים סביבות וירטואליות אימרסיביות, המשלבות דוברים מהאולפן ומהבית, עם אינטראקציה מלאה של הקהל.
                     </p>
                 </div>
@@ -531,10 +551,10 @@
             <h2 class="section-title text-center" data-key="section_packages">חבילות שירות</h2>
             <div class="grid grid-cols-1 md:grid-cols-3 gap-8 mt-12">
                 <div class="glass-card text-center hover:border-[var(--primary)] transition-colors hover-trigger">
-                    <h3 class="text-2xl font-bold text-white" data-key="pkg_tech">מפעיל טכני</h3>
-                    <div class="text-4xl font-black text-primary my-4" data-key="pkg_tech_price">₪2,500+</div>
+                    <h3 class="text-2xl font-bold text-[var(--text-color)]" data-key="pkg_tech">מפעיל טכני</h3>
+                    <div class="text-4xl font-black text-[var(--primary)] my-4" data-key="pkg_tech_price">₪2,500+</div>
                     <p class="mb-6 text-sm" data-key="pkg_tech_desc">פתרון נקודתי להפקות קיימות</p>
-                    <ul class="text-right space-y-3 text-gray-400 mb-8 text-sm px-4">
+                    <ul class="text-right space-y-3 text-muted-custom mb-8 text-sm px-4">
                         <li data-key="pkg_tech_li1">✓ תפעול מערכות שידור</li>
                         <li data-key="pkg_tech_li2">✓ אינטגרציה עם ציוד קיים</li>
                         <li data-key="pkg_tech_li3">✓ הקמה ופירוק</li>
@@ -543,11 +563,11 @@
                 </div>
 
                 <div class="glass-card text-center border-[var(--secondary)] transform scale-105 shadow-[0_0_30px_rgba(189,0,255,0.2)] hover-trigger relative overflow-hidden">
-                    <div class="absolute top-0 right-0 bg-secondary text-white text-xs px-3 py-1 font-bold" data-key="pkg_rec">מומלץ</div>
-                    <h3 class="text-2xl font-bold text-white" data-key="pkg_director">במאי / מפיק טכני</h3>
-                    <div class="text-4xl font-black text-secondary my-4" data-key="pkg_director_price">₪4,500+</div>
+                    <div class="absolute top-0 right-0 bg-[var(--secondary)] text-white text-xs px-3 py-1 font-bold" data-key="pkg_rec">מומלץ</div>
+                    <h3 class="text-2xl font-bold text-[var(--text-color)]" data-key="pkg_director">במאי / מפיק טכני</h3>
+                    <div class="text-4xl font-black text-[var(--secondary)] my-4" data-key="pkg_director_price">₪4,500+</div>
                     <p class="mb-6 text-sm" data-key="pkg_director_desc">ניהול מלא של האירוע בזמן אמת</p>
-                    <ul class="text-right space-y-3 text-gray-400 mb-8 text-sm px-4">
+                    <ul class="text-right space-y-3 text-muted-custom mb-8 text-sm px-4">
                         <li data-key="pkg_director_li1">✓ ניתוב מצלמות</li>
                         <li data-key="pkg_director_li2">✓ ניהול ליין-אפ</li>
                         <li data-key="pkg_director_li3">✓ תקשורת עם צוות הפקה</li>
@@ -556,10 +576,10 @@
                 </div>
 
                 <div class="glass-card text-center hover:border-[var(--primary)] transition-colors hover-trigger">
-                    <h3 class="text-2xl font-bold text-white" data-key="pkg_pm">ניהול פרויקט</h3>
-                    <div class="text-4xl font-black text-primary my-4" data-key="pkg_pm_price">מותאם אישית</div>
+                    <h3 class="text-2xl font-bold text-[var(--text-color)]" data-key="pkg_pm">ניהול פרויקט</h3>
+                    <div class="text-4xl font-black text-[var(--primary)] my-4" data-key="pkg_pm_price">מותאם אישית</div>
                     <p class="mb-6 text-sm" data-key="pkg_pm_desc">פתרון מקצה לקצה</p>
-                    <ul class="text-right space-y-3 text-gray-400 mb-8 text-sm px-4">
+                    <ul class="text-right space-y-3 text-muted-custom mb-8 text-sm px-4">
                         <li data-key="pkg_pm_li1">✓ אפיון טכני מלא</li>
                         <li data-key="pkg_pm_li2">✓ בניית צוות הפקה</li>
                         <li data-key="pkg_pm_li3">✓ אחריות כוללת</li>
@@ -573,20 +593,20 @@
         <section id="contact" class="py-20">
             <div class="glass-card max-w-3xl mx-auto text-center">
                 <h2 class="text-5xl font-bold mb-6 glitch-text" data-text="בואו ניצור משהו מדהים" data-key="contact_title">בואו ניצור משהו מדהים</h2>
-                <p class="text-xl text-gray-400 mb-12" data-key="contact_desc">
+                <p class="text-xl text-muted-custom mb-12" data-key="contact_desc">
                     יש לכם חזון? לנו יש את הכלים להגשים אותו.
                 </p>
                 <div class="flex flex-col md:flex-row justify-center gap-8 items-center mb-12">
-                    <a href="tel:054-255-9027" class="text-2xl hover:text-primary transition-colors hover-trigger font-bold font-mono">054-255-9027</a>
-                    <span class="hidden md:block text-gray-600">|</span>
-                    <a href="mailto:EdelenviProductions@gmail.com" class="text-2xl hover:text-secondary transition-colors hover-trigger font-bold">EdelenviProductions@gmail.com</a>
+                    <a href="tel:054-255-9027" class="text-2xl hover:text-[var(--primary)] transition-colors hover-trigger font-bold font-mono text-[var(--text-color)]">054-255-9027</a>
+                    <span class="hidden md:block text-muted-custom">|</span>
+                    <a href="mailto:EdelenviProductions@gmail.com" class="text-2xl hover:text-[var(--secondary)] transition-colors hover-trigger font-bold text-[var(--text-color)]">EdelenviProductions@gmail.com</a>
                 </div>
                 <div class="flex justify-center gap-6">
-                    <a href="https://wa.me/972542559027" target="_blank" class="cyber-btn bg-green-500/10 border-green-500 text-green-400 hover:bg-green-500 hover:text-black">WhatsApp</a>
+                    <a href="https://wa.me/972542559027" target="_blank" class="cyber-btn bg-green-500/10 border-green-500 text-green-600 hover:bg-green-500 hover:text-white">WhatsApp</a>
                     <a href="mailto:EdelenviProductions@gmail.com" class="cyber-btn" data-key="btn_email">שלחו מייל</a>
                 </div>
                 <div class="mt-8">
-                    <p class="text-lg font-bold" data-key="contact_name">אוריין אדלני</p>
+                    <p class="text-lg font-bold text-[var(--text-color)]" data-key="contact_name">אוריין אדלני</p>
                 </div>
             </div>
         </section>
@@ -660,6 +680,70 @@
             }
         };
 
+        // --- Theme Management ---
+        const themeBtns = document.querySelectorAll('.theme-btn');
+        const sunIcon = document.getElementById('icon-sun');
+        const moonIcon = document.getElementById('icon-moon');
+        
+        // Global ThreeJS Refs
+        let particlesMaterial; 
+
+        const updateThemeIcons = (isDark) => {
+            if(isDark) {
+                sunIcon.classList.remove('hidden');
+                moonIcon.classList.add('hidden');
+            } else {
+                sunIcon.classList.add('hidden');
+                moonIcon.classList.remove('hidden');
+            }
+            
+            // Update Particles Color if initialized
+            if(particlesMaterial) {
+                // Dark mode: Cyan (00f2ff), Light mode: Dark Blue/Black (003366)
+                particlesMaterial.color.setHex(isDark ? 0x00f2ff : 0x1a1a1a);
+                particlesMaterial.opacity = isDark ? 0.8 : 0.5;
+            }
+        };
+
+        const toggleTheme = () => {
+            const html = document.documentElement;
+            const isDark = html.classList.contains('dark');
+            
+            if(isDark) {
+                html.classList.remove('dark');
+                localStorage.setItem('theme', 'light');
+                updateThemeIcons(false);
+            } else {
+                html.classList.add('dark');
+                localStorage.setItem('theme', 'dark');
+                updateThemeIcons(true);
+            }
+        };
+
+        // Init Theme
+        const savedTheme = localStorage.getItem('theme');
+        const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+        
+        if (savedTheme === 'light') {
+            document.documentElement.classList.remove('dark');
+            updateThemeIcons(false);
+        } else if (savedTheme === 'dark') {
+            document.documentElement.classList.add('dark');
+            updateThemeIcons(true);
+        } else {
+            // Default behavior based on OS if no save
+            if(!prefersDark) {
+                document.documentElement.classList.remove('dark');
+                updateThemeIcons(false);
+            } else {
+                 updateThemeIcons(true);
+            }
+        }
+
+        themeBtns.forEach(btn => btn.addEventListener('click', toggleTheme));
+
+
+        // --- Language Logic ---
         const setLanguage = (lang) => {
             const elements = document.querySelectorAll('[data-key]');
             elements.forEach(el => {
@@ -669,31 +753,26 @@
                 }
             });
 
-            // Update Glitch Text manually as it uses a data attribute
+            // Update Glitch Text manually
             const glitchText = document.querySelector('.glitch-text');
             if(glitchText) {
-                const newText = lang === 'he' ? "השילוב המושלם" : "The Perfect Combo";
-                // We rebuild the inner HTML to keep the span styling
-                if(lang === 'he') {
-                    glitchText.innerHTML = `השילוב <span style="color:transparent; -webkit-text-stroke: 2px var(--primary);">המושלם</span>`;
-                    glitchText.setAttribute('data-text', "השילוב המושלם");
-                } else {
-                    glitchText.innerHTML = `The Perfect <span style="color:transparent; -webkit-text-stroke: 2px var(--primary);">Combo</span>`;
-                    glitchText.setAttribute('data-text', "The Perfect Combo");
-                }
+                const isDark = document.documentElement.classList.contains('dark');
+                // We rebuild innerHTML
+                const spanContent = lang === 'he' ? 'המושלם' : 'Combo';
+                const plainContent = lang === 'he' ? 'השילוב ' : 'The Perfect ';
+                
+                glitchText.innerHTML = `${plainContent}<span style="color:transparent; -webkit-text-stroke: 2px var(--primary);">${spanContent}</span>`;
+                glitchText.setAttribute('data-text', plainContent + spanContent);
             }
 
-            // Direction & Font
             document.documentElement.dir = lang === 'he' ? 'rtl' : 'ltr';
             document.documentElement.lang = lang;
             
-            // Active state for flags
             document.querySelectorAll('.lang-btn').forEach(btn => {
                 btn.classList.toggle('active', btn.dataset.lang === lang);
             });
         };
 
-        // Lang Button Listeners
         document.querySelectorAll('.lang-btn').forEach(btn => {
             btn.addEventListener('click', (e) => {
                 const lang = e.target.dataset.lang;
@@ -722,14 +801,17 @@
 
             particlesGeometry.setAttribute('position', new THREE.BufferAttribute(posArray, 3));
 
-            const material = new THREE.PointsMaterial({
+            // Initial color based on current theme
+            const isDark = document.documentElement.classList.contains('dark');
+            
+            particlesMaterial = new THREE.PointsMaterial({
                 size: 0.02,
-                color: 0x00f2ff,
+                color: isDark ? 0x00f2ff : 0x1a1a1a,
                 transparent: true,
-                opacity: 0.8,
+                opacity: isDark ? 0.8 : 0.5,
             });
 
-            const particlesMesh = new THREE.Points(particlesGeometry, material);
+            const particlesMesh = new THREE.Points(particlesGeometry, particlesMaterial);
             scene.add(particlesMesh);
 
             camera.position.z = 3;
@@ -817,7 +899,7 @@
             });
         };
 
-        // --- Video Logic (Preserved & Enhanced) ---
+        // --- Video Logic ---
         let playerA, playerB, activePlayer = 'A';
         let isMuted = true;
         const videos = [
@@ -849,7 +931,6 @@
             player.loadVideoById({ videoId: vid.videoId, startSeconds: 10, endSeconds: 25 });
         }
 
-        // Loop Transitions
         setInterval(() => {
             const current = activePlayer === 'A' ? playerA : playerB;
             const next = activePlayer === 'A' ? playerB : playerA;
@@ -857,15 +938,11 @@
             const nextEl = document.getElementById(activePlayer === 'A' ? 'player-container-b' : 'player-container-a');
 
             loadNextVideo(next);
-            
-            // Crossfade
             nextEl.style.opacity = 1;
             currentEl.style.opacity = 0;
-            
             activePlayer = activePlayer === 'A' ? 'B' : 'A';
-        }, 10000); // Every 10 seconds
+        }, 10000);
 
-        // Audio Toggle
         document.getElementById('mute-btn').addEventListener('click', () => {
             isMuted = !isMuted;
             if(playerA) isMuted ? playerA.mute() : playerA.unMute();
@@ -884,7 +961,6 @@
         // --- Init All ---
         document.addEventListener('DOMContentLoaded', () => {
             initThreeJS();
-            // initCursor(); // REMOVED as requested
             initTilt();
             initScrollReveal();
             
@@ -900,11 +976,11 @@
             const createLogo = (src) => {
                 const img = document.createElement('img');
                 img.src = src;
-                img.className = "h-12 object-contain filter brightness-0 invert";
+                img.className = "h-12 object-contain transition-all";
                 return img;
             }
             logos.forEach(l => track.appendChild(createLogo(l)));
-            logos.forEach(l => track.appendChild(createLogo(l))); // Duplicate for smooth scroll loop
+            logos.forEach(l => track.appendChild(createLogo(l)));
         });
 
     </script>
