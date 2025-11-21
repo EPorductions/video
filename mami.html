@@ -54,7 +54,7 @@
             
             -webkit-overflow-scrolling: touch; 
             scroll-snap-type: x proximity; 
-            scroll-behavior: auto; 
+            scroll-behavior: smooth; /* Smooth scrolling for resize adjustments */
             
             align-items: center;
             direction: ltr;
@@ -80,6 +80,7 @@
             cursor: grabbing; 
             user-select: none; 
             scroll-snap-type: none; 
+            scroll-behavior: auto !important; /* Disable smooth scroll during drag for responsiveness */
         }
 
         .vertical-text {
@@ -91,6 +92,23 @@
         .stroke-text {
             -webkit-text-stroke: 1px rgba(255, 255, 255, 0.3);
             color: transparent;
+        }
+        
+        /* Custom Scrollbar for internal content */
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 4px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: rgba(255, 255, 255, 0.05);
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: rgba(212, 163, 115, 0.3);
+            border-radius: 2px;
+        }
+
+        /* Smooth Layout Transitions */
+        .layout-transition {
+            transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
         }
         
         /* Navbar Animations */
@@ -142,7 +160,7 @@
                 navAbout: "אודות",
                 navContact: "צור קשר",
                 galleryBtn: "גלריה",
-                heroTitle: "אליז שנון אדלני", // Text fallback
+                heroTitle: "אליז שנון אדלני", 
                 heroSubtitle: "יצירה של צבע ורגש",
                 scrollHint: "גלילה לכל כיוון",
                 aboutTitle: "האמנית",
@@ -171,7 +189,7 @@
                 navAbout: "About",
                 navContact: "Contact",
                 galleryBtn: "Gallery",
-                heroTitle: "ELIZ SHANON EDELENYI", // Not used visually in Hero, replaced by Signature image
+                heroTitle: "ELIZ SHANON EDELENYI", 
                 heroSubtitle: "A Journey of Color & Emotion",
                 scrollHint: "Scroll Any Direction",
                 aboutTitle: "The Artist",
@@ -226,7 +244,6 @@
 
         // --- Item Specific Translations ---
         const itemTranslations = {
-            // Existing
             1: { he: { title: 'טבע דומם באדום', story: "חקירה של הצבע האדום והשפעתו על החלל." }, en: { title: 'Still Life in Red', story: "Exploration of the red color and its effect on space." }, hu: { title: 'Csendélet Vörösben', story: "A vörös szín és a térre gyakorolt hatásának kutatása." } },
             4: { he: { title: 'כד ומים', story: "פשטות החומר והשקיפות של המים." }, en: { title: 'Jug and Water', story: "The simplicity of matter and the transparency of water." }, hu: { title: 'Kancsó és Víz', story: "Az anyag egyszerűsége és a víz átlátszósága." } },
             7: { he: { title: 'העורב', story: "מבט אל הטבע הפראי." }, en: { title: 'The Raven', story: "A gaze into the wild nature." }, hu: { title: 'A Holló', story: "Pillantás a vad természetbe." } },
@@ -236,18 +253,12 @@
             6: { he: { title: 'קומפוזיציה בצבע', story: "משחק של כתמי צבע ואיזון." }, en: { title: 'Composition in Color', story: "A play of color patches and balance." }, hu: { title: 'Színes Kompozíció', story: "Színfoltok és egyensúly játéka." } },
             2: { he: { title: 'רישום מופשט', story: "קוים חופשיים המנסים ללכוד תנועה." }, en: { title: 'Abstract Drawing', story: "Free lines attempting to capture movement." }, hu: { title: 'Absztrakt Rajz', story: "Szabad vonalak, amelyek a mozgást próbálják megragadni." } },
             9: { he: { title: 'שלושה שלבים', story: "תהליך של שינוי וזמן." }, en: { title: 'Three Stages', story: "A process of change and time." }, hu: { title: 'Három Szakasz', story: "A változás és az idő folyamata." } },
-            
-            // New Items (Crows)
             30: { he: { title: 'עורבים על חוט', story: "מקצב שחור על רקע לבן." }, en: { title: 'Crows on a Wire', story: "Black rhythm on a white background." }, hu: { title: 'Varjak a dróton', story: "Fekete ritmus fehér háttér előtt." } },
             14: { he: { title: 'מתווה ציפור', story: "תנועה מהירה ברישום פחם." }, en: { title: 'Bird Sketch', story: "Quick movement in charcoal." }, hu: { title: 'Madárvázlat', story: "Gyors mozdulat szénrajzban." } },
             15: { he: { title: 'נוכחות שחורה', story: "העורב ככתם וכנוכחות." }, en: { title: 'Black Presence', story: "The crow as a stain and presence." }, hu: { title: 'Fekete Jelenlét', story: "A varjú mint folt ונוכחות." } },
-
-            // New Items (Movies)
             25: { he: { title: 'איש הגשם', story: "סצנה מתוך סרט, בדידות אורבנית." }, en: { title: 'Rain Man', story: "A scene from a movie, urban solitude." }, hu: { title: 'Esőember', story: "Jelenet egy filmből, városi magány." } },
             5: { he: { title: 'הקהל', story: "התבוננות בקהל צופים." }, en: { title: 'The Audience', story: "Observing the spectators." }, hu: { title: 'A Közönség', story: "A nézők megfigyelése." } },
             23: { he: { title: 'ספרים', story: "רגע של קריאה אינטימית." }, en: { title: 'Books', story: "A moment of intimate reading." }, hu: { title: 'Könyvek', story: "Az olvasás intim pillanata." } },
-
-            // New Items (Masks)
             13: { he: { title: 'ריבוי פנים', story: "מסכות ופרצופים מתמזגים." }, en: { title: 'Many Faces', story: "Masks and faces merging." }, hu: { title: 'Sok Arc', story: "Maszkok és arcok összeolvadása." } },
             21: { he: { title: 'הגברת', story: "דמות אניגמטית מאחורי משקפיים." }, en: { title: 'The Lady', story: "Enigmatic figure behind glasses." }, hu: { title: 'A Hölgy', story: "Rejtélyes alak szemüveg mögött." } },
             22: { he: { title: 'הרהור', story: "מבט פנימה." }, en: { title: 'Reflection', story: "Looking inward." }, hu: { title: 'Elmélkedés', story: "Befelé tekintés." } }
@@ -265,7 +276,7 @@
                         { id: 30, src: '30.jpg', year: '2019', ...getText(30) },
                         { id: 14, src: '14.jpg', year: '2019', ...getText(14) },
                         { id: 15, src: '15.jpg', year: '2019', isWide: true, ...getText(15) },
-                        { id: 7, src: '7.jpg', year: '2018', ...getText(7) }, // The original Raven
+                        { id: 7, src: '7.jpg', year: '2018', ...getText(7) }, 
                     ]
                 },
                 {
@@ -322,20 +333,19 @@
             <section 
                 id={id}
                 ref={sectionRef}
-                className="snap-center min-w-[100vw] h-[100vh] h-[100dvh] relative flex items-center justify-center overflow-hidden flex-shrink-0 bg-[#121212] z-20 shadow-2xl border-l border-r border-white/5"
+                className="snap-center min-w-[100vw] h-[100vh] h-[100dvh] relative flex items-center justify-center overflow-hidden flex-shrink-0 bg-[#121212] z-20 shadow-2xl border-l border-r border-white/5 layout-transition"
             >
                 <div className="absolute inset-0 opacity-30 select-none pointer-events-none">
                     <img src="20200704_004846.jpg" className="w-full h-full object-cover filter blur-lg scale-110" alt="" onError={(e)=>e.target.style.display='none'} />
                 </div>
-                <div className="relative z-10 text-center px-4 select-none flex flex-col items-center w-full max-w-[95vw]">
-                    {/* Conditional Title: Signature Image for ALL languages */}
-                    <div className="w-[90vw] md:w-[60vw] h-auto mb-8 mt-4">
+                <div className="relative z-10 text-center px-4 select-none flex flex-col items-center justify-center w-full h-full max-w-[95vw]">
+                    <div className="w-[90vw] md:w-[60vw] max-w-[600px] h-auto mb-8 mt-4 transition-all duration-500">
                         <img 
                             src="SIGN.png" 
                             alt={t.heroTitle}
                             className="w-full h-auto object-contain"
                             style={{
-                                opacity: 0.9 // Tints the white slightly if needed
+                                opacity: 0.9 
                             }}
                             onError={(e) => {
                                 e.target.style.display = 'none';
@@ -347,7 +357,7 @@
                     <p className="text-xl md:text-2xl serif font-light italic text-[#d4a373] mb-12">
                         {t.heroSubtitle}
                     </p>
-                    <div className="flex items-center gap-8 opacity-60 animate-pulse transition-opacity p-4 z-50 pointer-events-auto">
+                    <div className="flex items-center gap-8 opacity-60 animate-pulse transition-opacity p-4 z-50 pointer-events-auto absolute bottom-10 md:static">
                         <div onClick={onLeft} className="cursor-pointer hover:text-white hover:scale-110 transition-transform p-2"><Icons.ArrowLeft /></div>
                         <span onClick={onText} className="text-xs md:text-sm tracking-[0.3em] uppercase border-b border-white/20 pb-1 cursor-pointer hover:text-[#d4a373] transition-colors">{t.scrollHint}</span>
                         <div onClick={onRight} className="cursor-pointer hover:text-white hover:scale-110 transition-transform p-2"><Icons.ArrowRight /></div>
@@ -359,23 +369,26 @@
         const AboutSection = ({ t, sectionRef }) => (
              <section 
                 ref={sectionRef}
-                className="snap-center min-w-[100vw] md:min-w-[80vw] h-[100vh] h-[100dvh] bg-[#0f0f0f] flex items-center justify-center relative flex-shrink-0 p-6 border-l border-r border-white/5"
+                className="snap-center min-w-[100vw] md:min-w-[80vw] h-[100vh] h-[100dvh] bg-[#0f0f0f] flex items-center justify-center relative flex-shrink-0 border-l border-r border-white/5 layout-transition"
             >
-                <div className="max-w-6xl w-full grid md:grid-cols-2 gap-16 items-center">
-                    <div className="order-2 md:order-1 space-y-8 text-center md:text-start" dir={t.name === "אליז שנון אדלני" ? 'rtl' : 'ltr'}>
-                        <h2 className="text-4xl md:text-7xl serif text-[#d4a373]">{t.aboutTitle}</h2>
-                        <div className="space-y-6 text-lg md:text-xl font-light text-gray-300 leading-relaxed">
-                            <p>{t.aboutText1}</p>
-                            <p>{t.aboutText2}</p>
-                            <p>{t.aboutText3}</p>
+                {/* Use flex column for mobile, grid for desktop. Allow internal scrolling for overflow content */}
+                <div className="w-full h-full overflow-y-auto custom-scrollbar flex flex-col items-center justify-center p-6">
+                    <div className="max-w-6xl w-full grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-16 items-center my-auto">
+                        <div className="order-2 md:order-1 space-y-6 text-center md:text-start" dir={t.name === "אליז שנון אדלני" ? 'rtl' : 'ltr'}>
+                            <h2 className="text-3xl md:text-7xl serif text-[#d4a373]">{t.aboutTitle}</h2>
+                            <div className="space-y-4 md:space-y-6 text-base md:text-xl font-light text-gray-300 leading-relaxed">
+                                <p>{t.aboutText1}</p>
+                                <p>{t.aboutText2}</p>
+                                <p>{t.aboutText3}</p>
+                            </div>
+                            <div className="pt-6 md:pt-8 border-t border-white/10 flex flex-col gap-2 text-sm opacity-50 font-mono">
+                                <span>{t.rights}</span>
+                                <span className="text-xs opacity-70">{t.credits}</span>
+                            </div>
                         </div>
-                        <div className="pt-8 border-t border-white/10 flex flex-col gap-2 text-sm opacity-50 font-mono">
-                            <span>{t.rights}</span>
-                            <span className="text-xs opacity-70">{t.credits}</span>
+                        <div className="order-1 md:order-2 relative h-[30vh] md:h-[50vh] w-full flex-shrink-0">
+                            <img src="20200704_004846.jpg" alt="Studio" className="w-full h-full object-cover grayscale opacity-60 shadow-2xl rounded-sm" draggable="false" />
                         </div>
-                    </div>
-                    <div className="order-1 md:order-2 relative h-[40vh] md:h-[50vh] w-full">
-                        <img src="20200704_004846.jpg" alt="Studio" className="w-full h-full object-cover grayscale opacity-60 shadow-2xl rounded-sm" draggable="false" />
                     </div>
                 </div>
             </section>
@@ -384,34 +397,36 @@
         const ContactSection = ({ t, sectionRef }) => (
             <section 
                ref={sectionRef}
-               className="snap-center min-w-[100vw] md:min-w-[60vw] h-[100vh] h-[100dvh] bg-[#0a0a0a] flex items-center justify-center relative flex-shrink-0 p-6 border-l border-r border-white/5"
+               className="snap-center min-w-[100vw] md:min-w-[60vw] h-[100vh] h-[100dvh] bg-[#0a0a0a] flex items-center justify-center relative flex-shrink-0 border-l border-r border-white/5 layout-transition"
            >
-               <div className="max-w-3xl w-full flex flex-col items-center text-center space-y-8 md:space-y-12" dir={t.name === "אליז שנון אדלני" ? 'rtl' : 'ltr'}>
-                   <div>
-                       <span className="text-[#d4a373] text-sm tracking-[0.3em] uppercase mb-4 block">{t.contactTitle}</span>
-                       <h2 className="text-4xl md:text-7xl serif text-white leading-tight">{t.contactTitle}</h2>
-                   </div>
-                   <p className="text-lg md:text-xl font-light text-gray-400 max-w-lg leading-relaxed">{t.contactText}</p>
-                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-8 w-full max-w-lg mt-8">
-                       <div className="group flex flex-col items-center gap-4 p-6 md:p-8 border border-white/5 hover:border-[#d4a373]/30 bg-white/5 hover:bg-white/10 transition-all duration-500 rounded-sm cursor-pointer">
-                           <div className="p-3 rounded-full bg-[#d4a373]/10 text-[#d4a373] group-hover:scale-110 transition-transform duration-300"><Icons.Mail /></div>
-                           <div className="text-center w-full overflow-hidden"><span className="text-xs uppercase tracking-widest opacity-50 mb-1 block">{t.emailLabel}</span><span className="text-base md:text-lg serif break-all">eliz.shanon@gmail.com</span></div>
+               <div className="w-full h-full overflow-y-auto custom-scrollbar flex flex-col items-center justify-center p-6">
+                   <div className="max-w-3xl w-full flex flex-col items-center text-center space-y-8 md:space-y-12 my-auto" dir={t.name === "אליז שנון אדלני" ? 'rtl' : 'ltr'}>
+                       <div>
+                           <span className="text-[#d4a373] text-sm tracking-[0.3em] uppercase mb-4 block">{t.contactTitle}</span>
+                           <h2 className="text-3xl md:text-7xl serif text-white leading-tight">{t.contactTitle}</h2>
                        </div>
-                       <div className="group flex flex-col items-center gap-4 p-6 md:p-8 border border-white/5 hover:border-[#d4a373]/30 bg-white/5 hover:bg-white/10 transition-all duration-500 rounded-sm cursor-pointer">
-                           <div className="p-3 rounded-full bg-[#d4a373]/10 text-[#d4a373] group-hover:scale-110 transition-transform duration-300"><Icons.Phone /></div>
-                           <div className="text-center"><span className="text-xs uppercase tracking-widest opacity-50 mb-1 block">{t.phoneLabel}</span><span className="text-base md:text-lg serif" dir="ltr">+972 52-856-1536</span></div>
+                       <p className="text-base md:text-xl font-light text-gray-400 max-w-lg leading-relaxed">{t.contactText}</p>
+                       <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-8 w-full max-w-lg mt-4 md:mt-8">
+                           <div className="group flex flex-col items-center gap-4 p-6 md:p-8 border border-white/5 hover:border-[#d4a373]/30 bg-white/5 hover:bg-white/10 transition-all duration-500 rounded-sm cursor-pointer">
+                               <div className="p-3 rounded-full bg-[#d4a373]/10 text-[#d4a373] group-hover:scale-110 transition-transform duration-300"><Icons.Mail /></div>
+                               <div className="text-center w-full overflow-hidden"><span className="text-xs uppercase tracking-widest opacity-50 mb-1 block">{t.emailLabel}</span><span className="text-sm md:text-lg serif break-all">eliz.shanon@gmail.com</span></div>
+                           </div>
+                           <div className="group flex flex-col items-center gap-4 p-6 md:p-8 border border-white/5 hover:border-[#d4a373]/30 bg-white/5 hover:bg-white/10 transition-all duration-500 rounded-sm cursor-pointer">
+                               <div className="p-3 rounded-full bg-[#d4a373]/10 text-[#d4a373] group-hover:scale-110 transition-transform duration-300"><Icons.Phone /></div>
+                               <div className="text-center"><span className="text-xs uppercase tracking-widest opacity-50 mb-1 block">{t.phoneLabel}</span><span className="text-sm md:text-lg serif" dir="ltr">+972 52-856-1536</span></div>
+                           </div>
                        </div>
-                   </div>
-                   <div className="flex gap-8 mt-8 pt-8 border-t border-white/10 w-full max-w-xs justify-center">
-                       <a href="https://www.facebook.com/elizshanon" target="_blank" rel="noopener noreferrer" className="p-4 rounded-full bg-white/5 hover:bg-[#d4a373] hover:text-black transition-all duration-300 group"><Icons.Facebook /></a>
-                       <a href="https://www.instagram.com/eliz77shanon/" target="_blank" rel="noopener noreferrer" className="p-4 rounded-full bg-white/5 hover:bg-[#d4a373] hover:text-black transition-all duration-300 group"><Icons.Instagram /></a>
+                       <div className="flex gap-8 mt-8 pt-8 border-t border-white/10 w-full max-w-xs justify-center">
+                           <a href="https://www.facebook.com/elizshanon" target="_blank" rel="noopener noreferrer" className="p-4 rounded-full bg-white/5 hover:bg-[#d4a373] hover:text-black transition-all duration-300 group"><Icons.Facebook /></a>
+                           <a href="https://www.instagram.com/eliz77shanon/" target="_blank" rel="noopener noreferrer" className="p-4 rounded-full bg-white/5 hover:bg-[#d4a373] hover:text-black transition-all duration-300 group"><Icons.Instagram /></a>
+                       </div>
                    </div>
                </div>
            </section>
        );
 
         const CategoryCluster = ({ category, onImageClick }) => (
-            <div className="flex flex-row items-center gap-6 md:gap-16 px-4 md:px-24 border-l border-white/5 snap-center h-full">
+            <div className="flex flex-row items-center gap-6 md:gap-16 px-4 md:px-24 border-l border-white/5 snap-center h-full layout-transition">
                 <div className="h-[50vh] md:h-[60vh] flex flex-col justify-center items-center opacity-50 sticky left-0 z-10">
                     <div className="w-px h-12 md:h-24 bg-gradient-to-b from-transparent via-[#d4a373] to-transparent mb-4 md:mb-6"></div>
                     <h2 className="vertical-text text-3xl md:text-6xl serif tracking-widest text-transparent stroke-text font-bold whitespace-nowrap">{category.title}</h2>
@@ -476,7 +491,34 @@
             const isRTL = lang === 'he';
             const data = getCategoriesData(t, lang);
 
-            // --- SCROLL FIX FOR MOBILE ---
+            // --- SCROLL FIX FOR MOBILE & RESIZE ---
+            useEffect(() => {
+                const handleResize = () => {
+                    if (scrollContainerRef.current) {
+                        // Snap to nearest page on resize to avoid flickering between sections
+                        const viewWidth = window.innerWidth;
+                        const currentScroll = scrollContainerRef.current.scrollLeft;
+                        const pageIndex = Math.round(currentScroll / viewWidth);
+                        
+                        scrollContainerRef.current.scrollTo({
+                            left: pageIndex * viewWidth,
+                            behavior: 'smooth' 
+                        });
+                    }
+                };
+
+                window.addEventListener('resize', handleResize);
+                // Also trigger on orientation change specifically
+                window.addEventListener('orientationchange', () => {
+                    setTimeout(handleResize, 100);
+                });
+
+                return () => {
+                    window.removeEventListener('resize', handleResize);
+                    window.removeEventListener('orientationchange', handleResize);
+                };
+            }, []);
+
             useLayoutEffect(() => {
                 if ('scrollRestoration' in history) {
                     history.scrollRestoration = 'manual';
