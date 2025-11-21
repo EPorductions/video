@@ -142,8 +142,8 @@
                 navAbout: "אודות",
                 navContact: "צור קשר",
                 galleryBtn: "גלריה",
-                heroTitle: "אליז שנון אדלני",
-                heroSubtitle: "יצירה של צבע ורגש", // Updated subtitle
+                heroTitle: "אליז שנון אדלני", // Text fallback
+                heroSubtitle: "יצירה של צבע ורגש",
                 scrollHint: "גלילה לכל כיוון",
                 aboutTitle: "האמנית",
                 aboutText1: "ילידת 1947, בוגרת המחלקה לאמנות בבצלאל.",
@@ -171,7 +171,7 @@
                 navAbout: "About",
                 navContact: "Contact",
                 galleryBtn: "Gallery",
-                heroTitle: "ELIZ SHANON EDELENYI", // UPPERCASE
+                heroTitle: "ELIZ SHANON EDELENYI", // Not used visually in Hero, replaced by Signature image
                 heroSubtitle: "A Journey of Color & Emotion",
                 scrollHint: "Scroll Any Direction",
                 aboutTitle: "The Artist",
@@ -200,7 +200,7 @@
                 navAbout: "Rólam",
                 navContact: "Kapcsolat",
                 galleryBtn: "Galéria",
-                heroTitle: "ELIZ SHANON EDELENYI", // UPPERCASE
+                heroTitle: "ELIZ SHANON EDELENYI", 
                 heroSubtitle: "Színek és Érzelmek Utazása",
                 scrollHint: "Görgessen bármerre",
                 aboutTitle: "A Művész",
@@ -318,8 +318,7 @@
 
         // --- Reusable Components ---
 
-        // Hero: Removed isClone checks for arrows/text to prevent visual "jump" on infinite scroll loop
-        const Hero = ({ t, sectionRef, isClone, onLeft, onRight, onText, id }) => (
+        const Hero = ({ t, lang, sectionRef, isClone, onLeft, onRight, onText, id }) => (
             <section 
                 id={id}
                 ref={sectionRef}
@@ -329,9 +328,30 @@
                     <img src="20200704_004846.jpg" className="w-full h-full object-cover filter blur-lg scale-110" alt="" onError={(e)=>e.target.style.display='none'} />
                 </div>
                 <div className="relative z-10 text-center px-4 select-none flex flex-col items-center w-full max-w-[95vw]">
-                    <h1 className="text-[10vw] md:text-[8vw] leading-[0.9] font-black text-[#e5e5e5] mix-blend-overlay tracking-tighter mb-4 text-center w-full drop-shadow-lg">
-                        {t.heroTitle}
-                    </h1>
+                    {/* Conditional Title: Signature Image for EN/HU, Text for HE */}
+                    {lang === 'he' ? (
+                        <h1 className="text-[10vw] md:text-[8vw] leading-[0.9] font-black text-[#e5e5e5] mix-blend-overlay tracking-tighter mb-4 text-center w-full drop-shadow-lg">
+                            {t.heroTitle}
+                        </h1>
+                    ) : (
+                        <div className="w-[90vw] md:w-[60vw] h-auto mb-8 mt-4">
+                            <img 
+                                src="SIGN.PNG" 
+                                alt={t.heroTitle}
+                                className="w-full h-auto object-contain"
+                                style={{
+                                    filter: 'invert(1) brightness(2) grayscale(1)',
+                                    mixBlendMode: 'screen',
+                                    opacity: 0.9
+                                }}
+                                onError={(e) => {
+                                    e.target.style.display = 'none';
+                                    e.target.parentNode.innerHTML = `<h1 class="text-[10vw] md:text-[8vw] leading-[0.9] font-black text-[#e5e5e5] mix-blend-overlay tracking-tighter mb-4 text-center w-full drop-shadow-lg">${t.heroTitle}</h1>`;
+                                }}
+                            />
+                        </div>
+                    )}
+                    
                     <p className="text-xl md:text-2xl serif font-light italic text-[#d4a373] mb-12">
                         {t.heroSubtitle}
                     </p>
@@ -730,7 +750,7 @@
                         dir="ltr"
                     >
                         <div ref={heroCloneLeftRef}>
-                            <Hero id="hero-left" t={t} isClone={true} onLeft={handleLeftArrow} onRight={handleRightArrow} onText={handleStartStory} />
+                            <Hero id="hero-left" t={t} lang={lang} isClone={true} onLeft={handleLeftArrow} onRight={handleRightArrow} onText={handleStartStory} />
                         </div>
                         
                         <ContactSection t={t} />
@@ -742,6 +762,7 @@
                         <Hero 
                             id="hero-main"
                             t={t}
+                            lang={lang}
                             sectionRef={heroRef}
                             isRef={true} 
                             onLeft={handleLeftArrow} 
@@ -756,7 +777,7 @@
                         <ContactSection t={t} sectionRef={contactRef} />
                         
                         <div ref={heroCloneRightRef}>
-                            <Hero id="hero-right" t={t} isClone={true} onLeft={handleLeftArrow} onRight={handleRightArrow} onText={handleStartStory} />
+                            <Hero id="hero-right" t={t} lang={lang} isClone={true} onLeft={handleLeftArrow} onRight={handleRightArrow} onText={handleStartStory} />
                         </div>
 
                     </div>
