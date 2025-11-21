@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>Eliz Shanon-Edelenyi | Infinite Portfolio</title>
     
     <!-- React & Tailwind -->
@@ -21,7 +21,12 @@
             --accent: #d4a373;
         }
 
-        html, body {
+        html {
+            height: 100%;
+            height: -webkit-fill-available; /* Fix for iOS full height */
+        }
+
+        body {
             margin: 0;
             padding: 0;
             background-color: var(--bg-color);
@@ -29,8 +34,10 @@
             font-family: 'Heebo', sans-serif;
             overflow: hidden; 
             height: 100%;
+            height: -webkit-fill-available; /* Fix for iOS full height */
             width: 100%;
             overscroll-behavior: none; 
+            position: fixed; /* Prevents rubber banding on iOS */
         }
         
         h1, h2, h3, .serif {
@@ -48,13 +55,12 @@
             flex-direction: row;
             overflow-x: auto;
             overflow-y: hidden;
-            height: 100vh; 
+            height: 100vh; /* Fallback */
             height: 100dvh; 
             width: 100%;
             
             -webkit-overflow-scrolling: touch; 
             scroll-snap-type: x proximity; 
-            /* scroll-behavior is controlled via JS to prevent initial load offset */
             
             align-items: center;
             direction: ltr;
@@ -80,7 +86,7 @@
             cursor: grabbing; 
             user-select: none; 
             scroll-snap-type: none; 
-            scroll-behavior: auto !important; /* Disable smooth scroll during drag for responsiveness */
+            scroll-behavior: auto !important; 
         }
 
         .vertical-text {
@@ -94,7 +100,6 @@
             color: transparent;
         }
         
-        /* Custom Scrollbar for internal content */
         .custom-scrollbar::-webkit-scrollbar {
             width: 4px;
         }
@@ -106,12 +111,10 @@
             border-radius: 2px;
         }
 
-        /* Smooth Layout Transitions */
         .layout-transition {
             transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
         }
         
-        /* Navbar Animations */
         .brand-enter {
             opacity: 1;
             transform: translateY(0);
@@ -376,10 +379,10 @@
             >
                 <div className="w-full h-full overflow-y-auto custom-scrollbar flex flex-col items-center justify-center p-6 pt-28 md:pt-6">
                     <div className="max-w-6xl w-full grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-16 items-center my-auto">
-                        {/* Force text wrapping before screen edges on mobile: max-w-[90vw] + mx-auto */}
+                        {/* Replaced text-[min(4vw,18px)] with simpler text-sm md:text-lg to prevent mobile crashes */}
                         <div className="order-2 md:order-1 space-y-6 text-center md:text-start w-full max-w-[90vw] md:max-w-full mx-auto px-0" dir={t.name === "אליז שנון אדלני" ? 'rtl' : 'ltr'}>
                             <h2 className="text-3xl md:text-7xl serif text-[#d4a373]">{t.aboutTitle}</h2>
-                            <div className="space-y-4 md:space-y-6 text-base md:text-xl font-light text-gray-300 leading-relaxed break-words">
+                            <div className="space-y-4 md:space-y-6 text-sm md:text-xl font-light text-gray-300 leading-relaxed break-words">
                                 <p>{t.aboutText1}</p>
                                 <p>{t.aboutText2}</p>
                                 <p>{t.aboutText3}</p>
@@ -403,13 +406,13 @@
                className="snap-center min-w-[100vw] md:min-w-[60vw] h-[100vh] h-[100dvh] bg-[#0a0a0a] flex items-center justify-center relative flex-shrink-0 border-l border-r border-white/5 layout-transition"
            >
                <div className="w-full h-full overflow-y-auto custom-scrollbar flex flex-col items-center justify-center p-6 pt-28 md:pt-6">
-                   {/* Force text wrapping before screen edges on mobile: max-w-[90vw] + mx-auto */}
                    <div className="max-w-3xl w-full flex flex-col items-center text-center space-y-8 md:space-y-12 my-auto w-full max-w-[90vw] md:max-w-3xl mx-auto px-0" dir={t.name === "אליז שנון אדלני" ? 'rtl' : 'ltr'}>
                        <div>
                            <span className="text-[#d4a373] text-sm tracking-[0.3em] uppercase mb-4 block">{t.contactTitle}</span>
                            <h2 className="text-3xl md:text-7xl serif text-white leading-tight">{t.contactTitle}</h2>
                        </div>
-                       <p className="text-base md:text-xl font-light text-gray-400 max-w-lg leading-relaxed break-words">{t.contactText}</p>
+                       {/* Replaced text-[min(4vw,18px)] with simpler text-sm md:text-xl */}
+                       <p className="text-sm md:text-xl font-light text-gray-400 max-w-lg leading-relaxed break-words">{t.contactText}</p>
                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-8 w-full max-w-lg mt-4 md:mt-8">
                            <a 
                                href="mailto:eliz.shanon@gmail.com"
@@ -418,7 +421,7 @@
                                <div className="p-3 rounded-full bg-[#d4a373]/10 text-[#d4a373] group-hover:scale-110 transition-transform duration-300"><Icons.Mail /></div>
                                <div className="text-center w-full overflow-hidden">
                                    <span className="text-xs uppercase tracking-widest opacity-50 mb-1 block">{t.emailLabel}</span>
-                                   <span className="text-[min(4vw,18px)] md:text-lg serif whitespace-nowrap block">eliz.shanon@gmail.com</span>
+                                   <span className="text-sm md:text-lg serif whitespace-nowrap block">eliz.shanon@gmail.com</span>
                                </div>
                            </a>
                            <a 
@@ -430,7 +433,7 @@
                                <div className="p-3 rounded-full bg-[#d4a373]/10 text-[#d4a373] group-hover:scale-110 transition-transform duration-300"><Icons.Phone /></div>
                                <div className="text-center w-full overflow-hidden">
                                    <span className="text-xs uppercase tracking-widest opacity-50 mb-1 block">{t.phoneLabel}</span>
-                                   <span className="text-[min(4vw,18px)] md:text-lg serif whitespace-nowrap block" dir="ltr">+972 52-856-1536</span>
+                                   <span className="text-sm md:text-lg serif whitespace-nowrap block" dir="ltr">+972 52-856-1536</span>
                                </div>
                            </a>
                        </div>
@@ -564,16 +567,21 @@
                     }
                 };
 
-                forceCenter();
-                const timer = setTimeout(forceCenter, 50);
-                const timer2 = setTimeout(forceCenter, 200);
-                const timer3 = setTimeout(forceCenter, 500); // Added safeguard for slower rendering
+                // Safe guard with Try-Catch for older mobiles
+                try {
+                    forceCenter();
+                    const timer = setTimeout(forceCenter, 50);
+                    const timer2 = setTimeout(forceCenter, 200);
+                    const timer3 = setTimeout(forceCenter, 500); 
 
-                return () => {
-                    clearTimeout(timer);
-                    clearTimeout(timer2);
-                    clearTimeout(timer3);
-                };
+                    return () => {
+                        clearTimeout(timer);
+                        clearTimeout(timer2);
+                        clearTimeout(timer3);
+                    };
+                } catch(e) {
+                    console.error("Scroll sync error", e);
+                }
             }, []);
 
             // --- Intersection Observer for Brand Logo ---
@@ -882,5 +890,3 @@
     </script>
 </body>
 </html>
-
-
