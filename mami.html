@@ -340,9 +340,9 @@
                                 alt={t.heroTitle}
                                 className="w-full h-auto object-contain"
                                 style={{
-                                    filter: 'grayscale(1) brightness(0.9)', // Optimized for white-on-black signature
-                                    mixBlendMode: 'screen',
-                                    opacity: 0.9
+                                    filter: 'grayscale(100%) contrast(250%) brightness(90%)', // HIGH CONTRAST to crush dark gray background to black
+                                    mixBlendMode: 'screen', // Removes pure black
+                                    opacity: 0.9 // Tints the white slightly
                                 }}
                                 onError={(e) => {
                                     e.target.style.display = 'none';
