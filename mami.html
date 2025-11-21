@@ -820,15 +820,15 @@
                         onMouseMove={handleMouseMove}
                         dir="ltr"
                     >
-                        {/* LEFT CLONE SECTION - Reordered to match infinite loop logic */}
+                        {/* LEFT CLONE SECTION - FIXED ORDER: Contact -> Gallery -> About */}
                         <div ref={heroCloneLeftRef}>
                             <Hero id="hero-left" t={t} lang={lang} isClone={true} onLeft={handleLeftArrow} onRight={handleRightArrow} onText={handleStartStory} />
                         </div>
-                        <AboutSection t={t} />
-                        {data.map((cat) => (
+                        <ContactSection t={t} />
+                        {[...data].reverse().map((cat) => (
                             <CategoryCluster key={`left-${cat.id}`} category={cat} onImageClick={setSelectedImg} />
                         ))}
-                        <ContactSection t={t} />
+                        <AboutSection t={t} />
 
                         {/* MAIN SECTION */}
                         <Hero 
