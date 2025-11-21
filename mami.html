@@ -240,7 +240,7 @@
             // New Items (Crows)
             30: { he: { title: 'עורבים על חוט', story: "מקצב שחור על רקע לבן." }, en: { title: 'Crows on a Wire', story: "Black rhythm on a white background." }, hu: { title: 'Varjak a dróton', story: "Fekete ritmus fehér háttér előtt." } },
             14: { he: { title: 'מתווה ציפור', story: "תנועה מהירה ברישום פחם." }, en: { title: 'Bird Sketch', story: "Quick movement in charcoal." }, hu: { title: 'Madárvázlat', story: "Gyors mozdulat szénrajzban." } },
-            15: { he: { title: 'נוכחות שחורה', story: "העורב ככתם וכנוכחות." }, en: { title: 'Black Presence', story: "The crow as a stain and presence." }, hu: { title: 'Fekete Jelenlét', story: "A varjú mint folt és jelenlét." } },
+            15: { he: { title: 'נוכחות שחורה', story: "העורב ככתם וכנוכחות." }, en: { title: 'Black Presence', story: "The crow as a stain and presence." }, hu: { title: 'Fekete Jelenlét', story: "A varjú mint folt ונוכחות." } },
 
             // New Items (Movies)
             25: { he: { title: 'איש הגשם', story: "סצנה מתוך סרט, בדידות אורבנית." }, en: { title: 'Rain Man', story: "A scene from a movie, urban solitude." }, hu: { title: 'Esőember', story: "Jelenet egy filmből, városi magány." } },
@@ -336,13 +336,11 @@
                     ) : (
                         <div className="w-[90vw] md:w-[60vw] h-auto mb-8 mt-4">
                             <img 
-                                src="sign1.jpg" 
+                                src="SIGN.png" 
                                 alt={t.heroTitle}
                                 className="w-full h-auto object-contain"
                                 style={{
-                                    filter: 'grayscale(100%) contrast(250%) brightness(90%)', // HIGH CONTRAST to crush dark gray background to black
-                                    mixBlendMode: 'screen', // Removes pure black
-                                    opacity: 0.9 // Tints the white slightly
+                                    opacity: 0.9 // Tints the white slightly if needed
                                 }}
                                 onError={(e) => {
                                     e.target.style.display = 'none';
