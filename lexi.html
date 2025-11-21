@@ -1,0 +1,308 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>סיכום שיחת ייעוץ - לקסי</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #4a5d55; /* Sage Green */
+            --secondary: #f3f4f6;
+            --accent: #d97706;
+            --text: #1f2937;
+            --text-light: #6b7280;
+            --white: #ffffff;
+        }
+
+        body {
+            font-family: 'Heebo', sans-serif;
+            background-color: #f9fafb;
+            color: var(--text);
+            margin: 0;
+            padding: 0;
+            line-height: 1.6;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        header {
+            margin-bottom: 24px;
+            text-align: center;
+        }
+
+        h1 {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--primary);
+            margin: 0;
+        }
+
+        .subtitle {
+            font-size: 0.9rem;
+            color: var(--text-light);
+            margin-top: 4px;
+        }
+
+        /* Navigation */
+        .nav-wrapper {
+            background: var(--white);
+            padding: 6px;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 24px;
+        }
+
+        .nav-btn {
+            flex: 1;
+            border: none;
+            background: none;
+            padding: 10px 0;
+            font-family: 'Heebo', sans-serif;
+            font-size: 0.9rem;
+            font-weight: 500;
+            color: var(--text-light);
+            cursor: pointer;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+        }
+
+        .nav-btn.active {
+            background-color: var(--primary);
+            color: var(--white);
+            font-weight: 700;
+        }
+
+        /* Cards */
+        .content-section {
+            display: none;
+            animation: fadeIn 0.4s ease;
+        }
+
+        .content-section.active {
+            display: block;
+        }
+
+        .card {
+            background: var(--white);
+            border-radius: 16px;
+            padding: 24px;
+            margin-bottom: 16px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.03);
+            border: 1px solid rgba(0,0,0,0.02);
+        }
+
+        .card-title {
+            font-size: 1.1rem;
+            font-weight: 700;
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .card-icon {
+            color: var(--accent);
+        }
+
+        p {
+            margin-bottom: 12px;
+            font-size: 0.95rem;
+        }
+
+        ul {
+            padding-right: 20px;
+            margin: 0;
+        }
+
+        li {
+            margin-bottom: 8px;
+            font-size: 0.95rem;
+        }
+
+        /* Highlights */
+        .highlight-box {
+            background-color: #f0fdf4;
+            border-right: 4px solid var(--primary);
+            padding: 12px;
+            margin: 16px 0;
+            border-radius: 4px;
+            font-size: 0.9rem;
+            color: #166534;
+        }
+
+        .warning-box {
+            background-color: #fff7ed;
+            border-right: 4px solid var(--accent);
+            padding: 12px;
+            margin: 16px 0;
+            border-radius: 4px;
+            font-size: 0.9rem;
+            color: #9a3412;
+        }
+
+        .btn-primary {
+            background-color: var(--primary);
+            color: white;
+            padding: 14px;
+            border-radius: 12px;
+            text-align: center;
+            font-weight: 700;
+            margin-top: auto;
+            display: block;
+            text-decoration: none;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(5px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <header>
+        <h1>תוכנית עבודה: לקסי</h1>
+        <div class="subtitle">סיכום שיחת ייעוץ | גאיה - אילוף התנהגותי</div>
+    </header>
+
+    <!-- Navigation -->
+    <div class="nav-wrapper">
+        <button class="nav-btn active" onclick="switchTab('overview', this)">השורה התחתונה</button>
+        <button class="nav-btn" onclick="switchTab('diagnosis', this)">האבחון</button>
+        <button class="nav-btn" onclick="switchTab('plan', this)">התוכנית</button>
+        <button class="nav-btn" onclick="switchTab('logistics', this)">תכל'ס</button>
+    </div>
+
+    <!-- Tab 1: Overview -->
+    <div id="overview" class="content-section active">
+        <div class="card">
+            <div class="card-title">
+                <span class="card-icon">📌</span>
+                המצב הנוכחי
+            </div>
+            <p>על בסיס השיחה המקדימה, המסקנה החד-משמעית היא שלקסי <strong>אינה כלבה תוקפנית או "רעה" באופייה.</strong></p>
+            <p>כל ההתנהגויות הקשות (נבחנות, חשיפת שיניים, רתיעה) נובעות מתוך מצוקה, חרדה עמוקה וחוסר ביטחון מתמשך.</p>
+        </div>
+        
+        <div class="card">
+            <div class="card-title">
+                <span class="card-icon">💡</span>
+                המפתח לשינוי
+            </div>
+            <p>הפתרון לא טמון ב"חינוך מחדש" של הכלבה, אלא בשינוי ההתנהלות של הבית.</p>
+            <div class="highlight-box">
+                המטרה: להוריד מלקסי את האחריות שהיא לקחה על עצמה ("לשמור על הבית") ולהעביר את המושכות אליכם.
+            </div>
+            <p>ברגע שהיא תרגיש שיש לה על מי להישען, רמת החרדה תרד והתוקפנות תיעלם.</p>
+        </div>
+    </div>
+
+    <!-- Tab 2: Diagnosis -->
+    <div id="diagnosis" class="content-section">
+        <div class="card">
+            <div class="card-title">למה זה קורה עכשיו?</div>
+            <p>גאיה מזהה מצב של <strong>"סטרס הישרדותי"</strong> (קורטיזול גבוה באופן כרוני).</p>
+            <ul>
+                <li><strong>שינוי במבנה הלהקה:</strong> הכניסה של בת-זוג לבית ושינויי הדירות ערערו ללקסי את הקרקע.</li>
+                <li><strong>אובדן שליטה:</strong> היא מרגישה שהיא חייבת "לנהל" את הסיטואציה כי אין לה מנהיג שהיא סומכת עליו ב-100%.</li>
+            </ul>
+        </div>
+
+        <div class="card">
+            <div class="card-title">פרשנות התנהגותית</div>
+            <div class="warning-box">
+                <strong>חשיפת שיניים = תקשורת, לא תקיפה.</strong><br>
+                כשהיא חושפת שיניים והצד השני נרתע, היא לומדת שזה עובד לה. זה מחזק את ההתנהגות.
+            </div>
+            <p>הפחד ההדדי (של לקסי מעמית, ושל עמית מלקסי) יוצר מעגל שמזין את עצמו. המטרה היא לשבור את המעגל הזה דרך ביטחון ולא דרך כוח.</p>
+        </div>
+    </div>
+
+    <!-- Tab 3: The Plan -->
+    <div id="plan" class="content-section">
+        <div class="card">
+            <div class="card-title">1. היררכיה וגבולות</div>
+            <p>התהליך מתמקד בבניית סמכות הורית משותפת.</p>
+            <p>עמית תצטרך לעבור תהליך של בניית מעמד מול לקסי – להפוך לדמות שכיף להיות איתה, אבל גם כזו שמציבה גבולות ברורים. כשלקסי תבין שיש מנהל לבית, היא תפסיק לנסות לחנך את הנוכחים.</p>
+        </div>
+
+        <div class="card">
+            <div class="card-title">2. ניהול אנרגיה (קריטי)</div>
+            <p>טיולים רגילים הם כמו "לדפדף בעיתון" – הם לא פורקים מתח.</p>
+            <ul>
+                <li><strong>היעד:</strong> לרוקן את הסוללה הפיזית והמנטלית שלה מדי יום.</li>
+                <li><strong>הדרך:</strong> שילוב של ריצה/משחק (פיזי) עם עבודת הרחה וחיפוש אוכל (מנטלי).</li>
+                <li><strong>התוצאה:</strong> כלבה עייפה היא כלבה פחות חרדתית.</li>
+            </ul>
+        </div>
+
+        <div class="card">
+            <div class="card-title">3. חוויות מתקנות</div>
+            <p>יצירת אינטראקציות חיוביות בין עמית ללקסי (דרך האכלה, משחק ותרגול) כדי לבנות אמון מחדש ולהוריד את מפלס הפחד.</p>
+        </div>
+    </div>
+
+    <!-- Tab 4: Logistics -->
+    <div id="logistics" class="content-section">
+        <div class="card">
+            <div class="card-title">פגישת אבחון</div>
+            <p>נקבעה פגישה ראשונית להכרות, אבחון הדינמיקה בבית וקבלת כלים ראשונים.</p>
+            <div class="highlight-box" style="text-align: center; font-weight: bold;">
+                יום שלישי הקרוב (26/11)<br>
+                בשעה 19:30<br>
+                אצלכם בבית
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-title">פרטים טכניים</div>
+            <ul>
+                <li><strong>עלות פגישת ייעוץ:</strong> 450 ₪ (מתקזז במידה וממשיכים לתהליך).</li>
+                <li><strong>תהליך מלא:</strong> צפי לכ-8 מפגשים (אחת לשבוע).</li>
+                <li><strong>עלות משוערת לתהליך:</strong> 3,200 - 3,500 ₪.</li>
+            </ul>
+        </div>
+
+        <div class="card">
+            <div class="card-title">דגש חשוב</div>
+            <p>גאיה הדגישה שהתהליך דורש התגייסות של שני בני הזוג לתרגול בבית בין המפגשים. היא תלווה בוואטסאפ לכל שאלה.</p>
+        </div>
+    </div>
+
+</div>
+
+<script>
+    function switchTab(tabId, btnElement) {
+        // Hide all sections
+        const sections = document.querySelectorAll('.content-section');
+        sections.forEach(section => section.classList.remove('active'));
+
+        // Show selected section
+        document.getElementById(tabId).classList.add('active');
+
+        // Reset buttons
+        const buttons = document.querySelectorAll('.nav-btn');
+        buttons.forEach(btn => btn.classList.remove('active'));
+
+        // Activate clicked button
+        btnElement.classList.add('active');
+    }
+</script>
+
+</body>
+</html>
