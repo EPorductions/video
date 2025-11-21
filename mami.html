@@ -53,9 +53,8 @@
             width: 100%;
             
             -webkit-overflow-scrolling: touch; 
-            /* FIXED: Changed to mandatory to force snap to full pages always */
-            scroll-snap-type: x mandatory; 
-            scroll-behavior: smooth; 
+            scroll-snap-type: x proximity; 
+            /* scroll-behavior is controlled via JS to prevent initial load offset */
             
             align-items: center;
             direction: ltr;
@@ -73,15 +72,15 @@
 
         .snap-center {
             scroll-snap-align: center;
-            scroll-snap-stop: always; /* Ensure it stops exactly on the element */
+            scroll-snap-stop: normal; 
         }
 
         .cursor-grab { cursor: grab; }
         .is-dragging { 
             cursor: grabbing; 
             user-select: none; 
-            scroll-snap-type: none; /* Disable snap while dragging for fluid feel */
-            scroll-behavior: auto !important; 
+            scroll-snap-type: none; 
+            scroll-behavior: auto !important; /* Disable smooth scroll during drag for responsiveness */
         }
 
         .vertical-text {
@@ -127,6 +126,12 @@
         }
 
         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+        @media (max-width: 768px) {
+            .horizontal-scroll-container {
+                scroll-snap-type: x mandatory; 
+            }
+        }
     </style>
 </head>
 <body>
@@ -538,7 +543,16 @@
                 const forceCenter = () => {
                     if (heroRef.current && scrollContainerRef.current) {
                         const offset = heroRef.current.offsetLeft;
-                        scrollContainerRef.current.scrollTo({ left: offset, behavior: 'auto' }); // Instant jump
+                        
+                        // Temporarily disable smooth scroll for instant snap
+                        scrollContainerRef.current.style.scrollBehavior = 'auto';
+                        scrollContainerRef.current.scrollTo(offset, 0);
+                        
+                        // Re-enable smooth scroll after a delay
+                        setTimeout(() => {
+                            if(scrollContainerRef.current) scrollContainerRef.current.style.scrollBehavior = 'smooth';
+                        }, 1000); 
+
                         if (!loaded) {
                             requestAnimationFrame(() => {
                                 if(scrollContainerRef.current) scrollContainerRef.current.classList.add('loaded');
@@ -551,10 +565,12 @@
                 forceCenter();
                 const timer = setTimeout(forceCenter, 50);
                 const timer2 = setTimeout(forceCenter, 200);
+                const timer3 = setTimeout(forceCenter, 500); // Added safeguard for slower rendering
 
                 return () => {
                     clearTimeout(timer);
                     clearTimeout(timer2);
+                    clearTimeout(timer3);
                 };
             }, []);
 
