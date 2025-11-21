@@ -53,8 +53,9 @@
             width: 100%;
             
             -webkit-overflow-scrolling: touch; 
-            scroll-snap-type: x proximity; 
-            scroll-behavior: smooth; /* Smooth scrolling for resize adjustments */
+            /* FIXED: Changed to mandatory to force snap to full pages always */
+            scroll-snap-type: x mandatory; 
+            scroll-behavior: smooth; 
             
             align-items: center;
             direction: ltr;
@@ -72,15 +73,15 @@
 
         .snap-center {
             scroll-snap-align: center;
-            scroll-snap-stop: normal; 
+            scroll-snap-stop: always; /* Ensure it stops exactly on the element */
         }
 
         .cursor-grab { cursor: grab; }
         .is-dragging { 
             cursor: grabbing; 
             user-select: none; 
-            scroll-snap-type: none; 
-            scroll-behavior: auto !important; /* Disable smooth scroll during drag for responsiveness */
+            scroll-snap-type: none; /* Disable snap while dragging for fluid feel */
+            scroll-behavior: auto !important; 
         }
 
         .vertical-text {
@@ -126,12 +127,6 @@
         }
 
         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
-
-        @media (max-width: 768px) {
-            .horizontal-scroll-container {
-                scroll-snap-type: x mandatory; 
-            }
-        }
     </style>
 </head>
 <body>
@@ -374,12 +369,11 @@
                 ref={sectionRef}
                 className="snap-center min-w-[100vw] md:min-w-[80vw] h-[100vh] h-[100dvh] bg-[#0f0f0f] flex items-center justify-center relative flex-shrink-0 border-l border-r border-white/5 layout-transition"
             >
-                {/* Use flex column for mobile, grid for desktop. Allow internal scrolling for overflow content */}
                 <div className="w-full h-full overflow-y-auto custom-scrollbar flex flex-col items-center justify-center p-6">
                     <div className="max-w-6xl w-full grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-16 items-center my-auto">
-                        <div className="order-2 md:order-1 space-y-6 text-center md:text-start" dir={t.name === "אליז שנון אדלני" ? 'rtl' : 'ltr'}>
+                        <div className="order-2 md:order-1 space-y-6 text-center md:text-start w-full px-4 md:px-0" dir={t.name === "אליז שנון אדלני" ? 'rtl' : 'ltr'}>
                             <h2 className="text-3xl md:text-7xl serif text-[#d4a373]">{t.aboutTitle}</h2>
-                            <div className="space-y-4 md:space-y-6 text-base md:text-xl font-light text-gray-300 leading-relaxed">
+                            <div className="space-y-4 md:space-y-6 text-base md:text-xl font-light text-gray-300 leading-relaxed break-words">
                                 <p>{t.aboutText1}</p>
                                 <p>{t.aboutText2}</p>
                                 <p>{t.aboutText3}</p>
@@ -403,16 +397,16 @@
                className="snap-center min-w-[100vw] md:min-w-[60vw] h-[100vh] h-[100dvh] bg-[#0a0a0a] flex items-center justify-center relative flex-shrink-0 border-l border-r border-white/5 layout-transition"
            >
                <div className="w-full h-full overflow-y-auto custom-scrollbar flex flex-col items-center justify-center p-6">
-                   <div className="max-w-3xl w-full flex flex-col items-center text-center space-y-8 md:space-y-12 my-auto" dir={t.name === "אליז שנון אדלני" ? 'rtl' : 'ltr'}>
+                   <div className="max-w-3xl w-full flex flex-col items-center text-center space-y-8 md:space-y-12 my-auto w-full px-4 md:px-0" dir={t.name === "אליז שנון אדלני" ? 'rtl' : 'ltr'}>
                        <div>
                            <span className="text-[#d4a373] text-sm tracking-[0.3em] uppercase mb-4 block">{t.contactTitle}</span>
                            <h2 className="text-3xl md:text-7xl serif text-white leading-tight">{t.contactTitle}</h2>
                        </div>
-                       <p className="text-base md:text-xl font-light text-gray-400 max-w-lg leading-relaxed">{t.contactText}</p>
+                       <p className="text-base md:text-xl font-light text-gray-400 max-w-lg leading-relaxed break-words">{t.contactText}</p>
                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-8 w-full max-w-lg mt-4 md:mt-8">
                            <a 
                                href="mailto:eliz.shanon@gmail.com"
-                               className="group flex flex-col items-center gap-4 p-6 md:p-8 border border-white/5 hover:border-[#d4a373]/30 bg-white/5 hover:bg-white/10 transition-all duration-500 rounded-sm cursor-pointer text-white hover:text-white no-underline"
+                               className="group flex flex-col items-center gap-4 p-6 md:p-8 border border-white/5 hover:border-[#d4a373]/30 bg-white/5 hover:bg-white/10 transition-all duration-500 rounded-sm cursor-pointer text-white hover:text-white no-underline w-full"
                            >
                                <div className="p-3 rounded-full bg-[#d4a373]/10 text-[#d4a373] group-hover:scale-110 transition-transform duration-300"><Icons.Mail /></div>
                                <div className="text-center w-full overflow-hidden">
@@ -424,7 +418,7 @@
                                href={`https://wa.me/972528561536?text=${encodeURIComponent(t.whatsappMsg)}`}
                                target="_blank"
                                rel="noopener noreferrer"
-                               className="group flex flex-col items-center gap-4 p-6 md:p-8 border border-white/5 hover:border-[#d4a373]/30 bg-white/5 hover:bg-white/10 transition-all duration-500 rounded-sm cursor-pointer text-white hover:text-white no-underline"
+                               className="group flex flex-col items-center gap-4 p-6 md:p-8 border border-white/5 hover:border-[#d4a373]/30 bg-white/5 hover:bg-white/10 transition-all duration-500 rounded-sm cursor-pointer text-white hover:text-white no-underline w-full"
                            >
                                <div className="p-3 rounded-full bg-[#d4a373]/10 text-[#d4a373] group-hover:scale-110 transition-transform duration-300"><Icons.Phone /></div>
                                <div className="text-center w-full overflow-hidden">
@@ -544,7 +538,7 @@
                 const forceCenter = () => {
                     if (heroRef.current && scrollContainerRef.current) {
                         const offset = heroRef.current.offsetLeft;
-                        scrollContainerRef.current.scrollTo(offset, 0);
+                        scrollContainerRef.current.scrollTo({ left: offset, behavior: 'auto' }); // Instant jump
                         if (!loaded) {
                             requestAnimationFrame(() => {
                                 if(scrollContainerRef.current) scrollContainerRef.current.classList.add('loaded');
