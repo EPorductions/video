@@ -30,7 +30,7 @@
             overflow: hidden; 
             height: 100%;
             width: 100%;
-            overscroll-behavior-y: none; 
+            overscroll-behavior: none; 
         }
         
         h1, h2, h3, .serif {
@@ -52,17 +52,13 @@
             height: 100dvh; 
             width: 100%;
             
-            /* Native momentum for touch */
             -webkit-overflow-scrolling: touch; 
-            
-            /* "Proximity" is softer than "Mandatory". Items won't snap aggressively. */
             scroll-snap-type: x proximity; 
-            scroll-behavior: auto; /* JS handles smooth scroll logic */
+            scroll-behavior: auto; 
             
             align-items: center;
             direction: ltr;
             
-            /* Initially hidden to prevent flash of wrong position */
             opacity: 0;
             transition: opacity 0.5s ease-in;
         }
@@ -79,12 +75,11 @@
             scroll-snap-stop: normal; 
         }
 
-        /* Cursor States */
         .cursor-grab { cursor: grab; }
         .is-dragging { 
             cursor: grabbing; 
             user-select: none; 
-            scroll-snap-type: none; /* Completely disable snap while dragging */
+            scroll-snap-type: none; 
         }
 
         .vertical-text {
@@ -116,8 +111,7 @@
 
         @media (max-width: 768px) {
             .horizontal-scroll-container {
-                /* On mobile, snap helps alignment, but proximity keeps it loose */
-                scroll-snap-type: x proximity; 
+                scroll-snap-type: x mandatory; 
             }
         }
     </style>
@@ -142,17 +136,97 @@
         // --- Content Dictionary ---
         const content = {
             he: {
-                name: "אליז שנון אדלני", role: "תיק עבודות", navHome: "בית", navAbout: "אודות", navContact: "צור קשר", galleryBtn: "גלריה", heroTitle: "אליז שנון אדלני", heroSubtitle: "יצירה של צבע ורגש", scrollHint: "גלילה לכל כיוון - תחילת הסיפור", aboutTitle: "האמנית", aboutText1: "ילידת 1947, בוגרת המחלקה לאמנות בבצלאל.", aboutText2: "במשך עשרות שנים יצרה בשקט, בסטודיו הביתי, מתוך צורך פנימי עמוק וללא כוונה להציג. עבודותיה מתאפיינות בקו רגיש, בחיפוש מתמיד אחר הקומפוזיציה המדויקת, ובדיאלוג בין הפיגורטיבי למופשט.", aboutText3: "האתר הזה הוא הצצה ראשונה לארכיב עשיר ומרגש, המאגד בתוכו רגעים של התבוננות, טבע דומם ופורטרטים מלאי הבעה.", contactTitle: "יצירת קשר", contactText: "אשמח לשמוע מכם, לשתף מחשבות או לענות על שאלות לגבי העבודות.", emailLabel: "אימייל", phoneLabel: "טלפון", rights: "© 2025 כל הזכויות שמורות לאמנית", credits: "נבנה באהבה ע\"י בנה אוריין אדלני - PsychoFlash", categories: { still: "דומם וטבע", portrait: "דיוקן ונפש", abstract: "הפשטה וצבע" }
+                name: "אליז שנון אדלני",
+                role: "תיק עבודות",
+                navHome: "בית",
+                navAbout: "אודות",
+                navContact: "צור קשר",
+                galleryBtn: "גלריה",
+                heroTitle: "אליז שנון אדלני",
+                heroSubtitle: "מסע של צבע ורגש",
+                scrollHint: "גלילה לכל כיוון",
+                aboutTitle: "האמנית",
+                aboutText1: "ילידת 1947, בוגרת המחלקה לאמנות בבצלאל.",
+                aboutText2: "במשך עשרות שנים יצרה בשקט, בסטודיו הביתי, מתוך צורך פנימי עמוק וללא כוונה להציג. עבודותיה מתאפיינות בקו רגיש, בחיפוש מתמיד אחר הקומפוזיציה המדויקת, ובדיאלוג בין הפיגורטיבי למופשט.",
+                aboutText3: "האתר הזה הוא הצצה ראשונה לארכיב עשיר ומרגש, המאגד בתוכו רגעים של התבוננות, טבע דומם ופורטרטים מלאי הבעה.",
+                contactTitle: "יצירת קשר",
+                contactText: "אשמח לשמוע מכם, לשתף מחשבות או לענות על שאלות לגבי העבודות.",
+                emailLabel: "אימייל",
+                phoneLabel: "טלפון",
+                rights: "© 2025 כל הזכויות שמורות לאמנית",
+                credits: "נבנה באהבה ע\"י בנה אוריין אדלני - PsychoFlash",
+                categories: { 
+                    crows: "העורבים",
+                    movies: "קולנוע וסרטים",
+                    masks: "מסכות ודמויות",
+                    still: "דומם וטבע", 
+                    portrait: "דיוקן ונפש", 
+                    abstract: "הפשטה וצבע" 
+                }
             },
             en: {
-                name: "Eliz Shanon-Edelenyi", role: "Artist Portfolio", navHome: "Home", navAbout: "About", navContact: "Contact", galleryBtn: "Gallery", heroTitle: "Eliz Shanon Edelenyi", heroSubtitle: "A Creation of Color & Emotion", scrollHint: "Start The Story", aboutTitle: "The Artist", aboutText1: "Born in 1947, a graduate of the Bezalel Academy of Arts.", aboutText2: "For decades she created quietly in her home studio, driven by a deep internal need rather than public display. Her works are characterized by sensitive lines, a constant search for precise composition, and a dialogue between the figurative and the abstract.", aboutText3: "This website is a first glimpse into a rich and moving archive, bringing together moments of observation, still life, and expressive portraits.", contactTitle: "Get in Touch", contactText: "I would love to hear from you, share thoughts, or answer any questions about the artwork.", emailLabel: "Email", phoneLabel: "Phone", rights: "© 2025 All Rights Reserved", credits: "Built with love by her son Orian Edelenyi - PsychoFlash", categories: { still: "Nature & Still", portrait: "Portrait & Soul", abstract: "Abstract & Color" }
+                name: "Eliz Shanon-Edelenyi",
+                role: "Artist Portfolio",
+                navHome: "Home",
+                navAbout: "About",
+                navContact: "Contact",
+                galleryBtn: "Gallery",
+                heroTitle: "Eliz Shanon Edelenyi",
+                heroSubtitle: "A Journey of Color & Emotion",
+                scrollHint: "Scroll Any Direction",
+                aboutTitle: "The Artist",
+                aboutText1: "Born in 1947, a graduate of the Bezalel Academy of Arts.",
+                aboutText2: "For decades she created quietly in her home studio, driven by a deep internal need rather than public display. Her works are characterized by sensitive lines, a constant search for precise composition, and a dialogue between the figurative and the abstract.",
+                aboutText3: "This website is a first glimpse into a rich and moving archive, bringing together moments of observation, still life, and expressive portraits.",
+                contactTitle: "Get in Touch",
+                contactText: "I would love to hear from you, share thoughts, or answer any questions about the artwork.",
+                emailLabel: "Email",
+                phoneLabel: "Phone",
+                rights: "© 2025 All Rights Reserved",
+                credits: "Built with love by her son Orian Edelenyi - PsychoFlash",
+                categories: { 
+                    crows: "The Crows",
+                    movies: "Cinema & Movies",
+                    masks: "Masks & Figures",
+                    still: "Nature & Still", 
+                    portrait: "Portrait & Soul", 
+                    abstract: "Abstract & Color" 
+                }
             },
             hu: {
-                name: "Eliz Shanon-Edelenyi", role: "Művészeti Portfólió", navHome: "Kezdőlap", navAbout: "Rólam", navContact: "Kapcsolat", galleryBtn: "Galéria", heroTitle: "Eliz Shanon Edelényi", heroSubtitle: "Színek és Érzelmek alkotás", scrollHint: "A Történet Kezdete", aboutTitle: "A Művész", aboutText1: "1947-ben született, a Bezalel Művészeti Akadémia végzettje.", aboutText2: "Évtizedekig csendben alkotott otthoni műtermében, mély belső késztetéstől vezérelve. Munkáit érzékeny vonalvezetés, a pontos kompozíció állandó keresése és a figuratív, valamint az absztrakt közötti párbeszéd jellemzi.", aboutText3: "Ez a weboldal első bepillantást enged egy gazdag és megindító archívumba, amely a megfigyelés pillanatait, csendéleteket és kifejező portrékat egyesít.", contactTitle: "Kapcsolat", contactText: "Örömmel hallanék felőled, szívesen megosztom gondolataimat vagy válaszolok a művekkel kapcsolatos kérdésekre.", emailLabel: "E-mail", phoneLabel: "Telefon", rights: "© 2025 Minden jog fenntartva", credits: "Szeretettel készítette fia, Orian Edelenyi - PsychoFlash", categories: { still: "Csendélet", portrait: "Portré", abstract: "Absztrakt" }
+                name: "Eliz Shanon-Edelenyi",
+                role: "Művészeti Portfólió",
+                navHome: "Kezdőlap",
+                navAbout: "Rólam",
+                navContact: "Kapcsolat",
+                galleryBtn: "Galéria",
+                heroTitle: "Eliz Shanon Edelenyi",
+                heroSubtitle: "Színek és Érzelmek Utazása",
+                scrollHint: "Görgessen bármerre",
+                aboutTitle: "A Művész",
+                aboutText1: "1947-ben született, a Bezalel Művészeti Akadémia végzettje.",
+                aboutText2: "Évtizedekig csendben alkotott otthoni műtermében, mély belső késztetéstől vezérelve. Munkáit érzékeny vonalvezetés, a pontos kompozíció állandó keresése és a figuratív, valamint az absztrakt közötti párbeszéd jellemzi.",
+                aboutText3: "Ez a weboldal első bepillantást enged egy gazdag és megindító archívumba, amely a megfigyelés pillanatait, csendéleteket és kifejező portrékat egyesít.",
+                contactTitle: "Kapcsolat",
+                contactText: "Örömmel hallanék felőled, szívesen megosztom gondolataimat vagy válaszolok a művekkel kapcsolatos kérdésekre.",
+                emailLabel: "E-mail",
+                phoneLabel: "Telefon",
+                rights: "© 2025 Minden jog fenntartva",
+                credits: "Szeretettel készítette fia, Orian Edelenyi - PsychoFlash",
+                categories: { 
+                    crows: "A Hollók",
+                    movies: "Mozi és Filmek",
+                    masks: "Maszkok és Alakok",
+                    still: "Csendélet", 
+                    portrait: "Portré", 
+                    abstract: "Absztrakt" 
+                }
             }
         };
 
+        // --- Item Specific Translations ---
         const itemTranslations = {
+            // Existing
             1: { he: { title: 'טבע דומם באדום', story: "חקירה של הצבע האדום והשפעתו על החלל." }, en: { title: 'Still Life in Red', story: "Exploration of the red color and its effect on space." }, hu: { title: 'Csendélet Vörösben', story: "A vörös szín és a térre gyakorolt hatásának kutatása." } },
             4: { he: { title: 'כד ומים', story: "פשטות החומר והשקיפות של המים." }, en: { title: 'Jug and Water', story: "The simplicity of matter and the transparency of water." }, hu: { title: 'Kancsó és Víz', story: "Az anyag egyszerűsége és a víz átlátszósága." } },
             7: { he: { title: 'העורב', story: "מבט אל הטבע הפראי." }, en: { title: 'The Raven', story: "A gaze into the wild nature." }, hu: { title: 'A Holló', story: "Pillantás a vad természetbe." } },
@@ -161,19 +235,88 @@
             5: { he: { title: 'יד מושטת', story: "מחווה אנושית בסיסית." }, en: { title: 'Outstretched Hand', story: "A basic human gesture." }, hu: { title: 'Kinyújtott Kéz', story: "Egy alapvető emberi gesztus." } },
             6: { he: { title: 'קומפוזיציה בצבע', story: "משחק של כתמי צבע ואיזון." }, en: { title: 'Composition in Color', story: "A play of color patches and balance." }, hu: { title: 'Színes Kompozíció', story: "Színfoltok és egyensúly játéka." } },
             2: { he: { title: 'רישום מופשט', story: "קוים חופשיים המנסים ללכוד תנועה." }, en: { title: 'Abstract Drawing', story: "Free lines attempting to capture movement." }, hu: { title: 'Absztrakt Rajz', story: "Szabad vonalak, amelyek a mozgást próbálják megragadni." } },
-            9: { he: { title: 'שלושה שלבים', story: "תהליך של שינוי וזמן." }, en: { title: 'Three Stages', story: "A process of change and time." }, hu: { title: 'Három Szakasz', story: "A változás és az idő folyamata." } }
+            9: { he: { title: 'שלושה שלבים', story: "תהליך של שינוי וזמן." }, en: { title: 'Three Stages', story: "A process of change and time." }, hu: { title: 'Három Szakasz', story: "A változás és az idő folyamata." } },
+            
+            // New Items (Crows)
+            30: { he: { title: 'עורבים על חוט', story: "מקצב שחור על רקע לבן." }, en: { title: 'Crows on a Wire', story: "Black rhythm on a white background." }, hu: { title: 'Varjak a dróton', story: "Fekete ritmus fehér háttér előtt." } },
+            14: { he: { title: 'מתווה ציפור', story: "תנועה מהירה ברישום פחם." }, en: { title: 'Bird Sketch', story: "Quick movement in charcoal." }, hu: { title: 'Madárvázlat', story: "Gyors mozdulat szénrajzban." } },
+            15: { he: { title: 'נוכחות שחורה', story: "העורב ככתם וכנוכחות." }, en: { title: 'Black Presence', story: "The crow as a stain and presence." }, hu: { title: 'Fekete Jelenlét', story: "A varjú mint folt és jelenlét." } },
+
+            // New Items (Movies)
+            25: { he: { title: 'איש הגשם', story: "סצנה מתוך סרט, בדידות אורבנית." }, en: { title: 'Rain Man', story: "A scene from a movie, urban solitude." }, hu: { title: 'Esőember', story: "Jelenet egy filmből, városi magány." } },
+            5: { he: { title: 'הקהל', story: "התבוננות בקהל צופים." }, en: { title: 'The Audience', story: "Observing the spectators." }, hu: { title: 'A Közönség', story: "A nézők megfigyelése." } },
+            23: { he: { title: 'ספרים', story: "רגע של קריאה אינטימית." }, en: { title: 'Books', story: "A moment of intimate reading." }, hu: { title: 'Könyvek', story: "Az olvasás intim pillanata." } },
+
+            // New Items (Masks)
+            13: { he: { title: 'ריבוי פנים', story: "מסכות ופרצופים מתמזגים." }, en: { title: 'Many Faces', story: "Masks and faces merging." }, hu: { title: 'Sok Arc', story: "Maszkok és arcok összeolvadása." } },
+            21: { he: { title: 'הגברת', story: "דמות אניגמטית מאחורי משקפיים." }, en: { title: 'The Lady', story: "Enigmatic figure behind glasses." }, hu: { title: 'A Hölgy', story: "Rejtélyes alak szemüveg mögött." } },
+            22: { he: { title: 'הרהור', story: "מבט פנימה." }, en: { title: 'Reflection', story: "Looking inward." }, hu: { title: 'Elmélkedés', story: "Befelé tekintés." } }
         };
 
+        // --- Data Generation with Localization ---
         const getCategoriesData = (t, lang) => {
-            const getText = (id) => itemTranslations[id][lang];
+            const getText = (id) => itemTranslations[id] ? itemTranslations[id][lang] : { title: `Artwork ${id}`, story: "..." };
+
             return [
-                { id: 'still', title: t.categories.still, items: [{ id: 1, src: 'IMG_20181111_132940.jpg', year: '2018', ...getText(1) }, { id: 4, src: 'IMG_20181111_133319.jpg', year: '2018', ...getText(4) }, { id: 7, src: 'IMG_20181111_133407.jpg', year: '2018', isWide: true, ...getText(7) }] },
-                { id: 'portrait', title: t.categories.portrait, items: [{ id: 8, src: 'IMG_20181111_133411.jpg', year: '2018', ...getText(8) }, { id: 3, src: 'IMG_20181111_133313.jpg', year: '2018', ...getText(3) }, { id: 5, src: 'IMG_20181111_133334.jpg', year: '2018', ...getText(5) }] },
-                { id: 'abstract', title: t.categories.abstract, items: [{ id: 6, src: 'IMG_20181111_133357.jpg', year: '2018', isWide: true, ...getText(6) }, { id: 2, src: 'IMG_20181111_133126.jpg', year: '2018', ...getText(2) }, { id: 9, src: 'IMG_20200510_132359.jpg', year: '2020', isWide: true, ...getText(9) }] }
+                {
+                    id: 'crows',
+                    title: t.categories.crows,
+                    items: [
+                        { id: 30, src: '30.jpg', year: '2019', ...getText(30) },
+                        { id: 14, src: '14.jpg', year: '2019', ...getText(14) },
+                        { id: 15, src: '15.jpg', year: '2019', isWide: true, ...getText(15) },
+                        { id: 7, src: '7.jpg', year: '2018', ...getText(7) }, // The original Raven
+                    ]
+                },
+                {
+                    id: 'movies',
+                    title: t.categories.movies,
+                    items: [
+                        { id: 25, src: '25.jpg', year: '2020', isWide: true, ...getText(25) },
+                        { id: 5, src: '5.jpg', year: '2020', ...getText(5) },
+                        { id: 23, src: '23.jpg', year: '2020', ...getText(23) },
+                        { id: 4, src: '4.jpg', year: '2018', ...getText(4) },
+                    ]
+                },
+                 {
+                    id: 'masks',
+                    title: t.categories.masks,
+                    items: [
+                        { id: 13, src: '13.jpg', year: '2021', isWide: true, ...getText(13) },
+                        { id: 21, src: '21.jpg', year: '2021', ...getText(21) },
+                        { id: 22, src: '22.jpg', year: '2021', ...getText(22) },
+                    ]
+                },
+                {
+                    id: 'portrait',
+                    title: t.categories.portrait,
+                    items: [
+                        { id: 8, src: '8.jpg', year: '2018', ...getText(8) },
+                        { id: 3, src: '3.jpg', year: '2018', ...getText(3) },
+                        { id: 5, src: '5.jpg', year: '2018', ...getText(5) },
+                    ]
+                },
+                {
+                    id: 'abstract',
+                    title: t.categories.abstract,
+                    items: [
+                        { id: 6, src: '6.jpg', year: '2018', isWide: true, ...getText(6) },
+                        { id: 2, src: '2.jpg', year: '2018', ...getText(2) },
+                        { id: 9, src: '9.jpg', year: '2020', isWide: true, ...getText(9) },
+                    ]
+                },
+                {
+                    id: 'still',
+                    title: t.categories.still,
+                    items: [
+                        { id: 1, src: '1.jpg', year: '2018', ...getText(1) },
+                        { id: 4, src: '4.jpg', year: '2018', ...getText(4) },
+                    ]
+                }
             ];
         };
 
-        // --- Reusable Components (OUTSIDE App) ---
+        // --- Reusable Components ---
 
         const Hero = ({ t, sectionRef, isClone, onLeft, onRight, onText, id }) => (
             <section 
@@ -185,7 +328,7 @@
                     <img src="20200704_004846.jpg" className="w-full h-full object-cover filter blur-lg scale-110" alt="" onError={(e)=>e.target.style.display='none'} />
                 </div>
                 <div className="relative z-10 text-center px-4 select-none flex flex-col items-center w-full max-w-[95vw]">
-                    <h1 className="text-[15vw] md:text-[12vw] leading-[0.8] font-black text-[#e5e5e5] mix-blend-overlay tracking-tighter mb-4">
+                    <h1 className="text-[10vw] md:text-[8vw] leading-[0.9] font-black text-[#e5e5e5] mix-blend-overlay tracking-tighter mb-4 text-center w-full drop-shadow-lg">
                         {t.heroTitle}
                     </h1>
                     <p className="text-xl md:text-2xl serif font-light italic text-[#d4a373] mb-12">
@@ -284,8 +427,10 @@
 
         const App = () => {
             const getInitialLang = () => {
-                const params = new URLSearchParams(window.location.search);
-                if (params.get('lang')) return params.get('lang');
+                try {
+                    const params = new URLSearchParams(window.location.search);
+                    if (params.get('lang')) return params.get('lang');
+                } catch(e) {}
                 
                 try {
                     const browserLang = navigator.language || navigator.userLanguage || '';
@@ -307,6 +452,7 @@
             const aboutMainRef = useRef(null); 
             const contactRef = useRef(null);
 
+            // Mouse Drag Physics State
             const [isDown, setIsDown] = useState(false);
             const [startX, setStartX] = useState(0);
             const [scrollLeft, setScrollLeft] = useState(0);
@@ -314,39 +460,41 @@
             const momentumID = useRef(null);
             const lastMoveTime = useRef(Date.now());
             const lastMoveX = useRef(0);
-            const [isScrolling, setIsScrolling] = useState(false); 
+            
+            // Use Refs for Physics to avoid re-renders during heavy events
+            const isScrollingRef = useRef(false); 
 
             const t = content[lang];
             const isRTL = lang === 'he';
             const data = getCategoriesData(t, lang);
 
-            // --- FIX: Mobile Scroll Restoration Logic ---
+            // --- SCROLL FIX FOR MOBILE ---
             useLayoutEffect(() => {
-                // Disable native scroll restoration to prevent loading in middle of page
                 if ('scrollRestoration' in history) {
                     history.scrollRestoration = 'manual';
                 }
                 
-                // Force center on load immediately and again after delay
-                const centerHero = () => {
+                const forceCenter = () => {
                     if (heroRef.current && scrollContainerRef.current) {
                         const offset = heroRef.current.offsetLeft;
-                        scrollContainerRef.current.scrollTo(offset, 0); // Using scrollTo(x, y) directly
+                        scrollContainerRef.current.scrollTo(offset, 0);
+                        if (!loaded) {
+                            requestAnimationFrame(() => {
+                                if(scrollContainerRef.current) scrollContainerRef.current.classList.add('loaded');
+                                setLoaded(true);
+                            });
+                        }
                     }
                 };
 
-                centerHero();
-                
-                // Double check after paint
-                const timer = setTimeout(() => {
-                    centerHero();
-                    if(scrollContainerRef.current) {
-                        scrollContainerRef.current.classList.add('loaded'); // Show content only after positioning
-                        setLoaded(true);
-                    }
-                }, 50);
+                forceCenter();
+                const timer = setTimeout(forceCenter, 50);
+                const timer2 = setTimeout(forceCenter, 200);
 
-                return () => clearTimeout(timer);
+                return () => {
+                    clearTimeout(timer);
+                    clearTimeout(timer2);
+                };
             }, []);
 
             // --- Intersection Observer for Brand Logo ---
@@ -442,16 +590,16 @@
                     if (window.innerWidth > 768) {
                         if (Math.abs(e.deltaY) > 5 || Math.abs(e.deltaX) > 5) {
                             e.preventDefault();
-                            if(isScrolling) return;
+                            if(isScrollingRef.current) return;
 
-                            setIsScrolling(true);
+                            isScrollingRef.current = true;
                             const direction = (e.deltaY > 0 || e.deltaX > 0) ? 1 : -1;
                             
                             container.scrollBy({ left: direction * window.innerWidth, behavior: 'smooth' });
                             
                             clearTimeout(wheelTimeout);
                             wheelTimeout = setTimeout(() => {
-                                setIsScrolling(false);
+                                isScrollingRef.current = false;
                             }, 600); 
                         }
                     }
@@ -459,7 +607,7 @@
 
                 container.addEventListener('wheel', handleWheel, { passive: false });
                 return () => container.removeEventListener('wheel', handleWheel);
-            }, [isScrolling]);
+            }, []);
 
             // --- Mouse Drag Physics ---
             const cancelMomentum = () => {
@@ -503,12 +651,36 @@
                 }
             };
 
-            const handleMouseUp = () => {
+            const handleMouseUp = (e) => {
                 if (!isDown) return;
                 setIsDown(false);
+                
                 if(scrollContainerRef.current) {
                     scrollContainerRef.current.classList.remove('is-dragging');
-                    momentumLoop();
+                    
+                    // "Easy Snap" Logic
+                    const endX = e.pageX - scrollContainerRef.current.offsetLeft;
+                    const distance = startX - endX; 
+                    const viewWidth = window.innerWidth;
+                    const currentScroll = scrollContainerRef.current.scrollLeft;
+                    
+                    // Threshold: drag 20px to commit to next page
+                    const threshold = 20; 
+                    let targetPage = Math.round(currentScroll / viewWidth);
+                    
+                    if (Math.abs(distance) > threshold) {
+                        const direction = distance > 0 ? 1 : -1;
+                        if (direction === 1) {
+                            targetPage = Math.ceil(currentScroll / viewWidth);
+                        } else {
+                            targetPage = Math.floor(currentScroll / viewWidth);
+                        }
+                    } 
+
+                    scrollContainerRef.current.scrollTo({
+                        left: targetPage * viewWidth,
+                        behavior: 'smooth'
+                    });
                 }
             };
 
@@ -533,21 +705,18 @@
             return (
                 <div className="min-h-screen h-[100dvh] text-white">
                     <div className="grain"></div>
-                    <nav className="fixed top-0 left-0 w-full p-4 md:p-8 flex justify-between items-start z-50 text-white pointer-events-none">
-                        {/* Brand / Name - Fades out when on Hero */}
+                    <nav className="fixed top-0 left-0 w-full p-6 md:p-8 flex justify-between items-start z-50 mix-blend-difference text-white pointer-events-none">
                         <div className={`flex flex-col pointer-events-auto ${isHeroVisible ? 'brand-exit' : 'brand-enter'}`}>
-                            <span className="text-xl md:text-2xl font-bold tracking-tighter serif uppercase mix-blend-difference">{t.name}</span>
-                            <span className="text-[10px] md:text-xs opacity-70 tracking-[0.2em] uppercase mt-1 mix-blend-difference">{t.role}</span>
+                            <span className="text-xl md:text-2xl font-bold tracking-tighter serif uppercase">{t.name}</span>
+                            <span className="text-[10px] md:text-xs opacity-70 tracking-[0.2em] uppercase mt-1">{t.role}</span>
                         </div>
-                        
-                        {/* Menu - Always Visible */}
-                        <div className="flex flex-col items-end gap-4 pointer-events-auto mix-blend-difference">
+                        <div className="flex flex-col items-end gap-4 pointer-events-auto">
                             <div className="flex gap-2 text-xs font-bold uppercase tracking-wider">
                                 <button onClick={() => handleLangChange('he')} className={`px-2 py-1 rounded transition-colors ${lang === 'he' ? 'bg-white text-black' : 'text-white/50 hover:text-white'}`}>HE</button>
                                 <button onClick={() => handleLangChange('en')} className={`px-2 py-1 rounded transition-colors ${lang === 'en' ? 'bg-white text-black' : 'text-white/50 hover:text-white'}`}>EN</button>
                                 <button onClick={() => handleLangChange('hu')} className={`px-2 py-1 rounded transition-colors ${lang === 'hu' ? 'bg-white text-black' : 'text-white/50 hover:text-white'}`}>HU</button>
                             </div>
-                            <div className="flex gap-4 md:gap-6 text-sm font-light">
+                            <div className="flex gap-6 text-sm font-light">
                                 <button onClick={() => scrollToSection(heroRef)} className="hover:text-[#d4a373] transition-colors interactive uppercase tracking-widest text-xs">{t.navHome}</button>
                                 <button onClick={() => scrollToSection(aboutMainRef)} className="hover:text-[#d4a373] transition-colors interactive uppercase tracking-widest text-xs">{t.navAbout}</button>
                                 <button onClick={() => scrollToSection(contactRef)} className="hover:text-[#d4a373] transition-colors interactive uppercase tracking-widest text-xs">{t.navContact}</button>
@@ -556,24 +725,24 @@
                     </nav>
 
                     <div 
-                        className="horizontal-scroll-container hide-scrollbar"
+                        className="horizontal-scroll-container hide-scrollbar cursor-grab active:cursor-grabbing"
                         ref={scrollContainerRef}
-                        dir="ltr"
                         onMouseDown={handleMouseDown}
                         onMouseLeave={handleMouseLeave}
                         onMouseUp={handleMouseUp}
                         onMouseMove={handleMouseMove}
+                        dir="ltr"
                     >
                         <div ref={heroCloneLeftRef}>
                             <Hero id="hero-left" t={t} isClone={true} onLeft={handleLeftArrow} onRight={handleRightArrow} onText={handleStartStory} />
                         </div>
                         
                         <ContactSection t={t} />
-                        <CategoryCluster category={data[2]} onImageClick={setSelectedImg} /> 
-                        <CategoryCluster category={data[1]} onImageClick={setSelectedImg} /> 
-                        <CategoryCluster category={data[0]} onImageClick={setSelectedImg} /> 
+                        {[...data].reverse().map((cat) => (
+                            <CategoryCluster key={`left-${cat.id}`} category={cat} onImageClick={setSelectedImg} />
+                        ))}
                         <AboutSection t={t} />
-
+                        
                         <Hero 
                             id="hero-main"
                             t={t}
@@ -585,26 +754,36 @@
                         />
                         
                         <AboutSection t={t} sectionRef={aboutMainRef} />
-                        <CategoryCluster category={data[0]} onImageClick={setSelectedImg} /> 
-                        <CategoryCluster category={data[1]} onImageClick={setSelectedImg} /> 
-                        <CategoryCluster category={data[2]} onImageClick={setSelectedImg} /> 
+                        {data.map((cat) => (
+                            <CategoryCluster key={`right-${cat.id}`} category={cat} onImageClick={setSelectedImg} />
+                        ))}
                         <ContactSection t={t} sectionRef={contactRef} />
-
+                        
                         <div ref={heroCloneRightRef}>
                             <Hero id="hero-right" t={t} isClone={true} onLeft={handleLeftArrow} onRight={handleRightArrow} onText={handleStartStory} />
                         </div>
+
                     </div>
 
                     {selectedImg && (
-                        <div className="fixed inset-0 z-[100] bg-black/95 backdrop-blur-xl flex items-center justify-center p-0 animate-[fadeIn_0.3s_ease-out] cursor-auto" onClick={handleBackdropClick}>
-                            <button className="absolute top-6 right-6 text-white/50 hover:text-white z-50 p-4" onClick={() => setSelectedImg(null)}><Icons.X /></button>
+                        <div 
+                            className="fixed inset-0 z-[100] bg-black/95 backdrop-blur-xl flex items-center justify-center p-0 animate-[fadeIn_0.3s_ease-out] cursor-auto"
+                            onClick={handleBackdropClick} 
+                        >
+                            <button 
+                                className="absolute top-6 right-6 text-white/50 hover:text-white z-50 p-4"
+                                onClick={() => setSelectedImg(null)}
+                            >
+                                <Icons.X />
+                            </button>
+                            
                             <div className="w-full h-full md:max-w-7xl md:h-[85vh] grid grid-cols-1 md:grid-cols-3 md:gap-12 items-center p-4 md:p-8 pointer-events-none">
-                                <div className="md:col-span-2 h-[50vh] md:h-full flex items-center justify-center bg-[#0a0a0a] rounded-sm overflow-hidden shadow-2xl pointer-events-auto" onClick={(e) => e.stopPropagation()}>
+                                <div className="md:col-span-2 h-[55vh] md:h-full flex items-center justify-center bg-[#0a0a0a] rounded-sm overflow-hidden shadow-2xl pointer-events-auto" onClick={(e) => e.stopPropagation()}>
                                     <img src={selectedImg.src} alt={selectedImg.title} className="max-h-full max-w-full object-contain" />
                                 </div>
                                 <div className="md:col-span-1 flex flex-col justify-center mt-8 md:mt-0 text-right pointer-events-auto" dir={isRTL ? 'rtl' : 'ltr'} onClick={(e) => e.stopPropagation()}>
                                     <div className="w-12 h-px bg-[#d4a373] mb-6 ml-auto"></div>
-                                    <h3 className="text-3xl md:text-6xl serif text-white mb-2">{selectedImg.title}</h3>
+                                    <h3 className="text-4xl md:text-6xl serif text-white mb-2">{selectedImg.title}</h3>
                                     <p className="text-[#d4a373] font-mono text-base md:text-lg mb-6 tracking-widest">{selectedImg.year}</p>
                                     <p className="text-gray-300 font-light leading-relaxed text-lg md:text-xl border-t border-white/10 pt-6">{selectedImg.story}</p>
                                 </div>
