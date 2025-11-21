@@ -800,16 +800,17 @@
                         onMouseMove={handleMouseMove}
                         dir="ltr"
                     >
+                        {/* LEFT CLONE SECTION - Reordered to match infinite loop logic */}
                         <div ref={heroCloneLeftRef}>
                             <Hero id="hero-left" t={t} lang={lang} isClone={true} onLeft={handleLeftArrow} onRight={handleRightArrow} onText={handleStartStory} />
                         </div>
-                        
-                        <ContactSection t={t} />
-                        {[...data].reverse().map((cat) => (
+                        <AboutSection t={t} />
+                        {data.map((cat) => (
                             <CategoryCluster key={`left-${cat.id}`} category={cat} onImageClick={setSelectedImg} />
                         ))}
-                        <AboutSection t={t} />
-                        
+                        <ContactSection t={t} />
+
+                        {/* MAIN SECTION */}
                         <Hero 
                             id="hero-main"
                             t={t}
@@ -821,12 +822,14 @@
                             onText={handleStartStory} 
                         />
                         
+                        {/* RIGHT SECTION (Normal Flow) */}
                         <AboutSection t={t} sectionRef={aboutMainRef} />
                         {data.map((cat) => (
                             <CategoryCluster key={`right-${cat.id}`} category={cat} onImageClick={setSelectedImg} />
                         ))}
                         <ContactSection t={t} sectionRef={contactRef} />
                         
+                        {/* RIGHT CLONE SECTION */}
                         <div ref={heroCloneRightRef}>
                             <Hero id="hero-right" t={t} lang={lang} isClone={true} onLeft={handleLeftArrow} onRight={handleRightArrow} onText={handleStartStory} />
                         </div>
