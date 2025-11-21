@@ -30,7 +30,7 @@
             overflow: hidden; 
             height: 100%;
             width: 100%;
-            overscroll-behavior: none; /* Critical for mobile */
+            overscroll-behavior-y: none; 
         }
         
         h1, h2, h3, .serif {
@@ -52,26 +52,25 @@
             height: 100dvh; 
             width: 100%;
             
+            /* Native momentum for touch */
             -webkit-overflow-scrolling: touch; 
-            scroll-behavior: auto; 
+            
+            /* "Proximity" is softer than "Mandatory". Items won't snap aggressively. */
+            scroll-snap-type: x proximity; 
+            scroll-behavior: auto; /* JS handles smooth scroll logic */
             
             align-items: center;
             direction: ltr;
             
-            /* Hide initially to prevent jumping visual */
-            opacity: 0; 
-            transition: opacity 0.6s ease-in-out;
+            /* Initially hidden to prevent flash of wrong position */
+            opacity: 0;
+            transition: opacity 0.5s ease-in;
         }
         
         .horizontal-scroll-container.loaded {
             opacity: 1;
         }
         
-        /* Default: Proximity for Desktop smoothness */
-        .horizontal-scroll-container {
-            scroll-snap-type: x proximity;
-        }
-
         .horizontal-scroll-container::-webkit-scrollbar { display: none; }
         .horizontal-scroll-container { -ms-overflow-style: none; scrollbar-width: none; }
 
@@ -80,11 +79,12 @@
             scroll-snap-stop: normal; 
         }
 
+        /* Cursor States */
         .cursor-grab { cursor: grab; }
         .is-dragging { 
             cursor: grabbing; 
             user-select: none; 
-            scroll-snap-type: none; 
+            scroll-snap-type: none; /* Completely disable snap while dragging */
         }
 
         .vertical-text {
@@ -114,10 +114,10 @@
 
         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
 
-        /* Mobile Optimization: Force Snap */
         @media (max-width: 768px) {
             .horizontal-scroll-container {
-                scroll-snap-type: x mandatory; /* Stronger snap on mobile to avoid getting stuck between sections */
+                /* On mobile, snap helps alignment, but proximity keeps it loose */
+                scroll-snap-type: x proximity; 
             }
         }
     </style>
@@ -139,7 +139,7 @@
             Instagram: () => <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><rect x="2" y="2" width="20" height="20" rx="5" ry="5"></rect><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"></path><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"></line></svg>
         };
 
-        // --- Content ---
+        // --- Content Dictionary ---
         const content = {
             he: {
                 name: "אליז שנון אדלני", role: "תיק עבודות", navHome: "בית", navAbout: "אודות", navContact: "צור קשר", galleryBtn: "גלריה", heroTitle: "יְצִירָה", heroSubtitle: "מסע של צבע ורגש", scrollHint: "גלילה לכל כיוון - תחילת הסיפור", aboutTitle: "האמנית", aboutText1: "ילידת 1947, בוגרת המחלקה לאמנות בבצלאל.", aboutText2: "במשך עשרות שנים יצרה בשקט, בסטודיו הביתי, מתוך צורך פנימי עמוק וללא כוונה להציג. עבודותיה מתאפיינות בקו רגיש, בחיפוש מתמיד אחר הקומפוזיציה המדויקת, ובדיאלוג בין הפיגורטיבי למופשט.", aboutText3: "האתר הזה הוא הצצה ראשונה לארכיב עשיר ומרגש, המאגד בתוכו רגעים של התבוננות, טבע דומם ופורטרטים מלאי הבעה.", contactTitle: "יצירת קשר", contactText: "אשמח לשמוע מכם, לשתף מחשבות או לענות על שאלות לגבי העבודות.", emailLabel: "אימייל", phoneLabel: "טלפון", rights: "© 2025 כל הזכויות שמורות לאמנית", credits: "נבנה באהבה ע\"י בנה אוריין אדלני - PsychoFlash", categories: { still: "דומם וטבע", portrait: "דיוקן ונפש", abstract: "הפשטה וצבע" }
@@ -152,7 +152,6 @@
             }
         };
 
-        // --- Item Specific Translations ---
         const itemTranslations = {
             1: { he: { title: 'טבע דומם באדום', story: "חקירה של הצבע האדום והשפעתו על החלל." }, en: { title: 'Still Life in Red', story: "Exploration of the red color and its effect on space." }, hu: { title: 'Csendélet Vörösben', story: "A vörös szín és a térre gyakorolt hatásának kutatása." } },
             4: { he: { title: 'כד ומים', story: "פשטות החומר והשקיפות של המים." }, en: { title: 'Jug and Water', story: "The simplicity of matter and the transparency of water." }, hu: { title: 'Kancsó és Víz', story: "Az anyag egyszerűsége és a víz átlátszósága." } },
@@ -174,7 +173,7 @@
             ];
         };
 
-        // --- Reusable Components ---
+        // --- Reusable Components (OUTSIDE App) ---
 
         const Hero = ({ t, sectionRef, isClone, onLeft, onRight, onText, id }) => (
             <section 
@@ -321,44 +320,33 @@
             const isRTL = lang === 'he';
             const data = getCategoriesData(t, lang);
 
-            // --- SCROLL FIX FOR MOBILE ---
+            // --- FIX: Mobile Scroll Restoration Logic ---
             useLayoutEffect(() => {
-                // Disable native scroll restoration to ensure we can manually set position
+                // Disable native scroll restoration to prevent loading in middle of page
                 if ('scrollRestoration' in history) {
                     history.scrollRestoration = 'manual';
                 }
                 
-                const forceCenter = () => {
+                // Force center on load immediately and again after delay
+                const centerHero = () => {
                     if (heroRef.current && scrollContainerRef.current) {
-                        // Using absolute scroll position logic
-                        const container = scrollContainerRef.current;
-                        const hero = heroRef.current;
-                        
-                        // Center the scroll directly on the Hero section
-                        const targetX = hero.offsetLeft;
-                        container.scrollTo(targetX, 0);
-                        
-                        // Only reveal content after we have positioned it
-                        if (!loaded) {
-                            requestAnimationFrame(() => {
-                                container.classList.add('loaded');
-                                setLoaded(true);
-                            });
-                        }
+                        const offset = heroRef.current.offsetLeft;
+                        scrollContainerRef.current.scrollTo(offset, 0); // Using scrollTo(x, y) directly
                     }
                 };
 
-                // Attempt to center immediately
-                forceCenter();
+                centerHero();
                 
-                // Retry after a slight delay to allow layout to stabilize
-                const timer = setTimeout(forceCenter, 50);
-                const timer2 = setTimeout(forceCenter, 200);
+                // Double check after paint
+                const timer = setTimeout(() => {
+                    centerHero();
+                    if(scrollContainerRef.current) {
+                        scrollContainerRef.current.classList.add('loaded'); // Show content only after positioning
+                        setLoaded(true);
+                    }
+                }, 50);
 
-                return () => {
-                    clearTimeout(timer);
-                    clearTimeout(timer2);
-                };
+                return () => clearTimeout(timer);
             }, []);
 
             // --- Intersection Observer for Brand Logo ---
