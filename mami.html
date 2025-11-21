@@ -374,9 +374,10 @@
                 ref={sectionRef}
                 className="snap-center min-w-[100vw] md:min-w-[80vw] h-[100vh] h-[100dvh] bg-[#0f0f0f] flex items-center justify-center relative flex-shrink-0 border-l border-r border-white/5 layout-transition"
             >
-                <div className="w-full h-full overflow-y-auto custom-scrollbar flex flex-col items-center justify-center p-6">
+                <div className="w-full h-full overflow-y-auto custom-scrollbar flex flex-col items-center justify-center p-6 pt-28 md:pt-6">
                     <div className="max-w-6xl w-full grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-16 items-center my-auto">
-                        <div className="order-2 md:order-1 space-y-6 text-center md:text-start w-full px-4 md:px-0" dir={t.name === "אליז שנון אדלני" ? 'rtl' : 'ltr'}>
+                        {/* Force text wrapping before screen edges on mobile: max-w-[90vw] + mx-auto */}
+                        <div className="order-2 md:order-1 space-y-6 text-center md:text-start w-full max-w-[90vw] md:max-w-full mx-auto px-0" dir={t.name === "אליז שנון אדלני" ? 'rtl' : 'ltr'}>
                             <h2 className="text-3xl md:text-7xl serif text-[#d4a373]">{t.aboutTitle}</h2>
                             <div className="space-y-4 md:space-y-6 text-base md:text-xl font-light text-gray-300 leading-relaxed break-words">
                                 <p>{t.aboutText1}</p>
@@ -401,8 +402,9 @@
                ref={sectionRef}
                className="snap-center min-w-[100vw] md:min-w-[60vw] h-[100vh] h-[100dvh] bg-[#0a0a0a] flex items-center justify-center relative flex-shrink-0 border-l border-r border-white/5 layout-transition"
            >
-               <div className="w-full h-full overflow-y-auto custom-scrollbar flex flex-col items-center justify-center p-6">
-                   <div className="max-w-3xl w-full flex flex-col items-center text-center space-y-8 md:space-y-12 my-auto w-full px-4 md:px-0" dir={t.name === "אליז שנון אדלני" ? 'rtl' : 'ltr'}>
+               <div className="w-full h-full overflow-y-auto custom-scrollbar flex flex-col items-center justify-center p-6 pt-28 md:pt-6">
+                   {/* Force text wrapping before screen edges on mobile: max-w-[90vw] + mx-auto */}
+                   <div className="max-w-3xl w-full flex flex-col items-center text-center space-y-8 md:space-y-12 my-auto w-full max-w-[90vw] md:max-w-3xl mx-auto px-0" dir={t.name === "אליז שנון אדלני" ? 'rtl' : 'ltr'}>
                        <div>
                            <span className="text-[#d4a373] text-sm tracking-[0.3em] uppercase mb-4 block">{t.contactTitle}</span>
                            <h2 className="text-3xl md:text-7xl serif text-white leading-tight">{t.contactTitle}</h2>
