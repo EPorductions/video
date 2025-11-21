@@ -52,12 +52,12 @@
             height: 100dvh; 
             width: 100%;
             
-            /* Hybrid Approach: Native momentum for touch, Manual physics for mouse */
+            /* Native momentum for touch */
             -webkit-overflow-scrolling: touch; 
             
-            /* Snap is enabled but 'normal' to allow free movement */
+            /* "Proximity" is softer than "Mandatory". Items won't snap aggressively. */
             scroll-snap-type: x proximity; 
-            scroll-behavior: auto; /* JS handles smooth scroll */
+            scroll-behavior: auto; /* JS handles smooth scroll logic */
             
             align-items: center;
             direction: ltr;
@@ -68,6 +68,7 @@
 
         .snap-center {
             scroll-snap-align: center;
+            /* Remove 'always' to prevent sticky feeling */
             scroll-snap-stop: normal; 
         }
 
@@ -76,7 +77,7 @@
         .is-dragging { 
             cursor: grabbing; 
             user-select: none; 
-            scroll-snap-type: none; /* Disable snap while dragging */
+            scroll-snap-type: none; /* Completely disable snap while dragging */
         }
 
         .vertical-text {
@@ -94,7 +95,8 @@
 
         @media (max-width: 768px) {
             .horizontal-scroll-container {
-                scroll-snap-type: x mandatory; 
+                /* On mobile, snap helps alignment, but proximity keeps it loose */
+                scroll-snap-type: x proximity; 
             }
         }
     </style>
@@ -116,7 +118,7 @@
             Instagram: () => <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><rect x="2" y="2" width="20" height="20" rx="5" ry="5"></rect><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"></path><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"></line></svg>
         };
 
-        // --- Content ---
+        // --- Content Dictionary ---
         const content = {
             he: {
                 name: "אליז שנון אדלני", role: "תיק עבודות", navHome: "בית", navAbout: "אודות", navContact: "צור קשר", galleryBtn: "גלריה", heroTitle: "יְצִירָה", heroSubtitle: "מסע של צבע ורגש", scrollHint: "גלילה לכל כיוון - תחילת הסיפור", aboutTitle: "האמנית", aboutText1: "ילידת 1947, בוגרת המחלקה לאמנות בבצלאל.", aboutText2: "במשך עשרות שנים יצרה בשקט, בסטודיו הביתי, מתוך צורך פנימי עמוק וללא כוונה להציג. עבודותיה מתאפיינות בקו רגיש, בחיפוש מתמיד אחר הקומפוזיציה המדויקת, ובדיאלוג בין הפיגורטיבי למופשט.", aboutText3: "האתר הזה הוא הצצה ראשונה לארכיב עשיר ומרגש, המאגד בתוכו רגעים של התבוננות, טבע דומם ופורטרטים מלאי הבעה.", contactTitle: "יצירת קשר", contactText: "אשמח לשמוע מכם, לשתף מחשבות או לענות על שאלות לגבי העבודות.", emailLabel: "אימייל", phoneLabel: "טלפון", rights: "© 2025 כל הזכויות שמורות לאמנית", credits: "נבנה באהבה ע\"י בנה אוריין אדלני - PsychoFlash", categories: { still: "דומם וטבע", portrait: "דיוקן ונפש", abstract: "הפשטה וצבע" }
@@ -129,6 +131,7 @@
             }
         };
 
+        // --- Item Specific Translations ---
         const itemTranslations = {
             1: { he: { title: 'טבע דומם באדום', story: "חקירה של הצבע האדום והשפעתו על החלל." }, en: { title: 'Still Life in Red', story: "Exploration of the red color and its effect on space." }, hu: { title: 'Csendélet Vörösben', story: "A vörös szín és a térre gyakorolt hatásának kutatása." } },
             4: { he: { title: 'כד ומים', story: "פשטות החומר והשקיפות של המים." }, en: { title: 'Jug and Water', story: "The simplicity of matter and the transparency of water." }, hu: { title: 'Kancsó és Víz', story: "Az anyag egyszerűsége és a víz átlátszósága." } },
@@ -150,7 +153,7 @@
             ];
         };
 
-        // --- Components ---
+        // --- Reusable Components (OUTSIDE App) ---
 
         const Hero = ({ t, sectionRef, isClone, onLeft, onRight, onText }) => (
             <section 
@@ -295,7 +298,9 @@
             const momentumID = useRef(null);
             const lastMoveTime = useRef(Date.now());
             const lastMoveX = useRef(0);
-            const [isScrolling, setIsScrolling] = useState(false); // Debounce for wheel
+            
+            // Scrolling Lock for Wheel
+            const isScrollingRef = useRef(false); 
 
             const t = content[lang];
             const isRTL = lang === 'he';
@@ -320,8 +325,6 @@
 
             const handleStartStory = (e) => {
                 e.stopPropagation();
-                // Scroll one screen Right (Usually "About" or "Gallery" depending on direction)
-                // Since default is Right -> About, we just scroll right.
                 scrollByAmount(window.innerWidth);
             };
 
@@ -351,7 +354,7 @@
                 }
             }, []);
 
-            // --- Infinite Loop Logic (Center Teleport) ---
+            // --- Infinite Loop Logic ---
             useEffect(() => {
                 const container = scrollContainerRef.current;
                 if (!container) return;
@@ -370,7 +373,6 @@
                     }
                     
                     // 2. Left Edge Loop: Hit Left Clone Hero -> Jump to Main Hero
-                    // Since Left Clone is at start (0), checking if we are close to it
                     if (scrollLeft <= homeCloneLeftX + 5) {
                          container.scrollTo({ left: homeMainX + (scrollLeft - homeCloneLeftX), behavior: 'auto' });
                     }
@@ -380,34 +382,35 @@
                 return () => container.removeEventListener('scroll', checkLoop);
             }, []);
 
-            // --- Smart Wheel Navigation ---
+            // --- Smart Wheel Navigation (Fixed) ---
             useEffect(() => {
                 const container = scrollContainerRef.current;
                 if (!container) return;
 
                 let wheelTimeout;
                 const handleWheel = (e) => {
-                    if (window.innerWidth > 768) {
-                        if (Math.abs(e.deltaY) > 20 || Math.abs(e.deltaX) > 20) {
-                            e.preventDefault();
-                            if(isScrolling) return;
+                    // Trigger on any substantial move, threshold lowered for sensitivity
+                    if (Math.abs(e.deltaY) > 5 || Math.abs(e.deltaX) > 5) {
+                        e.preventDefault();
+                        
+                        if(isScrollingRef.current) return;
 
-                            setIsScrolling(true);
-                            const direction = (e.deltaY > 0 || e.deltaX > 0) ? 1 : -1;
-                            
-                            container.scrollBy({ left: direction * window.innerWidth, behavior: 'smooth' });
-                            
-                            clearTimeout(wheelTimeout);
-                            wheelTimeout = setTimeout(() => {
-                                setIsScrolling(false);
-                            }, 500); 
-                        }
+                        isScrollingRef.current = true;
+                        const direction = (e.deltaY > 0 || e.deltaX > 0) ? 1 : -1;
+                        
+                        container.scrollBy({ left: direction * window.innerWidth, behavior: 'smooth' });
+                        
+                        clearTimeout(wheelTimeout);
+                        wheelTimeout = setTimeout(() => {
+                            isScrollingRef.current = false;
+                        }, 600); 
                     }
                 };
 
+                // Add listener non-passive to allow preventDefault
                 container.addEventListener('wheel', handleWheel, { passive: false });
                 return () => container.removeEventListener('wheel', handleWheel);
-            }, [isScrolling]);
+            }, []);
 
             // --- Mouse Drag Physics (Momentum) ---
             
@@ -422,7 +425,7 @@
                 if (!scrollContainerRef.current) return;
                 
                 scrollContainerRef.current.scrollLeft -= velX;
-                const nextVelX = velX * 0.95; 
+                const nextVelX = velX * 0.95; // Drag friction
                 setVelX(nextVelX);
 
                 if (Math.abs(nextVelX) > 0.5) {
@@ -518,13 +521,14 @@
                         onMouseUp={handleMouseUp}
                         onMouseMove={handleMouseMove}
                     >
-                        {/* --- CLONES LEFT (Mirrored Order: Hero -> Contact -> Abstract... -> About) --- */}
+                        {/* --- CLONES LEFT (Hero -> Contact -> Gallery... -> About) --- */}
+                        {/* Reversed order relative to main because we scroll LEFT into them */}
                         <div ref={heroCloneLeftRef}>
                             <Hero t={t} isClone={true} onLeft={handleLeftArrow} onRight={handleRightArrow} onText={handleStartStory} />
                         </div>
                         
-                        {/* Left Sequence: Contact -> Abstract -> Portrait -> Still -> About (Going Left from Main Hero) */}
-                        {/* BUT in DOM LTR, this is: Contact -> Abstract ... -> About -> Main Hero */}
+                        {/* Order from right to left (as we scroll left): Contact, Abstract, Portrait, Still, About */}
+                        {/* In DOM flow (LTR), they appear after Hero Clone: */}
                         <ContactSection t={t} />
                         <CategoryCluster category={data[2]} onImageClick={setSelectedImg} /> {/* Abstract */}
                         <CategoryCluster category={data[1]} onImageClick={setSelectedImg} /> {/* Portrait */}
@@ -541,7 +545,7 @@
                             onText={handleStartStory} 
                         />
                         
-                        {/* Right Sequence: About -> Still -> Portrait -> Abstract -> Contact */}
+                        {/* Order Right: About -> Still -> Portrait -> Abstract -> Contact */}
                         <AboutSection t={t} sectionRef={aboutMainRef} />
                         <CategoryCluster category={data[0]} onImageClick={setSelectedImg} /> {/* Still */}
                         <CategoryCluster category={data[1]} onImageClick={setSelectedImg} /> {/* Portrait */}
