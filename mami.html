@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Eliz Shanon-Edelenyi | Portfolio</title>
+    <title>Eliz Shanon-Edelenyi | Infinite Portfolio</title>
     
     <!-- React & Tailwind -->
     <script src="https://unpkg.com/react@18/umd/react.development.js" crossorigin></script>
@@ -143,7 +143,7 @@
                 navContact: "צור קשר",
                 galleryBtn: "גלריה",
                 heroTitle: "אליז שנון אדלני",
-                heroSubtitle: "מסע של צבע ורגש",
+                heroSubtitle: "יצירה של צבע ורגש", // Updated subtitle
                 scrollHint: "גלילה לכל כיוון",
                 aboutTitle: "האמנית",
                 aboutText1: "ילידת 1947, בוגרת המחלקה לאמנות בבצלאל.",
@@ -171,8 +171,8 @@
                 navAbout: "About",
                 navContact: "Contact",
                 galleryBtn: "Gallery",
-                heroTitle: "ELIZ SHANON EDELENYI",
-                heroSubtitle: "A Creation of Color & Emotion",
+                heroTitle: "ELIZ SHANON EDELENYI", // UPPERCASE
+                heroSubtitle: "A Journey of Color & Emotion",
                 scrollHint: "Scroll Any Direction",
                 aboutTitle: "The Artist",
                 aboutText1: "Born in 1947, a graduate of the Bezalel Academy of Arts.",
@@ -200,7 +200,7 @@
                 navAbout: "Rólam",
                 navContact: "Kapcsolat",
                 galleryBtn: "Galéria",
-                heroTitle: "Eliz Shanon Edelényi",
+                heroTitle: "ELIZ SHANON EDELENYI", // UPPERCASE
                 heroSubtitle: "Színek és Érzelmek Utazása",
                 scrollHint: "Görgessen bármerre",
                 aboutTitle: "A Művész",
@@ -318,6 +318,7 @@
 
         // --- Reusable Components ---
 
+        // Hero: Removed isClone checks for arrows/text to prevent visual "jump" on infinite scroll loop
         const Hero = ({ t, sectionRef, isClone, onLeft, onRight, onText, id }) => (
             <section 
                 id={id}
@@ -334,13 +335,11 @@
                     <p className="text-xl md:text-2xl serif font-light italic text-[#d4a373] mb-12">
                         {t.heroSubtitle}
                     </p>
-                    {!isClone && (
-                        <div className="flex items-center gap-8 opacity-60 animate-pulse transition-opacity p-4 z-50 pointer-events-auto">
-                            <div onClick={onLeft} className="cursor-pointer hover:text-white hover:scale-110 transition-transform p-2"><Icons.ArrowLeft /></div>
-                            <span onClick={onText} className="text-xs md:text-sm tracking-[0.3em] uppercase border-b border-white/20 pb-1 cursor-pointer hover:text-[#d4a373] transition-colors">{t.scrollHint}</span>
-                            <div onClick={onRight} className="cursor-pointer hover:text-white hover:scale-110 transition-transform p-2"><Icons.ArrowRight /></div>
-                        </div>
-                    )}
+                    <div className="flex items-center gap-8 opacity-60 animate-pulse transition-opacity p-4 z-50 pointer-events-auto">
+                        <div onClick={onLeft} className="cursor-pointer hover:text-white hover:scale-110 transition-transform p-2"><Icons.ArrowLeft /></div>
+                        <span onClick={onText} className="text-xs md:text-sm tracking-[0.3em] uppercase border-b border-white/20 pb-1 cursor-pointer hover:text-[#d4a373] transition-colors">{t.scrollHint}</span>
+                        <div onClick={onRight} className="cursor-pointer hover:text-white hover:scale-110 transition-transform p-2"><Icons.ArrowRight /></div>
+                    </div>
                 </div>
             </section>
         );
@@ -427,16 +426,13 @@
 
         const App = () => {
             const getInitialLang = () => {
+                // Priority: URL -> English Default
                 try {
                     const params = new URLSearchParams(window.location.search);
                     if (params.get('lang')) return params.get('lang');
                 } catch(e) {}
                 
-                try {
-                    const browserLang = navigator.language || navigator.userLanguage || '';
-                    if (browserLang.toLowerCase().startsWith('he')) return 'he';
-                    if (browserLang.toLowerCase().startsWith('hu')) return 'hu';
-                } catch(e) {}
+                // Removed browser detection to force English as default per user request
                 return 'en'; 
             };
 
