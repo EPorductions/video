@@ -173,6 +173,7 @@
                 phoneLabel: "טלפון",
                 rights: "© 2025 כל הזכויות שמורות לאמנית",
                 credits: "נבנה באהבה ע\"י בנה אוריין אדלני - PsychoFlash",
+                whatsappMsg: "היי אליז, התרשמתי מהאתר ורציתי לשאול...",
                 categories: { 
                     crows: "העורבים",
                     movies: "קולנוע וסרטים",
@@ -202,6 +203,7 @@
                 phoneLabel: "Phone",
                 rights: "© 2025 All Rights Reserved",
                 credits: "Built with love by her son Orian Edelenyi - PsychoFlash",
+                whatsappMsg: "Hi Eliz, I visited your portfolio and would like to discuss...",
                 categories: { 
                     crows: "The Crows",
                     movies: "Cinema & Movies",
@@ -231,6 +233,7 @@
                 phoneLabel: "Telefon",
                 rights: "© 2025 Minden jog fenntartva",
                 credits: "Szeretettel készítette fia, Orian Edelenyi - PsychoFlash",
+                whatsappMsg: "Kedves Eliz, láttam a portfóliódat és érdeklődni szeretnék...",
                 categories: { 
                     crows: "A Hollók",
                     movies: "Mozi és Filmek",
@@ -407,14 +410,28 @@
                        </div>
                        <p className="text-base md:text-xl font-light text-gray-400 max-w-lg leading-relaxed">{t.contactText}</p>
                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-8 w-full max-w-lg mt-4 md:mt-8">
-                           <div className="group flex flex-col items-center gap-4 p-6 md:p-8 border border-white/5 hover:border-[#d4a373]/30 bg-white/5 hover:bg-white/10 transition-all duration-500 rounded-sm cursor-pointer">
+                           <a 
+                               href="mailto:eliz.shanon@gmail.com"
+                               className="group flex flex-col items-center gap-4 p-6 md:p-8 border border-white/5 hover:border-[#d4a373]/30 bg-white/5 hover:bg-white/10 transition-all duration-500 rounded-sm cursor-pointer text-white hover:text-white no-underline"
+                           >
                                <div className="p-3 rounded-full bg-[#d4a373]/10 text-[#d4a373] group-hover:scale-110 transition-transform duration-300"><Icons.Mail /></div>
-                               <div className="text-center w-full overflow-hidden"><span className="text-xs uppercase tracking-widest opacity-50 mb-1 block">{t.emailLabel}</span><span className="text-sm md:text-lg serif break-all">eliz.shanon@gmail.com</span></div>
-                           </div>
-                           <div className="group flex flex-col items-center gap-4 p-6 md:p-8 border border-white/5 hover:border-[#d4a373]/30 bg-white/5 hover:bg-white/10 transition-all duration-500 rounded-sm cursor-pointer">
+                               <div className="text-center w-full overflow-hidden">
+                                   <span className="text-xs uppercase tracking-widest opacity-50 mb-1 block">{t.emailLabel}</span>
+                                   <span className="text-[min(4vw,18px)] md:text-lg serif whitespace-nowrap block">eliz.shanon@gmail.com</span>
+                               </div>
+                           </a>
+                           <a 
+                               href={`https://wa.me/972528561536?text=${encodeURIComponent(t.whatsappMsg)}`}
+                               target="_blank"
+                               rel="noopener noreferrer"
+                               className="group flex flex-col items-center gap-4 p-6 md:p-8 border border-white/5 hover:border-[#d4a373]/30 bg-white/5 hover:bg-white/10 transition-all duration-500 rounded-sm cursor-pointer text-white hover:text-white no-underline"
+                           >
                                <div className="p-3 rounded-full bg-[#d4a373]/10 text-[#d4a373] group-hover:scale-110 transition-transform duration-300"><Icons.Phone /></div>
-                               <div className="text-center"><span className="text-xs uppercase tracking-widest opacity-50 mb-1 block">{t.phoneLabel}</span><span className="text-sm md:text-lg serif" dir="ltr">+972 52-856-1536</span></div>
-                           </div>
+                               <div className="text-center w-full overflow-hidden">
+                                   <span className="text-xs uppercase tracking-widest opacity-50 mb-1 block">{t.phoneLabel}</span>
+                                   <span className="text-[min(4vw,18px)] md:text-lg serif whitespace-nowrap block" dir="ltr">+972 52-856-1536</span>
+                               </div>
+                           </a>
                        </div>
                        <div className="flex gap-8 mt-8 pt-8 border-t border-white/10 w-full max-w-xs justify-center">
                            <a href="https://www.facebook.com/elizshanon" target="_blank" rel="noopener noreferrer" className="p-4 rounded-full bg-white/5 hover:bg-[#d4a373] hover:text-black transition-all duration-300 group"><Icons.Facebook /></a>
