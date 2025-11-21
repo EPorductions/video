@@ -1,8 +1,8 @@
 <!DOCTYPE html>
-<html lang="hu">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Eliz Shanon-Edelenyi | Infinite Portfolio</title>
     
     <!-- React & Tailwind -->
@@ -15,76 +15,88 @@
     <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;700;900&family=Frank+Ruhl+Libre:wght@300;500;700&display=swap" rel="stylesheet">
     
     <style>
-        /* --- Global Styles --- */
         :root {
             --bg-color: #121212;
             --text-color: #e5e5e5;
             --accent: #d4a373;
         }
 
-        body {
-            font-family: 'Heebo', sans-serif;
+        html, body {
+            margin: 0;
+            padding: 0;
             background-color: var(--bg-color);
             color: var(--text-color);
-            margin: 0;
-            overflow: hidden; /* We handle scroll manually in the container */
-            overscroll-behavior: none;
+            font-family: 'Heebo', sans-serif;
+            overflow: hidden; 
+            height: 100%;
+            width: 100%;
+            overscroll-behavior-y: none; 
         }
         
         h1, h2, h3, .serif {
             font-family: 'Frank Ruhl Libre', serif;
         }
 
-        /* Hide scrollbar but allow functionality */
-        .hide-scrollbar::-webkit-scrollbar { display: none; }
-        .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
-
-        /* --- Utilities --- */
         .grain {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             pointer-events: none; z-index: 50; opacity: 0.04;
             background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 400 400' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
         }
 
-        /* --- Horizontal Layout --- */
         .horizontal-scroll-container {
             display: flex;
             flex-direction: row;
             overflow-x: auto;
-            height: 100vh;
-            width: 100vw;
-            scroll-behavior: auto; 
+            overflow-y: hidden;
+            height: 100vh; 
+            height: 100dvh; 
+            width: 100%;
+            
+            /* Hybrid Approach: Native momentum for touch, Manual physics for mouse */
+            -webkit-overflow-scrolling: touch; 
+            
+            /* Snap is enabled but 'normal' to allow free movement */
+            scroll-snap-type: x proximity; 
+            scroll-behavior: auto; /* JS handles smooth scroll */
+            
             align-items: center;
-            /* Force LTR so math works consistently */
-            direction: ltr; 
-            overscroll-behavior-x: none;
+            direction: ltr;
         }
         
-        .is-dragging { cursor: grabbing; user-select: none; }
+        .horizontal-scroll-container::-webkit-scrollbar { display: none; }
+        .horizontal-scroll-container { -ms-overflow-style: none; scrollbar-width: none; }
+
+        .snap-center {
+            scroll-snap-align: center;
+            scroll-snap-stop: normal; 
+        }
+
+        /* Cursor States */
         .cursor-grab { cursor: grab; }
-        
-        /* Vertical text for categories */
+        .is-dragging { 
+            cursor: grabbing; 
+            user-select: none; 
+            scroll-snap-type: none; /* Disable snap while dragging */
+        }
+
         .vertical-text {
             writing-mode: vertical-rl;
             text-orientation: mixed;
             transform: rotate(180deg);
         }
 
-        /* Mobile specifics */
-        @media (max-width: 768px) {
-            .horizontal-scroll-container {
-                scroll-snap-type: x mandatory;
-            }
-            .snap-center {
-                scroll-snap-align: center;
-            }
-        }
-
         .stroke-text {
             -webkit-text-stroke: 1px rgba(255, 255, 255, 0.3);
             color: transparent;
         }
+        
         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+        @media (max-width: 768px) {
+            .horizontal-scroll-container {
+                scroll-snap-type: x mandatory; 
+            }
+        }
     </style>
 </head>
 <body>
@@ -104,172 +116,162 @@
             Instagram: () => <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><rect x="2" y="2" width="20" height="20" rx="5" ry="5"></rect><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"></path><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"></line></svg>
         };
 
-        // --- Content Dictionary ---
+        // --- Content ---
         const content = {
             he: {
-                name: "אליז שנון אדלני",
-                role: "תיק עבודות",
-                navHome: "בית",
-                navAbout: "אודות",
-                navContact: "צור קשר",
-                galleryBtn: "גלריה",
-                heroTitle: "יְצִירָה",
-                heroSubtitle: "מסע של צבע ורגש",
-                scrollHint: "גלילה לכל כיוון",
-                aboutTitle: "האמנית",
-                aboutText1: "ילידת 1947, בוגרת המחלקה לאמנות בבצלאל.",
-                aboutText2: "במשך עשרות שנים יצרה בשקט, בסטודיו הביתי, מתוך צורך פנימי עמוק וללא כוונה להציג. עבודותיה מתאפיינות בקו רגיש, בחיפוש מתמיד אחר הקומפוזיציה המדויקת, ובדיאלוג בין הפיגורטיבי למופשט.",
-                aboutText3: "האתר הזה הוא הצצה ראשונה לארכיב עשיר ומרגש, המאגד בתוכו רגעים של התבוננות, טבע דומם ופורטרטים מלאי הבעה.",
-                contactTitle: "יצירת קשר",
-                contactText: "אשמח לשמוע מכם, לשתף מחשבות או לענות על שאלות לגבי העבודות.",
-                emailLabel: "אימייל",
-                phoneLabel: "טלפון",
-                rights: "© 2025 כל הזכויות שמורות לאמנית",
-                credits: "נבנה באהבה ע\"י בנה אוריין אדלני - PsychoFlash",
-                categories: { still: "דומם וטבע", portrait: "דיוקן ונפש", abstract: "הפשטה וצבע" }
+                name: "אליז שנון אדלני", role: "תיק עבודות", navHome: "בית", navAbout: "אודות", navContact: "צור קשר", galleryBtn: "גלריה", heroTitle: "יְצִירָה", heroSubtitle: "מסע של צבע ורגש", scrollHint: "גלילה לכל כיוון - תחילת הסיפור", aboutTitle: "האמנית", aboutText1: "ילידת 1947, בוגרת המחלקה לאמנות בבצלאל.", aboutText2: "במשך עשרות שנים יצרה בשקט, בסטודיו הביתי, מתוך צורך פנימי עמוק וללא כוונה להציג. עבודותיה מתאפיינות בקו רגיש, בחיפוש מתמיד אחר הקומפוזיציה המדויקת, ובדיאלוג בין הפיגורטיבי למופשט.", aboutText3: "האתר הזה הוא הצצה ראשונה לארכיב עשיר ומרגש, המאגד בתוכו רגעים של התבוננות, טבע דומם ופורטרטים מלאי הבעה.", contactTitle: "יצירת קשר", contactText: "אשמח לשמוע מכם, לשתף מחשבות או לענות על שאלות לגבי העבודות.", emailLabel: "אימייל", phoneLabel: "טלפון", rights: "© 2025 כל הזכויות שמורות לאמנית", credits: "נבנה באהבה ע\"י בנה אוריין אדלני - PsychoFlash", categories: { still: "דומם וטבע", portrait: "דיוקן ונפש", abstract: "הפשטה וצבע" }
             },
             en: {
-                name: "Eliz Shanon-Edelenyi",
-                role: "Artist Portfolio",
-                navHome: "Home",
-                navAbout: "About",
-                navContact: "Contact",
-                galleryBtn: "Gallery",
-                heroTitle: "CREATION",
-                heroSubtitle: "A Journey of Color & Emotion",
-                scrollHint: "Scroll Any Direction",
-                aboutTitle: "The Artist",
-                aboutText1: "Born in 1947, a graduate of the Bezalel Academy of Arts.",
-                aboutText2: "For decades she created quietly in her home studio, driven by a deep internal need rather than public display. Her works are characterized by sensitive lines, a constant search for precise composition, and a dialogue between the figurative and the abstract.",
-                aboutText3: "This website is a first glimpse into a rich and moving archive, bringing together moments of observation, still life, and expressive portraits.",
-                contactTitle: "Get in Touch",
-                contactText: "I would love to hear from you, share thoughts, or answer any questions about the artwork.",
-                emailLabel: "Email",
-                phoneLabel: "Phone",
-                rights: "© 2025 All Rights Reserved",
-                credits: "Built with love by her son Orian Edelenyi - PsychoFlash",
-                categories: { still: "Nature & Still", portrait: "Portrait & Soul", abstract: "Abstract & Color" }
+                name: "Eliz Shanon-Edelenyi", role: "Artist Portfolio", navHome: "Home", navAbout: "About", navContact: "Contact", galleryBtn: "Gallery", heroTitle: "CREATION", heroSubtitle: "A Journey of Color & Emotion", scrollHint: "Start The Story", aboutTitle: "The Artist", aboutText1: "Born in 1947, a graduate of the Bezalel Academy of Arts.", aboutText2: "For decades she created quietly in her home studio, driven by a deep internal need rather than public display. Her works are characterized by sensitive lines, a constant search for precise composition, and a dialogue between the figurative and the abstract.", aboutText3: "This website is a first glimpse into a rich and moving archive, bringing together moments of observation, still life, and expressive portraits.", contactTitle: "Get in Touch", contactText: "I would love to hear from you, share thoughts, or answer any questions about the artwork.", emailLabel: "Email", phoneLabel: "Phone", rights: "© 2025 All Rights Reserved", credits: "Built with love by her son Orian Edelenyi - PsychoFlash", categories: { still: "Nature & Still", portrait: "Portrait & Soul", abstract: "Abstract & Color" }
             },
             hu: {
-                name: "Eliz Shanon-Edelenyi",
-                role: "Művészeti Portfólió",
-                navHome: "Kezdőlap",
-                navAbout: "Rólam",
-                navContact: "Kapcsolat",
-                galleryBtn: "Galéria",
-                heroTitle: "ALKOTÁS",
-                heroSubtitle: "Színek és Érzelmek Utazása",
-                scrollHint: "Görgessen bármerre",
-                aboutTitle: "A Művész",
-                aboutText1: "1947-ben született, a Bezalel Művészeti Akadémia végzettje.",
-                aboutText2: "Évtizedekig csendben alkotott otthoni műtermében, mély belső késztetéstől vezérelve. Munkáit érzékeny vonalvezetés, a pontos kompozíció állandó keresése és a figuratív, valamint az absztrakt közötti párbeszéd jellemzi.",
-                aboutText3: "Ez a weboldal első bepillantást enged egy gazdag és megindító archívumba, amely a megfigyelés pillanatait, csendéleteket és kifejező portrékat egyesít.",
-                contactTitle: "Kapcsolat",
-                contactText: "Örömmel hallanék felőled, szívesen megosztom gondolataimat vagy válaszolok a művekkel kapcsolatos kérdésekre.",
-                emailLabel: "E-mail",
-                phoneLabel: "Telefon",
-                rights: "© 2025 Minden jog fenntartva",
-                credits: "Szeretettel készítette fia, Orian Edelenyi - PsychoFlash",
-                categories: { still: "Csendélet", portrait: "Portré", abstract: "Absztrakt" }
+                name: "Eliz Shanon-Edelenyi", role: "Művészeti Portfólió", navHome: "Kezdőlap", navAbout: "Rólam", navContact: "Kapcsolat", galleryBtn: "Galéria", heroTitle: "ALKOTÁS", heroSubtitle: "Színek és Érzelmek Utazása", scrollHint: "A Történet Kezdete", aboutTitle: "A Művész", aboutText1: "1947-ben született, a Bezalel Művészeti Akadémia végzettje.", aboutText2: "Évtizedekig csendben alkotott otthoni műtermében, mély belső késztetéstől vezérelve. Munkáit érzékeny vonalvezetés, a pontos kompozíció állandó keresése és a figuratív, valamint az absztrakt közötti párbeszéd jellemzi.", aboutText3: "Ez a weboldal első bepillantást enged egy gazdag és megindító archívumba, amely a megfigyelés pillanatait, csendéleteket és kifejező portrékat egyesít.", contactTitle: "Kapcsolat", contactText: "Örömmel hallanék felőled, szívesen megosztom gondolataimat vagy válaszolok a művekkel kapcsolatos kérdésekre.", emailLabel: "E-mail", phoneLabel: "Telefon", rights: "© 2025 Minden jog fenntartva", credits: "Szeretettel készítette fia, Orian Edelenyi - PsychoFlash", categories: { still: "Csendélet", portrait: "Portré", abstract: "Absztrakt" }
             }
         };
 
-        // --- Item Specific Translations ---
         const itemTranslations = {
-            1: { 
-                he: { title: 'טבע דומם באדום', story: "חקירה של הצבע האדום והשפעתו על החלל." },
-                en: { title: 'Still Life in Red', story: "Exploration of the red color and its effect on space." },
-                hu: { title: 'Csendélet Vörösben', story: "A vörös szín és a térre gyakorolt hatásának kutatása." }
-            },
-            4: {
-                he: { title: 'כד ומים', story: "פשטות החומר והשקיפות של המים." },
-                en: { title: 'Jug and Water', story: "The simplicity of matter and the transparency of water." },
-                hu: { title: 'Kancsó és Víz', story: "Az anyag egyszerűsége és a víz átlátszósága." }
-            },
-            7: {
-                he: { title: 'העורב', story: "מבט אל הטבע הפראי." },
-                en: { title: 'The Raven', story: "A gaze into the wild nature." },
-                hu: { title: 'A Holló', story: "Pillantás a vad természetbe." }
-            },
-            8: {
-                he: { title: 'פורטרט פנימי', story: "ציור מצב הרוח הפנימי." },
-                en: { title: 'Inner Portrait', story: "Painting the inner mood." },
-                hu: { title: 'Belső Portré', story: "A belső hangulat megfestése." }
-            },
-            3: {
-                he: { title: 'דמות וצל', story: "מפגש דרמטי בין דמות לצל." },
-                en: { title: 'Figure and Shadow', story: "A dramatic encounter between figure and shadow." },
-                hu: { title: 'Alak és Árnyék', story: "Drámai találkozás alak és árnyék között." }
-            },
-            5: {
-                he: { title: 'יד מושטת', story: "מחווה אנושית בסיסית." },
-                en: { title: 'Outstretched Hand', story: "A basic human gesture." },
-                hu: { title: 'Kinyújtott Kéz', story: "Egy alapvető emberi gesztus." }
-            },
-            6: {
-                he: { title: 'קומפוזיציה בצבע', story: "משחק של כתמי צבע ואיזון." },
-                en: { title: 'Composition in Color', story: "A play of color patches and balance." },
-                hu: { title: 'Színes Kompozíció', story: "Színfoltok és egyensúly játéka." }
-            },
-            2: {
-                he: { title: 'רישום מופשט', story: "קוים חופשיים המנסים ללכוד תנועה." },
-                en: { title: 'Abstract Drawing', story: "Free lines attempting to capture movement." },
-                hu: { title: 'Absztrakt Rajz', story: "Szabad vonalak, amelyek a mozgást próbálják megragadni." }
-            },
-            9: {
-                he: { title: 'שלושה שלבים', story: "תהליך של שינוי וזמן." },
-                en: { title: 'Three Stages', story: "A process of change and time." },
-                hu: { title: 'Három Szakasz', story: "A változás és az idő folyamata." }
-            }
+            1: { he: { title: 'טבע דומם באדום', story: "חקירה של הצבע האדום והשפעתו על החלל." }, en: { title: 'Still Life in Red', story: "Exploration of the red color and its effect on space." }, hu: { title: 'Csendélet Vörösben', story: "A vörös szín és a térre gyakorolt hatásának kutatása." } },
+            4: { he: { title: 'כד ומים', story: "פשטות החומר והשקיפות של המים." }, en: { title: 'Jug and Water', story: "The simplicity of matter and the transparency of water." }, hu: { title: 'Kancsó és Víz', story: "Az anyag egyszerűsége és a víz átlátszósága." } },
+            7: { he: { title: 'העורב', story: "מבט אל הטבע הפראי." }, en: { title: 'The Raven', story: "A gaze into the wild nature." }, hu: { title: 'A Holló', story: "Pillantás a vad természetbe." } },
+            8: { he: { title: 'פורטרט פנימי', story: "ציור מצב הרוח הפנימי." }, en: { title: 'Inner Portrait', story: "Painting the inner mood." }, hu: { title: 'Belső Portré', story: "A belső hangulat megfestése." } },
+            3: { he: { title: 'דמות וצל', story: "מפגש דרמטי בין דמות לצל." }, en: { title: 'Figure and Shadow', story: "A dramatic encounter between figure and shadow." }, hu: { title: 'Alak és Árnyék', story: "Drámai találkozás alak és árnyék között." } },
+            5: { he: { title: 'יד מושטת', story: "מחווה אנושית בסיסית." }, en: { title: 'Outstretched Hand', story: "A basic human gesture." }, hu: { title: 'Kinyújtott Kéz', story: "Egy alapvető emberi gesztus." } },
+            6: { he: { title: 'קומפוזיציה בצבע', story: "משחק של כתמי צבע ואיזון." }, en: { title: 'Composition in Color', story: "A play of color patches and balance." }, hu: { title: 'Színes Kompozíció', story: "Színfoltok és egyensúly játéka." } },
+            2: { he: { title: 'רישום מופשט', story: "קוים חופשיים המנסים ללכוד תנועה." }, en: { title: 'Abstract Drawing', story: "Free lines attempting to capture movement." }, hu: { title: 'Absztrakt Rajz', story: "Szabad vonalak, amelyek a mozgást próbálják megragadni." } },
+            9: { he: { title: 'שלושה שלבים', story: "תהליך של שינוי וזמן." }, en: { title: 'Three Stages', story: "A process of change and time." }, hu: { title: 'Három Szakasz', story: "A változás és az idő folyamata." } }
         };
 
-        // --- Data Generation with Localization ---
         const getCategoriesData = (t, lang) => {
             const getText = (id) => itemTranslations[id][lang];
-
             return [
-                {
-                    id: 'still',
-                    title: t.categories.still,
-                    items: [
-                        { id: 1, src: 'IMG_20181111_132940.jpg', year: '2018', ...getText(1) },
-                        { id: 4, src: 'IMG_20181111_133319.jpg', year: '2018', ...getText(4) },
-                        { id: 7, src: 'IMG_20181111_133407.jpg', year: '2018', isWide: true, ...getText(7) },
-                    ]
-                },
-                {
-                    id: 'portrait',
-                    title: t.categories.portrait,
-                    items: [
-                        { id: 8, src: 'IMG_20181111_133411.jpg', year: '2018', ...getText(8) },
-                        { id: 3, src: 'IMG_20181111_133313.jpg', year: '2018', ...getText(3) },
-                        { id: 5, src: 'IMG_20181111_133334.jpg', year: '2018', ...getText(5) },
-                    ]
-                },
-                {
-                    id: 'abstract',
-                    title: t.categories.abstract,
-                    items: [
-                        { id: 6, src: 'IMG_20181111_133357.jpg', year: '2018', isWide: true, ...getText(6) },
-                        { id: 2, src: 'IMG_20181111_133126.jpg', year: '2018', ...getText(2) },
-                        { id: 9, src: 'IMG_20200510_132359.jpg', year: '2020', isWide: true, ...getText(9) },
-                    ]
-                }
+                { id: 'still', title: t.categories.still, items: [{ id: 1, src: 'IMG_20181111_132940.jpg', year: '2018', ...getText(1) }, { id: 4, src: 'IMG_20181111_133319.jpg', year: '2018', ...getText(4) }, { id: 7, src: 'IMG_20181111_133407.jpg', year: '2018', isWide: true, ...getText(7) }] },
+                { id: 'portrait', title: t.categories.portrait, items: [{ id: 8, src: 'IMG_20181111_133411.jpg', year: '2018', ...getText(8) }, { id: 3, src: 'IMG_20181111_133313.jpg', year: '2018', ...getText(3) }, { id: 5, src: 'IMG_20181111_133334.jpg', year: '2018', ...getText(5) }] },
+                { id: 'abstract', title: t.categories.abstract, items: [{ id: 6, src: 'IMG_20181111_133357.jpg', year: '2018', isWide: true, ...getText(6) }, { id: 2, src: 'IMG_20181111_133126.jpg', year: '2018', ...getText(2) }, { id: 9, src: 'IMG_20200510_132359.jpg', year: '2020', isWide: true, ...getText(9) }] }
             ];
         };
 
+        // --- Components ---
+
+        const Hero = ({ t, sectionRef, isClone, onLeft, onRight, onText }) => (
+            <section 
+                ref={sectionRef}
+                className="snap-center min-w-[100vw] h-[100vh] h-[100dvh] relative flex items-center justify-center overflow-hidden flex-shrink-0 bg-[#121212] z-20 shadow-2xl border-l border-r border-white/5"
+            >
+                <div className="absolute inset-0 opacity-30 select-none pointer-events-none">
+                    <img src="20200704_004846.jpg" className="w-full h-full object-cover filter blur-lg scale-110" alt="" onError={(e)=>e.target.style.display='none'} />
+                </div>
+                <div className="relative z-10 text-center px-4 select-none flex flex-col items-center w-full max-w-[95vw]">
+                    <h1 className="text-[15vw] md:text-[12vw] leading-[0.8] font-black text-[#e5e5e5] mix-blend-overlay tracking-tighter mb-4">
+                        {t.heroTitle}
+                    </h1>
+                    <p className="text-xl md:text-2xl serif font-light italic text-[#d4a373] mb-12">
+                        {t.heroSubtitle}
+                    </p>
+                    {!isClone && (
+                        <div className="flex items-center gap-8 opacity-60 animate-pulse transition-opacity p-4 z-50 pointer-events-auto">
+                            <div onClick={onLeft} className="cursor-pointer hover:text-white hover:scale-110 transition-transform p-2"><Icons.ArrowRight /></div>
+                            <span onClick={onText} className="text-xs md:text-sm tracking-[0.3em] uppercase border-b border-white/20 pb-1 cursor-pointer hover:text-[#d4a373] transition-colors">{t.scrollHint}</span>
+                            <div onClick={onRight} className="cursor-pointer hover:text-white hover:scale-110 transition-transform p-2"><Icons.ArrowLeft /></div>
+                        </div>
+                    )}
+                </div>
+            </section>
+        );
+
+        const AboutSection = ({ t, sectionRef }) => (
+             <section 
+                ref={sectionRef}
+                className="snap-center min-w-[100vw] md:min-w-[80vw] h-[100vh] h-[100dvh] bg-[#0f0f0f] flex items-center justify-center relative flex-shrink-0 p-6 border-l border-r border-white/5"
+            >
+                <div className="max-w-6xl w-full grid md:grid-cols-2 gap-16 items-center">
+                    <div className="order-2 md:order-1 space-y-8 text-center md:text-start" dir={t.name === "אליז שנון אדלני" ? 'rtl' : 'ltr'}>
+                        <h2 className="text-4xl md:text-7xl serif text-[#d4a373]">{t.aboutTitle}</h2>
+                        <div className="space-y-6 text-lg md:text-xl font-light text-gray-300 leading-relaxed">
+                            <p>{t.aboutText1}</p>
+                            <p>{t.aboutText2}</p>
+                            <p>{t.aboutText3}</p>
+                        </div>
+                        <div className="pt-8 border-t border-white/10 flex flex-col gap-2 text-sm opacity-50 font-mono">
+                            <span>{t.rights}</span>
+                            <span className="text-xs opacity-70">{t.credits}</span>
+                        </div>
+                    </div>
+                    <div className="order-1 md:order-2 relative h-[40vh] md:h-[50vh] w-full">
+                        <img src="20200704_004846.jpg" alt="Studio" className="w-full h-full object-cover grayscale opacity-60 shadow-2xl rounded-sm" draggable="false" />
+                    </div>
+                </div>
+            </section>
+        );
+
+        const ContactSection = ({ t, sectionRef }) => (
+            <section 
+               ref={sectionRef}
+               className="snap-center min-w-[100vw] md:min-w-[60vw] h-[100vh] h-[100dvh] bg-[#0a0a0a] flex items-center justify-center relative flex-shrink-0 p-6 border-l border-r border-white/5"
+           >
+               <div className="max-w-3xl w-full flex flex-col items-center text-center space-y-8 md:space-y-12" dir={t.name === "אליז שנון אדלני" ? 'rtl' : 'ltr'}>
+                   <div>
+                       <span className="text-[#d4a373] text-sm tracking-[0.3em] uppercase mb-4 block">{t.contactTitle}</span>
+                       <h2 className="text-4xl md:text-7xl serif text-white leading-tight">{t.contactTitle}</h2>
+                   </div>
+                   <p className="text-lg md:text-xl font-light text-gray-400 max-w-lg leading-relaxed">{t.contactText}</p>
+                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-8 w-full max-w-lg mt-8">
+                       <div className="group flex flex-col items-center gap-4 p-6 md:p-8 border border-white/5 hover:border-[#d4a373]/30 bg-white/5 hover:bg-white/10 transition-all duration-500 rounded-sm cursor-pointer">
+                           <div className="p-3 rounded-full bg-[#d4a373]/10 text-[#d4a373] group-hover:scale-110 transition-transform duration-300"><Icons.Mail /></div>
+                           <div className="text-center w-full overflow-hidden"><span className="text-xs uppercase tracking-widest opacity-50 mb-1 block">{t.emailLabel}</span><span className="text-base md:text-lg serif break-all">eliz.shanon@gmail.com</span></div>
+                       </div>
+                       <div className="group flex flex-col items-center gap-4 p-6 md:p-8 border border-white/5 hover:border-[#d4a373]/30 bg-white/5 hover:bg-white/10 transition-all duration-500 rounded-sm cursor-pointer">
+                           <div className="p-3 rounded-full bg-[#d4a373]/10 text-[#d4a373] group-hover:scale-110 transition-transform duration-300"><Icons.Phone /></div>
+                           <div className="text-center"><span className="text-xs uppercase tracking-widest opacity-50 mb-1 block">{t.phoneLabel}</span><span className="text-base md:text-lg serif" dir="ltr">+972 52-856-1536</span></div>
+                       </div>
+                   </div>
+                   <div className="flex gap-8 mt-8 pt-8 border-t border-white/10 w-full max-w-xs justify-center">
+                       <a href="https://www.facebook.com/elizshanon" target="_blank" rel="noopener noreferrer" className="p-4 rounded-full bg-white/5 hover:bg-[#d4a373] hover:text-black transition-all duration-300 group"><Icons.Facebook /></a>
+                       <a href="https://www.instagram.com/eliz77shanon/" target="_blank" rel="noopener noreferrer" className="p-4 rounded-full bg-white/5 hover:bg-[#d4a373] hover:text-black transition-all duration-300 group"><Icons.Instagram /></a>
+                   </div>
+               </div>
+           </section>
+       );
+
+        const CategoryCluster = ({ category, onImageClick }) => (
+            <div className="flex flex-row items-center gap-6 md:gap-16 px-4 md:px-24 border-l border-white/5 snap-center h-full">
+                <div className="h-[50vh] md:h-[60vh] flex flex-col justify-center items-center opacity-50 sticky left-0 z-10">
+                    <div className="w-px h-12 md:h-24 bg-gradient-to-b from-transparent via-[#d4a373] to-transparent mb-4 md:mb-6"></div>
+                    <h2 className="vertical-text text-3xl md:text-6xl serif tracking-widest text-transparent stroke-text font-bold whitespace-nowrap">{category.title}</h2>
+                    <div className="w-px h-12 md:h-24 bg-gradient-to-b from-transparent via-[#d4a373] to-transparent mt-4 md:mt-6"></div>
+                </div>
+                <div className="flex gap-6 md:gap-12 items-center">
+                    {category.items.map((item, idx) => (
+                        <div 
+                            key={`${category.id}-${item.id}-${idx}`}
+                            className={`relative group cursor-pointer transition-all duration-500 ease-out flex-shrink-0 snap-center ${item.isWide ? 'w-[85vw] md:w-[60vh] aspect-video' : 'w-[85vw] md:w-[40vh] aspect-[3/4]'} hover:scale-[1.02]`}
+                            onClick={() => onImageClick(item)}
+                        >
+                            <div className="absolute inset-0 bg-[#1a1a1a] -z-10 animate-pulse"></div>
+                            <img src={item.src} alt={item.title} className="w-full h-full object-cover grayscale contrast-110 group-hover:grayscale-0 transition-all duration-700 shadow-lg rounded-sm" loading="lazy" draggable="false" onError={(e) => {e.target.src = 'https://via.placeholder.com/600x800/333/999?text=Art'}} />
+                            <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity duration-300 flex flex-col justify-end p-6 text-right" dir="rtl">
+                                <span className="text-[#d4a373] text-sm font-mono mb-1 shadow-black drop-shadow-md">{item.year}</span>
+                                <h3 className="text-2xl md:text-3xl serif text-white shadow-black drop-shadow-md">{item.title}</h3>
+                            </div>
+                        </div>
+                    ))}
+                </div>
+            </div>
+        );
+
         const App = () => {
-            // --- Language Initialization from URL ---
             const getInitialLang = () => {
                 try {
                     const url = window.location.href;
                     if (url.includes('/he') || url.includes('lang=he')) return 'he';
                     if (url.includes('/en') || url.includes('lang=en')) return 'en';
                     if (url.includes('/hu') || url.includes('lang=hu')) return 'hu';
-                } catch (e) {
-                    console.log("Cannot read URL for lang init");
-                }
-                return 'hu'; 
+                } catch (e) {}
+                try {
+                    const browserLang = navigator.language || navigator.userLanguage || '';
+                    if (browserLang.toLowerCase().startsWith('he')) return 'he';
+                    if (browserLang.toLowerCase().startsWith('hu')) return 'hu';
+                } catch(e) {}
+                return 'en'; 
             };
 
             const [lang, setLang] = useState(getInitialLang());
@@ -278,372 +280,298 @@
             
             const scrollContainerRef = useRef(null);
             const heroRef = useRef(null);
-            const aboutRef = useRef(null);
+            
+            // Refs for infinite scrolling markers
+            const heroCloneRightRef = useRef(null);
+            const heroCloneLeftRef = useRef(null);
+            const aboutMainRef = useRef(null); 
             const contactRef = useRef(null);
-            
-            // Markers for infinite loop logic
-            const startLoopRef = useRef(null);
-            const endLoopRef = useRef(null);
-            
-            // Drag State
+
+            // Mouse Drag Physics State
             const [isDown, setIsDown] = useState(false);
             const [startX, setStartX] = useState(0);
             const [scrollLeft, setScrollLeft] = useState(0);
+            const [velX, setVelX] = useState(0);
+            const momentumID = useRef(null);
+            const lastMoveTime = useRef(Date.now());
+            const lastMoveX = useRef(0);
+            const [isScrolling, setIsScrolling] = useState(false); // Debounce for wheel
 
             const t = content[lang];
             const isRTL = lang === 'he';
-            // Pass both translations dictionary and current language code
             const data = getCategoriesData(t, lang);
 
-            // --- Scroll Helper ---
-            const scrollToSection = (ref) => {
-                if (ref.current && scrollContainerRef.current) {
-                    const elemLeft = ref.current.offsetLeft;
-                    const elemWidth = ref.current.offsetWidth;
-                    const containerWidth = window.innerWidth;
-                    const centerPos = elemLeft - (containerWidth / 2) + (elemWidth / 2);
-                    
-                    scrollContainerRef.current.scrollTo({
-                        left: centerPos,
-                        behavior: 'smooth'
-                    });
+            // --- Navigation ---
+            const scrollByAmount = (amount) => {
+                if (scrollContainerRef.current) {
+                    scrollContainerRef.current.scrollBy({ left: amount, behavior: 'smooth' });
                 }
             };
 
-            // --- Language Change Handler ---
+            const handleLeftArrow = (e) => {
+                e.stopPropagation();
+                scrollByAmount(-window.innerWidth);
+            };
+
+            const handleRightArrow = (e) => {
+                e.stopPropagation();
+                scrollByAmount(window.innerWidth);
+            };
+
+            const handleStartStory = (e) => {
+                e.stopPropagation();
+                // Scroll one screen Right (Usually "About" or "Gallery" depending on direction)
+                // Since default is Right -> About, we just scroll right.
+                scrollByAmount(window.innerWidth);
+            };
+
+            const scrollToSection = (ref) => {
+                if (ref.current) {
+                    ref.current.scrollIntoView({ behavior: 'smooth' });
+                }
+            };
+
             const handleLangChange = (newLang) => {
                 setLang(newLang);
                 try {
                     const url = new URL(window.location);
                     url.searchParams.set('lang', newLang);
                     window.history.pushState({}, '', url);
-                } catch (e) {
-                    console.warn("History API update blocked");
-                }
-                // Optional: Scroll to home when changing language to re-orient user
-                scrollToSection(heroRef);
+                } catch (e) {}
+                setTimeout(() => {
+                    if(heroRef.current) heroRef.current.scrollIntoView({ behavior: 'auto' });
+                }, 50);
             };
 
-            // --- Initial Centering ---
+            // --- Initial Center ---
             useLayoutEffect(() => {
-                if (heroRef.current && scrollContainerRef.current) {
-                    const heroLeft = heroRef.current.offsetLeft;
-                    const heroWidth = heroRef.current.offsetWidth;
-                    const containerWidth = window.innerWidth;
-                    const centerPos = heroLeft - (containerWidth / 2) + (heroWidth / 2);
-                    
-                    scrollContainerRef.current.scrollLeft = centerPos;
+                if (heroRef.current) {
+                    heroRef.current.scrollIntoView({ behavior: 'auto' });
                     setTimeout(() => setLoaded(true), 150);
                 }
             }, []);
 
-            // --- Infinite Loop Logic (Improved) ---
+            // --- Infinite Loop Logic (Center Teleport) ---
             useEffect(() => {
                 const container = scrollContainerRef.current;
                 if (!container) return;
 
-                const handleScroll = () => {
-                    if (!heroRef.current || !startLoopRef.current || !endLoopRef.current) return;
-
-                    const currentScroll = container.scrollLeft;
-                    const mainHeroLeft = heroRef.current.offsetLeft;
-
-                    // 1. Right Side Loop (Entering the Right Clone)
-                    const rightCloneLeft = endLoopRef.current.offsetLeft;
+                const checkLoop = () => {
+                    if(!heroRef.current || !heroCloneRightRef.current || !heroCloneLeftRef.current) return;
                     
-                    // If we have reached the start of the Right Clone
-                    if (currentScroll >= rightCloneLeft) {
-                        // How far into the clone are we?
-                        const offset = currentScroll - rightCloneLeft;
-                        // Jump to Main Hero start + offset
-                        container.scrollLeft = mainHeroLeft + offset;
+                    const scrollLeft = container.scrollLeft;
+                    const homeMainX = heroRef.current.offsetLeft;
+                    const homeCloneRightX = heroCloneRightRef.current.offsetLeft;
+                    const homeCloneLeftX = heroCloneLeftRef.current.offsetLeft;
+                    
+                    // 1. Right Edge Loop: Hit Right Clone Hero -> Jump to Main Hero
+                    if (scrollLeft >= homeCloneRightX - 5) {
+                        container.scrollTo({ left: homeMainX + (scrollLeft - homeCloneRightX), behavior: 'auto' });
                     }
-
-                    // 2. Left Side Loop (Entering the Left Clone)
-                    const leftCloneLeft = startLoopRef.current.offsetLeft;
-                    const leftCloneWidth = startLoopRef.current.offsetWidth;
-
-                    // If we scroll left into the "start" clone
-                    if (currentScroll <= leftCloneLeft + leftCloneWidth * 0.1) { 
-                         const offset = currentScroll - leftCloneLeft;
-                         container.scrollLeft = mainHeroLeft + offset;
+                    
+                    // 2. Left Edge Loop: Hit Left Clone Hero -> Jump to Main Hero
+                    // Since Left Clone is at start (0), checking if we are close to it
+                    if (scrollLeft <= homeCloneLeftX + 5) {
+                         container.scrollTo({ left: homeMainX + (scrollLeft - homeCloneLeftX), behavior: 'auto' });
                     }
                 };
 
+                container.addEventListener('scroll', checkLoop);
+                return () => container.removeEventListener('scroll', checkLoop);
+            }, []);
+
+            // --- Smart Wheel Navigation ---
+            useEffect(() => {
+                const container = scrollContainerRef.current;
+                if (!container) return;
+
+                let wheelTimeout;
                 const handleWheel = (e) => {
                     if (window.innerWidth > 768) {
-                        if (Math.abs(e.deltaY) > Math.abs(e.deltaX)) {
-                            container.scrollLeft += e.deltaY;
+                        if (Math.abs(e.deltaY) > 20 || Math.abs(e.deltaX) > 20) {
                             e.preventDefault();
+                            if(isScrolling) return;
+
+                            setIsScrolling(true);
+                            const direction = (e.deltaY > 0 || e.deltaX > 0) ? 1 : -1;
+                            
+                            container.scrollBy({ left: direction * window.innerWidth, behavior: 'smooth' });
+                            
+                            clearTimeout(wheelTimeout);
+                            wheelTimeout = setTimeout(() => {
+                                setIsScrolling(false);
+                            }, 500); 
                         }
                     }
                 };
-                
-                container.addEventListener('scroll', handleScroll, { passive: true });
+
                 container.addEventListener('wheel', handleWheel, { passive: false });
+                return () => container.removeEventListener('wheel', handleWheel);
+            }, [isScrolling]);
 
-                return () => {
-                    container.removeEventListener('scroll', handleScroll);
-                    container.removeEventListener('wheel', handleWheel);
-                };
-            }, [loaded]);
+            // --- Mouse Drag Physics (Momentum) ---
+            
+            const cancelMomentum = () => {
+                if (momentumID.current) {
+                    cancelAnimationFrame(momentumID.current);
+                    momentumID.current = null;
+                }
+            };
 
-            // --- Drag Handlers ---
+            const momentumLoop = () => {
+                if (!scrollContainerRef.current) return;
+                
+                scrollContainerRef.current.scrollLeft -= velX;
+                const nextVelX = velX * 0.95; 
+                setVelX(nextVelX);
+
+                if (Math.abs(nextVelX) > 0.5) {
+                    momentumID.current = requestAnimationFrame(momentumLoop);
+                } else {
+                    setVelX(0);
+                }
+            };
+
             const handleMouseDown = (e) => {
+                if ('ontouchstart' in window) return; 
                 setIsDown(true);
+                cancelMomentum();
                 if(scrollContainerRef.current) {
                     scrollContainerRef.current.classList.add('is-dragging');
                     setStartX(e.pageX - scrollContainerRef.current.offsetLeft);
                     setScrollLeft(scrollContainerRef.current.scrollLeft);
+                    lastMoveX.current = e.pageX;
+                    lastMoveTime.current = Date.now();
                 }
             };
+
             const handleMouseLeave = () => {
+                if (!isDown) return;
                 setIsDown(false);
-                if(scrollContainerRef.current) scrollContainerRef.current.classList.remove('is-dragging');
+                if(scrollContainerRef.current) {
+                    scrollContainerRef.current.classList.remove('is-dragging');
+                    momentumLoop(); 
+                }
             };
+
             const handleMouseUp = () => {
+                if (!isDown) return;
                 setIsDown(false);
-                if(scrollContainerRef.current) scrollContainerRef.current.classList.remove('is-dragging');
+                if(scrollContainerRef.current) {
+                    scrollContainerRef.current.classList.remove('is-dragging');
+                    momentumLoop();
+                }
             };
+
             const handleMouseMove = (e) => {
                 if (!isDown) return;
                 e.preventDefault();
+                
                 const x = e.pageX - scrollContainerRef.current.offsetLeft;
-                const walk = (x - startX) * 2; 
+                const walk = (x - startX) * 1.5; 
                 scrollContainerRef.current.scrollLeft = scrollLeft - walk;
+
+                const now = Date.now();
+                const dt = now - lastMoveTime.current;
+                const dx = e.pageX - lastMoveX.current;
+                
+                if (dt > 0) {
+                    setVelX(dx / dt * 15); 
+                }
+                
+                lastMoveX.current = e.pageX;
+                lastMoveTime.current = now;
             };
 
-            // --- Components ---
-
-            const Hero = ({ isRef = false, isClone = false, refProp = null }) => (
-                <section 
-                    ref={refProp || (isRef ? heroRef : null)}
-                    className="snap-center min-w-[100vw] h-screen relative flex items-center justify-center overflow-hidden flex-shrink-0 bg-[#121212] z-20 shadow-2xl border-l border-r border-white/5"
-                >
-                    <div className="absolute inset-0 opacity-30 select-none pointer-events-none">
-                        <img src="20200704_004846.jpg" className="w-full h-full object-cover filter blur-lg scale-110" alt="" onError={(e)=>e.target.style.display='none'} />
-                    </div>
-                    
-                    <div className="relative z-10 text-center px-4 select-none flex flex-col items-center w-full">
-                        <h1 className="text-[15vw] md:text-[12vw] leading-[0.8] font-black text-[#e5e5e5] mix-blend-overlay tracking-tighter mb-4">
-                            {t.heroTitle}
-                        </h1>
-                        <p className="text-xl md:text-2xl serif font-light italic text-[#d4a373] mb-12">
-                            {t.heroSubtitle}
-                        </p>
-                        {!isClone && (
-                            <div className="flex items-center gap-8 opacity-60 animate-pulse">
-                                <Icons.ArrowRight />
-                                <span className="text-xs md:text-sm tracking-[0.3em] uppercase border-b border-white/20 pb-1">{t.scrollHint}</span>
-                                <Icons.ArrowLeft />
-                            </div>
-                        )}
-                    </div>
-                </section>
-            );
-
-            const AboutSection = ({ isRef = false, refProp = null }) => (
-                 <section 
-                    ref={refProp || (isRef ? aboutRef : null)}
-                    className="snap-center min-w-[100vw] md:min-w-[80vw] h-screen bg-[#0f0f0f] flex items-center justify-center relative flex-shrink-0 p-6 border-l border-r border-white/5"
-                >
-                    <div className="max-w-6xl w-full grid md:grid-cols-2 gap-16 items-center">
-                        <div className="order-2 md:order-1 space-y-8 text-center md:text-start" dir={isRTL ? 'rtl' : 'ltr'}>
-                            <h2 className="text-5xl md:text-7xl serif text-[#d4a373]">{t.aboutTitle}</h2>
-                            <div className="space-y-6 text-lg md:text-xl font-light text-gray-300 leading-relaxed">
-                                <p>{t.aboutText1}</p>
-                                <p>{t.aboutText2}</p>
-                                <p>{t.aboutText3}</p>
-                            </div>
-                            <div className="pt-8 border-t border-white/10 flex flex-col gap-2 text-sm opacity-50 font-mono">
-                                <span>{t.rights}</span>
-                                <span className="text-xs opacity-70">{t.credits}</span>
-                            </div>
-                        </div>
-                        <div className="order-1 md:order-2 relative h-[50vh] w-full">
-                            <img src="20200704_004846.jpg" alt="Studio" className="w-full h-full object-cover grayscale opacity-60 shadow-2xl" draggable="false" />
-                        </div>
-                    </div>
-                </section>
-            );
-
-            const ContactSection = ({ isRef = false, refProp = null }) => (
-                <section 
-                   ref={refProp || (isRef ? contactRef : null)}
-                   className="snap-center min-w-[100vw] md:min-w-[60vw] h-screen bg-[#0a0a0a] flex items-center justify-center relative flex-shrink-0 p-6 border-l border-r border-white/5"
-               >
-                   <div className="max-w-3xl w-full flex flex-col items-center text-center space-y-12" dir={isRTL ? 'rtl' : 'ltr'}>
-                       <div>
-                           <span className="text-[#d4a373] text-sm tracking-[0.3em] uppercase mb-4 block">{t.contactTitle}</span>
-                           <h2 className="text-5xl md:text-7xl serif text-white leading-tight">{t.contactTitle}</h2>
-                       </div>
-                       
-                       <p className="text-xl font-light text-gray-400 max-w-lg leading-relaxed">
-                           {t.contactText}
-                       </p>
-
-                       <div className="grid grid-cols-1 md:grid-cols-2 gap-8 w-full max-w-lg mt-8">
-                           <div className="group flex flex-col items-center gap-4 p-8 border border-white/5 hover:border-[#d4a373]/30 bg-white/5 hover:bg-white/10 transition-all duration-500 rounded-sm cursor-pointer">
-                               <div className="p-3 rounded-full bg-[#d4a373]/10 text-[#d4a373] group-hover:scale-110 transition-transform duration-300">
-                                   <Icons.Mail />
-                               </div>
-                               <div className="text-center">
-                                   <span className="text-xs uppercase tracking-widest opacity-50 mb-1 block">{t.emailLabel}</span>
-                                   <span className="text-lg serif">eliz.shanon@gmail.com</span>
-                               </div>
-                           </div>
-                           
-                           <div className="group flex flex-col items-center gap-4 p-8 border border-white/5 hover:border-[#d4a373]/30 bg-white/5 hover:bg-white/10 transition-all duration-500 rounded-sm cursor-pointer">
-                               <div className="p-3 rounded-full bg-[#d4a373]/10 text-[#d4a373] group-hover:scale-110 transition-transform duration-300">
-                                   <Icons.Phone />
-                               </div>
-                               <div className="text-center">
-                                   <span className="text-xs uppercase tracking-widest opacity-50 mb-1 block">{t.phoneLabel}</span>
-                                   <span className="text-lg serif" dir="ltr">+972 52-856-1536</span>
-                               </div>
-                           </div>
-                       </div>
-                       
-                       {/* Social Icons */}
-                       <div className="flex gap-8 mt-8 pt-8 border-t border-white/10 w-full max-w-xs justify-center">
-                           <a href="https://www.facebook.com/elizshanon" target="_blank" rel="noopener noreferrer" className="p-4 rounded-full bg-white/5 hover:bg-[#d4a373] hover:text-black transition-all duration-300 group">
-                               <Icons.Facebook />
-                           </a>
-                           <a href="https://www.instagram.com/eliz77shanon/" target="_blank" rel="noopener noreferrer" className="p-4 rounded-full bg-white/5 hover:bg-[#d4a373] hover:text-black transition-all duration-300 group">
-                               <Icons.Instagram />
-                           </a>
-                       </div>
-                   </div>
-               </section>
-           );
-
-            const CategoryCluster = ({ category }) => (
-                <div className="flex flex-row items-center gap-6 md:gap-16 px-6 md:px-24 border-l border-white/5 snap-center h-full">
-                    <div className="h-[50vh] md:h-[60vh] flex flex-col justify-center items-center opacity-50 sticky left-0 z-10">
-                        <div className="w-px h-16 md:h-24 bg-gradient-to-b from-transparent via-[#d4a373] to-transparent mb-6"></div>
-                        <h2 className="vertical-text text-4xl md:text-6xl serif tracking-widest text-transparent stroke-text font-bold whitespace-nowrap">
-                            {category.title}
-                        </h2>
-                        <div className="w-px h-16 md:h-24 bg-gradient-to-b from-transparent via-[#d4a373] to-transparent mt-6"></div>
-                    </div>
-
-                    <div className="flex gap-8 md:gap-12 items-center">
-                        {category.items.map((item, idx) => (
-                            <div 
-                                key={`${category.id}-${item.id}-${idx}`}
-                                className={`
-                                    relative group cursor-pointer transition-all duration-500 ease-out
-                                    flex-shrink-0 snap-center
-                                    ${item.isWide ? 'w-[90vw] md:w-[60vh] aspect-video' : 'w-[90vw] md:w-[40vh] aspect-[3/4]'}
-                                    hover:scale-[1.02]
-                                `}
-                                onClick={() => setSelectedImg(item)}
-                            >
-                                <div className="absolute inset-0 bg-[#1a1a1a] -z-10 animate-pulse"></div>
-                                <img 
-                                    src={item.src} 
-                                    alt={item.title}
-                                    className="w-full h-full object-cover grayscale contrast-110 group-hover:grayscale-0 transition-all duration-700 shadow-lg"
-                                    loading="lazy"
-                                    draggable="false"
-                                    onError={(e) => {e.target.src = 'https://via.placeholder.com/600x800/333/999?text=Art'}}
-                                />
-                                <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity duration-300 flex flex-col justify-end p-6 text-right" dir="rtl">
-                                    <span className="text-[#d4a373] text-sm font-mono mb-1 shadow-black drop-shadow-md">{item.year}</span>
-                                    <h3 className="text-3xl serif text-white shadow-black drop-shadow-md">{item.title}</h3>
-                                </div>
-                            </div>
-                        ))}
-                    </div>
-                </div>
-            );
-
             const handleBackdropClick = (e) => {
-                if (e.target === e.currentTarget) {
-                    setSelectedImg(null);
-                }
+                if (e.target === e.currentTarget) setSelectedImg(null);
             };
 
             return (
-                <div className={`min-h-screen text-white ${!loaded ? 'opacity-0' : 'opacity-100'} transition-opacity duration-1000`}>
+                <div className={`min-h-screen h-[100dvh] text-white ${!loaded ? 'opacity-0' : 'opacity-100'} transition-opacity duration-1000`}>
                     <div className="grain"></div>
-
-                    {/* Navbar */}
-                    <nav className="fixed top-0 left-0 w-full p-6 md:p-8 flex justify-between items-start z-50 mix-blend-difference text-white pointer-events-none">
+                    <nav className="fixed top-0 left-0 w-full p-4 md:p-8 flex justify-between items-start z-50 mix-blend-difference text-white pointer-events-none">
                         <div className="flex flex-col pointer-events-auto">
                             <span className="text-xl md:text-2xl font-bold tracking-tighter serif uppercase">{t.name}</span>
                             <span className="text-[10px] md:text-xs opacity-70 tracking-[0.2em] uppercase mt-1">{t.role}</span>
                         </div>
                         <div className="flex flex-col items-end gap-4 pointer-events-auto">
-                            {/* Language Switcher */}
                             <div className="flex gap-2 text-xs font-bold uppercase tracking-wider">
                                 <button onClick={() => handleLangChange('he')} className={`px-2 py-1 rounded transition-colors ${lang === 'he' ? 'bg-white text-black' : 'text-white/50 hover:text-white'}`}>HE</button>
                                 <button onClick={() => handleLangChange('en')} className={`px-2 py-1 rounded transition-colors ${lang === 'en' ? 'bg-white text-black' : 'text-white/50 hover:text-white'}`}>EN</button>
                                 <button onClick={() => handleLangChange('hu')} className={`px-2 py-1 rounded transition-colors ${lang === 'hu' ? 'bg-white text-black' : 'text-white/50 hover:text-white'}`}>HU</button>
                             </div>
-                            {/* Nav Buttons */}
-                            <div className="flex gap-6 text-sm font-light">
+                            <div className="flex gap-4 md:gap-6 text-sm font-light">
                                 <button onClick={() => scrollToSection(heroRef)} className="hover:text-[#d4a373] transition-colors interactive uppercase tracking-widest text-xs">{t.navHome}</button>
-                                <button onClick={() => scrollToSection(aboutRef)} className="hover:text-[#d4a373] transition-colors interactive uppercase tracking-widest text-xs">{t.navAbout}</button>
+                                <button onClick={() => scrollToSection(aboutMainRef)} className="hover:text-[#d4a373] transition-colors interactive uppercase tracking-widest text-xs">{t.navAbout}</button>
                                 <button onClick={() => scrollToSection(contactRef)} className="hover:text-[#d4a373] transition-colors interactive uppercase tracking-widest text-xs">{t.navContact}</button>
                             </div>
                         </div>
                     </nav>
 
-                    {/* Scroll Container */}
                     <div 
-                        className="horizontal-scroll-container hide-scrollbar cursor-grab active:cursor-grabbing"
+                        className="horizontal-scroll-container hide-scrollbar"
                         ref={scrollContainerRef}
+                        dir="ltr"
                         onMouseDown={handleMouseDown}
                         onMouseLeave={handleMouseLeave}
                         onMouseUp={handleMouseUp}
                         onMouseMove={handleMouseMove}
-                        dir="ltr"
                     >
-                        {/* === LEFT LOOP STRUCTURE (Order: Contact -> Images -> About -> Hero) === */}
-                        <Hero isClone={true} refProp={startLoopRef} />
-                        <ContactSection />
-                        {[...data].reverse().map((cat) => (
-                            <CategoryCluster key={`left-${cat.id}`} category={cat} />
-                        ))}
-                        <AboutSection />
+                        {/* --- CLONES LEFT (Mirrored Order: Hero -> Contact -> Abstract... -> About) --- */}
+                        <div ref={heroCloneLeftRef}>
+                            <Hero t={t} isClone={true} onLeft={handleLeftArrow} onRight={handleRightArrow} onText={handleStartStory} />
+                        </div>
                         
-                        {/* === CENTER (Main) === */}
-                        <Hero isRef={true} />
+                        {/* Left Sequence: Contact -> Abstract -> Portrait -> Still -> About (Going Left from Main Hero) */}
+                        {/* BUT in DOM LTR, this is: Contact -> Abstract ... -> About -> Main Hero */}
+                        <ContactSection t={t} />
+                        <CategoryCluster category={data[2]} onImageClick={setSelectedImg} /> {/* Abstract */}
+                        <CategoryCluster category={data[1]} onImageClick={setSelectedImg} /> {/* Portrait */}
+                        <CategoryCluster category={data[0]} onImageClick={setSelectedImg} /> {/* Still */}
+                        <AboutSection t={t} />
 
-                        {/* === RIGHT LOOP STRUCTURE (Order: About -> Images -> Contact -> Hero) === */}
-                        <AboutSection isRef={true} />
-                        {data.map((cat) => (
-                            <CategoryCluster key={`right-${cat.id}`} category={cat} />
-                        ))}
-                        <ContactSection isRef={true} />
+                        {/* --- MAIN CONTENT (Center) --- */}
+                        <Hero 
+                            t={t}
+                            sectionRef={heroRef}
+                            isRef={true} 
+                            onLeft={handleLeftArrow} 
+                            onRight={handleRightArrow} 
+                            onText={handleStartStory} 
+                        />
                         
-                        <Hero isClone={true} refProp={endLoopRef} />
+                        {/* Right Sequence: About -> Still -> Portrait -> Abstract -> Contact */}
+                        <AboutSection t={t} sectionRef={aboutMainRef} />
+                        <CategoryCluster category={data[0]} onImageClick={setSelectedImg} /> {/* Still */}
+                        <CategoryCluster category={data[1]} onImageClick={setSelectedImg} /> {/* Portrait */}
+                        <CategoryCluster category={data[2]} onImageClick={setSelectedImg} /> {/* Abstract */}
+                        <ContactSection t={t} sectionRef={contactRef} />
 
+                        {/* --- CLONES RIGHT (Hero) --- */}
+                        <div ref={heroCloneRightRef}>
+                            <Hero 
+                                t={t}
+                                isClone={true} 
+                                onLeft={handleLeftArrow} 
+                                onRight={handleRightArrow} 
+                                onText={handleStartStory} 
+                            />
+                        </div>
                     </div>
 
-                    {/* Lightbox */}
                     {selectedImg && (
-                        <div 
-                            className="fixed inset-0 z-[100] bg-black/95 backdrop-blur-xl flex items-center justify-center p-0 animate-[fadeIn_0.3s_ease-out] cursor-auto"
-                            onClick={handleBackdropClick} 
-                        >
-                            <button 
-                                className="absolute top-6 right-6 text-white/50 hover:text-white z-50 p-4"
-                                onClick={() => setSelectedImg(null)}
-                            >
-                                <Icons.X />
-                            </button>
-                            
+                        <div className="fixed inset-0 z-[100] bg-black/95 backdrop-blur-xl flex items-center justify-center p-0 animate-[fadeIn_0.3s_ease-out] cursor-auto" onClick={handleBackdropClick}>
+                            <button className="absolute top-6 right-6 text-white/50 hover:text-white z-50 p-4" onClick={() => setSelectedImg(null)}><Icons.X /></button>
                             <div className="w-full h-full md:max-w-7xl md:h-[85vh] grid grid-cols-1 md:grid-cols-3 md:gap-12 items-center p-4 md:p-8 pointer-events-none">
-                                <div className="md:col-span-2 h-[55vh] md:h-full flex items-center justify-center bg-[#0a0a0a] rounded-sm overflow-hidden shadow-2xl pointer-events-auto" onClick={(e) => e.stopPropagation()}>
+                                <div className="md:col-span-2 h-[50vh] md:h-full flex items-center justify-center bg-[#0a0a0a] rounded-sm overflow-hidden shadow-2xl pointer-events-auto" onClick={(e) => e.stopPropagation()}>
                                     <img src={selectedImg.src} alt={selectedImg.title} className="max-h-full max-w-full object-contain" />
                                 </div>
                                 <div className="md:col-span-1 flex flex-col justify-center mt-8 md:mt-0 text-right pointer-events-auto" dir={isRTL ? 'rtl' : 'ltr'} onClick={(e) => e.stopPropagation()}>
                                     <div className="w-12 h-px bg-[#d4a373] mb-6 ml-auto"></div>
-                                    <h3 className="text-4xl md:text-6xl serif text-white mb-2">{selectedImg.title}</h3>
+                                    <h3 className="text-3xl md:text-6xl serif text-white mb-2">{selectedImg.title}</h3>
                                     <p className="text-[#d4a373] font-mono text-base md:text-lg mb-6 tracking-widest">{selectedImg.year}</p>
-                                    <p className="text-gray-300 font-light leading-relaxed text-lg md:text-xl border-t border-white/10 pt-6">{selectedImg.story}</p>
+                                    <p className="text-gray-300 font-light leading-relaxed text-lg md:text-xl border-t border-white/10 pt-6 max-h-[20vh] overflow-y-auto">{selectedImg.story}</p>
                                 </div>
                             </div>
                         </div>
