@@ -1,0 +1,763 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>בת שבע ליבנה | אמנית טקסטיל</title>
+    
+    <!-- React & Tailwind -->
+    <script src="https://unpkg.com/react@18/umd/react.development.js" crossorigin></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js" crossorigin></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Assistant:wght@200;300;400;600&family=Frank+Ruhl+Libre:wght@300;500;700&display=swap" rel="stylesheet">
+    
+    <style>
+        :root {
+            /* פלטת צבעים: פשתן, כותנה, חוטים, אדמה */
+            --bg-linen: #f4f1ea;
+            --bg-dark-linen: #e8e4dc;
+            --thread-color: #8c7b6c;
+            --text-primary: #3d342b;
+            --text-secondary: #5c504a;
+            --accent-gold: #c2a67a;
+        }
+
+        html {
+            height: 100%;
+            height: -webkit-fill-available;
+        }
+
+        body {
+            margin: 0;
+            padding: 0;
+            background-color: var(--bg-linen);
+            color: var(--text-primary);
+            font-family: 'Assistant', sans-serif;
+            overflow: hidden; 
+            height: 100%;
+            height: -webkit-fill-available;
+            width: 100%;
+            overscroll-behavior: none; 
+            position: fixed;
+            -webkit-font-smoothing: antialiased;
+        }
+        
+        .serif {
+            font-family: 'Frank Ruhl Libre', serif;
+        }
+
+        /* Texture Background */
+        .linen-bg {
+            background-color: var(--bg-linen);
+            background-image: 
+                url("data:image/svg+xml,%3Csvg width='4' height='4' viewBox='0 0 4 4' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M1 3h1v1H1V3zm2-2h1v1H3V1z' fill='%238c7b6c' fill-opacity='0.08'/%3E%3C/svg%3E");
+        }
+
+        .grain {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            pointer-events: none; z-index: 50; opacity: 0.05;
+            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
+        }
+
+        /* Stitched / Fabric Effects */
+        .stitched {
+            position: relative;
+            box-shadow: 2px 4px 10px rgba(0,0,0,0.05);
+            background: white;
+        }
+        .stitched::after {
+            content: '';
+            position: absolute;
+            top: 5px; left: 5px; right: 5px; bottom: 5px;
+            border: 1px dashed var(--thread-color);
+            pointer-events: none;
+            opacity: 0.4;
+        }
+        
+        .ragged-edge {
+            clip-path: polygon(
+                0% 0%, 100% 0%, 100% 98%, 98% 100%, 96% 98%, 94% 100%, 92% 98%, 90% 100%, 88% 98%, 86% 100%, 84% 98%, 82% 100%, 80% 98%,
+                78% 100%, 76% 98%, 74% 100%, 72% 98%, 70% 100%, 68% 98%, 66% 100%, 64% 98%, 62% 100%, 60% 98%,
+                58% 100%, 56% 98%, 54% 100%, 52% 98%, 50% 100%, 48% 98%, 46% 100%, 44% 98%, 42% 100%, 40% 98%,
+                38% 100%, 36% 98%, 34% 100%, 32% 98%, 30% 100%, 28% 98%, 26% 100%, 24% 98%, 22% 100%, 20% 98%,
+                18% 100%, 16% 98%, 14% 100%, 12% 98%, 10% 100%, 8% 98%, 6% 100%, 4% 98%, 2% 100%, 0% 98%
+            );
+        }
+
+        /* Horizontal Scroll Logic (From Source Code) */
+        .horizontal-scroll-container {
+            display: flex;
+            flex-direction: row;
+            overflow-x: auto;
+            overflow-y: hidden;
+            height: 100vh;
+            height: 100dvh; 
+            width: 100%;
+            -webkit-overflow-scrolling: touch; 
+            scroll-snap-type: x proximity; /* Proximity feels more natural for continuous cloth */
+            align-items: center;
+            direction: ltr; /* Keeps math simple for scroll logic */
+            opacity: 0;
+            transition: opacity 0.5s ease-in;
+        }
+        
+        .horizontal-scroll-container.loaded { opacity: 1; }
+        .horizontal-scroll-container::-webkit-scrollbar { display: none; }
+        .horizontal-scroll-container { -ms-overflow-style: none; scrollbar-width: none; }
+
+        .snap-center {
+            scroll-snap-align: center;
+            scroll-snap-stop: normal; 
+        }
+
+        .cursor-grab { cursor: grab; }
+        .is-dragging { 
+            cursor: grabbing; 
+            user-select: none; 
+            scroll-snap-type: none; 
+            scroll-behavior: auto !important; 
+        }
+
+        .vertical-text {
+            writing-mode: vertical-rl;
+            text-orientation: mixed;
+            transform: rotate(180deg);
+        }
+
+        .layout-transition { transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1); }
+        
+        /* Header Fading Logic */
+        .brand-enter {
+            opacity: 1;
+            transform: translateY(0);
+            transition: opacity 0.8s ease-out, transform 0.8s ease-out;
+        }
+        
+        .brand-exit {
+            opacity: 0;
+            transform: translateY(-20px); 
+            transition: opacity 0.5s ease-in, transform 0.5s ease-in;
+            pointer-events: none;
+        }
+
+        /* Intro Weaving Animation */
+        @keyframes weaveVert { 0% { height: 0; } 100% { height: 100%; } }
+        @keyframes weaveHoriz { 0% { width: 0; } 100% { width: 100%; } }
+
+        @media (max-width: 768px) {
+            .horizontal-scroll-container {
+                scroll-snap-type: x mandatory; 
+            }
+        }
+    </style>
+</head>
+<body>
+    <div id="root"></div>
+
+    <script type="text/babel">
+        const { useState, useEffect, useRef, useLayoutEffect } = React;
+
+        // --- Icons ---
+        const Icons = {
+            X: () => <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>,
+            ArrowRight: () => <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>,
+            ArrowLeft: () => <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>,
+            Mail: () => <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path><polyline points="22,6 12,13 2,6"></polyline></svg>,
+            Phone: () => <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path></svg>,
+        };
+
+        // --- Texts ---
+        const content = {
+            he: {
+                name: "בת שבע ליבנה",
+                role: "אמנית טקסטיל",
+                navHome: "בית",
+                navAbout: "אודות",
+                navContact: "צור קשר",
+                scrollHint: "גללו לאריגה",
+                heroTitle: "בת שבע ליבנה", 
+                heroSubtitle: "בין החומר לרוח, בין השתי לערב",
+                aboutTitle: "על האמנית",
+                aboutText1: "היצירה שלי נולדת מתוך המפגש בין החומר הגולמי לבין המחשבה.",
+                aboutText2: "כל חוט הוא מילה, כל אריג הוא סיפור. בעבודת יד עמלנית אני אורגת עולמות של צבע וטקסטורה, מחפשת את האיזון העדין בין המסורת העתיקה לבין הביטוי האישי העכשווי.",
+                aboutText3: "העבודות המוצגות כאן הן הזמנה למגע, להתבוננות בפרטים הקטנים המרכיבים את השלם.",
+                contactTitle: "יצירת קשר",
+                contactText: "לרכישת עבודות, הזמנות מיוחדות או שיח גלריה.",
+                emailLabel: "אימייל",
+                phoneLabel: "טלפון",
+                rights: "© 2025 כל הזכויות שמורות לבת שבע ליבנה",
+                whatsappMsg: "היי בת שבע, התרשמתי מהעבודות באתר...",
+                categories: { 
+                    cat1: "מרקמים",
+                    cat2: "טבע וצבע",
+                    cat3: "אריגה חופשית",
+                    cat4: "חוטים מספרים"
+                }
+            },
+            en: {
+                name: "Bat Sheva Livne",
+                role: "Textile Artist",
+                navHome: "Home",
+                navAbout: "About",
+                navContact: "Contact",
+                scrollHint: "Scroll to Weave",
+                heroTitle: "BAT SHEVA LIVNE", 
+                heroSubtitle: "Between Matter and Spirit, Warp and Weft",
+                aboutTitle: "The Artist",
+                aboutText1: "My creation is born from the encounter between raw material and thought.",
+                aboutText2: "Every thread is a word, every fabric a story. I weave worlds of color and texture, seeking the delicate balance between ancient tradition and contemporary expression.",
+                aboutText3: "The works presented here are an invitation to touch, to observe the small details that make up the whole.",
+                contactTitle: "Get in Touch",
+                contactText: "For inquiries, commissions, or gallery talks.",
+                emailLabel: "Email",
+                phoneLabel: "Phone",
+                rights: "© 2025 All Rights Reserved",
+                whatsappMsg: "Hi Bat Sheva, I saw your portfolio...",
+                categories: { 
+                    cat1: "Textures",
+                    cat2: "Nature & Color",
+                    cat3: "Free Weaving",
+                    cat4: "Narrative Threads"
+                }
+            }
+        };
+
+        // --- Data Generation (Auto 1-31) ---
+        // Splits the 31 images into 4 "Chapters" for the scroll
+        const getCategoriesData = (t) => {
+            const allImages = Array.from({ length: 31 }, (_, i) => i + 1);
+            
+            // Helper to create image objects
+            const makeImg = (id) => ({ 
+                id, 
+                src: `bat7_pics/pic (${id}).jpg`, 
+                fallback: `bat7_pics/pic (${id}).jpeg`, // Fallback for jpeg
+                title: `${t.role} ${id}`, // Generic title since we don't have specifics
+                year: '2024'
+            });
+
+            return [
+                {
+                    id: 'cat1',
+                    title: t.categories.cat1,
+                    items: allImages.slice(0, 8).map(makeImg)
+                },
+                {
+                    id: 'cat2',
+                    title: t.categories.cat2,
+                    items: allImages.slice(8, 16).map(makeImg)
+                },
+                {
+                    id: 'cat3',
+                    title: t.categories.cat3,
+                    items: allImages.slice(16, 24).map(makeImg)
+                },
+                {
+                    id: 'cat4',
+                    title: t.categories.cat4,
+                    items: allImages.slice(24, 31).map(makeImg)
+                }
+            ];
+        };
+
+        // --- Components ---
+
+        const Intro = ({ onComplete }) => {
+            const [visible, setVisible] = useState(true);
+            useEffect(() => {
+                const timer = setTimeout(() => {
+                    setVisible(false);
+                    setTimeout(onComplete, 1000);
+                }, 2500);
+                return () => clearTimeout(timer);
+            }, []);
+
+            return (
+                <div className={`fixed inset-0 z-[100] bg-[#f4f1ea] flex items-center justify-center transition-opacity duration-1000 ${visible ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}>
+                    <div className="relative w-64 h-64 border-4 border-[#8c7b6c] p-4 flex flex-col justify-between">
+                        {/* Weaving Animation */}
+                        <div className="absolute top-0 left-10 w-1 h-full bg-[#8c7b6c]/20 animate-[weaveVert_1s_ease-out]"></div>
+                        <div className="absolute top-0 left-20 w-1 h-full bg-[#8c7b6c]/20 animate-[weaveVert_1.2s_ease-out]"></div>
+                        <div className="absolute top-0 left-30 w-1 h-full bg-[#8c7b6c]/20 animate-[weaveVert_1.4s_ease-out]"></div>
+                        
+                        <div className="absolute top-10 left-0 w-full h-1 bg-[#8c7b6c]/20 animate-[weaveHoriz_1.1s_ease-out]"></div>
+                        <div className="absolute top-20 left-0 w-full h-1 bg-[#8c7b6c]/20 animate-[weaveHoriz_1.3s_ease-out]"></div>
+                        
+                        <div className="m-auto text-center z-10">
+                            <h1 className="serif text-2xl text-[#3d342b] tracking-widest uppercase">Weaving</h1>
+                        </div>
+                    </div>
+                </div>
+            );
+        };
+
+        // Smart Image component that handles JPG/JPEG fallback and hiding if missing
+        const SmartImage = ({ src, fallback, alt, className }) => {
+            const [currentSrc, setCurrentSrc] = useState(src);
+            const [error, setError] = useState(false);
+            const [display, setDisplay] = useState('block');
+
+            const handleError = () => {
+                if (currentSrc === src && fallback) {
+                    setCurrentSrc(fallback);
+                } else {
+                    setError(true);
+                    setDisplay('none'); // Hide completely if both fail
+                }
+            };
+
+            if (error) return null;
+
+            return (
+                <img 
+                    src={currentSrc} 
+                    alt={alt} 
+                    className={className} 
+                    onError={handleError}
+                    style={{ display }}
+                    loading="lazy"
+                    draggable="false"
+                />
+            );
+        };
+
+        const Hero = ({ t, sectionRef, isClone, onLeft, onRight, onText, id }) => (
+            <section 
+                id={id}
+                ref={sectionRef}
+                className="snap-center min-w-[100vw] h-[100vh] h-[100dvh] relative flex items-center justify-center overflow-hidden flex-shrink-0 bg-[#f4f1ea] z-20 layout-transition border-l border-r border-[#8c7b6c]/10"
+            >
+                {/* Background Decoration */}
+                <div className="absolute inset-0 opacity-10 select-none pointer-events-none">
+                     <div className="absolute right-[-10%] bottom-[-10%] w-[60vh] h-[60vh] rounded-full bg-[#c2a67a] filter blur-[100px]"></div>
+                </div>
+
+                <div className="relative z-10 text-center px-4 select-none flex flex-col items-center justify-center w-full h-full max-w-[95vw]">
+                    {/* Artist Image Frame */}
+                    <div className="relative p-3 bg-white shadow-xl mb-8 transform rotate-1 stitched hover:rotate-0 transition-transform duration-700">
+                        <div className="w-[70vw] md:w-[25vw] aspect-[3/4] overflow-hidden bg-[#e8e4dc]">
+                            <SmartImage 
+                                src="bat7_pics/artist.jpeg" 
+                                fallback="bat7_pics/artist.jpg"
+                                alt={t.name}
+                                className="w-full h-full object-cover grayscale contrast-110 hover:grayscale-0 transition-all duration-700"
+                            />
+                        </div>
+                        {/* Tape effect */}
+                        <div className="absolute -top-4 left-1/2 -translate-x-1/2 w-24 h-8 bg-[#f4f1ea] opacity-90 shadow-sm rotate-[-2deg]"></div>
+                    </div>
+                    
+                    <h1 className="text-4xl md:text-7xl serif text-[#3d342b] mb-4 tracking-tight drop-shadow-sm">{t.heroTitle}</h1>
+                    <p className="text-lg md:text-xl font-light italic text-[#8c7b6c] mb-12">
+                        {t.heroSubtitle}
+                    </p>
+                    
+                    <div className="flex items-center gap-8 opacity-60 animate-pulse transition-opacity p-4 z-50 pointer-events-auto">
+                        <div onClick={onLeft} className="cursor-pointer hover:text-[#c2a67a] hover:scale-110 transition-transform p-2"><Icons.ArrowLeft /></div>
+                        <span onClick={onText} className="text-xs md:text-sm tracking-[0.3em] uppercase border-b border-[#8c7b6c]/30 pb-1 cursor-pointer hover:text-[#c2a67a] transition-colors">{t.scrollHint}</span>
+                        <div onClick={onRight} className="cursor-pointer hover:text-[#c2a67a] hover:scale-110 transition-transform p-2"><Icons.ArrowRight /></div>
+                    </div>
+                </div>
+            </section>
+        );
+
+        const AboutSection = ({ t, sectionRef }) => (
+             <section 
+                ref={sectionRef}
+                className="snap-center min-w-[100vw] md:min-w-[80vw] h-[100vh] h-[100dvh] bg-[#e8e4dc] flex items-center justify-center relative flex-shrink-0 border-l border-r border-[#8c7b6c]/10 layout-transition"
+            >
+                <div className="w-full h-full overflow-y-auto custom-scrollbar flex flex-col items-center justify-center p-6 pt-24 md:pt-6">
+                    <div className="max-w-6xl w-full grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-16 items-center my-auto">
+                        <div className="order-2 md:order-1 space-y-6 text-center md:text-start w-full max-w-[90vw] md:max-w-full mx-auto px-0" dir="rtl">
+                            <h2 className="text-3xl md:text-6xl serif text-[#3d342b] mb-6 relative inline-block">
+                                {t.aboutTitle}
+                                <div className="absolute -bottom-2 right-0 w-1/2 h-1 bg-[#c2a67a]"></div>
+                            </h2>
+                            <div className="space-y-4 md:space-y-6 text-sm md:text-xl font-light text-[#5c504a] leading-relaxed">
+                                <p>{t.aboutText1}</p>
+                                <p>{t.aboutText2}</p>
+                                <p>{t.aboutText3}</p>
+                            </div>
+                            <div className="pt-6 md:pt-8 border-t border-[#8c7b6c]/20 flex flex-col gap-2 text-sm opacity-60 font-mono text-[#8c7b6c]">
+                                <span>{t.rights}</span>
+                            </div>
+                        </div>
+                        
+                        {/* Decorative image replacing previous element */}
+                        <div className="order-1 md:order-2 flex items-center justify-center w-full h-full">
+                             <div className="relative w-[80vw] md:w-[35vw] aspect-[3/4] bg-white p-3 shadow-xl transform rotate-2 hover:rotate-0 transition-transform duration-700 stitched">
+                                <SmartImage 
+                                    src="bat7_pics/pic (1).jpg" 
+                                    fallback="bat7_pics/pic (1).jpeg"
+                                    alt="About Art"
+                                    className="w-full h-full object-cover"
+                                />
+                             </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        );
+
+        const ContactSection = ({ t, sectionRef }) => (
+            <section 
+               ref={sectionRef}
+               className="snap-center min-w-[100vw] md:min-w-[60vw] h-[100vh] h-[100dvh] bg-[#3d342b] text-[#f4f1ea] flex items-center justify-center relative flex-shrink-0 border-l border-r border-white/5 layout-transition"
+           >
+               <div className="w-full h-full overflow-y-auto custom-scrollbar flex flex-col items-center justify-center p-6 pt-24 md:pt-6">
+                   <div className="max-w-3xl w-full flex flex-col items-center text-center space-y-8 md:space-y-12 my-auto" dir="rtl">
+                       <div>
+                           <span className="text-[#c2a67a] text-sm tracking-[0.3em] uppercase mb-4 block">{t.contactTitle}</span>
+                           <h2 className="text-4xl md:text-7xl serif text-[#f4f1ea] leading-tight">{t.contactTitle}</h2>
+                       </div>
+                       <p className="text-sm md:text-xl font-light text-[#e8e4dc] max-w-lg leading-relaxed opacity-80">{t.contactText}</p>
+                       <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-8 w-full max-w-lg mt-4 md:mt-8">
+                           <a 
+                               href="mailto:bat7.livne@gmail.com"
+                               className="group flex flex-col items-center gap-4 p-6 md:p-8 border border-[#f4f1ea]/10 hover:border-[#c2a67a] bg-[#f4f1ea]/5 hover:bg-[#f4f1ea]/10 transition-all duration-500 rounded-sm cursor-pointer text-[#f4f1ea] no-underline w-full"
+                           >
+                               <div className="p-3 rounded-full bg-[#c2a67a]/20 text-[#c2a67a] group-hover:scale-110 transition-transform duration-300"><Icons.Mail /></div>
+                               <div className="text-center w-full overflow-hidden">
+                                   <span className="text-xs uppercase tracking-widest opacity-50 mb-1 block">{t.emailLabel}</span>
+                                   <span className="text-sm md:text-lg serif whitespace-nowrap block">bat7.livne@gmail.com</span>
+                               </div>
+                           </a>
+                           <a 
+                               href={`https://wa.me/972501234567`}
+                               target="_blank"
+                               rel="noopener noreferrer"
+                               className="group flex flex-col items-center gap-4 p-6 md:p-8 border border-[#f4f1ea]/10 hover:border-[#c2a67a] bg-[#f4f1ea]/5 hover:bg-[#f4f1ea]/10 transition-all duration-500 rounded-sm cursor-pointer text-[#f4f1ea] no-underline w-full"
+                           >
+                               <div className="p-3 rounded-full bg-[#c2a67a]/20 text-[#c2a67a] group-hover:scale-110 transition-transform duration-300"><Icons.Phone /></div>
+                               <div className="text-center w-full overflow-hidden">
+                                   <span className="text-xs uppercase tracking-widest opacity-50 mb-1 block">{t.phoneLabel}</span>
+                                   <span className="text-sm md:text-lg serif whitespace-nowrap block" dir="ltr">050-1234567</span>
+                               </div>
+                           </a>
+                       </div>
+                   </div>
+               </div>
+           </section>
+       );
+
+        const CategoryCluster = ({ category, onImageClick }) => (
+            <div className="flex flex-row items-center gap-6 md:gap-16 px-4 md:px-16 border-l border-[#8c7b6c]/10 snap-center h-full layout-transition">
+                <div className="h-[50vh] md:h-[60vh] flex flex-col justify-center items-center opacity-60 sticky left-0 z-10">
+                    <div className="w-px h-12 md:h-24 bg-gradient-to-b from-transparent via-[#c2a67a] to-transparent mb-4 md:mb-6"></div>
+                    <h2 className="vertical-text text-3xl md:text-5xl serif tracking-widest text-[#3d342b] font-bold whitespace-nowrap opacity-50">{category.title}</h2>
+                    <div className="w-px h-12 md:h-24 bg-gradient-to-b from-transparent via-[#c2a67a] to-transparent mt-4 md:mt-6"></div>
+                </div>
+                <div className="flex gap-6 md:gap-12 items-center">
+                    {category.items.map((item, idx) => (
+                        <div 
+                            key={`${category.id}-${item.id}-${idx}`}
+                            className={`relative group cursor-pointer transition-all duration-500 ease-out flex-shrink-0 snap-center w-[80vw] md:w-[45vh] aspect-[3/4] stitched hover:-translate-y-2`}
+                            onClick={() => onImageClick(item)}
+                        >
+                            <div className="w-full h-full p-2 bg-white">
+                                <SmartImage 
+                                    src={item.src} 
+                                    fallback={item.fallback} 
+                                    alt={item.title} 
+                                    className="w-full h-full object-cover transition-all duration-700" 
+                                />
+                            </div>
+                            <div className="absolute inset-0 bg-gradient-to-t from-[#3d342b]/80 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex flex-col justify-end p-6 text-right" dir="rtl">
+                                <span className="text-[#c2a67a] text-sm font-mono mb-1">{item.year}</span>
+                                <h3 className="text-2xl serif text-[#f4f1ea]">{item.title}</h3>
+                            </div>
+                        </div>
+                    ))}
+                </div>
+            </div>
+        );
+
+        const App = () => {
+            const [lang, setLang] = useState('he'); // Force Hebrew
+            const [loaded, setLoaded] = useState(false);
+            const [introDone, setIntroDone] = useState(false);
+            const [selectedImg, setSelectedImg] = useState(null);
+            const [isHeroVisible, setIsHeroVisible] = useState(true); 
+            
+            const scrollContainerRef = useRef(null);
+            const heroRef = useRef(null);
+            const heroCloneRightRef = useRef(null);
+            const heroCloneLeftRef = useRef(null);
+            const aboutMainRef = useRef(null); 
+            const contactRef = useRef(null);
+
+            // Drag Physics State (Exact from Source)
+            const [isDown, setIsDown] = useState(false);
+            const [startX, setStartX] = useState(0);
+            const [scrollLeft, setScrollLeft] = useState(0);
+            const [velX, setVelX] = useState(0);
+            const momentumID = useRef(null);
+            const lastMoveTime = useRef(Date.now());
+            const lastMoveX = useRef(0);
+            const isScrollingRef = useRef(false); 
+
+            const t = content[lang];
+            const data = getCategoriesData(t);
+
+            // Init Scroll
+            useLayoutEffect(() => {
+                const forceCenter = () => {
+                    if (heroRef.current && scrollContainerRef.current) {
+                        const offset = heroRef.current.offsetLeft;
+                        scrollContainerRef.current.style.scrollBehavior = 'auto';
+                        scrollContainerRef.current.scrollTo(offset, 0);
+                        setTimeout(() => {
+                            if(scrollContainerRef.current) scrollContainerRef.current.style.scrollBehavior = 'smooth';
+                        }, 1000); 
+                        if (!loaded) {
+                            requestAnimationFrame(() => {
+                                if(scrollContainerRef.current) scrollContainerRef.current.classList.add('loaded');
+                                setLoaded(true);
+                            });
+                        }
+                    }
+                };
+                
+                if(introDone) {
+                    forceCenter();
+                    setTimeout(forceCenter, 100); // Double check layout
+                }
+            }, [introDone]);
+
+            // Header Observer
+            useEffect(() => {
+                const observer = new IntersectionObserver(
+                    ([entry]) => setIsHeroVisible(entry.isIntersecting),
+                    { threshold: 0.5 } 
+                );
+                if (heroRef.current) observer.observe(heroRef.current);
+                return () => observer.disconnect();
+            }, []);
+
+            // Nav Handlers
+            const scrollByAmount = (amount) => {
+                if (scrollContainerRef.current) scrollContainerRef.current.scrollBy({ left: amount, behavior: 'smooth' });
+            };
+
+            const scrollToSection = (ref) => {
+                if (ref.current) ref.current.scrollIntoView({ behavior: 'smooth' });
+            };
+
+            // Infinite Loop (Exact from Source)
+            useEffect(() => {
+                const container = scrollContainerRef.current;
+                if (!container) return;
+
+                const checkLoop = () => {
+                    if(!heroRef.current || !heroCloneRightRef.current || !heroCloneLeftRef.current) return;
+                    
+                    const scrollLeft = container.scrollLeft;
+                    const homeMainX = heroRef.current.offsetLeft;
+                    const homeCloneRightX = heroCloneRightRef.current.offsetLeft;
+                    const homeCloneLeftX = heroCloneLeftRef.current.offsetLeft;
+                    
+                    if (scrollLeft >= homeCloneRightX - 5) {
+                        container.scrollTo({ left: homeMainX + (scrollLeft - homeCloneRightX), behavior: 'auto' });
+                    }
+                    if (scrollLeft <= homeCloneLeftX + 5) {
+                         container.scrollTo({ left: homeMainX + (scrollLeft - homeCloneLeftX), behavior: 'auto' });
+                    }
+                };
+
+                container.addEventListener('scroll', checkLoop);
+                return () => container.removeEventListener('scroll', checkLoop);
+            }, [introDone]);
+
+            // Wheel (Exact from Source)
+            useEffect(() => {
+                const container = scrollContainerRef.current;
+                if (!container) return;
+                let wheelTimeout;
+                const handleWheel = (e) => {
+                    if (window.innerWidth > 768) {
+                        if (Math.abs(e.deltaY) > 5 || Math.abs(e.deltaX) > 5) {
+                            e.preventDefault();
+                            if(isScrollingRef.current) return;
+                            isScrollingRef.current = true;
+                            const direction = (e.deltaY > 0 || e.deltaX > 0) ? 1 : -1;
+                            container.scrollBy({ left: direction * window.innerWidth, behavior: 'smooth' });
+                            clearTimeout(wheelTimeout);
+                            wheelTimeout = setTimeout(() => isScrollingRef.current = false, 600); 
+                        }
+                    }
+                };
+                container.addEventListener('wheel', handleWheel, { passive: false });
+                return () => container.removeEventListener('wheel', handleWheel);
+            }, [introDone]);
+
+            // Physics (Exact from Source)
+            const cancelMomentum = () => {
+                if (momentumID.current) {
+                    cancelAnimationFrame(momentumID.current);
+                    momentumID.current = null;
+                }
+            };
+
+            const momentumLoop = () => {
+                if (!scrollContainerRef.current) return;
+                scrollContainerRef.current.scrollLeft -= velX;
+                const nextVelX = velX * 0.95; 
+                setVelX(nextVelX);
+                if (Math.abs(nextVelX) > 0.5) {
+                    momentumID.current = requestAnimationFrame(momentumLoop);
+                } else {
+                    setVelX(0);
+                }
+            };
+
+            const handleMouseDown = (e) => {
+                if ('ontouchstart' in window) return; 
+                setIsDown(true);
+                cancelMomentum();
+                if(scrollContainerRef.current) {
+                    scrollContainerRef.current.classList.add('is-dragging');
+                    setStartX(e.pageX - scrollContainerRef.current.offsetLeft);
+                    setScrollLeft(scrollContainerRef.current.scrollLeft);
+                    lastMoveX.current = e.pageX;
+                    lastMoveTime.current = Date.now();
+                }
+            };
+
+            const handleMouseLeave = () => {
+                if (!isDown) return;
+                setIsDown(false);
+                if(scrollContainerRef.current) {
+                    scrollContainerRef.current.classList.remove('is-dragging');
+                    momentumLoop(); 
+                }
+            };
+
+            const handleMouseUp = (e) => {
+                if (!isDown) return;
+                setIsDown(false);
+                if(scrollContainerRef.current) {
+                    scrollContainerRef.current.classList.remove('is-dragging');
+                    // Snap Logic
+                    const endX = e.pageX - scrollContainerRef.current.offsetLeft;
+                    const distance = startX - endX; 
+                    const viewWidth = window.innerWidth;
+                    const currentScroll = scrollContainerRef.current.scrollLeft;
+                    const threshold = 20; 
+                    let targetPage = Math.round(currentScroll / viewWidth);
+                    if (Math.abs(distance) > threshold) {
+                        const direction = distance > 0 ? 1 : -1;
+                        if (direction === 1) targetPage = Math.ceil(currentScroll / viewWidth);
+                        else targetPage = Math.floor(currentScroll / viewWidth);
+                    } 
+                    scrollContainerRef.current.scrollTo({ left: targetPage * viewWidth, behavior: 'smooth' });
+                }
+            };
+
+            const handleMouseMove = (e) => {
+                if (!isDown) return;
+                e.preventDefault();
+                const x = e.pageX - scrollContainerRef.current.offsetLeft;
+                const walk = (x - startX) * 1.5; 
+                scrollContainerRef.current.scrollLeft = scrollLeft - walk;
+                const now = Date.now();
+                const dt = now - lastMoveTime.current;
+                const dx = e.pageX - lastMoveX.current;
+                if (dt > 0) setVelX(dx / dt * 15); 
+                lastMoveX.current = e.pageX;
+                lastMoveTime.current = now;
+            };
+
+            return (
+                <div className="min-h-screen h-[100dvh] text-[#3d342b] linen-bg" dir={lang === 'he' ? 'rtl' : 'ltr'}>
+                    <div className="grain"></div>
+                    
+                    {!introDone && <Intro onComplete={() => setIntroDone(true)} />}
+
+                    {/* Nav Bar / Brand Header */}
+                    <nav className="fixed top-0 left-0 w-full p-6 md:p-8 flex justify-between items-start z-50 text-[#3d342b] pointer-events-none">
+                        <div className={`flex flex-col pointer-events-auto ${isHeroVisible ? 'brand-exit' : 'brand-enter'}`}>
+                            <span className="text-xl md:text-2xl font-bold tracking-tighter serif uppercase">{t.name}</span>
+                            <span className="text-[10px] md:text-xs opacity-70 tracking-[0.2em] uppercase mt-1">{t.role}</span>
+                        </div>
+                        <div className="flex flex-col items-end gap-4 pointer-events-auto">
+                            <div className="flex gap-2 text-xs font-bold uppercase tracking-wider">
+                                <button onClick={() => setLang('he')} className={`px-2 py-1 rounded transition-colors ${lang === 'he' ? 'bg-[#3d342b] text-[#f4f1ea]' : 'text-[#3d342b]/50 hover:text-[#3d342b]'}`}>HE</button>
+                                <button onClick={() => setLang('en')} className={`px-2 py-1 rounded transition-colors ${lang === 'en' ? 'bg-[#3d342b] text-[#f4f1ea]' : 'text-[#3d342b]/50 hover:text-[#3d342b]'}`}>EN</button>
+                            </div>
+                            <div className="flex gap-6 text-sm font-light text-[#3d342b]">
+                                <button onClick={() => scrollToSection(heroRef)} className="hover:text-[#c2a67a] transition-colors uppercase tracking-widest text-xs font-bold">{t.navHome}</button>
+                                <button onClick={() => scrollToSection(aboutMainRef)} className="hover:text-[#c2a67a] transition-colors uppercase tracking-widest text-xs font-bold">{t.navAbout}</button>
+                                <button onClick={() => scrollToSection(contactRef)} className="hover:text-[#c2a67a] transition-colors uppercase tracking-widest text-xs font-bold">{t.navContact}</button>
+                            </div>
+                        </div>
+                    </nav>
+
+                    <div 
+                        className={`horizontal-scroll-container hide-scrollbar cursor-grab active:cursor-grabbing ${introDone ? 'opacity-100' : 'opacity-0'}`}
+                        ref={scrollContainerRef}
+                        onMouseDown={handleMouseDown}
+                        onMouseLeave={handleMouseLeave}
+                        onMouseUp={handleMouseUp}
+                        onMouseMove={handleMouseMove}
+                        dir="ltr" 
+                    >
+                        {/* LEFT CLONE SECTION */}
+                        <div ref={heroCloneLeftRef}><Hero id="hero-left" t={t} isClone={true} onLeft={() => scrollByAmount(-window.innerWidth)} onRight={() => scrollByAmount(window.innerWidth)} /></div>
+                        
+                        <ContactSection t={t} />
+                        {[...data].reverse().map((cat) => (
+                            <CategoryCluster key={`left-${cat.id}`} category={cat} onImageClick={setSelectedImg} />
+                        ))}
+                        <AboutSection t={t} />
+
+                        {/* MAIN SECTION */}
+                        <Hero 
+                            id="hero-main"
+                            t={t}
+                            sectionRef={heroRef}
+                            onLeft={() => scrollByAmount(-window.innerWidth)} 
+                            onRight={() => scrollByAmount(window.innerWidth)} 
+                            onText={() => scrollByAmount(window.innerWidth)} 
+                        />
+                        
+                        {/* RIGHT SECTION (Natural Order: About -> Gallery -> Contact) */}
+                        <AboutSection t={t} sectionRef={aboutMainRef} />
+                        {data.map((cat) => (
+                            <CategoryCluster key={`right-${cat.id}`} category={cat} onImageClick={setSelectedImg} />
+                        ))}
+                        <ContactSection t={t} sectionRef={contactRef} />
+                        
+                        {/* RIGHT CLONE SECTION */}
+                        <div ref={heroCloneRightRef}><Hero id="hero-right" t={t} isClone={true} onLeft={() => scrollByAmount(-window.innerWidth)} onRight={() => scrollByAmount(window.innerWidth)} /></div>
+                    </div>
+
+                    {selectedImg && (
+                        <div 
+                            className="fixed inset-0 z-[100] bg-[#3d342b]/95 backdrop-blur-sm flex items-center justify-center p-0 animate-[fadeIn_0.3s_ease-out] cursor-auto"
+                            onClick={() => setSelectedImg(null)} 
+                        >
+                            <button className="absolute top-6 right-6 text-white/50 hover:text-white z-50 p-4"><Icons.X /></button>
+                            <div className="w-full h-full md:max-w-7xl md:h-[85vh] grid grid-cols-1 md:grid-cols-3 md:gap-12 items-center p-4 md:p-8 pointer-events-none">
+                                <div className="md:col-span-2 h-[55vh] md:h-full flex items-center justify-center bg-[#f4f1ea] p-2 stitched pointer-events-auto" onClick={(e) => e.stopPropagation()}>
+                                    <img src={selectedImg.src} className="max-h-full max-w-full object-contain" />
+                                </div>
+                                <div className="md:col-span-1 flex flex-col justify-center mt-8 md:mt-0 text-right pointer-events-auto" dir="rtl" onClick={(e) => e.stopPropagation()}>
+                                    <div className="w-12 h-px bg-[#c2a67a] mb-6 ml-auto"></div>
+                                    <h3 className="text-4xl md:text-5xl serif text-[#f4f1ea] mb-2">{selectedImg.title}</h3>
+                                    <p className="text-[#c2a67a] font-mono text-base tracking-widest">{selectedImg.year}</p>
+                                </div>
+                            </div>
+                        </div>
+                    )}
+                </div>
+            );
+        };
+
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(<App />);
+    </script>
+</body>
+</html>
