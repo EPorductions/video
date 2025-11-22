@@ -556,23 +556,29 @@
                 return () => observer.disconnect();
             }, []);
 
-            // --- Navigation Logic (Fixed for bi-directional) ---
+            // --- Navigation Logic (Smart Nearest Neighbor) ---
             const navigateTo = (target) => {
                 const container = scrollContainerRef.current;
-                const hero = heroRef.current;
-                if (!container || !hero) return;
+                if (!container || !heroRef.current) return;
 
                 const currentScroll = container.scrollLeft;
-                const heroLeft = hero.offsetLeft;
-                
-                // Identify if user is currently viewing the "left side" of the timeline
-                // (Left of the Main Hero)
+                const heroLeft = heroRef.current.offsetLeft;
                 const isLeftContext = currentScroll < (heroLeft - 10); 
 
                 let destRef = null;
 
                 if (target === 'home') {
-                    destRef = heroRef; // Always go to center
+                    // Find closest Home (Main, Left Clone, or Right Clone)
+                    const homes = [
+                        { ref: heroCloneLeftRef, dist: Math.abs((heroCloneLeftRef.current?.offsetLeft || 0) - currentScroll) },
+                        { ref: heroRef, dist: Math.abs(heroRef.current.offsetLeft - currentScroll) },
+                        { ref: heroCloneRightRef, dist: Math.abs((heroCloneRightRef.current?.offsetLeft || 0) - currentScroll) }
+                    ].filter(h => h.ref.current); // Ensure ref exists
+                    
+                    // Sort by distance and pick the closest
+                    homes.sort((a, b) => a.dist - b.dist);
+                    destRef = homes[0].ref;
+
                 } else if (target === 'about') {
                     destRef = isLeftContext ? aboutLeftRef : aboutMainRef;
                 } else if (target === 'contact') {
@@ -580,7 +586,6 @@
                 }
 
                 if (destRef && destRef.current) {
-                    // Use explicit scrollTo calculation for accuracy
                     container.scrollTo({
                         left: destRef.current.offsetLeft,
                         behavior: 'smooth'
@@ -811,11 +816,11 @@
                                 <div ref={heroCloneLeftRef}>
                                     <Hero id="hero-left" t={t} lang={lang} isClone={true} onLeft={handleLeftArrow} onRight={handleRightArrow} onText={handleStartStory} />
                                 </div>
-                                <ContactSection t={t} sectionRef={contactLeftRef} />
+                                <ContactSection t={t} />
                                 {[...data].reverse().map((cat) => (
                                     <CategoryCluster key={`left-${cat.id}`} category={cat} onImageClick={setSelectedImg} />
                                 ))}
-                                <AboutSection t={t} sectionRef={aboutLeftRef} />
+                                <AboutSection t={t} />
 
                                 {/* MAIN SECTION */}
                                 <Hero 
@@ -843,7 +848,6 @@
                         )}
                     </div>
 
-                    {/* Modal with Conditional Text */}
                     {selectedImg && (
                         <div 
                             className="fixed inset-0 z-[100] bg-black/95 backdrop-blur-xl flex items-center justify-center p-0 animate-[fadeIn_0.3s_ease-out] cursor-auto"
@@ -857,30 +861,15 @@
                             </button>
                             
                             <div className="w-full h-full md:max-w-7xl md:h-[85vh] grid grid-cols-1 md:grid-cols-3 md:gap-12 items-center p-4 md:p-8 pointer-events-none">
-                                <div className={`md:col-span-2 h-[55vh] md:h-full flex items-center justify-center bg-[#0a0a0a] rounded-sm overflow-hidden shadow-2xl pointer-events-auto ${!selectedImg.hasMetadata ? 'md:col-span-3' : ''}`} onClick={(e) => e.stopPropagation()}>
-                                    <img src={selectedImg.src} alt={selectedImg.title || 'Artwork'} className="max-h-full max-w-full object-contain" />
+                                <div className="md:col-span-2 h-[55vh] md:h-full flex items-center justify-center bg-[#0a0a0a] rounded-sm overflow-hidden shadow-2xl pointer-events-auto" onClick={(e) => e.stopPropagation()}>
+                                    <img src={selectedImg.src} alt={selectedImg.title} className="max-h-full max-w-full object-contain" />
                                 </div>
-                                
-                                {selectedImg.hasMetadata && (
-                                    <div className="md:col-span-1 flex flex-col justify-center mt-8 md:mt-0 text-right pointer-events-auto h-full overflow-y-auto" dir={isRTL ? 'rtl' : 'ltr'} onClick={(e) => e.stopPropagation()}>
-                                        <div className="w-12 h-px bg-[#d4a373] mb-6 ml-auto"></div>
-                                        <h3 className="text-4xl md:text-5xl serif text-white mb-2">{selectedImg.title}</h3>
-                                        {selectedImg.subtitle && <h4 className="text-xl text-gray-400 mb-4 italic">{selectedImg.subtitle}</h4>}
-                                        <p className="text-[#d4a373] font-mono text-base md:text-lg mb-6 tracking-widest">{selectedImg.year}</p>
-                                        
-                                        <div className="text-gray-300 font-light leading-relaxed text-lg border-t border-white/10 pt-6 space-y-4">
-                                            <p>{selectedImg.story}</p>
-                                            {selectedImg.secondaryStory && <p className="text-sm opacity-80">{selectedImg.secondaryStory}</p>}
-                                            
-                                            <div className="mt-8 space-y-2 text-sm font-mono text-gray-500">
-                                                {selectedImg.technique && <div className="flex justify-between border-b border-white/5 pb-1"><span>{t.metadataLabels.technique}</span> <span className="text-gray-300">{selectedImg.technique}</span></div>}
-                                                {selectedImg.materials && <div className="flex justify-between border-b border-white/5 pb-1"><span>{t.metadataLabels.materials}</span> <span className="text-gray-300">{selectedImg.materials}</span></div>}
-                                                {selectedImg.canvasType && <div className="flex justify-between border-b border-white/5 pb-1"><span>{t.metadataLabels.canvas}</span> <span className="text-gray-300">{selectedImg.canvasType}</span></div>}
-                                                {selectedImg.process && <div className="mt-4 pt-2 border-t border-white/5"><span className="block mb-1 opacity-50">Process:</span><p className="italic">{selectedImg.process}</p></div>}
-                                            </div>
-                                        </div>
-                                    </div>
-                                )}
+                                <div className="md:col-span-1 flex flex-col justify-center mt-8 md:mt-0 text-right pointer-events-auto" dir={isRTL ? 'rtl' : 'ltr'} onClick={(e) => e.stopPropagation()}>
+                                    <div className="w-12 h-px bg-[#d4a373] mb-6 ml-auto"></div>
+                                    <h3 className="text-4xl md:text-6xl serif text-white mb-2">{selectedImg.title}</h3>
+                                    <p className="text-[#d4a373] font-mono text-base md:text-lg mb-6 tracking-widest">{selectedImg.year}</p>
+                                    <p className="text-gray-300 font-light leading-relaxed text-lg md:text-xl border-t border-white/10 pt-6">{selectedImg.story}</p>
+                                </div>
                             </div>
                         </div>
                     )}
