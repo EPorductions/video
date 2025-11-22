@@ -11,11 +11,12 @@
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
     <script src="https://cdn.tailwindcss.com"></script>
     
-    <!-- Fonts: Heebo -->
+    <!-- Fonts: Heebo (Modern, Clean) -->
     <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@100;300;400;500;700;900&display=swap" rel="stylesheet">
     
     <style>
         :root {
+            /* Palette */
             --bg-linen: #fbf9f4;
             --bg-dark-linen: #f0ebe0;
             --thread-color: #8c7b6c;
@@ -43,7 +44,7 @@
         .serif { font-family: 'Heebo', sans-serif; font-weight: 200; }
         strong, b { font-weight: 700; }
 
-        /* Texture Background */
+        /* Background Texture - Woven Cross-Hatch */
         .linen-bg {
             background-color: var(--bg-linen);
             background-image: 
@@ -53,13 +54,14 @@
             background-position: 0 0, 10px 10px;
         }
 
+        /* Noise Overlay */
         .grain {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             pointer-events: none; z-index: 50; opacity: 0.04;
             background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
         }
 
-        /* Stitched Effect */
+        /* Stitched Card Effect */
         .stitched {
             position: relative;
             box-shadow: 4px 6px 15px rgba(0,0,0,0.08);
@@ -75,7 +77,7 @@
             border: 1px dotted var(--accent-gold); pointer-events: none; opacity: 0.6;
         }
         
-        /* Horizontal Scroll */
+        /* Scroll Container */
         .horizontal-scroll-container {
             display: flex;
             flex-direction: row;
@@ -101,8 +103,11 @@
         .vertical-text { writing-mode: vertical-rl; text-orientation: mixed; transform: rotate(180deg); }
         .layout-transition { transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1); }
         
-        .brand-enter { opacity: 1; transform: translateY(0); transition: opacity 0.8s ease-out, transform 0.8s ease-out; }
-        .brand-exit { opacity: 0; transform: translateY(-20px); transition: opacity 0.5s ease-in, transform 0.5s ease-in; pointer-events: none; }
+        /* Header Animation */
+        .brand-header {
+            transition: transform 0.3s ease, opacity 0.3s ease; 
+            will-change: transform, opacity;
+        }
 
         @keyframes weaveVert { 0% { height: 0; } 100% { height: 100%; } }
         @keyframes weaveHoriz { 0% { width: 0; } 100% { width: 100%; } }
@@ -127,7 +132,7 @@
             Phone: () => <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path></svg>,
         };
 
-        // --- Texts ---
+        // --- Content ---
         const content = {
             he: {
                 name: "בת שבע ליבנה",
@@ -147,7 +152,12 @@
                 emailLabel: "אימייל",
                 phoneLabel: "טלפון",
                 rights: "© 2025 כל הזכויות שמורות לבת שבע ליבנה",
-                categories: { cat1: "מרקמים", cat2: "טבע וצבע", cat3: "אריגה חופשית", cat4: "חוטים מספרים" }
+                categories: { 
+                    cat1: "מרקמים",
+                    cat2: "טבע וצבע",
+                    cat3: "אריגה חופשית",
+                    cat4: "חוטים מספרים"
+                }
             },
             en: {
                 name: "Bat Sheva Livne",
@@ -167,13 +177,26 @@
                 emailLabel: "Email",
                 phoneLabel: "Phone",
                 rights: "© 2025 All Rights Reserved",
-                categories: { cat1: "Textures", cat2: "Nature & Color", cat3: "Free Weaving", cat4: "Narrative Threads" }
+                categories: { 
+                    cat1: "Textures",
+                    cat2: "Nature & Color",
+                    cat3: "Free Weaving",
+                    cat4: "Narrative Threads"
+                }
             }
         };
 
+        // --- Data Generation (31 Images) ---
         const getCategoriesData = (t) => {
             const allImages = Array.from({ length: 31 }, (_, i) => i + 1);
-            const makeImg = (id) => ({ id, src: `bat7_pics/pic (${id}).jpg`, fallback: `bat7_pics/pic (${id}).jpeg`, title: `${t.role} ${id}`, year: '2024' });
+            const makeImg = (id) => ({ 
+                id, 
+                src: `bat7_pics/pic (${id}).jpg`, 
+                fallback: `bat7_pics/pic (${id}).jpeg`, 
+                title: `${t.role} ${id}`, 
+                year: '2024' 
+            });
+            // Split into 4 logical groups
             return [
                 { id: 'cat1', title: t.categories.cat1, items: allImages.slice(0, 8).map(makeImg) },
                 { id: 'cat2', title: t.categories.cat2, items: allImages.slice(8, 16).map(makeImg) },
@@ -306,19 +329,20 @@
             const [loaded, setLoaded] = useState(false);
             const [introDone, setIntroDone] = useState(false);
             const [selectedImg, setSelectedImg] = useState(null);
-            const [isHeroVisible, setIsHeroVisible] = useState(true); 
             
             const scrollContainerRef = useRef(null);
-            const heroRef = useRef(null); // Main Home
+            const heroRef = useRef(null);
             const heroCloneRightRef = useRef(null);
             const heroCloneLeftRef = useRef(null);
             const aboutMainRef = useRef(null); 
             const contactRef = useRef(null);
+            const headerRef = useRef(null);
 
-            const [isDown, setIsDown] = useState(false);
-            const [startX, setStartX] = useState(0);
-            const [scrollLeft, setScrollLeft] = useState(0);
-            const [velX, setVelX] = useState(0);
+            // Physics Refs (For stability inside listeners)
+            const isDown = useRef(false);
+            const startX = useRef(0);
+            const scrollLeft = useRef(0);
+            const velX = useRef(0);
             const momentumID = useRef(null);
             const lastMoveTime = useRef(Date.now());
             const lastMoveX = useRef(0);
@@ -327,52 +351,93 @@
             const t = content[lang];
             const data = getCategoriesData(t);
 
+            // Init Force Center
             useLayoutEffect(() => {
                 const forceCenter = () => {
                     if (heroRef.current && scrollContainerRef.current) {
                         const offset = heroRef.current.offsetLeft;
                         scrollContainerRef.current.style.scrollBehavior = 'auto';
-                        scrollContainerRef.current.scrollTo(offset, 0);
-                        setTimeout(() => { if(scrollContainerRef.current) scrollContainerRef.current.style.scrollBehavior = 'smooth'; }, 1000); 
-                        if (!loaded) {
-                            requestAnimationFrame(() => { if(scrollContainerRef.current) scrollContainerRef.current.classList.add('loaded'); setLoaded(true); });
-                        }
+                        scrollContainerRef.current.scrollLeft = offset;
+                        requestAnimationFrame(() => { if(scrollContainerRef.current) scrollContainerRef.current.scrollLeft = offset; });
+                        setTimeout(() => { if(scrollContainerRef.current) scrollContainerRef.current.style.scrollBehavior = 'smooth'; }, 500); 
+                        if (!loaded) { requestAnimationFrame(() => { if(scrollContainerRef.current) scrollContainerRef.current.classList.add('loaded'); setLoaded(true); }); }
                     }
                 };
                 if(introDone) { forceCenter(); setTimeout(forceCenter, 100); }
             }, [introDone]);
 
-            useEffect(() => {
-                const observer = new IntersectionObserver(
-                    ([entry]) => setIsHeroVisible(entry.isIntersecting), { threshold: 0.5 } 
-                );
-                const els = [heroRef.current, heroCloneRightRef.current, heroCloneLeftRef.current];
-                els.forEach(el => { if(el) observer.observe(el); });
-                return () => observer.disconnect();
-            }, [introDone]);
-
-            const scrollByAmount = (amount) => { if (scrollContainerRef.current) scrollContainerRef.current.scrollBy({ left: amount, behavior: 'smooth' }); };
-            const scrollToSection = (ref) => { if (ref.current) ref.current.scrollIntoView({ behavior: 'smooth' }); };
-
-            // Infinite Loop Logic
+            // Scroll Logic (Infinite + Header)
             useEffect(() => {
                 const container = scrollContainerRef.current;
                 if (!container) return;
-                const checkLoop = () => {
+
+                const handleScroll = () => {
                     if(!heroRef.current || !heroCloneRightRef.current || !heroCloneLeftRef.current) return;
-                    const scrollLeft = container.scrollLeft;
+                    
+                    const currentScroll = container.scrollLeft;
                     const homeMainX = heroRef.current.offsetLeft;
                     const homeCloneRightX = heroCloneRightRef.current.offsetLeft;
                     const homeCloneLeftX = heroCloneLeftRef.current.offsetLeft;
+                    const viewW = window.innerWidth;
+
+                    // SEAMLESS JUMP LOGIC
+                    // If we hit a clone, we shift the scroll position INSTANTLY to the main hero
+                    // We also shift the physics 'startX' if dragging, so the user feels no jump.
+                    let jumpDelta = 0;
                     
-                    // Tighter threshold for seamless jump
-                    if (scrollLeft >= homeCloneRightX - 5) { container.scrollTo({ left: homeMainX, behavior: 'auto' }); }
-                    if (scrollLeft <= homeCloneLeftX + 5) { container.scrollTo({ left: homeMainX, behavior: 'auto' }); }
+                    // Threshold must be tight but allow small errors
+                    if (currentScroll >= homeCloneRightX - 10) { 
+                        const offsetIntoClone = currentScroll - homeCloneRightX;
+                        const newPos = homeMainX + offsetIntoClone;
+                        container.style.scrollBehavior = 'auto';
+                        container.scrollLeft = newPos;
+                        container.style.scrollBehavior = 'smooth';
+                        jumpDelta = newPos - currentScroll;
+                    }
+                    else if (currentScroll <= homeCloneLeftX + 10) {
+                        const offsetIntoClone = currentScroll - homeCloneLeftX;
+                        const newPos = homeMainX + offsetIntoClone;
+                        container.style.scrollBehavior = 'auto';
+                        container.scrollLeft = newPos;
+                        container.style.scrollBehavior = 'smooth';
+                        jumpDelta = newPos - currentScroll;
+                    }
+
+                    // Adjust dragging reference if a jump happened
+                    if (isDown.current && jumpDelta !== 0) {
+                        scrollLeft.current += jumpDelta; 
+                        // Don't touch startX, touch event is absolute. We just shift the anchor base.
+                    }
+
+                    // Sticky Header Visibility
+                    if (headerRef.current) {
+                        const threshold = viewW * 0.6;
+                        const distMain = Math.abs(currentScroll - homeMainX);
+                        const distRight = Math.abs(currentScroll - homeCloneRightX);
+                        const distLeft = Math.abs(currentScroll - homeCloneLeftX);
+                        const isNearHero = (distMain < threshold) || (distRight < threshold) || (distLeft < threshold);
+                        
+                        if (isNearHero) {
+                            headerRef.current.style.transform = 'translateY(-20px)';
+                            headerRef.current.style.opacity = '0';
+                            headerRef.current.style.pointerEvents = 'none';
+                        } else {
+                            headerRef.current.style.transform = 'translateY(0)';
+                            headerRef.current.style.opacity = '1';
+                            headerRef.current.style.pointerEvents = 'auto';
+                        }
+                    }
                 };
-                container.addEventListener('scroll', checkLoop);
-                return () => container.removeEventListener('scroll', checkLoop);
+
+                container.addEventListener('scroll', handleScroll);
+                return () => container.removeEventListener('scroll', handleScroll);
             }, [introDone]);
 
+            // Navigation
+            const scrollByAmount = (amount) => { if (scrollContainerRef.current) scrollContainerRef.current.scrollBy({ left: amount, behavior: 'smooth' }); };
+            const scrollToSection = (ref) => { if (ref.current) ref.current.scrollIntoView({ behavior: 'smooth' }); };
+
+            // Wheel
             useEffect(() => {
                 const container = scrollContainerRef.current;
                 if (!container) return;
@@ -394,43 +459,60 @@
                 return () => container.removeEventListener('wheel', handleWheel);
             }, [introDone]);
 
+            // Drag Physics Implementation
             const cancelMomentum = () => { if (momentumID.current) { cancelAnimationFrame(momentumID.current); momentumID.current = null; } };
             const momentumLoop = () => {
                 if (!scrollContainerRef.current) return;
-                scrollContainerRef.current.scrollLeft -= velX;
-                const nextVelX = velX * 0.95; setVelX(nextVelX);
-                if (Math.abs(nextVelX) > 0.5) momentumID.current = requestAnimationFrame(momentumLoop); else setVelX(0);
+                scrollContainerRef.current.scrollLeft -= velX.current;
+                velX.current *= 0.95; // Friction
+                if (Math.abs(velX.current) > 0.5) momentumID.current = requestAnimationFrame(momentumLoop); else velX.current = 0;
             };
             const handleMouseDown = (e) => {
-                if ('ontouchstart' in window) return; setIsDown(true); cancelMomentum();
-                if(scrollContainerRef.current) { scrollContainerRef.current.classList.add('is-dragging'); setStartX(e.pageX - scrollContainerRef.current.offsetLeft); setScrollLeft(scrollContainerRef.current.scrollLeft); lastMoveX.current = e.pageX; lastMoveTime.current = Date.now(); }
+                if ('ontouchstart' in window) return; 
+                isDown.current = true; cancelMomentum();
+                if(scrollContainerRef.current) { 
+                    scrollContainerRef.current.classList.add('is-dragging'); 
+                    setStartX(e.pageX - scrollContainerRef.current.offsetLeft); 
+                    scrollLeft.current = scrollContainerRef.current.scrollLeft; 
+                    lastMoveX.current = e.pageX; lastMoveTime.current = Date.now(); 
+                }
             };
-            const handleMouseLeave = () => { if (!isDown) return; setIsDown(false); if(scrollContainerRef.current) { scrollContainerRef.current.classList.remove('is-dragging'); momentumLoop(); } };
+            const handleMouseLeave = () => { if (!isDown.current) return; isDown.current = false; if(scrollContainerRef.current) { scrollContainerRef.current.classList.remove('is-dragging'); momentumLoop(); } };
             const handleMouseUp = (e) => {
-                if (!isDown) return; setIsDown(false);
+                if (!isDown.current) return; isDown.current = false;
                 if(scrollContainerRef.current) {
                     scrollContainerRef.current.classList.remove('is-dragging');
+                    // Snap if dragged enough
                     const endX = e.pageX - scrollContainerRef.current.offsetLeft;
-                    const distance = startX - endX; const viewWidth = window.innerWidth; const currentScroll = scrollContainerRef.current.scrollLeft;
+                    const distance = startX.current - endX; 
+                    const viewWidth = window.innerWidth; const currentScroll = scrollContainerRef.current.scrollLeft;
                     let targetPage = Math.round(currentScroll / viewWidth);
-                    if (Math.abs(distance) > 20) { const direction = distance > 0 ? 1 : -1; targetPage = direction === 1 ? Math.ceil(currentScroll / viewWidth) : Math.floor(currentScroll / viewWidth); } 
+                    if (Math.abs(distance) > 20) { 
+                        const direction = distance > 0 ? 1 : -1; 
+                        targetPage = direction === 1 ? Math.ceil(currentScroll / viewWidth) : Math.floor(currentScroll / viewWidth); 
+                    } 
                     scrollContainerRef.current.scrollTo({ left: targetPage * viewWidth, behavior: 'smooth' });
                 }
             };
             const handleMouseMove = (e) => {
-                if (!isDown) return; e.preventDefault();
-                const x = e.pageX - scrollContainerRef.current.offsetLeft; const walk = (x - startX) * 1.5; 
-                scrollContainerRef.current.scrollLeft = scrollLeft - walk;
+                if (!isDown.current) return; e.preventDefault();
+                const x = e.pageX - scrollContainerRef.current.offsetLeft; 
+                const walk = (x - startX.current) * 1.5; 
+                scrollContainerRef.current.scrollLeft = scrollLeft.current - walk;
+                
+                // Calculate Velocity
                 const now = Date.now(); const dt = now - lastMoveTime.current; const dx = e.pageX - lastMoveX.current;
-                if (dt > 0) setVelX(dx / dt * 15); lastMoveX.current = e.pageX; lastMoveTime.current = now;
+                if (dt > 0) velX.current = dx / dt * 15; 
+                lastMoveX.current = e.pageX; lastMoveTime.current = now;
             };
 
             return (
                 <div className="min-h-screen h-[100dvh] text-[#3d342b] linen-bg" dir={lang === 'he' ? 'rtl' : 'ltr'}>
                     <div className="grain"></div>
                     {!introDone && <Intro onComplete={() => setIntroDone(true)} />}
-                    <nav className="fixed top-0 left-0 w-full p-6 md:p-8 flex justify-between items-start z-50 text-[#3d342b] pointer-events-none">
-                        <div className={`flex flex-col pointer-events-auto ${isHeroVisible ? 'brand-exit' : 'brand-enter'}`}>
+                    
+                    <nav ref={headerRef} className="fixed top-0 left-0 w-full p-6 md:p-8 flex justify-between items-start z-50 text-[#3d342b] pointer-events-none brand-header" style={{opacity: 0, transform: 'translateY(-20px)'}}>
+                        <div className={`flex flex-col pointer-events-auto`}>
                             <span className="text-xl md:text-2xl font-bold tracking-tighter serif uppercase text-[#d66853] drop-shadow-sm font-black">{t.name}</span>
                             <span className="text-[10px] md:text-xs opacity-80 tracking-[0.2em] uppercase mt-1 text-[#2a9d8f] font-bold">{t.role}</span>
                         </div>
