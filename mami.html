@@ -60,13 +60,16 @@
             width: 100%;
             
             -webkit-overflow-scrolling: touch; 
-            scroll-snap-type: x proximity; 
+            /* scroll-snap is managed via JS for better control with infinite loop */
             
             align-items: center;
             direction: ltr;
             
             opacity: 0;
             transition: opacity 0.5s ease-in;
+            
+            /* IMPORTANT: Keep auto to allow JS manual smoothing and instant loop jumps */
+            scroll-behavior: auto; 
         }
         
         .horizontal-scroll-container.loaded {
@@ -78,15 +81,12 @@
 
         .snap-center {
             scroll-snap-align: center;
-            scroll-snap-stop: normal; 
         }
 
         .cursor-grab { cursor: grab; }
         .is-dragging { 
             cursor: grabbing; 
             user-select: none; 
-            scroll-snap-type: none; 
-            scroll-behavior: auto !important; 
         }
 
         .vertical-text {
@@ -129,12 +129,6 @@
         }
 
         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
-
-        @media (max-width: 768px) {
-            .horizontal-scroll-container {
-                scroll-snap-type: x mandatory; 
-            }
-        }
     </style>
 </head>
 <body>
@@ -248,6 +242,41 @@
             }
         };
 
+        // --- Fallback Data ---
+        const fallbackData = {
+            crows: [
+                { id: 30, src: '30.jpg', year: '2019' },
+                { id: 14, src: '14.jpg', year: '2019' },
+                { id: 15, src: '15.jpg', year: '2019', isWide: true },
+                { id: 7, src: '7.jpg', year: '2018' },
+            ],
+            movies: [
+                { id: 25, src: '25.jpg', year: '2020', isWide: true },
+                { id: '5b', src: '5.jpg', year: '2020' }, 
+                { id: 23, src: '23.jpg', year: '2020' },
+                { id: 4, src: '4.jpg', year: '2018' },
+            ],
+            masks: [
+                { id: 13, src: '13.jpg', year: '2021', isWide: true },
+                { id: 21, src: '21.jpg', year: '2021' },
+                { id: 22, src: '22.jpg', year: '2021' },
+            ],
+            portrait: [
+                { id: 8, src: '8.jpg', year: '2018' },
+                { id: 3, src: '3.jpg', year: '2018' },
+                { id: 5, src: '5.jpg', year: '2018' },
+            ],
+            abstract: [
+                { id: 6, src: '6.jpg', year: '2018', isWide: true },
+                { id: 2, src: '2.jpg', year: '2018' },
+                { id: 9, src: '9.jpg', year: '2020', isWide: true },
+            ],
+            still: [
+                { id: 1, src: '1.jpg', year: '2018' },
+                { id: 4, src: '4.jpg', year: '2018' },
+            ]
+        };
+
         // --- Item Specific Translations ---
         const itemTranslations = {
             1: { he: { title: 'טבע דומם באדום', story: "חקירה של הצבע האדום והשפעתו על החלל." }, en: { title: 'Still Life in Red', story: "Exploration of the red color and its effect on space." }, hu: { title: 'Csendélet Vörösben', story: "A vörös szín és a térre gyakorolt hatásának kutatása." } },
@@ -256,6 +285,7 @@
             8: { he: { title: 'פורטרט פנימי', story: "ציור מצב הרוח הפנימי." }, en: { title: 'Inner Portrait', story: "Painting the inner mood." }, hu: { title: 'Belső Portré', story: "A belső hangulat megfestése." } },
             3: { he: { title: 'דמות וצל', story: "מפגש דרמטי בין דמות לצל." }, en: { title: 'Figure and Shadow', story: "A dramatic encounter between figure and shadow." }, hu: { title: 'Alak és Árnyék', story: "Drámai találkozás alak és árnyék között." } },
             5: { he: { title: 'יד מושטת', story: "מחווה אנושית בסיסית." }, en: { title: 'Outstretched Hand', story: "A basic human gesture." }, hu: { title: 'Kinyújtott Kéz', story: "Egy alapvető emberi gesztus." } },
+            '5b': { he: { title: 'הקהל', story: "התבוננות בקהל צופים." }, en: { title: 'The Audience', story: "Observing the spectators." }, hu: { title: 'A Közönség', story: "A nézők megfigyelése." } },
             6: { he: { title: 'קומפוזיציה בצבע', story: "משחק של כתמי צבע ואיזון." }, en: { title: 'Composition in Color', story: "A play of color patches and balance." }, hu: { title: 'Színes Kompozíció', story: "Színfoltok és egyensúly játéka." } },
             2: { he: { title: 'רישום מופשט', story: "קוים חופשיים המנסים ללכוד תנועה." }, en: { title: 'Abstract Drawing', story: "Free lines attempting to capture movement." }, hu: { title: 'Absztrakt Rajz', story: "Szabad vonalak, amelyek a mozgást próbálják megragadni." } },
             9: { he: { title: 'שלושה שלבים', story: "תהליך של שינוי וזמן." }, en: { title: 'Three Stages', story: "A process of change and time." }, hu: { title: 'Három Szakasz', story: "A változás és az idő folyamata." } },
@@ -263,74 +293,10 @@
             14: { he: { title: 'מתווה ציפור', story: "תנועה מהירה ברישום פחם." }, en: { title: 'Bird Sketch', story: "Quick movement in charcoal." }, hu: { title: 'Madárvázlat', story: "Gyors mozdulat szénrajzban." } },
             15: { he: { title: 'נוכחות שחורה', story: "העורב ככתם וכנוכחות." }, en: { title: 'Black Presence', story: "The crow as a stain and presence." }, hu: { title: 'Fekete Jelenlét', story: "A varjú mint folt ונוכחות." } },
             25: { he: { title: 'איש הגשם', story: "סצנה מתוך סרט, בדידות אורבנית." }, en: { title: 'Rain Man', story: "A scene from a movie, urban solitude." }, hu: { title: 'Esőember', story: "Jelenet egy filmből, városi magány." } },
-            5: { he: { title: 'הקהל', story: "התבוננות בקהל צופים." }, en: { title: 'The Audience', story: "Observing the spectators." }, hu: { title: 'A Közönség', story: "A nézők megfigyelése." } },
             23: { he: { title: 'ספרים', story: "רגע של קריאה אינטימית." }, en: { title: 'Books', story: "A moment of intimate reading." }, hu: { title: 'Könyvek', story: "Az olvasás intim pillanata." } },
             13: { he: { title: 'ריבוי פנים', story: "מסכות ופרצופים מתמזגים." }, en: { title: 'Many Faces', story: "Masks and faces merging." }, hu: { title: 'Sok Arc', story: "Maszkok és arcok összeolvadása." } },
             21: { he: { title: 'הגברת', story: "דמות אניגמטית מאחורי משקפיים." }, en: { title: 'The Lady', story: "Enigmatic figure behind glasses." }, hu: { title: 'A Hölgy', story: "Rejtélyes alak szemüveg mögött." } },
             22: { he: { title: 'הרהור', story: "מבט פנימה." }, en: { title: 'Reflection', story: "Looking inward." }, hu: { title: 'Elmélkedés', story: "Befelé tekintés." } }
-        };
-
-        // --- Data Generation with Localization ---
-        const getCategoriesData = (t, lang) => {
-            const getText = (id) => itemTranslations[id] ? itemTranslations[id][lang] : { title: `Artwork ${id}`, story: "..." };
-
-            return [
-                {
-                    id: 'crows',
-                    title: t.categories.crows,
-                    items: [
-                        { id: 30, src: '30.jpg', year: '2019', ...getText(30) },
-                        { id: 14, src: '14.jpg', year: '2019', ...getText(14) },
-                        { id: 15, src: '15.jpg', year: '2019', isWide: true, ...getText(15) },
-                        { id: 7, src: '7.jpg', year: '2018', ...getText(7) }, 
-                    ]
-                },
-                {
-                    id: 'movies',
-                    title: t.categories.movies,
-                    items: [
-                        { id: 25, src: '25.jpg', year: '2020', isWide: true, ...getText(25) },
-                        { id: 5, src: '5.jpg', year: '2020', ...getText(5) },
-                        { id: 23, src: '23.jpg', year: '2020', ...getText(23) },
-                        { id: 4, src: '4.jpg', year: '2018', ...getText(4) },
-                    ]
-                },
-                 {
-                    id: 'masks',
-                    title: t.categories.masks,
-                    items: [
-                        { id: 13, src: '13.jpg', year: '2021', isWide: true, ...getText(13) },
-                        { id: 21, src: '21.jpg', year: '2021', ...getText(21) },
-                        { id: 22, src: '22.jpg', year: '2021', ...getText(22) },
-                    ]
-                },
-                {
-                    id: 'portrait',
-                    title: t.categories.portrait,
-                    items: [
-                        { id: 8, src: '8.jpg', year: '2018', ...getText(8) },
-                        { id: 3, src: '3.jpg', year: '2018', ...getText(3) },
-                        { id: 5, src: '5.jpg', year: '2018', ...getText(5) },
-                    ]
-                },
-                {
-                    id: 'abstract',
-                    title: t.categories.abstract,
-                    items: [
-                        { id: 6, src: '6.jpg', year: '2018', isWide: true, ...getText(6) },
-                        { id: 2, src: '2.jpg', year: '2018', ...getText(2) },
-                        { id: 9, src: '9.jpg', year: '2020', isWide: true, ...getText(9) },
-                    ]
-                },
-                {
-                    id: 'still',
-                    title: t.categories.still,
-                    items: [
-                        { id: 1, src: '1.jpg', year: '2018', ...getText(1) },
-                        { id: 4, src: '4.jpg', year: '2018', ...getText(4) },
-                    ]
-                }
-            ];
         };
 
         // --- Reusable Components ---
@@ -350,9 +316,7 @@
                             src="SIGN.png" 
                             alt={t.heroTitle}
                             className="w-full h-auto object-contain"
-                            style={{
-                                opacity: 0.9 
-                            }}
+                            style={{ opacity: 0.9 }}
                             onError={(e) => {
                                 e.target.style.display = 'none';
                                 e.target.parentNode.innerHTML = `<h1 class="text-[10vw] md:text-[8vw] leading-[0.9] font-black text-[#e5e5e5] mix-blend-overlay tracking-tighter mb-4 text-center w-full drop-shadow-lg">${t.heroTitle}</h1>`;
@@ -379,7 +343,6 @@
             >
                 <div className="w-full h-full overflow-y-auto custom-scrollbar flex flex-col items-center justify-center p-6 pt-28 md:pt-6">
                     <div className="max-w-6xl w-full grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-16 items-center my-auto">
-                        {/* Replaced text-[min(4vw,18px)] with simpler text-sm md:text-lg to prevent mobile crashes */}
                         <div className="order-2 md:order-1 space-y-6 text-center md:text-start w-full max-w-[90vw] md:max-w-full mx-auto px-0" dir={t.name === "אליז שנון אדלני" ? 'rtl' : 'ltr'}>
                             <h2 className="text-3xl md:text-7xl serif text-[#d4a373]">{t.aboutTitle}</h2>
                             <div className="space-y-4 md:space-y-6 text-sm md:text-xl font-light text-gray-300 leading-relaxed break-words">
@@ -411,7 +374,6 @@
                            <span className="text-[#d4a373] text-sm tracking-[0.3em] uppercase mb-4 block">{t.contactTitle}</span>
                            <h2 className="text-3xl md:text-7xl serif text-white leading-tight">{t.contactTitle}</h2>
                        </div>
-                       {/* Replaced text-[min(4vw,18px)] with simpler text-sm md:text-xl */}
                        <p className="text-sm md:text-xl font-light text-gray-400 max-w-lg leading-relaxed break-words">{t.contactText}</p>
                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-8 w-full max-w-lg mt-4 md:mt-8">
                            <a 
@@ -474,13 +436,10 @@
 
         const App = () => {
             const getInitialLang = () => {
-                // Priority: URL -> English Default
                 try {
                     const params = new URLSearchParams(window.location.search);
                     if (params.get('lang')) return params.get('lang');
                 } catch(e) {}
-                
-                // Removed browser detection to force English as default per user request
                 return 'en'; 
             };
 
@@ -488,51 +447,102 @@
             const [loaded, setLoaded] = useState(false);
             const [selectedImg, setSelectedImg] = useState(null);
             const [isHeroVisible, setIsHeroVisible] = useState(true); 
-            
+            const [galleryData, setGalleryData] = useState(null); 
+
             const scrollContainerRef = useRef(null);
             const heroRef = useRef(null);
             const heroCloneRightRef = useRef(null);
             const heroCloneLeftRef = useRef(null);
             const aboutMainRef = useRef(null); 
             const contactRef = useRef(null);
-
-            // Mouse Drag Physics State
-            const [isDown, setIsDown] = useState(false);
-            const [startX, setStartX] = useState(0);
-            const [scrollLeft, setScrollLeft] = useState(0);
-            const [velX, setVelX] = useState(0);
-            const momentumID = useRef(null);
-            const lastMoveTime = useRef(Date.now());
-            const lastMoveX = useRef(0);
-            
-            // Use Refs for Physics to avoid re-renders during heavy events
-            const isScrollingRef = useRef(false); 
+            const contactCloneLeftRef = useRef(null); 
+            const aboutCloneRightRef = useRef(null); // Extra ref for right loop logic
 
             const t = content[lang];
             const isRTL = lang === 'he';
-            const data = getCategoriesData(t, lang);
 
+            // --- Fetch Data Logic ---
+            useEffect(() => {
+                const fetchManifest = async () => {
+                    try {
+                        const response = await fetch('eliz_pic/manifest.json');
+                        if (!response.ok) throw new Error('Manifest not found');
+                        const manifest = await response.json();
+                        
+                        const grouped = manifest.reduce((acc, item) => {
+                            const cat = item.category || 'abstract';
+                            if (!acc[cat]) acc[cat] = [];
+                            acc[cat].push({
+                                id: item.id,
+                                src: `eliz_pic/${item.filename}`,
+                                year: item.year,
+                                title: item.title,
+                                story: item.description,
+                                isWide: false 
+                            });
+                            return acc;
+                        }, {});
+
+                        const formattedData = Object.keys(grouped).map(key => ({
+                            id: key,
+                            title: t.categories[key] || key,
+                            items: grouped[key]
+                        }));
+                        
+                        setGalleryData(formattedData);
+
+                    } catch (error) {
+                        console.log("Using fallback data", error);
+                        const fallbackCategories = [
+                            { id: 'crows', title: t.categories.crows, items: fallbackData.crows },
+                            { id: 'movies', title: t.categories.movies, items: fallbackData.movies },
+                            { id: 'masks', title: t.categories.masks, items: fallbackData.masks },
+                            { id: 'portrait', title: t.categories.portrait, items: fallbackData.portrait },
+                            { id: 'abstract', title: t.categories.abstract, items: fallbackData.abstract },
+                            { id: 'still', title: t.categories.still, items: fallbackData.still },
+                        ];
+                        
+                        const enrichedFallback = fallbackCategories.map(cat => ({
+                            ...cat,
+                            items: cat.items.map(item => {
+                                const trans = itemTranslations[item.id] ? itemTranslations[item.id][lang] : { title: `Artwork ${item.id}`, story: "..." };
+                                return {
+                                    ...item,
+                                    src: `${item.src}`, 
+                                    title: trans.title,
+                                    story: trans.story 
+                                };
+                            })
+                        }));
+                        setGalleryData(enrichedFallback);
+                    }
+                };
+
+                fetchManifest();
+            }, [lang]);
+
+            // --- Mouse Drag Physics State ---
+            const [isDown, setIsDown] = useState(false);
+            const [startX, setStartX] = useState(0);
+            const [scrollLeft, setScrollLeft] = useState(0);
+            
             // --- SCROLL FIX FOR MOBILE & RESIZE ---
             useEffect(() => {
                 const handleResize = () => {
                     if (scrollContainerRef.current) {
-                        // Snap to nearest page on resize to avoid flickering between sections
                         const viewWidth = window.innerWidth;
                         const currentScroll = scrollContainerRef.current.scrollLeft;
                         const pageIndex = Math.round(currentScroll / viewWidth);
                         
                         scrollContainerRef.current.scrollTo({
                             left: pageIndex * viewWidth,
-                            behavior: 'smooth' 
+                            behavior: 'auto' 
                         });
                     }
                 };
 
                 window.addEventListener('resize', handleResize);
-                // Also trigger on orientation change specifically
-                window.addEventListener('orientationchange', () => {
-                    setTimeout(handleResize, 100);
-                });
+                window.addEventListener('orientationchange', () => { setTimeout(handleResize, 100); });
 
                 return () => {
                     window.removeEventListener('resize', handleResize);
@@ -548,16 +558,8 @@
                 const forceCenter = () => {
                     if (heroRef.current && scrollContainerRef.current) {
                         const offset = heroRef.current.offsetLeft;
-                        
-                        // Temporarily disable smooth scroll for instant snap
-                        scrollContainerRef.current.style.scrollBehavior = 'auto';
                         scrollContainerRef.current.scrollTo(offset, 0);
                         
-                        // Re-enable smooth scroll after a delay
-                        setTimeout(() => {
-                            if(scrollContainerRef.current) scrollContainerRef.current.style.scrollBehavior = 'smooth';
-                        }, 1000); 
-
                         if (!loaded) {
                             requestAnimationFrame(() => {
                                 if(scrollContainerRef.current) scrollContainerRef.current.classList.add('loaded');
@@ -567,21 +569,15 @@
                     }
                 };
 
-                // Safe guard with Try-Catch for older mobiles
                 try {
                     forceCenter();
+                    // Multiple attempts to ensure correct positioning after load/render
                     const timer = setTimeout(forceCenter, 50);
                     const timer2 = setTimeout(forceCenter, 200);
                     const timer3 = setTimeout(forceCenter, 500); 
 
-                    return () => {
-                        clearTimeout(timer);
-                        clearTimeout(timer2);
-                        clearTimeout(timer3);
-                    };
-                } catch(e) {
-                    console.error("Scroll sync error", e);
-                }
+                    return () => { clearTimeout(timer); clearTimeout(timer2); clearTimeout(timer3); };
+                } catch(e) { console.error("Scroll sync error", e); }
             }, []);
 
             // --- Intersection Observer for Brand Logo ---
@@ -600,34 +596,67 @@
                 return () => observer.disconnect();
             }, []);
 
-            // --- Navigation ---
-            const scrollByAmount = (amount) => {
-                if (scrollContainerRef.current) {
-                    scrollContainerRef.current.scrollBy({ left: amount, behavior: 'smooth' });
+            // --- Navigation Logic (Smart Closest Target) ---
+            const scrollToSection = (targetRef) => {
+                if (!scrollContainerRef.current || !targetRef.current) return;
+
+                const container = scrollContainerRef.current;
+                const currentScroll = container.scrollLeft;
+                const targetX = targetRef.current.offsetLeft;
+                
+                // Handle potential clones for smart navigation
+                let finalTarget = targetX;
+                
+                // Example: If navigating to Contact, check main vs clone
+                if (targetRef === contactRef) {
+                    const cloneX = contactCloneLeftRef.current ? contactCloneLeftRef.current.offsetLeft : Infinity;
+                    if (Math.abs(currentScroll - cloneX) < Math.abs(currentScroll - targetX)) {
+                        finalTarget = cloneX;
+                    }
+                }
+                
+                // If navigating to About, check main vs clone (if existed, here we only have one clone at far right)
+                if (targetRef === aboutMainRef && aboutCloneRightRef.current) {
+                    const cloneX = aboutCloneRightRef.current.offsetLeft;
+                     if (Math.abs(currentScroll - cloneX) < Math.abs(currentScroll - targetX)) {
+                        finalTarget = cloneX;
+                    }
+                }
+
+                // If navigating to Hero
+                if (targetRef === heroRef) {
+                     const cloneLeftX = heroCloneLeftRef.current ? heroCloneLeftRef.current.offsetLeft : Infinity;
+                     const cloneRightX = heroCloneRightRef.current ? heroCloneRightRef.current.offsetLeft : Infinity;
+                     
+                     const distMain = Math.abs(currentScroll - targetX);
+                     const distLeft = Math.abs(currentScroll - cloneLeftX);
+                     const distRight = Math.abs(currentScroll - cloneRightX);
+                     
+                     if (distLeft < distMain && distLeft < distRight) finalTarget = cloneLeftX;
+                     else if (distRight < distMain && distRight < distLeft) finalTarget = cloneRightX;
+                }
+
+                container.scrollTo({
+                    left: finalTarget,
+                    behavior: 'smooth'
+                });
+            };
+
+            const handleLeftArrow = (e) => { 
+                e.stopPropagation(); 
+                if(scrollContainerRef.current) {
+                    scrollContainerRef.current.scrollBy({ left: -window.innerWidth, behavior: 'smooth' });
                 }
             };
-
-            const handleLeftArrow = (e) => {
-                e.stopPropagation();
-                scrollByAmount(-window.innerWidth);
-            };
-
-            const handleRightArrow = (e) => {
-                e.stopPropagation();
-                scrollByAmount(window.innerWidth);
-            };
-
-            const handleStartStory = (e) => {
-                e.stopPropagation();
-                scrollByAmount(-window.innerWidth); 
-            };
-
-            const scrollToSection = (ref) => {
-                if (ref.current) {
-                    ref.current.scrollIntoView({ behavior: 'smooth' });
+            
+            const handleRightArrow = (e) => { 
+                e.stopPropagation(); 
+                 if(scrollContainerRef.current) {
+                    scrollContainerRef.current.scrollBy({ left: window.innerWidth, behavior: 'smooth' });
                 }
             };
-
+            
+            const handleStartStory = (e) => { e.stopPropagation(); handleLeftArrow(e); };
             const handleLangChange = (newLang) => {
                 setLang(newLang);
                 try {
@@ -635,10 +664,6 @@
                     url.searchParams.set('lang', newLang);
                     window.history.pushState({}, '', url);
                 } catch (e) {}
-                
-                setTimeout(() => {
-                    if(heroRef.current) heroRef.current.scrollIntoView({ behavior: 'auto' });
-                }, 50);
             };
 
             // --- Infinite Loop Logic ---
@@ -647,19 +672,25 @@
                 if (!container) return;
 
                 const checkLoop = () => {
-                    if(!heroRef.current || !heroCloneRightRef.current || !heroCloneLeftRef.current) return;
+                    if(!heroRef.current || !heroCloneRightRef.current || !contactRef.current || !contactCloneLeftRef.current) return;
                     
                     const scrollLeft = container.scrollLeft;
-                    const homeMainX = heroRef.current.offsetLeft;
+                    
                     const homeCloneRightX = heroCloneRightRef.current.offsetLeft;
-                    const homeCloneLeftX = heroCloneLeftRef.current.offsetLeft;
+                    const homeMainX = heroRef.current.offsetLeft;
                     
-                    if (scrollLeft >= homeCloneRightX - 5) {
-                        container.scrollTo({ left: homeMainX + (scrollLeft - homeCloneRightX), behavior: 'auto' });
+                    // Threshold increased slightly to ensure it catches even with fast scroll
+                    if (scrollLeft >= homeCloneRightX - 2) { 
+                         const relativePos = scrollLeft - homeCloneRightX;
+                         container.scrollTo({ left: homeMainX + relativePos, behavior: 'auto' });
                     }
-                    
-                    if (scrollLeft <= homeCloneLeftX + 5) {
-                         container.scrollTo({ left: homeMainX + (scrollLeft - homeCloneLeftX), behavior: 'auto' });
+
+                    const contactCloneLeftX = contactCloneLeftRef.current.offsetLeft;
+                    const contactMainX = contactRef.current.offsetLeft;
+
+                    if (scrollLeft <= contactCloneLeftX + 2) { 
+                         const relativePos = contactCloneLeftX - scrollLeft;
+                         container.scrollTo({ left: contactMainX - relativePos, behavior: 'auto' });
                     }
                 };
 
@@ -667,127 +698,26 @@
                 return () => container.removeEventListener('scroll', checkLoop);
             }, []);
 
-            // --- Smart Wheel ---
-            useEffect(() => {
-                const container = scrollContainerRef.current;
-                if (!container) return;
-
-                let wheelTimeout;
-                const handleWheel = (e) => {
-                    if (window.innerWidth > 768) {
-                        if (Math.abs(e.deltaY) > 5 || Math.abs(e.deltaX) > 5) {
-                            e.preventDefault();
-                            if(isScrollingRef.current) return;
-
-                            isScrollingRef.current = true;
-                            const direction = (e.deltaY > 0 || e.deltaX > 0) ? 1 : -1;
-                            
-                            container.scrollBy({ left: direction * window.innerWidth, behavior: 'smooth' });
-                            
-                            clearTimeout(wheelTimeout);
-                            wheelTimeout = setTimeout(() => {
-                                isScrollingRef.current = false;
-                            }, 600); 
-                        }
-                    }
-                };
-
-                container.addEventListener('wheel', handleWheel, { passive: false });
-                return () => container.removeEventListener('wheel', handleWheel);
-            }, []);
-
-            // --- Mouse Drag Physics ---
-            const cancelMomentum = () => {
-                if (momentumID.current) {
-                    cancelAnimationFrame(momentumID.current);
-                    momentumID.current = null;
-                }
-            };
-
-            const momentumLoop = () => {
+            // --- Snap Logic on Interaction End ---
+            const snapToNearestPage = () => {
                 if (!scrollContainerRef.current) return;
-                scrollContainerRef.current.scrollLeft -= velX;
-                const nextVelX = velX * 0.95; 
-                setVelX(nextVelX);
-                if (Math.abs(nextVelX) > 0.5) {
-                    momentumID.current = requestAnimationFrame(momentumLoop);
-                } else {
-                    setVelX(0);
-                }
-            };
-
-            const handleMouseDown = (e) => {
-                if ('ontouchstart' in window) return; 
-                setIsDown(true);
-                cancelMomentum();
-                if(scrollContainerRef.current) {
-                    scrollContainerRef.current.classList.add('is-dragging');
-                    setStartX(e.pageX - scrollContainerRef.current.offsetLeft);
-                    setScrollLeft(scrollContainerRef.current.scrollLeft);
-                    lastMoveX.current = e.pageX;
-                    lastMoveTime.current = Date.now();
-                }
-            };
-
-            const handleMouseLeave = () => {
-                if (!isDown) return;
-                setIsDown(false);
-                if(scrollContainerRef.current) {
-                    scrollContainerRef.current.classList.remove('is-dragging');
-                    momentumLoop(); 
-                }
-            };
-
-            const handleMouseUp = (e) => {
-                if (!isDown) return;
-                setIsDown(false);
+                const viewWidth = window.innerWidth;
+                const currentScroll = scrollContainerRef.current.scrollLeft;
+                const pageIndex = Math.round(currentScroll / viewWidth);
                 
-                if(scrollContainerRef.current) {
-                    scrollContainerRef.current.classList.remove('is-dragging');
-                    
-                    // "Easy Snap" Logic
-                    const endX = e.pageX - scrollContainerRef.current.offsetLeft;
-                    const distance = startX - endX; 
-                    const viewWidth = window.innerWidth;
-                    const currentScroll = scrollContainerRef.current.scrollLeft;
-                    
-                    // Threshold: drag 20px to commit to next page
-                    const threshold = 20; 
-                    let targetPage = Math.round(currentScroll / viewWidth);
-                    
-                    if (Math.abs(distance) > threshold) {
-                        const direction = distance > 0 ? 1 : -1;
-                        if (direction === 1) {
-                            targetPage = Math.ceil(currentScroll / viewWidth);
-                        } else {
-                            targetPage = Math.floor(currentScroll / viewWidth);
-                        }
-                    } 
-
-                    scrollContainerRef.current.scrollTo({
-                        left: targetPage * viewWidth,
-                        behavior: 'smooth'
-                    });
-                }
+                scrollContainerRef.current.scrollTo({
+                    left: pageIndex * viewWidth,
+                    behavior: 'smooth'
+                });
             };
 
-            const handleMouseMove = (e) => {
-                if (!isDown) return;
-                e.preventDefault();
-                const x = e.pageX - scrollContainerRef.current.offsetLeft;
-                const walk = (x - startX) * 1.5; 
-                scrollContainerRef.current.scrollLeft = scrollLeft - walk;
-                const now = Date.now();
-                const dt = now - lastMoveTime.current;
-                const dx = e.pageX - lastMoveX.current;
-                if (dt > 0) setVelX(dx / dt * 15); 
-                lastMoveX.current = e.pageX;
-                lastMoveTime.current = now;
-            };
-
-            const handleBackdropClick = (e) => {
-                if (e.target === e.currentTarget) setSelectedImg(null);
-            };
+            const handleMouseDown = (e) => { if ('ontouchstart' in window) return; setIsDown(true); setStartX(e.pageX - scrollContainerRef.current.offsetLeft); setScrollLeft(scrollContainerRef.current.scrollLeft); };
+            const handleMouseLeave = () => { if (isDown) { setIsDown(false); snapToNearestPage(); } };
+            const handleMouseUp = () => { if (isDown) { setIsDown(false); snapToNearestPage(); } };
+            const handleMouseMove = (e) => { if(!isDown) return; e.preventDefault(); const x = e.pageX - scrollContainerRef.current.offsetLeft; const walk = (x - startX) * 1.5; scrollContainerRef.current.scrollLeft = scrollLeft - walk; };
+            const handleTouchEnd = () => { snapToNearestPage(); }; // For mobile swipe snap
+            
+            const handleBackdropClick = (e) => { if (e.target === e.currentTarget) setSelectedImg(null); };
 
             return (
                 <div className="min-h-screen h-[100dvh] text-white">
@@ -818,19 +748,19 @@
                         onMouseLeave={handleMouseLeave}
                         onMouseUp={handleMouseUp}
                         onMouseMove={handleMouseMove}
+                        onTouchEnd={handleTouchEnd} 
                         dir="ltr"
                     >
-                        {/* LEFT CLONE SECTION - FIXED ORDER: Contact -> Gallery -> About */}
-                        <div ref={heroCloneLeftRef}>
-                            <Hero id="hero-left" t={t} lang={lang} isClone={true} onLeft={handleLeftArrow} onRight={handleRightArrow} onText={handleStartStory} />
+                        {/* LEFT CLONE: Contact -> Gallery -> About -> Hero */}
+                        <div ref={contactCloneLeftRef}>
+                             <ContactSection t={t} />
                         </div>
-                        <ContactSection t={t} />
-                        {[...data].reverse().map((cat) => (
+                        {galleryData && [...galleryData].reverse().map((cat) => (
                             <CategoryCluster key={`left-${cat.id}`} category={cat} onImageClick={setSelectedImg} />
                         ))}
                         <AboutSection t={t} />
 
-                        {/* MAIN SECTION */}
+                        {/* MAIN HERO */}
                         <Hero 
                             id="hero-main"
                             t={t}
@@ -842,16 +772,19 @@
                             onText={handleStartStory} 
                         />
                         
-                        {/* RIGHT SECTION (Normal Flow) */}
+                        {/* RIGHT: About -> Gallery -> Contact */}
                         <AboutSection t={t} sectionRef={aboutMainRef} />
-                        {data.map((cat) => (
+                        {galleryData && galleryData.map((cat) => (
                             <CategoryCluster key={`right-${cat.id}`} category={cat} onImageClick={setSelectedImg} />
                         ))}
                         <ContactSection t={t} sectionRef={contactRef} />
                         
-                        {/* RIGHT CLONE SECTION */}
+                        {/* RIGHT CLONE: Hero -> About (Loop Buffer) */}
                         <div ref={heroCloneRightRef}>
                             <Hero id="hero-right" t={t} lang={lang} isClone={true} onLeft={handleLeftArrow} onRight={handleRightArrow} onText={handleStartStory} />
+                        </div>
+                        <div ref={aboutCloneRightRef}>
+                            <AboutSection t={t} /> 
                         </div>
 
                     </div>
@@ -868,11 +801,11 @@
                                 <Icons.X />
                             </button>
                             
-                            <div className="w-full h-full md:max-w-7xl md:h-[85vh] grid grid-cols-1 md:grid-cols-3 md:gap-12 items-center p-4 md:p-8 pointer-events-none">
-                                <div className="md:col-span-2 h-[55vh] md:h-full flex items-center justify-center bg-[#0a0a0a] rounded-sm overflow-hidden shadow-2xl pointer-events-auto" onClick={(e) => e.stopPropagation()}>
+                            <div className="w-full h-full md:max-w-7xl md:h-[85vh] grid grid-cols-1 md:grid-cols-3 md:gap-12 items-center p-4 md:p-8 pointer-events-auto" onClick={(e) => e.stopPropagation()}>
+                                <div className="md:col-span-2 h-[55vh] md:h-full flex items-center justify-center bg-[#0a0a0a] rounded-sm overflow-hidden shadow-2xl" onClick={(e) => e.stopPropagation()}>
                                     <img src={selectedImg.src} alt={selectedImg.title} className="max-h-full max-w-full object-contain" />
                                 </div>
-                                <div className="md:col-span-1 flex flex-col justify-center mt-8 md:mt-0 text-right pointer-events-auto" dir={isRTL ? 'rtl' : 'ltr'} onClick={(e) => e.stopPropagation()}>
+                                <div className="md:col-span-1 flex flex-col justify-center mt-8 md:mt-0 text-right" dir={isRTL ? 'rtl' : 'ltr'} onClick={(e) => e.stopPropagation()}>
                                     <div className="w-12 h-px bg-[#d4a373] mb-6 ml-auto"></div>
                                     <h3 className="text-4xl md:text-6xl serif text-white mb-2">{selectedImg.title}</h3>
                                     <p className="text-[#d4a373] font-mono text-base md:text-lg mb-6 tracking-widest">{selectedImg.year}</p>
