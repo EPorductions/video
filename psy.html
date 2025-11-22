@@ -46,7 +46,7 @@
             --text-color: #ffffff;
             --text-muted: #a0a0a0;
             --glass-border: rgba(255, 255, 255, 0.08);
-            --glass-bg: rgba(10, 10, 15, 0.8); /* Slightly more opaque for modals */
+            --glass-bg: rgba(10, 10, 15, 0.8);
             --nav-bg: rgba(3, 3, 5, 0.7);
             --nav-text: #a0a0a0;
             --nav-active: #fff;
@@ -216,7 +216,6 @@
             display: flex; align-items: flex-start; gap: 1rem;
             position: relative;
         }
-        /* Clickable indicator */
         .service-list-item::after {
             content: '+';
             position: absolute; left: 1rem; top: 50%; transform: translateY(-50%);
@@ -271,11 +270,63 @@
             display: inline-block;
         }
 
-        /* Logos */
-        #logo-track img { 
-            height: 3rem; filter: none; opacity: 0.8; transition: opacity 0.3s;
+        /* Logos Ticker */
+        .ticker-container {
+            width: 100%;
+            overflow: hidden;
+            white-space: nowrap;
+            position: relative;
+            padding: 2rem 0;
+            mask-image: linear-gradient(to right, transparent, black 10%, black 90%, transparent);
+            -webkit-mask-image: linear-gradient(to right, transparent, black 10%, black 90%, transparent);
         }
-        #logo-track img:hover { opacity: 1; }
+        .ticker-track {
+            display: inline-block;
+            animation: scroll-left 40s linear infinite;
+        }
+        .ticker-track:hover {
+            animation-play-state: paused;
+        }
+        .ticker-item {
+            display: inline-block;
+            margin: 0 2rem;
+            cursor: pointer;
+            transition: transform 0.3s ease, filter 0.3s ease;
+            filter: grayscale(100%) opacity(0.7);
+        }
+        .ticker-item:hover {
+            transform: scale(1.1);
+            filter: grayscale(0%) opacity(1);
+        }
+        .partner-logo-card {
+            display: inline-flex;
+            align-items: center; justify-content: center;
+            width: 180px; height: 80px;
+            background: rgba(255,255,255,0.05);
+            border: 1px solid var(--glass-border);
+            border-radius: 8px;
+            padding: 10px;
+            color: var(--text-color);
+            font-family: 'Orbitron', sans-serif;
+            font-weight: bold;
+            font-size: 0.9rem;
+            text-align: center;
+            white-space: normal;
+        }
+        .partner-logo-card img {
+            max-width: 100%; max-height: 100%;
+            object-fit: contain;
+        }
+
+        @keyframes scroll-left {
+            0% { transform: translateX(0); }
+            100% { transform: translateX(50%); } /* RTL: moving right effectively */
+        }
+        html[dir="ltr"] .ticker-track { animation-name: scroll-right; }
+        @keyframes scroll-right {
+            0% { transform: translateX(0); }
+            100% { transform: translateX(-50%); }
+        }
         
         /* Contact */
         .contact-item {
@@ -314,26 +365,7 @@
         .click-hint {
             position: absolute; bottom: 10px; left: 10px; opacity: 0; font-size: 0.7rem; color: var(--primary); transition: opacity 0.3s;
         }
-        .process-card:hover .click-hint, .clickable-card:hover .click-hint { opacity: 1; }
-
-        /* Work Circles & Algorithm */
-        .clickable-card { cursor: pointer; position: relative; }
-
-        .circle-badge {
-            position: absolute; top: 10px; left: 10px; z-index: 10;
-            background: rgba(0,0,0,0.7); backdrop-filter: blur(5px);
-            padding: 5px 12px; border-radius: 20px; border: 1px solid var(--glass-border);
-            font-size: 0.8rem; color: #fff;
-        }
-        
-        .algo-stat {
-            font-family: 'Orbitron', sans-serif;
-            font-size: 0.7rem;
-            color: var(--primary);
-            margin-top: 0.5rem;
-            display: block;
-            opacity: 0.8;
-        }
+        .process-card:hover .click-hint { opacity: 1; }
 
         /* Modal System */
         .modal-overlay {
@@ -411,8 +443,7 @@
             <a href="#home" class="nav-link hover-trigger" data-key="nav_home">ראשי</a>
             <a href="#about" class="nav-link hover-trigger" data-key="nav_about">אודות</a>
             <a href="#services" class="nav-link hover-trigger" data-key="nav_services">שירותים</a>
-            <a href="#showreel" class="nav-link hover-trigger" data-key="nav_work">CINE MATCH</a>
-            <a href="#clients" class="nav-link hover-trigger" data-key="nav_clients">לקוחותינו</a>
+            <a href="#ecosystem" class="nav-link hover-trigger" data-key="nav_ecosystem">מעגלי עבודה</a>
             <a href="#testimonials" class="nav-link hover-trigger" data-key="nav_recommendations">המלצות</a>
             <a href="#contact" class="nav-link hover-trigger" data-key="nav_contact">צור קשר</a>
         </nav>
@@ -446,8 +477,7 @@
             <a href="#home" class="mobile-link" data-key="nav_home">ראשי</a>
             <a href="#about" class="mobile-link" data-key="nav_about">אודות</a>
             <a href="#services" class="mobile-link" data-key="nav_services">שירותים</a>
-            <a href="#showreel" class="mobile-link" data-key="nav_work">CINE MATCH</a>
-            <a href="#clients" class="mobile-link" data-key="nav_clients">לקוחותינו</a>
+            <a href="#ecosystem" class="mobile-link" data-key="nav_ecosystem">מעגלי עבודה</a>
             <a href="#testimonials" class="mobile-link" data-key="nav_recommendations">המלצות</a>
             <a href="#contact" class="mobile-link" data-key="nav_contact">צור קשר</a>
         </nav>
@@ -467,7 +497,7 @@
             </p>
             <div class="flex gap-6">
                 <a href="#contact" class="cyber-btn hover-trigger" data-key="hero_cta_start">התחילו פרויקט</a>
-                <a href="#showreel" class="cyber-btn hover-trigger" style="border-color: var(--text-color); color: var(--text-color);" data-key="hero_cta_work">למעגלי העבודה</a>
+                <a href="#ecosystem" class="cyber-btn hover-trigger" style="border-color: var(--text-color); color: var(--text-color);" data-key="hero_cta_work">למעגלי העבודה</a>
             </div>
         </section>
 
@@ -493,19 +523,19 @@
                     <!-- Process Grid with Click Actions -->
                     <div class="process-grid">
                         <div class="process-card" onclick="openModal('strategy')">
-                            <img src="psy_pics/20250223_151517.jpg" class="process-img" alt="Strategy">
+                            <img src="assets/20250223_151517.jpg" class="process-img" alt="Strategy">
                             <h4 class="font-bold text-[var(--text-color)] mb-2" data-key="process_1">אסטרטגיה</h4>
                             <p class="text-xs text-muted-custom" data-key="process_1_desc">תכנון אדריכלי של האירוע או התוכן, מהמסר ועד לפיקסל.</p>
                             <span class="click-hint">לחץ להרחבה +</span>
                         </div>
                         <div class="process-card" onclick="openModal('production')">
-                            <img src="psy_pics/20250215_190052.jpg" class="process-img" alt="Production">
+                            <img src="assets/20250215_190052.jpg" class="process-img" alt="Production">
                             <h4 class="font-bold text-[var(--text-color)] mb-2" data-key="process_2">הפקה חיה</h4>
                             <p class="text-xs text-muted-custom" data-key="process_2_desc">ביצוע טכני ללא פשרות, ניהול צוותים וניתוב בזמן אמת.</p>
                             <span class="click-hint">לחץ להרחבה +</span>
                         </div>
                         <div class="process-card" onclick="openModal('ai')">
-                            <img src="psy_pics/20250223_151808.jpg" class="process-img" alt="AI">
+                            <img src="assets/20250223_151808.jpg" class="process-img" alt="AI">
                             <h4 class="font-bold text-[var(--text-color)] mb-2" data-key="process_ai">AI & Tech</h4>
                             <p class="text-xs text-muted-custom" data-key="process_ai_desc">העצמת הויזואל עם כלים מחוללי תמונה וקוד.</p>
                             <span class="click-hint">לחץ להרחבה +</span>
@@ -515,7 +545,7 @@
                 
                 <!-- Main About Image (Tech/Art Blend) -->
                 <div class="relative h-[600px] rounded-2xl overflow-hidden border border-[var(--glass-border)] group sticky top-24">
-                    <img src="psy_pics/20250215_175100.jpg" alt="Cyberpunk Studio" class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110">
+                    <img src="assets/20250215_175100.jpg" alt="Cyberpunk Studio" class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110">
                     <div class="absolute inset-0 bg-gradient-to-t from-[var(--bg-color)] via-transparent to-transparent opacity-60"></div>
                 </div>
             </div>
@@ -562,10 +592,10 @@
                 <!-- Left Side: Sticky Preview -->
                 <div class="relative hidden lg:block h-full pointer-events-none">
                     <div class="preview-stage sticky top-32">
-                        <img src="psy_pics/20250214_192736.jpg" class="preview-media active" id="preview-1" alt="Live">
-                        <img src="psy_pics/20250223_151800.jpg" class="preview-media" id="preview-2" alt="AI">
-                        <img src="psy_pics/20250215_175126(0).jpg" class="preview-media" id="preview-3" alt="Virtual">
-                        <img src="psy_pics/20250216_122300.jpg" class="preview-media" id="preview-4" alt="Post">
+                        <img src="assets/20250214_192736.jpg" class="preview-media active" id="preview-1" alt="Live">
+                        <img src="assets/20250223_151800.jpg" class="preview-media" id="preview-2" alt="AI">
+                        <img src="assets/20250215_175126(0).jpg" class="preview-media" id="preview-3" alt="Virtual">
+                        <img src="assets/20250216_122300.jpg" class="preview-media" id="preview-4" alt="Post">
                         <div class="absolute bottom-0 left-0 right-0 p-6 bg-gradient-to-t from-black via-black/50 to-transparent">
                             <div class="flex items-center gap-2 text-[var(--primary)]">
                                 <div class="w-2 h-2 bg-[var(--primary)] rounded-full animate-pulse"></div>
@@ -577,79 +607,31 @@
             </div>
         </section>
 
-        <!-- Work Circles (CINE MATCH) - Enhanced -->
-        <section id="showreel">
-            <div class="mb-12">
-                <div class="flex flex-col md:flex-row justify-between items-end mb-6">
-                    <h2 class="section-title mb-0" data-key="section_cinematch">CINE MATCH <span class="text-2xl block text-muted-custom mt-2" data-key="work_circles">בורסת מעגלי העבודה</span></h2>
+        <!-- NEW MERGED SECTION: Collaborative Ecosystem (Clients & Work Circles) -->
+        <section id="ecosystem" class="py-20">
+            <div class="text-center mb-16">
+                <h2 class="section-title" data-key="section_ecosystem">הסינרגיה שלנו: מעגלי עבודה ושותפים</h2>
+                <p class="text-xl text-muted-custom max-w-3xl mx-auto mt-4" data-key="ecosystem_desc">
+                    אנחנו לא מאמינים ביחסי ספק-לקוח סטנדרטיים. הלקוחות שלנו הם הקולגות שלנו. זה יד לוחצת יד. אנחנו מפרים אחד את השני בקריאייטיב, ביכולות הניהול ובהפקת פרויקטים מורכבים.
+                </p>
+            </div>
+
+            <!-- Ticker / Marquee -->
+            <div class="ticker-container">
+                <div class="ticker-track" id="ticker-track-1">
+                    <!-- Content injected via JS -->
                 </div>
-                
-                <!-- Algorithm Explanation -->
-                <div class="glass-card mb-12 p-8 border-r-4 border-r-[var(--primary)] text-right">
-                    <h3 class="text-xl font-bold mb-2">האלגוריתם שלנו</h3>
-                    <p class="text-muted-custom mb-4">
-                        שיטת Cine Match היא פיתוח ייחודי המנתח את ה"דופק" של הפרויקט (קצב, רגש, מסר) ומצמיד לו את הטכנולוגיה הויזואלית המדויקת ביותר. במקום לנחש, אנחנו מחשבים את המסלול הקצר ביותר ללב הצופה.
-                    </p>
-                    <div class="flex gap-4 text-sm font-mono text-[var(--primary)]">
-                         <span>> Input: Emotion</span>
-                         <span>> Process: Creative Tech</span>
-                         <span>> Output: Impact</span>
-                    </div>
+                <div class="ticker-track" id="ticker-track-2">
+                    <!-- Content duplicated via JS -->
                 </div>
             </div>
             
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-                <!-- Project 1 -->
-                <div class="clickable-card group relative aspect-video rounded-lg overflow-hidden border border-[var(--glass-border)] hover-trigger" onclick="openModal('project_1')">
-                    <div class="circle-badge">Live Broadcast</div>
-                    <img src="psy_pics/20250221_095912.jpg" class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" alt="MindFly">
-                    <div class="absolute inset-0 bg-black/80 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex flex-col justify-center items-center p-4 text-center">
-                        <h3 class="text-3xl font-bold text-white mb-2">MindFly Experience</h3>
-                        <p class="text-[var(--primary)] font-bold">ספורט טק</p>
-                        <span class="algo-stat">MATCH SCORE: 98.4%</span>
-                        <span class="click-hint text-white">לחץ לניתוח מלא</span>
-                    </div>
-                </div>
-                <!-- Project 2 -->
-                <div class="clickable-card group relative aspect-video rounded-lg overflow-hidden border border-[var(--glass-border)] hover-trigger" onclick="openModal('project_2')">
-                    <div class="circle-badge" style="border-color:var(--secondary); color:var(--secondary);">AI & Post</div>
-                    <img src="psy_pics/20250223_151818.jpg" class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" alt="AI Art">
-                    <div class="absolute inset-0 bg-black/80 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex flex-col justify-center items-center p-4 text-center">
-                        <h3 class="text-3xl font-bold text-white mb-2">Future Vision</h3>
-                        <p class="text-[var(--secondary)] font-bold">קמפיין מבוסס AI</p>
-                        <span class="algo-stat">TRENDING UP ▲</span>
-                        <span class="click-hint text-white">לחץ לניתוח מלא</span>
-                    </div>
-                </div>
-                <!-- Project 3 -->
-                <div class="clickable-card group relative aspect-video rounded-lg overflow-hidden border border-[var(--glass-border)] hover-trigger" onclick="openModal('project_3')">
-                    <div class="circle-badge">Broadcast IP</div>
-                    <img src="psy_pics/20250222_122221.jpg" class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" alt="Broadcast">
-                    <div class="absolute inset-0 bg-black/80 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex flex-col justify-center items-center p-4 text-center">
-                        <h3 class="text-3xl font-bold text-white mb-2">Broadcast Infra</h3>
-                        <p class="text-[var(--primary)] font-bold">תשתיות שידור</p>
-                        <span class="algo-stat">SYSTEM STABLE</span>
-                        <span class="click-hint text-white">לחץ לניתוח מלא</span>
-                    </div>
-                </div>
+            <div class="text-center mt-8">
+                <p class="text-sm text-muted-custom opacity-70"><span class="text-[var(--primary)]">◄</span> גררו או לחצו על לוגו לפירוט שיתוף הפעולה</p>
             </div>
         </section>
 
-        <!-- Clients Section -->
-        <section id="clients" class="pt-10 pb-0 mt-20">
-            <div class="text-center mb-12">
-                <h2 class="section-title" data-key="section_clients">לקוחותינו</h2>
-                <p class="text-muted-custom" data-key="clients_subtitle">גופי שידור, חברות הפקה ומותגים מובילים</p>
-            </div>
-            
-            <div class="border-y border-[var(--glass-border)] bg-[var(--glass-bg)] backdrop-blur-sm overflow-hidden py-10">
-                 <div class="flex w-max scrolling-logos">
-                    <div id="logo-track" class="flex gap-16 items-center transition-all duration-500"></div>
-                </div>
-            </div>
-        </section>
-
-        <!-- Stats Strip (Moved After Clients) -->
+        <!-- Stats Strip (Moved After Ecosystem) -->
         <div id="stats-strip" class="w-full mt-0 border-t-0">
             <div class="max-w-7xl mx-auto px-6 grid grid-cols-1 md:grid-cols-3 gap-12 text-center divide-y md:divide-y-0 md:divide-x md:divide-x-reverse divide-[var(--glass-border)]">
                 <div class="hover-trigger count-container">
@@ -717,10 +699,6 @@
             <a href="https://www.instagram.com/orianedelenyi/" target="_blank" class="hover:text-white transition-colors">
                 <svg width="24" height="24" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/></svg>
             </a>
-            <!-- LinkedIn -->
-            <a href="https://www.linkedin.com/in/orian-edelenyi-22a812273/" target="_blank" class="hover:text-white transition-colors">
-                <svg width="24" height="24" fill="currentColor" viewBox="0 0 24 24"><path d="M19 0h-14c-2.761 0-5 2.239-5 5v14c0 2.761 2.239 5 5 5h14c2.762 0 5-2.239 5-5v-14c0-2.761-2.238-5-5-5zm-11 19h-3v-11h3v11zm-1.5-12.268c-.966 0-1.75-.79-1.75-1.764s.784-1.764 1.75-1.764 1.75.79 1.75 1.764-.783 1.764-1.75 1.764zm13.5 12.268h-3v-5.604c0-3.368-4-3.113-4 0v5.604h-3v-11h3v1.765c1.396-2.586 7-2.777 7 2.476v6.759z"/></svg>
-            </a>
         </div>
         <p>&copy; 2024 PsychoFlash Productions. All rights reserved.</p>
     </footer>
@@ -733,136 +711,123 @@
     <script src="https://www.youtube.com/iframe_api"></script>
 
     <script>
+        // --- Partners / Work Circles Data ---
+        // Using high quality placeholders with names to ensure robustness without broken hotlinks
+        const partnersData = [
+            { id: 'johnny', name: 'יונתן אוחנה', role: 'צילום וניתוב', logo: 'https://placehold.co/200x100/1a1a1a/white?text=JOHNNY+OHANA', desc: 'שיתוף פעולה הדוק בתחום הצילום והניתוב למערכות מולטי-קאמרה מורכבות. יחד אנו מספקים מעטפת טכנית ויזואלית לאירועים הדורשים דיוק של שניות.' },
+            { id: 'golive', name: 'Go Live Israel', role: 'חברת שידור', logo: 'https://placehold.co/200x100/1a1a1a/white?text=GO+LIVE+ISRAEL', desc: 'שותפים אסטרטגיים בהפקות ענק. החיבור עם Go Live מאפשר לנו להרים הפקות שידור מורכבות עם ניידות שידור וציוד קצה מהמתקדמים בעולם.' },
+            { id: 'mizmor', name: 'מזמור הפקות', role: 'הפקות טלוויזיה', logo: 'https://placehold.co/200x100/1a1a1a/white?text=MIZMOR+PROD', desc: 'עבודה משותפת בהפקות טלוויזיה ושידורי ספורט. סינרגיה שמשלבת את היכולות ההפקתיות של מזמור עם החדשנות הטכנולוגית שלנו.' },
+            { id: 'yuki', name: 'יוקי איתמר כהן', role: 'במאי ומפיק', logo: 'https://placehold.co/200x100/1a1a1a/white?text=YUKI+COHEN', desc: 'קולגה ליצירה ובימוי. יחד אנחנו מפתחים פורמטים וקונספטים ויזואליים שיוצאים מהקופסה.' },
+            { id: 'teddy', name: 'טדי הפקות', role: 'הפקות תוכן', logo: 'https://placehold.co/200x100/1a1a1a/white?text=TEDDY+PROD', desc: 'שיתוף פעולה בפיתוח תכנים והפקות מקור. חיבור בין עולמות התוכן של טדי לבין היכולות הטכניות שלנו.' },
+            { id: 'scmedia', name: 'SC Media', role: 'הפקה ירושלמית', logo: 'https://placehold.co/200x100/1a1a1a/white?text=SC+MEDIA', desc: 'שותפים להפקות באזור ירושלים והסביבה. שיתוף פעולה פורה המאפשר מתן מענה מהיר ואיכותי ללקוחות בבירה.' },
+            { id: 'rino', name: 'רינו צרור', role: 'תקשורת', logo: 'https://placehold.co/200x100/1a1a1a/white?text=RINO+TZROR', desc: 'עבודה משותפת על פרויקטים דוקומנטריים ותקשורתיים המשלבים עומק עיתונאי עם ויזואליה מתקדמת.' },
+            { id: 'rakefet', name: 'רקפת בן שבתאי', role: 'צילום ופרסום', logo: 'https://placehold.co/200x100/1a1a1a/white?text=RAKEFET+B.S', desc: 'שיתוף פעולה בתחום הפרסום והתוכן השיווקי.' },
+            { id: 'yeladim', name: 'ילדים בסיכוי', role: 'עמותה', logo: 'https://placehold.co/200x100/1a1a1a/white?text=YELADIM+BESIKUY', desc: 'שותפות דרך הלב. הפקת תכנים ואירועים למען עמותת ילדים בסיכוי, מתוך אמונה בכוחה של המדיה לשנות מציאות.' }
+        ];
+
         // --- Modal Content Data ---
         const contentData = {
             // Process Cards
             strategy: {
                 title: "אסטרטגיה: הלב הפועם",
                 text: "כל פרויקט גדול מתחיל בשאלה אחת: 'מה הסיפור?'. בשלב האסטרטגיה אנחנו מנתחים את ה-DNA של המותג, מגדירים את קהל היעד ומפענחים את השפה הויזואלית שתשרת את המסר בצורה הטובה ביותר. זה השלב שבו אנחנו הופכים רעיונות מופשטים לתוכנית פעולה מדויקת, כולל סטוריבורד, בחירת טכנולוגיות ולוחות זמנים.",
-                image: "psy_pics/20250223_151517.jpg"
+                image: "assets/20250223_151517.jpg"
             },
             production: {
                 title: "הפקה חיה: רגע האמת",
                 text: "בשידור חי אין הזדמנות שנייה. אנחנו מביאים לשטח ניסיון של מאות שעות שידור, ציוד קצה מתקדם וצוותים מיומנים שיודעים לתפקד תחת לחץ. מניידות שידור ועד מערכות ניתוב ניידות, אנחנו דואגים שהכל יעבוד חלק - מהסאונד ועד הפיקסל האחרון.",
-                image: "psy_pics/20250215_190052.jpg"
+                image: "assets/20250215_190052.jpg"
             },
             ai: {
                 title: "AI & Tech: העתיד כבר כאן",
                 text: "אנחנו משלבים כלי בינה מלאכותית בתהליך היצירה כדי לפרוץ גבולות. מיצירת רקעים וירטואליים בזמן אמת, דרך תיקוני צבע אוטומטיים ועד אנימציות מורכבות. הטכנולוגיה מאפשרת לנו לעשות יותר, מהר יותר ובאיכות שלא נראתה כמותה.",
-                image: "psy_pics/20250223_151808.jpg"
+                image: "assets/20250223_151808.jpg"
             },
             
             // Services Pages
             service_live: {
                 title: "הפקות וידאו ושידורים חיים",
                 type: "service",
-                videoId: "px7UwM8QDDU", // Example ID
+                videoId: "px7UwM8QDDU",
                 desc: "שירות הדגל שלנו. אנו מספקים מעטפת מלאה לשידורים חיים בכל סדר גודל. בין אם זה כנס חברה, אירוע ספורט או מופע תרבות, אנחנו שם עם הטכנולוגיה המתקדמת ביותר. המומחיות שלנו כוללת שידורים מרובי מצלמות (Multi-Camera), שילוב גרפיקה בזמן אמת, שידורים היברידיים המשלבים קהל באולם וקהל בבית, ופתרונות שידור IP מתקדמים לכל רשת חברתית או פלטפורמה ייעודית.",
                 gallery: [
-                    "psy_pics/20250214_192736.jpg",
-                    "psy_pics/20250215_175104.jpg",
-                    "psy_pics/20250223_151800.jpg",
-                    "psy_pics/20250223_151818.jpg"
+                    "assets/20250214_192736.jpg",
+                    "assets/20250215_175104.jpg",
+                    "assets/20250223_151800.jpg",
+                    "assets/20250223_151818.jpg"
                 ]
             },
             service_ai: {
                 title: "יצירת תוכן AI & On The Fly",
                 type: "service",
-                videoId: "d2_lJ42GuZ0", // Example ID
+                videoId: "d2_lJ42GuZ0",
                 desc: "המהפכה כבר כאן, ואנחנו מובילים אותה. שירות זה מאפשר לייצר ויזואליה מרהיבה ללא צורך בימי צילום יקרים. אנחנו משתמשים במחוללי תמונות ווידאו מתקדמים כדי ליצור סטוריבורדים, הדמיות, רקעים וירטואליים ואפילו דמויות דיגיטליות. היכולת ליצור תוכן 'On The Fly' (תוך כדי תנועה) מאפשרת גמישות אדירה ותגובה מהירה לטרנדים ולשינויים בזמן אמת.",
                 gallery: [
-                    "psy_pics/20250223_151534.jpg",
-                    "psy_pics/20250223_151808.jpg",
-                    "psy_pics/20250216_122459.jpg",
-                    "psy_pics/20250222_122300.jpg"
+                    "assets/20250223_151534.jpg",
+                    "assets/20250223_151808.jpg",
+                    "assets/20250216_122459.jpg",
+                    "assets/20250222_122300.jpg"
                 ]
             },
             service_virtual: {
                 title: "כנסים וירטואליים והיברידיים",
                 type: "service",
-                videoId: "Z3oO_GmtFfg", // Example ID
+                videoId: "Z3oO_GmtFfg",
                 desc: "העולם השתנה, וגם הכנסים. אנו מתמחים ביצירת חוויות אימרסיביות המטשטשות את הגבול בין המציאות למסך. באמצעות אולפנים וירטואליים (Green Screen) וטכנולוגיות AR, אנחנו מביאים דוברים מכל העולם לבמה אחת משותפת. המערכות שלנו מאפשרות אינטראקציה מלאה עם הקהל, סקרים בזמן אמת וחדרי נטוורקינג וירטואליים.",
                 gallery: [
-                    "psy_pics/20250215_175100.jpg",
-                    "psy_pics/20250215_175124.jpg",
-                    "psy_pics/20250215_175126(0).jpg",
-                    "psy_pics/20250215_192652.jpg"
+                    "assets/20250215_175100.jpg",
+                    "assets/20250215_175124.jpg",
+                    "assets/20250215_175126(0).jpg",
+                    "assets/20250215_192652.jpg"
                 ]
             },
             service_post: {
                 title: "פוסט-פרודקשן מתקדם",
                 type: "service",
-                videoId: "_rv2sMdyCpg", // Example ID
+                videoId: "_rv2sMdyCpg",
                 desc: "הקסם הסופי קורה בעריכה. מחלקת הפוסט שלנו כוללת עורכים, אמני אפקטים (VFX) ואנימטורים מהשורה הראשונה. אנחנו מטפלים בהכל: Offline, Online, תיקוני צבע (Color Grading), עיצוב סאונד ומיקס. הגישה שלנו היא לספר את הסיפור בצורה המהודקת והמרגשת ביותר, תוך עמידה בלוחות זמנים צפופים.",
                 gallery: [
-                    "psy_pics/20250222_122141.jpg",
-                    "psy_pics/20250222_122150.jpg",
-                    "psy_pics/20250222_122206.jpg",
-                    "psy_pics/20250216_122300.jpg"
+                    "assets/20250222_122141.jpg",
+                    "assets/20250222_122150.jpg",
+                    "assets/20250222_122206.jpg",
+                    "assets/20250216_122300.jpg"
                 ]
-            },
-
-            // Cine Match Projects
-            project_1: {
-                title: "MindFly Sports",
-                type: "cinematch",
-                stats: { score: "99.2%", tech: "BodyCam AI", emotion: "Immersion" },
-                text: "בשיתוף פעולה עם MindFly, יצרנו חוויית צפייה חדשנית המכניסה את הצופה לנעלי השחקן. שימוש בטכנולוגיית AI לייצוב תמונה ושידור בזמן אמת מנקודת מבט ראשון.",
-                image: "psy_pics/20250221_095912.jpg"
-            },
-            project_2: {
-                title: "Future Vision",
-                type: "cinematch",
-                stats: { score: "TRENDING UP", tech: "Stable Diffusion", emotion: "Wonder" },
-                text: "קמפיין שנוצר כולו ב-AI. הלקוח רצה לשדר 'עתידנות'. ניתחנו את הסגנון הויזואלי המתאים ויצרנו סדרה של סרטונים המשלבים לייב אקשן עם רקעים גנרטיביים.",
-                image: "psy_pics/20250223_151818.jpg"
-            },
-            project_3: {
-                title: "Broadcast Infrastructure",
-                type: "cinematch",
-                stats: { score: "STABLE", tech: "IP / SRT", emotion: "Trust" },
-                text: "בניית תשתית שידור לרשת ארצית. כאן האלגוריתם הצביע על 'אמינות' כערך עליון. הפתרון: מערכת גיבוי כפולה ושידור מבוסס ענן ליציבות מקסימלית.",
-                image: "psy_pics/20250222_122221.jpg"
             }
         };
 
-        // --- Translations Data (Updated) ---
+        // --- Translations Data ---
         const translations = {
             he: {
-                // ... Existing translations ...
-                nav_home: "ראשי", nav_about: "אודות", nav_work: "CINE MATCH", nav_services: "שירותים", nav_clients: "לקוחותינו", nav_contact: "צור קשר", nav_recommendations: "המלצות",
+                nav_home: "ראשי", nav_about: "אודות", nav_work: "CINE MATCH", nav_services: "שירותים", nav_ecosystem: "מעגלי עבודה", nav_contact: "צור קשר", nav_recommendations: "המלצות",
                 hero_title: "הנדסת חוויות ויזואליות", hero_subtitle: "איפה שטכנולוגיה פוגשת רגש בזמן אמת", hero_desc: "אנחנו לא רק מפיקים תוכן, אנחנו מהנדסים רגעים. שילוב עוצמתי בין שידורים חיים, קוד יצירתי ובינה מלאכותית שמשנה את חוקי המשחק והופכת כל פיקסל לסיפור.", hero_cta_start: "התחילו פרויקט", hero_cta_work: "למעגלי העבודה",
                 stat_productions: "הפקות מוצלחות", stat_countries: "מדינות בעולם", stat_support: "זמינות ויצירה",
                 about_title: "מי אנחנו", about_intro: "בנקודת המפגש שבין ביצוע טכני מושלם לחזון אומנותי פורץ דרך.", about_subtitle: "מקוד לאומנות: המסע של כל פרויקט", about_text: "העולם הדיגיטלי דורש מהירות של מכונה ונשמה של אומן. השיטה שלנו ייחודית: אנחנו מפרקים כל אתגר לגורמים טכניים ומרכיבים אותם מחדש ליצירה ויזואלית חיה.", about_text2: "זה לא רק \"לצלם ולערוך\". זה לבנות מערכות שמגיבות בזמן אמת, לייצר יש מאין באמצעות AI, ולדעת שברגע האמת - בשידור החי - הכל יעבוד כמו שעון שוויצרי.",
                 process_1: "אסטרטגיה", process_1_desc: "תכנון אדריכלי של האירוע או התוכן, מהמסר ועד לפיקסל.",
                 process_2: "הפקה חיה", process_2_desc: "ביצוע טכני ללא פשרות, ניהול צוותים וניתוב בזמן אמת.",
                 process_ai: "AI & Tech", process_ai_desc: "העצמת הויזואל עם כלים מחוללי תמונה וקוד.",
-                section_cinematch: "CINE MATCH", work_circles: "בורסת מעגלי העבודה",
+                section_ecosystem: "הסינרגיה שלנו: מעגלי עבודה ושותפים", ecosystem_desc: "אנחנו לא מאמינים ביחסי ספק-לקוח סטנדרטיים. הלקוחות שלנו הם הקולגות שלנו. זה יד לוחצת יד. אנחנו מפרים אחד את השני בקריאייטיב, ביכולות הניהול ובהפקת פרויקטים מורכבים.",
                 section_solutions: "השירותים שלנו",
                 sol_live_title: "הפקות וידאו ושידורים חיים", sol_live_short: "מולטי-קאמרה, ניתוב בזמן אמת ושידור לכל פלטפורמה.",
                 sol_ai_title: "יצירת תוכן AI & On The Fly", sol_ai_short: "שתילת אובייקטים, הנפשת תמונות ויצירת עולמות ללא גבול פיזי.",
                 sol_virtual_title: "כנסים וירטואליים והיברידיים", sol_virtual_short: "שילוב דוברים מהאולפן ומהבית בסביבה אימרסיבית.",
                 sol_post_title: "פוסט-פרודקשן מתקדם", sol_post_short: "עריכה, צבע, ואנימציה שסוגרים את המעגל.",
-                section_clients: "לקוחותינו", clients_subtitle: "גופי שידור, חברות הפקה ומותגים מובילים",
                 section_testimonials: "המלצות",
                 contact_title: "בואו ניצור משהו מדהים", contact_desc: "יש לכם חזון? לנו יש את הכלים להגשים אותו.", btn_email: "שלחו מייל", contact_name: "אוריין אדלני"
             },
             en: {
-                // ... Existing translations ...
-                nav_home: "Home", nav_about: "About", nav_work: "CINE MATCH", nav_services: "Services", nav_clients: "Our Clients", nav_contact: "Contact", nav_recommendations: "Testimonials",
+                nav_home: "Home", nav_about: "About", nav_work: "CINE MATCH", nav_services: "Services", nav_ecosystem: "Ecosystem", nav_contact: "Contact", nav_recommendations: "Testimonials",
                 hero_title: "Visual Experience Engineering", hero_subtitle: "Where Technology Meets Emotion in Real-Time", hero_desc: "We don't just produce content; we engineer moments. A powerful fusion of live broadcasting, creative coding, and AI that changes the rules of the game and turns every pixel into a story.", hero_cta_start: "Start a Project", hero_cta_work: "View Work",
                 stat_productions: "Successful Productions", stat_countries: "Countries Worldwide", stat_support: "Creation Availability",
                 about_title: "About Us", about_intro: "At the intersection of perfect technical execution and groundbreaking artistic vision.", about_subtitle: "From Code to Art: The Journey of Every Project", about_text: "The digital world demands the speed of a machine and the soul of an artist. Our method is unique: we deconstruct every challenge into technical factors and reassemble them into a living visual creation.", about_text2: "It's not just \"shoot and edit\". It's building systems that respond in real-time, creating from nothing using AI, and knowing that at the moment of truth - the live broadcast - everything will work like a Swiss watch.",
                 process_1: "Strategy", process_1_desc: "Architectural planning of the event or content, from message to pixel.",
                 process_2: "Live Production", process_2_desc: "Uncompromising technical execution, team management, and real-time switching.",
                 process_ai: "AI & Tech", process_ai_desc: "Empowering visuals with image-generating tools and code.",
-                section_cinematch: "CINE MATCH", work_circles: "Work Circles Exchange",
+                section_ecosystem: "Our Synergy: Work Circles & Partners", ecosystem_desc: "We don't believe in standard supplier-client relationships. Our clients are our colleagues. Hand shakes hand. We cross-pollinate creative, management, and production capabilities.",
                 section_solutions: "Our Services",
                 sol_live_title: "Video Production & Live Broadcast", sol_live_short: "Multi-camera, real-time switching, and broadcasting to any platform.",
                 sol_ai_title: "AI Content & On The Fly", sol_ai_short: "Object embedding, image animation, and creating worlds without physical boundaries.",
                 sol_virtual_title: "Virtual & Hybrid Conferences", sol_virtual_short: "Integrating studio and remote speakers in an immersive environment.",
                 sol_post_title: "Advanced Post-Production", sol_post_short: "Editing, color, and animation closing the loop.",
-                section_clients: "Our Clients", clients_subtitle: "Broadcasters, Production Companies, and Leading Brands",
                 section_testimonials: "Testimonials",
                 contact_title: "Let's Create Magic", contact_desc: "Have a vision? We have the tools to make it happen.", btn_email: "Send Email", contact_name: "Orian Edelenyi"
             }
@@ -870,7 +835,19 @@
 
         // --- Modal Logic ---
         function openModal(contentId) {
-            const data = contentData[contentId];
+            // Check if it's a partner/work circle
+            const partner = partnersData.find(p => p.id === contentId);
+            
+            let data;
+            let isPartner = false;
+
+            if (partner) {
+                data = partner;
+                isPartner = true;
+            } else {
+                data = contentData[contentId];
+            }
+
             if (!data) return;
 
             const modalOverlay = document.getElementById('modal-overlay');
@@ -879,12 +856,29 @@
             let htmlContent = `
                 <button class="modal-close" onclick="closeModal()">✕</button>
                 <div class="p-8 md:p-12">
-                    <h2 class="text-3xl md:text-5xl font-bold mb-6 text-[var(--primary)] text-center">${data.title}</h2>
             `;
 
-            if (data.type === 'service') {
+            if (isPartner) {
+                // Partner / Work Circle Modal
+                htmlContent += `
+                    <div class="flex flex-col md:flex-row gap-8 items-center">
+                        <div class="w-full md:w-1/3 flex justify-center">
+                            <div class="w-48 h-48 rounded-full bg-white/10 border border-[var(--primary)] flex items-center justify-center p-4 shadow-[0_0_30px_rgba(0,242,255,0.2)]">
+                                <img src="${data.logo}" class="max-w-full max-h-full object-contain" alt="${data.name}">
+                            </div>
+                        </div>
+                        <div class="w-full md:w-2/3 text-center md:text-right">
+                            <h2 class="text-3xl md:text-5xl font-bold mb-2 text-[var(--primary)]">${data.name}</h2>
+                            <h3 class="text-xl text-white mb-6 font-light tracking-widest uppercase">${data.role}</h3>
+                            <div class="h-1 w-20 bg-[var(--secondary)] mb-6 mx-auto md:mx-0"></div>
+                            <p class="text-xl text-[var(--text-color)] leading-relaxed">${data.desc}</p>
+                        </div>
+                    </div>
+                `;
+            } else if (data.type === 'service') {
                 // Service Page Layout
                 htmlContent += `
+                    <h2 class="text-3xl md:text-5xl font-bold mb-6 text-[var(--primary)] text-center">${data.title}</h2>
                     <div class="mb-8 rounded-xl overflow-hidden shadow-2xl border border-[var(--glass-border)] aspect-video relative">
                          <iframe width="100%" height="100%" src="https://www.youtube.com/embed/${data.videoId}?autoplay=1&mute=1&controls=1" title="Video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
                     </div>
@@ -896,35 +890,10 @@
                         ${data.gallery.map(img => `<div class="rounded-lg overflow-hidden h-40 border border-[var(--glass-border)]"><img src="${img}" class="w-full h-full object-cover hover:scale-110 transition-transform duration-500"></div>`).join('')}
                     </div>
                 `;
-            } else if (data.type === 'cinematch') {
-                // Cine Match Project Layout
-                htmlContent += `
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-8 items-center mb-8">
-                        <div class="rounded-xl overflow-hidden border border-[var(--glass-border)] h-64 md:h-80">
-                            <img src="${data.image}" class="w-full h-full object-cover">
-                        </div>
-                        <div>
-                             <div class="grid grid-cols-3 gap-4 mb-6 text-center">
-                                <div class="bg-[var(--glass-bg)] p-3 rounded-lg border border-[var(--primary)]">
-                                    <div class="text-[var(--primary)] font-bold text-lg">${data.stats.score}</div>
-                                    <div class="text-xs uppercase">Match Score</div>
-                                </div>
-                                <div class="bg-[var(--glass-bg)] p-3 rounded-lg border border-[var(--glass-border)]">
-                                    <div class="font-bold text-lg">${data.stats.tech}</div>
-                                    <div class="text-xs uppercase">Technology</div>
-                                </div>
-                                <div class="bg-[var(--glass-bg)] p-3 rounded-lg border border-[var(--glass-border)]">
-                                    <div class="font-bold text-lg">${data.stats.emotion}</div>
-                                    <div class="text-xs uppercase">Emotion</div>
-                                </div>
-                             </div>
-                             <p class="text-lg text-[var(--text-muted)] leading-relaxed">${data.text}</p>
-                        </div>
-                    </div>
-                `;
             } else {
                 // Default / Simple Modal (Process)
                 htmlContent += `
+                    <h2 class="text-3xl md:text-5xl font-bold mb-6 text-[var(--primary)] text-center">${data.title}</h2>
                     <div class="flex flex-col md:flex-row gap-8 items-center">
                         <div class="w-full md:w-1/2 rounded-xl overflow-hidden border border-[var(--glass-border)]">
                             <img src="${data.image}" class="w-full h-64 object-cover">
@@ -939,7 +908,7 @@
             htmlContent += `</div>`;
             modalInner.innerHTML = htmlContent;
             modalOverlay.classList.add('active');
-            document.body.style.overflow = 'hidden'; // Prevent background scrolling
+            document.body.style.overflow = 'hidden'; 
         }
 
         function closeModal() {
@@ -948,7 +917,6 @@
             document.body.style.overflow = '';
         }
 
-        // Close on outside click
         document.getElementById('modal-overlay').addEventListener('click', (e) => {
             if (e.target.id === 'modal-overlay') closeModal();
         });
@@ -1197,6 +1165,24 @@
             });
         };
 
+        // --- Init Ticker ---
+        const initTicker = () => {
+            const track1 = document.getElementById('ticker-track-1');
+            const track2 = document.getElementById('ticker-track-2');
+            
+            // Build HTML
+            const tickerHTML = partnersData.map(p => `
+                <div class="ticker-item" onclick="openModal('${p.id}')">
+                    <div class="partner-logo-card">
+                        <img src="${p.logo}" alt="${p.name}">
+                    </div>
+                </div>
+            `).join('');
+
+            track1.innerHTML = tickerHTML;
+            track2.innerHTML = tickerHTML;
+        }
+
         // --- Video Logic ---
         let playerA, playerB, activePlayer = 'A';
         let isMuted = true;
@@ -1261,23 +1247,7 @@
             initScrollReveal();
             initStatsAnimation();
             initServices();
-            
-            // Inject Generic Placeholder Logos
-            const logos = [
-                'https://placehold.co/180x60/transparent/white?text=CLIENT+1',
-                'https://placehold.co/180x60/transparent/white?text=CLIENT+2',
-                'https://placehold.co/180x60/transparent/white?text=CLIENT+3',
-                'https://placehold.co/180x60/transparent/white?text=CLIENT+4',
-                'https://placehold.co/180x60/transparent/white?text=CLIENT+5'
-            ];
-            const track = document.getElementById('logo-track');
-            const createLogo = (src) => {
-                const img = document.createElement('img');
-                img.src = src;
-                return img;
-            }
-            logos.forEach(l => track.appendChild(createLogo(l)));
-            logos.forEach(l => track.appendChild(createLogo(l)));
+            initTicker();
         });
 
     </script>
