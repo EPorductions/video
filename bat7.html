@@ -365,27 +365,40 @@
                 if(introDone) { forceCenter(); setTimeout(forceCenter, 50); }
             }, [introDone]);
 
-            // Smart Navigation Function
+            // Smart Navigation Function - Updated for Smart Home
             const navigateTo = (target) => {
                 if (!scrollContainerRef.current || !heroRef.current) return;
                 
                 const currentScroll = scrollContainerRef.current.scrollLeft;
                 const mainHeroX = heroRef.current.offsetLeft;
                 
-                // Determine if we are on the Left side (scroll is less than main hero position)
-                // We add a small buffer to avoid flickering when exactly at zero
+                if (target === 'home') {
+                    // Find the CLOSEST Home (Main, Clone Left, or Clone Right)
+                    // We calculate absolute distance to each ref's position
+                    const targets = [
+                        { ref: heroRef, pos: heroRef.current.offsetLeft },
+                        { ref: heroCloneLeftRef, pos: heroCloneLeftRef.current ? heroCloneLeftRef.current.offsetLeft : -Infinity },
+                        { ref: heroCloneRightRef, pos: heroCloneRightRef.current ? heroCloneRightRef.current.offsetLeft : Infinity }
+                    ];
+                    
+                    // Sort by distance, closest first
+                    targets.sort((a, b) => Math.abs(currentScroll - a.pos) - Math.abs(currentScroll - b.pos));
+                    
+                    // Scroll to the closest one
+                    if (targets[0].ref.current) {
+                        targets[0].ref.current.scrollIntoView({ behavior: 'smooth' });
+                    }
+                    return;
+                }
+
+                // Logic for 'about' and 'contact' remains direction-aware
                 const isLeftSide = currentScroll < (mainHeroX - 10);
-                
                 let targetRef = null;
                 
                 if (isLeftSide) {
-                    // Navigate to Left Mirror Sections
-                    if (target === 'home') targetRef = heroRef; // Always go to Main Hero for reset
                     if (target === 'about') targetRef = aboutLeftRef;
                     if (target === 'contact') targetRef = contactLeftRef;
                 } else {
-                    // Navigate to Right Normal Sections
-                    if (target === 'home') targetRef = heroRef;
                     if (target === 'about') targetRef = aboutMainRef;
                     if (target === 'contact') targetRef = contactRef;
                 }
