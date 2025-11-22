@@ -11,8 +11,8 @@
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
     <script src="https://cdn.tailwindcss.com"></script>
     
-    <!-- Fonts -->
-    <link href="https://fonts.googleapis.com/css2?family=Assistant:wght@200;300;400;600&family=Frank+Ruhl+Libre:wght@300;500;700&display=swap" rel="stylesheet">
+    <!-- Fonts: Switched to Heebo (Modern) -->
+    <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@100;300;400;500;700;900&display=swap" rel="stylesheet">
     
     <style>
         :root {
@@ -39,7 +39,7 @@
             padding: 0;
             background-color: var(--bg-linen);
             color: var(--text-primary);
-            font-family: 'Assistant', sans-serif;
+            font-family: 'Heebo', sans-serif; /* פונט ראשי מודרני */
             overflow: hidden; 
             height: 100%;
             height: -webkit-fill-available;
@@ -49,8 +49,14 @@
             -webkit-font-smoothing: antialiased;
         }
         
+        /* החלפנו את הסריף המיושן במשקל דק/אלגנטי של היבו או בולד */
         .serif {
-            font-family: 'Frank Ruhl Libre', serif;
+            font-family: 'Heebo', sans-serif;
+            font-weight: 200; /* דק ואלגנטי לכותרות */
+        }
+        
+        strong, b {
+            font-weight: 700;
         }
 
         /* Texture Background - Woven Pattern */
@@ -276,7 +282,7 @@
                         <div className="absolute top-20 left-0 w-full h-1 bg-[#2a9d8f]/40 animate-[weaveHoriz_1.3s_ease-out]"></div>
                         
                         <div className="m-auto text-center z-10">
-                            <h1 className="serif text-2xl text-[#2d2420] tracking-widest uppercase">Weaving</h1>
+                            <h1 className="serif text-2xl text-[#2d2420] tracking-widest uppercase font-bold">Weaving</h1>
                         </div>
                     </div>
                 </div>
@@ -339,7 +345,7 @@
                         <div className="absolute -top-4 left-1/2 -translate-x-1/2 w-24 h-8 bg-[#f4f1ea] opacity-90 shadow-sm rotate-[-2deg] border border-[#ccc]"></div>
                     </div>
                     
-                    <h1 className="text-4xl md:text-7xl serif text-[#2d2420] mb-4 tracking-tight drop-shadow-sm">{t.heroTitle}</h1>
+                    <h1 className="text-4xl md:text-7xl serif text-[#2d2420] mb-4 tracking-tight drop-shadow-sm font-black">{t.heroTitle}</h1>
                     <p className="text-lg md:text-xl font-light italic text-[#d66853] mb-12">
                         {t.heroSubtitle}
                     </p>
@@ -364,7 +370,7 @@
                 <div className="w-full h-full overflow-y-auto custom-scrollbar flex flex-col items-center justify-center p-6 pt-24 md:pt-6 relative z-10">
                     <div className="max-w-6xl w-full grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-16 items-center my-auto">
                         <div className="order-2 md:order-1 space-y-6 text-center md:text-start w-full max-w-[90vw] md:max-w-full mx-auto px-0" dir="rtl">
-                            <h2 className="text-3xl md:text-6xl serif text-[#2d2420] mb-6 relative inline-block">
+                            <h2 className="text-3xl md:text-6xl serif text-[#2d2420] mb-6 relative inline-block font-black">
                                 {t.aboutTitle}
                                 <div className="absolute -bottom-2 right-0 w-full h-1 bg-gradient-to-r from-[#d66853] to-[#e09f3e]"></div>
                             </h2>
@@ -405,7 +411,7 @@
                    <div className="max-w-3xl w-full flex flex-col items-center text-center space-y-8 md:space-y-12 my-auto" dir="rtl">
                        <div>
                            <span className="text-[#e09f3e] text-sm tracking-[0.3em] uppercase mb-4 block">{t.contactTitle}</span>
-                           <h2 className="text-4xl md:text-7xl serif text-[#f4f1ea] leading-tight">{t.contactTitle}</h2>
+                           <h2 className="text-4xl md:text-7xl serif text-[#f4f1ea] leading-tight font-black">{t.contactTitle}</h2>
                        </div>
                        <p className="text-sm md:text-xl font-light text-[#e8e4dc] max-w-lg leading-relaxed opacity-90">{t.contactText}</p>
                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-8 w-full max-w-lg mt-4 md:mt-8">
@@ -664,6 +670,10 @@
                 lastMoveTime.current = now;
             };
 
+            const handleBackdropClick = (e) => {
+                if (e.target === e.currentTarget) setSelectedImg(null);
+            };
+
             return (
                 <div className="min-h-screen h-[100dvh] text-[#3d342b] linen-bg" dir={lang === 'he' ? 'rtl' : 'ltr'}>
                     <div className="grain"></div>
@@ -673,7 +683,7 @@
                     {/* Nav Bar / Brand Header */}
                     <nav className="fixed top-0 left-0 w-full p-6 md:p-8 flex justify-between items-start z-50 text-[#3d342b] pointer-events-none">
                         <div className={`flex flex-col pointer-events-auto ${isHeroVisible ? 'brand-exit' : 'brand-enter'}`}>
-                            <span className="text-xl md:text-2xl font-bold tracking-tighter serif uppercase text-[#d66853] drop-shadow-sm">{t.name}</span>
+                            <span className="text-xl md:text-2xl font-bold tracking-tighter serif uppercase text-[#d66853] drop-shadow-sm font-black">{t.name}</span>
                             <span className="text-[10px] md:text-xs opacity-80 tracking-[0.2em] uppercase mt-1 text-[#2a9d8f] font-bold">{t.role}</span>
                         </div>
                         <div className="flex flex-col items-end gap-4 pointer-events-auto">
@@ -731,9 +741,15 @@
                     {selectedImg && (
                         <div 
                             className="fixed inset-0 z-[100] bg-[#2d2420]/95 backdrop-blur-sm flex items-center justify-center p-0 animate-[fadeIn_0.3s_ease-out] cursor-auto"
-                            onClick={() => setSelectedImg(null)} 
+                            onClick={handleBackdropClick} 
                         >
-                            <button className="absolute top-6 right-6 text-white/50 hover:text-white z-50 p-4"><Icons.X /></button>
+                            <button 
+                                className="absolute top-6 right-6 text-white/50 hover:text-white z-50 p-4"
+                                onClick={() => setSelectedImg(null)}
+                            >
+                                <Icons.X />
+                            </button>
+                            
                             <div className="w-full h-full md:max-w-7xl md:h-[85vh] grid grid-cols-1 md:grid-cols-3 md:gap-12 items-center p-4 md:p-8 pointer-events-none">
                                 <div className="md:col-span-2 h-[55vh] md:h-full flex items-center justify-center bg-[#fbf9f4] p-3 stitched pointer-events-auto" onClick={(e) => e.stopPropagation()}>
                                     <img src={selectedImg.src} className="max-h-full max-w-full object-contain" />
