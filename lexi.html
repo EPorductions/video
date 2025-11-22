@@ -12,6 +12,9 @@
             --primary: #4a5d55; /* Sage Green */
             --secondary: #f3f4f6;
             --accent: #d97706;
+            --hint-bg: #e0e7ff;
+            --hint-border: #6366f1;
+            --hint-text: #3730a3;
             --text: #1f2937;
             --text-light: #6b7280;
             --white: #ffffff;
@@ -63,13 +66,14 @@
             display: flex;
             justify-content: space-between;
             margin-bottom: 24px;
+            overflow-x: auto;
         }
 
         .nav-btn {
             flex: 1;
             border: none;
             background: none;
-            padding: 10px 0;
+            padding: 10px 12px;
             font-family: 'Heebo', sans-serif;
             font-size: 0.9rem;
             font-weight: 500;
@@ -77,6 +81,7 @@
             cursor: pointer;
             border-radius: 8px;
             transition: all 0.3s ease;
+            white-space: nowrap;
         }
 
         .nav-btn.active {
@@ -132,7 +137,7 @@
             font-size: 0.95rem;
         }
 
-        /* Highlights */
+        /* Highlights & Hints */
         .highlight-box {
             background-color: #f0fdf4;
             border-right: 4px solid var(--primary);
@@ -153,16 +158,42 @@
             color: #9a3412;
         }
 
-        .btn-primary {
-            background-color: var(--primary);
-            color: white;
-            padding: 14px;
-            border-radius: 12px;
-            text-align: center;
+        /* Collapsible Hint Box */
+        details.hint-box {
+            background-color: #f8fafc;
+            border: 1px dashed var(--primary);
+            padding: 12px;
+            margin-top: 16px;
+            border-radius: 8px;
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+
+        details.hint-box:hover {
+            background-color: #f0fdfa;
+        }
+
+        summary {
             font-weight: 700;
-            margin-top: auto;
-            display: block;
-            text-decoration: none;
+            color: var(--primary);
+            margin-bottom: 4px;
+            list-style: none; /* Hide default triangle */
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        
+        summary::before {
+            content: "💡"; 
+        }
+
+        .hint-content {
+            margin-top: 8px;
+            color: var(--text);
+            font-size: 0.9rem;
+            border-top: 1px solid #e5e7eb;
+            padding-top: 8px;
         }
 
         @keyframes fadeIn {
@@ -184,7 +215,7 @@
     <div class="nav-wrapper">
         <button class="nav-btn active" onclick="switchTab('overview', this)">השורה התחתונה</button>
         <button class="nav-btn" onclick="switchTab('diagnosis', this)">האבחון</button>
-        <button class="nav-btn" onclick="switchTab('plan', this)">התוכנית</button>
+        <button class="nav-btn" onclick="switchTab('plan', this)">התוכנית וכלים</button>
         <button class="nav-btn" onclick="switchTab('logistics', this)">תכל'ס</button>
     </div>
 
@@ -230,6 +261,13 @@
                 כשהיא חושפת שיניים והצד השני נרתע, היא לומדת שזה עובד לה. זה מחזק את ההתנהגות.
             </div>
             <p>הפחד ההדדי (של לקסי מעמית, ושל עמית מלקסי) יוצר מעגל שמזין את עצמו. המטרה היא לשבור את המעגל הזה דרך ביטחון ולא דרך כוח.</p>
+            
+            <details class="hint-box">
+                <summary>מה עושים כשזה קורה?</summary>
+                <div class="hint-content">
+                    במקום להירתע לאחור (שמשדר "את הבוס"), יש לשמור על שפת גוף רגועה אך יציבה. אם היא נוהמת על הספה/מיטה, המטרה היא להוריד אותה ברוגע (למשל עם רצועה שהושארה עליה מראש) ולא להיכנס לעימות חזיתי או כעס.
+                </div>
+            </details>
         </div>
     </div>
 
@@ -237,23 +275,41 @@
     <div id="plan" class="content-section">
         <div class="card">
             <div class="card-title">1. היררכיה וגבולות</div>
-            <p>התהליך מתמקד בבניית סמכות הורית משותפת.</p>
-            <p>עמית תצטרך לעבור תהליך של בניית מעמד מול לקסי – להפוך לדמות שכיף להיות איתה, אבל גם כזו שמציבה גבולות ברורים. כשלקסי תבין שיש מנהל לבית, היא תפסיק לנסות לחנך את הנוכחים.</p>
+            <p>התהליך מתמקד בבניית סמכות הורית משותפת. עמית תצטרך להפוך לדמות שכיף להיות איתה, אבל גם כזו שמציבה גבולות.</p>
+            
+            <details class="hint-box">
+                <summary>טיפ לביצוע: תרגול "למקום"</summary>
+                <div class="hint-content">
+                    <strong>פקודת "למקום":</strong> ללמד את לקסי ללכת למיטה/שטיח שלה ולהישאר שם. זה נותן לה "תפקיד" להיות רגועה במקום מוגדר, במקום לשוטט ולחפש סכנות.<br><br>
+                    <strong>כלוב אילוף (בהמלצה):</strong> לשקול שימוש בכלוב כ"חדר ביטחון" ולא כעונש. מקום שבו היא יכולה להתנתק מהגירויים של הבית ולהירגע באמת.
+                </div>
+            </details>
         </div>
 
         <div class="card">
             <div class="card-title">2. ניהול אנרגיה (קריטי)</div>
-            <p>טיולים רגילים הם כמו "לדפדף בעיתון" – הם לא פורקים מתח.</p>
-            <ul>
-                <li><strong>היעד:</strong> לרוקן את הסוללה הפיזית והמנטלית שלה מדי יום.</li>
-                <li><strong>הדרך:</strong> שילוב של ריצה/משחק (פיזי) עם עבודת הרחה וחיפוש אוכל (מנטלי).</li>
-                <li><strong>התוצאה:</strong> כלבה עייפה היא כלבה פחות חרדתית.</li>
-            </ul>
+            <p>טיולים רגילים הם לא פריקת אנרגיה. צריך לרוקן את הסוללה הפיזית והמנטלית.</p>
+            
+            <details class="hint-box">
+                <summary>טיפ לביצוע: איך פורקים נכון?</summary>
+                <div class="hint-content">
+                    <strong>1. עבודת אף (מנטלי):</strong> במקום קערה, פזרו את האוכל שלה בתוך הדשא בגינה או החביאו אותו בבית. 10 דקות של רחרוח מעייפות כמו שעה הליכה.<br>
+                    <strong>2. משחק משיכות (פיזי+משמעת):</strong> משחק עם חבל/צעצוע שבו יש חוקים – מתחילים כשאתם אומרים ומפסיקים כשאתם אומרים. זה מלמד אותה ויסות יצרים.
+                </div>
+            </details>
         </div>
 
         <div class="card">
-            <div class="card-title">3. חוויות מתקנות</div>
-            <p>יצירת אינטראקציות חיוביות בין עמית ללקסי (דרך האכלה, משחק ותרגול) כדי לבנות אמון מחדש ולהוריד את מפלס הפחד.</p>
+            <div class="card-title">3. חוויות מתקנות (עמית ולקסי)</div>
+            <p>יצירת אינטראקציות חיוביות כדי לבנות אמון מחדש ולהוריד את מפלס הפחד ההדדי.</p>
+            
+            <details class="hint-box">
+                <summary>טיפ לביצוע: "Treat & Retreat"</summary>
+                <div class="hint-content">
+                    <strong>מי מאכיל?</strong> עמית לוקחת פיקוד על הארוחות כדי להיות המקור לדברים טובים.<br>
+                    <strong>זריקת צ'ופר לאחור:</strong> כשעמית נכנסת לחדר ולקסי לחוצה, עמית תזרוק חטיף *מאחורי* לקסי. <br>זה גורם ללקסי להתרחק (מוריד לחץ) אבל עדיין לקבל חיזוק חיובי על הנוכחות של עמית.
+                </div>
+            </details>
         </div>
     </div>
 
