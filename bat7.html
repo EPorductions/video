@@ -11,12 +11,11 @@
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
     <script src="https://cdn.tailwindcss.com"></script>
     
-    <!-- Fonts: Heebo (Modern, Clean) -->
+    <!-- Fonts: Heebo -->
     <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@100;300;400;500;700;900&display=swap" rel="stylesheet">
     
     <style>
         :root {
-            /* Palette */
             --bg-linen: #fbf9f4;
             --bg-dark-linen: #f0ebe0;
             --thread-color: #8c7b6c;
@@ -44,7 +43,6 @@
         .serif { font-family: 'Heebo', sans-serif; font-weight: 200; }
         strong, b { font-weight: 700; }
 
-        /* Background Texture - Woven Cross-Hatch */
         .linen-bg {
             background-color: var(--bg-linen);
             background-image: 
@@ -54,14 +52,12 @@
             background-position: 0 0, 10px 10px;
         }
 
-        /* Noise Overlay */
         .grain {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             pointer-events: none; z-index: 50; opacity: 0.04;
             background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
         }
 
-        /* Stitched Card Effect */
         .stitched {
             position: relative;
             box-shadow: 4px 6px 15px rgba(0,0,0,0.08);
@@ -77,7 +73,6 @@
             border: 1px dotted var(--accent-gold); pointer-events: none; opacity: 0.6;
         }
         
-        /* Scroll Container */
         .horizontal-scroll-container {
             display: flex;
             flex-direction: row;
@@ -103,8 +98,8 @@
         .vertical-text { writing-mode: vertical-rl; text-orientation: mixed; transform: rotate(180deg); }
         .layout-transition { transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1); }
         
-        /* Header Animation */
-        .brand-header {
+        /* Brand Animation - Only affects the name */
+        .brand-element {
             transition: transform 0.3s ease, opacity 0.3s ease; 
             will-change: transform, opacity;
         }
@@ -336,9 +331,9 @@
             const heroCloneLeftRef = useRef(null);
             const aboutMainRef = useRef(null); 
             const contactRef = useRef(null);
-            const headerRef = useRef(null);
+            const brandRef = useRef(null); // Only the name/role part
 
-            // Physics Refs (For stability inside listeners)
+            // Physics Refs
             const isDown = useRef(false);
             const startX = useRef(0);
             const scrollLeft = useRef(0);
@@ -363,10 +358,10 @@
                         if (!loaded) { requestAnimationFrame(() => { if(scrollContainerRef.current) scrollContainerRef.current.classList.add('loaded'); setLoaded(true); }); }
                     }
                 };
-                if(introDone) { forceCenter(); setTimeout(forceCenter, 100); }
+                if(introDone) { forceCenter(); setTimeout(forceCenter, 50); }
             }, [introDone]);
 
-            // Scroll Logic (Infinite + Header)
+            // Combined Scroll Logic
             useEffect(() => {
                 const container = scrollContainerRef.current;
                 if (!container) return;
@@ -381,11 +376,7 @@
                     const viewW = window.innerWidth;
 
                     // SEAMLESS JUMP LOGIC
-                    // If we hit a clone, we shift the scroll position INSTANTLY to the main hero
-                    // We also shift the physics 'startX' if dragging, so the user feels no jump.
                     let jumpDelta = 0;
-                    
-                    // Threshold must be tight but allow small errors
                     if (currentScroll >= homeCloneRightX - 10) { 
                         const offsetIntoClone = currentScroll - homeCloneRightX;
                         const newPos = homeMainX + offsetIntoClone;
@@ -403,14 +394,12 @@
                         jumpDelta = newPos - currentScroll;
                     }
 
-                    // Adjust dragging reference if a jump happened
                     if (isDown.current && jumpDelta !== 0) {
                         scrollLeft.current += jumpDelta; 
-                        // Don't touch startX, touch event is absolute. We just shift the anchor base.
                     }
 
-                    // Sticky Header Visibility
-                    if (headerRef.current) {
+                    // Sticky Brand Name Visibility ONLY (Nav remains visible)
+                    if (brandRef.current) {
                         const threshold = viewW * 0.6;
                         const distMain = Math.abs(currentScroll - homeMainX);
                         const distRight = Math.abs(currentScroll - homeCloneRightX);
@@ -418,13 +407,15 @@
                         const isNearHero = (distMain < threshold) || (distRight < threshold) || (distLeft < threshold);
                         
                         if (isNearHero) {
-                            headerRef.current.style.transform = 'translateY(-20px)';
-                            headerRef.current.style.opacity = '0';
-                            headerRef.current.style.pointerEvents = 'none';
+                            // Hide Name (Move up and fade out)
+                            brandRef.current.style.transform = 'translateY(-20px)';
+                            brandRef.current.style.opacity = '0';
+                            brandRef.current.style.pointerEvents = 'none';
                         } else {
-                            headerRef.current.style.transform = 'translateY(0)';
-                            headerRef.current.style.opacity = '1';
-                            headerRef.current.style.pointerEvents = 'auto';
+                            // Show Name
+                            brandRef.current.style.transform = 'translateY(0)';
+                            brandRef.current.style.opacity = '1';
+                            brandRef.current.style.pointerEvents = 'auto';
                         }
                     }
                 };
@@ -459,7 +450,7 @@
                 return () => container.removeEventListener('wheel', handleWheel);
             }, [introDone]);
 
-            // Drag Physics Implementation
+            // Physics
             const cancelMomentum = () => { if (momentumID.current) { cancelAnimationFrame(momentumID.current); momentumID.current = null; } };
             const momentumLoop = () => {
                 if (!scrollContainerRef.current) return;
@@ -482,10 +473,8 @@
                 if (!isDown.current) return; isDown.current = false;
                 if(scrollContainerRef.current) {
                     scrollContainerRef.current.classList.remove('is-dragging');
-                    // Snap if dragged enough
                     const endX = e.pageX - scrollContainerRef.current.offsetLeft;
-                    const distance = startX.current - endX; 
-                    const viewWidth = window.innerWidth; const currentScroll = scrollContainerRef.current.scrollLeft;
+                    const distance = startX.current - endX; const viewWidth = window.innerWidth; const currentScroll = scrollContainerRef.current.scrollLeft;
                     let targetPage = Math.round(currentScroll / viewWidth);
                     if (Math.abs(distance) > 20) { 
                         const direction = distance > 0 ? 1 : -1; 
@@ -499,11 +488,8 @@
                 const x = e.pageX - scrollContainerRef.current.offsetLeft; 
                 const walk = (x - startX.current) * 1.5; 
                 scrollContainerRef.current.scrollLeft = scrollLeft.current - walk;
-                
-                // Calculate Velocity
                 const now = Date.now(); const dt = now - lastMoveTime.current; const dx = e.pageX - lastMoveX.current;
-                if (dt > 0) velX.current = dx / dt * 15; 
-                lastMoveX.current = e.pageX; lastMoveTime.current = now;
+                if (dt > 0) velX.current = dx / dt * 15; lastMoveX.current = e.pageX; lastMoveTime.current = now;
             };
 
             return (
@@ -511,8 +497,9 @@
                     <div className="grain"></div>
                     {!introDone && <Intro onComplete={() => setIntroDone(true)} />}
                     
-                    <nav ref={headerRef} className="fixed top-0 left-0 w-full p-6 md:p-8 flex justify-between items-start z-50 text-[#3d342b] pointer-events-none brand-header" style={{opacity: 0, transform: 'translateY(-20px)'}}>
-                        <div className={`flex flex-col pointer-events-auto`}>
+                    {/* Header - Only brand element fades out now */}
+                    <nav className="fixed top-0 left-0 w-full p-6 md:p-8 flex justify-between items-start z-50 text-[#3d342b] pointer-events-none">
+                        <div ref={brandRef} className={`flex flex-col pointer-events-auto brand-element`} style={{opacity: 0, transform: 'translateY(-20px)'}}>
                             <span className="text-xl md:text-2xl font-bold tracking-tighter serif uppercase text-[#d66853] drop-shadow-sm font-black">{t.name}</span>
                             <span className="text-[10px] md:text-xs opacity-80 tracking-[0.2em] uppercase mt-1 text-[#2a9d8f] font-bold">{t.role}</span>
                         </div>
