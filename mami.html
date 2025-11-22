@@ -60,7 +60,7 @@
             width: 100%;
             
             -webkit-overflow-scrolling: touch; 
-            /* scroll-snap is managed via JS for better control with infinite loop */
+            scroll-snap-type: x proximity; 
             
             align-items: center;
             direction: ltr;
@@ -68,7 +68,7 @@
             opacity: 0;
             transition: opacity 0.5s ease-in;
             
-            /* IMPORTANT: Keep auto to allow JS manual smoothing and instant loop jumps */
+            /* Keeping auto for JS control */
             scroll-behavior: auto; 
         }
         
@@ -87,6 +87,8 @@
         .is-dragging { 
             cursor: grabbing; 
             user-select: none; 
+            scroll-snap-type: none;
+            scroll-behavior: auto !important;
         }
 
         .vertical-text {
@@ -129,6 +131,12 @@
         }
 
         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+        @media (max-width: 768px) {
+            .horizontal-scroll-container {
+                scroll-snap-type: x mandatory; 
+            }
+        }
     </style>
 </head>
 <body>
@@ -148,7 +156,7 @@
             Instagram: () => <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><rect x="2" y="2" width="20" height="20" rx="5" ry="5"></rect><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"></path><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"></line></svg>
         };
 
-        // --- Content Dictionary ---
+        // --- Content ---
         const content = {
             he: {
                 name: "אליז שנון אדלני",
@@ -327,23 +335,26 @@
                     <p className="text-xl md:text-2xl serif font-light italic text-[#d4a373] mb-12">
                         {t.heroSubtitle}
                     </p>
-                    <div className="flex items-center gap-8 opacity-60 animate-pulse transition-opacity p-4 z-50 pointer-events-auto absolute bottom-10 md:static">
-                        <div onClick={onLeft} className="cursor-pointer hover:text-white hover:scale-110 transition-transform p-2"><Icons.ArrowLeft /></div>
-                        <span onClick={onText} className="text-xs md:text-sm tracking-[0.3em] uppercase border-b border-white/20 pb-1 cursor-pointer hover:text-[#d4a373] transition-colors">{t.scrollHint}</span>
-                        <div onClick={onRight} className="cursor-pointer hover:text-white hover:scale-110 transition-transform p-2"><Icons.ArrowRight /></div>
-                    </div>
+                    {!isClone && (
+                        <div className="flex items-center gap-8 opacity-60 animate-pulse transition-opacity p-4 z-50 pointer-events-auto absolute bottom-10 md:static">
+                            <div onClick={onLeft} className="cursor-pointer hover:text-white hover:scale-110 transition-transform p-2"><Icons.ArrowLeft /></div>
+                            <span onClick={onText} className="text-xs md:text-sm tracking-[0.3em] uppercase border-b border-white/20 pb-1 cursor-pointer hover:text-[#d4a373] transition-colors">{t.scrollHint}</span>
+                            <div onClick={onRight} className="cursor-pointer hover:text-white hover:scale-110 transition-transform p-2"><Icons.ArrowRight /></div>
+                        </div>
+                    )}
                 </div>
             </section>
         );
 
-        const AboutSection = ({ t, sectionRef }) => (
+        const AboutSection = ({ t, sectionRef, reversed }) => (
              <section 
                 ref={sectionRef}
                 className="snap-center min-w-[100vw] md:min-w-[80vw] h-[100vh] h-[100dvh] bg-[#0f0f0f] flex items-center justify-center relative flex-shrink-0 border-l border-r border-white/5 layout-transition"
             >
                 <div className="w-full h-full overflow-y-auto custom-scrollbar flex flex-col items-center justify-center p-6 pt-28 md:pt-6">
                     <div className="max-w-6xl w-full grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-16 items-center my-auto">
-                        <div className="order-2 md:order-1 space-y-6 text-center md:text-start w-full max-w-[90vw] md:max-w-full mx-auto px-0" dir={t.name === "אליז שנון אדלני" ? 'rtl' : 'ltr'}>
+                        {/* If reversed, order-2 becomes order-1 on MD screens to flip layout */}
+                        <div className={`order-2 ${reversed ? 'md:order-2' : 'md:order-1'} space-y-6 text-center md:text-start w-full max-w-[90vw] md:max-w-full mx-auto px-0`} dir={t.name === "אליז שנון אדלני" ? 'rtl' : 'ltr'}>
                             <h2 className="text-3xl md:text-7xl serif text-[#d4a373]">{t.aboutTitle}</h2>
                             <div className="space-y-4 md:space-y-6 text-sm md:text-xl font-light text-gray-300 leading-relaxed break-words">
                                 <p>{t.aboutText1}</p>
@@ -355,7 +366,7 @@
                                 <span className="text-xs opacity-70">{t.credits}</span>
                             </div>
                         </div>
-                        <div className="order-1 md:order-2 relative h-[30vh] md:h-[50vh] w-full flex-shrink-0">
+                        <div className={`order-1 ${reversed ? 'md:order-1' : 'md:order-2'} relative h-[30vh] md:h-[50vh] w-full flex-shrink-0`}>
                             <img src="20200704_004846.jpg" alt="Studio" className="w-full h-full object-cover grayscale opacity-60 shadow-2xl rounded-sm" draggable="false" />
                         </div>
                     </div>
@@ -363,7 +374,7 @@
             </section>
         );
 
-        const ContactSection = ({ t, sectionRef }) => (
+        const ContactSection = ({ t, sectionRef, reversed }) => (
             <section 
                ref={sectionRef}
                className="snap-center min-w-[100vw] md:min-w-[60vw] h-[100vh] h-[100dvh] bg-[#0a0a0a] flex items-center justify-center relative flex-shrink-0 border-l border-r border-white/5 layout-transition"
@@ -408,14 +419,14 @@
            </section>
        );
 
-        const CategoryCluster = ({ category, onImageClick }) => (
-            <div className="flex flex-row items-center gap-6 md:gap-16 px-4 md:px-24 border-l border-white/5 snap-center h-full layout-transition">
+        const CategoryCluster = ({ category, onImageClick, reversed }) => (
+            <div className={`flex ${reversed ? 'flex-row-reverse' : 'flex-row'} items-center gap-6 md:gap-16 px-4 md:px-24 border-l border-white/5 snap-center h-full layout-transition`}>
                 <div className="h-[50vh] md:h-[60vh] flex flex-col justify-center items-center opacity-50 sticky left-0 z-10">
                     <div className="w-px h-12 md:h-24 bg-gradient-to-b from-transparent via-[#d4a373] to-transparent mb-4 md:mb-6"></div>
                     <h2 className="vertical-text text-3xl md:text-6xl serif tracking-widest text-transparent stroke-text font-bold whitespace-nowrap">{category.title}</h2>
                     <div className="w-px h-12 md:h-24 bg-gradient-to-b from-transparent via-[#d4a373] to-transparent mt-4 md:mt-6"></div>
                 </div>
-                <div className="flex gap-6 md:gap-12 items-center">
+                <div className={`flex ${reversed ? 'flex-row-reverse' : 'flex-row'} gap-6 md:gap-12 items-center`}>
                     {category.items.map((item, idx) => (
                         <div 
                             key={`${category.id}-${item.id}-${idx}`}
@@ -450,13 +461,17 @@
             const [galleryData, setGalleryData] = useState(null); 
 
             const scrollContainerRef = useRef(null);
+            
+            // REFS FOR SMART NAV
             const heroRef = useRef(null);
             const heroCloneRightRef = useRef(null);
             const heroCloneLeftRef = useRef(null);
-            const aboutMainRef = useRef(null); 
+            
+            const aboutMainRef = useRef(null);
+            const aboutLeftRef = useRef(null);
+            
             const contactRef = useRef(null);
-            const contactCloneLeftRef = useRef(null); 
-            const aboutCloneRightRef = useRef(null); // Extra ref for right loop logic
+            const contactLeftRef = useRef(null); 
 
             const t = content[lang];
             const isRTL = lang === 'he';
@@ -558,8 +573,12 @@
                 const forceCenter = () => {
                     if (heroRef.current && scrollContainerRef.current) {
                         const offset = heroRef.current.offsetLeft;
+                        scrollContainerRef.current.style.scrollBehavior = 'auto';
                         scrollContainerRef.current.scrollTo(offset, 0);
-                        
+                        setTimeout(() => {
+                            if(scrollContainerRef.current) scrollContainerRef.current.style.scrollBehavior = 'smooth';
+                        }, 1000); 
+
                         if (!loaded) {
                             requestAnimationFrame(() => {
                                 if(scrollContainerRef.current) scrollContainerRef.current.classList.add('loaded');
@@ -571,7 +590,6 @@
 
                 try {
                     forceCenter();
-                    // Multiple attempts to ensure correct positioning after load/render
                     const timer = setTimeout(forceCenter, 50);
                     const timer2 = setTimeout(forceCenter, 200);
                     const timer3 = setTimeout(forceCenter, 500); 
@@ -596,67 +614,41 @@
                 return () => observer.disconnect();
             }, []);
 
-            // --- Navigation Logic (Smart Closest Target) ---
-            const scrollToSection = (targetRef) => {
-                if (!scrollContainerRef.current || !targetRef.current) return;
+            // --- Navigation Functions ---
+            const scrollToSection = (targetName) => {
+                if (!scrollContainerRef.current || !heroRef.current) return;
 
-                const container = scrollContainerRef.current;
-                const currentScroll = container.scrollLeft;
-                const targetX = targetRef.current.offsetLeft;
+                const currentScroll = scrollContainerRef.current.scrollLeft;
+                const mainHeroX = heroRef.current.offsetLeft;
+                const isLeftSide = currentScroll < (mainHeroX - 10);
                 
-                // Handle potential clones for smart navigation
-                let finalTarget = targetX;
+                let targetRef = null;
                 
-                // Example: If navigating to Contact, check main vs clone
-                if (targetRef === contactRef) {
-                    const cloneX = contactCloneLeftRef.current ? contactCloneLeftRef.current.offsetLeft : Infinity;
-                    if (Math.abs(currentScroll - cloneX) < Math.abs(currentScroll - targetX)) {
-                        finalTarget = cloneX;
-                    }
-                }
-                
-                // If navigating to About, check main vs clone (if existed, here we only have one clone at far right)
-                if (targetRef === aboutMainRef && aboutCloneRightRef.current) {
-                    const cloneX = aboutCloneRightRef.current.offsetLeft;
-                     if (Math.abs(currentScroll - cloneX) < Math.abs(currentScroll - targetX)) {
-                        finalTarget = cloneX;
-                    }
+                if (isLeftSide) {
+                     if (targetName === 'home') targetRef = heroRef; 
+                     if (targetName === 'about') targetRef = aboutLeftRef;
+                     if (targetName === 'contact') targetRef = contactLeftRef;
+                } else {
+                     if (targetName === 'home') targetRef = heroRef; 
+                     if (targetName === 'about') targetRef = aboutMainRef;
+                     if (targetName === 'contact') targetRef = contactRef;
                 }
 
-                // If navigating to Hero
-                if (targetRef === heroRef) {
-                     const cloneLeftX = heroCloneLeftRef.current ? heroCloneLeftRef.current.offsetLeft : Infinity;
-                     const cloneRightX = heroCloneRightRef.current ? heroCloneRightRef.current.offsetLeft : Infinity;
-                     
-                     const distMain = Math.abs(currentScroll - targetX);
-                     const distLeft = Math.abs(currentScroll - cloneLeftX);
-                     const distRight = Math.abs(currentScroll - cloneRightX);
-                     
-                     if (distLeft < distMain && distLeft < distRight) finalTarget = cloneLeftX;
-                     else if (distRight < distMain && distRight < distLeft) finalTarget = cloneRightX;
+                if (targetRef && targetRef.current) {
+                    targetRef.current.scrollIntoView({ behavior: 'smooth' });
                 }
-
-                container.scrollTo({
-                    left: finalTarget,
-                    behavior: 'smooth'
-                });
             };
 
-            const handleLeftArrow = (e) => { 
-                e.stopPropagation(); 
-                if(scrollContainerRef.current) {
-                    scrollContainerRef.current.scrollBy({ left: -window.innerWidth, behavior: 'smooth' });
+            const scrollByAmount = (amount) => {
+                if (scrollContainerRef.current) {
+                    scrollContainerRef.current.scrollBy({ left: amount, behavior: 'smooth' });
                 }
             };
-            
-            const handleRightArrow = (e) => { 
-                e.stopPropagation(); 
-                 if(scrollContainerRef.current) {
-                    scrollContainerRef.current.scrollBy({ left: window.innerWidth, behavior: 'smooth' });
-                }
-            };
-            
-            const handleStartStory = (e) => { e.stopPropagation(); handleLeftArrow(e); };
+
+            const handleLeftArrow = (e) => { e.stopPropagation(); scrollByAmount(-window.innerWidth); };
+            const handleRightArrow = (e) => { e.stopPropagation(); scrollByAmount(window.innerWidth); };
+            const handleStartStory = (e) => { e.stopPropagation(); scrollByAmount(-window.innerWidth); };
+
             const handleLangChange = (newLang) => {
                 setLang(newLang);
                 try {
@@ -664,6 +656,7 @@
                     url.searchParams.set('lang', newLang);
                     window.history.pushState({}, '', url);
                 } catch (e) {}
+                setTimeout(() => { if(heroRef.current) heroRef.current.scrollIntoView({ behavior: 'auto' }); }, 50);
             };
 
             // --- Infinite Loop Logic ---
@@ -672,25 +665,26 @@
                 if (!container) return;
 
                 const checkLoop = () => {
-                    if(!heroRef.current || !heroCloneRightRef.current || !contactRef.current || !contactCloneLeftRef.current) return;
+                    if(!heroRef.current || !heroCloneRightRef.current || !heroCloneLeftRef.current) return;
                     
                     const scrollLeft = container.scrollLeft;
                     
                     const homeCloneRightX = heroCloneRightRef.current.offsetLeft;
                     const homeMainX = heroRef.current.offsetLeft;
+                    const homeCloneLeftX = heroCloneLeftRef.current.offsetLeft;
                     
-                    // Threshold increased slightly to ensure it catches even with fast scroll
                     if (scrollLeft >= homeCloneRightX - 2) { 
                          const relativePos = scrollLeft - homeCloneRightX;
-                         container.scrollTo({ left: homeMainX + relativePos, behavior: 'auto' });
+                         container.style.scrollBehavior = 'auto';
+                         container.scrollTo({ left: homeMainX + relativePos });
+                         container.style.scrollBehavior = 'smooth';
                     }
 
-                    const contactCloneLeftX = contactCloneLeftRef.current.offsetLeft;
-                    const contactMainX = contactRef.current.offsetLeft;
-
-                    if (scrollLeft <= contactCloneLeftX + 2) { 
-                         const relativePos = contactCloneLeftX - scrollLeft;
-                         container.scrollTo({ left: contactMainX - relativePos, behavior: 'auto' });
+                    if (scrollLeft <= homeCloneLeftX + 2) { 
+                         const relativePos = homeCloneLeftX - scrollLeft;
+                         container.style.scrollBehavior = 'auto';
+                         container.scrollTo({ left: homeMainX - relativePos });
+                         container.style.scrollBehavior = 'smooth';
                     }
                 };
 
@@ -698,7 +692,7 @@
                 return () => container.removeEventListener('scroll', checkLoop);
             }, []);
 
-            // --- Snap Logic on Interaction End ---
+            // --- Snap Logic ---
             const snapToNearestPage = () => {
                 if (!scrollContainerRef.current) return;
                 const viewWidth = window.innerWidth;
@@ -715,7 +709,7 @@
             const handleMouseLeave = () => { if (isDown) { setIsDown(false); snapToNearestPage(); } };
             const handleMouseUp = () => { if (isDown) { setIsDown(false); snapToNearestPage(); } };
             const handleMouseMove = (e) => { if(!isDown) return; e.preventDefault(); const x = e.pageX - scrollContainerRef.current.offsetLeft; const walk = (x - startX) * 1.5; scrollContainerRef.current.scrollLeft = scrollLeft - walk; };
-            const handleTouchEnd = () => { snapToNearestPage(); }; // For mobile swipe snap
+            const handleTouchEnd = () => { snapToNearestPage(); }; 
             
             const handleBackdropClick = (e) => { if (e.target === e.currentTarget) setSelectedImg(null); };
 
@@ -734,9 +728,9 @@
                                 <button onClick={() => handleLangChange('hu')} className={`px-2 py-1 rounded transition-colors ${lang === 'hu' ? 'bg-white text-black' : 'text-white/50 hover:text-white'}`}>HU</button>
                             </div>
                             <div className="flex gap-6 text-sm font-light">
-                                <button onClick={() => scrollToSection(heroRef)} className="hover:text-[#d4a373] transition-colors interactive uppercase tracking-widest text-xs">{t.navHome}</button>
-                                <button onClick={() => scrollToSection(aboutMainRef)} className="hover:text-[#d4a373] transition-colors interactive uppercase tracking-widest text-xs">{t.navAbout}</button>
-                                <button onClick={() => scrollToSection(contactRef)} className="hover:text-[#d4a373] transition-colors interactive uppercase tracking-widest text-xs">{t.navContact}</button>
+                                <button onClick={() => scrollToSection('home')} className="hover:text-[#d4a373] transition-colors interactive uppercase tracking-widest text-xs">{t.navHome}</button>
+                                <button onClick={() => scrollToSection('about')} className="hover:text-[#d4a373] transition-colors interactive uppercase tracking-widest text-xs">{t.navAbout}</button>
+                                <button onClick={() => scrollToSection('contact')} className="hover:text-[#d4a373] transition-colors interactive uppercase tracking-widest text-xs">{t.navContact}</button>
                             </div>
                         </div>
                     </nav>
@@ -751,14 +745,19 @@
                         onTouchEnd={handleTouchEnd} 
                         dir="ltr"
                     >
-                        {/* LEFT CLONE: Contact -> Gallery -> About -> Hero */}
-                        <div ref={contactCloneLeftRef}>
-                             <ContactSection t={t} />
+                        {/* LEFT CLONE: Hero -> Contact -> Categories(Rev) -> About -> (connects to Main Hero) */}
+                        <div ref={heroCloneLeftRef}>
+                            <Hero id="hero-left" t={t} lang={lang} isClone={true} onLeft={handleLeftArrow} onRight={handleRightArrow} onText={handleStartStory} />
+                        </div>
+                        <div ref={contactLeftRef}>
+                             <ContactSection t={t} reversed={true} />
                         </div>
                         {galleryData && [...galleryData].reverse().map((cat) => (
-                            <CategoryCluster key={`left-${cat.id}`} category={cat} onImageClick={setSelectedImg} />
+                            <CategoryCluster key={`left-${cat.id}`} category={cat} onImageClick={setSelectedImg} reversed={true} />
                         ))}
-                        <AboutSection t={t} />
+                        <div ref={aboutLeftRef}>
+                             <AboutSection t={t} reversed={true} />
+                        </div>
 
                         {/* MAIN HERO */}
                         <Hero 
@@ -779,12 +778,9 @@
                         ))}
                         <ContactSection t={t} sectionRef={contactRef} />
                         
-                        {/* RIGHT CLONE: Hero -> About (Loop Buffer) */}
+                        {/* RIGHT CLONE: Hero */}
                         <div ref={heroCloneRightRef}>
                             <Hero id="hero-right" t={t} lang={lang} isClone={true} onLeft={handleLeftArrow} onRight={handleRightArrow} onText={handleStartStory} />
-                        </div>
-                        <div ref={aboutCloneRightRef}>
-                            <AboutSection t={t} /> 
                         </div>
 
                     </div>
