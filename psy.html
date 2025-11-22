@@ -4,8 +4,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>PsychoFlash | Interactive Production Experience</title>
-    <meta name="description" content="פתרונות הפקה טכניים ויצירתיים | Technical and Creative Production Solutions">
+    <title>PsychoFlash | Visual Experience Engineering</title>
+    <meta name="description" content="הנדסת חוויות ויזואליות, שידורים חיים, AI ואלגוריטמיקה">
 
     <!-- Favicons -->
     <link rel="icon" href="https://img.icons8.com/nolan/96/00f2ff/bd00ff/lightning-bolt.png" type="image/png">
@@ -35,7 +35,7 @@
             --nav-text: #333;
             --nav-active: #000;
             --card-shadow: 0 15px 35px rgba(0,0,0,0.1);
-            --section-spacing: 80px; /* Reduced spacing */
+            --section-spacing: 120px;
         }
 
         /* Dark Mode Overrides */
@@ -86,42 +86,47 @@
             display: inline-block;
         }
         
-        /* Glitch Effect - Continuous Infinite Loop */
-        .glitch-text { position: relative; }
+        /* Glitch Effect - FIXED: Runs once, removes mask */
+        .glitch-text { position: relative; display: inline-block; }
         .glitch-text::before, .glitch-text::after {
             content: attr(data-text);
             position: absolute;
             top: 0; left: 0;
             width: 100%; height: 100%;
-            background: var(--bg-color); /* Matches bg to hide original */
+            background: var(--bg-color); 
+            opacity: 0.8;
         }
-        .glitch-text::before {
+        
+        .glitch-active::before {
             left: 2px;
             text-shadow: -1px 0 var(--secondary);
             clip: rect(44px, 450px, 56px, 0);
-            animation: glitch-anim 5s infinite linear alternate-reverse;
+            animation: glitch-anim 2s 1 forwards;
         }
-        .glitch-text::after {
+        .glitch-active::after {
             left: -2px;
             text-shadow: -1px 0 var(--primary);
             clip: rect(44px, 450px, 56px, 0);
-            animation: glitch-anim2 5s infinite linear alternate-reverse;
+            animation: glitch-anim2 2.2s 1 forwards;
         }
+
         @keyframes glitch-anim {
-            0% { clip: rect(33px, 9999px, 11px, 0); }
-            20% { clip: rect(89px, 9999px, 13px, 0); }
-            40% { clip: rect(12px, 9999px, 86px, 0); }
-            60% { clip: rect(45px, 9999px, 22px, 0); }
-            80% { clip: rect(4px, 9999px, 99px, 0); }
-            100% { clip: rect(67px, 9999px, 3px, 0); }
+            0% { clip: rect(33px, 9999px, 11px, 0); opacity: 1; }
+            20% { clip: rect(89px, 9999px, 13px, 0); opacity: 1; }
+            40% { clip: rect(12px, 9999px, 86px, 0); opacity: 1; }
+            60% { clip: rect(45px, 9999px, 22px, 0); opacity: 1; }
+            80% { clip: rect(4px, 9999px, 99px, 0); opacity: 1; }
+            99% { clip: rect(67px, 9999px, 3px, 0); opacity: 1; }
+            100% { clip: rect(67px, 9999px, 3px, 0); opacity: 0; display: none; }
         }
         @keyframes glitch-anim2 {
-            0% { clip: rect(2px, 9999px, 44px, 0); }
-            20% { clip: rect(12px, 9999px, 88px, 0); }
-            40% { clip: rect(76px, 9999px, 11px, 0); }
-            60% { clip: rect(32px, 9999px, 55px, 0); }
-            80% { clip: rect(90px, 9999px, 4px, 0); }
-            100% { clip: rect(12px, 9999px, 22px, 0); }
+            0% { clip: rect(2px, 9999px, 44px, 0); opacity: 1; }
+            20% { clip: rect(12px, 9999px, 88px, 0); opacity: 1; }
+            40% { clip: rect(76px, 9999px, 11px, 0); opacity: 1; }
+            60% { clip: rect(32px, 9999px, 55px, 0); opacity: 1; }
+            80% { clip: rect(90px, 9999px, 4px, 0); opacity: 1; }
+            99% { clip: rect(12px, 9999px, 22px, 0); opacity: 1; }
+            100% { clip: rect(12px, 9999px, 22px, 0); opacity: 0; display: none; }
         }
 
         /* Backgrounds */
@@ -195,11 +200,6 @@
             transform: translateZ(10px);
             color: var(--text-muted); line-height: 1.6;
         }
-        .glass-card-icon {
-            transform: translateZ(30px); margin-bottom: 1.5rem;
-            filter: drop-shadow(0 0 10px var(--primary));
-            height: 64px; width: 64px; object-fit: contain;
-        }
 
         /* Buttons */
         .cyber-btn {
@@ -218,34 +218,49 @@
             box-shadow: 0 0 30px var(--primary);
         }
 
-        /* Services Layout - Fixed spacing */
-        .service-block {
-            display: grid; grid-template-columns: 1fr; gap: 2rem;
-            margin-bottom: 4rem; align-items: center; /* Reduced margin */
-            opacity: 0; transform: translateY(50px);
-            transition: all 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+        /* Services Design (Interactive List) */
+        .services-container {
+            display: grid; grid-template-columns: 1fr; gap: 4rem;
         }
-        .service-block.visible { opacity: 1; transform: translateY(0); }
         @media (min-width: 992px) {
-            .service-block { grid-template-columns: 1fr 1fr; gap: 4rem; }
-            .service-block.alt { direction: ltr; }
-            .service-block.alt .service-content { text-align: left; direction: rtl; } 
-            html[dir="ltr"] .service-block.alt { direction: rtl; }
-            html[dir="ltr"] .service-block.alt .service-content { text-align: left; direction: ltr; }
+            .services-container { grid-template-columns: 1fr 1.2fr; }
         }
         
-        .service-img-wrapper {
-            position: relative; border-radius: 4px; overflow: hidden;
-            box-shadow: var(--card-shadow);
+        .service-list-item {
+            padding: 2rem;
+            border-bottom: 1px solid var(--glass-border);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            opacity: 0.6;
+            display: flex; align-items: flex-start; gap: 1rem;
+        }
+        .service-list-item:hover, .service-list-item.active {
+            opacity: 1;
+            padding-right: 3rem; /* Indent on hover (RTL) */
+            border-bottom-color: var(--primary);
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.02));
+        }
+        html[dir="ltr"] .service-list-item:hover, html[dir="ltr"] .service-list-item.active {
+             padding-right: 2rem; padding-left: 3rem;
+        }
+
+        .preview-stage {
+            position: relative;
+            border-radius: 16px;
+            overflow: hidden;
             aspect-ratio: 16/9;
+            box-shadow: var(--card-shadow);
+            border: 1px solid var(--glass-border);
+            background: #000;
         }
-        .service-img-wrapper::after {
-            content: ''; position: absolute; inset: 0;
-            background: linear-gradient(45deg, var(--primary), transparent);
-            opacity: 0.2; z-index: 1;
+        
+        .preview-media {
+            position: absolute; inset: 0; width: 100%; height: 100%;
+            object-fit: cover;
+            opacity: 0; transition: opacity 0.5s ease, transform 1s ease;
+            transform: scale(1.1);
         }
-        .service-img { width: 100%; height: 100%; object-fit: cover; transition: transform 0.7s ease; }
-        .service-block:hover .service-img { transform: scale(1.05); }
+        .preview-media.active { opacity: 1; transform: scale(1); }
 
         /* Stats Strip */
         #stats-strip {
@@ -263,6 +278,7 @@
             background: linear-gradient(to bottom, var(--text-color), var(--text-muted));
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
+            display: inline-block;
         }
 
         /* Logos - Colorful */
@@ -284,6 +300,29 @@
         .contact-item:hover { color: var(--primary); }
         .contact-icon { width: 24px; height: 24px; stroke: var(--primary); }
 
+        /* Process Cards in About */
+        .process-grid {
+            display: grid; grid-template-columns: repeat(3, 1fr); gap: 1.5rem;
+            margin-top: 2rem;
+        }
+        @media(max-width: 768px) { .process-grid { grid-template-columns: 1fr; } }
+
+        .process-card {
+            background: var(--glass-bg);
+            border: 1px solid var(--glass-border);
+            border-radius: 12px;
+            padding: 1.5rem;
+            transition: transform 0.3s ease;
+            overflow: hidden;
+            position: relative;
+        }
+        .process-card:hover { transform: translateY(-5px); border-color: var(--primary); }
+        .process-img {
+            width: 100%; height: 120px; object-fit: cover; border-radius: 8px; margin-bottom: 1rem;
+            filter: brightness(0.8); transition: filter 0.3s;
+        }
+        .process-card:hover .process-img { filter: brightness(1.1); }
+
         /* Mobile Menu */
         #mobile-menu {
             position: fixed; inset: 0; background: var(--bg-color); z-index: 900;
@@ -296,6 +335,14 @@
         .text-gradient-primary { color: var(--primary); }
         .text-muted-custom { color: var(--text-muted); }
         .logo { color: var(--text-color); }
+        
+        /* Work Circles */
+        .circle-badge {
+            position: absolute; top: 10px; left: 10px;
+            background: rgba(0,0,0,0.7); backdrop-filter: blur(5px);
+            padding: 5px 12px; border-radius: 20px; border: 1px solid var(--glass-border);
+            font-size: 0.8rem; color: #fff;
+        }
 
     </style>
 </head>
@@ -317,15 +364,13 @@
             PSYCHO<span style="color:var(--primary)">FLASH</span>
         </a>
         
-        <!-- Nav Order: About -> Process -> Services -> Packages -> Recommendations -> Gallery -> Contact -->
         <nav class="hidden lg:flex gap-6 items-center">
             <a href="#home" class="nav-link hover-trigger" data-key="nav_home">ראשי</a>
             <a href="#about" class="nav-link hover-trigger" data-key="nav_about">אודות</a>
-            <a href="#process" class="nav-link hover-trigger" data-key="nav_process">תהליך</a>
             <a href="#services" class="nav-link hover-trigger" data-key="nav_services">שירותים</a>
-            <a href="#packages" class="nav-link hover-trigger" data-key="nav_packages">חבילות</a>
+            <a href="#showreel" class="nav-link hover-trigger" data-key="nav_work">CINE MATCH</a>
+            <a href="#clients" class="nav-link hover-trigger" data-key="nav_clients">לקוחותינו</a>
             <a href="#testimonials" class="nav-link hover-trigger" data-key="nav_recommendations">המלצות</a>
-            <a href="#showreel" class="nav-link hover-trigger" data-key="nav_work">עבודות</a>
             <a href="#contact" class="nav-link hover-trigger" data-key="nav_contact">צור קשר</a>
         </nav>
 
@@ -357,9 +402,10 @@
         <nav class="flex flex-col items-center gap-8 text-xl text-[var(--text-color)]">
             <a href="#home" class="mobile-link" data-key="nav_home">ראשי</a>
             <a href="#about" class="mobile-link" data-key="nav_about">אודות</a>
-            <a href="#process" class="mobile-link" data-key="nav_process">תהליך</a>
             <a href="#services" class="mobile-link" data-key="nav_services">שירותים</a>
-            <a href="#packages" class="mobile-link" data-key="nav_packages">חבילות</a>
+            <a href="#showreel" class="mobile-link" data-key="nav_work">CINE MATCH</a>
+            <a href="#clients" class="mobile-link" data-key="nav_clients">לקוחותינו</a>
+            <a href="#testimonials" class="mobile-link" data-key="nav_recommendations">המלצות</a>
             <a href="#contact" class="mobile-link" data-key="nav_contact">צור קשר</a>
         </nav>
     </div>
@@ -367,224 +413,201 @@
     <main>
         <!-- Hero Section -->
         <section id="home" class="min-h-[90vh] flex flex-col justify-center items-center text-center pt-32">
-            <h1 class="text-6xl md:text-8xl font-black mb-6 tracking-tight leading-none glitch-text" data-key="hero_title" data-text="השילוב המושלם">
-                השילוב <span style="color:transparent; -webkit-text-stroke: 2px var(--primary);">המושלם</span>
+            <h1 class="text-6xl md:text-8xl font-black mb-6 tracking-tight leading-none glitch-text glitch-active" data-key="hero_title" data-text="הנדסת חוויות ויזואליות">
+                הנדסת חוויות <span style="color:transparent; -webkit-text-stroke: 2px var(--primary);">ויזואליות</span>
             </h1>
-            <h2 class="text-4xl md:text-6xl font-bold mb-8 text-muted-custom" data-key="hero_subtitle">
-                בין ביצוע טכני לחדשנות יצירתית
+            <h2 class="text-3xl md:text-5xl font-bold mb-8 text-muted-custom" data-key="hero_subtitle">
+                איפה שטכנולוגיה פוגשת רגש בזמן אמת
             </h2>
             <p class="max-w-2xl text-lg text-muted-custom mb-12 leading-relaxed opacity-80" data-key="hero_desc">
-                מהפקות וידאו ושידורים חיים ועד פיתוח פתרונות תוכנה ו-AI. אנחנו כאן כדי להפוך את החזון שלכם למציאות מרשימה, חלקה ונטולת תקלות.
+                אנחנו לא רק מפיקים תוכן, אנחנו מהנדסים רגעים. שילוב עוצמתי בין שידורים חיים, קוד יצירתי ובינה מלאכותית שמשנה את חוקי המשחק והופכת כל פיקסל לסיפור.
             </p>
             <div class="flex gap-6">
                 <a href="#contact" class="cyber-btn hover-trigger" data-key="hero_cta_start">התחילו פרויקט</a>
-                <a href="#showreel" class="cyber-btn hover-trigger" style="border-color: var(--text-color); color: var(--text-color);" data-key="hero_cta_work">צפו בעבודות</a>
+                <a href="#showreel" class="cyber-btn hover-trigger" style="border-color: var(--text-color); color: var(--text-color);" data-key="hero_cta_work">למעגלי העבודה</a>
             </div>
         </section>
 
-        <!-- Stats Strip (Moved up and styled as strip) -->
-        <div id="stats-strip" class="w-full">
+        <!-- About Section (Enhanced Process) -->
+        <section id="about" class="scroll-reveal">
+            <div class="text-center mb-12">
+                 <h2 class="section-title" data-key="about_title">מי אנחנו</h2>
+                 <p class="text-xl max-w-3xl mx-auto text-muted-custom" data-key="about_intro">
+                     בנקודת המפגש שבין ביצוע טכני מושלם לחזון אומנותי פורץ דרך.
+                 </p>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-16 items-start">
+                <div>
+                    <h3 class="text-3xl font-bold mb-6 text-[var(--primary)] leading-tight" data-key="about_subtitle">מקוד לאומנות: המסע של כל פרויקט</h3>
+                    <p class="text-muted-custom text-lg leading-relaxed mb-6" data-key="about_text">
+                        העולם הדיגיטלי דורש מהירות של מכונה ונשמה של אומן. השיטה שלנו ייחודית: אנחנו מפרקים כל אתגר לגורמים טכניים ומרכיבים אותם מחדש ליצירה ויזואלית חיה.
+                    </p>
+                    <p class="text-muted-custom text-lg leading-relaxed mb-8" data-key="about_text2">
+                        זה לא רק "לצלם ולערוך". זה לבנות מערכות שמגיבות בזמן אמת, לייצר יש מאין באמצעות AI, ולדעת שברגע האמת - בשידור החי - הכל יעבוד כמו שעון שוויצרי.
+                    </p>
+                    
+                    <!-- New Process Grid with Images -->
+                    <div class="process-grid">
+                        <div class="process-card">
+                            <img src="https://images.unsplash.com/photo-1531403009284-440f080d1e12?q=80&w=1000&auto=format&fit=crop" class="process-img" alt="Strategy">
+                            <h4 class="font-bold text-[var(--text-color)] mb-2" data-key="process_1">אסטרטגיה</h4>
+                            <p class="text-xs text-muted-custom" data-key="process_1_desc">תכנון אדריכלי של האירוע או התוכן, מהמסר ועד לפיקסל.</p>
+                        </div>
+                        <div class="process-card">
+                            <img src="https://images.unsplash.com/photo-1492691527719-9d1e07e534b4?q=80&w=1000&auto=format&fit=crop" class="process-img" alt="Production">
+                            <h4 class="font-bold text-[var(--text-color)] mb-2" data-key="process_2">הפקה חיה</h4>
+                            <p class="text-xs text-muted-custom" data-key="process_2_desc">ביצוע טכני ללא פשרות, ניהול צוותים וניתוב בזמן אמת.</p>
+                        </div>
+                        <div class="process-card">
+                            <img src="https://images.unsplash.com/photo-1620712943543-bcc4688e7485?q=80&w=1000&auto=format&fit=crop" class="process-img" alt="AI">
+                            <h4 class="font-bold text-[var(--text-color)] mb-2" data-key="process_ai">AI & Tech</h4>
+                            <p class="text-xs text-muted-custom" data-key="process_ai_desc">העצמת הויזואל עם כלים מחוללי תמונה וקוד.</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Main About Image (Tech/Art Blend) -->
+                <div class="relative h-[600px] rounded-2xl overflow-hidden border border-[var(--glass-border)] group sticky top-24">
+                    <img src="https://images.unsplash.com/photo-1550751827-4bd374c3f58b?q=80&w=1000&auto=format&fit=crop" alt="Cyberpunk Studio" class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110">
+                    <div class="absolute inset-0 bg-gradient-to-t from-[var(--bg-color)] via-transparent to-transparent opacity-60"></div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Services (Enhanced with Icons and Images) -->
+        <section id="services">
+            <h2 class="section-title mb-12" data-key="section_solutions">השירותים שלנו</h2>
+            
+            <div class="services-container">
+                <!-- Right Side: List -->
+                <div class="service-list space-y-4">
+                    <div class="service-list-item active" data-target="preview-1">
+                        <img src="https://img.icons8.com/nolan/64/00f2ff/bd00ff/camcorder-pro.png" class="w-10 h-10 object-contain" alt="Live Icon">
+                        <div>
+                            <h3 class="text-2xl font-bold text-[var(--text-color)]" data-key="sol_live_title">הפקות וידאו ושידורים חיים</h3>
+                            <p class="text-sm text-muted-custom mt-2" data-key="sol_live_short">מולטי-קאמרה, ניתוב בזמן אמת ושידור לכל פלטפורמה.</p>
+                        </div>
+                    </div>
+                    <div class="service-list-item" data-target="preview-2">
+                        <img src="https://img.icons8.com/nolan/64/00f2ff/bd00ff/artificial-intelligence.png" class="w-10 h-10 object-contain" alt="AI Icon">
+                        <div>
+                            <h3 class="text-2xl font-bold text-[var(--text-color)]" data-key="sol_ai_title">יצירת תוכן AI & On The Fly</h3>
+                            <p class="text-sm text-muted-custom mt-2" data-key="sol_ai_short">שתילת אובייקטים, הנפשת תמונות ויצירת עולמות ללא גבול פיזי.</p>
+                        </div>
+                    </div>
+                    <div class="service-list-item" data-target="preview-3">
+                         <img src="https://img.icons8.com/nolan/64/00f2ff/bd00ff/virtual-reality.png" class="w-10 h-10 object-contain" alt="Virtual Icon">
+                        <div>
+                            <h3 class="text-2xl font-bold text-[var(--text-color)]" data-key="sol_virtual_title">כנסים וירטואליים והיברידיים</h3>
+                            <p class="text-sm text-muted-custom mt-2" data-key="sol_virtual_short">שילוב דוברים מהאולפן ומהבית בסביבה אימרסיבית.</p>
+                        </div>
+                    </div>
+                    <div class="service-list-item" data-target="preview-4">
+                        <img src="https://img.icons8.com/nolan/64/00f2ff/bd00ff/video-editing.png" class="w-10 h-10 object-contain" alt="Post Icon">
+                        <div>
+                            <h3 class="text-2xl font-bold text-[var(--text-color)]" data-key="sol_post_title">פוסט-פרודקשן מתקדם</h3>
+                            <p class="text-sm text-muted-custom mt-2" data-key="sol_post_short">עריכה, צבע, ואנימציה שסוגרים את המעגל.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Left Side: Sticky Preview -->
+                <div class="relative hidden lg:block h-full">
+                    <div class="preview-stage sticky top-32">
+                        <!-- Preview 1: Live -->
+                        <img src="https://images.unsplash.com/photo-1516961642265-531546e84af2?q=80&w=1000&auto=format&fit=crop" class="preview-media active" id="preview-1" alt="Live">
+                        <!-- Preview 2: AI -->
+                        <img src="https://images.unsplash.com/photo-1620712943543-bcc4688e7485?q=80&w=1000&auto=format&fit=crop" class="preview-media" id="preview-2" alt="AI">
+                        <!-- Preview 3: Virtual -->
+                        <img src="https://images.unsplash.com/photo-1588196749597-9ff075ee6b5b?q=80&w=1000&auto=format&fit=crop" class="preview-media" id="preview-3" alt="Virtual">
+                        <!-- Preview 4: Post -->
+                        <img src="https://images.unsplash.com/photo-1574717432707-c257192fef94?q=80&w=1000&auto=format&fit=crop" class="preview-media" id="preview-4" alt="Post">
+                        
+                        <!-- Overlay UI overlay -->
+                        <div class="absolute bottom-0 left-0 right-0 p-6 bg-gradient-to-t from-black via-black/50 to-transparent">
+                            <div class="flex items-center gap-2 text-[var(--primary)]">
+                                <div class="w-2 h-2 bg-[var(--primary)] rounded-full animate-pulse"></div>
+                                <span class="text-xs font-mono uppercase">Interactive Preview</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Work Circles (CINE MATCH) -->
+        <section id="showreel">
+            <div class="flex flex-col md:flex-row justify-between items-end mb-12">
+                <h2 class="section-title mb-0" data-key="section_cinematch">CINE MATCH <span class="text-2xl block text-muted-custom mt-2" data-key="work_circles">מעגלי עבודה</span></h2>
+                <p class="text-muted-custom max-w-md text-left rtl:text-right mt-4 md:mt-0">פרויקטים נבחרים המציגים את המנעד הרחב: מספורט בינלאומי ועד קריאייטיב טכנולוגי.</p>
+            </div>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                <!-- Generic Project 1 -->
+                <div class="group relative aspect-video rounded-lg overflow-hidden border border-[var(--glass-border)] hover-trigger cursor-pointer">
+                    <div class="circle-badge">Live Broadcast</div>
+                    <img src="https://images.unsplash.com/photo-1541532713592-79a0317b6b77?q=80&w=1000&auto=format&fit=crop" class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" alt="Racing">
+                    <div class="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex flex-col justify-center items-center p-4 text-center">
+                        <h3 class="text-3xl font-bold text-white mb-2">International Racing</h3>
+                        <p class="text-[var(--primary)]">הפקה בינלאומית</p>
+                    </div>
+                </div>
+                <!-- Generic Project 2 -->
+                <div class="group relative aspect-video rounded-lg overflow-hidden border border-[var(--glass-border)] hover-trigger cursor-pointer">
+                    <div class="circle-badge" style="border-color:var(--secondary); color:var(--secondary);">AI & Post</div>
+                    <img src="https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?q=80&w=1000&auto=format&fit=crop" class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" alt="AI Art">
+                    <div class="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex flex-col justify-center items-center p-4 text-center">
+                        <h3 class="text-3xl font-bold text-white mb-2">Future Vision</h3>
+                        <p class="text-[var(--secondary)]">קמפיין מבוסס AI</p>
+                    </div>
+                </div>
+                <!-- Generic Project 3 -->
+                <div class="group relative aspect-video rounded-lg overflow-hidden border border-[var(--glass-border)] hover-trigger cursor-pointer">
+                    <div class="circle-badge">Broadcast IP</div>
+                    <img src="https://images.unsplash.com/photo-1516321318423-f06f85e504b3?q=80&w=1000&auto=format&fit=crop" class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" alt="Broadcast">
+                    <div class="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex flex-col justify-center items-center p-4 text-center">
+                        <h3 class="text-3xl font-bold text-white mb-2">Broadcast Infrastructure</h3>
+                        <p class="text-[var(--primary)]">תשתיות שידור</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Clients Section -->
+        <section id="clients" class="pt-10 pb-0 mt-20">
+            <div class="text-center mb-12">
+                <h2 class="section-title" data-key="section_clients">לקוחותינו</h2>
+                <p class="text-muted-custom" data-key="clients_subtitle">גופי שידור, חברות הפקה ומותגים מובילים</p>
+            </div>
+            
+            <div class="border-y border-[var(--glass-border)] bg-[var(--glass-bg)] backdrop-blur-sm overflow-hidden py-10">
+                 <div class="flex w-max scrolling-logos">
+                    <div id="logo-track" class="flex gap-16 items-center transition-all duration-500"></div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Stats Strip (Moved After Clients) -->
+        <div id="stats-strip" class="w-full mt-0 border-t-0">
             <div class="max-w-7xl mx-auto px-6 grid grid-cols-1 md:grid-cols-3 gap-12 text-center divide-y md:divide-y-0 md:divide-x md:divide-x-reverse divide-[var(--glass-border)]">
-                <div class="hover-trigger">
-                    <div class="stat-number">1,200+</div>
+                <div class="hover-trigger count-container">
+                    <div class="stat-number" data-target="1200">0</div><span class="text-4xl font-black text-muted-custom align-super">+</span>
                     <p class="text-gradient-primary tracking-widest uppercase mt-2 font-bold" data-key="stat_productions">הפקות מוצלחות</p>
                 </div>
-                <div class="hover-trigger">
-                    <div class="stat-number">25+</div>
+                <div class="hover-trigger count-container">
+                    <div class="stat-number" data-target="25">0</div><span class="text-4xl font-black text-muted-custom align-super">+</span>
                     <p class="text-[var(--secondary)] tracking-widest uppercase mt-2 font-bold" data-key="stat_countries">מדינות בעולם</p>
                 </div>
-                <div class="hover-trigger">
-                    <div class="stat-number">24/7</div>
-                    <p class="text-gradient-primary tracking-widest uppercase mt-2 font-bold" data-key="stat_support">תמיכה ושירות</p>
+                <div class="hover-trigger count-container">
+                    <div class="stat-number" data-target="24">0</div><span class="text-4xl font-black text-muted-custom align-super">/7</span>
+                    <p class="text-gradient-primary tracking-widest uppercase mt-2 font-bold" data-key="stat_support">זמינות ויצירה</p>
                 </div>
             </div>
         </div>
 
-        <!-- About Section (New) -->
-        <section id="about" class="scroll-reveal">
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-12 items-center">
-                <div>
-                    <h2 class="section-title" data-key="about_title">מי אנחנו</h2>
-                    <h3 class="text-2xl font-bold mb-4 text-[var(--primary)]" data-key="about_subtitle">ה-DNA שלנו הוא טכנולוגיה ורגש</h3>
-                    <p class="text-muted-custom text-lg leading-relaxed mb-6" data-key="about_text">
-                        עם ניסיון של שנים בתעשיית השידור וההפקה, אנו מביאים לשולחן שילוב נדיר של ידע טכני עמוק והבנה קריאייטיבית רחבה. 
-                        אנחנו לא רק לוחצים על כפתורים; אנחנו מהנדסים חוויות. היכולת שלנו לשלב בין מערכות שידור מורכבות, פיתוח תוכנה ייעודי ועיצוב ויזואלי מרהיב, מאפשרת לנו ליצור פתרונות שאין להם תחרות בשוק.
-                    </p>
-                    <p class="text-muted-custom text-lg leading-relaxed" data-key="about_text2">
-                        בין אם מדובר בשידור ספורט בינלאומי או כנס חברה אינטימי, הגישה שלנו נשארת זהה: דיוק, חדשנות ושקט נפשי ללקוח.
-                    </p>
-                </div>
-                <div class="relative h-[400px] rounded-2xl overflow-hidden border border-[var(--glass-border)]">
-                    <img src="https://images.unsplash.com/photo-1524178232363-1fb2b075b655?q=80&w=1000&auto=format&fit=crop" alt="About Us" class="w-full h-full object-cover">
-                    <div class="absolute inset-0 bg-gradient-to-t from-[var(--bg-color)] to-transparent opacity-60"></div>
-                </div>
-            </div>
-        </section>
-
-        <!-- Process (Colorful & Icons) -->
-        <section id="process" class="relative">
-            <div class="text-center mb-16">
-                <h2 class="section-title" data-key="section_process">התהליך שלנו</h2>
-                <p class="text-muted-custom">מייעלים את הדרך מהרעיון לביצוע</p>
-            </div>
-            <div class="flex flex-wrap justify-center gap-8">
-                <div class="w-full md:w-1/5 glass-card text-center hover-trigger border-t-4 border-t-[var(--primary)]">
-                    <div class="mb-6 flex justify-center">
-                        <img src="https://img.icons8.com/nolan/64/00f2ff/bd00ff/brain.png" alt="Strategy">
-                    </div>
-                    <h3 class="text-xl font-bold text-[var(--primary)]" data-key="process_1">אסטרטגיה</h3>
-                    <p class="text-sm mt-2" data-key="process_1_desc">פיצוח הקונספט והגדרת יעדים</p>
-                </div>
-                <div class="w-full md:w-1/5 glass-card text-center hover-trigger border-t-4 border-t-[var(--secondary)]">
-                    <div class="mb-6 flex justify-center">
-                        <img src="https://img.icons8.com/nolan/64/00f2ff/bd00ff/video-call.png" alt="Production">
-                    </div>
-                    <h3 class="text-xl font-bold text-[var(--secondary)]" data-key="process_2">הפקה</h3>
-                    <p class="text-sm mt-2" data-key="process_2_desc">יום צילום, ניהול וביצוע טכני</p>
-                </div>
-                <div class="w-full md:w-1/5 glass-card text-center hover-trigger border-t-4 border-t-[var(--primary)]">
-                    <div class="mb-6 flex justify-center">
-                        <img src="https://img.icons8.com/nolan/64/00f2ff/bd00ff/editing-vlog.png" alt="Post">
-                    </div>
-                    <h3 class="text-xl font-bold text-[var(--primary)]" data-key="process_3">פוסט</h3>
-                    <p class="text-sm mt-2" data-key="process_3_desc">עריכה, אנימציה וצבע</p>
-                </div>
-                <div class="w-full md:w-1/5 glass-card text-center hover-trigger border-t-4 border-t-[var(--secondary)]">
-                    <div class="mb-6 flex justify-center">
-                        <img src="https://img.icons8.com/nolan/64/00f2ff/bd00ff/worldwide-location.png" alt="Distribution">
-                    </div>
-                    <h3 class="text-xl font-bold text-[var(--secondary)]" data-key="process_4">הפצה</h3>
-                    <p class="text-sm mt-2" data-key="process_4_desc">שידור וקידום התוכן</p>
-                </div>
-            </div>
-        </section>
-
-        <!-- Services (Was "What We Do" / "Solutions") -->
-        <section id="services">
-            <h2 class="section-title text-center mb-20" data-key="section_solutions">השירותים שלנו</h2>
-
-            <div class="service-block scroll-reveal">
-                <div class="service-content">
-                    <h3 class="text-3xl font-bold mb-4 text-[var(--text-color)]" data-key="sol_live_title">הפקות וידאו ושידורים חיים</h3>
-                    <p class="text-muted-custom text-lg leading-relaxed mb-6" data-key="sol_live_desc">
-                        שידור חי הוא אומנות של שניות. עם ניסיון של אלפי שעות שידור, אנו מביאים את היכולות של עולם הטלוויזיה לכל פלטפורמה דיגיטלית. איכות שידור ללא פשרות, גיבוי מלא וניהול בזמן אמת.
-                    </p>
-                    <ul class="space-y-2 text-muted-custom">
-                        <li class="flex items-center gap-2"><span class="w-2 h-2 bg-[var(--primary)] rounded-full"></span> <span data-key="sol_live_li1">שידור רב-מוקדי</span></li>
-                        <li class="flex items-center gap-2"><span class="w-2 h-2 bg-[var(--primary)] rounded-full"></span> <span data-key="sol_live_li2">גרפיקה בזמן אמת</span></li>
-                    </ul>
-                </div>
-                <div class="service-img-wrapper hover-trigger">
-                    <img src="https://images.unsplash.com/photo-1516961642265-531546e84af2?q=80&w=1000&auto=format&fit=crop" class="service-img" alt="Live">
-                </div>
-            </div>
-
-            <div class="service-block alt scroll-reveal">
-                <div class="service-content">
-                    <h3 class="text-3xl font-bold mb-4 text-[var(--text-color)]" data-key="sol_ob_title">ניידת שידור ו-Multi Camera</h3>
-                    <p class="text-muted-custom text-lg leading-relaxed mb-6" data-key="sol_ob_desc">
-                        מערך צילום מרובה מצלמות שמאפשר לספר את הסיפור מכל הזוויות. ניידת השידור המודולרית שלנו מצוידת בטכנולוגיות 4K, מערכות ניתוב מתקדמות ויכולות הקלטה בסטנדרט בינלאומי.
-                    </p>
-                </div>
-                <div class="service-img-wrapper hover-trigger">
-                    <!-- Replaced OB Van Image -->
-                    <img src="https://images.unsplash.com/photo-1579546929518-9e396f3cc809?q=80&w=1000&auto=format&fit=crop" class="service-img" alt="Broadcast Equipment">
-                </div>
-            </div>
-
-            <div class="service-block scroll-reveal">
-                <div class="service-content">
-                    <h3 class="text-3xl font-bold mb-4 text-[var(--text-color)]" data-key="sol_virtual_title">כנסים וירטואליים</h3>
-                    <p class="text-muted-custom text-lg leading-relaxed mb-6" data-key="sol_virtual_desc">
-                        העתיד של הכנסים כבר כאן. אנו יוצרים סביבות וירטואליות אימרסיביות, המשלבות דוברים מהאולפן ומהבית, עם אינטראקציה מלאה של הקהל.
-                    </p>
-                </div>
-                <div class="service-img-wrapper hover-trigger">
-                    <img src="https://images.unsplash.com/photo-1588196749597-9ff075ee6b5b?q=80&w=1000&auto=format&fit=crop" class="service-img" alt="Virtual Conf">
-                </div>
-            </div>
-        </section>
-
-        <!-- Target Audience (Was DNA) -->
-        <section id="clients-target">
-            <div class="text-center mb-16">
-                <h2 class="section-title" data-key="section_target">קהל יעד / לקוחותינו</h2>
-                <p class="text-muted-custom" data-key="target_subtitle">למי הפתרונות שלנו מתאימים?</p>
-            </div>
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 perspective-container">
-                <div class="glass-card js-tilt hover-trigger p-6">
-                    <img src="https://img.icons8.com/nolan/64/00f2ff/bd00ff/clapperboard.png" class="glass-card-icon" alt="icon">
-                    <h3 class="text-xl" data-key="dna_production">חברות הפקה</h3>
-                    <p class="text-sm" data-key="dna_production_desc">ניהול טכני מלא להפקות ואירועים גדולים. אנחנו הדאגה הטכנית שלכם בשטח.</p>
-                </div>
-                <div class="glass-card js-tilt hover-trigger p-6">
-                    <img src="https://img.icons8.com/nolan/64/00f2ff/bd00ff/video-camera.png" class="glass-card-icon" alt="icon">
-                    <h3 class="text-xl" data-key="dna_broadcasters">גופי שידור</h3>
-                    <p class="text-sm" data-key="dna_broadcasters_desc">תמיכה בשידורים חיים, הקמת אולפנים ותפעול מערכות וידאו מתקדמות.</p>
-                </div>
-                <div class="glass-card js-tilt hover-trigger p-6">
-                    <img src="https://img.icons8.com/nolan/64/00f2ff/bd00ff/online-store.png" class="glass-card-icon" alt="icon">
-                    <h3 class="text-xl" data-key="dna_brands">מותגים</h3>
-                    <p class="text-sm" data-key="dna_brands_desc">שיווק וסיפור מותג באמצעות וידאו, השקות מוצר וכנסים וירטואליים.</p>
-                </div>
-                <div class="glass-card js-tilt hover-trigger p-6">
-                    <img src="https://img.icons8.com/nolan/64/00f2ff/bd00ff/university.png" class="glass-card-icon" alt="icon">
-                    <h3 class="text-xl" data-key="dna_public">ציבורי ואקדמי</h3>
-                    <p class="text-sm" data-key="dna_public_desc">הנגשת תוכן לימודי, כנסי מדע והרצאות היברידיות.</p>
-                </div>
-                <div class="glass-card js-tilt hover-trigger p-6">
-                    <img src="https://img.icons8.com/nolan/64/00f2ff/bd00ff/rocket.png" class="glass-card-icon" alt="icon">
-                    <h3 class="text-xl" data-key="dna_startups">סטארטאפים</h3>
-                    <p class="text-sm" data-key="dna_startups_desc">פיצ'ים, סרטוני תדמית ודמואים טכנולוגיים ברמה הגבוהה ביותר.</p>
-                </div>
-            </div>
-        </section>
-
-        <!-- Packages -->
-        <section id="packages">
-            <h2 class="section-title text-center" data-key="section_packages">חבילות שירות</h2>
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-8 mt-12">
-                <div class="glass-card text-center hover:border-[var(--primary)] transition-colors hover-trigger">
-                    <h3 class="text-2xl font-bold text-[var(--text-color)]" data-key="pkg_tech">מפעיל טכני</h3>
-                    <div class="text-4xl font-black text-[var(--primary)] my-4" data-key="pkg_tech_price">₪2,500+</div>
-                    <p class="mb-6 text-sm" data-key="pkg_tech_desc">פתרון נקודתי להפקות קיימות</p>
-                    <ul class="text-right space-y-3 text-muted-custom mb-8 text-sm px-4">
-                        <li data-key="pkg_tech_li1">✓ תפעול מערכות שידור</li>
-                        <li data-key="pkg_tech_li2">✓ אינטגרציה עם ציוד קיים</li>
-                        <li data-key="pkg_tech_li3">✓ הקמה ופירוק</li>
-                    </ul>
-                    <a href="#contact" class="cyber-btn w-full block" data-key="btn_order">הזמן עכשיו</a>
-                </div>
-
-                <div class="glass-card text-center border-[var(--secondary)] transform scale-105 shadow-[0_0_30px_rgba(189,0,255,0.2)] hover-trigger relative overflow-hidden">
-                    <div class="absolute top-0 right-0 bg-[var(--secondary)] text-white text-xs px-3 py-1 font-bold" data-key="pkg_rec">מומלץ</div>
-                    <h3 class="text-2xl font-bold text-[var(--text-color)]" data-key="pkg_director">במאי / מפיק טכני</h3>
-                    <div class="text-4xl font-black text-[var(--secondary)] my-4" data-key="pkg_director_price">₪4,500+</div>
-                    <p class="mb-6 text-sm" data-key="pkg_director_desc">ניהול מלא של האירוע בזמן אמת</p>
-                    <ul class="text-right space-y-3 text-muted-custom mb-8 text-sm px-4">
-                        <li data-key="pkg_director_li1">✓ ניתוב מצלמות</li>
-                        <li data-key="pkg_director_li2">✓ ניהול ליין-אפ</li>
-                        <li data-key="pkg_director_li3">✓ תקשורת עם צוות הפקה</li>
-                    </ul>
-                    <a href="#contact" class="cyber-btn w-full block" style="border-color: var(--secondary); color: var(--secondary);" data-key="btn_order">הזמן עכשיו</a>
-                </div>
-
-                <div class="glass-card text-center hover:border-[var(--primary)] transition-colors hover-trigger">
-                    <h3 class="text-2xl font-bold text-[var(--text-color)]" data-key="pkg_pm">ניהול פרויקט</h3>
-                    <div class="text-4xl font-black text-[var(--primary)] my-4" data-key="pkg_pm_price">מותאם אישית</div>
-                    <p class="mb-6 text-sm" data-key="pkg_pm_desc">פתרון מקצה לקצה</p>
-                    <ul class="text-right space-y-3 text-muted-custom mb-8 text-sm px-4">
-                        <li data-key="pkg_pm_li1">✓ אפיון טכני מלא</li>
-                        <li data-key="pkg_pm_li2">✓ בניית צוות הפקה</li>
-                        <li data-key="pkg_pm_li3">✓ אחריות כוללת</li>
-                    </ul>
-                    <a href="#contact" class="cyber-btn w-full block" data-key="btn_contact">צור קשר</a>
-                </div>
-            </div>
-        </section>
-
-        <!-- Testimonials (New) -->
-        <section id="testimonials" class="bg-[var(--glass-bg)] py-16 rounded-xl">
+        <!-- Testimonials (Moved After Stats) -->
+        <section id="testimonials" class="bg-[var(--glass-bg)] py-16 rounded-xl my-20">
              <h2 class="section-title text-center mb-12" data-key="section_testimonials">המלצות</h2>
              <div class="max-w-4xl mx-auto px-4 text-center">
                 <div class="text-4xl text-[var(--primary)] mb-4">"</div>
@@ -593,45 +616,10 @@
              </div>
         </section>
 
-        <!-- Showreel Grid -->
-        <section id="showreel">
-            <h2 class="section-title text-center w-full" data-key="section_work">נבחרת העבודות</h2>
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mt-12">
-                <div class="group relative aspect-video rounded-lg overflow-hidden border border-[var(--glass-border)] hover-trigger">
-                    <img src="https://images.unsplash.com/photo-1541532713592-79a0317b6b77?q=80&w=1000&auto=format&fit=crop" class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" alt="WRC">
-                    <div class="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex flex-col justify-center items-center p-4 text-center">
-                        <h3 class="text-3xl font-bold text-white mb-2">WRC All Live</h3>
-                        <p class="text-[var(--primary)]" data-key="work_live_sport">שידור חי | ספורט</p>
-                    </div>
-                </div>
-                <div class="group relative aspect-video rounded-lg overflow-hidden border border-[var(--glass-border)] hover-trigger">
-                    <img src="https://images.unsplash.com/photo-1587329310686-94756011cdead?q=80&w=1000&auto=format&fit=crop" class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" alt="Wimbledon">
-                    <div class="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex flex-col justify-center items-center p-4 text-center">
-                        <h3 class="text-3xl font-bold text-white mb-2">Wimbledon</h3>
-                        <p class="text-[var(--secondary)]" data-key="work_live_sport">שידור חי | ספורט</p>
-                    </div>
-                </div>
-                <div class="group relative aspect-video rounded-lg overflow-hidden border border-[var(--glass-border)] hover-trigger">
-                    <img src="https://images.unsplash.com/photo-1516321318423-f06f85e504b3?q=80&w=1000&auto=format&fit=crop" class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" alt="Seven Network">
-                    <div class="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex flex-col justify-center items-center p-4 text-center">
-                        <h3 class="text-3xl font-bold text-white mb-2">Seven Network</h3>
-                        <p class="text-[var(--primary)]" data-key="work_broadcast_ip">שידור | IP</p>
-                    </div>
-                </div>
-            </div>
-        </section>
-
-        <!-- Clients Marquee (Moved to bottom) -->
-        <section id="clients" class="py-10 border-y border-[var(--glass-border)] bg-[var(--glass-bg)] backdrop-blur-sm overflow-hidden mt-20">
-            <div class="flex w-max scrolling-logos">
-                <div id="logo-track" class="flex gap-16 items-center transition-all duration-500"></div>
-            </div>
-        </section>
-
         <!-- Contact -->
         <section id="contact" class="py-20">
             <div class="glass-card max-w-3xl mx-auto text-center">
-                <h2 class="text-5xl font-bold mb-6 glitch-text" data-text="בואו ניצור משהו מדהים" data-key="contact_title">בואו ניצור משהו מדהים</h2>
+                <h2 class="text-5xl font-bold mb-6 glitch-text glitch-active" data-text="בואו ניצור משהו מדהים" data-key="contact_title">בואו ניצור משהו מדהים</h2>
                 <p class="text-xl text-muted-custom mb-12" data-key="contact_desc">
                     יש לכם חזון? לנו יש את הכלים להגשים אותו.
                 </p>
@@ -688,49 +676,39 @@
         // --- Translations Data ---
         const translations = {
             he: {
-                nav_home: "ראשי", nav_about: "אודות", nav_work: "עבודות", nav_services: "שירותים", nav_packages: "חבילות", nav_contact: "צור קשר", nav_process: "תהליך", nav_recommendations: "המלצות",
-                hero_title: "השילוב המושלם", hero_subtitle: "בין ביצוע טכני לחדשנות יצירתית", hero_desc: "מהפקות וידאו ושידורים חיים ועד פיתוח פתרונות תוכנה ו-AI. אנחנו כאן כדי להפוך את החזון שלכם למציאות מרשימה, חלקה ונטולת תקלות.", hero_cta_start: "התחילו פרויקט", hero_cta_work: "צפו בעבודות",
-                stat_productions: "הפקות מוצלחות", stat_countries: "מדינות בעולם", stat_support: "תמיכה ושירות",
-                about_title: "מי אנחנו", about_subtitle: "ה-DNA שלנו הוא טכנולוגיה ורגש", about_text: "עם ניסיון של שנים בתעשיית השידור וההפקה, אנו מביאים לשולחן שילוב נדיר של ידע טכני עמוק והבנה קריאייטיבית רחבה.", about_text2: "אנחנו לא רק לוחצים על כפתורים; אנחנו מהנדסים חוויות.",
-                section_work: "נבחרת העבודות", work_live_sport: "שידור חי | ספורט", work_broadcast_ip: "שידור | IP",
-                section_target: "קהל יעד / לקוחותינו", target_subtitle: "למי הפתרונות שלנו מתאימים?",
-                dna_production: "חברות הפקה", dna_production_desc: "ניהול טכני מלא להפקות ואירועים גדולים. אנחנו הדאגה הטכנית שלכם בשטח.",
-                dna_broadcasters: "גופי שידור", dna_broadcasters_desc: "תמיכה בשידורים חיים, הקמת אולפנים ותפעול מערכות וידאו מתקדמות.",
-                dna_brands: "מותגים", dna_brands_desc: "שיווק וסיפור מותג באמצעות וידאו, השקות מוצר וכנסים וירטואליים.",
-                dna_public: "ציבורי ואקדמי", dna_public_desc: "הנגשת תוכן לימודי, כנסי מדע והרצאות היברידיות.",
-                dna_startups: "סטארטאפים", dna_startups_desc: "פיצ'ים, סרטוני תדמית ודמואים טכנולוגיים ברמה הגבוהה ביותר.",
-                section_process: "התהליך שלנו", process_1: "אסטרטגיה", process_1_desc: "פיצוח הקונספט והגדרת יעדים", process_2: "הפקה", process_2_desc: "יום צילום, ניהול וביצוע טכני", process_3: "פוסט", process_3_desc: "עריכה, אנימציה וצבע", process_4: "הפצה", process_4_desc: "שידור וקידום התוכן",
+                nav_home: "ראשי", nav_about: "אודות", nav_work: "CINE MATCH", nav_services: "שירותים", nav_clients: "לקוחותינו", nav_contact: "צור קשר", nav_recommendations: "המלצות",
+                hero_title: "הנדסת חוויות ויזואליות", hero_subtitle: "איפה שטכנולוגיה פוגשת רגש בזמן אמת", hero_desc: "אנחנו לא רק מפיקים תוכן, אנחנו מהנדסים רגעים. שילוב עוצמתי בין שידורים חיים, קוד יצירתי ובינה מלאכותית שמשנה את חוקי המשחק והופכת כל פיקסל לסיפור.", hero_cta_start: "התחילו פרויקט", hero_cta_work: "למעגלי העבודה",
+                stat_productions: "הפקות מוצלחות", stat_countries: "מדינות בעולם", stat_support: "זמינות ויצירה",
+                about_title: "מי אנחנו", about_intro: "בנקודת המפגש שבין ביצוע טכני מושלם לחזון אומנותי פורץ דרך.", about_subtitle: "מקוד לאומנות: המסע של כל פרויקט", about_text: "העולם הדיגיטלי דורש מהירות של מכונה ונשמה של אומן. השיטה שלנו ייחודית: אנחנו מפרקים כל אתגר לגורמים טכניים ומרכיבים אותם מחדש ליצירה ויזואלית חיה.", about_text2: "זה לא רק \"לצלם ולערוך\". זה לבנות מערכות שמגיבות בזמן אמת, לייצר יש מאין באמצעות AI, ולדעת שברגע האמת - בשידור החי - הכל יעבוד כמו שעון שוויצרי.",
+                process_1: "אסטרטגיה", process_1_desc: "תכנון אדריכלי של האירוע או התוכן, מהמסר ועד לפיקסל.",
+                process_2: "הפקה חיה", process_2_desc: "ביצוע טכני ללא פשרות, ניהול צוותים וניתוב בזמן אמת.",
+                process_ai: "AI & Tech", process_ai_desc: "העצמת הויזואל עם כלים מחוללי תמונה וקוד.",
+                section_cinematch: "CINE MATCH", work_circles: "מעגלי עבודה",
                 section_solutions: "השירותים שלנו",
-                sol_live_title: "הפקות וידאו ושידורים חיים", sol_live_desc: "שידור חי הוא אומנות של שניות. עם ניסיון של אלפי שעות שידור, אנו מביאים את היכולות של עולם הטלוויזיה לכל פלטפורמה דיגיטלית. איכות שידור ללא פשרות, גיבוי מלא וניהול בזמן אמת.", sol_live_li1: "שידור רב-מוקדי", sol_live_li2: "גרפיקה בזמן אמת",
-                sol_ob_title: "ניידת שידור ו-Multi Camera", sol_ob_desc: "מערך צילום מרובה מצלמות שמאפשר לספר את הסיפור מכל הזוויות. ניידת השידור המודולרית שלנו מצוידת בטכנולוגיות 4K, מערכות ניתוב מתקדמות ויכולות הקלטה בסטנדרט בינלאומי.",
-                sol_virtual_title: "כנסים וירטואליים", sol_virtual_desc: "העתיד של הכנסים כבר כאן. אנו יוצרים סביבות וירטואליות אימרסיביות, המשלבות דוברים מהאולפן ומהבית, עם אינטראקציה מלאה של הקהל.",
-                section_packages: "חבילות שירות", section_testimonials: "המלצות",
-                pkg_tech: "מפעיל טכני", pkg_tech_price: "₪2,500+", pkg_tech_desc: "פתרון נקודתי להפקות קיימות", pkg_tech_li1: "✓ תפעול מערכות שידור", pkg_tech_li2: "✓ אינטגרציה עם ציוד קיים", pkg_tech_li3: "✓ הקמה ופירוק", btn_order: "הזמן עכשיו",
-                pkg_director: "במאי / מפיק טכני", pkg_director_price: "₪4,500+", pkg_director_desc: "ניהול מלא של האירוע בזמן אמת", pkg_director_li1: "✓ ניתוב מצלמות", pkg_director_li2: "✓ ניהול ליין-אפ", pkg_director_li3: "✓ תקשורת עם צוות הפקה", pkg_rec: "מומלץ",
-                pkg_pm: "ניהול פרויקט", pkg_pm_price: "מותאם אישית", pkg_pm_desc: "פתרון מקצה לקצה", pkg_pm_li1: "✓ אפיון טכני מלא", pkg_pm_li2: "✓ בניית צוות הפקה", pkg_pm_li3: "✓ אחריות כוללת", btn_contact: "צור קשר",
+                sol_live_title: "הפקות וידאו ושידורים חיים", sol_live_short: "מולטי-קאמרה, ניתוב בזמן אמת ושידור לכל פלטפורמה.",
+                sol_ai_title: "יצירת תוכן AI & On The Fly", sol_ai_short: "שתילת אובייקטים, הנפשת תמונות ויצירת עולמות ללא גבול פיזי.",
+                sol_virtual_title: "כנסים וירטואליים והיברידיים", sol_virtual_short: "שילוב דוברים מהאולפן ומהבית בסביבה אימרסיבית.",
+                sol_post_title: "פוסט-פרודקשן מתקדם", sol_post_short: "עריכה, צבע, ואנימציה שסוגרים את המעגל.",
+                section_clients: "לקוחותינו", clients_subtitle: "גופי שידור, חברות הפקה ומותגים מובילים",
+                section_testimonials: "המלצות",
                 contact_title: "בואו ניצור משהו מדהים", contact_desc: "יש לכם חזון? לנו יש את הכלים להגשים אותו.", btn_email: "שלחו מייל", contact_name: "אוריין אדלני"
             },
             en: {
-                nav_home: "Home", nav_about: "About", nav_work: "Work", nav_services: "Services", nav_packages: "Packages", nav_contact: "Contact", btn_talk: "Let's Talk",
-                hero_title: "The Perfect Combo", hero_subtitle: "Between Technical Execution & Creative Innovation", hero_desc: "From video productions and live broadcasts to software and AI solutions. We are here to turn your vision into an impressive, smooth, and flawless reality.", hero_cta_start: "Start a Project", hero_cta_work: "View Work",
-                stat_productions: "Successful Productions", stat_countries: "Countries Worldwide", stat_support: "Support & Service",
-                about_title: "About Us", about_subtitle: "Technology & Emotion is our DNA", about_text: "With years of experience in the broadcast and production industry, we combine deep technical knowledge with creative understanding.", about_text2: "We don't just push buttons; we engineer experiences.",
-                section_work: "Selected Works", work_live_sport: "Live Broadcast | Sport", work_broadcast_ip: "Broadcast | IP",
-                section_target: "Our Clients / Target Audience", target_subtitle: "Who are our solutions for?",
-                dna_production: "Production Companies", dna_production_desc: "Full technical management for large productions and events. We are your technical peace of mind on the ground.",
-                dna_broadcasters: "Broadcasters", dna_broadcasters_desc: "Support for live broadcasts, studio setup, and operation of advanced video systems.",
-                dna_brands: "Brands", dna_brands_desc: "Marketing and brand storytelling through video, product launches, and virtual conferences.",
-                dna_public: "Public & Academic", dna_public_desc: "Accessible educational content, science conferences, and hybrid lectures.",
-                dna_startups: "Startups", dna_startups_desc: "Pitches, promotional videos, and high-end technological demos.",
-                section_process: "Our Process", process_1: "Strategy", process_1_desc: "Cracking the concept and defining goals", process_2: "Production", process_2_desc: "Shooting day, management, and technical execution", process_3: "Post", process_3_desc: "Editing, animation, and color grading", process_4: "Distribution", process_4_desc: "Broadcasting and promoting content",
+                nav_home: "Home", nav_about: "About", nav_work: "CINE MATCH", nav_services: "Services", nav_clients: "Our Clients", nav_contact: "Contact", nav_recommendations: "Testimonials",
+                hero_title: "Visual Experience Engineering", hero_subtitle: "Where Technology Meets Emotion in Real-Time", hero_desc: "We don't just produce content; we engineer moments. A powerful fusion of live broadcasting, creative coding, and AI that changes the rules of the game and turns every pixel into a story.", hero_cta_start: "Start a Project", hero_cta_work: "View Work",
+                stat_productions: "Successful Productions", stat_countries: "Countries Worldwide", stat_support: "Creation Availability",
+                about_title: "About Us", about_intro: "At the intersection of perfect technical execution and groundbreaking artistic vision.", about_subtitle: "From Code to Art: The Journey of Every Project", about_text: "The digital world demands the speed of a machine and the soul of an artist. Our method is unique: we deconstruct every challenge into technical factors and reassemble them into a living visual creation.", about_text2: "It's not just \"shoot and edit\". It's building systems that respond in real-time, creating from nothing using AI, and knowing that at the moment of truth - the live broadcast - everything will work like a Swiss watch.",
+                process_1: "Strategy", process_1_desc: "Architectural planning of the event or content, from message to pixel.",
+                process_2: "Live Production", process_2_desc: "Uncompromising technical execution, team management, and real-time switching.",
+                process_ai: "AI & Tech", process_ai_desc: "Empowering visuals with image-generating tools and code.",
+                section_cinematch: "CINE MATCH", work_circles: "Work Circles",
                 section_solutions: "Our Services",
-                sol_live_title: "Video Productions & Live Broadcasts", sol_live_desc: "Live broadcasting is an art of seconds. With thousands of broadcast hours, we bring TV-world capabilities to every digital platform. Uncompromising quality, full backup, and real-time management.", sol_live_li1: "Multi-Site Broadcast", sol_live_li2: "Real-Time Graphics",
-                sol_ob_title: "OB Van & Multi Camera", sol_ob_desc: "A multi-camera setup allowing you to tell the story from all angles. Our modular OB van is equipped with 4K technologies, advanced routing systems, and international standard recording capabilities.",
-                sol_virtual_title: "Virtual Conferences", sol_virtual_desc: "The future of conferences is here. We create immersive virtual environments, combining speakers from the studio and home, with full audience interaction.",
-                section_packages: "Service Packages", section_testimonials: "Testimonials",
-                pkg_tech: "Technical Operator", pkg_tech_price: "₪2,500+", pkg_tech_desc: "Specific solution for existing productions", pkg_tech_li1: "✓ Broadcast system operation", pkg_tech_li2: "✓ Integration with existing gear", pkg_tech_li3: "✓ Setup and dismantle", btn_order: "Book Now",
-                pkg_director: "Technical Director", pkg_director_price: "₪4,500+", pkg_director_desc: "Full event management in real-time", pkg_director_li1: "✓ Camera routing", pkg_director_li2: "✓ Line-up management", pkg_director_li3: "✓ Crew communication", pkg_rec: "Recommended",
-                pkg_pm: "Project Management", pkg_pm_price: "Custom", pkg_pm_desc: "End-to-end solution", pkg_pm_li1: "✓ Full technical spec", pkg_pm_li2: "✓ Production crew building", pkg_pm_li3: "✓ Overall responsibility", btn_contact: "Contact Us",
+                sol_live_title: "Video Production & Live Broadcast", sol_live_short: "Multi-camera, real-time switching, and broadcasting to any platform.",
+                sol_ai_title: "AI Content & On The Fly", sol_ai_short: "Object embedding, image animation, and creating worlds without physical boundaries.",
+                sol_virtual_title: "Virtual & Hybrid Conferences", sol_virtual_short: "Integrating studio and remote speakers in an immersive environment.",
+                sol_post_title: "Advanced Post-Production", sol_post_short: "Editing, color, and animation closing the loop.",
+                section_clients: "Our Clients", clients_subtitle: "Broadcasters, Production Companies, and Leading Brands",
+                section_testimonials: "Testimonials",
                 contact_title: "Let's Create Magic", contact_desc: "Have a vision? We have the tools to make it happen.", btn_email: "Send Email", contact_name: "Orian Edelenyi"
             }
         };
@@ -802,10 +780,15 @@
 
             const glitchText = document.querySelector('.glitch-text');
             if(glitchText) {
-                const spanContent = lang === 'he' ? 'המושלם' : 'Combo';
-                const plainContent = lang === 'he' ? 'השילוב ' : 'The Perfect ';
+                const spanContent = lang === 'he' ? 'ויזואליות' : 'Engineering';
+                const plainContent = lang === 'he' ? 'הנדסת חוויות ' : 'Visual Experience ';
                 glitchText.innerHTML = `${plainContent}<span style="color:transparent; -webkit-text-stroke: 2px var(--primary);">${spanContent}</span>`;
                 glitchText.setAttribute('data-text', plainContent + spanContent);
+                
+                // Restart glitch animation on language change
+                glitchText.classList.remove('glitch-active');
+                void glitchText.offsetWidth; // Trigger reflow
+                glitchText.classList.add('glitch-active');
             }
 
             document.documentElement.dir = lang === 'he' ? 'rtl' : 'ltr';
@@ -923,6 +906,57 @@
             });
         };
 
+        // --- Stats Animation ---
+        const initStatsAnimation = () => {
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if(entry.isIntersecting) {
+                        const numEl = entry.target.querySelector('.stat-number');
+                        if(numEl && !numEl.classList.contains('counted')) {
+                            const target = parseInt(numEl.getAttribute('data-target'));
+                            animateValue(numEl, 0, target, 2000);
+                            numEl.classList.add('counted');
+                        }
+                    }
+                });
+            }, { threshold: 0.5 });
+
+            document.querySelectorAll('.count-container').forEach(el => observer.observe(el));
+        };
+
+        function animateValue(obj, start, end, duration) {
+            let startTimestamp = null;
+            const step = (timestamp) => {
+                if (!startTimestamp) startTimestamp = timestamp;
+                const progress = Math.min((timestamp - startTimestamp) / duration, 1);
+                obj.innerHTML = Math.floor(progress * (end - start) + start);
+                if (progress < 1) {
+                    window.requestAnimationFrame(step);
+                }
+            };
+            window.requestAnimationFrame(step);
+        }
+
+        // --- Service List Interaction ---
+        const initServices = () => {
+            const listItems = document.querySelectorAll('.service-list-item');
+            const previews = document.querySelectorAll('.preview-media');
+
+            listItems.forEach(item => {
+                item.addEventListener('mouseenter', () => {
+                    // Remove active from all
+                    listItems.forEach(i => i.classList.remove('active'));
+                    previews.forEach(p => p.classList.remove('active'));
+
+                    // Add active to current
+                    item.classList.add('active');
+                    const targetId = item.getAttribute('data-target');
+                    const targetPreview = document.getElementById(targetId);
+                    if(targetPreview) targetPreview.classList.add('active');
+                });
+            });
+        };
+
         // --- Video Logic ---
         let playerA, playerB, activePlayer = 'A';
         let isMuted = true;
@@ -985,14 +1019,16 @@
             initThreeJS();
             initTilt();
             initScrollReveal();
+            initStatsAnimation();
+            initServices();
             
-            // Inject Logos
+            // Inject Generic Placeholder Logos
             const logos = [
-                'https://go-live.co.il/wp-content/uploads/2021/11/logo-strauss2.png',
-                'https://go-live.co.il/wp-content/uploads/2021/11/Wix.com_Logo-1.png',
-                'https://go-live.co.il/wp-content/uploads/2021/11/Microsoft_logo_2012.svg_-1.png',
-                'https://go-live.co.il/wp-content/uploads/2021/11/1280px-Poalim2018.svg_-1.png',
-                'https://go-live.co.il/wp-content/uploads/2021/11/assuta_logo-1.png'
+                'https://placehold.co/180x60/transparent/white?text=CLIENT+1',
+                'https://placehold.co/180x60/transparent/white?text=CLIENT+2',
+                'https://placehold.co/180x60/transparent/white?text=CLIENT+3',
+                'https://placehold.co/180x60/transparent/white?text=CLIENT+4',
+                'https://placehold.co/180x60/transparent/white?text=CLIENT+5'
             ];
             const track = document.getElementById('logo-track');
             const createLogo = (src) => {
