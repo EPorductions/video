@@ -59,7 +59,8 @@
             height: 100dvh; 
             width: 100%;
             -webkit-overflow-scrolling: touch; 
-            scroll-snap-type: x proximity; 
+            /* Updated to mandatory for stricter snap */
+            scroll-snap-type: x mandatory; 
             align-items: center;
             direction: ltr; /* Force LTR for scrolling logic */
             opacity: 0;
@@ -75,7 +76,7 @@
 
         .snap-center {
             scroll-snap-align: center;
-            scroll-snap-stop: always; /* More rigid snap */
+            scroll-snap-stop: always; 
         }
 
         .cursor-grab { cursor: grab; }
@@ -140,10 +141,9 @@
                 navContact: "צור קשר",
                 galleryBtn: "גלריה",
                 heroTitle: "אליז שנון אדלני", 
-                heroSubtitle: "יצירה חיה, נושמת ומתפתחת", // עדכון קטן לכותרת
+                heroSubtitle: "יצירה חיה, נושמת ומתפתחת", 
                 scrollHint: "גלילה לכל כיוון",
                 aboutTitle: "האמנית",
-                // עדכון משמעותי לטקסט - דגש על עשייה ופעילות
                 aboutText1: "ילידת 1947, בוגרת המחלקה לאמנות בבצלאל. אמנית פעילה ויוצרת המציגה בתערוכות ולוקחת חלק בשיח האמנותי המקומי.",
                 aboutText2: "עבודותיה מתאפיינות בקו רגיש ומדויק, בחיפוש מתמיד אחר הקומפוזיציה הנכונה, ובדיאלוג מרתק בין הפיגורטיבי למופשט. היצירה שלה נובעת מתשוקה וסקרנות אינסופית לחומר ולצורה.",
                 aboutText3: "האתר החדש הוא הזמנה פתוחה להיכנס לסטודיו, להתרשם מגוף עבודות עשיר שנבנה לאורך שנים, ולראשונה – לאפשר ליצירות למצוא בית חדש אצל אוהבי אמנות.",
@@ -482,11 +482,17 @@
             const [isHeroVisible, setIsHeroVisible] = useState(true); 
             
             const scrollContainerRef = useRef(null);
+            
+            // Refs for Smart Nav (Main / Right Side)
             const heroRef = useRef(null);
             const heroCloneRightRef = useRef(null);
-            const heroCloneLeftRef = useRef(null);
             const aboutMainRef = useRef(null); 
             const contactRef = useRef(null);
+
+            // Refs for Left Side Mirror
+            const heroCloneLeftRef = useRef(null);
+            const aboutLeftRef = useRef(null);
+            const contactLeftRef = useRef(null);
 
             const isScrollingRef = useRef(false); 
 
@@ -505,32 +511,7 @@
             const lastMoveTime = useRef(Date.now());
             const lastMoveX = useRef(0);
 
-            // --- SCROLL FIX FOR MOBILE & RESIZE ---
-            useEffect(() => {
-                const handleResize = () => {
-                    if (scrollContainerRef.current) {
-                        const viewWidth = window.innerWidth;
-                        const currentScroll = scrollContainerRef.current.scrollLeft;
-                        const pageIndex = Math.round(currentScroll / viewWidth);
-                        
-                        scrollContainerRef.current.scrollTo({
-                            left: pageIndex * viewWidth,
-                            behavior: 'smooth' 
-                        });
-                    }
-                };
-
-                window.addEventListener('resize', handleResize);
-                window.addEventListener('orientationchange', () => {
-                    setTimeout(handleResize, 100);
-                });
-
-                return () => {
-                    window.removeEventListener('resize', handleResize);
-                    window.removeEventListener('orientationchange', handleResize);
-                };
-            }, []);
-
+            // --- Init Force Center ---
             useLayoutEffect(() => {
                 if ('scrollRestoration' in history) {
                     history.scrollRestoration = 'manual';
@@ -540,10 +521,12 @@
                     if (heroRef.current && scrollContainerRef.current) {
                         const offset = heroRef.current.offsetLeft;
                         scrollContainerRef.current.style.scrollBehavior = 'auto';
-                        scrollContainerRef.current.scrollTo(offset, 0);
+                        scrollContainerRef.current.scrollLeft = offset;
+                        requestAnimationFrame(() => { if(scrollContainerRef.current) scrollContainerRef.current.scrollLeft = offset; });
+                        
                         setTimeout(() => {
                             if(scrollContainerRef.current) scrollContainerRef.current.style.scrollBehavior = 'smooth';
-                        }, 1000); 
+                        }, 500); 
 
                         if (!loaded) {
                             requestAnimationFrame(() => {
@@ -557,12 +540,12 @@
                 try {
                     if (!dataLoading) {
                         forceCenter();
-                        setTimeout(forceCenter, 200);
+                        setTimeout(forceCenter, 100);
                     }
                 } catch(e) {
                     console.error("Scroll sync error", e);
                 }
-            }, [dataLoading]); // Re-run when data loads
+            }, [dataLoading]); 
 
             useEffect(() => {
                 const observer = new IntersectionObserver(
@@ -572,6 +555,38 @@
                 if (heroRef.current) observer.observe(heroRef.current);
                 return () => observer.disconnect();
             }, []);
+
+            // --- Navigation Logic (Fixed for bi-directional) ---
+            const navigateTo = (target) => {
+                const container = scrollContainerRef.current;
+                const hero = heroRef.current;
+                if (!container || !hero) return;
+
+                const currentScroll = container.scrollLeft;
+                const heroLeft = hero.offsetLeft;
+                
+                // Identify if user is currently viewing the "left side" of the timeline
+                // (Left of the Main Hero)
+                const isLeftContext = currentScroll < (heroLeft - 10); 
+
+                let destRef = null;
+
+                if (target === 'home') {
+                    destRef = heroRef; // Always go to center
+                } else if (target === 'about') {
+                    destRef = isLeftContext ? aboutLeftRef : aboutMainRef;
+                } else if (target === 'contact') {
+                    destRef = isLeftContext ? contactLeftRef : contactRef;
+                }
+
+                if (destRef && destRef.current) {
+                    // Use explicit scrollTo calculation for accuracy
+                    container.scrollTo({
+                        left: destRef.current.offsetLeft,
+                        behavior: 'smooth'
+                    });
+                }
+            };
 
             const scrollByAmount = (amount) => {
                 if (scrollContainerRef.current) {
@@ -591,11 +606,7 @@
 
             const handleStartStory = (e) => {
                 e.stopPropagation();
-                scrollByAmount(-window.innerWidth); 
-            };
-
-            const scrollToSection = (ref) => {
-                if (ref.current) ref.current.scrollIntoView({ behavior: 'smooth' });
+                scrollByAmount(window.innerWidth); 
             };
 
             const handleLangChange = (newLang) => {
@@ -610,40 +621,51 @@
                 }, 50);
             };
 
-            // --- Infinite Loop Logic (UPDATED with Mouse Wheel) ---
+            // --- Infinite Loop Logic (Seamless Jump) ---
             useEffect(() => {
                 const container = scrollContainerRef.current;
                 if (!container || dataLoading) return;
 
-                const checkLoop = () => {
+                const handleScroll = () => {
                     if(!heroRef.current || !heroCloneRightRef.current || !heroCloneLeftRef.current) return;
                     
-                    const scrollLeft = container.scrollLeft;
+                    const currentScroll = container.scrollLeft;
                     const homeMainX = heroRef.current.offsetLeft;
                     const homeCloneRightX = heroCloneRightRef.current.offsetLeft;
                     const homeCloneLeftX = heroCloneLeftRef.current.offsetLeft;
                     
-                    // Adjusted Loop Logic for smoother experience
-                    if (scrollLeft >= homeCloneRightX - 10) {
-                        // Jump back to center
-                        const offset = scrollLeft - homeCloneRightX;
+                    // Right Loop: If we hit the Right Clone, jump to Main
+                    if (currentScroll >= homeCloneRightX - 5) {
+                        const offsetIntoClone = currentScroll - homeCloneRightX;
                         container.style.scrollBehavior = 'auto';
-                        container.scrollTo({ left: homeMainX + offset, top: 0 });
+                        container.scrollLeft = homeMainX + offsetIntoClone;
                         container.style.scrollBehavior = 'smooth'; // Restore smooth
+                        
+                        // Sync Physics
+                        if (isDown) {
+                            setScrollLeft(homeMainX + offsetIntoClone);
+                            setStartX(prev => prev - (homeCloneRightX - homeMainX)); 
+                        }
                     }
                     
-                    if (scrollLeft <= homeCloneLeftX + 10) {
-                         // Jump forward to center
-                         const offset = scrollLeft - homeCloneLeftX;
+                    // Left Loop: If we hit the Left Clone, jump to Main
+                    if (currentScroll <= homeCloneLeftX + 5) {
+                         const offsetIntoClone = currentScroll - homeCloneLeftX;
                          container.style.scrollBehavior = 'auto';
-                         container.scrollTo({ left: homeMainX + offset, top: 0 });
+                         container.scrollLeft = homeMainX + offsetIntoClone;
                          container.style.scrollBehavior = 'smooth'; // Restore smooth
+                         
+                         // Sync Physics
+                         if (isDown) {
+                            setScrollLeft(homeMainX + offsetIntoClone);
+                            setStartX(prev => prev + (homeMainX - homeCloneLeftX)); 
+                        }
                     }
                 };
 
-                container.addEventListener('scroll', checkLoop);
-                return () => container.removeEventListener('scroll', checkLoop);
-            }, [dataLoading]);
+                container.addEventListener('scroll', handleScroll);
+                return () => container.removeEventListener('scroll', handleScroll);
+            }, [dataLoading, isDown]);
 
             // --- MOUSE WHEEL (Restored) ---
             useEffect(() => {
@@ -653,11 +675,13 @@
                 const handleWheel = (e) => {
                     if (window.innerWidth > 768) {
                         if (Math.abs(e.deltaY) > 5 || Math.abs(e.deltaX) > 5) {
-                            e.preventDefault();
                             if(isScrollingRef.current) return;
                             isScrollingRef.current = true;
+                            
                             const direction = (e.deltaY > 0 || e.deltaX > 0) ? 1 : -1;
+                            
                             container.scrollBy({ left: direction * window.innerWidth, behavior: 'smooth' });
+                            
                             clearTimeout(wheelTimeout);
                             wheelTimeout = setTimeout(() => { isScrollingRef.current = false; }, 600); 
                         }
@@ -760,9 +784,9 @@
                                 <button onClick={() => handleLangChange('hu')} className={`px-2 py-1 rounded transition-colors ${lang === 'hu' ? 'bg-white text-black' : 'text-white/50 hover:text-white'}`}>HU</button>
                             </div>
                             <div className="flex gap-6 text-sm font-light">
-                                <button onClick={() => scrollToSection(heroRef)} className="hover:text-[#d4a373] transition-colors interactive uppercase tracking-widest text-xs">{t.navHome}</button>
-                                <button onClick={() => scrollToSection(aboutMainRef)} className="hover:text-[#d4a373] transition-colors interactive uppercase tracking-widest text-xs">{t.navAbout}</button>
-                                <button onClick={() => scrollToSection(contactRef)} className="hover:text-[#d4a373] transition-colors interactive uppercase tracking-widest text-xs">{t.navContact}</button>
+                                <button onClick={() => navigateTo('home')} className="hover:text-[#d4a373] transition-colors interactive uppercase tracking-widest text-xs">{t.navHome}</button>
+                                <button onClick={() => navigateTo('about')} className="hover:text-[#d4a373] transition-colors interactive uppercase tracking-widest text-xs">{t.navAbout}</button>
+                                <button onClick={() => navigateTo('contact')} className="hover:text-[#d4a373] transition-colors interactive uppercase tracking-widest text-xs">{t.navContact}</button>
                             </div>
                         </div>
                     </nav>
@@ -787,14 +811,23 @@
                                 <div ref={heroCloneLeftRef}>
                                     <Hero id="hero-left" t={t} lang={lang} isClone={true} onLeft={handleLeftArrow} onRight={handleRightArrow} onText={handleStartStory} />
                                 </div>
-                                <ContactSection t={t} />
+                                <ContactSection t={t} sectionRef={contactLeftRef} />
                                 {[...data].reverse().map((cat) => (
                                     <CategoryCluster key={`left-${cat.id}`} category={cat} onImageClick={setSelectedImg} />
                                 ))}
-                                <AboutSection t={t} />
+                                <AboutSection t={t} sectionRef={aboutLeftRef} />
 
                                 {/* MAIN SECTION */}
-                                <Hero id="hero-main" t={t} lang={lang} sectionRef={heroRef} isRef={true} onLeft={handleLeftArrow} onRight={handleRightArrow} onText={handleStartStory} />
+                                <Hero 
+                                    id="hero-main"
+                                    t={t}
+                                    lang={lang}
+                                    sectionRef={heroRef}
+                                    isRef={true} 
+                                    onLeft={handleLeftArrow} 
+                                    onRight={handleRightArrow} 
+                                    onText={handleStartStory} 
+                                />
                                 
                                 <AboutSection t={t} sectionRef={aboutMainRef} />
                                 {data.map((cat) => (
