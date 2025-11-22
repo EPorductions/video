@@ -16,13 +16,17 @@
     
     <style>
         :root {
-            /* פלטת צבעים: פשתן, כותנה, חוטים, אדמה */
-            --bg-linen: #f4f1ea;
-            --bg-dark-linen: #e8e4dc;
+            /* פלטת צבעים מחודשת: חמה, שמחה וטבעית */
+            --bg-linen: #fbf9f4; /* בהיר יותר */
+            --bg-dark-linen: #f0ebe0;
             --thread-color: #8c7b6c;
-            --text-primary: #3d342b;
+            --text-primary: #2d2420;
             --text-secondary: #5c504a;
-            --accent-gold: #c2a67a;
+            
+            /* צבעי הדגשה שמחים */
+            --accent-gold: #e09f3e;
+            --accent-terracotta: #d66853; /* כתום-אדמדם חם */
+            --accent-teal: #2a9d8f; /* נגיעה של טורקיז לאיזון */
         }
 
         html {
@@ -49,45 +53,51 @@
             font-family: 'Frank Ruhl Libre', serif;
         }
 
-        /* Texture Background */
+        /* Texture Background - Woven Pattern */
         .linen-bg {
             background-color: var(--bg-linen);
+            /* דוגמת אריגה עדינה */
             background-image: 
-                url("data:image/svg+xml,%3Csvg width='4' height='4' viewBox='0 0 4 4' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M1 3h1v1H1V3zm2-2h1v1H3V1z' fill='%238c7b6c' fill-opacity='0.08'/%3E%3C/svg%3E");
+                linear-gradient(45deg, rgba(214, 104, 83, 0.03) 25%, transparent 25%, transparent 75%, rgba(214, 104, 83, 0.03) 75%, rgba(214, 104, 83, 0.03)),
+                linear-gradient(45deg, rgba(214, 104, 83, 0.03) 25%, transparent 25%, transparent 75%, rgba(214, 104, 83, 0.03) 75%, rgba(214, 104, 83, 0.03));
+            background-size: 20px 20px;
+            background-position: 0 0, 10px 10px;
         }
 
+        /* Noise for realism */
         .grain {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            pointer-events: none; z-index: 50; opacity: 0.05;
+            pointer-events: none; z-index: 50; opacity: 0.04;
             background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
         }
 
-        /* Stitched / Fabric Effects */
+        /* Stitched / Fabric Effects - More Colorful */
         .stitched {
             position: relative;
-            box-shadow: 2px 4px 10px rgba(0,0,0,0.05);
+            box-shadow: 4px 6px 15px rgba(0,0,0,0.08);
             background: white;
+            transition: all 0.3s ease;
         }
+        /* Double Stitch Effect */
         .stitched::after {
             content: '';
             position: absolute;
-            top: 5px; left: 5px; right: 5px; bottom: 5px;
-            border: 1px dashed var(--thread-color);
+            top: 6px; left: 6px; right: 6px; bottom: 6px;
+            border: 2px dashed var(--accent-terracotta); /* צבע שמח יותר לתפר */
             pointer-events: none;
-            opacity: 0.4;
+            opacity: 0.5;
+            border-radius: 2px;
+        }
+        .stitched::before {
+            content: '';
+            position: absolute;
+            top: 3px; left: 3px; right: 3px; bottom: 3px;
+            border: 1px dotted var(--accent-gold); /* תפר שני עדין */
+            pointer-events: none;
+            opacity: 0.6;
         }
         
-        .ragged-edge {
-            clip-path: polygon(
-                0% 0%, 100% 0%, 100% 98%, 98% 100%, 96% 98%, 94% 100%, 92% 98%, 90% 100%, 88% 98%, 86% 100%, 84% 98%, 82% 100%, 80% 98%,
-                78% 100%, 76% 98%, 74% 100%, 72% 98%, 70% 100%, 68% 98%, 66% 100%, 64% 98%, 62% 100%, 60% 98%,
-                58% 100%, 56% 98%, 54% 100%, 52% 98%, 50% 100%, 48% 98%, 46% 100%, 44% 98%, 42% 100%, 40% 98%,
-                38% 100%, 36% 98%, 34% 100%, 32% 98%, 30% 100%, 28% 98%, 26% 100%, 24% 98%, 22% 100%, 20% 98%,
-                18% 100%, 16% 98%, 14% 100%, 12% 98%, 10% 100%, 8% 98%, 6% 100%, 4% 98%, 2% 100%, 0% 98%
-            );
-        }
-
-        /* Horizontal Scroll Logic (From Source Code) */
+        /* Horizontal Scroll Logic */
         .horizontal-scroll-container {
             display: flex;
             flex-direction: row;
@@ -97,9 +107,9 @@
             height: 100dvh; 
             width: 100%;
             -webkit-overflow-scrolling: touch; 
-            scroll-snap-type: x proximity; /* Proximity feels more natural for continuous cloth */
+            scroll-snap-type: x proximity; 
             align-items: center;
-            direction: ltr; /* Keeps math simple for scroll logic */
+            direction: ltr; 
             opacity: 0;
             transition: opacity 0.5s ease-in;
         }
@@ -129,7 +139,6 @@
 
         .layout-transition { transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1); }
         
-        /* Header Fading Logic */
         .brand-enter {
             opacity: 1;
             transform: translateY(0);
@@ -143,7 +152,6 @@
             pointer-events: none;
         }
 
-        /* Intro Weaving Animation */
         @keyframes weaveVert { 0% { height: 0; } 100% { height: 100%; } }
         @keyframes weaveHoriz { 0% { width: 0; } 100% { width: 100%; } }
 
@@ -163,8 +171,8 @@
         // --- Icons ---
         const Icons = {
             X: () => <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>,
-            ArrowRight: () => <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>,
-            ArrowLeft: () => <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>,
+            ArrowRight: () => <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>,
+            ArrowLeft: () => <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>,
             Mail: () => <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path><polyline points="22,6 12,13 2,6"></polyline></svg>,
             Phone: () => <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path></svg>,
         };
@@ -225,41 +233,23 @@
             }
         };
 
-        // --- Data Generation (Auto 1-31) ---
-        // Splits the 31 images into 4 "Chapters" for the scroll
+        // --- Data Generation ---
         const getCategoriesData = (t) => {
             const allImages = Array.from({ length: 31 }, (_, i) => i + 1);
             
-            // Helper to create image objects
             const makeImg = (id) => ({ 
                 id, 
                 src: `bat7_pics/pic (${id}).jpg`, 
-                fallback: `bat7_pics/pic (${id}).jpeg`, // Fallback for jpeg
-                title: `${t.role} ${id}`, // Generic title since we don't have specifics
+                fallback: `bat7_pics/pic (${id}).jpeg`, 
+                title: `${t.role} ${id}`, 
                 year: '2024'
             });
 
             return [
-                {
-                    id: 'cat1',
-                    title: t.categories.cat1,
-                    items: allImages.slice(0, 8).map(makeImg)
-                },
-                {
-                    id: 'cat2',
-                    title: t.categories.cat2,
-                    items: allImages.slice(8, 16).map(makeImg)
-                },
-                {
-                    id: 'cat3',
-                    title: t.categories.cat3,
-                    items: allImages.slice(16, 24).map(makeImg)
-                },
-                {
-                    id: 'cat4',
-                    title: t.categories.cat4,
-                    items: allImages.slice(24, 31).map(makeImg)
-                }
+                { id: 'cat1', title: t.categories.cat1, items: allImages.slice(0, 8).map(makeImg) },
+                { id: 'cat2', title: t.categories.cat2, items: allImages.slice(8, 16).map(makeImg) },
+                { id: 'cat3', title: t.categories.cat3, items: allImages.slice(16, 24).map(makeImg) },
+                { id: 'cat4', title: t.categories.cat4, items: allImages.slice(24, 31).map(makeImg) }
             ];
         };
 
@@ -276,25 +266,23 @@
             }, []);
 
             return (
-                <div className={`fixed inset-0 z-[100] bg-[#f4f1ea] flex items-center justify-center transition-opacity duration-1000 ${visible ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}>
-                    <div className="relative w-64 h-64 border-4 border-[#8c7b6c] p-4 flex flex-col justify-between">
-                        {/* Weaving Animation */}
-                        <div className="absolute top-0 left-10 w-1 h-full bg-[#8c7b6c]/20 animate-[weaveVert_1s_ease-out]"></div>
-                        <div className="absolute top-0 left-20 w-1 h-full bg-[#8c7b6c]/20 animate-[weaveVert_1.2s_ease-out]"></div>
-                        <div className="absolute top-0 left-30 w-1 h-full bg-[#8c7b6c]/20 animate-[weaveVert_1.4s_ease-out]"></div>
+                <div className={`fixed inset-0 z-[100] bg-[#fbf9f4] flex items-center justify-center transition-opacity duration-1000 ${visible ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}>
+                    <div className="relative w-64 h-64 border-4 border-[#d66853] p-4 flex flex-col justify-between shadow-2xl bg-white/50">
+                        <div className="absolute top-0 left-10 w-1 h-full bg-[#e09f3e]/40 animate-[weaveVert_1s_ease-out]"></div>
+                        <div className="absolute top-0 left-20 w-1 h-full bg-[#2a9d8f]/40 animate-[weaveVert_1.2s_ease-out]"></div>
+                        <div className="absolute top-0 left-30 w-1 h-full bg-[#d66853]/40 animate-[weaveVert_1.4s_ease-out]"></div>
                         
-                        <div className="absolute top-10 left-0 w-full h-1 bg-[#8c7b6c]/20 animate-[weaveHoriz_1.1s_ease-out]"></div>
-                        <div className="absolute top-20 left-0 w-full h-1 bg-[#8c7b6c]/20 animate-[weaveHoriz_1.3s_ease-out]"></div>
+                        <div className="absolute top-10 left-0 w-full h-1 bg-[#e09f3e]/40 animate-[weaveHoriz_1.1s_ease-out]"></div>
+                        <div className="absolute top-20 left-0 w-full h-1 bg-[#2a9d8f]/40 animate-[weaveHoriz_1.3s_ease-out]"></div>
                         
                         <div className="m-auto text-center z-10">
-                            <h1 className="serif text-2xl text-[#3d342b] tracking-widest uppercase">Weaving</h1>
+                            <h1 className="serif text-2xl text-[#2d2420] tracking-widest uppercase">Weaving</h1>
                         </div>
                     </div>
                 </div>
             );
         };
 
-        // Smart Image component that handles JPG/JPEG fallback and hiding if missing
         const SmartImage = ({ src, fallback, alt, className }) => {
             const [currentSrc, setCurrentSrc] = useState(src);
             const [error, setError] = useState(false);
@@ -305,7 +293,7 @@
                     setCurrentSrc(fallback);
                 } else {
                     setError(true);
-                    setDisplay('none'); // Hide completely if both fail
+                    setDisplay('none');
                 }
             };
 
@@ -328,37 +316,38 @@
             <section 
                 id={id}
                 ref={sectionRef}
-                className="snap-center min-w-[100vw] h-[100vh] h-[100dvh] relative flex items-center justify-center overflow-hidden flex-shrink-0 bg-[#f4f1ea] z-20 layout-transition border-l border-r border-[#8c7b6c]/10"
+                className="snap-center min-w-[100vw] h-[100vh] h-[100dvh] relative flex items-center justify-center overflow-hidden flex-shrink-0 bg-[#fbf9f4] z-20 layout-transition border-l border-r border-[#d66853]/20"
             >
-                {/* Background Decoration */}
-                <div className="absolute inset-0 opacity-10 select-none pointer-events-none">
-                     <div className="absolute right-[-10%] bottom-[-10%] w-[60vh] h-[60vh] rounded-full bg-[#c2a67a] filter blur-[100px]"></div>
+                {/* Colorful Background Decoration */}
+                <div className="absolute inset-0 opacity-20 select-none pointer-events-none">
+                     <div className="absolute right-[-10%] bottom-[-10%] w-[60vh] h-[60vh] rounded-full bg-[#e09f3e] filter blur-[100px]"></div>
+                     <div className="absolute left-[-10%] top-[-10%] w-[50vh] h-[50vh] rounded-full bg-[#d66853] filter blur-[120px]"></div>
                 </div>
 
                 <div className="relative z-10 text-center px-4 select-none flex flex-col items-center justify-center w-full h-full max-w-[95vw]">
-                    {/* Artist Image Frame */}
+                    {/* Artist Image Frame - Removed Grayscale */}
                     <div className="relative p-3 bg-white shadow-xl mb-8 transform rotate-1 stitched hover:rotate-0 transition-transform duration-700">
                         <div className="w-[70vw] md:w-[25vw] aspect-[3/4] overflow-hidden bg-[#e8e4dc]">
                             <SmartImage 
                                 src="bat7_pics/artist.jpeg" 
                                 fallback="bat7_pics/artist.jpg"
                                 alt={t.name}
-                                className="w-full h-full object-cover grayscale contrast-110 hover:grayscale-0 transition-all duration-700"
+                                className="w-full h-full object-cover transition-all duration-700 hover:scale-105" // Full Color!
                             />
                         </div>
                         {/* Tape effect */}
-                        <div className="absolute -top-4 left-1/2 -translate-x-1/2 w-24 h-8 bg-[#f4f1ea] opacity-90 shadow-sm rotate-[-2deg]"></div>
+                        <div className="absolute -top-4 left-1/2 -translate-x-1/2 w-24 h-8 bg-[#f4f1ea] opacity-90 shadow-sm rotate-[-2deg] border border-[#ccc]"></div>
                     </div>
                     
-                    <h1 className="text-4xl md:text-7xl serif text-[#3d342b] mb-4 tracking-tight drop-shadow-sm">{t.heroTitle}</h1>
-                    <p className="text-lg md:text-xl font-light italic text-[#8c7b6c] mb-12">
+                    <h1 className="text-4xl md:text-7xl serif text-[#2d2420] mb-4 tracking-tight drop-shadow-sm">{t.heroTitle}</h1>
+                    <p className="text-lg md:text-xl font-light italic text-[#d66853] mb-12">
                         {t.heroSubtitle}
                     </p>
                     
-                    <div className="flex items-center gap-8 opacity-60 animate-pulse transition-opacity p-4 z-50 pointer-events-auto">
-                        <div onClick={onLeft} className="cursor-pointer hover:text-[#c2a67a] hover:scale-110 transition-transform p-2"><Icons.ArrowLeft /></div>
-                        <span onClick={onText} className="text-xs md:text-sm tracking-[0.3em] uppercase border-b border-[#8c7b6c]/30 pb-1 cursor-pointer hover:text-[#c2a67a] transition-colors">{t.scrollHint}</span>
-                        <div onClick={onRight} className="cursor-pointer hover:text-[#c2a67a] hover:scale-110 transition-transform p-2"><Icons.ArrowRight /></div>
+                    <div className="flex items-center gap-8 opacity-80 animate-pulse transition-opacity p-4 z-50 pointer-events-auto">
+                        <div onClick={onLeft} className="cursor-pointer text-[#d66853] hover:scale-110 transition-transform p-2"><Icons.ArrowLeft /></div>
+                        <span onClick={onText} className="text-xs md:text-sm tracking-[0.3em] uppercase border-b border-[#d66853] pb-1 cursor-pointer text-[#8c7b6c] hover:text-[#d66853] transition-colors">{t.scrollHint}</span>
+                        <div onClick={onRight} className="cursor-pointer text-[#d66853] hover:scale-110 transition-transform p-2"><Icons.ArrowRight /></div>
                     </div>
                 </div>
             </section>
@@ -367,33 +356,35 @@
         const AboutSection = ({ t, sectionRef }) => (
              <section 
                 ref={sectionRef}
-                className="snap-center min-w-[100vw] md:min-w-[80vw] h-[100vh] h-[100dvh] bg-[#e8e4dc] flex items-center justify-center relative flex-shrink-0 border-l border-r border-[#8c7b6c]/10 layout-transition"
+                className="snap-center min-w-[100vw] md:min-w-[80vw] h-[100vh] h-[100dvh] bg-[#f0ebe0] flex items-center justify-center relative flex-shrink-0 border-l border-r border-[#d66853]/10 layout-transition"
             >
-                <div className="w-full h-full overflow-y-auto custom-scrollbar flex flex-col items-center justify-center p-6 pt-24 md:pt-6">
+                {/* Weave Pattern Overlay */}
+                <div className="absolute inset-0 opacity-10" style={{backgroundImage: 'radial-gradient(#d66853 1px, transparent 1px)', backgroundSize: '20px 20px'}}></div>
+
+                <div className="w-full h-full overflow-y-auto custom-scrollbar flex flex-col items-center justify-center p-6 pt-24 md:pt-6 relative z-10">
                     <div className="max-w-6xl w-full grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-16 items-center my-auto">
                         <div className="order-2 md:order-1 space-y-6 text-center md:text-start w-full max-w-[90vw] md:max-w-full mx-auto px-0" dir="rtl">
-                            <h2 className="text-3xl md:text-6xl serif text-[#3d342b] mb-6 relative inline-block">
+                            <h2 className="text-3xl md:text-6xl serif text-[#2d2420] mb-6 relative inline-block">
                                 {t.aboutTitle}
-                                <div className="absolute -bottom-2 right-0 w-1/2 h-1 bg-[#c2a67a]"></div>
+                                <div className="absolute -bottom-2 right-0 w-full h-1 bg-gradient-to-r from-[#d66853] to-[#e09f3e]"></div>
                             </h2>
                             <div className="space-y-4 md:space-y-6 text-sm md:text-xl font-light text-[#5c504a] leading-relaxed">
                                 <p>{t.aboutText1}</p>
                                 <p>{t.aboutText2}</p>
                                 <p>{t.aboutText3}</p>
                             </div>
-                            <div className="pt-6 md:pt-8 border-t border-[#8c7b6c]/20 flex flex-col gap-2 text-sm opacity-60 font-mono text-[#8c7b6c]">
+                            <div className="pt-6 md:pt-8 border-t border-[#d66853]/20 flex flex-col gap-2 text-sm opacity-60 font-mono text-[#8c7b6c]">
                                 <span>{t.rights}</span>
                             </div>
                         </div>
                         
-                        {/* Decorative image replacing previous element */}
                         <div className="order-1 md:order-2 flex items-center justify-center w-full h-full">
                              <div className="relative w-[80vw] md:w-[35vw] aspect-[3/4] bg-white p-3 shadow-xl transform rotate-2 hover:rotate-0 transition-transform duration-700 stitched">
                                 <SmartImage 
                                     src="bat7_pics/pic (1).jpg" 
                                     fallback="bat7_pics/pic (1).jpeg"
                                     alt="About Art"
-                                    className="w-full h-full object-cover"
+                                    className="w-full h-full object-cover" // Full Color
                                 />
                              </div>
                         </div>
@@ -405,21 +396,24 @@
         const ContactSection = ({ t, sectionRef }) => (
             <section 
                ref={sectionRef}
-               className="snap-center min-w-[100vw] md:min-w-[60vw] h-[100vh] h-[100dvh] bg-[#3d342b] text-[#f4f1ea] flex items-center justify-center relative flex-shrink-0 border-l border-r border-white/5 layout-transition"
+               className="snap-center min-w-[100vw] md:min-w-[60vw] h-[100vh] h-[100dvh] bg-[#2d2420] text-[#f4f1ea] flex items-center justify-center relative flex-shrink-0 border-l border-r border-white/5 layout-transition"
            >
-               <div className="w-full h-full overflow-y-auto custom-scrollbar flex flex-col items-center justify-center p-6 pt-24 md:pt-6">
+               {/* Dark Weave Pattern */}
+               <div className="absolute inset-0 opacity-5" style={{backgroundImage: 'repeating-linear-gradient(45deg, #d66853 0, #d66853 1px, transparent 0, transparent 50%)', backgroundSize: '20px 20px'}}></div>
+
+               <div className="w-full h-full overflow-y-auto custom-scrollbar flex flex-col items-center justify-center p-6 pt-24 md:pt-6 relative z-10">
                    <div className="max-w-3xl w-full flex flex-col items-center text-center space-y-8 md:space-y-12 my-auto" dir="rtl">
                        <div>
-                           <span className="text-[#c2a67a] text-sm tracking-[0.3em] uppercase mb-4 block">{t.contactTitle}</span>
+                           <span className="text-[#e09f3e] text-sm tracking-[0.3em] uppercase mb-4 block">{t.contactTitle}</span>
                            <h2 className="text-4xl md:text-7xl serif text-[#f4f1ea] leading-tight">{t.contactTitle}</h2>
                        </div>
-                       <p className="text-sm md:text-xl font-light text-[#e8e4dc] max-w-lg leading-relaxed opacity-80">{t.contactText}</p>
+                       <p className="text-sm md:text-xl font-light text-[#e8e4dc] max-w-lg leading-relaxed opacity-90">{t.contactText}</p>
                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-8 w-full max-w-lg mt-4 md:mt-8">
                            <a 
                                href="mailto:bat7.livne@gmail.com"
-                               className="group flex flex-col items-center gap-4 p-6 md:p-8 border border-[#f4f1ea]/10 hover:border-[#c2a67a] bg-[#f4f1ea]/5 hover:bg-[#f4f1ea]/10 transition-all duration-500 rounded-sm cursor-pointer text-[#f4f1ea] no-underline w-full"
+                               className="group flex flex-col items-center gap-4 p-6 md:p-8 border border-[#d66853] hover:bg-[#d66853]/20 transition-all duration-500 rounded-sm cursor-pointer text-[#f4f1ea] no-underline w-full bg-[#2d2420]"
                            >
-                               <div className="p-3 rounded-full bg-[#c2a67a]/20 text-[#c2a67a] group-hover:scale-110 transition-transform duration-300"><Icons.Mail /></div>
+                               <div className="p-3 rounded-full bg-[#d66853] text-white group-hover:scale-110 transition-transform duration-300"><Icons.Mail /></div>
                                <div className="text-center w-full overflow-hidden">
                                    <span className="text-xs uppercase tracking-widest opacity-50 mb-1 block">{t.emailLabel}</span>
                                    <span className="text-sm md:text-lg serif whitespace-nowrap block">bat7.livne@gmail.com</span>
@@ -429,9 +423,9 @@
                                href={`https://wa.me/972501234567`}
                                target="_blank"
                                rel="noopener noreferrer"
-                               className="group flex flex-col items-center gap-4 p-6 md:p-8 border border-[#f4f1ea]/10 hover:border-[#c2a67a] bg-[#f4f1ea]/5 hover:bg-[#f4f1ea]/10 transition-all duration-500 rounded-sm cursor-pointer text-[#f4f1ea] no-underline w-full"
+                               className="group flex flex-col items-center gap-4 p-6 md:p-8 border border-[#2a9d8f] hover:bg-[#2a9d8f]/20 transition-all duration-500 rounded-sm cursor-pointer text-[#f4f1ea] no-underline w-full bg-[#2d2420]"
                            >
-                               <div className="p-3 rounded-full bg-[#c2a67a]/20 text-[#c2a67a] group-hover:scale-110 transition-transform duration-300"><Icons.Phone /></div>
+                               <div className="p-3 rounded-full bg-[#2a9d8f] text-white group-hover:scale-110 transition-transform duration-300"><Icons.Phone /></div>
                                <div className="text-center w-full overflow-hidden">
                                    <span className="text-xs uppercase tracking-widest opacity-50 mb-1 block">{t.phoneLabel}</span>
                                    <span className="text-sm md:text-lg serif whitespace-nowrap block" dir="ltr">050-1234567</span>
@@ -444,11 +438,11 @@
        );
 
         const CategoryCluster = ({ category, onImageClick }) => (
-            <div className="flex flex-row items-center gap-6 md:gap-16 px-4 md:px-16 border-l border-[#8c7b6c]/10 snap-center h-full layout-transition">
-                <div className="h-[50vh] md:h-[60vh] flex flex-col justify-center items-center opacity-60 sticky left-0 z-10">
-                    <div className="w-px h-12 md:h-24 bg-gradient-to-b from-transparent via-[#c2a67a] to-transparent mb-4 md:mb-6"></div>
-                    <h2 className="vertical-text text-3xl md:text-5xl serif tracking-widest text-[#3d342b] font-bold whitespace-nowrap opacity-50">{category.title}</h2>
-                    <div className="w-px h-12 md:h-24 bg-gradient-to-b from-transparent via-[#c2a67a] to-transparent mt-4 md:mt-6"></div>
+            <div className="flex flex-row items-center gap-6 md:gap-16 px-4 md:px-16 border-l border-[#d66853]/10 snap-center h-full layout-transition relative">
+                <div className="h-[50vh] md:h-[60vh] flex flex-col justify-center items-center opacity-80 sticky left-0 z-10">
+                    <div className="w-1 h-12 md:h-24 bg-gradient-to-b from-transparent via-[#d66853] to-transparent mb-4 md:mb-6"></div>
+                    <h2 className="vertical-text text-3xl md:text-5xl serif tracking-widest text-[#2d2420] font-bold whitespace-nowrap opacity-60 drop-shadow-sm">{category.title}</h2>
+                    <div className="w-1 h-12 md:h-24 bg-gradient-to-b from-transparent via-[#2a9d8f] to-transparent mt-4 md:mt-6"></div>
                 </div>
                 <div className="flex gap-6 md:gap-12 items-center">
                     {category.items.map((item, idx) => (
@@ -462,11 +456,11 @@
                                     src={item.src} 
                                     fallback={item.fallback} 
                                     alt={item.title} 
-                                    className="w-full h-full object-cover transition-all duration-700" 
+                                    className="w-full h-full object-cover transition-all duration-700" // Full Color!
                                 />
                             </div>
-                            <div className="absolute inset-0 bg-gradient-to-t from-[#3d342b]/80 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex flex-col justify-end p-6 text-right" dir="rtl">
-                                <span className="text-[#c2a67a] text-sm font-mono mb-1">{item.year}</span>
+                            <div className="absolute inset-0 bg-gradient-to-t from-[#2d2420]/90 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex flex-col justify-end p-6 text-right" dir="rtl">
+                                <span className="text-[#e09f3e] text-sm font-mono mb-1">{item.year}</span>
                                 <h3 className="text-2xl serif text-[#f4f1ea]">{item.title}</h3>
                             </div>
                         </div>
@@ -476,7 +470,7 @@
         );
 
         const App = () => {
-            const [lang, setLang] = useState('he'); // Force Hebrew
+            const [lang, setLang] = useState('he');
             const [loaded, setLoaded] = useState(false);
             const [introDone, setIntroDone] = useState(false);
             const [selectedImg, setSelectedImg] = useState(null);
@@ -489,7 +483,7 @@
             const aboutMainRef = useRef(null); 
             const contactRef = useRef(null);
 
-            // Drag Physics State (Exact from Source)
+            // Drag Physics
             const [isDown, setIsDown] = useState(false);
             const [startX, setStartX] = useState(0);
             const [scrollLeft, setScrollLeft] = useState(0);
@@ -523,7 +517,7 @@
                 
                 if(introDone) {
                     forceCenter();
-                    setTimeout(forceCenter, 100); // Double check layout
+                    setTimeout(forceCenter, 100); 
                 }
             }, [introDone]);
 
@@ -546,7 +540,7 @@
                 if (ref.current) ref.current.scrollIntoView({ behavior: 'smooth' });
             };
 
-            // Infinite Loop (Exact from Source)
+            // Infinite Loop
             useEffect(() => {
                 const container = scrollContainerRef.current;
                 if (!container) return;
@@ -571,7 +565,7 @@
                 return () => container.removeEventListener('scroll', checkLoop);
             }, [introDone]);
 
-            // Wheel (Exact from Source)
+            // Wheel
             useEffect(() => {
                 const container = scrollContainerRef.current;
                 if (!container) return;
@@ -593,7 +587,7 @@
                 return () => container.removeEventListener('wheel', handleWheel);
             }, [introDone]);
 
-            // Physics (Exact from Source)
+            // Physics
             const cancelMomentum = () => {
                 if (momentumID.current) {
                     cancelAnimationFrame(momentumID.current);
@@ -679,18 +673,18 @@
                     {/* Nav Bar / Brand Header */}
                     <nav className="fixed top-0 left-0 w-full p-6 md:p-8 flex justify-between items-start z-50 text-[#3d342b] pointer-events-none">
                         <div className={`flex flex-col pointer-events-auto ${isHeroVisible ? 'brand-exit' : 'brand-enter'}`}>
-                            <span className="text-xl md:text-2xl font-bold tracking-tighter serif uppercase">{t.name}</span>
-                            <span className="text-[10px] md:text-xs opacity-70 tracking-[0.2em] uppercase mt-1">{t.role}</span>
+                            <span className="text-xl md:text-2xl font-bold tracking-tighter serif uppercase text-[#d66853] drop-shadow-sm">{t.name}</span>
+                            <span className="text-[10px] md:text-xs opacity-80 tracking-[0.2em] uppercase mt-1 text-[#2a9d8f] font-bold">{t.role}</span>
                         </div>
                         <div className="flex flex-col items-end gap-4 pointer-events-auto">
                             <div className="flex gap-2 text-xs font-bold uppercase tracking-wider">
-                                <button onClick={() => setLang('he')} className={`px-2 py-1 rounded transition-colors ${lang === 'he' ? 'bg-[#3d342b] text-[#f4f1ea]' : 'text-[#3d342b]/50 hover:text-[#3d342b]'}`}>HE</button>
-                                <button onClick={() => setLang('en')} className={`px-2 py-1 rounded transition-colors ${lang === 'en' ? 'bg-[#3d342b] text-[#f4f1ea]' : 'text-[#3d342b]/50 hover:text-[#3d342b]'}`}>EN</button>
+                                <button onClick={() => setLang('he')} className={`px-2 py-1 rounded transition-colors ${lang === 'he' ? 'bg-[#d66853] text-white' : 'text-[#3d342b]/50 hover:text-[#d66853]'}`}>HE</button>
+                                <button onClick={() => setLang('en')} className={`px-2 py-1 rounded transition-colors ${lang === 'en' ? 'bg-[#d66853] text-white' : 'text-[#3d342b]/50 hover:text-[#d66853]'}`}>EN</button>
                             </div>
                             <div className="flex gap-6 text-sm font-light text-[#3d342b]">
-                                <button onClick={() => scrollToSection(heroRef)} className="hover:text-[#c2a67a] transition-colors uppercase tracking-widest text-xs font-bold">{t.navHome}</button>
-                                <button onClick={() => scrollToSection(aboutMainRef)} className="hover:text-[#c2a67a] transition-colors uppercase tracking-widest text-xs font-bold">{t.navAbout}</button>
-                                <button onClick={() => scrollToSection(contactRef)} className="hover:text-[#c2a67a] transition-colors uppercase tracking-widest text-xs font-bold">{t.navContact}</button>
+                                <button onClick={() => scrollToSection(heroRef)} className="hover:text-[#d66853] transition-colors uppercase tracking-widest text-xs font-bold">{t.navHome}</button>
+                                <button onClick={() => scrollToSection(aboutMainRef)} className="hover:text-[#d66853] transition-colors uppercase tracking-widest text-xs font-bold">{t.navAbout}</button>
+                                <button onClick={() => scrollToSection(contactRef)} className="hover:text-[#d66853] transition-colors uppercase tracking-widest text-xs font-bold">{t.navContact}</button>
                             </div>
                         </div>
                     </nav>
@@ -736,18 +730,18 @@
 
                     {selectedImg && (
                         <div 
-                            className="fixed inset-0 z-[100] bg-[#3d342b]/95 backdrop-blur-sm flex items-center justify-center p-0 animate-[fadeIn_0.3s_ease-out] cursor-auto"
+                            className="fixed inset-0 z-[100] bg-[#2d2420]/95 backdrop-blur-sm flex items-center justify-center p-0 animate-[fadeIn_0.3s_ease-out] cursor-auto"
                             onClick={() => setSelectedImg(null)} 
                         >
                             <button className="absolute top-6 right-6 text-white/50 hover:text-white z-50 p-4"><Icons.X /></button>
                             <div className="w-full h-full md:max-w-7xl md:h-[85vh] grid grid-cols-1 md:grid-cols-3 md:gap-12 items-center p-4 md:p-8 pointer-events-none">
-                                <div className="md:col-span-2 h-[55vh] md:h-full flex items-center justify-center bg-[#f4f1ea] p-2 stitched pointer-events-auto" onClick={(e) => e.stopPropagation()}>
+                                <div className="md:col-span-2 h-[55vh] md:h-full flex items-center justify-center bg-[#fbf9f4] p-3 stitched pointer-events-auto" onClick={(e) => e.stopPropagation()}>
                                     <img src={selectedImg.src} className="max-h-full max-w-full object-contain" />
                                 </div>
                                 <div className="md:col-span-1 flex flex-col justify-center mt-8 md:mt-0 text-right pointer-events-auto" dir="rtl" onClick={(e) => e.stopPropagation()}>
-                                    <div className="w-12 h-px bg-[#c2a67a] mb-6 ml-auto"></div>
+                                    <div className="w-12 h-1 bg-[#d66853] mb-6 ml-auto"></div>
                                     <h3 className="text-4xl md:text-5xl serif text-[#f4f1ea] mb-2">{selectedImg.title}</h3>
-                                    <p className="text-[#c2a67a] font-mono text-base tracking-widest">{selectedImg.year}</p>
+                                    <p className="text-[#e09f3e] font-mono text-base tracking-widest">{selectedImg.year}</p>
                                 </div>
                             </div>
                         </div>
