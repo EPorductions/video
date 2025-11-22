@@ -365,47 +365,35 @@
                 if(introDone) { forceCenter(); setTimeout(forceCenter, 50); }
             }, [introDone]);
 
-            // Smart Navigation Function - Updated for Smart Home
+            // Smart Navigation Function (Shortest Path for ALL items)
             const navigateTo = (target) => {
-                if (!scrollContainerRef.current || !heroRef.current) return;
+                if (!scrollContainerRef.current) return;
                 
                 const currentScroll = scrollContainerRef.current.scrollLeft;
-                const mainHeroX = heroRef.current.offsetLeft;
                 
-                if (target === 'home') {
-                    // Find the CLOSEST Home (Main, Clone Left, or Clone Right)
-                    // We calculate absolute distance to each ref's position
-                    const targets = [
-                        { ref: heroRef, pos: heroRef.current.offsetLeft },
-                        { ref: heroCloneLeftRef, pos: heroCloneLeftRef.current ? heroCloneLeftRef.current.offsetLeft : -Infinity },
-                        { ref: heroCloneRightRef, pos: heroCloneRightRef.current ? heroCloneRightRef.current.offsetLeft : Infinity }
-                    ];
-                    
-                    // Sort by distance, closest first
-                    targets.sort((a, b) => Math.abs(currentScroll - a.pos) - Math.abs(currentScroll - b.pos));
-                    
-                    // Scroll to the closest one
-                    if (targets[0].ref.current) {
-                        targets[0].ref.current.scrollIntoView({ behavior: 'smooth' });
-                    }
-                    return;
-                }
+                // Define potential targets for each navigation item
+                const targetMap = {
+                    home: [heroRef, heroCloneLeftRef, heroCloneRightRef],
+                    about: [aboutMainRef, aboutLeftRef],
+                    contact: [contactRef, contactLeftRef]
+                };
 
-                // Logic for 'about' and 'contact' remains direction-aware
-                const isLeftSide = currentScroll < (mainHeroX - 10);
-                let targetRef = null;
-                
-                if (isLeftSide) {
-                    if (target === 'about') targetRef = aboutLeftRef;
-                    if (target === 'contact') targetRef = contactLeftRef;
-                } else {
-                    if (target === 'about') targetRef = aboutMainRef;
-                    if (target === 'contact') targetRef = contactRef;
-                }
-                
-                if (targetRef && targetRef.current) {
-                    targetRef.current.scrollIntoView({ behavior: 'smooth' });
-                }
+                const potentialRefs = targetMap[target];
+                if (!potentialRefs) return;
+
+                // Filter valid refs and find closest
+                const validRefs = potentialRefs.filter(r => r.current);
+                if (validRefs.length === 0) return;
+
+                // Sort by distance
+                validRefs.sort((a, b) => {
+                    const posA = a.current.offsetLeft;
+                    const posB = b.current.offsetLeft;
+                    return Math.abs(currentScroll - posA) - Math.abs(currentScroll - posB);
+                });
+
+                // Scroll to winner
+                validRefs[0].current.scrollIntoView({ behavior: 'smooth' });
             };
 
             // Combined Scroll Logic
