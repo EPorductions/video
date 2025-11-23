@@ -35,7 +35,7 @@
             --nav-text: #333;
             --nav-active: #000;
             --card-shadow: 0 20px 40px rgba(0,0,0,0.1);
-            --section-spacing: 180px; /* Increased for breathing room */
+            --section-spacing: 180px;
         }
 
         /* Dark Mode Overrides */
@@ -75,7 +75,7 @@
         
         .section-title {
             font-family: 'Teko', sans-serif;
-            font-size: clamp(4rem, 7vw, 7rem); /* Larger titles */
+            font-size: clamp(4rem, 7vw, 7rem);
             text-transform: uppercase;
             line-height: 0.85;
             margin-bottom: 4rem;
@@ -201,7 +201,7 @@
             box-shadow: 0 0 40px var(--primary);
         }
 
-        /* Services Design - Improved Spacing */
+        /* Services Design */
         .services-container {
             display: grid; grid-template-columns: 1fr; gap: 8rem;
         }
@@ -253,7 +253,7 @@
         }
         .preview-media.active { opacity: 1; transform: scale(1); }
 
-        /* Stats Strip - Enhanced */
+        /* Stats Strip */
         #stats-strip {
             background: rgba(255,255,255,0.01);
             border-top: 1px solid var(--glass-border);
@@ -261,7 +261,22 @@
             backdrop-filter: blur(15px);
             padding: 100px 0;
             margin-top: 60px;
+            min-height: 300px; /* Ensure height stability during transitions */
+            display: flex;
+            align-items: center;
         }
+
+        /* Stats Animations */
+        .stat-content-wrapper {
+            transition: opacity 0.6s ease, transform 0.6s cubic-bezier(0.22, 1, 0.36, 1);
+            opacity: 1;
+            transform: translateY(0);
+        }
+        .stat-content-wrapper.fading {
+            opacity: 0;
+            transform: translateY(20px);
+        }
+
         .stat-number {
             font-family: 'Orbitron', sans-serif;
             font-size: 5rem; font-weight: 900;
@@ -396,6 +411,16 @@
         }
         .process-card:hover .click-hint { opacity: 1; transform: translateY(0); }
 
+        /* Partner Badge in Modal */
+        .partner-badge {
+            display: inline-flex; align-items: center; gap: 0.8rem;
+            background: rgba(255,255,255,0.05); padding: 0.5rem 1rem;
+            border-radius: 50px; border: 1px solid var(--glass-border);
+            margin-bottom: 1.5rem; font-size: 0.9rem;
+            backdrop-filter: blur(10px);
+        }
+        .partner-badge img { height: 24px; width: auto; }
+
         /* Modal System */
         .modal-overlay {
             position: fixed; inset: 0; z-index: 1000;
@@ -471,16 +496,6 @@
         .text-gradient-primary { color: var(--primary); }
         .text-muted-custom { color: var(--text-muted); }
         .logo { color: var(--text-color); }
-
-        /* Draggable Scroll Class */
-        .draggable-scroll {
-            cursor: grab;
-            overflow-x: auto;
-            -webkit-overflow-scrolling: touch;
-            scrollbar-width: none; /* Firefox */
-        }
-        .draggable-scroll::-webkit-scrollbar { display: none; }
-        .draggable-scroll.active { cursor: grabbing; }
 
     </style>
 </head>
@@ -698,9 +713,46 @@
             </div>
 
             <!-- Draggable Ticker -->
-            <div class="ticker-wrapper" id="draggable-ticker">
+            <div class="ticker-wrapper mb-24" id="draggable-ticker">
                 <div class="ticker-content" id="ticker-content">
                     <!-- Content injected via JS -->
+                </div>
+            </div>
+
+            <!-- Featured Projects Grid (Cine Match) - ADDED FROM NEW CODE -->
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10 px-6">
+                <!-- MindFly Project -->
+                <div class="process-card group" onclick="openModal('mindfly')">
+                    <div class="absolute top-4 left-4 z-10 partner-badge">
+                        <img src="https://media.licdn.com/dms/image/v2/C4D0BAQG99s-i4dtuUw/company-logo_200_200/company-logo_200_200/0/1643726613899/mindfly_logo?e=2147483647&v=beta&t=J-2ZzXq-2ZzXq-2ZzXq-2ZzXq-2ZzXq-2ZzXq-2ZzXq" alt="MindFly">
+                        <span>MindFly US Tour</span>
+                    </div>
+                    <img src="assets/20250221_095912.jpg" class="w-full h-64 object-cover rounded-xl mb-6 transition-transform duration-700 group-hover:scale-105" alt="MindFly">
+                    <h3 class="text-2xl font-bold mb-2 text-[var(--text-color)]">MindFly Sports</h3>
+                    <p class="text-muted-custom">מסע הפקה חוצה יבשות: 2 לגים, 13 ימים, 6 מדינות ו-3 משחקי פוטבול.</p>
+                    <span class="click-hint">לפרטים מלאים +</span>
+                </div>
+
+                <!-- NBA All-Stars -->
+                <div class="process-card group" onclick="openModal('nba')">
+                    <div class="absolute top-4 left-4 z-10 partner-badge bg-blue-900/50 border-blue-500/30">
+                        <span>NBA All-Stars</span>
+                    </div>
+                    <img src="assets/20250215_052712.jpg" class="w-full h-64 object-cover rounded-xl mb-6 transition-transform duration-700 group-hover:scale-105" alt="NBA">
+                    <h3 class="text-2xl font-bold mb-2 text-[var(--text-color)]">RF Engineering</h3>
+                    <p class="text-muted-custom">אחריות על שידור מצלמות חזה (Chest Cam) לשחקנים במשחקי כדורסל והוקי.</p>
+                    <span class="click-hint">לפרטים מלאים +</span>
+                </div>
+
+                <!-- Solties Live -->
+                <div class="process-card group" onclick="openModal('solties')">
+                    <div class="absolute top-4 left-4 z-10 partner-badge bg-yellow-900/50 border-yellow-500/30">
+                        <span>Solties Live</span>
+                    </div>
+                    <img src="https://img.youtube.com/vi/GqMse9F2ipY/maxresdefault.jpg" class="w-full h-64 object-cover rounded-xl mb-6 transition-transform duration-700 group-hover:scale-105" alt="Solties">
+                    <h3 class="text-2xl font-bold mb-2 text-[var(--text-color)]">Solties Pool Jump</h3>
+                    <p class="text-muted-custom">שידור חי רציף של 3 שעות באירוע אקסטרים, כולל עריכה בזמן אמת.</p>
+                    <span class="click-hint">לצפייה בשידור +</span>
                 </div>
             </div>
             
@@ -709,25 +761,10 @@
             </div>
         </section>
 
-        <!-- Stats Strip (IMPACT METRICS) -->
+        <!-- Stats Strip (ROTATING) -->
         <div id="stats-strip" class="w-full mt-0 border-t-0 relative z-10">
-            <div class="max-w-[1800px] mx-auto px-10 grid grid-cols-1 md:grid-cols-4 gap-20 text-center divide-y md:divide-y-0 md:divide-x md:divide-x-reverse divide-[var(--glass-border)]">
-                <div class="hover-trigger count-container group">
-                    <div class="stat-number group-hover:text-[var(--primary)] transition-colors" data-target="7">0</div><span class="text-6xl font-black text-muted-custom align-super">+</span>
-                    <p class="text-muted-custom tracking-[0.3em] uppercase mt-4 font-bold text-2xl">שנות פעילות</p>
-                </div>
-                <div class="hover-trigger count-container group">
-                    <div class="stat-number group-hover:text-[var(--primary)] transition-colors" data-target="1200">0</div><span class="text-6xl font-black text-muted-custom align-super">+</span>
-                    <p class="text-muted-custom tracking-[0.3em] uppercase mt-4 font-bold text-2xl">הפקות מוצלחות</p>
-                </div>
-                <div class="hover-trigger count-container group">
-                    <div class="stat-number group-hover:text-[var(--primary)] transition-colors" data-target="25">0</div><span class="text-6xl font-black text-muted-custom align-super">+</span>
-                    <p class="text-muted-custom tracking-[0.3em] uppercase mt-4 font-bold text-2xl">מדינות בעולם</p>
-                </div>
-                <div class="hover-trigger count-container group">
-                    <div class="stat-number group-hover:text-[var(--primary)] transition-colors" data-target="24">0</div><span class="text-6xl font-black text-muted-custom align-super">/7</span>
-                    <p class="text-muted-custom tracking-[0.3em] uppercase mt-4 font-bold text-2xl">זמינות ויצירה</p>
-                </div>
+            <div id="stats-container" class="stat-content-wrapper max-w-[1800px] mx-auto px-10 grid grid-cols-1 md:grid-cols-4 gap-20 text-center divide-y md:divide-y-0 md:divide-x md:divide-x-reverse divide-[var(--glass-border)]">
+                <!-- Content injected via JS -->
             </div>
         </div>
 
@@ -743,10 +780,10 @@
 
         <!-- Contact -->
         <section id="contact" class="py-40">
-            <div class="glass-card max-w-5xl mx-auto text-center">
+            <div class="glass-card max-w-5xl mx-auto text-center border-t-4 border-t-[var(--primary)]">
                 <h2 class="text-7xl font-bold mb-10 glitch-text glitch-active" data-text="בואו ניצור משהו מדהים" data-key="contact_title">בואו ניצור משהו מדהים</h2>
                 <p class="text-3xl text-muted-custom mb-20" data-key="contact_desc">
-                    יש לכם חזון? לנו יש את הכלים להגשים אותו.
+                    יש לכם חזון? לנו יש את הכלים, הצוות והטכנולוגיה להגשים אותו.
                 </p>
                 
                 <!-- Clean Contact Icons -->
@@ -793,21 +830,21 @@
     <script src="https://www.youtube.com/iframe_api"></script>
 
     <script>
-        // --- Partners / Work Circles Data (Updated with Real JSON Logos) ---
+        // --- Partners / Work Circles Data (Fused with Analysis & Brand Assets) ---
         const partnersData = [
-            // Tech & Startups
+            // Tech & Startups (2024-2025 Era)
             { 
                 id: 'mindfly', 
                 name: 'MindFly', 
-                role: 'Sport-Tech Bodycam', 
-                logo: 'https://logo.clearbit.com/mindfly.live',
-                desc: 'שותפות אסטרטגית פורצת דרך בפיתוח ויישום טכנולוגיית Bodycam לשידורי ספורט. שיתוף הפעולה כלל שני סבבים אינטנסיביים בארה"ב (13 יום כל אחד) ב-6 מדינות שונות, כולל עבודה ב-3 משחקי פוטבול. היינו אחראים על תחום ה-RF Engineering ב-NBA All-Stars, כולל שידור ישיר ממצלמות חזה של שחקנים בזמן אמת.',
+                role: 'ספורט-טק', 
+                logo: 'https://media.licdn.com/dms/image/v2/C4D0BAQG99s-i4dtuUw/company-logo_200_200/company-logo_200_200/0/1643726613899/mindfly_logo?e=2147483647&v=beta&t=J-2ZzXq-2ZzXq-2ZzXq-2ZzXq-2ZzXq-2ZzXq-2ZzXq',
+                desc: 'שיתוף פעולה אסטרטגי עם סטארטאפ הספורט-טק המהפכני. עבודה בנפח גבוה הכוללת עיבוד ושידור תכני BodyCam לליגות ספורט מובילות (יורוליג).',
                 stats: { hours: '100+', projects: '15', period: '2024-2025', peak: 'עונת המשחקים' }
             },
             { 
                 id: 'pentera', 
                 name: 'Pentera', 
-                role: 'Cyber Unicorn', 
+                role: 'סייבר יוניקורן', 
                 logo: 'https://logo.clearbit.com/pentera.io',
                 desc: 'הקמה ותפעול של אולפן שידור In-house מתקדם במשרדי החברה. אינטגרציה מלאה של מערכות וידאו, זום וניתוב לאירועי חברה גלובליים.',
                 stats: { hours: '50+', projects: '10', period: '2022-2025', peak: 'השקות גרסה' }
@@ -815,7 +852,7 @@
             { 
                 id: 'sweet', 
                 name: 'Sweet Security', 
-                role: 'Cloud Security', 
+                role: 'סייבר ענן', 
                 logo: 'https://logo.clearbit.com/sweet.security',
                 desc: 'יצירת תוכן שיווקי (Marketing Collateral) ועריכת וידאו שוטפת במודל ריטיינר עבור חברת הסייבר הצומחת.',
                 stats: { hours: '30+', projects: 'Retainer', period: '2024-2025', peak: 'Q4 Push' }
@@ -833,10 +870,26 @@
             { 
                 id: 'golive', 
                 name: 'Go Live Israel', 
-                role: 'Strategic Partner', 
+                role: 'חברת שידור', 
                 logo: 'https://logo.clearbit.com/go-live.co.il', 
-                desc: 'ה-עוגן האסטרטגי שלנו מ-2018 ועד היום. שיתוף פעולה יומיומי בהפקות ענק עבור משרדי ממשלה וארגוני אנטרפרייז. אנחנו משמשים כזרוע הביצועית בניתוב, ניהול שידור ופתרונות טכניים מורכבים.',
+                desc: 'שותפים אסטרטגיים משנת 2018. הספק הראשי להפקות שידור מורכבות, ניידות שידור ואירועים ממשלתיים.',
                 stats: { hours: '2500+', projects: '80+', period: '2018-2025', peak: 'קורונה (וירטואלי)' }
+            },
+            { 
+                id: 'oculus', 
+                name: 'Oculus Productions', 
+                role: 'הפקות הייטק', 
+                logo: 'https://placehold.co/200x100/1a1a1a/white?text=OCULUS', 
+                desc: 'הפקות יוקרה למותגי על כמו Google, Taboola ו-Gong. התמחות באירועי Tech בינלאומיים ומופעי ענק (קיסריה).',
+                stats: { hours: '400+', projects: '25', period: '2021-2025', peak: 'כנסים שנתיים' }
+            },
+            { 
+                id: 'by', 
+                name: 'B.Y. Productions', 
+                role: 'מגה-אירועים', 
+                logo: 'https://placehold.co/200x100/1a1a1a/white?text=B.Y.+GROUP', 
+                desc: 'עבודה באירועים לאומיים והפקות ענק (בנייני האומה, בריכת הסולטן). ניהול מערכות הקרנה וניתוב למסכי ענק.',
+                stats: { hours: '300+', projects: '20', period: '2021-2023', peak: 'יום העצמאות' }
             },
             { 
                 id: 'mizmor', 
@@ -846,36 +899,29 @@
                 desc: 'עבודה בסטנדרט ברודקאסט מחמיר. צילומים לתוכניות פריים-טיים ("משחקי השף") ושידורי ספורט.',
                 stats: { hours: '100+', projects: 'Various', period: '2018-2025', peak: 'Prime Time' }
             },
+
+            // Independent Producers & Broadcast
+            { 
+                id: 'johnny', 
+                name: 'יונתן אוחנה', 
+                role: 'צילום וניתוב', 
+                logo: 'https://placehold.co/200x100/1a1a1a/white?text=JOHNNY+OHANA', 
+                desc: 'קולגה ושותף לדרך. שיתוף פעולה הדוק בתחום הצילום והניתוב למערכות מולטי-קאמרה מורכבות.' 
+            },
             { 
                 id: 'itamar', 
                 name: 'איתמר כהן', 
-                role: 'Production Master', 
+                role: 'מפיק על', 
                 logo: 'https://placehold.co/200x100/333333/white?text=ITAMAR+COHEN', 
-                desc: 'קבלן ביצוע ראשי ושותף לדרך. יד ביד באירועים הגדולים ביותר: מביקור הנסיך בכותל, דרך פסטיבל הפסנתר ועד אירועי ענק של WIX ו-Adidas.',
+                desc: 'ה"בולדוזר" של ההפקות. עשרות פרויקטים משותפים: מעיריית לוד, דרך פסטיבל הפסנתר ועד קמפיינים לאדידס.',
                 stats: { hours: '800+', projects: '60+', period: '2018-2025', peak: 'אירועי קיץ' }
             },
-            {
-                id: 'teddy',
-                name: 'טדי הפקות',
-                role: 'הפקות תוכן',
-                logo: 'https://logo.clearbit.com/tedy.co.il',
-                desc: 'שיתוף פעולה בפיתוח תכנים והפקות מקור. חיבור בין עולמות התוכן של טדי לבין היכולות הטכניות שלנו.',
-                stats: { hours: '50+', projects: 'Series', period: '2020-2024', peak: 'צילומי אולפן' }
-            },
-            {
-                id: 'keshet',
-                name: 'Mako / Keshet',
-                role: 'Broadcast',
-                logo: 'https://logo.clearbit.com/mako.co.il',
-                desc: 'עבודה מול גוף השידור המוביל בישראל ואתר Mako בפרויקטים דיגיטליים.',
-                stats: { hours: '40+', projects: 'Digital', period: '2021-2024', peak: 'News Cycles' }
-            },
 
-            // Independent Producers & Culture
+            // Culture & Community
             { 
                 id: 'eastside', 
                 name: 'Eastside Studio', 
-                role: 'Docu & Medical', 
+                role: 'דוקו ורפואה', 
                 logo: 'https://logo.clearbit.com/eastsidestudio.co.il', 
                 desc: 'התמחות בתוכן רפואי ודוקומנטרי רגיש. תיעוד עבור מד"א, טבע וכנסים רפואיים בינלאומיים.',
                 stats: { hours: '200+', projects: '40', period: '2018-2023', peak: 'כנסים רפואיים' }
@@ -885,7 +931,7 @@
                 name: 'פליציה בלומנטל', 
                 role: 'מוזיקה ותרבות', 
                 logo: 'https://logo.clearbit.com/fbmc.co.il', 
-                desc: 'שימור נכסי תרבות. תיעוד קונצרטים וראיונות עומק במוזיאון תל אביב, במיוחד בתקופת הקורונה.',
+                desc: 'שימור נכסי תרבות. תיעוד קונצרטים וראיונות עומק במוזיאון תל אביב.',
                 stats: { hours: '150+', projects: '30', period: '2020-2023', peak: 'פסטיבלים' }
             },
             { 
@@ -946,6 +992,7 @@
                 title: "הפקות וידאו ושידורים חיים",
                 type: "service",
                 videoId: "px7UwM8QDDU",
+                partnerId: "golive", // Linked to Go Live
                 desc: "שירות הדגל שלנו. אנו מספקים מעטפת מלאה לשידורים חיים בכל סדר גודל. בין אם זה כנס חברה, אירוע ספורט או מופע תרבות, אנחנו שם עם הטכנולוגיה המתקדמת ביותר. המומחיות שלנו כוללת שידורים מרובי מצלמות (Multi-Camera), שילוב גרפיקה בזמן אמת, שידורים היברידיים המשלבים קהל באולם וקהל בבית, ופתרונות שידור IP מתקדמים לכל רשת חברתית או פלטפורמה ייעודית.",
                 gallery: [
                     "assets/20250214_192736.jpg",
@@ -970,6 +1017,7 @@
                 title: "כנסים וירטואליים והיברידיים",
                 type: "service",
                 videoId: "Z3oO_GmtFfg",
+                partnerId: "pentera", // Linked to Pentera
                 desc: "העולם השתנה, וגם הכנסים. אנו מתמחים ביצירת חוויות אימרסיביות המטשטשות את הגבול בין המציאות למסך. באמצעות אולפנים וירטואליים (Green Screen) וטכנולוגיות AR, אנחנו מביאים דוברים מכל העולם לבמה אחת משותפת. המערכות שלנו מאפשרות אינטראקציה מלאה עם הקהל, סקרים בזמן אמת וחדרי נטוורקינג וירטואליים.",
                 gallery: [
                     "assets/20250215_175100.jpg",
@@ -989,6 +1037,26 @@
                     "assets/20250222_122206.jpg",
                     "assets/20250216_122300.jpg"
                 ]
+            },
+
+            // Projects (Specific)
+            mindfly: partnersData.find(p => p.id === 'mindfly'), // Reusing partner data structure
+            
+            nba: {
+                title: "NBA All-Stars RF Engineering",
+                type: "cinematch",
+                stats: { score: "HIGH TECH", tech: "RF / Wireless", emotion: "Precision" },
+                text: "תפקיד RF Engineer באירוע האולסטארס. אחריות מלאה על תשדורת אלחוטית ממצלמות חזה (Chest Cam) שנלבשו על ידי השחקנים בזמן אמת במשחקי כדורסל והוקי. אתגר טכנולוגי בסביבה רווית תדרים.",
+                image: "assets/20250215_052712.jpg"
+            },
+            solties: {
+                title: "Solties - Live Extreme Event",
+                type: "cinematch",
+                stats: { score: "LIVE STREAM", tech: "Multi-Cam", emotion: "Fun" },
+                text: "הפקה ושידור חי של אירוע אקסטרים בבריכה שנמשך 3 שעות. ניהול שידור רציף, שילוב גרפיקה ועריכת Highlights בזמן אמת.",
+                videoId: "GqMse9F2ipY", // Live stream ID
+                extraVideoId: "Y8DxFX8sooI", // Edited ID
+                image: "https://img.youtube.com/vi/GqMse9F2ipY/maxresdefault.jpg"
             }
         };
 
@@ -998,7 +1066,7 @@
                 nav_home: "ראשי", nav_about: "אודות", nav_work: "CINE MATCH", nav_services: "שירותים", nav_ecosystem: "מעגלי עבודה", nav_contact: "צור קשר", nav_recommendations: "המלצות",
                 hero_title: "הנדסת חוויות ויזואליות", hero_subtitle: "איפה שטכנולוגיה פוגשת רגש בזמן אמת", hero_desc: "אנחנו לא רק מפיקים תוכן, אנחנו מהנדסים רגעים. שילוב עוצמתי בין שידורים חיים, קוד יצירתי ובינה מלאכותית שמשנה את חוקי המשחק והופכת כל פיקסל לסיפור.", hero_cta_start: "התחילו פרויקט", hero_cta_work: "למעגלי העבודה",
                 stat_productions: "הפקות מוצלחות", stat_countries: "מדינות בעולם", stat_support: "זמינות ויצירה",
-                about_title: "מי אנחנו", about_intro: "בנקודת המפגש שבין ביצוע טכני מושלם לחזון אומנותי פורץ דרך.", about_subtitle: "מקוד לאומנות: המסע של כל פרויקט", about_text: "העולם הדיגיטלי דורש מהירות של מכונה ונשמה של אומן. השיטה שלנו ייחודית: אנחנו מפרקים כל אתגר לגורמים טכניים ומרכיבים אותם מחדש ליצירה ויזואלית חיה.", about_text2: "זה לא רק \"לצלם ולערוך\". זה לבנות מערכות שמגיבות בזמן אמת, לייצר יש מאין באמצעות AI, ולדעת שברגע האמת - בשידור החי - הכל יעבוד כמו שעון שוויצרי.",
+                about_title: "מי אנחנו", about_intro: "בנקודת המפגש שבין ביצוע טכני מושלם לחזון אומנותי פורץ דרך.", about_subtitle: "מקוד לאומנות: המסע של כל פרויקט", about_text: "העולם הדיגיטלי דורש מהירות של מכונה ונשמה של אומן. השיטה שלנו ייחודית: אנחנו מפרקים כל אתגר לגורמים טכניים ומרכיבים אותם מחדש ליצירה ויזואלית חיה.", about_text2: "זה לא רק \"לצלם ולערוך\". זה לבנות מערכות שמגיבות בזמן אמת, לייצר יש מאין באמצעות AI, ולדעת שברגע האמת - בשידור החי - הכל יעבוד כמו שעון שוויצרי. הניסיון שלנו נפרש על פני למעלה מ-13 שנים, בהן פיתחנו התמחויות ייחודיות ופתרונות קצה לקצה עבור הלקוחות הגדולים במשק.",
                 process_1: "אסטרטגיה", process_1_desc: "תכנון אדריכלי של האירוע או התוכן, מהמסר ועד לפיקסל.",
                 process_2: "הפקה חיה", process_2_desc: "ביצוע טכני ללא פשרות, ניהול צוותים וניתוב בזמן אמת.",
                 process_ai: "AI & Tech", process_ai_desc: "העצמת הויזואל עם כלים מחוללי תמונה וקוד.",
@@ -1015,7 +1083,7 @@
                 nav_home: "Home", nav_about: "About", nav_work: "CINE MATCH", nav_services: "Services", nav_ecosystem: "Ecosystem", nav_contact: "Contact", nav_recommendations: "Testimonials",
                 hero_title: "Visual Experience Engineering", hero_subtitle: "Where Technology Meets Emotion in Real-Time", hero_desc: "We don't just produce content; we engineer moments. A powerful fusion of live broadcasting, creative coding, and AI that changes the rules of the game and turns every pixel into a story.", hero_cta_start: "Start a Project", hero_cta_work: "View Work",
                 stat_productions: "Successful Productions", stat_countries: "Countries Worldwide", stat_support: "Creation Availability",
-                about_title: "About Us", about_intro: "At the intersection of perfect technical execution and groundbreaking artistic vision.", about_subtitle: "From Code to Art: The Journey of Every Project", about_text: "The digital world demands the speed of a machine and the soul of an artist. Our method is unique: we deconstruct every challenge into technical factors and reassemble them into a living visual creation.", about_text2: "It's not just \"shoot and edit\". It's building systems that respond in real-time, creating from nothing using AI, and knowing that at the moment of truth - the live broadcast - everything will work like a Swiss watch.",
+                about_title: "About Us", about_intro: "At the intersection of perfect technical execution and groundbreaking artistic vision.", about_subtitle: "From Code to Art: The Journey of Every Project", about_text: "The digital world demands the speed of a machine and the soul of an artist. Our method is unique: we deconstruct every challenge into technical factors and reassemble them into a living visual creation.", about_text2: "It's not just \"shoot and edit\". It's building systems that respond in real-time, creating from nothing using AI, and knowing that at the moment of truth - the live broadcast - everything will work like a Swiss watch. Our experience spans over 13 years, developing unique specializations and end-to-end solutions for market leaders.",
                 process_1: "Strategy", process_1_desc: "Architectural planning of the event or content, from message to pixel.",
                 process_2: "Live Production", process_2_desc: "Uncompromising technical execution, team management, and real-time switching.",
                 process_ai: "AI & Tech", process_ai_desc: "Empowering visuals with image-generating tools and code.",
@@ -1054,6 +1122,21 @@
                 <button class="modal-close" onclick="closeModal()">✕</button>
                 <div class="p-8 md:p-16">
             `;
+
+            // PARTNER BADGE LOGIC (New)
+            let partnerHtml = '';
+            if (data.partnerId) {
+                const pObj = partnersData.find(p => p.id === data.partnerId);
+                if (pObj) {
+                    partnerHtml = `
+                        <div class="partner-badge mb-6">
+                            <span class="text-muted-custom text-sm">בשיתוף:</span>
+                            <img src="${pObj.logo}" alt="${pObj.name}" style="height: 30px;">
+                            <span class="font-bold">${pObj.name}</span>
+                        </div>
+                    `;
+                }
+            }
 
             if (isPartner) {
                 // Partner / Work Circle Modal
@@ -1097,20 +1180,39 @@
                     `;
                 }
 
-            } else if (data.type === 'service') {
-                // Service Page Layout
+            } else if (data.type === 'service' || data.type === 'cinematch') {
+                // Service / Project Page Layout
                 htmlContent += `
+                    ${partnerHtml}
                     <h2 class="text-4xl md:text-6xl font-bold mb-8 text-[var(--primary)] text-center">${data.title}</h2>
+                    
+                    ${data.videoId ? `
                     <div class="mb-12 rounded-2xl overflow-hidden shadow-2xl border border-[var(--glass-border)] aspect-video relative">
                          <iframe width="100%" height="100%" src="https://www.youtube.com/embed/${data.videoId}?autoplay=1&mute=1&controls=1" title="Video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+                    </div>` : ''}
+
+                    ${data.extraVideoId ? `
+                    <div class="mb-10">
+                        <h4 class="text-xl font-bold mb-4 text-center">תוכן ערוך</h4>
+                        <div class="rounded-3xl overflow-hidden shadow-2xl border border-[var(--glass-border)] aspect-video relative">
+                             <iframe width="100%" height="100%" src="https://www.youtube.com/embed/${data.extraVideoId}?controls=1" title="Edited Video" frameborder="0" allowfullscreen></iframe>
+                        </div>
+                    </div>` : ''}
+
+                     ${data.image && !data.videoId ? `
+                    <div class="mb-10 rounded-3xl overflow-hidden shadow-2xl border border-[var(--glass-border)] h-80 relative">
+                         <img src="${data.image}" class="w-full h-full object-cover">
+                    </div>` : ''}
+
+                    <div class="prose prose-lg prose-invert max-w-none mb-16 text-center">
+                        <p class="text-2xl leading-relaxed text-[var(--text-color)] opacity-90">${data.desc || data.text}</p>
                     </div>
-                    <div class="prose prose-lg prose-invert max-w-none mb-16">
-                        <p class="text-2xl leading-relaxed text-[var(--text-color)] opacity-90">${data.desc}</p>
-                    </div>
-                    <h3 class="text-3xl font-bold mb-8 border-b border-[var(--glass-border)] pb-4">מאחורי הקלעים</h3>
+
+                    ${data.gallery ? `
+                    <h3 class="text-3xl font-bold mb-8 border-b border-[var(--glass-border)] pb-4 text-center">גלריה</h3>
                     <div class="grid grid-cols-2 md:grid-cols-4 gap-6">
                         ${data.gallery.map(img => `<div class="rounded-xl overflow-hidden h-48 border border-[var(--glass-border)]"><img src="${img}" class="w-full h-full object-cover hover:scale-110 transition-transform duration-500"></div>`).join('')}
-                    </div>
+                    </div>` : ''}
                 `;
             } else {
                 // Default / Simple Modal (Process)
@@ -1340,36 +1442,79 @@
             });
         };
 
-        // --- Stats Animation ---
-        const initStatsAnimation = () => {
-            const observer = new IntersectionObserver((entries) => {
-                entries.forEach(entry => {
-                    if(entry.isIntersecting) {
-                        const numEl = entry.target.querySelector('.stat-number');
-                        if(numEl && !numEl.classList.contains('counted')) {
-                            const target = parseInt(numEl.getAttribute('data-target'));
-                            animateValue(numEl, 0, target, 2000);
-                            numEl.classList.add('counted');
-                        }
-                    }
-                });
-            }, { threshold: 0.5 });
+        // --- ROTATING Stats Animation Logic (NEW) ---
+        const initRotatingStats = () => {
+            const container = document.getElementById('stats-container');
+            
+            // 3 Different Sets of Stats
+            const statsSets = [
+                // Set 1: Classic History
+                [
+                    { num: 13, suffix: '+', label: 'שנות פעילות' },
+                    { num: 1200, suffix: '+', label: 'הפקות מוצלחות' },
+                    { num: 25, suffix: '+', label: 'מדינות בעולם' },
+                    { num: 24, suffix: '/7', label: 'זמינות ויצירה' }
+                ],
+                // Set 2: Technical & Impact
+                [
+                    { num: 1, suffix: 'M+', label: 'צופים בשידור חי' },
+                    { num: 50, suffix: '+', label: 'אנשי צוות' },
+                    { num: 4, suffix: 'K', label: 'רזולוציית שידור' },
+                    { num: 6, suffix: '+', label: 'שפות שידור' }
+                ],
+                // Set 3: Service & Quality
+                [
+                    { num: 100, suffix: '%', label: 'אחוזי הצלחה' },
+                    { num: 500, suffix: '+', label: 'לקוחות מרוצים' },
+                    { num: 0, suffix: '', label: 'תקלות שידור' },
+                    { num: 8, suffix: '+', label: 'פתרונות טכנולוגיים' }
+                ]
+            ];
 
-            document.querySelectorAll('.count-container').forEach(el => observer.observe(el));
+            let currentSetIndex = 0;
+
+            const renderStats = (setIndex) => {
+                const currentSet = statsSets[setIndex];
+                
+                // 1. Clear current content with fade out
+                container.classList.add('fading');
+
+                setTimeout(() => {
+                    // 2. Build new HTML
+                    container.innerHTML = currentSet.map((stat, idx) => `
+                        <div class="hover-trigger count-container group py-4 md:py-0">
+                            <div class="stat-number group-hover:text-[var(--primary)] transition-colors" data-target="${stat.num}" data-suffix="${stat.suffix}">0</div>
+                            <span class="text-6xl font-black text-muted-custom align-super">${stat.suffix}</span>
+                            <p class="text-muted-custom tracking-[0.3em] uppercase mt-4 font-bold text-2xl">${stat.label}</p>
+                        </div>
+                    `).join('');
+
+                    // 3. Trigger number animation for new elements
+                    const newElements = container.querySelectorAll('.stat-number');
+                    newElements.forEach(el => {
+                        const target = parseInt(el.getAttribute('data-target'));
+                        const suffix = el.getAttribute('data-suffix');
+                        // Custom animation that handles the suffix visually if needed inside the number, 
+                        // though here suffix is separate span.
+                        animateValue(el, 0, target, 1500, ''); 
+                    });
+
+                    // 4. Fade in
+                    container.classList.remove('fading');
+
+                }, 600); // Wait for fade out
+            };
+
+            // Initial Render
+            renderStats(0);
+
+            // Interval Rotation
+            setInterval(() => {
+                currentSetIndex = (currentSetIndex + 1) % statsSets.length;
+                renderStats(currentSetIndex);
+            }, 6000); // Change every 6 seconds
         };
 
-        function animateValue(obj, start, end, duration) {
-            let startTimestamp = null;
-            const step = (timestamp) => {
-                if (!startTimestamp) startTimestamp = timestamp;
-                const progress = Math.min((timestamp - startTimestamp) / duration, 1);
-                obj.innerHTML = Math.floor(progress * (end - start) + start);
-                if (progress < 1) {
-                    window.requestAnimationFrame(step);
-                }
-            };
-            window.requestAnimationFrame(step);
-        }
 
         // --- Service List Interaction ---
         const initServices = () => {
@@ -1445,8 +1590,8 @@
         let playerA, playerB, activePlayer = 'A';
         let isMuted = true;
         const videos = [
-             { videoId: 'GqMse9F2ipY', duration: 300 }, // Salties Live
-             { videoId: 'Y8DxFX8sooI', duration: 180 }, // Salties Edited
+             { videoId: 'GqMse9F2ipY', duration: 300 }, // Solties Live
+             { videoId: 'Y8DxFX8sooI', duration: 180 }, // Solties Edited
              { videoId: '_rv2sMdyCpg', duration: 258 }, // Showreel
              { videoId: 'Z3oO_GmtFfg', duration: 112 }, // Virtual
              { videoId: 'd2_lJ42GuZ0', duration: 153 }, // AI
@@ -1507,7 +1652,8 @@
         document.addEventListener('DOMContentLoaded', () => {
             initThreeJS();
             initScrollReveal();
-            initStatsAnimation();
+            // initStatsAnimation(); // REPLACED BY ROTATING STATS
+            initRotatingStats(); // NEW FUNCTION CALL
             initServices();
             initTicker();
         });
