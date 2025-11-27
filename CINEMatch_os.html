@@ -45,6 +45,7 @@
                         'fade-in': 'fadeIn 0.6s ease-out forwards',
                         'slide-up': 'slideUp 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards',
                         'pulse-glow': 'pulseGlow 3s infinite',
+                        'graph-breath': 'graphBreath 3s ease-in-out infinite alternate',
                     },
                     keyframes: {
                         fadeIn: { '0%': { opacity: '0' }, '100%': { opacity: '1' } },
@@ -52,6 +53,10 @@
                         pulseGlow: {
                             '0%, 100%': { boxShadow: '0 0 5px rgba(59, 130, 246, 0.5)' },
                             '50%': { boxShadow: '0 0 20px rgba(59, 130, 246, 0.8)' },
+                        },
+                        graphBreath: {
+                            '0%': { transform: 'scale(1)' },
+                            '100%': { transform: 'scale(1.03)' }
                         }
                     }
                 }
@@ -305,7 +310,7 @@
                 <h2 class="text-4xl font-bold mb-4">סימולטור הרכבת צוותים (AI Powered)</h2>
                 <p class="text-[var(--text-muted)] max-w-2xl mx-auto">
                     הזן את דרישות ההפקה. המנוע שלנו (Gemini AI) ינתח את הדרישות, יבין את הניואנסים (כולל כמויות ותפקידים מיוחדים),
-                    ויציע לך 3 מסלולים המבוססים על משולש האתיקה ונתוני אמת.
+                    ויציע לך 3 מסלולים המבוססים על גרף אתיקה 4D ונתוני אמת.
                 </p>
             </div>
 
@@ -858,20 +863,27 @@
                 You are a veteran Israeli production manager. 
                 Analyze this complex Hebrew request: "${input}".
                 
-                Identify all specific roles and quantities requested (e.g., "2 cameramen" -> 2 member objects). 
-                If technical roles like "Zoom technician" or "Switcher" (Natav) are asked, include them.
-                
-                Generate 3 distinct packages: 'Premium' (Best gear/people), 'Balanced' (Good value), 'Economy' (Budget).
+                1. Identify ALL specific roles and quantities requested. Create a COMPLETE crew list.
+                2. For each package (Premium, Balanced, Economy), assemble a specific team.
+                3. CRITICAL: Invent a "Synergy Story" for the team. 
+                   - Who worked with whom before? (e.g. Cameraman A worked with Soundman B).
+                   - Who is an "Outsider" (External) brought in just for this project?
                 
                 Return a JSON array of 3 objects. Each object must have:
-                - title (String, Hebrew)
-                - price (Number, estimated NIS total including manpower and equipment mentioned)
+                - title (Hebrew)
+                - price (Number)
                 - match (Number 70-100)
-                - tag (String, Hebrew)
-                - ethics: { time (0-100), look (0-100), taste (0-100) }
-                - members: Array of objects representing the ACTUAL crew list based on the request quantity. 
-                  Each member object: { name (Israeli Hebrew name), role (Hebrew), rating (Number 8.0-10.0) }.
-                  Make sure to generate distinct names for multiple people of the same role (e.g. "Yossi Cohen", "Dani Levi" for 2 cameramen).
+                - tag (Hebrew)
+                - description (Hebrew, short summary of the team dynamic, e.g. "Solid core team from News 12, plus an external drone operator")
+                - ethics: { time (0-100), look (0-100), taste (0-100), service (0-100) }
+                - members: Array of objects. Each member: 
+                  { 
+                    name (Hebrew), 
+                    role (Hebrew), 
+                    rating (8.0-10.0), 
+                    type: "Core" | "External", 
+                    connected_to: [Array of names they worked with] 
+                  }
                 
                 Return ONLY raw JSON. No markdown formatting.
             `;
@@ -917,23 +929,37 @@
                 {
                     title: "צוות פרימיום (Premium)",
                     price: 18500, match: 98, tag: "איכות קולנועית",
+                    description: "צוות ותיק שעבד יחד בהפקות דוקו, עם תוספת של מפעיל רחפן חיצוני.",
                     color: "blue", colorRGB: "59, 130, 246",
-                    ethics: { time: 90, look: 99, taste: 95 },
-                    members: [{name: "רון לוי", role: "במאי", rating: 9.9, img: DB.freelancers[0].img}, {name: "שרה כהן", role: "צלמת", rating: 9.7, img: DB.freelancers[1].img}, {name: "מיכל", role: "הפקה", rating: 9.8, img: DB.freelancers[3].img}]
+                    ethics: { time: 90, look: 99, taste: 95, service: 98 },
+                    members: [
+                        {name: "רון לוי", role: "במאי", rating: 9.9, img: DB.freelancers[0].img, type: "Core", connected_to: ["שרה כהן"]}, 
+                        {name: "שרה כהן", role: "צלמת", rating: 9.7, img: DB.freelancers[1].img, type: "Core", connected_to: ["רון לוי"]}, 
+                        {name: "מיכל", role: "הפקה", rating: 9.8, img: DB.freelancers[3].img, type: "External", connected_to: []}
+                    ]
                 },
                 {
                     title: "צוות מאוזן (Balanced)",
                     price: 12000, match: 92, tag: "מומלץ",
+                    description: "שילוב של כוחות חדשים עם ניסיון מוכח.",
                     color: "purple", colorRGB: "139, 92, 246",
-                    ethics: { time: 95, look: 88, taste: 90 },
-                    members: [{name: "דני רופ", role: "צלם", rating: 9.5, img: DB.freelancers[2].img}, {name: "יוני", role: "סאונד", rating: 9.2, img: DB.freelancers[4].img}, {name: "גל", role: "איפור", rating: 9.4, img: DB.freelancers[5].img}]
+                    ethics: { time: 95, look: 88, taste: 90, service: 92 },
+                    members: [
+                        {name: "דני רופ", role: "צלם", rating: 9.5, img: DB.freelancers[2].img, type: "Core", connected_to: ["יוני"]}, 
+                        {name: "יוני", role: "סאונד", rating: 9.2, img: DB.freelancers[4].img, type: "Core", connected_to: ["דני רופ"]}, 
+                        {name: "גל", role: "איפור", rating: 9.4, img: DB.freelancers[5].img, type: "External", connected_to: []}
+                    ]
                 },
                 {
                     title: "צוות בסיסי (Economy)",
                     price: 8500, match: 85, tag: "חסכוני",
+                    description: "צוות יעיל ומהיר למשימות דחופות.",
                     color: "green", colorRGB: "16, 185, 129",
-                    ethics: { time: 98, look: 75, taste: 85 },
-                    members: [{name: "אביב", role: "צלם/עורך", rating: 9.0, img: DB.freelancers[6].img}, {name: "נועה", role: "עוזרת", rating: 9.1, img: DB.freelancers[7].img}]
+                    ethics: { time: 98, look: 75, taste: 85, service: 88 },
+                    members: [
+                        {name: "אביב", role: "צלם/עורך", rating: 9.0, img: DB.freelancers[6].img, type: "Core", connected_to: []}, 
+                        {name: "נועה", role: "עוזרת", rating: 9.1, img: DB.freelancers[7].img, type: "Core", connected_to: []}
+                    ]
                 }
             ];
         }
@@ -942,10 +968,37 @@
             const container = document.getElementById('sim-results');
             
             container.innerHTML = options.map((opt, idx) => {
-                // Triangle Calculations
-                const pTime = { x: 50, y: 60 - 50 * (opt.ethics.time / 100) };
-                const pLook = { x: 50 + 40 * (opt.ethics.look / 100), y: 60 + 25 * (opt.ethics.look / 100) };
-                const pTaste = { x: 50 - 40 * (opt.ethics.taste / 100), y: 60 + 25 * (opt.ethics.taste / 100) };
+                // 4D Radar Chart Logic
+                // Center: 50, 50
+                // Max radius: 40
+                
+                // Time (Top): x=50, y=50 - val
+                const pTime = { 
+                    x: 50, 
+                    y: 50 - (opt.ethics.time / 100) * 40 
+                };
+                
+                // Look (Right): x=50 + val, y=50
+                const pLook = { 
+                    x: 50 + (opt.ethics.look / 100) * 40, 
+                    y: 50 
+                };
+                
+                // Taste (Bottom): x=50, y=50 + val
+                const pTaste = { 
+                    x: 50, 
+                    y: 50 + (opt.ethics.taste / 100) * 40 
+                };
+                
+                // Service (Left): x=50 - val, y=50  (using service or fallback)
+                const serviceVal = opt.ethics.service || getRandomInt(80, 95);
+                const pService = { 
+                    x: 50 - (serviceVal / 100) * 40, 
+                    y: 50 
+                };
+
+                // Generate random data for simulation display
+                const serviceDisplayVal = opt.ethics.service || getRandomInt(80, 99);
 
                 return `
                 <div class="sys-card p-6 flex flex-col h-full animate-slide-up" style="animation-delay: ${idx * 100}ms">
@@ -960,35 +1013,68 @@
                         </div>
                     </div>
 
+                    <!-- Synergy Description -->
+                    <div class="mb-4 text-xs text-[var(--text-muted)] bg-[var(--bg-app)] p-3 rounded border-l-4 border-${opt.color}-500">
+                        <span class="font-bold block mb-1 text-${opt.color}-500">דינמיקה קבוצתית:</span>
+                        ${opt.description || "צוות מגובש עם ניסיון משותף."}
+                    </div>
+
+                    <!-- 4D Radar Chart (SVG) -->
                     <div class="flex justify-center mb-6">
-                        <div class="relative w-48 h-40">
+                        <div class="relative w-48 h-48">
                            <svg viewBox="0 0 100 100" class="w-full h-full overflow-visible">
-                              <polygon points="50,10 90,85 10,85" fill="rgba(${opt.colorRGB}, 0.05)" stroke="var(--border-color)" stroke-width="0.5" stroke-dasharray="2,2" />
-                              <line x1="50" y1="60" x2="50" y2="10" stroke="var(--border-color)" stroke-width="0.3" opacity="0.3" />
-                              <line x1="50" y1="60" x2="90" y2="85" stroke="var(--border-color)" stroke-width="0.3" opacity="0.3" />
-                              <line x1="50" y1="60" x2="10" y2="85" stroke="var(--border-color)" stroke-width="0.3" opacity="0.3" />
-                              <polygon points="${pTime.x},${pTime.y} ${pLook.x},${pLook.y} ${pTaste.x},${pTaste.y}" fill="rgba(${opt.colorRGB}, 0.3)" stroke="rgba(${opt.colorRGB}, 1)" stroke-width="1.5" />
-                              <circle cx="${pTime.x}" cy="${pTime.y}" r="1.5" fill="white" stroke="rgba(${opt.colorRGB}, 1)" />
-                              <circle cx="${pLook.x}" cy="${pLook.y}" r="1.5" fill="white" stroke="rgba(${opt.colorRGB}, 1)" />
-                              <circle cx="${pTaste.x}" cy="${pTaste.y}" r="1.5" fill="white" stroke="rgba(${opt.colorRGB}, 1)" />
-                              <text x="50" y="5" text-anchor="middle" font-size="6" fill="var(--text-muted)" font-weight="bold">Time (${opt.ethics.time})</text>
-                              <text x="95" y="90" text-anchor="start" font-size="6" fill="var(--text-muted)" font-weight="bold">Look (${opt.ethics.look})</text>
-                              <text x="5" y="90" text-anchor="end" font-size="6" fill="var(--text-muted)" font-weight="bold">Taste (${opt.ethics.taste})</text>
+                              <!-- Background Grid (Concentric Diamonds) -->
+                              <polygon points="50,10 90,50 50,90 10,50" fill="rgba(${opt.colorRGB}, 0.05)" stroke="var(--border-color)" stroke-width="0.5" stroke-dasharray="2,2" />
+                              <polygon points="50,20 80,50 50,80 20,50" fill="none" stroke="var(--border-color)" stroke-width="0.3" stroke-dasharray="2,2" />
+                              
+                              <!-- Axes Lines -->
+                              <line x1="50" y1="50" x2="50" y2="10" stroke="var(--border-color)" stroke-width="0.3" opacity="0.5" />
+                              <line x1="50" y1="50" x2="90" y2="50" stroke="var(--border-color)" stroke-width="0.3" opacity="0.5" />
+                              <line x1="50" y1="50" x2="50" y2="90" stroke="var(--border-color)" stroke-width="0.3" opacity="0.5" />
+                              <line x1="50" y1="50" x2="10" y2="50" stroke="var(--border-color)" stroke-width="0.3" opacity="0.5" />
+
+                              <!-- Data Polygon (With Animation Class) -->
+                              <polygon points="${pTime.x},${pTime.y} ${pLook.x},${pLook.y} ${pTaste.x},${pTaste.y} ${pService.x},${pService.y}" 
+                                       fill="rgba(${opt.colorRGB}, 0.3)" 
+                                       stroke="rgba(${opt.colorRGB}, 1)" 
+                                       stroke-width="1.5"
+                                       class="animate-graph-breath origin-center" />
+                              
+                              <!-- Points -->
+                              <circle cx="${pTime.x}" cy="${pTime.y}" r="2" fill="white" stroke="rgba(${opt.colorRGB}, 1)" />
+                              <circle cx="${pLook.x}" cy="${pLook.y}" r="2" fill="white" stroke="rgba(${opt.colorRGB}, 1)" />
+                              <circle cx="${pTaste.x}" cy="${pTaste.y}" r="2" fill="white" stroke="rgba(${opt.colorRGB}, 1)" />
+                              <circle cx="${pService.x}" cy="${pService.y}" r="2" fill="white" stroke="rgba(${opt.colorRGB}, 1)" />
+
+                              <!-- Labels -->
+                              <text x="50" y="6" text-anchor="middle" font-size="7" fill="var(--text-muted)" font-weight="bold">Time (${opt.ethics.time})</text>
+                              <text x="94" y="52" text-anchor="start" font-size="7" fill="var(--text-muted)" font-weight="bold">Look (${opt.ethics.look})</text>
+                              <text x="50" y="98" text-anchor="middle" font-size="7" fill="var(--text-muted)" font-weight="bold">Taste (${opt.ethics.taste})</text>
+                              <text x="6" y="52" text-anchor="end" font-size="7" fill="var(--text-muted)" font-weight="bold">Service (${serviceDisplayVal})</text>
                            </svg>
                         </div>
                     </div>
 
                     <div class="flex-1 space-y-3 mb-6">
-                        ${opt.members.map(m => `
-                            <div class="flex items-center gap-3 p-2 hover:bg-[var(--bg-app)] rounded-lg cursor-pointer transition group" onclick="openProfile('${m.id || 'f1'}')">
-                                <img src="${m.img}" class="w-8 h-8 rounded-full border border-[var(--border-color)] object-cover">
+                        ${opt.members.map(m => {
+                            const isExternal = m.type === 'External';
+                            const hasConnections = m.connected_to && m.connected_to.length > 0;
+                            const borderClass = isExternal ? 'border-dashed border-orange-500/50' : 'border-[var(--border-color)]';
+                            const badge = isExternal ? '<span class="text-[9px] bg-orange-500 text-white px-1 rounded ml-2">חיצוני</span>' : '';
+                            const connIcon = hasConnections ? `<i class="fas fa-link text-blue-500 text-xs ml-1" title="עבד עם: ${m.connected_to.join(', ')}"></i>` : '';
+
+                            return `
+                            <div class="flex items-center gap-3 p-2 hover:bg-[var(--bg-app)] rounded-lg cursor-pointer transition group border ${borderClass}" onclick="openProfile('${m.id || 'f1'}')">
+                                <img src="${m.img}" class="w-8 h-8 rounded-full object-cover">
                                 <div class="flex-1">
-                                    <div class="font-bold text-sm group-hover:text-blue-500 transition">${m.name}</div>
+                                    <div class="font-bold text-sm group-hover:text-blue-500 transition flex items-center">
+                                        ${m.name} ${badge} ${connIcon}
+                                    </div>
                                     <div class="text-xs text-[var(--text-muted)]">${m.role}</div>
                                 </div>
                                 <div class="text-xs font-bold text-green-500">${m.rating}</div>
                             </div>
-                        `).join('')}
+                        `}).join('')}
                     </div>
 
                     <button class="w-full py-3 rounded-xl bg-[var(--bg-app)] border border-[var(--border-color)] hover:border-${opt.color}-500 hover:text-${opt.color}-500 font-bold transition flex justify-center items-center gap-2">
