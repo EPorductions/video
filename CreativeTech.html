@@ -1,0 +1,357 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>הצעת מחיר ושירותים - PsychoFlash</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;700;900&family=Teko:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+
+    <style>
+        :root {
+            --primary: #00f2ff;
+            --secondary: #bd00ff;
+            --text-main: #1e293b;
+            --bg-page: #f8fafc;
+        }
+
+        body {
+            font-family: 'Heebo', sans-serif;
+            background-color: var(--bg-page);
+            color: var(--text-main);
+            overflow-x: hidden; /* מניעת גלילה אופקית בטעות */
+        }
+
+        .font-teko { font-family: 'Teko', sans-serif; }
+
+        /* כרטיסיות משודרגות */
+        .service-card {
+            background: rgba(255, 255, 255, 0.9);
+            backdrop-filter: blur(10px);
+            border: 1px solid #e2e8f0;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        /* אפקט הובר עדין */
+        .service-card:hover {
+            transform: translateY(-6px) scale(1.005);
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.01);
+            border-color: #94a3b8;
+        }
+
+        .service-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            right: 0;
+            width: 4px;
+            height: 100%;
+            background: transparent;
+            transition: background 0.3s ease;
+        }
+        
+        .service-card:hover::before {
+            background: linear-gradient(to bottom, #2563eb, #00f2ff);
+        }
+
+        /* תגיות */
+        .tag-highlight {
+            background-color: #f0f9ff;
+            color: #0369a1;
+            padding: 4px 12px;
+            border-radius: 9999px;
+            font-size: 0.8rem;
+            font-weight: 700;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        }
+
+        /* אייקונים ברקע הכותרות */
+        .section-icon-bg {
+            position: absolute;
+            left: -10px;
+            top: -10px;
+            opacity: 0.05;
+            transform: rotate(-15deg);
+            z-index: 0;
+            pointer-events: none;
+        }
+
+        /* התאמות להדפסה */
+        @media print {
+            .no-print { display: none !important; }
+            body { background: white; padding: 0; font-size: 12pt; }
+            .service-card { break-inside: avoid; box-shadow: none; border: 1px solid #ccc; margin-bottom: 20px; page-break-inside: avoid; }
+            header { margin-bottom: 30px; }
+            h1, h2, h3 { color: black !important; }
+            * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
+        }
+    </style>
+</head>
+<body class="min-h-screen py-8 px-4 sm:px-8 md:px-16 lg:max-w-7xl mx-auto selection:bg-blue-100 selection:text-blue-900">
+
+    <!-- כפתור הדפסה צף -->
+    <div class="fixed top-6 left-6 z-50 no-print group">
+        <button onclick="window.print()" class="bg-slate-900 text-white pl-6 pr-4 py-3 rounded-full shadow-2xl hover:bg-blue-600 transition-all flex items-center gap-3 text-sm font-bold shadow-blue-900/20 group-hover:scale-105">
+            <span>שמור כ-PDF</span>
+            <div class="bg-white/20 p-1 rounded-full"><i data-lucide="printer" class="w-4 h-4"></i></div>
+        </button>
+    </div>
+
+    <!-- כותרת ראשית (Header) -->
+    <header class="flex flex-col-reverse md:flex-row justify-between items-center md:items-end mb-16 border-b border-slate-200 pb-8 gap-8">
+        
+        <!-- צד ימין - לוגו ופרטי לקוח -->
+        <div class="text-center md:text-right w-full md:w-auto">
+            <div class="inline-block px-4 py-1.5 bg-blue-50 text-blue-800 rounded-lg text-xs font-bold uppercase tracking-widest mb-4 border border-blue-100">
+                הצעת מחיר עבור
+            </div>
+            
+            <!-- לוגו הלקוח -->
+            <div class="flex flex-col md:flex-row items-center md:items-end gap-6 mb-2">
+                <!-- שימוש בלוגו שביקשת -->
+                <img src="image_bbff86.png" alt="Starburst Logo" class="h-16 md:h-20 object-contain filter drop-shadow-sm hover:scale-105 transition-transform duration-500">
+                
+                <div class="hidden md:block h-12 w-px bg-slate-200 mx-2"></div>
+                
+                <!-- טקסט תיאור -->
+                <div class="text-slate-500 text-lg font-light leading-tight">
+                    פתרונות טכנולוגיים<br>וקריאייטיב מתקדמים
+                </div>
+            </div>
+        </div>
+
+        <!-- צד שמאל - לוגו הספק -->
+        <div class="text-center md:text-left w-full md:w-auto">
+            <div class="text-5xl md:text-6xl font-black tracking-tighter text-slate-900 relative">
+                PSYCHO<span class="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-indigo-600">FLASH</span>
+                <div class="absolute -top-4 -right-4 w-8 h-8 bg-blue-500 rounded-full blur-xl opacity-20 animate-pulse"></div>
+            </div>
+            <div class="text-sm text-slate-400 mt-2 font-mono tracking-widest uppercase">Orian Edelenyi // Creative Tech</div>
+        </div>
+    </header>
+
+    <!-- חלק 1: ניהול וארגון -->
+    <section class="mb-20 break-inside-avoid relative">
+        <div class="flex items-center gap-4 mb-8">
+            <div class="w-12 h-12 rounded-2xl bg-gradient-to-br from-blue-500 to-blue-700 flex items-center justify-center text-white shadow-lg shadow-blue-500/30">
+                <i data-lucide="layout-list" class="w-6 h-6"></i>
+            </div>
+            <h2 class="text-3xl font-black text-slate-800">סדר וארגון (ניהול המידע)</h2>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-1 gap-8">
+            
+            <!-- מערכת ניהול - פישוט -->
+            <div class="service-card p-6 md:p-10 rounded-3xl flex flex-col md:flex-row gap-8">
+                <div class="flex-1 z-10">
+                    <div class="flex flex-wrap gap-2 mb-4">
+                        <span class="tag-highlight bg-blue-50 text-blue-700">הכי מבוקש</span>
+                    </div>
+                    <h3 class="text-2xl font-bold text-slate-900 mb-3">המערכת לניהול המשתתפים (Dashboard)</h3>
+                    <p class="text-slate-600 leading-relaxed text-lg mb-6">
+                        המקום המרכזי שבו הכל קורה. במקום להסתבך עם עשרות קבצי אקסל ומיילים, אנחנו מקימים לכם "בית" מסודר באינטרנט. שם תוכלו לראות את כל הסטארטאפים, המשימות שלהם, וההתקדמות - הכל במבט אחד פשוט וברור.
+                    </p>
+                    
+                    <div class="bg-slate-50/80 p-6 rounded-2xl border border-slate-100/50">
+                        <h4 class="font-bold text-slate-700 mb-4 text-sm uppercase tracking-wide flex items-center gap-2">
+                            <i data-lucide="zap" class="w-4 h-4 text-amber-500"></i> מה זה נותן לכם?
+                        </h4>
+                        <ul class="grid grid-cols-1 md:grid-cols-2 gap-y-3 gap-x-6 text-slate-600">
+                            <li class="flex items-start gap-3"><i data-lucide="check-circle-2" class="w-5 h-5 text-emerald-500 shrink-0"></i> כרטיס ביקור דיגיטלי לכל סטארטאפ</li>
+                            <li class="flex items-start gap-3"><i data-lucide="check-circle-2" class="w-5 h-5 text-emerald-500 shrink-0"></i> בדיקה קלה מי הגיש משימות</li>
+                            <li class="flex items-start gap-3"><i data-lucide="check-circle-2" class="w-5 h-5 text-emerald-500 shrink-0"></i> מחשבון ניקוד אוטומטי לשופטים</li>
+                            <li class="flex items-start gap-3"><i data-lucide="check-circle-2" class="w-5 h-5 text-emerald-500 shrink-0"></i> הכל מסתנכרן לאקסל שלכם אוטומטית</li>
+                        </ul>
+                    </div>
+                </div>
+                
+                <!-- מחיר -->
+                <div class="md:w-64 w-full flex flex-col justify-center items-center md:items-end md:border-r md:border-t-0 border-t border-slate-100 md:pr-8 md:pt-0 pt-6 mt-2 md:mt-0">
+                    <span class="text-slate-400 text-sm font-medium mb-1">עלות הקמה חד-פעמית</span>
+                    <span class="text-5xl font-teko font-bold text-blue-600 leading-none">₪4,500+</span>
+                    <span class="text-xs text-slate-400 mt-2 text-center md:text-right">המחיר הסופי תלוי בכמות הפיצ'רים שתרצו להוסיף</span>
+                </div>
+            </div>
+
+            <!-- מסכים חכמים - פישוט -->
+            <div class="service-card p-6 md:p-10 rounded-3xl flex flex-col md:flex-row gap-8">
+                <div class="flex-1 z-10">
+                    <h3 class="text-2xl font-bold text-slate-900 mb-3">שליטה על המסכים באירוע</h3>
+                    <p class="text-slate-600 leading-relaxed text-lg mb-6">
+                        להפוך את המסכים באולם מסתם תמונה סטטית למשהו חי. אנחנו נדאג שעל המסך יופיע תמיד המידע הנכון בזמן הנכון - בלי שתצטרכו לרדוף אחרי איש הסאונד/וידאו עם דיסק-און-קי.
+                    </p>
+                    <ul class="space-y-2 text-slate-600">
+                        <li class="flex items-center gap-3 bg-white/50 p-2 rounded-lg border border-slate-100">
+                            <i data-lucide="monitor-play" class="w-5 h-5 text-indigo-500"></i>
+                            <span><strong>מה רואים?</strong> לו"ז מתעדכן, שעון עצר למרצים (טיימר), וכותרות רצות.</span>
+                        </li>
+                        <li class="flex items-center gap-3 bg-white/50 p-2 rounded-lg border border-slate-100">
+                            <i data-lucide="smartphone" class="w-5 h-5 text-indigo-500"></i>
+                            <span><strong>איך זה עובד?</strong> שליטה מלאה ופשוטה דרך הטלפון שלכם.</span>
+                        </li>
+                    </ul>
+                </div>
+                
+                <div class="md:w-64 w-full flex flex-col justify-center items-center md:items-end md:border-r md:border-t-0 border-t border-slate-100 md:pr-8 md:pt-0 pt-6">
+                    <span class="text-slate-400 text-sm font-medium mb-1">הערכה לאירוע</span>
+                    <span class="text-4xl font-teko font-bold text-slate-800">₪3,500 - ₪5,000</span>
+                </div>
+            </div>
+
+        </div>
+    </section>
+
+    <!-- חלק 2: חלון הראווה (אתר) -->
+    <section class="mb-20 break-inside-avoid">
+        <div class="flex items-center gap-4 mb-8">
+            <div class="w-12 h-12 rounded-2xl bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center text-white shadow-lg shadow-indigo-500/30">
+                <i data-lucide="globe" class="w-6 h-6"></i>
+            </div>
+            <h2 class="text-3xl font-black text-slate-800">חלון הראווה (אתר אירוע)</h2>
+        </div>
+
+        <div class="service-card p-6 md:p-8 rounded-3xl">
+            <div class="flex flex-col md:flex-row gap-8 items-center">
+                <div class="flex-1">
+                    <h3 class="text-2xl font-bold text-slate-900 mb-3">אתר אינטרנט ייעודי לאירוע</h3>
+                    <p class="text-slate-600 text-lg mb-4">
+                        דף נחיתה מעוצב ומרשים שנשלח למשקיעים ולאורחים. זה ה"פנים" של האירוע שלכם ברשת.
+                    </p>
+                    <div class="flex flex-wrap gap-3">
+                        <span class="px-3 py-1 bg-slate-100 text-slate-600 rounded-lg text-sm">הצגת הסטארטאפים והצוותים</span>
+                        <span class="px-3 py-1 bg-slate-100 text-slate-600 rounded-lg text-sm">לוח זמנים והרשמה</span>
+                        <span class="px-3 py-1 bg-slate-100 text-slate-600 rounded-lg text-sm">עיצוב יוקרתי (לא תבנית פשוטה)</span>
+                    </div>
+                </div>
+                <div class="md:w-auto w-full text-center md:text-right md:border-r border-slate-100 md:pr-8">
+                    <span class="block text-slate-400 text-sm font-medium mb-1">עלות פיתוח ועיצוב</span>
+                    <span class="block text-4xl font-teko font-bold text-indigo-600">₪2,800 - ₪4,200</span>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- גריד תחתון: וידאו, ניהול טכני ושירותים שוטפים -->
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-8 mb-20">
+        
+        <!-- עמודה 1: וידאו וצילום -->
+        <div class="flex flex-col gap-6">
+            <div class="flex items-center gap-3 mb-2">
+                <div class="w-10 h-10 rounded-xl bg-pink-100 text-pink-600 flex items-center justify-center"><i data-lucide="camera" class="w-5 h-5"></i></div>
+                <h2 class="text-2xl font-bold text-slate-800">צילום ועריכה</h2>
+            </div>
+            
+            <div class="service-card p-6 rounded-2xl flex-1 flex flex-col justify-between">
+                <div>
+                    <h3 class="text-xl font-bold text-slate-900 mb-2">סרטוני סיכום (Highlights)</h3>
+                    <p class="text-slate-600 text-sm mb-4">עריכה מהירה וקצבית של הרגעים הכי טובים מהאירוע, מוכן לשיתוף בלינקדאין/אינסטגרם.</p>
+                </div>
+                <div class="flex justify-between items-center border-t border-slate-100 pt-3">
+                    <span class="text-xs font-bold text-pink-500 uppercase">כולל סאונד וצבע</span>
+                    <span class="font-teko text-2xl font-bold text-slate-700">₪1,500 - ₪2,500</span>
+                </div>
+            </div>
+
+            <div class="service-card p-6 rounded-2xl flex-1 flex flex-col justify-between">
+                <div>
+                    <h3 class="text-xl font-bold text-slate-900 mb-2">צילום האירוע</h3>
+                    <p class="text-slate-600 text-sm mb-4">צלם מקצועי שמלווה את היום, כולל הקלטה איכותית של ההרצאות והפיצ'ים.</p>
+                </div>
+                <div class="flex justify-between items-center border-t border-slate-100 pt-3">
+                    <span class="text-xs font-bold text-pink-500 uppercase">איכות 4K</span>
+                    <span class="font-teko text-2xl font-bold text-slate-700">₪2,000 <span class="text-sm font-sans font-normal text-slate-400">/ ליום</span></span>
+                </div>
+            </div>
+        </div>
+
+        <!-- עמודה 2: טכני ושידור -->
+        <div class="flex flex-col gap-6">
+            <div class="flex items-center gap-3 mb-2">
+                <div class="w-10 h-10 rounded-xl bg-emerald-100 text-emerald-600 flex items-center justify-center"><i data-lucide="mic-2" class="w-5 h-5"></i></div>
+                <h2 class="text-2xl font-bold text-slate-800">ניהול טכני ושידור</h2>
+            </div>
+
+            <div class="service-card p-6 rounded-2xl h-full">
+                <h3 class="text-xl font-bold text-slate-900 mb-3">חיבור דוברים מרחוק (זום / שידור)</h3>
+                <p class="text-slate-600 mb-4">
+                    אם יש לכם שופט מחו"ל או משקיע שלא יכול להגיע פיזית - אנחנו דואגים שיראו וישמעו אותו מצוין באולם, ושגם הוא יראה אתכם טוב.
+                </p>
+                <div class="bg-emerald-50 rounded-xl p-4 mb-4 text-sm text-emerald-800">
+                    <strong>מה באחריותנו?</strong> בדיקת סאונד, מניעת "הדהוד" (אקו), שיתוף מצגות חלק, ודאגה שהטכנולוגיה לא תתקע את האירוע.
+                </div>
+                <div class="text-right mt-auto">
+                     <span class="block text-3xl font-teko font-bold text-emerald-600">₪2,800</span>
+                     <span class="text-xs text-slate-400">ליום פעילות</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- בנק שעות - עיצוב חדש ונקי -->
+    <section class="break-inside-avoid mb-16 pt-8 border-t border-slate-200">
+        <h3 class="text-2xl font-black text-gray-900 mb-8 text-center">מחירון שירותים שוטפים (לפי שעה)</h3>
+        
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+            <!-- קוביה 1 -->
+            <div class="bg-white border border-slate-200 p-4 rounded-xl text-center hover:border-sky-400 transition-colors">
+                <div class="text-sky-500 mb-2 flex justify-center"><i data-lucide="code-2" class="w-6 h-6"></i></div>
+                <div class="font-bold text-slate-800 text-sm">מתכנת / פיתוח</div>
+                <div class="text-2xl font-teko font-bold text-slate-900 mt-1">₪350</div>
+            </div>
+            <!-- קוביה 2 -->
+            <div class="bg-white border border-slate-200 p-4 rounded-xl text-center hover:border-purple-400 transition-colors">
+                <div class="text-purple-500 mb-2 flex justify-center"><i data-lucide="video" class="w-6 h-6"></i></div>
+                <div class="font-bold text-slate-800 text-sm">עריכת וידאו</div>
+                <div class="text-2xl font-teko font-bold text-slate-900 mt-1">₪250</div>
+            </div>
+            <!-- קוביה 3 -->
+            <div class="bg-white border border-slate-200 p-4 rounded-xl text-center hover:border-orange-400 transition-colors">
+                <div class="text-orange-500 mb-2 flex justify-center"><i data-lucide="palette" class="w-6 h-6"></i></div>
+                <div class="font-bold text-slate-800 text-sm">עיצוב גרפי</div>
+                <div class="text-2xl font-teko font-bold text-slate-900 mt-1">₪250</div>
+            </div>
+            <!-- קוביה 4 -->
+            <div class="bg-white border border-slate-200 p-4 rounded-xl text-center hover:border-green-400 transition-colors">
+                <div class="text-green-500 mb-2 flex justify-center"><i data-lucide="wrench" class="w-6 h-6"></i></div>
+                <div class="font-bold text-slate-800 text-sm">תמיכה טכנית</div>
+                <div class="text-2xl font-teko font-bold text-slate-900 mt-1">₪250</div>
+            </div>
+        </div>
+    </section>
+
+    <!-- פוטר -->
+    <footer class="border-t border-slate-200 pt-10 pb-6 text-center md:text-left">
+        <div class="flex flex-col md:flex-row justify-between items-center gap-6 text-slate-500 text-sm">
+            <div class="flex items-center gap-2">
+                <span class="font-bold text-slate-900">PSYCHOFLASH</span> &copy; 2024
+            </div>
+            <div class="flex flex-col md:flex-row gap-4 md:gap-8">
+                <a href="mailto:PsychoFlash@gmail.com" class="hover:text-blue-600 transition-colors">PsychoFlash@gmail.com</a>
+                <span dir="ltr" class="hover:text-blue-600 transition-colors">+972-54-2559027</span>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // אתחול האייקונים
+        function initIcons() {
+            if (window.lucide) {
+                window.lucide.createIcons();
+            } else {
+                setTimeout(initIcons, 100);
+            }
+        }
+        document.addEventListener('DOMContentLoaded', initIcons);
+    </script>
+</body>
+</html>
