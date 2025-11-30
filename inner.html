@@ -3,14 +3,17 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>InnerVerse - מרחב לנשימה והתפתחות</title>
-    <meta name="description" content="מסע של ריפוי, נשימה וחיבור פנימי. הצטרפו לסדנאות ולמפגשים האישיים.">
+    <title>InnerVerse - עומר | ריברסינג וטיפול בנשימה</title>
+    <meta name="description" content="המסע פנימה מתחיל בנשימה אחת. טיפול בריברסינג, סדנאות ומעגלי התפתחות.">
     
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     
     <!-- Three.js -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    
+    <!-- Lenis for Smooth Scroll -->
+    <script src="https://cdn.jsdelivr.net/gh/studio-freight/lenis@1.0.29/bundled/lenis.min.js"></script>
 
     <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -51,53 +54,69 @@
     </script>
 
     <style>
-        /* Custom Scrollbar */
-        ::-webkit-scrollbar { width: 10px; }
-        ::-webkit-scrollbar-track { background: #f8fafc; }
-        .dark ::-webkit-scrollbar-track { background: #1e293b; }
-        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 5px; }
-        ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
-
-        /* Animations */
-        .fade-in-up {
-            animation: fadeInUp 1s ease-out forwards;
-            opacity: 0;
-            transform: translateY(20px);
+        /* Base Styles */
+        body {
+            overflow-x: hidden;
+            /* Cursor is normal as requested */
         }
-        .delay-100 { animation-delay: 0.1s; }
-        .delay-200 { animation-delay: 0.2s; }
+
+        /* Smooth Scroll Container */
+        html.lenis {
+            height: auto;
+        }
+        .lenis.lenis-smooth {
+            scroll-behavior: auto;
+        }
+        .lenis.lenis-smooth [data-lenis-prevent] {
+            overscroll-behavior: contain;
+        }
+        .lenis.lenis-stopped {
+            overflow: hidden;
+        }
         
-        @keyframes fadeInUp {
-            to { opacity: 1; transform: translateY(0); }
+        /* Animations */
+        .reveal-text {
+            opacity: 0;
+            transform: translateY(30px);
+            transition: all 1s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+        .reveal-text.visible {
+            opacity: 1;
+            transform: translateY(0);
         }
 
-        /* Glassmorphism */
+        /* Glassmorphism Enhanced */
         .glassmorphic-card {
             background: rgba(255, 255, 255, 0.85);
-            backdrop-filter: blur(12px);
-            -webkit-backdrop-filter: blur(12px);
-            border: 1px solid rgba(255, 255, 255, 0.6);
-            border-radius: 1rem;
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.5);
+            border-radius: 1.5rem;
+            box-shadow: 0 10px 40px -10px rgba(0, 0, 0, 0.05);
+            transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275), box-shadow 0.4s ease;
+        }
+        .glassmorphic-card:hover {
+            transform: translateY(-5px) scale(1.01);
+            box-shadow: 0 20px 50px -10px rgba(13, 148, 136, 0.1);
         }
         .dark .glassmorphic-card {
             background: rgba(30, 41, 59, 0.75);
-            border: 1px solid rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.05);
         }
 
-        /* Image Hover Zoom Effect */
+        /* Image Zoom Container */
         .img-zoom-container {
             overflow: hidden;
-            border-radius: 1rem;
+            border-radius: 1.5rem;
         }
         .img-zoom {
-            transition: transform 0.5s ease;
+            transition: transform 0.7s cubic-bezier(0.25, 0.46, 0.45, 0.94);
         }
-        .img-zoom:hover {
+        .img-zoom-container:hover .img-zoom {
             transform: scale(1.05);
         }
 
-        /* Canvas Background - Particles */
+        /* Canvas Background */
         #canvas-container {
             position: fixed;
             top: 0;
@@ -106,49 +125,62 @@
             height: 100%;
             z-index: -1;
             pointer-events: none;
-            filter: blur(8px); 
-            opacity: 0.5;
-            transition: all 0.5s ease;
+            transition: opacity 0.8s ease;
+        }
+
+        .magnetic-btn {
+            display: inline-block;
+            transition: transform 0.2s cubic-bezier(0.25, 0.46, 0.45, 0.94);
         }
 
         .active-nav {
             color: #0d9488;
             font-weight: 700;
-            border-bottom: 2px solid #0d9488;
+            position: relative;
         }
-        .dark .active-nav { color: #2dd4bf; border-bottom-color: #2dd4bf; }
+        .active-nav::after {
+            content: '';
+            position: absolute;
+            bottom: -4px;
+            left: 0;
+            width: 100%;
+            height: 2px;
+            background-color: #0d9488;
+            transform: scaleX(1);
+            transform-origin: right;
+            transition: transform 0.3s ease;
+        }
     </style>
 </head>
-<body class="bg-sand-50 text-slate-800 dark:bg-slate-900 dark:text-slate-100 transition-colors duration-300 antialiased page-home">
+<body class="bg-sand-50 text-slate-800 dark:bg-slate-900 dark:text-slate-100 transition-colors duration-500 antialiased selection:bg-teal-200 selection:text-teal-900">
 
     <!-- 3D Background -->
     <div id="canvas-container"></div>
 
     <!-- Navigation -->
-    <nav class="fixed w-full z-50 top-0 start-0 border-b border-stone-200/50 dark:border-slate-800/50 bg-white/90 dark:bg-slate-900/90 backdrop-blur-md transition-colors duration-300">
-        <div class="max-w-7xl mx-auto flex flex-wrap items-center justify-between p-4">
-            <a href="#" onclick="router.navigate('home')" class="flex items-center space-x-3 space-x-reverse rtl:space-x-reverse">
-                <span class="self-center text-2xl font-bold whitespace-nowrap text-teal-700 dark:text-teal-400 tracking-wide">InnerVerse</span>
+    <nav class="fixed w-full z-50 top-0 start-0 border-b border-white/20 bg-white/80 dark:bg-slate-900/80 backdrop-blur-lg transition-all duration-300" id="navbar">
+        <div class="max-w-7xl mx-auto flex flex-wrap items-center justify-between p-4 md:p-6">
+            <a href="#" onclick="router.navigate('home')" class="interactive-element flex items-center space-x-3 space-x-reverse rtl:space-x-reverse group">
+                <span class="self-center text-2xl font-bold whitespace-nowrap text-teal-800 dark:text-teal-400 tracking-tight group-hover:tracking-wide transition-all duration-500">InnerVerse</span>
             </a>
             
             <div class="flex md:order-2 space-x-3 space-x-reverse md:space-x-0 rtl:space-x-reverse items-center">
-                <button id="theme-toggle" type="button" class="text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-700 focus:outline-none rounded-lg text-sm p-2.5 mr-2 transition-all">
+                <button id="theme-toggle" type="button" class="interactive-element text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 focus:outline-none rounded-full w-10 h-10 flex items-center justify-center transition-all duration-300">
                     <i class="fas fa-moon hidden dark:block"></i>
                     <i class="fas fa-sun block dark:hidden text-yellow-500"></i>
                 </button>
 
-                <div id="auth-buttons" class="hidden md:block">
+                <div id="auth-buttons" class="hidden md:block mr-2">
                     <!-- Injected via JS -->
                 </div>
 
-                <button data-collapse-toggle="navbar-sticky" type="button" class="inline-flex items-center p-2 w-10 h-10 justify-center text-sm text-slate-500 rounded-lg md:hidden hover:bg-slate-100 focus:outline-none" aria-controls="navbar-sticky" aria-expanded="false" id="menu-toggle">
-                    <span class="sr-only">פתח תפריט</span>
+                <button data-collapse-toggle="navbar-sticky" type="button" class="interactive-element inline-flex items-center justify-center w-10 h-10 text-sm text-slate-500 rounded-full md:hidden hover:bg-slate-100 focus:outline-none" aria-controls="navbar-sticky" aria-expanded="false" id="menu-toggle">
                     <i class="fas fa-bars text-xl"></i>
                 </button>
             </div>
 
             <div class="items-center justify-between hidden w-full md:flex md:w-auto md:order-1" id="navbar-sticky">
-                <ul class="flex flex-col p-4 md:p-0 mt-4 font-medium border border-slate-100 rounded-lg bg-slate-50 md:space-x-8 rtl:space-x-reverse md:flex-row md:mt-0 md:border-0 md:bg-transparent dark:bg-slate-800 md:dark:bg-transparent dark:border-slate-700" id="nav-links">
+                <ul class="flex flex-col p-4 md:p-0 mt-4 font-medium border border-slate-100 rounded-2xl bg-white/50 md:space-x-8 rtl:space-x-reverse md:flex-row md:mt-0 md:border-0 md:bg-transparent dark:bg-slate-800 md:dark:bg-transparent" id="nav-links">
                     <!-- Links Injected via JS -->
                 </ul>
             </div>
@@ -161,8 +193,8 @@
     </main>
 
     <!-- Modal Overlay -->
-    <div id="modal-overlay" class="fixed inset-0 bg-black/60 z-[60] hidden flex items-center justify-center backdrop-blur-sm p-4 animate-fade-in">
-        <div id="modal-content" class="relative w-full max-w-2xl"></div>
+    <div id="modal-overlay" class="fixed inset-0 bg-black/40 z-[60] hidden flex items-center justify-center backdrop-blur-md p-4 opacity-0 transition-opacity duration-300">
+        <div id="modal-content" class="relative w-full max-w-2xl transform scale-95 transition-transform duration-300"></div>
     </div>
 
     <!-- Logic Script -->
@@ -174,9 +206,7 @@
                 title: "חרדה",
                 subtitle: "למצוא עוגן של שקט בתוך הסערה.",
                 iconClass: "fa-water",
-                colorClass: "text-teal-600 dark:text-teal-400",
-                bgClass: "bg-teal-50 dark:bg-teal-900/30",
-                borderHover: "hover:border-teal-200 dark:hover:border-teal-800",
+                imageUrl: "https://images.unsplash.com/photo-1505118380757-91f5f5632de0?auto=format&fit=crop&w=800&q=80", // Stormy wave
                 lead: `הלב דופק, המחשבות רצות... הגוף זוכר את מה שהראש מנסה לשכוח.`,
                 fullContent: `התחושה הזו, שהלב דופק קצת יותר מדי מהר, שהמחשבות רצות בלופים והדאגה קיימת כל הזמן - היא סימן. סימן שהמערכת שלך נמצאת ״בצבירת יתר״. למדנו לעצור את הנשימה ברגעי מתח, וכך 'כלאנו' את החרדה בגוף. בריברסינג, אנו נושמים אל תוך המקומות האלו ומשחררים אותם.`
             },
@@ -185,9 +215,7 @@
                 title: "תקיעות וכיוון",
                 subtitle: "להפוך קיפאון לתנועה זורמת.",
                 iconClass: "fa-compass",
-                colorClass: "text-blue-600 dark:text-blue-400",
-                bgClass: "bg-blue-50 dark:bg-blue-900/30",
-                borderHover: "hover:border-blue-200 dark:hover:border-blue-800",
+                imageUrl: "https://images.unsplash.com/photo-1502680390469-be75c86b636f?auto=format&fit=crop&w=800&q=80", // Surfer/Flow
                 lead: `כמו נהר שקפא – הרצון קיים, אבל הגוף לא זז.`,
                 fullContent: `תחושת התקיעות היא כמו לנסות לשחות בנהר שקפא. הנשימה המעגלית עוקפת את המיינד הביקורתי ומחברת אותך ישירות לכוח החיים, כדי להמיס את הקרח ולהתחיל לנוע מחדש.`
             },
@@ -196,9 +224,7 @@
                 title: "עייפות ושחיקה",
                 subtitle: "להטעין מצברים ולחזור לעוצמה.",
                 iconClass: "fa-sun",
-                colorClass: "text-amber-600 dark:text-amber-400",
-                bgClass: "bg-amber-50 dark:bg-amber-900/30",
-                borderHover: "hover:border-amber-200 dark:hover:border-amber-800",
+                imageUrl: "https://images.unsplash.com/photo-1446776811953-b23d57bd21aa?auto=format&fit=crop&w=800&q=80", // Rock in water/Zen
                 lead: `כשנותנים יותר ממה שמקבלים, הנשימה הופכת שטחית והאור דועך.`,
                 fullContent: `אנחנו חיים תחת עומס ולחץ אינסופי. חוסר החמצן התמידי הזה גורם לשחיקה פנימית. הנשימה היא המקור הישיר והזמין ביותר לאנרגיית חיים (פראנה). בואו נלמד לנשום מחדש.`
             },
@@ -207,9 +233,7 @@
                 title: "מערכות יחסים",
                 subtitle: "לפתוח את הלב לאינטימיות.",
                 iconClass: "fa-heart",
-                colorClass: "text-rose-500 dark:text-rose-400",
-                bgClass: "bg-rose-50 dark:bg-rose-900/30",
-                borderHover: "hover:border-rose-200 dark:hover:border-rose-800",
+                imageUrl: "https://images.unsplash.com/photo-1559419823-c906d7f631a7?auto=format&fit=crop&w=800&q=80", // Crab/Sand
                 lead: `השריון שבנינו מגן עלינו, אבל גם מונע מאהבה להיכנס.`,
                 fullContent: `אם את/ה מוצא/ת את עצמך חוזר/ת על אותם דפוסים כואבים, ייתכן שהלב עטוף בשריון הגנה ישן. הנשימה המעגלית מאפשרת לנו גישה בטוחה ורכה אל המקומות הפגיעים, כדי להסכים להרגיש שוב.`
             },
@@ -218,9 +242,7 @@
                 title: "כאב וגוף",
                 subtitle: "לשחרר את מה שהגוף מחזיק.",
                 iconClass: "fa-leaf",
-                colorClass: "text-emerald-600 dark:text-emerald-400",
-                bgClass: "bg-emerald-50 dark:bg-emerald-900/30",
-                borderHover: "hover:border-emerald-200 dark:hover:border-emerald-800",
+                imageUrl: "https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=800&q=80", // Feet in sand
                 lead: `הגוף צועק את מה שהנפש לא מעזה ללחוש.`,
                 fullContent: `כאבים כרוניים ומתח פיזי הם לעתים קרובות הדרך של הגוף לצעוק רגשות מודחקים. נשימה עמוקה ומלאה מביאה זרימה מוגברת של דם וחמצן לאזורים תפוסים ומאפשרת שחרור עמוק.`
             }
@@ -248,6 +270,7 @@
         const allAppointmentsAdmin = [
             { id: 1, name: "ישראל ישראלי", email: "israel@example.com", date: '2024-08-15T10:00:00', topic: 'חרדה' },
             { id: 2, name: "דנה כהן", email: "dana@example.com", date: '2024-08-22T14:30:00', topic: 'שחיקה' },
+            { id: 3, name: "אבי לוי", email: "avi@example.com", date: '2024-09-05T10:00:00', topic: 'מפגש כללי' },
         ];
 
         /** 2. APP STORE */
@@ -259,7 +282,7 @@
             animationParams: { exhaleForce: 0.008, inhaleForce: 0.01, velocityDampening: 0.98, particleSize: 0.04, spikeValue: 0.03, spikeDuration: 3, calmDuration: 15 }
         };
 
-        /** 3. THREE.JS BACKGROUND (Breathing Particles) */
+        /** 3. ADVANCED THREE.JS BACKGROUND (Interactive Flow) */
         const initThreeJS = () => {
             const container = document.getElementById('canvas-container');
             const scene = new THREE.Scene();
@@ -270,32 +293,43 @@
             container.appendChild(renderer.domElement);
             camera.position.z = 5;
 
-            // Particles
+            // Mouse Interaction Variables
+            const mouse = new THREE.Vector2();
+            const targetMouse = new THREE.Vector2();
+            
+            document.addEventListener('mousemove', (e) => {
+                targetMouse.x = (e.clientX / window.innerWidth) * 2 - 1;
+                targetMouse.y = -(e.clientY / window.innerHeight) * 2 + 1;
+            });
+
+            // Particles - Flow Field Style
+            const count = 3000;
             const geometry = new THREE.BufferGeometry();
-            const count = 2500; 
             const positions = new Float32Array(count * 3);
             const colors = new Float32Array(count * 3);
+            const originalPositions = new Float32Array(count * 3);
+            const randoms = new Float32Array(count); 
 
-            // Warmer Palette (Teal + Sand/Gold/Warm White)
             const colorPalette = [
-                new THREE.Color('#ccfbf1'), // Teal 100
-                new THREE.Color('#99f6e4'), // Teal 200
-                new THREE.Color('#fef3c7'), // Amber 100
-                new THREE.Color('#fff1f2')  // Rose 50
+                new THREE.Color('#ccfbf1'), 
+                new THREE.Color('#5eead4'), 
+                new THREE.Color('#fef3c7'), 
             ];
 
             for(let i=0; i<count; i++) {
-                const r = (Math.random() * 7) + 1; 
-                const theta = Math.random() * Math.PI * 2;
-                const phi = Math.acos((Math.random() * 2) - 1);
-                
-                const x = r * Math.sin(phi) * Math.cos(theta);
-                const y = r * Math.sin(phi) * Math.sin(theta);
-                const z = r * Math.cos(phi);
+                const x = (Math.random() - 0.5) * 15;
+                const y = (Math.random() - 0.5) * 15;
+                const z = (Math.random() - 0.5) * 5;
 
                 positions[i*3] = x;
                 positions[i*3+1] = y;
                 positions[i*3+2] = z;
+
+                originalPositions[i*3] = x;
+                originalPositions[i*3+1] = y;
+                originalPositions[i*3+2] = z;
+
+                randoms[i] = Math.random();
 
                 const color = colorPalette[Math.floor(Math.random() * colorPalette.length)];
                 colors[i*3] = color.r;
@@ -307,34 +341,73 @@
             geometry.setAttribute('color', new THREE.BufferAttribute(colors, 3));
 
             const material = new THREE.PointsMaterial({ 
-                size: 0.05, 
+                size: 0.04, 
                 vertexColors: true, 
                 transparent: true, 
-                opacity: 0.5,
-                sizeAttenuation: true
+                opacity: 0.7,
+                sizeAttenuation: true,
+                blending: THREE.AdditiveBlending
             });
             
             const points = new THREE.Points(geometry, material);
             scene.add(points);
 
-            let generalBreathingTime = 0;
+            let time = 0;
 
             const animate = () => {
                 requestAnimationFrame(animate);
-                let targetScale = 1.0;
-                if (store.exerciseState.isRunning) {
-                    const progress = store.exerciseState.progress;
-                    if (store.exerciseState.phase === 'inhale') targetScale = 1.0 - (progress * 0.4); 
-                    else if (store.exerciseState.phase === 'exhale') targetScale = 0.6 + (progress * 0.6);
-                    else targetScale = store.exerciseState.phase === 'inhale' ? 0.6 : 1.2;
+                time += 0.005;
+                
+                mouse.x += (targetMouse.x - mouse.x) * 0.05;
+                mouse.y += (targetMouse.y - mouse.y) * 0.05;
+
+                const positions = geometry.attributes.position.array;
+
+                let breatheMult = 0;
+                if(store.exerciseState.isRunning) {
+                     const p = store.exerciseState.progress;
+                     if(store.exerciseState.phase === 'inhale') breatheMult = -p * 0.5; 
+                     else if(store.exerciseState.phase === 'exhale') breatheMult = p * 0.5; 
                 } else {
-                    generalBreathingTime += 0.005;
-                    targetScale = 1.0 + Math.sin(generalBreathingTime) * 0.1; 
+                     breatheMult = Math.sin(time) * 0.1; 
                 }
 
-                const currentScale = points.scale.x;
-                points.scale.set(currentScale + (targetScale - currentScale) * 0.05, currentScale + (targetScale - currentScale) * 0.05, currentScale + (targetScale - currentScale) * 0.05);
-                points.rotation.y += 0.0005;
+                for(let i=0; i<count; i++) {
+                    const i3 = i * 3;
+                    const ox = originalPositions[i3];
+                    const oy = originalPositions[i3+1];
+                    const oz = originalPositions[i3+2];
+                    
+                    let nx = ox + Math.sin(time + oy * 0.5) * 0.1;
+                    let ny = oy + Math.cos(time * 0.8 + ox * 0.5) * 0.1;
+                    let nz = oz;
+
+                    const dx = mouse.x * 7 - ox; 
+                    const dy = mouse.y * 7 - oy;
+                    const dist = Math.sqrt(dx*dx + dy*dy);
+                    
+                    if(dist < 3) {
+                        const force = (3 - dist) * 0.2;
+                        nx -= (dx / dist) * force;
+                        ny -= (dy / dist) * force;
+                    }
+
+                    const distCenter = Math.sqrt(ox*ox + oy*oy);
+                    const dirX = ox / distCenter;
+                    const dirY = oy / distCenter;
+                    
+                    if (distCenter > 0.1) {
+                        nx += dirX * breatheMult * distCenter * 0.5;
+                        ny += dirY * breatheMult * distCenter * 0.5;
+                    }
+
+                    positions[i3] = nx;
+                    positions[i3+1] = ny;
+                    positions[i3+2] = nz;
+                }
+
+                geometry.attributes.position.needsUpdate = true;
+                points.rotation.y = time * 0.05;
                 renderer.render(scene, camera);
             };
             animate();
@@ -346,14 +419,77 @@
             });
         };
 
-        /** 4. ROUTER & RENDERERS */
+        /** 4. SMOOTH SCROLL SETUP */
+        const initSmoothScroll = () => {
+            const lenis = new Lenis({
+                duration: 1.2,
+                easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)), 
+                direction: 'vertical',
+                gestureDirection: 'vertical',
+                smooth: true,
+                mouseMultiplier: 1,
+                smoothTouch: false,
+                touchMultiplier: 2,
+            });
+
+            function raf(time) {
+                lenis.raf(time);
+                requestAnimationFrame(raf);
+            }
+
+            requestAnimationFrame(raf);
+            window.lenis = lenis;
+        };
+
+        /** 5. MAGNETICS */
+        const attachHoverEffects = () => {
+            const interactives = document.querySelectorAll('.magnetic-btn, .magnetic');
+
+            interactives.forEach(el => {
+                if(el.tagName === 'BUTTON' || el.classList.contains('magnetic')) {
+                    el.addEventListener('mousemove', (e) => {
+                        const rect = el.getBoundingClientRect();
+                        const x = e.clientX - rect.left - rect.width / 2;
+                        const y = e.clientY - rect.top - rect.height / 2;
+                        el.style.transform = `translate(${x * 0.2}px, ${y * 0.2}px)`;
+                    });
+                    el.addEventListener('mouseleave', () => {
+                        el.style.transform = 'translate(0px, 0px)';
+                    });
+                }
+            });
+        };
+
+        const setupObservers = () => {
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if(entry.isIntersecting) {
+                        entry.target.classList.add('visible');
+                    }
+                });
+            }, { threshold: 0.1 });
+
+            document.querySelectorAll('.reveal-text').forEach(el => observer.observe(el));
+        };
+
+        /** 6. ROUTER & RENDERERS */
         const router = {
             navigate: (pageName) => {
                 store.page = pageName;
                 if (pageName === 'home') document.body.classList.add('page-home');
                 else document.body.classList.remove('page-home');
-                renderUI();
-                window.scrollTo(0,0);
+                
+                const root = document.getElementById('app-root');
+                root.style.opacity = 0;
+                
+                setTimeout(() => {
+                    renderUI();
+                    window.scrollTo(0,0);
+                    if(window.lenis) window.lenis.scrollTo(0, {immediate: true}); 
+                    setupObservers();
+                    attachHoverEffects();
+                    root.style.opacity = 1;
+                }, 300);
             }
         };
 
@@ -380,12 +516,12 @@
             const navContainer = document.getElementById('nav-links');
             const authContainer = document.getElementById('auth-buttons');
             
+            // Updated links based on PDF request
             const links = [
-                { id: 'home', label: 'בית' },
-                { id: 'articles', label: 'מאמרים' },
-                { id: 'journal', label: 'יומן' },
+                { id: 'about', label: 'אודות' },
+                { id: 'programs', label: 'תוכניות' },
+                { id: 'workshops', label: 'סדנאות' },
                 { id: 'breathing-exercise', label: 'תרגול נשימה' },
-                { id: 'booking', label: 'הזמנת מפגש' },
                 { id: 'contact', label: 'צור קשר' },
             ];
 
@@ -396,21 +532,22 @@
 
             navContainer.innerHTML = links.map(link => `
                 <li>
-                    <a href="#" onclick="router.navigate('${link.id}')" 
-                       class="block py-2 px-3 rounded hover:bg-slate-100 md:hover:bg-transparent md:hover:text-teal-600 dark:text-white dark:hover:bg-slate-700 md:dark:hover:bg-transparent ${store.page === link.id ? 'active-nav' : ''}">
+                    <a href="#" onclick="router.navigate(this.dataset.id || '${link.id}')" data-id="${link.id}"
+                       class="interactive-element block py-2 px-3 rounded hover:bg-slate-100 md:hover:bg-transparent md:hover:text-teal-600 dark:text-white dark:hover:bg-slate-700 md:dark:hover:bg-transparent transition-all duration-300 ${store.page === link.id ? 'active-nav' : ''}">
                        ${link.label}
                     </a>
                 </li>
             `).join('');
 
+            // Login on Left side logic handled by flex layout (order-2)
             if (store.user) {
                 authContainer.innerHTML = `
                     <span class="text-sm font-semibold ml-2 text-teal-700 dark:text-teal-300">שלום, ${store.user.name.split(' ')[0]}</span>
-                    <button onclick="auth.logout()" class="text-sm font-bold text-slate-500 hover:text-red-500">יציאה</button>
+                    <button onclick="auth.logout()" class="interactive-element text-sm font-bold text-slate-500 hover:text-red-500">יציאה</button>
                 `;
             } else {
                 authContainer.innerHTML = `
-                    <a href="#" onclick="router.navigate('login')" class="text-white bg-teal-600 hover:bg-teal-700 font-medium rounded-full text-sm px-5 py-2 text-center shadow-md transition-all">כניסה למטופלים</a>
+                    <a href="#" onclick="router.navigate('login')" class="interactive-element text-white bg-teal-600 hover:bg-teal-700 font-medium rounded-full text-sm px-5 py-2 text-center shadow-md transition-all magnetic">כניסה למטופלים</a>
                 `;
             }
         };
@@ -418,227 +555,233 @@
         // --- PAGES ---
 
         const renderHomePage = (container) => {
+            // Mapping for navigation
+            if(store.page === 'about') setTimeout(()=> document.getElementById('about').scrollIntoView({behavior:'smooth'}), 100);
+            if(store.page === 'programs') setTimeout(()=> document.getElementById('focus-areas').scrollIntoView({behavior:'smooth'}), 100);
+            if(store.page === 'workshops') setTimeout(()=> document.getElementById('workshops').scrollIntoView({behavior:'smooth'}), 100);
+            if(store.page === 'contact') setTimeout(()=> document.getElementById('contact').scrollIntoView({behavior:'smooth'}), 100);
+
             container.innerHTML = `
-                <!-- Hero Section - Reverted to Nature/Yoga Image -->
-                <section class="relative h-screen min-h-[650px] flex items-center justify-center overflow-hidden">
-                    <div class="absolute inset-0 z-0">
-                        <!-- Original Nature/Yoga Image with lower opacity for particle visibility -->
-                        <img src="https://images.unsplash.com/photo-1506126613408-eca07ce68773?ixlib=rb-4.0.3&auto=format&fit=crop&w=1920&q=80" alt="Nature Yoga Background" class="w-full h-full object-cover opacity-30">
-                        <div class="absolute inset-0 bg-gradient-to-b from-white/60 via-white/40 to-white/90 dark:from-slate-900/80 dark:via-slate-900/60 dark:to-slate-900"></div>
+                <!-- Hero Section -->
+                <section class="relative h-screen min-h-[700px] flex items-center justify-center overflow-hidden">
+                    <div class="absolute inset-0 z-0 overflow-hidden">
+                        <div class="absolute inset-0 bg-black/10 z-10"></div> 
+                        <img src="https://images.unsplash.com/photo-1506126613408-eca07ce68773?ixlib=rb-4.0.3&auto=format&fit=crop&w=1920&q=80" 
+                             alt="Nature Yoga Background" 
+                             class="w-full h-full object-cover opacity-80 scale-110"
+                             style="transform-origin: center center;" 
+                             data-scroll data-scroll-speed="-0.5"> 
+                        <div class="absolute inset-0 bg-gradient-to-b from-transparent via-white/20 to-sand-50 dark:to-slate-900 z-20"></div>
                     </div>
-                    <div class="relative z-10 text-center px-4 max-w-5xl mx-auto mt-20">
-                        <div class="inline-block mb-4 px-4 py-1 rounded-full bg-white/30 backdrop-blur-md border border-white/40 text-slate-800 dark:text-white font-medium text-sm fade-in-up">
+                    
+                    <div class="relative z-30 text-center px-4 max-w-5xl mx-auto mt-10">
+                        <div class="reveal-text inline-block mb-6 px-6 py-2 rounded-full bg-white/30 backdrop-blur-md border border-white/40 text-slate-900 dark:text-white font-medium text-sm tracking-wide shadow-lg">
                             ✨ מרחב בטוח להתפתחות וריפוי
                         </div>
-                        <h1 class="fade-in-up delay-100 text-5xl md:text-7xl font-bold text-slate-900 dark:text-white mb-8 tracking-tight leading-tight drop-shadow-sm">
-                            לחזור הביתה <br><span class="text-teal-700 dark:text-teal-400">אל הגוף והנשימה</span>
+                        <h1 class="reveal-text text-6xl md:text-8xl font-bold text-slate-900 dark:text-white mb-8 tracking-tight leading-tight drop-shadow-sm" style="transition-delay: 0.1s;">
+                            המסע פנימה <br><span class="text-teal-700 dark:text-teal-400 italic">מתחיל בנשימה אחת</span>
                         </h1>
-                        <p class="fade-in-up delay-200 text-xl md:text-2xl text-slate-800 dark:text-slate-200 mb-12 max-w-2xl mx-auto leading-relaxed font-light">
+                        <p class="reveal-text text-xl md:text-2xl text-slate-800 dark:text-slate-200 mb-12 max-w-2xl mx-auto leading-relaxed font-light" style="transition-delay: 0.2s;">
                             תהליכי עומק, סדנאות ריברסינג ומעגלי התפתחות לחיבור מחדש אל כוח החיים שבתוכנו.
                         </p>
-                        <div class="fade-in-up delay-200 flex flex-col sm:flex-row gap-4 justify-center">
-                            <button onclick="document.getElementById('focus-areas').scrollIntoView({behavior: 'smooth'})" class="inline-flex items-center justify-center px-8 py-4 text-lg font-medium text-white bg-teal-600 rounded-full hover:bg-teal-700 transition-all shadow-xl hover:-translate-y-1">
+                        <div class="reveal-text flex flex-col sm:flex-row gap-6 justify-center" style="transition-delay: 0.3s;">
+                            <button onclick="document.getElementById('focus-areas').scrollIntoView({behavior: 'smooth'})" class="interactive-element magnetic px-10 py-4 text-lg font-medium text-white bg-teal-600 rounded-full hover:bg-teal-700 transition-all shadow-xl hover:shadow-2xl transform hover:-translate-y-1">
                                 איך מתחילים?
                             </button>
-                            <button onclick="router.navigate('contact')" class="inline-flex items-center justify-center px-8 py-4 text-lg font-medium text-teal-700 bg-white/80 backdrop-blur-sm rounded-full hover:bg-white transition-all shadow-lg hover:-translate-y-1">
+                            <button onclick="router.navigate('contact')" class="interactive-element magnetic px-10 py-4 text-lg font-medium text-teal-800 bg-white/80 backdrop-blur-md rounded-full hover:bg-white transition-all shadow-lg hover:shadow-xl transform hover:-translate-y-1">
                                 דברו איתי
                             </button>
                         </div>
                     </div>
                 </section>
 
-                <!-- Focus Areas -->
-                <section id="focus-areas" class="py-24 bg-white/90 dark:bg-slate-900/90 backdrop-blur-sm relative z-10">
+                <!-- About -->
+                <section id="about" class="py-32 transition-colors duration-300">
                     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                        <div class="text-center mb-16">
-                            <h2 class="text-3xl md:text-5xl font-bold text-slate-900 dark:text-white mb-6">על מה אנחנו עובדים?</h2>
+                        <div class="flex flex-col md:flex-row items-center gap-20">
+                            <div class="w-full md:w-5/12 relative reveal-text">
+                                <div class="absolute top-10 -left-10 w-full h-full border-2 border-teal-500/20 rounded-[2.5rem] z-0 hidden md:block"></div>
+                                <img src="https://images.unsplash.com/photo-1556157382-97eda2d62296?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80" alt="Omer Profile" class="rounded-[2.5rem] shadow-2xl w-full h-[600px] object-cover relative z-10 hover:grayscale-0 transition-all duration-700">
+                            </div>
+                            
+                            <div class="w-full md:w-7/12 text-center md:text-right reveal-text" style="transition-delay: 0.2s">
+                                <span class="text-teal-600 font-bold tracking-widest uppercase text-sm mb-2 block">הסיפור שלי</span>
+                                <h2 class="text-5xl md:text-7xl font-bold text-slate-900 dark:text-white mb-10">
+                                    נעים מאוד, אני עומר.
+                                </h2>
+                                <div class="space-y-6 text-xl text-slate-600 dark:text-slate-300 leading-relaxed font-light">
+                                    <p>מטפל בשיטות ריברסינג, תרפיה ביו אנרגטית וגישות התפתחותיות-גופניות. אחרי שש שנים של הכשרות מעמיקות, תרגול אישי וליווי מטופלים, אני מביא אל המפגש מרחב בטוח, רגשי וקשוב כזה שמאפשר לגוף ולנפש להתחבר מחדש.</p>
+                                    <p>אני מאמין שהגוף והנפש הם אחד. כשהנשימה נפתחת גם הלב נפתח, וכשהגוף נרגע הנפש יכולה לרפא את עצמה. בתוך המקום הזה מתרחשת הטרנספורמציה.</p>
+                                    <p>במפגשים איתי אני משלב ריברסינג (נשימה מעגלית), תרפיה אנרגטית ושיטת "בדרך הלוחם" טיפול המשלב תנועה, משחק ומיומנויות חיבור עצמי.</p>
+                                    <p class="font-medium text-teal-700">הזמינו את עצמכם למסע של שינוי מבפנים.</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Focus Areas (Programs) -->
+                <section id="focus-areas" class="py-32 relative z-10 bg-white/50 dark:bg-slate-800/30 backdrop-blur-sm">
+                    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                        <div class="text-center mb-20 reveal-text">
+                            <h2 class="text-4xl md:text-6xl font-bold text-slate-900 dark:text-white mb-6">על מה אנחנו עובדים?</h2>
                             <p class="text-xl text-slate-600 dark:text-slate-400 max-w-2xl mx-auto">כל קושי הוא הזמנה לצמיחה. בחרו את המקום שבו אתם מרגישים קריאה לשינוי.</p>
                         </div>
                         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-                            ${Object.values(issueData).map(issue => `
-                                <div onclick="ui.openTopicModal('${issue.key}')" class="group bg-white dark:bg-slate-800 rounded-3xl p-8 shadow-lg hover:shadow-2xl transition-all duration-500 border border-slate-100 dark:border-slate-700 ${issue.borderHover} transform hover:-translate-y-2 cursor-pointer">
-                                    <div class="w-16 h-16 ${issue.bgClass} rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-500">
-                                        <i class="fas ${issue.iconClass} text-3xl ${issue.colorClass}"></i>
+                            ${Object.values(issueData).map((issue, index) => `
+                                <div onclick="ui.openTopicModal('${issue.key}')" class="reveal-text glassmorphic-card group p-0 cursor-pointer relative overflow-hidden h-[400px]" style="transition-delay: ${index * 0.1}s">
+                                    <img src="${issue.imageUrl}" class="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" alt="${issue.title}">
+                                    <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent flex flex-col justify-end p-8 text-white">
+                                        <div class="mb-4 text-teal-300 text-3xl"><i class="fas ${issue.iconClass}"></i></div>
+                                        <h3 class="text-3xl font-bold mb-2">${issue.title}</h3>
+                                        <p class="text-gray-200 text-lg leading-relaxed opacity-0 group-hover:opacity-100 transform translate-y-4 group-hover:translate-y-0 transition-all duration-500">${issue.subtitle}</p>
                                     </div>
-                                    <h3 class="text-2xl font-bold text-slate-900 dark:text-white mb-3">${issue.title}</h3>
-                                    <p class="text-slate-600 dark:text-slate-400 leading-relaxed">${issue.subtitle}</p>
                                 </div>
                             `).join('')}
                         </div>
                     </div>
                 </section>
 
-                <!-- Gallery / "Moments" Section -->
-                <section class="py-24 bg-stone-50 dark:bg-slate-800/50 relative z-10">
+                <!-- Workshops -->
+                <section id="workshops" class="py-32 relative z-10">
                     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                        <div class="flex flex-col md:flex-row justify-between items-end mb-12">
+                        <div class="flex flex-col md:flex-row justify-between items-end mb-16 reveal-text">
                             <div>
-                                <h2 class="text-3xl md:text-5xl font-bold text-slate-900 dark:text-white mb-4">רגעים מהדרך</h2>
+                                <h2 class="text-4xl md:text-6xl font-bold text-slate-900 dark:text-white mb-4">רגעים מהדרך</h2>
                                 <p class="text-xl text-slate-600 dark:text-slate-400">סדנאות, מפגשים ומה שביניהם.</p>
                             </div>
-                            <a href="#" class="text-teal-600 font-bold hover:underline mt-4 md:mt-0">לגלריה המלאה <i class="fas fa-arrow-left mr-2"></i></a>
+                            <a href="#" class="interactive-element text-teal-600 font-bold hover:underline mt-4 md:mt-0 text-lg">לגלריה המלאה <i class="fas fa-arrow-left mr-2"></i></a>
                         </div>
                         
-                        <!-- Masonry-style Grid -->
-                        <div class="grid grid-cols-1 md:grid-cols-4 gap-4 h-[600px] md:h-[500px]">
-                            <!-- Large Left Item -->
-                            <div class="md:col-span-2 md:row-span-2 img-zoom-container h-full relative rounded-2xl shadow-md group cursor-pointer">
-                                <img src="https://images.unsplash.com/photo-1526045431048-f857369b2d59?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80" class="w-full h-full object-cover img-zoom" alt="Group Circle">
-                                <div class="absolute inset-0 bg-black/20 group-hover:bg-black/40 transition-colors"></div>
-                                <div class="absolute bottom-6 right-6 text-white">
-                                    <span class="bg-teal-600/80 px-3 py-1 rounded-full text-sm mb-2 inline-block backdrop-blur-sm">סדנאות עומק</span>
-                                    <h3 class="text-2xl font-bold">המעגל הקבוצתי</h3>
+                        <div class="grid grid-cols-1 md:grid-cols-4 gap-6 h-[800px] md:h-[600px]">
+                            <div class="md:col-span-2 md:row-span-2 img-zoom-container h-full relative rounded-3xl shadow-lg group cursor-pointer overflow-hidden reveal-text">
+                                <img src="https://images.unsplash.com/photo-1526045431048-f857369b2d59?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80" class="w-full h-full object-cover img-zoom transition-transform duration-700" alt="Group Circle">
+                                <div class="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent opacity-80 transition-opacity"></div>
+                                <div class="absolute bottom-8 right-8 text-white z-10">
+                                    <span class="bg-teal-600/90 px-4 py-1 rounded-full text-sm mb-3 inline-block backdrop-blur-md shadow-md">סדנאות עומק</span>
+                                    <h3 class="text-3xl font-bold">מעגל גברים וחיבור</h3>
                                 </div>
                             </div>
-                            <!-- Top Right -->
-                            <div class="md:col-span-1 img-zoom-container h-full relative rounded-2xl shadow-md group cursor-pointer">
-                                <img src="https://images.unsplash.com/photo-1516934955-80261728d09d?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80" class="w-full h-full object-cover img-zoom" alt="Hands">
-                                <div class="absolute bottom-4 right-4 text-white font-bold drop-shadow-md">חיבור אנושי</div>
+                            <div class="md:col-span-1 img-zoom-container h-full relative rounded-3xl shadow-lg group cursor-pointer overflow-hidden reveal-text" style="transition-delay: 0.1s">
+                                <img src="https://images.unsplash.com/photo-1516934955-80261728d09d?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80" class="w-full h-full object-cover img-zoom transition-transform duration-700" alt="Hands">
+                                <div class="absolute bottom-6 right-6 text-white font-bold drop-shadow-md text-xl z-10">חיבור אנושי</div>
+                                <div class="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent"></div>
                             </div>
-                            <div class="md:col-span-1 img-zoom-container h-full relative rounded-2xl shadow-md group cursor-pointer">
-                                <img src="https://images.unsplash.com/photo-1544367563-12123d8965cd?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80" class="w-full h-full object-cover img-zoom" alt="Therapy">
-                                <div class="absolute bottom-4 right-4 text-white font-bold drop-shadow-md">ליווי אישי</div>
+                            <div class="md:col-span-1 img-zoom-container h-full relative rounded-3xl shadow-lg group cursor-pointer overflow-hidden reveal-text" style="transition-delay: 0.2s">
+                                <img src="https://images.unsplash.com/photo-1544367563-12123d8965cd?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80" class="w-full h-full object-cover img-zoom transition-transform duration-700" alt="Therapy">
+                                <div class="absolute bottom-6 right-6 text-white font-bold drop-shadow-md text-xl z-10">ליווי אישי</div>
+                                <div class="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent"></div>
                             </div>
-                            <!-- Bottom Right -->
-                            <div class="md:col-span-2 img-zoom-container h-full relative rounded-2xl shadow-md group cursor-pointer">
-                                <img src="https://images.unsplash.com/photo-1507120410856-1f35574c3b45?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80" class="w-full h-full object-cover img-zoom" alt="Music & Vibe">
-                                <div class="absolute bottom-6 right-6 text-white">
-                                    <h3 class="text-xl font-bold">מוזיקה ותדר</h3>
+                            <div class="md:col-span-2 img-zoom-container h-full relative rounded-3xl shadow-lg group cursor-pointer overflow-hidden reveal-text" style="transition-delay: 0.3s">
+                                <img src="https://images.unsplash.com/photo-1507120410856-1f35574c3b45?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80" class="w-full h-full object-cover img-zoom transition-transform duration-700" alt="Music & Vibe">
+                                <div class="absolute bottom-8 right-8 text-white z-10">
+                                    <h3 class="text-2xl font-bold">מוזיקה ותדר</h3>
                                 </div>
-                            </div>
-                        </div>
-                    </div>
-                </section>
-
-                <!-- About - Personal Touch -->
-                <section id="about" class="py-24 bg-white dark:bg-slate-900 transition-colors duration-300">
-                    <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
-                        <div class="flex flex-col md:flex-row items-center gap-16">
-                            <!-- Profile Image (Placeholder for Omer) -->
-                            <div class="w-full md:w-5/12 relative">
-                                <div class="absolute top-4 -left-4 w-full h-full border-2 border-teal-500/30 rounded-3xl z-0 hidden md:block"></div>
-                                <img src="https://images.unsplash.com/photo-1556157382-97eda2d62296?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80" alt="Omer Profile" class="rounded-3xl shadow-2xl w-full h-[500px] object-cover relative z-10">
-                            </div>
-                            
-                            <div class="w-full md:w-7/12 text-center md:text-right">
-                                <span class="text-teal-600 font-bold tracking-wide uppercase text-sm">נעים להכיר</span>
-                                <h2 class="text-4xl md:text-5xl font-bold text-slate-900 dark:text-white mb-6 mt-2">
-                                    היי, אני עומר.
-                                </h2>
-                                <div class="space-y-6 text-lg text-slate-600 dark:text-slate-300 leading-relaxed font-light">
-                                    <p>
-                                        המסע שלי בעולם הנשימה התחיל מתוך הצורך האישי שלי למצוא שקט. אחרי שנים של חיפוש, גיליתי שכל התשובות שחיפשתי בחוץ, נמצאות למעשה במרחק נשימה אחת פנימה.
-                                    </p>
-                                    <p>
-                                        <b>InnerVerse</b> נולד מתוך הרצון ליצור מרחב בטוח ומאפשר. מרחב שבו מותר להרגיש הכל, לשחרר את השיפוטיות ופשוט להיות. אני מזמין אתכם למסע משותף של גילוי, שחרור וריפוי.
-                                    </p>
-                                    <p>
-                                        בין אם במפגש אישי בקליניקה ובין אם באנרגיה העוצמתית של הקבוצה - אני כאן כדי ללוות אתכם יד ביד.
-                                    </p>
-                                </div>
-                                <div class="mt-10 flex flex-col sm:flex-row gap-4 justify-center md:justify-start">
-                                    <button onclick="router.navigate('contact')" class="px-8 py-3 bg-slate-900 text-white rounded-full hover:bg-slate-700 transition shadow-lg">קבעו מפגש היכרות</button>
-                                    <button class="px-8 py-3 border border-slate-300 rounded-full hover:bg-slate-50 dark:hover:bg-slate-800 transition">קראו עוד עליי</button>
-                                </div>
+                                <div class="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent"></div>
                             </div>
                         </div>
                     </div>
                 </section>
 
                 <!-- Testimonials -->
-                <section class="py-20 bg-teal-50/50 dark:bg-slate-800/30">
-                    <div class="max-w-6xl mx-auto px-4 text-center">
-                        <h2 class="text-3xl font-bold mb-12">מילים של אנשים</h2>
+                <section class="py-24 bg-teal-50/30 dark:bg-slate-800/30 backdrop-blur-md">
+                    <div class="max-w-7xl mx-auto px-4 text-center">
+                        <h2 class="text-4xl font-bold mb-16 reveal-text">מילים של אנשים</h2>
                         <div class="grid md:grid-cols-3 gap-8">
-                            <div class="bg-white dark:bg-slate-800 p-8 rounded-2xl shadow-sm text-right relative">
-                                <i class="fas fa-quote-right text-4xl text-teal-100 absolute top-6 left-6"></i>
-                                <p class="text-slate-600 dark:text-slate-300 mb-4 relative z-10">"הגעתי סקפטית ויצאתי אחרת לגמרי. הסדנה אפשרה לי לשחרר מועקה שסחבתי שנים. עומר מחזיק את המרחב בצורה מדהימה."</p>
-                                <div class="font-bold text-slate-900 dark:text-white">- מיכל ל.</div>
+                            <div class="glassmorphic-card p-10 text-right relative reveal-text" style="transition-delay: 0s">
+                                <i class="fas fa-quote-right text-5xl text-teal-100/50 absolute top-6 left-6"></i>
+                                <p class="text-slate-700 dark:text-slate-200 mb-6 relative z-10 text-lg leading-relaxed">"הגעתי סקפטית ויצאתי אחרת לגמרי. הסדנה אפשרה לי לשחרר מועקה שסחבתי שנים. עומר מחזיק את המרחב בצורה מדהימה."</p>
+                                <div class="font-bold text-slate-900 dark:text-white text-lg">- מיכל ל.</div>
                             </div>
-                            <div class="bg-white dark:bg-slate-800 p-8 rounded-2xl shadow-sm text-right relative">
-                                <i class="fas fa-quote-right text-4xl text-teal-100 absolute top-6 left-6"></i>
-                                <p class="text-slate-600 dark:text-slate-300 mb-4 relative z-10">"תהליך הריברסינג שינה לי את החיים. למדתי לנשום מחדש, פשוטו כמשמעו. תודה על הליווי הרגיש."</p>
-                                <div class="font-bold text-slate-900 dark:text-white">- דניאל כ.</div>
+                            <div class="glassmorphic-card p-10 text-right relative reveal-text" style="transition-delay: 0.1s">
+                                <i class="fas fa-quote-right text-5xl text-teal-100/50 absolute top-6 left-6"></i>
+                                <p class="text-slate-700 dark:text-slate-200 mb-6 relative z-10 text-lg leading-relaxed">"תהליך הריברסינג שינה לי את החיים. למדתי לנשום מחדש, פשוטו כמשמעו. תודה על הליווי הרגיש."</p>
+                                <div class="font-bold text-slate-900 dark:text-white text-lg">- דניאל כ.</div>
                             </div>
-                            <div class="bg-white dark:bg-slate-800 p-8 rounded-2xl shadow-sm text-right relative">
-                                <i class="fas fa-quote-right text-4xl text-teal-100 absolute top-6 left-6"></i>
-                                <p class="text-slate-600 dark:text-slate-300 mb-4 relative z-10">"מרחב בטוח ומכיל. הרגשתי בבית מהרגע הראשון. ממליצה בחום לכל מי שמחפש חיבור לעצמו."</p>
-                                <div class="font-bold text-slate-900 dark:text-white">- שרון א.</div>
+                            <div class="glassmorphic-card p-10 text-right relative reveal-text" style="transition-delay: 0.2s">
+                                <i class="fas fa-quote-right text-5xl text-teal-100/50 absolute top-6 left-6"></i>
+                                <p class="text-slate-700 dark:text-slate-200 mb-6 relative z-10 text-lg leading-relaxed">"מרחב בטוח ומכיל. הרגשתי בבית מהרגע הראשון. ממליצה בחום לכל מי שמחפש חיבור לעצמו."</p>
+                                <div class="font-bold text-slate-900 dark:text-white text-lg">- שרון א.</div>
                             </div>
                         </div>
                     </div>
                 </section>
 
-                <!-- Footer -->
-                <footer class="bg-slate-900 text-slate-300 py-16 border-t border-slate-800 relative z-10">
+                <!-- Footer (Contact) -->
+                <footer id="contact" class="bg-slate-900 text-slate-300 py-20 border-t border-slate-800 relative z-10">
                     <div class="max-w-7xl mx-auto px-4">
                         <div class="grid grid-cols-1 md:grid-cols-4 gap-12 text-center md:text-right">
                             <div class="col-span-1 md:col-span-2">
-                                <h3 class="text-3xl font-bold text-white mb-4 tracking-wide">InnerVerse</h3>
-                                <p class="text-slate-400 mb-6 max-w-md leading-relaxed">
+                                <h3 class="text-4xl font-bold text-white mb-6 tracking-wide">InnerVerse</h3>
+                                <p class="text-slate-400 mb-8 max-w-md leading-relaxed text-lg">
                                     מרחב לנשימה, התפתחות וריפוי. אני מזמין אתכם להצטרף למסע של גילוי עצמי דרך חכמת הגוף והנשימה.
                                 </p>
                                 <div class="flex space-x-4 space-x-reverse justify-center md:justify-start">
-                                    <a href="#" class="w-10 h-10 rounded-full bg-slate-800 flex items-center justify-center hover:bg-teal-600 transition-colors"><i class="fab fa-facebook-f"></i></a>
-                                    <a href="#" class="w-10 h-10 rounded-full bg-slate-800 flex items-center justify-center hover:bg-teal-600 transition-colors"><i class="fab fa-instagram"></i></a>
-                                    <a href="#" class="w-10 h-10 rounded-full bg-slate-800 flex items-center justify-center hover:bg-teal-600 transition-colors"><i class="fab fa-whatsapp"></i></a>
+                                    <a href="#" class="interactive-element w-12 h-12 rounded-full bg-slate-800 flex items-center justify-center hover:bg-teal-600 transition-all duration-300 hover:scale-110"><i class="fab fa-facebook-f text-xl"></i></a>
+                                    <a href="#" class="interactive-element w-12 h-12 rounded-full bg-slate-800 flex items-center justify-center hover:bg-teal-600 transition-all duration-300 hover:scale-110"><i class="fab fa-instagram text-xl"></i></a>
+                                    <a href="#" class="interactive-element w-12 h-12 rounded-full bg-slate-800 flex items-center justify-center hover:bg-teal-600 transition-all duration-300 hover:scale-110"><i class="fab fa-whatsapp text-xl"></i></a>
                                 </div>
                             </div>
                             <div>
-                                <h4 class="text-lg font-bold text-white mb-6">ניווט</h4>
-                                <ul class="space-y-3 text-slate-400">
-                                    <li><a href="#" onclick="router.navigate('articles')" class="hover:text-teal-400 transition">מאמרים ותובנות</a></li>
-                                    <li><a href="#" onclick="router.navigate('journal')" class="hover:text-teal-400 transition">יומן אישי</a></li>
-                                    <li><a href="#" onclick="router.navigate('booking')" class="hover:text-teal-400 transition">תיאום מפגש</a></li>
-                                    <li><a href="#" onclick="router.navigate('breathing-exercise')" class="hover:text-teal-400 transition">תרגול נשימה אונליין</a></li>
+                                <h4 class="text-xl font-bold text-white mb-8">ניווט</h4>
+                                <ul class="space-y-4 text-slate-400 text-lg">
+                                    <li><a href="#" onclick="router.navigate('articles')" class="interactive-element hover:text-teal-400 transition">מאמרים ותובנות</a></li>
+                                    <li><a href="#" onclick="router.navigate('journal')" class="interactive-element hover:text-teal-400 transition">יומן אישי</a></li>
+                                    <li><a href="#" onclick="router.navigate('booking')" class="interactive-element hover:text-teal-400 transition">תיאום מפגש</a></li>
+                                    <li><a href="#" onclick="router.navigate('breathing-exercise')" class="interactive-element hover:text-teal-400 transition">תרגול נשימה אונליין</a></li>
                                 </ul>
                             </div>
                             <div>
-                                <h4 class="text-lg font-bold text-white mb-6">דברו איתי</h4>
-                                <ul class="space-y-4 text-slate-400">
-                                    <li class="flex items-start justify-center md:justify-start gap-3">
+                                <h4 class="text-xl font-bold text-white mb-8">דברו איתי</h4>
+                                <ul class="space-y-5 text-slate-400 text-lg">
+                                    <li class="flex items-start justify-center md:justify-start gap-4">
                                         <i class="fas fa-envelope mt-1 text-teal-500"></i>
                                         <span>pozso@breathing.co.il</span>
                                     </li>
-                                    <li class="flex items-start justify-center md:justify-start gap-3">
+                                    <li class="flex items-start justify-center md:justify-start gap-4">
                                         <i class="fas fa-phone mt-1 text-teal-500"></i>
                                         <span>052-1234567</span>
                                     </li>
-                                    <li class="flex items-start justify-center md:justify-start gap-3">
+                                    <li class="flex items-start justify-center md:justify-start gap-4">
                                         <i class="fas fa-map-marker-alt mt-1 text-teal-500"></i>
                                         <span>קליניקה בפרדס חנה / תל אביב</span>
                                     </li>
                                 </ul>
                             </div>
                         </div>
-                        <div class="border-t border-slate-800 mt-12 pt-8 text-center text-sm text-slate-500">
-                            &copy; 2023 InnerVerse. נבנה באהבה.
+                        <div class="border-t border-slate-800 mt-16 pt-8 text-center text-sm text-slate-500 flex flex-col md:flex-row justify-between items-center">
+                            <p>&copy; 2025 InnerVerse. נבנה באהבה.</p>
+                            <p class="mt-2 md:mt-0">עיצוב ופיתוח אינטראקטיבי</p>
                         </div>
                     </div>
                 </footer>
             `;
+            
+            // Re-initialize hover effects after rendering
+            attachHoverEffects();
+            setupObservers();
         };
 
         const renderArticlesPage = (container) => {
             container.innerHTML = `
-                <div class="pt-32 px-4 max-w-4xl mx-auto fade-in-up min-h-screen">
-                    <div class="text-center mb-12">
-                        <h1 class="text-4xl font-bold text-slate-900 dark:text-white mb-4">מאמרים ומחשבות</h1>
+                <div class="pt-40 px-4 max-w-5xl mx-auto min-h-screen fade-in-up">
+                    <div class="text-center mb-16 reveal-text">
+                        <h1 class="text-5xl font-bold text-slate-900 dark:text-white mb-6">מאמרים ומחשבות</h1>
                         <p class="text-xl text-slate-600 dark:text-slate-400">מרחב של ידע, השראה ותובנות מהקליניקה.</p>
                     </div>
-                    <div class="grid gap-8 md:grid-cols-2">
-                        ${Object.values(issueData).map(issue => `
-                            <div class="bg-white dark:bg-slate-800 rounded-2xl p-8 shadow-sm hover:shadow-md transition border border-slate-100 dark:border-slate-700 flex flex-col h-full">
-                                <div class="flex items-center gap-3 mb-4">
-                                    <div class="w-10 h-10 rounded-full ${issue.bgClass} flex items-center justify-center text-teal-600"><i class="fas ${issue.iconClass}"></i></div>
-                                    <span class="text-sm text-slate-500">קריאה של 3 דקות</span>
+                    <div class="grid gap-10 md:grid-cols-2">
+                        ${Object.values(issueData).map((issue, i) => `
+                            <div class="glassmorphic-card p-10 flex flex-col h-full reveal-text" style="transition-delay: ${i * 0.1}s">
+                                <div class="flex items-center gap-4 mb-6">
+                                    <div class="w-12 h-12 rounded-full ${issue.bgClass} flex items-center justify-center text-teal-600"><i class="fas ${issue.iconClass} text-xl"></i></div>
+                                    <span class="text-sm text-slate-500 font-medium uppercase tracking-wide">קריאה של 3 דקות</span>
                                 </div>
-                                <h3 class="text-2xl font-bold mb-3 text-slate-900 dark:text-white">${issue.title}</h3>
-                                <div class="text-slate-600 dark:text-slate-300 mb-6 flex-grow leading-relaxed">
+                                <h3 class="text-3xl font-bold mb-4 text-slate-900 dark:text-white">${issue.title}</h3>
+                                <div class="text-slate-600 dark:text-slate-300 mb-8 flex-grow leading-relaxed text-lg">
                                     ${issue.fullContent.substring(0, 120)}...
                                 </div>
-                                <button onclick="ui.openTopicModal('${issue.key}')" class="text-teal-600 font-bold hover:text-teal-700 flex items-center gap-2 mt-auto">
-                                    להמשך קריאה <i class="fas fa-arrow-left text-sm"></i>
+                                <button onclick="ui.openTopicModal('${issue.key}')" class="interactive-element text-teal-600 font-bold hover:text-teal-800 flex items-center gap-3 mt-auto text-lg group">
+                                    להמשך קריאה <i class="fas fa-arrow-left text-sm transform group-hover:-translate-x-2 transition-transform"></i>
                                 </button>
                             </div>
                         `).join('')}
@@ -646,43 +789,43 @@
                 </div>
             `;
         };
-
+        
         const renderJournalPage = (container) => {
             container.innerHTML = `
-                <div class="pt-32 px-4 max-w-5xl mx-auto text-center fade-in-up min-h-screen">
-                    <h1 class="text-4xl font-bold mb-4 text-slate-900 dark:text-white">יומן מסע</h1>
-                    <p class="text-lg text-slate-600 mb-10">זה המקום שלך לפרוק, לשתף ולהתבונן פנימה.</p>
+                <div class="pt-40 px-4 max-w-6xl mx-auto text-center min-h-screen fade-in-up">
+                    <h1 class="text-5xl font-bold mb-4 text-slate-900 dark:text-white">יומן מסע</h1>
+                    <p class="text-xl text-slate-600 mb-12">זה המקום שלך לפרוק, לשתף ולהתבונן פנימה.</p>
                     
-                    <div class="glassmorphic-card p-8 text-right">
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-10">
-                            <div class="space-y-6">
+                    <div class="glassmorphic-card p-10 text-right">
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-12">
+                            <div class="space-y-8">
                                 <div class="flex items-center gap-3 mb-2">
-                                    <i class="fas fa-pen-fancy text-teal-600 text-xl"></i>
-                                    <h3 class="font-bold text-xl">כתיבה אינטואיטיבית</h3>
+                                    <i class="fas fa-pen-fancy text-teal-600 text-2xl"></i>
+                                    <h3 class="font-bold text-2xl text-slate-900 dark:text-white">כתיבה אינטואיטיבית</h3>
                                 </div>
-                                <textarea id="journal-entry" rows="12" class="w-full p-4 rounded-xl bg-white/60 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 focus:ring-2 focus:ring-teal-500 outline-none resize-none shadow-inner" placeholder="איך הנשימה שלך מרגישה היום? מה עולה בך עכשיו?"></textarea>
+                                <textarea id="journal-entry" rows="12" class="w-full p-5 rounded-2xl bg-white/60 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 focus:ring-2 focus:ring-teal-500 outline-none resize-none shadow-inner text-lg" placeholder="איך הנשימה שלך מרגישה היום? מה עולה בך עכשיו?"></textarea>
                                 <div class="flex justify-between items-center">
-                                    <button onclick="ui.saveJournal()" class="bg-teal-600 text-white px-6 py-2 rounded-full hover:bg-teal-700 shadow-md transition">שמירה ביומן</button>
-                                    <span id="save-status" class="text-teal-600 font-medium opacity-0 transition"><i class="fas fa-check mr-1"></i> נשמר בהצלחה</span>
+                                    <button onclick="ui.saveJournal()" class="interactive-element magnetic bg-teal-600 text-white px-8 py-3 rounded-full hover:bg-teal-700 shadow-lg transition font-bold">שמירה ביומן</button>
+                                    <span id="save-status" class="text-teal-600 font-medium opacity-0 transition flex items-center gap-2"><i class="fas fa-check"></i> נשמר בהצלחה</span>
                                 </div>
                             </div>
 
-                            <div class="flex flex-col h-[500px] bg-white/40 dark:bg-slate-800/30 rounded-xl p-1 border border-slate-200/50 dark:border-slate-700/50">
-                                <div class="p-4 border-b border-slate-200/50 dark:border-slate-700/50 flex items-center gap-3">
-                                    <div class="w-8 h-8 rounded-full bg-teal-100 flex items-center justify-center text-teal-600"><i class="fas fa-robot"></i></div>
-                                    <h3 class="font-bold">המדריך הפנימי</h3>
+                            <div class="flex flex-col h-[600px] bg-white/40 dark:bg-slate-800/30 rounded-2xl p-2 border border-slate-200/50 dark:border-slate-700/50">
+                                <div class="p-6 border-b border-slate-200/50 dark:border-slate-700/50 flex items-center gap-4">
+                                    <div class="w-10 h-10 rounded-full bg-teal-100 flex items-center justify-center text-teal-600 text-lg"><i class="fas fa-robot"></i></div>
+                                    <h3 class="font-bold text-xl text-slate-900 dark:text-white">המדריך הפנימי</h3>
                                 </div>
-                                <div id="chat-history" class="flex-grow overflow-y-auto p-4 space-y-4 custom-scrollbar">
+                                <div id="chat-history" class="flex-grow overflow-y-auto p-6 space-y-4">
                                     <div class="flex gap-3">
-                                        <div class="bg-white dark:bg-slate-700 p-4 rounded-2xl rounded-br-none shadow-sm max-w-[85%] text-sm leading-relaxed">
+                                        <div class="bg-white dark:bg-slate-700 p-5 rounded-2xl rounded-br-none shadow-sm max-w-[85%] text-base leading-relaxed text-slate-800 dark:text-slate-200">
                                             שלום. אני כאן כדי להקשיב ולכוון. אם עולה בך תחושה של עומס או בלבול, נסה/י לשתף אותי.
                                         </div>
                                     </div>
                                 </div>
                                 <div class="p-4 pt-2">
-                                    <div class="flex gap-2 bg-white dark:bg-slate-900 p-2 rounded-full shadow-sm border border-slate-200 dark:border-slate-700">
-                                        <input type="text" id="chat-input" class="flex-grow bg-transparent px-4 outline-none text-sm" placeholder="כתוב/י הודעה..." onkeypress="if(event.key === 'Enter') ui.sendChat()">
-                                        <button onclick="ui.sendChat()" class="w-8 h-8 bg-teal-600 text-white rounded-full flex items-center justify-center hover:bg-teal-700 transition"><i class="fas fa-arrow-left"></i></button>
+                                    <div class="flex gap-3 bg-white dark:bg-slate-900 p-3 rounded-full shadow-md border border-slate-200 dark:border-slate-700">
+                                        <input type="text" id="chat-input" class="flex-grow bg-transparent px-4 outline-none text-base text-slate-800 dark:text-white" placeholder="כתוב/י הודעה..." onkeypress="if(event.key === 'Enter') ui.sendChat()">
+                                        <button onclick="ui.sendChat()" class="interactive-element w-10 h-10 bg-teal-600 text-white rounded-full flex items-center justify-center hover:bg-teal-700 transition"><i class="fas fa-arrow-left"></i></button>
                                     </div>
                                 </div>
                             </div>
@@ -690,242 +833,248 @@
                     </div>
                 </div>
             `;
+            attachHoverEffects();
         };
-
-        const renderBreathingPage = (container) => {
-            container.innerHTML = `
+        
+        const renderBreathingPage = (container) => { 
+             container.innerHTML = `
                 <div class="flex flex-col items-center justify-center h-screen w-full relative fade-in-up">
-                    <div class="text-center z-10 mb-24">
-                        <h2 id="breath-cue" class="text-5xl md:text-7xl font-bold mb-4 transition-all duration-500 transform text-slate-800 dark:text-white drop-shadow-sm">התכונן...</h2>
-                        <div id="breath-timer" class="text-8xl font-mono font-thin tabular-nums text-teal-600 dark:text-teal-400 opacity-80">0</div>
+                    <div class="text-center z-10 mb-24 mix-blend-difference text-white"> <!-- Blend mode for coolness -->
+                        <h2 id="breath-cue" class="text-6xl md:text-8xl font-bold mb-4 transition-all duration-500 transform drop-shadow-lg">התכונן...</h2>
+                        <div id="breath-timer" class="text-9xl font-mono font-thin tabular-nums opacity-80">0</div>
                     </div>
                     
                     <!-- Controls -->
-                    <div class="absolute bottom-0 left-0 w-full glassmorphic-card rounded-b-none rounded-t-3xl p-8 flex flex-col md:flex-row items-center justify-center gap-8 border-t border-white/50">
-                        <div class="flex items-center gap-4">
-                            <button onclick="breathing.toggle()" id="breath-control-btn" class="w-20 h-20 rounded-full bg-teal-600 text-white flex items-center justify-center hover:bg-teal-700 transition shadow-xl hover:scale-105">
-                                <i class="fas fa-play text-2xl ml-1"></i>
+                    <div class="absolute bottom-0 left-0 w-full glassmorphic-card rounded-b-none rounded-t-[3rem] p-10 flex flex-col md:flex-row items-center justify-center gap-12 border-t border-white/50 backdrop-blur-xl">
+                        <div class="flex items-center gap-6">
+                            <button onclick="breathing.toggle()" id="breath-control-btn" class="interactive-element magnetic w-24 h-24 rounded-full bg-teal-600 text-white flex items-center justify-center hover:bg-teal-700 transition shadow-2xl hover:scale-105">
+                                <i class="fas fa-play text-3xl ml-1"></i>
                             </button>
                         </div>
-                        <div class="w-full max-w-xs text-right">
-                            <label class="text-xs font-bold text-slate-500 uppercase tracking-wider mb-2 block">בחירת תרגיל</label>
+                        <div class="w-full max-w-sm text-right">
+                            <label class="text-sm font-bold text-slate-500 uppercase tracking-wider mb-3 block">בחירת תרגיל</label>
                             <div class="relative">
-                                <select id="exercise-select" onchange="breathing.changeExercise(this.value)" class="w-full p-3 pr-10 rounded-xl bg-slate-100 dark:bg-slate-800 border-none focus:ring-2 focus:ring-teal-500 appearance-none cursor-pointer font-medium">
+                                <select id="exercise-select" onchange="breathing.changeExercise(this.value)" class="w-full p-4 pr-12 rounded-2xl bg-slate-100 dark:bg-slate-800 border-none focus:ring-2 focus:ring-teal-500 appearance-none cursor-pointer font-medium text-lg text-slate-900 dark:text-white shadow-inner">
                                     ${Object.entries(breathingLibrary).map(([cat, exercises]) => `
                                         <optgroup label="${cat === 'anxiety' ? 'להרגעה' : (cat === 'stuck' ? 'לאנרגיה' : 'כללי')}">
                                             ${exercises.map(ex => `<option value="${ex.id}">${ex.name}</option>`).join('')}
                                         </optgroup>
                                     `).join('')}
                                 </select>
-                                <i class="fas fa-chevron-down absolute top-4 left-4 text-slate-400 pointer-events-none"></i>
+                                <i class="fas fa-chevron-down absolute top-5 left-5 text-slate-400 pointer-events-none"></i>
                             </div>
                         </div>
                     </div>
-                </div>
-            `;
-            breathing.init();
+                </div>`;
+             breathing.init();
+             attachHoverEffects();
         };
 
         const renderLoginPage = (container) => {
             container.innerHTML = `
-                <div class="flex items-center justify-center min-h-screen fade-in-up px-4 bg-slate-50/50 dark:bg-slate-900/50">
-                    <div class="bg-white dark:bg-slate-800 p-10 w-full max-w-md rounded-3xl shadow-xl border border-slate-100 dark:border-slate-700">
-                        <div class="text-center mb-8">
-                            <div class="w-16 h-16 bg-teal-100 rounded-full flex items-center justify-center text-teal-600 mx-auto mb-4 text-2xl"><i class="fas fa-user"></i></div>
-                            <h2 class="text-3xl font-bold text-slate-900 dark:text-white">כניסה למערכת</h2>
-                            <p class="text-slate-500 mt-2">גישה לאזור האישי למטופלים</p>
+                <div class="flex items-center justify-center min-h-screen fade-in-up px-4">
+                    <div class="glassmorphic-card p-12 w-full max-w-md">
+                        <div class="text-center mb-10">
+                            <div class="w-20 h-20 bg-teal-100 rounded-full flex items-center justify-center text-teal-600 mx-auto mb-6 text-3xl"><i class="fas fa-user"></i></div>
+                            <h2 class="text-4xl font-bold text-slate-900 dark:text-white mb-2">כניסה</h2>
+                            <p class="text-slate-500">גישה לאזור האישי למטופלים</p>
                         </div>
-                        <form onsubmit="auth.login(event)" class="space-y-5">
+                        <form onsubmit="auth.login(event)" class="space-y-6">
                             <div>
                                 <label class="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-2">אימייל</label>
-                                <input type="email" id="login-email" value="demo@user.com" class="w-full p-3 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 focus:ring-2 focus:ring-teal-500 outline-none transition">
+                                <input type="email" id="login-email" value="demo@user.com" class="w-full p-4 rounded-xl bg-white/50 dark:bg-slate-900/50 border border-slate-200 dark:border-slate-700 focus:ring-2 focus:ring-teal-500 outline-none transition">
                             </div>
                             <div>
                                 <label class="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-2">סיסמה</label>
-                                <input type="password" id="login-pass" value="123" class="w-full p-3 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 focus:ring-2 focus:ring-teal-500 outline-none transition">
+                                <input type="password" id="login-pass" value="123" class="w-full p-4 rounded-xl bg-white/50 dark:bg-slate-900/50 border border-slate-200 dark:border-slate-700 focus:ring-2 focus:ring-teal-500 outline-none transition">
                             </div>
-                            <button type="submit" class="w-full bg-teal-600 text-white py-3 rounded-xl hover:bg-teal-700 font-bold shadow-lg hover:shadow-xl transition transform hover:-translate-y-0.5">התחברות</button>
+                            <button type="submit" class="interactive-element magnetic w-full bg-teal-600 text-white py-4 rounded-xl hover:bg-teal-700 font-bold shadow-lg hover:shadow-xl transition transform hover:-translate-y-1 text-lg">התחברות</button>
                         </form>
-                        <p id="login-error" class="text-red-500 text-sm text-center mt-4 hidden bg-red-50 p-2 rounded-lg">שגיאה בפרטי ההתחברות. נסו שוב.</p>
+                        <p id="login-error" class="text-red-500 text-sm text-center mt-6 hidden bg-red-50 p-3 rounded-xl">שגיאה בפרטי ההתחברות. נסו שוב.</p>
                     </div>
                 </div>
             `;
+            attachHoverEffects();
         };
         
         const renderBookingPage = (container) => {
             container.innerHTML = `
-                <div class="pt-32 px-4 max-w-3xl mx-auto fade-in-up min-h-screen">
-                    <div class="text-center mb-12">
-                        <h1 class="text-4xl font-bold text-slate-900 dark:text-white mb-4">תיאום מפגש</h1>
-                        <p class="text-lg text-slate-600">הצעד הראשון מתחיל כאן. מלאו את הפרטים ונחזור אליכם.</p>
+                <div class="pt-40 px-4 max-w-4xl mx-auto fade-in-up min-h-screen">
+                    <div class="text-center mb-16">
+                        <h1 class="text-5xl font-bold text-slate-900 dark:text-white mb-6">תיאום מפגש</h1>
+                        <p class="text-xl text-slate-600 dark:text-slate-400">הצעד הראשון מתחיל כאן. מלאו את הפרטים ונחזור אליכם.</p>
                     </div>
-                    <div class="bg-white dark:bg-slate-800 p-8 md:p-12 rounded-3xl shadow-xl border border-slate-100 dark:border-slate-700">
-                        <form class="space-y-6 text-right">
-                            <div class="grid md:grid-cols-2 gap-6">
+                    <div class="glassmorphic-card p-12 border border-slate-100 dark:border-slate-700">
+                        <form class="space-y-8 text-right">
+                            <div class="grid md:grid-cols-2 gap-8">
                                 <div>
-                                    <label class="block text-sm font-bold mb-2 text-slate-700 dark:text-slate-300">שם מלא</label>
-                                    <input type="text" class="w-full p-3 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 focus:ring-2 focus:ring-teal-500 outline-none" placeholder="ישראל ישראלי">
+                                    <label class="block text-sm font-bold mb-3 text-slate-700 dark:text-slate-300">שם מלא</label>
+                                    <input type="text" class="w-full p-4 rounded-xl bg-slate-50 dark:bg-slate-900/50 border border-slate-200 dark:border-slate-700 focus:ring-2 focus:ring-teal-500 outline-none" placeholder="ישראל ישראלי">
                                 </div>
                                 <div>
-                                    <label class="block text-sm font-bold mb-2 text-slate-700 dark:text-slate-300">אימייל</label>
-                                    <input type="email" class="w-full p-3 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 focus:ring-2 focus:ring-teal-500 outline-none" placeholder="example@mail.com">
+                                    <label class="block text-sm font-bold mb-3 text-slate-700 dark:text-slate-300">אימייל</label>
+                                    <input type="email" class="w-full p-4 rounded-xl bg-slate-50 dark:bg-slate-900/50 border border-slate-200 dark:border-slate-700 focus:ring-2 focus:ring-teal-500 outline-none" placeholder="example@mail.com">
                                 </div>
                             </div>
                             <div>
-                                <label class="block text-sm font-bold mb-2 text-slate-700 dark:text-slate-300">במה תרצו להתמקד?</label>
-                                <select class="w-full p-3 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 focus:ring-2 focus:ring-teal-500 outline-none">
+                                <label class="block text-sm font-bold mb-3 text-slate-700 dark:text-slate-300">במה תרצו להתמקד?</label>
+                                <select class="w-full p-4 rounded-xl bg-slate-50 dark:bg-slate-900/50 border border-slate-200 dark:border-slate-700 focus:ring-2 focus:ring-teal-500 outline-none cursor-pointer">
                                     ${Object.values(issueData).map(i => `<option value="${i.key}">${i.title}</option>`).join('')}
                                     <option value="other">אחר / התייעצות כללית</option>
                                 </select>
                             </div>
                             <div>
-                                <label class="block text-sm font-bold mb-2 text-slate-700 dark:text-slate-300">הודעה אישית (אופציונלי)</label>
-                                <textarea rows="4" class="w-full p-3 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 focus:ring-2 focus:ring-teal-500 outline-none resize-none" placeholder="שתפו בקצרה מה מביא אתכם לכאן..."></textarea>
+                                <label class="block text-sm font-bold mb-3 text-slate-700 dark:text-slate-300">הודעה אישית (אופציונלי)</label>
+                                <textarea rows="5" class="w-full p-4 rounded-xl bg-slate-50 dark:bg-slate-900/50 border border-slate-200 dark:border-slate-700 focus:ring-2 focus:ring-teal-500 outline-none resize-none" placeholder="שתפו בקצרה מה מביא אתכם לכאן..."></textarea>
                             </div>
-                            <button type="button" onclick="alert('הטופס נשלח בהצלחה! ניצור קשר בקרוב.')" class="w-full bg-teal-600 text-white py-4 rounded-xl hover:bg-teal-700 font-bold text-lg shadow-lg transition">שליחת בקשה</button>
+                            <button type="button" onclick="alert('הטופס נשלח בהצלחה! ניצור קשר בקרוב.')" class="interactive-element magnetic w-full bg-teal-600 text-white py-5 rounded-xl hover:bg-teal-700 font-bold text-xl shadow-xl transition hover:-translate-y-1">שליחת בקשה</button>
                         </form>
                     </div>
                 </div>
             `;
+            attachHoverEffects();
         };
 
         const renderContactPage = (container) => {
             container.innerHTML = `
-                <div class="pt-32 px-4 max-w-5xl mx-auto fade-in-up text-center min-h-screen">
-                    <h1 class="text-4xl font-bold mb-4 text-slate-900 dark:text-white">יצירת קשר</h1>
-                    <p class="text-lg text-slate-600 mb-12">מוזמנים לפנות בכל שאלה או התייעצות.</p>
+                <div class="pt-40 px-4 max-w-6xl mx-auto fade-in-up text-center min-h-screen">
+                    <h1 class="text-5xl font-bold mb-6 text-slate-900 dark:text-white">יצירת קשר</h1>
+                    <p class="text-xl text-slate-600 dark:text-slate-400 mb-16">מוזמנים לפנות בכל שאלה או התייעצות.</p>
                     
-                    <div class="grid md:grid-cols-2 gap-8 items-start">
-                        <div class="bg-teal-600 text-white p-10 rounded-3xl shadow-xl text-right relative overflow-hidden">
-                            <div class="absolute top-0 left-0 w-32 h-32 bg-white/10 rounded-full -translate-x-10 -translate-y-10"></div>
-                            <div class="absolute bottom-0 right-0 w-24 h-24 bg-white/10 rounded-full translate-x-10 translate-y-10"></div>
+                    <div class="grid md:grid-cols-2 gap-12 items-start">
+                        <div class="bg-teal-600 text-white p-12 rounded-[2.5rem] shadow-2xl text-right relative overflow-hidden">
+                            <div class="absolute top-0 left-0 w-48 h-48 bg-white/10 rounded-full -translate-x-16 -translate-y-16"></div>
+                            <div class="absolute bottom-0 right-0 w-32 h-32 bg-white/10 rounded-full translate-x-12 translate-y-12"></div>
                             
-                            <h3 class="text-2xl font-bold mb-8 relative z-10">פרטי התקשרות</h3>
-                            <div class="space-y-6 relative z-10">
-                                <div class="flex items-center gap-4">
-                                    <div class="w-10 h-10 rounded-full bg-white/20 flex items-center justify-center"><i class="fas fa-envelope"></i></div>
-                                    <a href="mailto:pozso@breathing.co.il" class="hover:underline text-lg">pozso@breathing.co.il</a>
+                            <h3 class="text-3xl font-bold mb-10 relative z-10">פרטי התקשרות</h3>
+                            <div class="space-y-8 relative z-10 text-lg">
+                                <div class="flex items-center gap-6">
+                                    <div class="w-14 h-14 rounded-full bg-white/20 flex items-center justify-center text-2xl"><i class="fas fa-envelope"></i></div>
+                                    <a href="mailto:pozso@breathing.co.il" class="interactive-element hover:underline hover:text-teal-100 transition">pozso@breathing.co.il</a>
                                 </div>
-                                <div class="flex items-center gap-4">
-                                    <div class="w-10 h-10 rounded-full bg-white/20 flex items-center justify-center"><i class="fas fa-phone"></i></div>
-                                    <a href="tel:052-1234567" class="hover:underline text-lg">052-1234567</a>
+                                <div class="flex items-center gap-6">
+                                    <div class="w-14 h-14 rounded-full bg-white/20 flex items-center justify-center text-2xl"><i class="fas fa-phone"></i></div>
+                                    <a href="tel:052-1234567" class="interactive-element hover:underline hover:text-teal-100 transition">052-1234567</a>
                                 </div>
-                                <div class="flex items-center gap-4">
-                                    <div class="w-10 h-10 rounded-full bg-white/20 flex items-center justify-center"><i class="fas fa-map-marker-alt"></i></div>
-                                    <span class="text-lg">פרדס חנה / תל אביב</span>
+                                <div class="flex items-center gap-6">
+                                    <div class="w-14 h-14 rounded-full bg-white/20 flex items-center justify-center text-2xl"><i class="fas fa-map-marker-alt"></i></div>
+                                    <span>פרדס חנה / תל אביב</span>
                                 </div>
                             </div>
                             
-                            <div class="mt-12">
-                                <h4 class="font-bold mb-4">עקבו אחריי</h4>
-                                <div class="flex gap-4">
-                                    <a href="#" class="hover:text-teal-200 transition"><i class="fab fa-facebook text-2xl"></i></a>
-                                    <a href="#" class="hover:text-teal-200 transition"><i class="fab fa-instagram text-2xl"></i></a>
+                            <div class="mt-16">
+                                <h4 class="font-bold mb-6 text-xl">עקבו אחריי</h4>
+                                <div class="flex gap-6">
+                                    <a href="#" class="interactive-element hover:text-teal-200 transition transform hover:scale-110"><i class="fab fa-facebook text-3xl"></i></a>
+                                    <a href="#" class="interactive-element hover:text-teal-200 transition transform hover:scale-110"><i class="fab fa-instagram text-3xl"></i></a>
                                 </div>
                             </div>
                         </div>
                         
-                        <div class="bg-white dark:bg-slate-800 p-10 rounded-3xl shadow-xl border border-slate-100 dark:border-slate-700">
-                             <h3 class="text-2xl font-bold mb-6 text-right text-slate-900 dark:text-white">שלחו הודעה</h3>
-                             <form class="space-y-4 text-right">
-                                <input type="text" placeholder="שם מלא" class="w-full p-3 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 focus:ring-2 focus:ring-teal-500 outline-none">
-                                <input type="text" placeholder="טלפון" class="w-full p-3 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 focus:ring-2 focus:ring-teal-500 outline-none">
-                                <textarea placeholder="הודעה" rows="4" class="w-full p-3 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 focus:ring-2 focus:ring-teal-500 outline-none resize-none"></textarea>
-                                <button type="button" onclick="alert('נשלח!')" class="w-full bg-slate-900 text-white py-3 rounded-xl hover:bg-slate-700 font-bold transition">שליחה</button>
+                        <div class="glassmorphic-card p-12 shadow-xl border border-slate-100 dark:border-slate-700">
+                             <h3 class="text-3xl font-bold mb-8 text-right text-slate-900 dark:text-white">שלחו הודעה</h3>
+                             <form class="space-y-6 text-right">
+                                <input type="text" placeholder="שם מלא" class="w-full p-4 rounded-xl bg-slate-50 dark:bg-slate-900/50 border border-slate-200 dark:border-slate-700 focus:ring-2 focus:ring-teal-500 outline-none">
+                                <input type="text" placeholder="טלפון" class="w-full p-4 rounded-xl bg-slate-50 dark:bg-slate-900/50 border border-slate-200 dark:border-slate-700 focus:ring-2 focus:ring-teal-500 outline-none">
+                                <textarea placeholder="הודעה" rows="5" class="w-full p-4 rounded-xl bg-slate-50 dark:bg-slate-900/50 border border-slate-200 dark:border-slate-700 focus:ring-2 focus:ring-teal-500 outline-none resize-none"></textarea>
+                                <button type="button" onclick="alert('נשלח!')" class="interactive-element magnetic w-full bg-slate-900 text-white py-4 rounded-xl hover:bg-slate-700 font-bold transition shadow-lg hover:-translate-y-1 text-lg">שליחה</button>
                              </form>
                         </div>
                     </div>
                 </div>
             `;
+            attachHoverEffects();
         };
-
+        
         const renderMyAppointmentsPage = (container) => {
             const apps = store.user.appointments || [];
             container.innerHTML = `
-                <div class="pt-32 px-4 max-w-4xl mx-auto fade-in-up min-h-screen">
-                    <h1 class="text-3xl font-bold text-center mb-2 text-slate-900 dark:text-white">האזור האישי</h1>
-                    <p class="text-center text-slate-500 mb-10">ברוך הבא, ${store.user.name}</p>
+                <div class="pt-40 px-4 max-w-5xl mx-auto fade-in-up min-h-screen">
+                    <h1 class="text-4xl font-bold text-center mb-2 text-slate-900 dark:text-white">האזור האישי</h1>
+                    <p class="text-center text-slate-500 mb-12 text-xl">ברוך הבא, ${store.user.name}</p>
                     
-                    <div class="grid md:grid-cols-3 gap-8">
-                        <div class="md:col-span-2 space-y-6">
-                            <h2 class="text-xl font-bold text-slate-800 dark:text-slate-200 border-b pb-2 border-slate-200 dark:border-slate-700">פגישות קרובות</h2>
+                    <div class="grid md:grid-cols-3 gap-10">
+                        <div class="md:col-span-2 space-y-8">
+                            <h2 class="text-2xl font-bold text-slate-800 dark:text-slate-200 border-b pb-4 border-slate-200 dark:border-slate-700">פגישות קרובות</h2>
                             ${apps.length > 0 ? apps.map(app => `
-                                <div class="bg-white dark:bg-slate-800 p-6 rounded-2xl shadow-sm border-r-4 border-teal-500 flex flex-col sm:flex-row justify-between items-center gap-4">
+                                <div class="glassmorphic-card p-8 flex flex-col sm:flex-row justify-between items-center gap-6 border-r-4 border-teal-500">
                                     <div class="text-right w-full">
-                                        <h3 class="font-bold text-lg text-slate-900 dark:text-white">מפגש אישי: ${app.topic}</h3>
-                                        <div class="text-slate-500 mt-1 flex items-center gap-3">
+                                        <h3 class="font-bold text-xl text-slate-900 dark:text-white">מפגש אישי: ${app.topic}</h3>
+                                        <div class="text-slate-500 mt-2 flex items-center gap-4 text-lg">
                                             <span><i class="far fa-calendar ml-1"></i> ${new Date(app.date).toLocaleDateString('he-IL')}</span>
                                             <span><i class="far fa-clock ml-1"></i> 10:00</span>
                                         </div>
-                                        <div class="mt-2 text-sm text-slate-400"><i class="fas fa-map-pin ml-1"></i> קליניקה תל אביב</div>
+                                        <div class="mt-3 text-slate-400"><i class="fas fa-map-pin ml-1"></i> קליניקה תל אביב</div>
                                     </div>
-                                    <div class="flex gap-2 w-full sm:w-auto">
-                                        <button class="px-4 py-2 bg-teal-50 text-teal-700 rounded-lg hover:bg-teal-100 transition font-medium text-sm flex-1 whitespace-nowrap">הכנה למפגש</button>
-                                        <button class="px-4 py-2 border border-slate-200 rounded-lg hover:bg-slate-50 text-sm flex-1">שינוי</button>
+                                    <div class="flex gap-3 w-full sm:w-auto">
+                                        <button class="interactive-element magnetic px-6 py-3 bg-teal-50 text-teal-700 rounded-xl hover:bg-teal-100 transition font-bold flex-1 whitespace-nowrap">הכנה למפגש</button>
+                                        <button class="interactive-element magnetic px-6 py-3 border border-slate-200 rounded-xl hover:bg-slate-50 transition flex-1">שינוי</button>
                                     </div>
                                 </div>
-                            `).join('') : `<div class="text-center p-8 bg-slate-50 rounded-2xl text-slate-500">אין פגישות קרובות כרגע</div>`}
+                            `).join('') : `<div class="text-center p-10 bg-slate-50 rounded-3xl text-slate-500 text-lg">אין פגישות קרובות כרגע</div>`}
                         </div>
                         
-                        <div class="space-y-6">
-                            <div class="bg-teal-600 text-white p-6 rounded-2xl shadow-lg">
-                                <h3 class="font-bold text-lg mb-2">תרגול מומלץ להיום</h3>
-                                <p class="text-teal-100 text-sm mb-4">על בסיס המפגש האחרון, מומלץ לתרגל נשימה קוהרנטית.</p>
-                                <button onclick="router.navigate('breathing-exercise')" class="w-full bg-white text-teal-600 py-2 rounded-lg font-bold text-sm hover:bg-teal-50 transition">לתרגול עכשיו</button>
+                        <div class="space-y-8">
+                            <div class="bg-teal-600 text-white p-8 rounded-3xl shadow-xl relative overflow-hidden">
+                                <div class="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full -translate-y-10 translate-x-10"></div>
+                                <h3 class="font-bold text-xl mb-3 relative z-10">תרגול מומלץ להיום</h3>
+                                <p class="text-teal-100 mb-6 relative z-10">על בסיס המפגש האחרון, מומלץ לתרגל נשימה קוהרנטית.</p>
+                                <button onclick="router.navigate('breathing-exercise')" class="interactive-element magnetic w-full bg-white text-teal-600 py-3 rounded-xl font-bold hover:bg-teal-50 transition shadow-md relative z-10">לתרגול עכשיו</button>
                             </div>
-                            <div class="bg-white dark:bg-slate-800 p-6 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-700">
-                                <h3 class="font-bold text-lg mb-4 text-slate-800 dark:text-slate-200">סיכומים ומסמכים</h3>
-                                <ul class="space-y-3 text-sm text-slate-500">
-                                    <li class="flex items-center gap-2 cursor-pointer hover:text-teal-600"><i class="far fa-file-pdf"></i> סיכום מפגש 10.9</li>
-                                    <li class="flex items-center gap-2 cursor-pointer hover:text-teal-600"><i class="far fa-file-pdf"></i> המלצות תזונה ותנועה</li>
+                            <div class="glassmorphic-card p-8 border border-slate-100 dark:border-slate-700">
+                                <h3 class="font-bold text-xl mb-6 text-slate-800 dark:text-slate-200">סיכומים ומסמכים</h3>
+                                <ul class="space-y-4 text-slate-500">
+                                    <li class="flex items-center gap-3 cursor-pointer hover:text-teal-600 transition"><i class="far fa-file-pdf text-xl"></i> סיכום מפגש 10.9</li>
+                                    <li class="flex items-center gap-3 cursor-pointer hover:text-teal-600 transition"><i class="far fa-file-pdf text-xl"></i> המלצות תזונה ותנועה</li>
                                 </ul>
                             </div>
                         </div>
                     </div>
                 </div>
             `;
+            attachHoverEffects();
         };
 
         const renderAdminPage = (container) => {
             if (!store.user || store.user.email !== 'admin@user.com') { router.navigate('home'); return; }
             container.innerHTML = `
-                <div class="pt-32 px-4 max-w-5xl mx-auto fade-in-up min-h-screen">
-                    <div class="flex justify-between items-center mb-8">
-                        <h1 class="text-3xl font-bold text-slate-900 dark:text-white">לוח בקרה - ניהול</h1>
-                        <button class="bg-teal-600 text-white px-4 py-2 rounded-lg text-sm hover:bg-teal-700">+ יומן חדש</button>
+                <div class="pt-40 px-4 max-w-6xl mx-auto fade-in-up min-h-screen">
+                    <div class="flex justify-between items-center mb-10">
+                        <h1 class="text-4xl font-bold text-slate-900 dark:text-white">לוח בקרה - ניהול</h1>
+                        <button class="interactive-element magnetic bg-teal-600 text-white px-6 py-3 rounded-xl hover:bg-teal-700 font-bold shadow-md transition">+ יומן חדש</button>
                     </div>
                     
-                    <div class="grid md:grid-cols-4 gap-4 mb-8">
-                        <div class="bg-white dark:bg-slate-800 p-4 rounded-xl shadow-sm border-r-4 border-blue-500">
-                            <div class="text-slate-500 text-sm">פגישות השבוע</div>
-                            <div class="text-2xl font-bold text-slate-900 dark:text-white">12</div>
+                    <div class="grid md:grid-cols-3 gap-6 mb-10">
+                        <div class="glassmorphic-card p-6 border-r-4 border-blue-500 flex flex-col justify-between h-32">
+                            <div class="text-slate-500 font-medium">פגישות השבוע</div>
+                            <div class="text-4xl font-bold text-slate-900 dark:text-white">12</div>
                         </div>
-                        <div class="bg-white dark:bg-slate-800 p-4 rounded-xl shadow-sm border-r-4 border-teal-500">
-                            <div class="text-slate-500 text-sm">מטופלים פעילים</div>
-                            <div class="text-2xl font-bold text-slate-900 dark:text-white">45</div>
+                        <div class="glassmorphic-card p-6 border-r-4 border-teal-500 flex flex-col justify-between h-32">
+                            <div class="text-slate-500 font-medium">מטופלים פעילים</div>
+                            <div class="text-4xl font-bold text-slate-900 dark:text-white">45</div>
                         </div>
-                         <div class="bg-white dark:bg-slate-800 p-4 rounded-xl shadow-sm border-r-4 border-amber-500">
-                            <div class="text-slate-500 text-sm">בקשות חדשות</div>
-                            <div class="text-2xl font-bold text-slate-900 dark:text-white">3</div>
+                         <div class="glassmorphic-card p-6 border-r-4 border-amber-500 flex flex-col justify-between h-32">
+                            <div class="text-slate-500 font-medium">בקשות חדשות</div>
+                            <div class="text-4xl font-bold text-slate-900 dark:text-white">3</div>
                         </div>
                     </div>
 
-                    <div class="bg-white dark:bg-slate-800 rounded-2xl shadow-sm overflow-hidden border border-slate-200 dark:border-slate-700">
-                        <div class="p-4 border-b border-slate-200 dark:border-slate-700 font-bold text-slate-700 dark:text-slate-300">יומן פגישות</div>
+                    <div class="glassmorphic-card overflow-hidden border border-slate-200 dark:border-slate-700">
+                        <div class="p-6 border-b border-slate-200 dark:border-slate-700 font-bold text-xl text-slate-800 dark:text-slate-200">יומן פגישות</div>
                         <table class="w-full text-right">
-                            <thead class="bg-slate-50 dark:bg-slate-900 text-slate-500 text-sm">
-                                <tr><th class="p-4">שם מטופל</th><th class="p-4">אימייל</th><th class="p-4">נושא</th><th class="p-4">סטטוס</th><th class="p-4">פעולות</th></tr>
+                            <thead class="bg-slate-50/50 dark:bg-slate-900/50 text-slate-500 font-medium">
+                                <tr><th class="p-5">שם מטופל</th><th class="p-5">אימייל</th><th class="p-5">נושא</th><th class="p-5">סטטוס</th><th class="p-5">פעולות</th></tr>
                             </thead>
                             <tbody class="divide-y divide-slate-100 dark:divide-slate-700 text-slate-700 dark:text-slate-300">
                                 ${allAppointmentsAdmin.map(app => `
-                                    <tr class="hover:bg-slate-50 dark:hover:bg-slate-700/50 transition">
-                                        <td class="p-4 font-medium">${app.name}</td>
-                                        <td class="p-4 text-slate-500">${app.email}</td>
-                                        <td class="p-4"><span class="bg-slate-100 dark:bg-slate-700 px-2 py-1 rounded text-xs">${app.topic}</span></td>
-                                        <td class="p-4"><span class="text-green-600 text-sm"><i class="fas fa-circle text-[8px] ml-1"></i> מאושר</span></td>
-                                        <td class="p-4">
-                                            <button class="text-slate-400 hover:text-teal-600 ml-2"><i class="fas fa-edit"></i></button>
-                                            <button class="text-slate-400 hover:text-red-600"><i class="fas fa-trash"></i></button>
+                                    <tr class="hover:bg-slate-50/50 dark:hover:bg-slate-800/50 transition">
+                                        <td class="p-5 font-bold">${app.name}</td>
+                                        <td class="p-5 text-slate-500">${app.email}</td>
+                                        <td class="p-5"><span class="bg-slate-100 dark:bg-slate-800 px-3 py-1 rounded-lg text-sm font-medium">${app.topic}</span></td>
+                                        <td class="p-5"><span class="text-green-600 font-medium flex items-center gap-2"><i class="fas fa-circle text-[8px]"></i> מאושר</span></td>
+                                        <td class="p-5">
+                                            <button class="interactive-element text-slate-400 hover:text-teal-600 ml-3 transition"><i class="fas fa-edit text-lg"></i></button>
+                                            <button class="interactive-element text-slate-400 hover:text-red-600 transition"><i class="fas fa-trash text-lg"></i></button>
                                         </td>
                                     </tr>
                                 `).join('')}
@@ -934,149 +1083,10 @@
                     </div>
                 </div>
             `;
+            attachHoverEffects();
         };
 
-        /** 5. LOGIC MODULES */
-        const ui = {
-            openTopicModal: (key) => {
-                const data = issueData[key];
-                const overlay = document.getElementById('modal-overlay');
-                const content = document.getElementById('modal-content');
-                content.innerHTML = `
-                    <div class="bg-white dark:bg-slate-900 rounded-3xl p-8 md:p-10 relative shadow-2xl max-h-[90vh] overflow-y-auto">
-                        <button onclick="document.getElementById('modal-overlay').classList.add('hidden')" class="absolute top-6 left-6 w-8 h-8 bg-slate-100 dark:bg-slate-800 rounded-full flex items-center justify-center text-slate-500 hover:text-red-500 transition"><i class="fas fa-times"></i></button>
-                        
-                        <div class="w-16 h-16 ${data.bgClass} rounded-2xl flex items-center justify-center mb-6 text-teal-600 text-3xl">
-                            <i class="fas ${data.iconClass}"></i>
-                        </div>
-                        
-                        <h2 class="text-3xl font-bold mb-3 text-slate-900 dark:text-white">${data.title}</h2>
-                        <p class="text-xl text-slate-500 mb-8 font-light">${data.subtitle}</p>
-                        
-                        <div class="prose dark:prose-invert max-w-none mb-10 leading-relaxed text-lg">
-                            <p class="font-medium text-slate-800 dark:text-slate-200 mb-4">${data.lead}</p>
-                            <p class="text-slate-600 dark:text-slate-400">${data.fullContent}</p>
-                        </div>
-                        
-                        <div class="flex flex-col sm:flex-row gap-4 justify-center border-t border-slate-100 dark:border-slate-800 pt-8">
-                            <button onclick="ui.startPracticeFromModal()" class="bg-teal-600 hover:bg-teal-700 text-white font-bold py-3 px-8 rounded-full shadow-lg transition transform hover:-translate-y-1 flex items-center gap-2">
-                                <i class="fas fa-play"></i> תרגול מותאם
-                            </button>
-                             <button onclick="router.navigate('booking'); document.getElementById('modal-overlay').classList.add('hidden');" class="bg-white border border-slate-200 text-slate-700 hover:bg-slate-50 font-bold py-3 px-8 rounded-full transition">
-                                קביעת פגישה
-                            </button>
-                        </div>
-                    </div>
-                `;
-                overlay.classList.remove('hidden');
-            },
-            startPracticeFromModal: () => {
-                document.getElementById('modal-overlay').classList.add('hidden');
-                router.navigate('breathing-exercise');
-            },
-            saveJournal: () => {
-                const txt = document.getElementById('journal-entry').value;
-                if(!txt) return;
-                const status = document.getElementById('save-status');
-                status.classList.remove('opacity-0');
-                setTimeout(() => status.classList.add('opacity-0'), 2000);
-            },
-            sendChat: () => {
-                const input = document.getElementById('chat-input');
-                const txt = input.value.trim();
-                if(!txt) return;
-                const history = document.getElementById('chat-history');
-                history.innerHTML += `<div class="flex gap-3 justify-end"><div class="bg-teal-600 text-white p-4 rounded-2xl rounded-bl-none shadow-md max-w-[85%] text-sm leading-relaxed fade-in-up">${txt}</div></div>`;
-                input.value = '';
-                history.scrollTop = history.scrollHeight;
-                let reply = 'אני מקשיב. נסה לנשום אל תוך התחושה הזו.';
-                if(txt.includes('חרד')) reply = 'זה טבעי להרגיש כך. בוא ננסה להאריך את הנשיפה.';
-                setTimeout(() => {
-                    history.innerHTML += `<div class="flex gap-3"><div class="bg-white dark:bg-slate-700 p-4 rounded-2xl rounded-br-none shadow-sm max-w-[85%] text-sm leading-relaxed fade-in-up">${reply}</div></div>`;
-                    history.scrollTop = history.scrollHeight;
-                }, 1000);
-            }
-        };
-
-        const auth = {
-            login: (e) => {
-                e.preventDefault();
-                const email = document.getElementById('login-email').value;
-                const pass = document.getElementById('login-pass').value;
-                const user = mockUsers[email];
-                if(user && user.password === pass) {
-                    store.user = user;
-                    localStorage.setItem('user', JSON.stringify(user));
-                    const target = email === 'admin@user.com' ? 'admin' : 'my_appointments';
-                    router.navigate(target);
-                } else {
-                    document.getElementById('login-error').classList.remove('hidden');
-                }
-            },
-            logout: () => {
-                store.user = null;
-                localStorage.removeItem('user');
-                router.navigate('home');
-            }
-        };
-
-        const breathing = {
-            interval: null,
-            init: () => {
-                store.exerciseState.isRunning = false;
-                store.exerciseState.phaseIndex = 0;
-                const exId = document.getElementById('exercise-select').value;
-                breathing.loadExercise(exId);
-            },
-            loadExercise: (id) => {
-                const exercise = Object.values(breathingLibrary).flat().find(e => e.id === id);
-                store.exerciseState.currentExercise = exercise;
-                store.exerciseState.phase = exercise.pattern[0].phase;
-                document.getElementById('breath-cue').innerText = "מוכן?";
-                document.getElementById('breath-timer').innerText = exercise.pattern[0].secs;
-            },
-            changeExercise: (val) => { breathing.stop(); breathing.loadExercise(val); },
-            toggle: () => { if(store.exerciseState.isRunning) breathing.stop(); else breathing.start(); },
-            start: () => {
-                store.exerciseState.isRunning = true;
-                document.getElementById('breath-control-btn').innerHTML = '<i class="fas fa-pause text-2xl ml-1"></i>';
-                let phaseStart = Date.now();
-                const exercise = store.exerciseState.currentExercise;
-                breathing.interval = setInterval(() => {
-                    const now = Date.now();
-                    const currentPattern = exercise.pattern[store.exerciseState.phaseIndex];
-                    const elapsed = (now - phaseStart) / 1000;
-                    const remaining = Math.max(0, Math.ceil(currentPattern.secs - elapsed));
-                    const totalSecs = currentPattern.secs;
-                    
-                    // Calculate progress 0 to 1 for animation
-                    store.exerciseState.progress = Math.min(elapsed / totalSecs, 1.0);
-                    store.exerciseState.phase = currentPattern.phase;
-
-                    document.getElementById('breath-timer').innerText = remaining;
-                    document.getElementById('breath-cue').innerText = currentPattern.cue;
-                    
-                    // Visual Updates
-                    const cueEl = document.getElementById('breath-cue');
-                    if(currentPattern.phase === 'inhale') cueEl.className = "text-5xl md:text-7xl font-bold mb-4 text-teal-500 transform scale-110 transition-all duration-1000";
-                    else if(currentPattern.phase === 'exhale') cueEl.className = "text-5xl md:text-7xl font-bold mb-4 text-blue-500 transform scale-90 transition-all duration-1000";
-                    else cueEl.className = "text-5xl md:text-7xl font-bold mb-4 text-slate-400 transition-all duration-500";
-
-                    if (elapsed >= currentPattern.secs) {
-                        store.exerciseState.phaseIndex = (store.exerciseState.phaseIndex + 1) % exercise.pattern.length;
-                        phaseStart = Date.now();
-                    }
-                }, 50);
-            },
-            stop: () => {
-                store.exerciseState.isRunning = false;
-                clearInterval(breathing.interval);
-                document.getElementById('breath-control-btn').innerHTML = '<i class="fas fa-play text-2xl ml-1"></i>';
-                document.getElementById('breath-cue').innerText = "הושהה";
-            }
-        };
-
-        /** 6. INIT */
+        /** 7. INIT */
         window.onload = () => {
             const savedUser = localStorage.getItem('user');
             if(savedUser) store.user = JSON.parse(savedUser);
@@ -1087,6 +1097,7 @@
             }
             
             initThreeJS();
+            initSmoothScroll();
             
             document.getElementById('theme-toggle').addEventListener('click', () => {
                 const html = document.documentElement;
