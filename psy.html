@@ -29,7 +29,7 @@
             /* Default / Light Mode Variables */
             --primary: #0070f3;
             --secondary: #7928ca;
-            --bg-color: #f8fafc; /* Updated to match services light theme */
+            --bg-color: #f8fafc; 
             --text-color: #1e293b;
             --text-muted: #64748b;
             --glass-border: rgba(0, 0, 0, 0.1);
@@ -40,7 +40,7 @@
             --card-shadow: 0 15px 30px rgba(0,0,0,0.1);
             --section-spacing: 100px; 
             
-            /* Services Specifics (Light Mode) */
+            /* Pricing Specifics (Light Mode) */
             --price-card-bg: rgba(255, 255, 255, 0.95);
             --price-border: #e2e8f0;
         }
@@ -59,9 +59,25 @@
             --nav-active: #fff;
             --card-shadow: 0 20px 40px rgba(0,0,0,0.4);
             
-            /* Services Specifics (Dark Mode) */
+            /* Pricing Specifics (Dark Mode) */
             --price-card-bg: rgba(20, 20, 25, 0.6);
             --price-border: rgba(255, 255, 255, 0.1);
+        }
+
+        /* Accessibility Mode Overrides */
+        html.accessibility-mode {
+            --bg-color: #ffffff !important;
+            --text-color: #000000 !important;
+            --text-muted: #222222 !important;
+            --primary: #0000ff !important;
+            --secondary: #800080 !important;
+            font-size: 18px !important; /* Larger Text */
+        }
+        html.accessibility-mode.dark {
+            --bg-color: #000000 !important;
+            --text-color: #ffffff !important;
+            --text-muted: #dddddd !important;
+            --primary: #ffff00 !important; /* High contrast yellow */
         }
 
         html {
@@ -512,7 +528,7 @@
             .about-img-col { flex: 1; position: sticky; top: 120px; }
         }
 
-        /* --- PRICING SECTION STYLES (Merged) --- */
+        /* --- PRICING SECTION STYLES --- */
         .pricing-card {
             background: var(--price-card-bg);
             backdrop-filter: blur(10px);
@@ -1007,14 +1023,6 @@
                     </div>
                 </div>
             </div>
-
-            <!-- Print Button (Float) -->
-             <div class="fixed bottom-6 left-6 z-50 flex flex-col-reverse gap-4 no-print items-center">
-                <button onclick="window.print()" class="bg-slate-800 text-white w-10 h-10 rounded-full shadow-xl hover:bg-slate-700 hover:scale-110 transition-all flex items-center justify-center group relative" title="שמור כ-PDF">
-                    <i data-lucide="printer" class="w-5 h-5"></i>
-                    <span class="absolute left-full ml-3 bg-slate-900 text-white text-xs px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none">PDF</span>
-                </button>
-            </div>
         </section>
 
         <!-- Stats Strip (WAVE + COUNT UP) -->
@@ -1094,10 +1102,27 @@
         <p>&copy; 2025 PsychoFlash Productions. All rights reserved.</p>
     </footer>
 
-    <button id="mute-btn" class="fixed bottom-8 left-8 z-50 p-4 rounded-full bg-white/10 backdrop-blur border border-white/20 text-white hover:bg-primary hover:text-black transition-all no-print">
-        <svg id="mute-icon" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon><line x1="23" y1="9" x2="17" y2="15"></line><line x1="17" y1="9" x2="23" y2="15"></line></svg>
-        <svg id="unmute-icon" class="hidden" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon><path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"></path></svg>
-    </button>
+    <!-- Floating Actions: WhatsApp & Accessibility -->
+    <div class="fixed bottom-6 left-6 z-50 flex flex-col-reverse gap-4 no-print items-center">
+        
+        <!-- WhatsApp -->
+        <a href="https://wa.me/972542559027" target="_blank" class="bg-[#25D366] text-white w-14 h-14 rounded-full shadow-2xl hover:bg-[#128C7E] hover:scale-110 transition-all flex items-center justify-center group relative" title="צ'אט בוואטסאפ">
+            <i data-lucide="message-circle" class="w-7 h-7 fill-current"></i>
+            <span class="absolute left-full ml-3 bg-slate-900 text-white text-xs px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none">WhatsApp</span>
+        </a>
+        
+        <!-- Accessibility -->
+        <button id="a11y-btn" class="bg-blue-600 text-white w-10 h-10 rounded-full shadow-xl hover:bg-blue-700 hover:scale-110 transition-all flex items-center justify-center group relative" title="נגישות">
+            <i data-lucide="accessibility" class="w-5 h-5"></i>
+            <span class="absolute left-full ml-3 bg-slate-900 text-white text-xs px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none">נגישות</span>
+        </button>
+
+        <!-- Mute Button (Moved here for grouping) -->
+        <button id="mute-btn" class="bg-white/10 backdrop-blur border border-white/20 text-white w-10 h-10 rounded-full shadow-xl hover:bg-[var(--primary)] hover:text-black transition-all flex items-center justify-center">
+            <svg id="mute-icon" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon><line x1="23" y1="9" x2="17" y2="15"></line><line x1="17" y1="9" x2="23" y2="15"></line></svg>
+            <svg id="unmute-icon" class="hidden" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon><path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"></path></svg>
+        </button>
+    </div>
 
     <script src="https://www.youtube.com/iframe_api"></script>
 
@@ -1121,6 +1146,20 @@
             { id: 'kornit', name: 'Kornit Digital', role: 'Fashion Tech', logo: 'https://logo.clearbit.com/kornit.com', desc: 'שיתוף פעולה בתחום טכנולוגיות הדפסה על טקסטיל.', stats: { hours: '15+', projects: 'Tech', period: '2023', peak: 'Events' } },
             { id: 'cinemark', name: 'Cinemark', role: 'Cinema Chain', logo: 'https://logo.clearbit.com/cinemark.com', desc: 'עבודה מול רשת בתי הקולנוע הבינלאומית.', stats: { hours: '10+', projects: 'Promo', period: '2024', peak: 'Launch' } }
         ];
+
+        // --- Modal Content Data ---
+        const contentData = {
+            strategy: { title: "אסטרטגיה: הלב הפועם", text: "כל פרויקט גדול מתחיל בשאלה אחת: 'מה הסיפור?'. בשלב האסטרטגיה אנחנו מנתחים את ה-DNA של המותג, מגדירים את קהל היעד ומפענחים את השפה הויזואלית שתשרת את המסר בצורה הטובה ביותר.", image: "assets/20250223_151517.jpg" },
+            production: { title: "הפקה חיה: רגע האמת", text: "בשידור חי אין הזדמנות שנייה. אנחנו מביאים לשטח ניסיון של מאות שעות שידור, ציוד קצה מתקדם וצוותים מיומנים שיודעים לתפקד תחת לחץ.", image: "assets/20250215_190052.jpg" },
+            ai: { title: "AI & Tech: העתיד כבר כאן", text: "אנחנו משלבים כלי בינה מלאכותית בתהליך היצירה כדי לפרוץ גבולות. מיצירת רקעים וירטואליים בזמן אמת, דרך תיקוני צבע אוטומטיים ועד אנימציות מורכבות.", image: "assets/20250223_151808.jpg" },
+            service_live: { title: "הפקות וידאו ושידורים חיים", type: "service", videoId: "px7UwM8QDDU", partnerId: "golive", desc: "שירות הדגל שלנו. אנו מספקים מעטפת מלאה לשידורים חיים בכל סדר גודל. מולטי-קאמרה, שילוב גרפיקה וניתוב.", gallery: ["assets/20250214_192736.jpg","assets/20250215_175104.jpg","assets/20250223_151800.jpg","assets/20250223_151818.jpg"] },
+            service_ai: { title: "יצירת תוכן AI & On The Fly", type: "service", videoId: "d2_lJ42GuZ0", desc: "המהפכה כבר כאן. יצירת ויזואליה מרהיבה ללא צורך בימי צילום. סטוריבורדים, הדמיות ורקעים וירטואליים.", gallery: ["assets/20250223_151534.jpg","assets/20250223_151808.jpg","assets/20250216_122459.jpg","assets/20250222_122300.jpg"] },
+            service_virtual: { title: "כנסים וירטואליים והיברידיים", type: "service", videoId: "Z3oO_GmtFfg", partnerId: "pentera", desc: "חוויות אימרסיביות באולפנים וירטואליים. שילוב דוברים מרחוק ואינטראקציה מלאה עם הקהל.", gallery: ["assets/20250215_175100.jpg","assets/20250215_175124.jpg","assets/20250215_175126(0).jpg","assets/20250215_192652.jpg"] },
+            service_post: { title: "פוסט-פרודקשן מתקדם", type: "service", videoId: "_rv2sMdyCpg", desc: "הקסם הסופי. עריכה, VFX, אנימציה וצבע. אנחנו מספרים את הסיפור בצורה המהודקת ביותר.", gallery: ["assets/20250222_122141.jpg","assets/20250222_122150.jpg","assets/20250222_122206.jpg","assets/20250216_122300.jpg"] },
+            mindfly: partnersData.find(p => p.id === 'mindfly'),
+            nba: { title: "NBA All-Stars RF Engineering", type: "cinematch", stats: { score: "HIGH TECH", tech: "RF / Wireless", emotion: "Precision" }, text: "תפקיד RF Engineer באירוע האולסטארס. אחריות מלאה על תשדורת אלחוטית ממצלמות חזה (Chest Cam).", image: "assets/20250215_052712.jpg" },
+            solties: { title: "Solties - Live Extreme Event", type: "cinematch", stats: { score: "LIVE STREAM", tech: "Multi-Cam", emotion: "Fun" }, text: "הפקה ושידור חי של אירוע אקסטרים בבריכה שנמשך 3 שעות.", videoId: "GqMse9F2ipY", extraVideoId: "Y8DxFX8sooI", image: "https://img.youtube.com/vi/GqMse9F2ipY/maxresdefault.jpg" }
+        };
 
         // --- Translations Data ---
         const translations = {
@@ -1338,6 +1377,13 @@
             }
         };
         themeBtns.forEach(btn => btn.addEventListener('click', toggleTheme));
+
+        // --- Theme Icons Init ---
+        const initThemeIcons = () => {
+            const isDark = document.documentElement.classList.contains('dark');
+            document.getElementById('icon-sun').classList.toggle('hidden', !isDark);
+            document.getElementById('icon-moon').classList.toggle('hidden', isDark);
+        };
 
         // --- Three.js ---
         const initThreeJS = () => {
@@ -1563,6 +1609,42 @@
             }
         }
 
+        // --- Init Accessibility Button ---
+        function initAccessibility() {
+            const btn = document.getElementById('a11y-btn');
+            if (btn) {
+                btn.addEventListener('click', () => {
+                    document.documentElement.classList.toggle('accessibility-mode');
+                });
+            }
+        }
+
+        // --- Language Logic ---
+        const setLanguage = (lang) => {
+            const elements = document.querySelectorAll('[data-key]');
+            elements.forEach(el => {
+                const key = el.getAttribute('data-key');
+                if(translations[lang][key]) {
+                    el.textContent = translations[lang][key];
+                }
+            });
+
+            const glitchText = document.querySelector('.glitch-text');
+            if(glitchText) {
+                const spanContent = lang === 'he' ? 'ויזואלי' : 'Engineering';
+                const plainContent = lang === 'he' ? 'הנדסת תוכן ' : 'Visual Content ';
+                glitchText.innerHTML = `${plainContent}<span style="color:transparent; -webkit-text-stroke: 1px var(--primary); letter-spacing: 0.15em;">${spanContent}</span>`;
+                glitchText.setAttribute('data-text', plainContent + spanContent);
+                
+                glitchText.classList.remove('glitch-active');
+                void glitchText.offsetWidth; 
+                glitchText.classList.add('glitch-active');
+            }
+
+            document.documentElement.dir = lang === 'he' ? 'rtl' : 'ltr';
+            document.documentElement.lang = lang;
+        };
+
         // --- Init All ---
         document.addEventListener('DOMContentLoaded', () => {
             initThreeJS();
@@ -1574,6 +1656,8 @@
             initScrollSpy();
             initAboutInteraction();
             initIcons();
+            initAccessibility();
+            initThemeIcons(); // Fixed missing init
         });
     </script>
 </body>
