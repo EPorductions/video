@@ -832,7 +832,7 @@
             </div>
         </section>
 
-        <!-- NEW SPECIFICATION SECTION (NO PRICES) -->
+        <!-- NEW SPECIFICATION SECTION (NO PRICES - ALL SERVICES ICONS) -->
         <section id="pricing" class="py-24">
             <div class="flex items-center gap-3 sm:gap-4 mb-6 sm:mb-8">
                 <div class="w-10 h-10 sm:w-12 sm:h-12 rounded-2xl bg-gradient-to-br from-blue-500 to-blue-700 flex items-center justify-center text-white shadow-lg shadow-blue-500/30 shrink-0">
@@ -887,7 +887,7 @@
                     </div>
                 </div>
 
-                <!-- Integration Ops -->
+                <!-- Integration Ops (NO PRICE MENTION) -->
                 <div class="pricing-card p-5 sm:p-6 md:p-8 rounded-3xl flex flex-col md:flex-row gap-6 sm:gap-8 items-center">
                     <div class="flex-1">
                         <div class="flex items-center gap-2 mb-2 flex-wrap">
@@ -993,33 +993,74 @@
                 </div>
             </div>
 
-            <!-- Hourly Bank -->
+            <!-- All Services Catalog (Icons Grid) -->
             <div class="mt-16 pt-10 border-t-2 border-[var(--glass-border)]">
-                <h3 class="text-xl sm:text-2xl font-black text-[var(--text-color)] mb-2 text-center flex items-center justify-center gap-3" data-key="pricing_hourly_title">
-                    <i data-lucide="hourglass" class="w-5 h-5 sm:w-6 sm:h-6 text-blue-500"></i>
-                    שירותים שוטפים (לפי שעה)
+                <h3 class="text-xl sm:text-2xl font-black text-[var(--text-color)] mb-2 text-center flex items-center justify-center gap-3" data-key="pricing_catalog_title">
+                    <i data-lucide="layout-grid" class="w-5 h-5 sm:w-6 sm:h-6 text-blue-500"></i>
+                    קטלוג שירותים מלא
                 </h3>
+                <p class="text-center text-[var(--text-muted)] mb-8 text-xs sm:text-sm" data-key="pricing_catalog_subtitle">ריכוז כלל היכולות והשירותים תחת קורת גג אחת</p>
                 
-                <div class="grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4 mt-8">
-                    <div class="pricing-card p-4 sm:p-5 rounded-2xl text-center group">
-                        <div class="text-sky-500 mb-2 flex justify-center group-hover:scale-110 transition-transform"><i data-lucide="code-2" class="w-6 h-6 sm:w-7 sm:h-7"></i></div>
-                        <div class="font-bold text-[var(--text-color)] text-sm sm:text-base" data-key="pricing_h_dev">פיתוח קוד</div>
-                        <div class="text-xs sm:text-sm text-[var(--text-muted)] mb-2">Full Stack</div>
+                <div class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
+                    <!-- 1. Dashboard -->
+                    <div class="pricing-card p-4 rounded-2xl text-center group hover:border-blue-400">
+                        <div class="text-blue-500 mb-2 flex justify-center group-hover:scale-110 transition-transform"><i data-lucide="layout-dashboard" class="w-6 h-6"></i></div>
+                        <div class="font-bold text-[var(--text-color)] text-sm" data-key="svc_dashboard">פיתוח דשבורד</div>
                     </div>
-                    <div class="pricing-card p-4 sm:p-5 rounded-2xl text-center group">
-                        <div class="text-purple-500 mb-2 flex justify-center group-hover:scale-110 transition-transform"><i data-lucide="film" class="w-6 h-6 sm:w-7 sm:h-7"></i></div>
-                        <div class="font-bold text-[var(--text-color)] text-sm sm:text-base" data-key="pricing_h_edit">עריכת וידאו</div>
-                        <div class="text-xs sm:text-sm text-[var(--text-muted)] mb-2">Premiere Pro</div>
+                    <!-- 2. Microsites -->
+                    <div class="pricing-card p-4 rounded-2xl text-center group hover:border-indigo-400">
+                        <div class="text-indigo-500 mb-2 flex justify-center group-hover:scale-110 transition-transform"><i data-lucide="globe" class="w-6 h-6"></i></div>
+                        <div class="font-bold text-[var(--text-color)] text-sm" data-key="svc_microsite">אתרי אירוע</div>
                     </div>
-                    <div class="pricing-card p-4 sm:p-5 rounded-2xl text-center group">
-                        <div class="text-orange-500 mb-2 flex justify-center group-hover:scale-110 transition-transform"><i data-lucide="move-3d" class="w-6 h-6 sm:w-7 sm:h-7"></i></div>
-                        <div class="font-bold text-[var(--text-color)] text-sm sm:text-base" data-key="pricing_h_anim">אנימציה & Motion</div>
-                        <div class="text-xs sm:text-sm text-[var(--text-muted)] mb-2">After Effects</div>
+                    <!-- 3. Integration -->
+                    <div class="pricing-card p-4 rounded-2xl text-center group hover:border-cyan-400">
+                        <div class="text-cyan-500 mb-2 flex justify-center group-hover:scale-110 transition-transform"><i data-lucide="network" class="w-6 h-6"></i></div>
+                        <div class="font-bold text-[var(--text-color)] text-sm" data-key="svc_integration">אינטגרציה</div>
                     </div>
-                    <div class="pricing-card p-4 sm:p-5 rounded-2xl text-center group bg-red-50/50 border-red-100">
-                        <div class="text-red-500 mb-2 flex justify-center"><i data-lucide="alarm-clock" class="w-6 h-6 sm:w-7 sm:h-7"></i></div>
-                        <div class="font-bold text-[var(--text-color)] text-sm sm:text-base" data-key="pricing_h_urgent">עבודה דחופה / לילה</div>
-                        <div class="text-xs sm:text-sm text-[var(--text-muted)] mb-2" data-key="pricing_h_urgent_desc">חריגה משעות רגילות</div>
+                    <!-- 4. AI Strategy -->
+                    <div class="pricing-card p-4 rounded-2xl text-center group hover:border-purple-400">
+                        <div class="text-purple-500 mb-2 flex justify-center group-hover:scale-110 transition-transform"><i data-lucide="brain-circuit" class="w-6 h-6"></i></div>
+                        <div class="font-bold text-[var(--text-color)] text-sm" data-key="svc_ai_consult">ייעוץ AI</div>
+                    </div>
+                    <!-- 5. Automations -->
+                    <div class="pricing-card p-4 rounded-2xl text-center group hover:border-fuchsia-400">
+                        <div class="text-fuchsia-500 mb-2 flex justify-center group-hover:scale-110 transition-transform"><i data-lucide="workflow" class="w-6 h-6"></i></div>
+                        <div class="font-bold text-[var(--text-color)] text-sm" data-key="svc_automation">אוטומציות</div>
+                    </div>
+                    <!-- 6. Video Editing -->
+                    <div class="pricing-card p-4 rounded-2xl text-center group hover:border-pink-400">
+                        <div class="text-pink-500 mb-2 flex justify-center group-hover:scale-110 transition-transform"><i data-lucide="film" class="w-6 h-6"></i></div>
+                        <div class="font-bold text-[var(--text-color)] text-sm" data-key="svc_video_edit">עריכת וידאו</div>
+                    </div>
+                    <!-- 7. Virtual Studio -->
+                    <div class="pricing-card p-4 rounded-2xl text-center group hover:border-rose-400">
+                        <div class="text-rose-500 mb-2 flex justify-center group-hover:scale-110 transition-transform"><i data-lucide="monitor-play" class="w-6 h-6"></i></div>
+                        <div class="font-bold text-[var(--text-color)] text-sm" data-key="svc_virtual">אולפן וירטואלי</div>
+                    </div>
+                    <!-- 8. Event Filming -->
+                    <div class="pricing-card p-4 rounded-2xl text-center group hover:border-orange-400">
+                        <div class="text-orange-500 mb-2 flex justify-center group-hover:scale-110 transition-transform"><i data-lucide="camera" class="w-6 h-6"></i></div>
+                        <div class="font-bold text-[var(--text-color)] text-sm" data-key="svc_filming">צילום אירועים</div>
+                    </div>
+                    <!-- 9. Motion Graphics -->
+                    <div class="pricing-card p-4 rounded-2xl text-center group hover:border-amber-400">
+                        <div class="text-amber-500 mb-2 flex justify-center group-hover:scale-110 transition-transform"><i data-lucide="move-3d" class="w-6 h-6"></i></div>
+                        <div class="font-bold text-[var(--text-color)] text-sm" data-key="svc_motion">אנימציה</div>
+                    </div>
+                    <!-- 10. Graphic Design -->
+                    <div class="pricing-card p-4 rounded-2xl text-center group hover:border-yellow-400">
+                        <div class="text-yellow-500 mb-2 flex justify-center group-hover:scale-110 transition-transform"><i data-lucide="palette" class="w-6 h-6"></i></div>
+                        <div class="font-bold text-[var(--text-color)] text-sm" data-key="svc_design">עיצוב גרפי</div>
+                    </div>
+                    <!-- 11. Tech Support -->
+                    <div class="pricing-card p-4 rounded-2xl text-center group hover:border-green-400">
+                        <div class="text-green-500 mb-2 flex justify-center group-hover:scale-110 transition-transform"><i data-lucide="wrench" class="w-6 h-6"></i></div>
+                        <div class="font-bold text-[var(--text-color)] text-sm" data-key="svc_support">תמיכה טכנית</div>
+                    </div>
+                    <!-- 12. Full Stack Dev -->
+                    <div class="pricing-card p-4 rounded-2xl text-center group hover:border-teal-400">
+                        <div class="text-teal-500 mb-2 flex justify-center group-hover:scale-110 transition-transform"><i data-lucide="code-2" class="w-6 h-6"></i></div>
+                        <div class="font-bold text-[var(--text-color)] text-sm" data-key="svc_code">פיתוח קוד</div>
                     </div>
                 </div>
             </div>
@@ -1206,13 +1247,20 @@
                 pricing_virtual_desc: "צילום על מסך ירוק, הטמעת רקעים וירטואליים תלת-ממדיים או מותאמים אישית.",
                 pricing_cam_title: "צילום שטח ואירועים (Camera Shift)",
                 pricing_cam_desc: "מתן שירותי צילום מקצועיים לאירועים, הרצאות ופיצ'ים.",
-                pricing_hourly_title: "שירותים שוטפים (לפי שעה)",
-                pricing_hourly_note: "המחירים מתייחסים לשעות עבודה בלבד ואינם כוללים מע\"מ וציוד",
-                pricing_h_dev: "פיתוח קוד",
-                pricing_h_edit: "עריכת וידאו",
-                pricing_h_anim: "אנימציה & Motion",
-                pricing_h_urgent: "עבודה דחופה / לילה",
-                pricing_h_urgent_desc: "חריגה משעות רגילות"
+                pricing_catalog_title: "קטלוג שירותים מלא",
+                pricing_catalog_subtitle: "ריכוז כלל היכולות והשירותים תחת קורת גג אחת",
+                svc_dashboard: "פיתוח דשבורד",
+                svc_microsite: "אתרי אירוע",
+                svc_integration: "אינטגרציה",
+                svc_ai_consult: "ייעוץ AI",
+                svc_automation: "אוטומציות",
+                svc_video_edit: "עריכת וידאו",
+                svc_virtual: "אולפן וירטואלי",
+                svc_filming: "צילום אירועים",
+                svc_motion: "אנימציה",
+                svc_design: "עיצוב גרפי",
+                svc_support: "תמיכה טכנית",
+                svc_code: "פיתוח קוד"
             },
             en: {
                 nav_home: "Home", nav_about: "About", nav_work: "CINE MATCH", nav_services: "Services", nav_ecosystem: "Ecosystem", nav_pricing: "Specs", nav_contact: "Contact", nav_recommendations: "Testimonials",
@@ -1257,13 +1305,20 @@
                 pricing_virtual_desc: "Green Screen filming, 3D or custom virtual background integration.",
                 pricing_cam_title: "Field & Event Filming",
                 pricing_cam_desc: "Professional filming for events, lectures, and pitches.",
-                pricing_hourly_title: "Ongoing Services (Hourly)",
-                pricing_hourly_note: "Prices for labor only, VAT and equipment not included",
-                pricing_h_dev: "Code Dev",
-                pricing_h_edit: "Video Editing",
-                pricing_h_anim: "Animation & Motion",
-                pricing_h_urgent: "Urgent / Night Work",
-                pricing_h_urgent_desc: "Outside regular hours"
+                pricing_catalog_title: "Full Service Catalog",
+                pricing_catalog_subtitle: "All capabilities and services under one roof",
+                svc_dashboard: "Dashboard Dev",
+                svc_microsite: "Microsites",
+                svc_integration: "Integration",
+                svc_ai_consult: "AI Consulting",
+                svc_automation: "Automations",
+                svc_video_edit: "Video Editing",
+                svc_virtual: "Virtual Studio",
+                svc_filming: "Event Filming",
+                svc_motion: "Animation",
+                svc_design: "Graphic Design",
+                svc_support: "Tech Support",
+                svc_code: "Code Dev"
             }
         };
 
