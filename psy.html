@@ -29,7 +29,7 @@
             /* Default / Light Mode Variables */
             --primary: #0070f3;
             --secondary: #7928ca;
-            --bg-color: #f8fafc; /* Updated to match pricing light theme */
+            --bg-color: #f8fafc; /* Updated to match services light theme */
             --text-color: #1e293b;
             --text-muted: #64748b;
             --glass-border: rgba(0, 0, 0, 0.1);
@@ -40,7 +40,7 @@
             --card-shadow: 0 15px 30px rgba(0,0,0,0.1);
             --section-spacing: 100px; 
             
-            /* Pricing Specifics (Light Mode) */
+            /* Services Specifics (Light Mode) */
             --price-card-bg: rgba(255, 255, 255, 0.95);
             --price-border: #e2e8f0;
         }
@@ -59,7 +59,7 @@
             --nav-active: #fff;
             --card-shadow: 0 20px 40px rgba(0,0,0,0.4);
             
-            /* Pricing Specifics (Dark Mode) */
+            /* Services Specifics (Dark Mode) */
             --price-card-bg: rgba(20, 20, 25, 0.6);
             --price-border: rgba(255, 255, 255, 0.1);
         }
@@ -603,7 +603,7 @@
             <a href="#about" class="nav-link hover-trigger" id="link-about" data-key="nav_about">אודות</a>
             <a href="#services" class="nav-link hover-trigger" id="link-services" data-key="nav_services">שירותים</a>
             <a href="#ecosystem" class="nav-link hover-trigger" id="link-ecosystem" data-key="nav_ecosystem">מעגלי עבודה</a>
-            <a href="#pricing" class="nav-link hover-trigger" id="link-pricing" data-key="nav_pricing">מחירון</a>
+            <a href="#pricing" class="nav-link hover-trigger" id="link-pricing" data-key="nav_pricing">מפרט שירותים</a>
             <a href="#testimonials" class="nav-link hover-trigger" id="link-testimonials" data-key="nav_recommendations">המלצות</a>
             <a href="#contact" class="nav-link hover-trigger" id="link-contact" data-key="nav_contact">צור קשר</a>
         </nav>
@@ -638,7 +638,7 @@
             <a href="#about" class="mobile-link" data-key="nav_about">אודות</a>
             <a href="#services" class="mobile-link" data-key="nav_services">שירותים</a>
             <a href="#ecosystem" class="mobile-link" data-key="nav_ecosystem">מעגלי עבודה</a>
-            <a href="#pricing" class="mobile-link" data-key="nav_pricing">מחירון</a>
+            <a href="#pricing" class="mobile-link" data-key="nav_pricing">מפרט שירותים</a>
             <a href="#testimonials" class="mobile-link" data-key="nav_recommendations">המלצות</a>
             <a href="#contact" class="mobile-link" data-key="nav_contact">צור קשר</a>
         </nav>
@@ -816,13 +816,13 @@
             </div>
         </section>
 
-        <!-- NEW PRICING SECTION -->
+        <!-- NEW SPECIFICATION SECTION (NO PRICES) -->
         <section id="pricing" class="py-24">
             <div class="flex items-center gap-3 sm:gap-4 mb-6 sm:mb-8">
                 <div class="w-10 h-10 sm:w-12 sm:h-12 rounded-2xl bg-gradient-to-br from-blue-500 to-blue-700 flex items-center justify-center text-white shadow-lg shadow-blue-500/30 shrink-0">
                     <i data-lucide="layout-list" class="w-5 h-5 sm:w-6 sm:h-6"></i>
                 </div>
-                <h2 class="text-2xl sm:text-3xl font-black text-[var(--text-color)]" data-key="pricing_title">מפרט שירותים ומחירים</h2>
+                <h2 class="text-2xl sm:text-3xl font-black text-[var(--text-color)]" data-key="pricing_title">מפרט שירותים</h2>
             </div>
 
             <!-- Dashboard System -->
@@ -843,14 +843,6 @@
                             <li class="flex items-center gap-3"><div class="w-1.5 h-1.5 bg-emerald-500 rounded-full shrink-0"></div><span data-key="pricing_dashboard_li3">יצירת כרטיסי מידע חכמים</span></li>
                             <li class="flex items-center gap-3"><div class="w-1.5 h-1.5 bg-blue-500 rounded-full shrink-0"></div><span data-key="pricing_dashboard_li4">תשתית סקיילבילית לפאנל ניהול</span></li>
                         </ul>
-                    </div>
-                </div>
-                <div class="md:w-60 w-full flex flex-col justify-center items-center md:items-end md:border-r md:border-t-0 border-t border-[var(--glass-border)] md:pr-8 md:pt-0 pt-6 mt-2 md:mt-0">
-                    <span class="text-[var(--text-muted)] text-sm font-bold mb-1 uppercase tracking-wide" data-key="pricing_setup_cost">עלות הקמה והתאמה</span>
-                    <span class="text-4xl sm:text-5xl font-teko font-bold text-[var(--primary)] leading-none">₪5,500</span>
-                    <div class="text-right mt-3 space-y-1">
-                         <div class="price-breakdown" data-key="pricing_breakdown_dev">אפיון טכני + עיצוב + פיתוח</div>
-                         <div class="text-xs text-[var(--text-muted)]" data-key="pricing_vat">לפני מע"מ</div>
                     </div>
                 </div>
             </div>
@@ -877,11 +869,6 @@
                             <span class="bg-indigo-100 text-indigo-700 px-3 py-1 rounded-lg" data-key="pricing_tag_anim">פיתוח אנימציות CSS/JS</span>
                         </div>
                     </div>
-                    <div class="w-full md:w-auto text-center md:text-right md:border-r border-[var(--glass-border)] md:pr-8 pt-4 md:pt-0 border-t md:border-t-0">
-                        <span class="block text-[var(--text-muted)] text-sm font-bold mb-1 uppercase" data-key="pricing_dev_design">פיתוח ועיצוב</span>
-                        <span class="block text-3xl sm:text-4xl font-teko font-bold text-indigo-500">₪3,500</span>
-                        <div class="price-breakdown mt-2" data-key="pricing_hours_est">הערכת שעות: כ-15 ש"ע</div>
-                    </div>
                 </div>
 
                 <!-- Integration Ops -->
@@ -894,16 +881,6 @@
                         <p class="text-[var(--text-muted)] text-sm mb-4 leading-relaxed" data-key="pricing_ops_desc">
                             ביצוע פעולות טכניות על גבי התשתית הקיימת. כולל: למידת המערכת, התממשקות, ניהול העלאת תכנים, QA ותחזוקה.
                         </p>
-                    </div>
-                    <div class="w-full md:w-auto text-center md:text-right md:border-r border-[var(--glass-border)] md:pr-8 pt-4 md:pt-0 border-t md:border-t-0">
-                        <div class="mb-4">
-                            <span class="block text-[var(--text-muted)] text-xs font-bold mb-1 uppercase" data-key="pricing_system_learn">למידת מערכת (חד פעמי)</span>
-                            <span class="block text-2xl font-teko font-bold text-[var(--text-color)]">₪1,500</span>
-                        </div>
-                        <div>
-                            <span class="block text-[var(--text-muted)] text-xs font-bold mb-1 uppercase" data-key="pricing_ongoing_ops">תפעול שוטף</span>
-                            <span class="block text-2xl font-teko font-bold text-[var(--text-color)]" data-key="pricing_hourly">לפי שעה</span>
-                        </div>
                     </div>
                 </div>
             </div>
@@ -941,12 +918,6 @@
                             </div>
                         </div>
                     </div>
-                    <div class="w-full md:w-60 border-t md:border-t-0 md:border-r border-[var(--glass-border)] pt-6 md:pt-0 md:pr-8 text-center md:text-right">
-                        <span class="block text-[var(--secondary)] text-sm font-bold mb-1 uppercase" data-key="pricing_package">חבילת ייעוץ / פיתוח</span>
-                        <span class="block text-3xl sm:text-4xl font-teko font-bold text-[var(--text-color)]">Custom</span>
-                        <p class="text-xs text-[var(--text-muted)] mt-2" data-key="pricing_custom_desc">תמחור בהתאם להיקף שעות הייעוץ ומורכבות הפיתוח.</p>
-                        <div class="mt-4 inline-block bg-purple-100 text-purple-700 px-3 py-1 rounded text-xs font-bold" data-key="pricing_base_rate">החל מ-₪500 לשעת ייעוץ</div>
-                    </div>
                 </div>
             </div>
 
@@ -968,16 +939,11 @@
                         </p>
                         <div class="bg-[var(--glass-bg)] p-3 rounded-xl border border-[var(--glass-border)] mb-4">
                             <div class="text-xs font-bold text-[var(--text-muted)] mb-2 uppercase" data-key="pricing_addons">תוספות ושדרוגים (לפי דרישה):</div>
-                            <div class="addon-item"><span data-key="pricing_add_sound">עיצוב פס-קול ומיקס</span><span class="font-bold">₪800</span></div>
-                            <div class="addon-item"><span data-key="pricing_add_color">עיבוד צבע</span><span class="font-bold">₪600</span></div>
-                            <div class="addon-item"><span data-key="pricing_add_subs">כתוביות ותמלול</span><span class="font-bold">₪500</span></div>
-                            <div class="addon-item"><span data-key="pricing_add_after">אפטר אפקטס</span><span class="font-bold">₪1,500</span></div>
+                            <div class="addon-item"><span data-key="pricing_add_sound">עיצוב פס-קול ומיקס</span></div>
+                            <div class="addon-item"><span data-key="pricing_add_color">עיבוד צבע</span></div>
+                            <div class="addon-item"><span data-key="pricing_add_subs">כתוביות ותמלול</span></div>
+                            <div class="addon-item"><span data-key="pricing_add_after">אפטר אפקטס</span></div>
                         </div>
-                    </div>
-                    <div class="border-t border-[var(--glass-border)] pt-3 mt-4 text-right">
-                        <span class="text-xs font-bold text-pink-500 uppercase block mb-1" data-key="pricing_edit_shift">משמרת עריכה יומית</span>
-                        <span class="font-teko text-2xl sm:text-3xl font-bold text-[var(--text-color)]">₪2,500</span>
-                        <div class="text-xs text-[var(--text-muted)]" data-key="pricing_vat_studio">+ מע"מ (עבודה בסטודיו/מרחוק)</div>
                     </div>
                 </div>
 
@@ -996,12 +962,6 @@
                                 צילום על מסך ירוק, הטמעת רקעים וירטואליים תלת-ממדיים או מותאמים אישית.
                             </p>
                         </div>
-                        <div class="border-t border-[var(--glass-border)] pt-3 mt-4 text-right">
-                             <span class="text-xs font-bold text-pink-600 uppercase block mb-1" data-key="pricing_director_shift">משמרת בימוי/צילום</span>
-                             <span class="font-teko text-2xl sm:text-3xl font-bold text-[var(--text-color)]">₪2,500</span>
-                             <div class="text-xs text-[var(--text-muted)]" data-key="pricing_wage_only">+ מע"מ (שכר עבודה בלבד)</div>
-                             <div class="equipment-note" data-key="pricing_no_equip"><i data-lucide="alert-circle" class="w-3 h-3"></i> לא כולל השכרת אולפן/ציוד</div>
-                        </div>
                     </div>
                 </div>
 
@@ -1013,11 +973,6 @@
                             <h3 class="text-lg sm:text-xl font-bold text-[var(--text-color)] mb-2" data-key="pricing_cam_title">צילום שטח ואירועים (Camera Shift)</h3>
                             <p class="text-[var(--text-muted)] text-sm" data-key="pricing_cam_desc">מתן שירותי צילום מקצועיים לאירועים, הרצאות ופיצ'ים.</p>
                         </div>
-                        <div class="w-full md:w-auto text-center md:text-right border-t md:border-t-0 md:border-r border-[var(--glass-border)] pt-4 md:pt-0 md:pr-6">
-                            <span class="block text-3xl sm:text-4xl font-teko font-bold text-[var(--text-color)]">₪2,500</span>
-                            <div class="price-breakdown" data-key="pricing_cam_shift_len">משמרת צלם (עד 10 שעות)</div>
-                            <div class="equipment-note justify-center md:justify-end" data-key="pricing_equip_extra"><i data-lucide="alert-circle" class="w-3 h-3"></i> ציוד צילום וסאונד יתומחר בנפרד</div>
-                        </div>
                     </div>
                 </div>
             </div>
@@ -1026,34 +981,29 @@
             <div class="mt-16 pt-10 border-t-2 border-[var(--glass-border)]">
                 <h3 class="text-xl sm:text-2xl font-black text-[var(--text-color)] mb-2 text-center flex items-center justify-center gap-3" data-key="pricing_hourly_title">
                     <i data-lucide="hourglass" class="w-5 h-5 sm:w-6 sm:h-6 text-blue-500"></i>
-                    מחירון שירותים שוטפים (לפי שעה)
+                    שירותים שוטפים (לפי שעה)
                 </h3>
-                <p class="text-center text-[var(--text-muted)] mb-8 text-xs sm:text-sm" data-key="pricing_hourly_note">המחירים מתייחסים לשעות עבודה בלבד ואינם כוללים מע"מ וציוד</p>
                 
-                <div class="grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4">
+                <div class="grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4 mt-8">
                     <div class="pricing-card p-4 sm:p-5 rounded-2xl text-center group">
                         <div class="text-sky-500 mb-2 flex justify-center group-hover:scale-110 transition-transform"><i data-lucide="code-2" class="w-6 h-6 sm:w-7 sm:h-7"></i></div>
                         <div class="font-bold text-[var(--text-color)] text-sm sm:text-base" data-key="pricing_h_dev">פיתוח קוד</div>
                         <div class="text-xs sm:text-sm text-[var(--text-muted)] mb-2">Full Stack</div>
-                        <div class="text-2xl sm:text-3xl font-teko font-bold text-[var(--text-color)]">₪600</div>
                     </div>
                     <div class="pricing-card p-4 sm:p-5 rounded-2xl text-center group">
                         <div class="text-purple-500 mb-2 flex justify-center group-hover:scale-110 transition-transform"><i data-lucide="film" class="w-6 h-6 sm:w-7 sm:h-7"></i></div>
                         <div class="font-bold text-[var(--text-color)] text-sm sm:text-base" data-key="pricing_h_edit">עריכת וידאו</div>
                         <div class="text-xs sm:text-sm text-[var(--text-muted)] mb-2">Premiere Pro</div>
-                        <div class="text-2xl sm:text-3xl font-teko font-bold text-[var(--text-color)]">₪400</div>
                     </div>
                     <div class="pricing-card p-4 sm:p-5 rounded-2xl text-center group">
                         <div class="text-orange-500 mb-2 flex justify-center group-hover:scale-110 transition-transform"><i data-lucide="move-3d" class="w-6 h-6 sm:w-7 sm:h-7"></i></div>
                         <div class="font-bold text-[var(--text-color)] text-sm sm:text-base" data-key="pricing_h_anim">אנימציה & Motion</div>
                         <div class="text-xs sm:text-sm text-[var(--text-muted)] mb-2">After Effects</div>
-                        <div class="text-2xl sm:text-3xl font-teko font-bold text-[var(--text-color)]">₪450</div>
                     </div>
                     <div class="pricing-card p-4 sm:p-5 rounded-2xl text-center group bg-red-50/50 border-red-100">
                         <div class="text-red-500 mb-2 flex justify-center"><i data-lucide="alarm-clock" class="w-6 h-6 sm:w-7 sm:h-7"></i></div>
                         <div class="font-bold text-[var(--text-color)] text-sm sm:text-base" data-key="pricing_h_urgent">עבודה דחופה / לילה</div>
                         <div class="text-xs sm:text-sm text-[var(--text-muted)] mb-2" data-key="pricing_h_urgent_desc">חריגה משעות רגילות</div>
-                        <div class="text-lg sm:text-xl font-bold text-red-600 mt-2">150%</div>
                     </div>
                 </div>
             </div>
@@ -1175,13 +1125,13 @@
         // --- Translations Data ---
         const translations = {
             he: {
-                nav_home: "ראשי", nav_about: "אודות", nav_work: "CINE MATCH", nav_services: "שירותים", nav_ecosystem: "מעגלי עבודה", nav_pricing: "מחירון", nav_contact: "צור קשר", nav_recommendations: "המלצות",
+                nav_home: "ראשי", nav_about: "אודות", nav_work: "CINE MATCH", nav_services: "שירותים", nav_ecosystem: "מעגלי עבודה", nav_pricing: "מפרט שירותים", nav_contact: "צור קשר", nav_recommendations: "המלצות",
                 hero_title: "הנדסת תוכן ויזואלי", hero_subtitle: "איפה שטכנולוגיה פוגשת רגש בזמן אמת", hero_desc: "אנחנו לא רק מפיקים תוכן, אנחנו מהנדסים רגעים. שילוב עוצמתי בין שידורים חיים, קוד יצירתי ובינה מלאכותית.", hero_cta_start: "התחילו פרויקט", hero_cta_work: "למעגלי העבודה",
                 about_title: "מי אנחנו", about_intro: "בנקודת המפגש שבין ביצוע טכני מושלם לחזון אומנותי פורץ דרך.", about_subtitle: "מקוד לאומנות: המסע של כל פרויקט", about_text: "העולם הדיגיטלי דורש מהירות של מכונה ונשמה של אומן. השיטה שלנו ייחודית.", about_text2: "זה לא רק \"לצלם ולערוך\". זה לבנות מערכות שמגיבות בזמן אמת, לייצר יש מאין באמצעות AI.",
                 section_ecosystem: "הסינרגיה שלנו", ecosystem_desc: "אנחנו לא מאמינים ביחסי ספק-לקוח סטנדרטיים. הלקוחות שלנו הם הקולגות שלנו.",
                 section_solutions: "השירותים שלנו", section_testimonials: "המלצות", contact_title: "בואו ניצור משהו מדהים", contact_desc: "יש לכם חזון? לנו יש את הכלים.", btn_email: "שלחו מייל", contact_name: "אוריין אדלני",
                 // Pricing
-                pricing_title: "מפרט שירותים ומחירים",
+                pricing_title: "מפרט שירותים",
                 pricing_dashboard_badge: "פיתוח דשבורד",
                 pricing_dashboard_title: "פיתוח והטמעת מערכת נתונים (Dashboard)",
                 pricing_dashboard_desc: "פיתוח ממשק משתמש אינטראקטיבי המציג נתונים מורכבים בצורה ויזואלית ונגישה. המערכת מחליפה עבודה ידנית בטבלאות ומספקת תמונת מצב עדכנית בזמן אמת.",
@@ -1189,22 +1139,14 @@
                 pricing_dashboard_li2: "סנכרון דו-כיווני מול Google Sheets",
                 pricing_dashboard_li3: "יצירת כרטיסי מידע חכמים",
                 pricing_dashboard_li4: "תשתית סקיילבילית לפאנל ניהול",
-                pricing_setup_cost: "עלות הקמה והתאמה",
-                pricing_breakdown_dev: "אפיון טכני + עיצוב + פיתוח",
-                pricing_vat: "לפני מע\"מ",
                 pricing_web_title: "אתרים, אינטגרציה ותפעול (Web Ops)",
                 pricing_micro_title: "אפיון ופיתוח אתר אירוע (Microsite)",
                 pricing_micro_desc: "בניית דף נחיתה ייעודי מותאם אישית (Custom Code). השירות כולל עיצוב ממשק, פיתוח צד-לקוח (Frontend) והתאמה רספונסיבית.",
                 pricing_tag_catalog: "קטלוג סטארטאפים",
                 pricing_tag_anim: "פיתוח אנימציות CSS/JS",
-                pricing_dev_design: "פיתוח ועיצוב",
-                pricing_hours_est: "הערכת שעות: כ-15 ש\"ע",
                 pricing_ops_title: "אינטגרציה ותפעול שוטף (Integration & Ops)",
                 pricing_tech_service: "שירות טכני",
                 pricing_ops_desc: "ביצוע פעולות טכניות על גבי התשתית הקיימת. כולל: למידת המערכת, התממשקות, ניהול העלאת תכנים, QA ותחזוקה.",
-                pricing_system_learn: "למידת מערכת (חד פעמי)",
-                pricing_ongoing_ops: "תפעול שוטף",
-                pricing_hourly: "לפי שעה",
                 pricing_ai_title: "ייעוץ והטמעת AI בארגון",
                 pricing_ai_strat: "פיתוח אסטרטגיה וכלים מבוססי בינה מלאכותית",
                 pricing_ai_desc: "ייעוץ ופיתוח לשימוש בטכנולוגיות AI. ניתוח צרכים, פיתוח אוטומציות לחיסכון בזמן, והטמעת כלים ליצירת תוכן וניהול מידע חכם.",
@@ -1212,9 +1154,6 @@
                 pricing_auto_desc: "בניית תהליכים אוטומטיים",
                 pricing_ai_tools: "הטמעת כלי AI",
                 pricing_ai_adapt: "התאמת פתרונות לצרכי החברה",
-                pricing_package: "חבילת ייעוץ / פיתוח",
-                pricing_custom_desc: "תמחור בהתאם להיקף שעות הייעוץ ומורכבות הפיתוח.",
-                pricing_base_rate: "החל מ-₪500 לשעת ייעוץ",
                 pricing_creative_title: "הפקת תוכן ואולפן (Creative)",
                 pricing_video_title: "עריכת וידאו ופוסט (Video Editing)",
                 pricing_video_desc: "עריכת וידאו מקצועית (Offline & Online). חיתוך וסידור חומרים, שילוב אנימציות, תיקוני צבע וסאונד.",
@@ -1223,19 +1162,12 @@
                 pricing_add_color: "עיבוד צבע",
                 pricing_add_subs: "כתוביות ותמלול",
                 pricing_add_after: "אפטר אפקטס",
-                pricing_edit_shift: "משמרת עריכה יומית",
-                pricing_vat_studio: "+ מע\"מ (עבודה בסטודיו/מרחוק)",
                 pricing_virtual_title: "אולפן וירטואלי ופודקאסטים",
                 pricing_new: "חדש",
                 pricing_virtual_desc: "צילום על מסך ירוק, הטמעת רקעים וירטואליים תלת-ממדיים או מותאמים אישית.",
-                pricing_director_shift: "משמרת בימוי/צילום",
-                pricing_wage_only: "+ מע\"מ (שכר עבודה בלבד)",
-                pricing_no_equip: "לא כולל השכרת אולפן/ציוד",
                 pricing_cam_title: "צילום שטח ואירועים (Camera Shift)",
                 pricing_cam_desc: "מתן שירותי צילום מקצועיים לאירועים, הרצאות ופיצ'ים.",
-                pricing_cam_shift_len: "משמרת צלם (עד 10 שעות)",
-                pricing_equip_extra: "ציוד צילום וסאונד יתומחר בנפרד",
-                pricing_hourly_title: "מחירון שירותים שוטפים (לפי שעה)",
+                pricing_hourly_title: "שירותים שוטפים (לפי שעה)",
                 pricing_hourly_note: "המחירים מתייחסים לשעות עבודה בלבד ואינם כוללים מע\"מ וציוד",
                 pricing_h_dev: "פיתוח קוד",
                 pricing_h_edit: "עריכת וידאו",
@@ -1244,13 +1176,13 @@
                 pricing_h_urgent_desc: "חריגה משעות רגילות"
             },
             en: {
-                nav_home: "Home", nav_about: "About", nav_work: "CINE MATCH", nav_services: "Services", nav_ecosystem: "Ecosystem", nav_pricing: "Pricing", nav_contact: "Contact", nav_recommendations: "Testimonials",
+                nav_home: "Home", nav_about: "About", nav_work: "CINE MATCH", nav_services: "Services", nav_ecosystem: "Ecosystem", nav_pricing: "Specs", nav_contact: "Contact", nav_recommendations: "Testimonials",
                 hero_title: "Visual Content Engineering", hero_subtitle: "Where Technology Meets Emotion in Real-Time", hero_desc: "We don't just produce content; we engineer moments. A powerful fusion of live broadcasting, creative coding, and AI.", hero_cta_start: "Start a Project", hero_cta_work: "View Work",
-                about_title: "About Us", about_intro: "At the intersection of perfect technical execution and groundbreaking artistic vision.", about_subtitle: "From Code to Art: The Journey of Every Project", about_text: "The digital world demands the speed of a machine and the soul of an artist.", about_text2: "It's not just \"shoot and edit\". It's building systems that respond in real-time.",
+                about_title: "About Us", about_intro: "At the intersection of perfect technical execution and groundbreaking artistic vision.", about_subtitle: "From Code to Art: The Journey of Every Project", about_text: "The digital world demands the speed of a machine and the soul of an artist. Our method is unique: we deconstruct every challenge into technical factors and reassemble them into a living visual creation.", about_text2: "It's not just \"shoot and edit\". It's building systems that respond in real-time.",
                 section_ecosystem: "Our Synergy", ecosystem_desc: "We don't believe in standard supplier-client relationships. Our clients are our colleagues.",
                 section_solutions: "Our Services", section_testimonials: "Testimonials", contact_title: "Let's Create Magic", contact_desc: "Have a vision? We have the tools.", btn_email: "Send Email", contact_name: "Orian Edelenyi",
                 // Pricing
-                pricing_title: "Services & Pricing Spec",
+                pricing_title: "Services Specification",
                 pricing_dashboard_badge: "Dashboard Dev",
                 pricing_dashboard_title: "Data System Dev & Implementation",
                 pricing_dashboard_desc: "Developing interactive UI presenting complex data visually. Replaces manual spreadsheets and provides real-time status.",
@@ -1258,22 +1190,14 @@
                 pricing_dashboard_li2: "Bi-directional Google Sheets Sync",
                 pricing_dashboard_li3: "Smart Info Cards",
                 pricing_dashboard_li4: "Scalable Admin Panel Infrastructure",
-                pricing_setup_cost: "Setup & Customization Cost",
-                pricing_breakdown_dev: "Tech Specs + Design + Dev",
-                pricing_vat: "Before VAT",
                 pricing_web_title: "Websites, Integration & Ops",
                 pricing_micro_title: "Event Microsite Dev",
                 pricing_micro_desc: "Custom code landing page. Includes UI design, Frontend development, and responsive adaptation.",
                 pricing_tag_catalog: "Startup Catalog",
                 pricing_tag_anim: "CSS/JS Animations",
-                pricing_dev_design: "Dev & Design",
-                pricing_hours_est: "Est. Hours: ~15h",
                 pricing_ops_title: "Integration & Ongoing Ops",
                 pricing_tech_service: "Tech Service",
                 pricing_ops_desc: "Technical operations on existing infrastructure. Includes: System learning, integration, content upload, QA, and maintenance.",
-                pricing_system_learn: "System Learning (One-off)",
-                pricing_ongoing_ops: "Ongoing Ops",
-                pricing_hourly: "Hourly",
                 pricing_ai_title: "AI Consulting & Implementation",
                 pricing_ai_strat: "AI Strategy & Tools Development",
                 pricing_ai_desc: "Consulting and dev for AI technologies. Needs analysis, automation development, and smart content tools implementation.",
@@ -1281,9 +1205,6 @@
                 pricing_auto_desc: "Building automated processes",
                 pricing_ai_tools: "AI Tools Implementation",
                 pricing_ai_adapt: "Tailoring solutions to needs",
-                pricing_package: "Consulting / Dev Package",
-                pricing_custom_desc: "Pricing based on consulting hours and dev complexity.",
-                pricing_base_rate: "From ₪500/hour",
                 pricing_creative_title: "Content Production (Creative)",
                 pricing_video_title: "Video Editing & Post",
                 pricing_video_desc: "Professional video editing (Offline & Online). Cutting, arranging, animations, color correction, and sound.",
@@ -1292,19 +1213,12 @@
                 pricing_add_color: "Color Grading",
                 pricing_add_subs: "Subtitles & Transcription",
                 pricing_add_after: "After Effects",
-                pricing_edit_shift: "Daily Editing Shift",
-                pricing_vat_studio: "+ VAT (Studio/Remote)",
                 pricing_virtual_title: "Virtual Studio & Podcasts",
                 pricing_new: "New",
                 pricing_virtual_desc: "Green Screen filming, 3D or custom virtual background integration.",
-                pricing_director_shift: "Director/Camera Shift",
-                pricing_wage_only: "+ VAT (Wage only)",
-                pricing_no_equip: "Studio/Gear rental not included",
                 pricing_cam_title: "Field & Event Filming",
                 pricing_cam_desc: "Professional filming for events, lectures, and pitches.",
-                pricing_cam_shift_len: "Camera Shift (up to 10h)",
-                pricing_equip_extra: "Gear priced separately",
-                pricing_hourly_title: "Ongoing Services Price List (Hourly)",
+                pricing_hourly_title: "Ongoing Services (Hourly)",
                 pricing_hourly_note: "Prices for labor only, VAT and equipment not included",
                 pricing_h_dev: "Code Dev",
                 pricing_h_edit: "Video Editing",
