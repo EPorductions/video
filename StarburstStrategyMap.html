@@ -204,7 +204,15 @@
                     try {
                         // Check if we are in an environment that provides a custom token (less likely now with custom config, but good to keep)
                         if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
-                            await signInWithCustomToken(auth, __initial_auth_token);
+                            // Only attempt to sign in with custom token if it matches the current project
+                            // Since we have a custom config, this token will likely fail as it is for the default project.
+                            // We wrap it in try-catch to allow fallback.
+                             try {
+                                await signInWithCustomToken(auth, __initial_auth_token);
+                            } catch (tokenError) {
+                                console.warn("Custom token mismatch (expected for custom config), falling back to anonymous auth", tokenError);
+                                await signInAnonymously(auth);
+                            }
                         } else {
                             // Fallback to anonymous auth for standalone usage
                             await signInAnonymously(auth);
