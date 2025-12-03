@@ -17,13 +17,13 @@
 
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;700;900&display=swap');
-        body { font-family: 'Heebo', sans-serif; background-color: #F1F1F1; }
+        body { font-family: 'Heebo', sans-serif; background-color: #F6F6F4; }
         
         /* Custom Scrollbar */
         ::-webkit-scrollbar { width: 8px; }
-        ::-webkit-scrollbar-track { background: #17191A; }
-        ::-webkit-scrollbar-thumb { background: #FFC700; border-radius: 4px; }
-        ::-webkit-scrollbar-thumb:hover { background: #E5B300; }
+        ::-webkit-scrollbar-track { background: #0A0A0A; }
+        ::-webkit-scrollbar-thumb { background: #CCFF00; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #B3E600; }
 
         /* Hide Scrollbar for Filter Chips */
         .no-scrollbar::-webkit-scrollbar { display: none; }
@@ -55,11 +55,16 @@
             overflow: hidden;
         }
 
-        /* Branding Colors */
-        .bg-psych-dark { background-color: #17191A; }
-        .text-psych-yellow { color: #FFC700; }
-        .border-psych-yellow { border-color: #FFC700; }
-        .bg-psych-yellow { background-color: #FFC700; }
+        /* Modern Branding Colors */
+        .bg-psych-dark { background-color: #050505; }
+        .text-psych-neon { color: #CCFF00; }
+        .border-psych-neon { border-color: #CCFF00; }
+        .bg-psych-neon { background-color: #CCFF00; }
+        
+        .text-psych-turq { color: #00F0FF; }
+        .bg-psych-turq { background-color: #00F0FF; }
+        
+        .bg-psych-blonde { background-color: #FFFCE8; }
     </style>
 </head>
 <body>
@@ -121,13 +126,14 @@
         };
 
         const THEME = {
-            black: '#191B1D',
-            dark: '#17191A',
-            yellow: '#FFC700',
-            blue: '#1F63C7',
-            bg: '#F1F1F1',
-            gray: '#E3E3E3',
-            white: '#FFFFFF'
+            black: '#000000',
+            dark: '#050505',
+            primary: '#CCFF00', // Neon Green
+            secondary: '#00F0FF', // Turquoise
+            blonde: '#FFFCE8', // Blonde/Cream
+            bg: '#F6F6F4',
+            white: '#FFFFFF',
+            gray: '#E3E3E3'
         };
 
         // --- CSV Parser ---
@@ -153,8 +159,8 @@
         const Toast = ({ type, message, onClose }) => {
             if (!message) return null;
             return (
-                <div className={`fixed bottom-20 left-4 z-50 px-6 py-4 rounded-lg shadow-xl flex items-center gap-3 toast-enter transform transition-all duration-300 ${type === 'success' ? 'bg-[#191B1D] text-white border-r-4 border-[#FFC700]' : 'bg-red-600 text-white border-r-4 border-white'}`}>
-                    {type === 'success' ? <Icons.Check size={20} className="text-[#FFC700]" /> : <Icons.AlertTriangle size={20} />}
+                <div className={`fixed bottom-20 left-4 z-50 px-6 py-4 rounded-lg shadow-xl flex items-center gap-3 toast-enter transform transition-all duration-300 ${type === 'success' ? 'bg-[#050505] text-[#CCFF00] border-r-4 border-[#CCFF00]' : 'bg-red-600 text-white border-r-4 border-white'}`}>
+                    {type === 'success' ? <Icons.Check size={20} className="text-[#CCFF00]" /> : <Icons.AlertTriangle size={20} />}
                     <span className="font-bold text-sm">{message}</span>
                     <button onClick={onClose} className="mr-4 text-white/50 hover:text-white"><Icons.X size={16} /></button>
                 </div>
@@ -176,7 +182,7 @@
                 onClick={onClick}
                 className={`px-4 py-2 rounded-xl text-sm font-medium transition-all duration-200 whitespace-nowrap ${
                     active 
-                    ? 'bg-[#cce8ff] text-[#001d35]' // Active State (Gemini blue)
+                    ? 'bg-[#00F0FF] text-[#004D51]' // Active State (Turquoise)
                     : 'bg-white border border-[#E0E3E7] text-[#444746] hover:bg-[#E9EEF6]' // Inactive State
                 }`}
             >
@@ -445,39 +451,39 @@
 
                     {/* HERO */}
                     <header className="text-white relative overflow-hidden" style={{ backgroundColor: THEME.dark }}>
-                         <div className="absolute right-[-10%] top-[-50%] w-[50%] h-[200%] opacity-5 pointer-events-none" style={{ background: `radial-gradient(circle, ${THEME.yellow} 0%, transparent 70%)` }}></div>
+                         <div className="absolute right-[-10%] top-[-50%] w-[50%] h-[200%] opacity-20 pointer-events-none" style={{ background: `radial-gradient(circle, ${THEME.primary} 0%, transparent 70%)` }}></div>
                          
                          {/* Psychoflash Branding Element */}
-                         <div className="absolute -left-20 -top-20 z-0 opacity-10 pointer-events-none animate-pulse-slow">
-                            <Icons.Flash size={600} className="text-white" />
+                         <div className="absolute -left-20 -top-20 z-0 opacity-20 pointer-events-none animate-pulse-slow text-[#CCFF00]">
+                            <Icons.Flash size={600} fill="currentColor" />
                         </div>
 
                         <div className="max-w-7xl mx-auto px-6 py-12 relative z-10">
                             {/* BRANDING HEADER ROW */}
-                            <div className="flex items-center gap-6 mb-8 border-b border-white/10 pb-6">
+                            <div className="flex items-center gap-6 mb-8 border-b border-[#CCFF00]/20 pb-6">
                                 <div className="flex items-center gap-2 group cursor-pointer hover:opacity-80 transition-opacity">
-                                    <div className="p-2 bg-yellow-400 rounded-full text-black">
+                                    <div className="p-2 bg-[#CCFF00] rounded-full text-black">
                                         <Icons.Flash size={24} fill="currentColor" />
                                     </div>
-                                    <span className="text-2xl font-black tracking-tighter uppercase italic">PSYCHOFLASH</span>
+                                    <span className="text-2xl font-black tracking-tighter uppercase italic text-[#CCFF00]">PSYCHOFLASH</span>
                                 </div>
                             </div>
 
                             <div className="flex flex-col md:flex-row justify-between items-end gap-8">
                                 <div>
                                     <div className="flex items-center gap-3 mb-4">
-                                        <span className="text-xs font-bold px-3 py-1 rounded uppercase tracking-widest text-black flex items-center gap-1" style={{ backgroundColor: THEME.yellow }}>
+                                        <span className="text-xs font-bold px-3 py-1 rounded uppercase tracking-widest text-black flex items-center gap-1 bg-[#CCFF00]">
                                             <Icons.Flash size={12} fill="currentColor" /> NETWORK
                                         </span>
                                     </div>
-                                    <h1 className="text-6xl md:text-8xl font-black uppercase leading-[0.85] tracking-tighter mb-4">מאגר<br/>השותפים</h1>
-                                    <p className="text-xl text-gray-400 font-light max-w-lg">ניהול קשרים אסטרטגיים ונטוורקינג למאיץ.</p>
+                                    <h1 className="text-6xl md:text-8xl font-black uppercase leading-[0.85] tracking-tighter mb-4 text-white">מאגר<br/>השותפים</h1>
+                                    <p className="text-xl text-[#00F0FF] font-light max-w-lg">ניהול קשרים אסטרטגיים ונטוורקינג למאיץ.</p>
                                 </div>
                                 <div className="flex gap-4">
                                     <button onClick={() => setIsImportModalOpen(true)} className="group flex items-center gap-3 px-6 py-4 text-lg font-bold text-white border border-white/30 hover:bg-white/10 transition-all rounded-sm">
                                         <Icons.UploadCloud size={24} /> ייבוא מ-CSV
                                     </button>
-                                    <button onClick={() => { setEditingId('new'); setEditForm({ company: "", category: "", subCategory: "", phone: "", email: "", location: "", valueProp: "" }); setIsAddingNew(true); }} className="group flex items-center gap-3 px-8 py-4 text-lg font-bold text-black transition-all hover:scale-105 shadow-lg" style={{ backgroundColor: THEME.yellow }}>
+                                    <button onClick={() => { setEditingId('new'); setEditForm({ company: "", category: "", subCategory: "", phone: "", email: "", location: "", valueProp: "" }); setIsAddingNew(true); }} className="group flex items-center gap-3 px-8 py-4 text-lg font-bold text-black transition-all hover:scale-105 shadow-lg bg-[#CCFF00] hover:bg-[#B3E600]">
                                         <Icons.Plus size={24} strokeWidth={3} /> הוסף שותף
                                     </button>
                                 </div>
@@ -492,12 +498,12 @@
                             {/* TOP ROW: SEARCH & COUNT */}
                             <div className="flex flex-col md:flex-row gap-4 justify-between items-center">
                                 <div className="relative flex-1 w-full max-w-md">
-                                    <input type="text" placeholder="חיפוש חברה, טכנולוגיה..." className="w-full pl-4 pr-10 py-3 bg-gray-100 border border-transparent focus:bg-white focus:border-blue-600 outline-none transition-all rounded-none font-medium" value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} />
+                                    <input type="text" placeholder="חיפוש חברה, טכנולוגיה..." className="w-full pl-4 pr-10 py-3 bg-gray-100 border border-transparent focus:bg-white focus:border-[#00F0FF] outline-none transition-all rounded-none font-medium" value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} />
                                     <Icons.Search size={18} className="absolute top-3.5 right-3 text-gray-500" />
                                 </div>
                                 
                                 <div className="flex items-center gap-2 text-sm font-bold text-gray-500 bg-gray-100 px-4 py-3 rounded-none">
-                                    {loading ? <Icons.RefreshCw size={16} className="animate-spin" /> : <Icons.Check size={16} className="text-green-500" />}
+                                    {loading ? <Icons.RefreshCw size={16} className="animate-spin text-[#00F0FF]" /> : <Icons.Check size={16} className="text-[#CCFF00]" />}
                                     <span>{filteredPartners.length} שותפים</span>
                                 </div>
                             </div>
@@ -516,7 +522,7 @@
                             <div className="flex flex-wrap gap-4 items-center text-sm bg-white p-3 rounded border border-gray-100">
                                 <div className="flex items-center gap-2">
                                     <span className="font-bold text-gray-500">תת-קטגוריה:</span>
-                                    <select className="p-2 bg-gray-50 border border-gray-200 rounded outline-none focus:border-blue-500" value={filterSubCategory} onChange={(e) => setFilterSubCategory(e.target.value)} disabled={selectedCategory === 'הכל'}>
+                                    <select className="p-2 bg-gray-50 border border-gray-200 rounded outline-none focus:border-[#00F0FF]" value={filterSubCategory} onChange={(e) => setFilterSubCategory(e.target.value)} disabled={selectedCategory === 'הכל'}>
                                         {subCategories.map(cat => <option key={cat} value={cat}>{cat}</option>)}
                                     </select>
                                 </div>
@@ -525,7 +531,7 @@
                                     <span className="font-bold text-gray-500">סטטוס:</span>
                                     <div className="flex bg-gray-100 p-1 rounded">
                                         <button onClick={() => setFilterStatus('all')} className={`px-3 py-1 rounded text-xs font-bold transition-all ${filterStatus === 'all' ? 'bg-white shadow text-black' : 'text-gray-500 hover:text-gray-700'}`}>הכל</button>
-                                        <button onClick={() => setFilterStatus('contacted')} className={`px-3 py-1 rounded text-xs font-bold transition-all ${filterStatus === 'contacted' ? 'bg-green-100 text-green-700 shadow' : 'text-gray-500 hover:text-gray-700'}`}>נוצר קשר</button>
+                                        <button onClick={() => setFilterStatus('contacted')} className={`px-3 py-1 rounded text-xs font-bold transition-all ${filterStatus === 'contacted' ? 'bg-[#CCFF00]/20 text-[#88AA00] shadow' : 'text-gray-500 hover:text-gray-700'}`}>נוצר קשר</button>
                                         <button onClick={() => setFilterStatus('not_contacted')} className={`px-3 py-1 rounded text-xs font-bold transition-all ${filterStatus === 'not_contacted' ? 'bg-red-50 text-red-600 shadow' : 'text-gray-500 hover:text-gray-700'}`}>טרם טופל</button>
                                     </div>
                                 </div>
@@ -549,7 +555,7 @@
                     <div className="max-w-7xl mx-auto px-6 py-6 flex-grow">
                          {loading && partners.length === 0 ? (
                             <div className="flex justify-center py-20">
-                                <div className="animate-spin rounded-full h-12 w-12 border-t-4 border-b-4" style={{ borderColor: THEME.blue }}></div>
+                                <div className="animate-spin rounded-full h-12 w-12 border-t-4 border-b-4 border-[#00F0FF]"></div>
                             </div>
                         ) : (
                             <>
@@ -557,8 +563,8 @@
                                 {layoutMode === 'detailed' && (
                                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
                                         {filteredPartners.map((partner) => (
-                                            <div key={partner.id} className="bg-white border-2 border-transparent hover:border-blue-600 transition-all duration-300 group flex flex-col relative shadow-sm hover:shadow-xl" style={{ borderColor: partner.contacted ? '#48BB78' : 'transparent' }}>
-                                                <button onClick={() => toggleContact(partner)} className={`absolute top-0 right-0 px-3 py-1 text-xs font-black uppercase tracking-wider z-10 transition-colors ${partner.contacted ? 'bg-green-500 text-white' : 'bg-gray-200 text-gray-500 hover:bg-gray-300'}`}>
+                                            <div key={partner.id} className="bg-white border-2 border-transparent hover:border-[#00F0FF] transition-all duration-300 group flex flex-col relative shadow-sm hover:shadow-xl" style={{ borderColor: partner.contacted ? '#CCFF00' : 'transparent' }}>
+                                                <button onClick={() => toggleContact(partner)} className={`absolute top-0 right-0 px-3 py-1 text-xs font-black uppercase tracking-wider z-10 transition-colors ${partner.contacted ? 'bg-[#CCFF00] text-black' : 'bg-gray-200 text-gray-500 hover:bg-gray-300'}`}>
                                                     {partner.contacted ? 'נוצר קשר ✓' : 'לפני פנייה'}
                                                 </button>
                                                 
@@ -567,7 +573,7 @@
                                                      <button onClick={() => handleDelete(partner.id)} className="p-2 text-gray-400 hover:text-red-600 transition-colors" title="מחק">
                                                         <Icons.Trash2 size={18} />
                                                     </button>
-                                                    <button onClick={() => { setEditingId(partner.id); setEditForm(partner); setIsAddingNew(false); }} className="p-2 text-gray-400 hover:text-blue-600 transition-colors border-r border-gray-200" title="ערוך">
+                                                    <button onClick={() => { setEditingId(partner.id); setEditForm(partner); setIsAddingNew(false); }} className="p-2 text-gray-400 hover:text-[#00F0FF] transition-colors border-r border-gray-200" title="ערוך">
                                                         <Icons.Edit3 size={18} />
                                                     </button>
                                                 </div>
@@ -580,7 +586,7 @@
                                                         <div>
                                                             <h2 className="text-2xl font-black text-[#191B1D] leading-none mb-1">{partner.company}</h2>
                                                             <div className="flex items-center gap-1 text-sm text-gray-500 font-medium"><Icons.MapPin size={12} /> {partner.location || "ישראל"}</div>
-                                                            <div className="mt-2 inline-block px-2 py-0.5 bg-blue-50 text-blue-700 text-[10px] font-bold uppercase tracking-wide border border-blue-100">{partner.category}</div>
+                                                            <div className="mt-2 inline-block px-2 py-0.5 bg-[#E0F7FA] text-[#006064] text-[10px] font-bold uppercase tracking-wide border border-[#B2EBF2]">{partner.category}</div>
                                                         </div>
                                                     </div>
 
@@ -592,8 +598,8 @@
                                                             </div>
                                                         )}
                                                         {partner.acceleratorStrategy && (
-                                                            <div className="p-3 bg-yellow-50 border-r-4 border-yellow-400">
-                                                                <div className="flex items-center gap-2 text-xs font-bold text-yellow-700 uppercase mb-1"><Icons.Rocket size={12} /> אסטרטגיית שת"פ</div>
+                                                            <div className="p-3 bg-[#FFFCE8] border-r-4 border-[#CCFF00]">
+                                                                <div className="flex items-center gap-2 text-xs font-bold text-[#88AA00] uppercase mb-1"><Icons.Rocket size={12} /> אסטרטגיית שת"פ</div>
                                                                 <p className="text-sm font-bold text-gray-900 leading-relaxed">{partner.acceleratorStrategy}</p>
                                                             </div>
                                                         )}
@@ -605,13 +611,13 @@
                                                         </div>
                                                     </div>
                                                     <div className="mt-6">
-                                                        <textarea className="w-full text-sm bg-[#F9F9F9] border-b-2 border-gray-200 focus:border-yellow-400 outline-none p-2 resize-none min-h-[60px] transition-colors placeholder-gray-400" placeholder="הערות..." value={partner.note || ""} onChange={(e) => updateNoteLocalUI(partner.id, e.target.value)} onBlur={(e) => saveNote(partner.id, e.target.value)} />
+                                                        <textarea className="w-full text-sm bg-[#F9F9F9] border-b-2 border-gray-200 focus:border-[#CCFF00] outline-none p-2 resize-none min-h-[60px] transition-colors placeholder-gray-400" placeholder="הערות..." value={partner.note || ""} onChange={(e) => updateNoteLocalUI(partner.id, e.target.value)} onBlur={(e) => saveNote(partner.id, e.target.value)} />
                                                     </div>
                                                 </div>
                                                 <div className="px-6 py-4 bg-gray-50 border-t border-gray-100 grid grid-cols-3 gap-3">
                                                     <ActionButton href={partner.phone ? `tel:${partner.phone}` : null} icon={Icons.Phone} label="חיוג" colorClass="bg-white border border-gray-200 text-gray-700 hover:bg-gray-100" />
-                                                    <ActionButton href={partner.email ? `mailto:${partner.email}` : null} icon={Icons.Mail} label="מייל" colorClass="bg-blue-50 text-blue-700 hover:bg-blue-100" />
-                                                    <ActionButton href={partner.phone ? `https://wa.me/${formatForWhatsapp(partner.phone)}` : null} icon={Icons.MessageCircle} label="" colorClass="bg-green-50 text-green-600 hover:bg-green-100" />
+                                                    <ActionButton href={partner.email ? `mailto:${partner.email}` : null} icon={Icons.Mail} label="מייל" colorClass="bg-[#E0F7FA] text-[#006064] hover:bg-[#B2EBF2]" />
+                                                    <ActionButton href={partner.phone ? `https://wa.me/${formatForWhatsapp(partner.phone)}` : null} icon={Icons.MessageCircle} label="" colorClass="bg-[#F0F4C3] text-[#827717] hover:bg-[#E6EE9C]" />
                                                 </div>
                                             </div>
                                         ))}
@@ -625,10 +631,10 @@
                                             <div 
                                                 key={partner.id} 
                                                 onClick={() => setViewingId(partner.id)}
-                                                className="bg-white border hover:border-blue-500 transition-all cursor-pointer shadow-sm hover:shadow-md rounded-lg p-2 flex flex-col items-center justify-center text-center aspect-square relative"
-                                                style={{ borderColor: partner.contacted ? '#48BB78' : undefined }}
+                                                className="bg-white border hover:border-[#00F0FF] transition-all cursor-pointer shadow-sm hover:shadow-md rounded-lg p-2 flex flex-col items-center justify-center text-center aspect-square relative"
+                                                style={{ borderColor: partner.contacted ? '#CCFF00' : undefined }}
                                             >
-                                                {partner.contacted && <div className="absolute top-1 right-1 w-2 h-2 rounded-full bg-green-500"></div>}
+                                                {partner.contacted && <div className="absolute top-1 right-1 w-2 h-2 rounded-full bg-[#CCFF00]"></div>}
                                                 <div className="w-10 h-10 md:w-14 md:h-14 mb-2 flex items-center justify-center">
                                                     <img src={getLogoUrl(partner.domain, partner.company)} alt="" className="w-full h-full object-contain mix-blend-multiply" onError={(e) => e.target.src = `https://ui-avatars.com/api/?name=${partner.company}`} />
                                                 </div>
@@ -651,7 +657,7 @@
                                 </div>
                                 
                                 {/* Status Badge */}
-                                <button onClick={() => toggleContact(activePartner)} className={`absolute top-0 right-0 px-4 py-2 text-xs font-black uppercase tracking-wider z-10 transition-colors rounded-bl-xl ${activePartner.contacted ? 'bg-green-500 text-white' : 'bg-gray-200 text-gray-500 hover:bg-gray-300'}`}>
+                                <button onClick={() => toggleContact(activePartner)} className={`absolute top-0 right-0 px-4 py-2 text-xs font-black uppercase tracking-wider z-10 transition-colors rounded-bl-xl ${activePartner.contacted ? 'bg-[#CCFF00] text-black' : 'bg-gray-200 text-gray-500 hover:bg-gray-300'}`}>
                                     {activePartner.contacted ? 'נוצר קשר ✓' : 'לפני פנייה'}
                                 </button>
 
@@ -664,7 +670,7 @@
                                         <div>
                                             <h2 className="text-3xl font-black text-[#191B1D] leading-none mb-1">{activePartner.company}</h2>
                                             <div className="flex items-center gap-1 text-sm text-gray-500 font-medium"><Icons.MapPin size={12} /> {activePartner.location || "ישראל"}</div>
-                                            <div className="mt-2 inline-block px-2 py-0.5 bg-blue-50 text-blue-700 text-[10px] font-bold uppercase tracking-wide border border-blue-100 rounded">{activePartner.category}</div>
+                                            <div className="mt-2 inline-block px-2 py-0.5 bg-[#E0F7FA] text-[#006064] text-[10px] font-bold uppercase tracking-wide border border-[#B2EBF2] rounded">{activePartner.category}</div>
                                         </div>
                                     </div>
 
@@ -676,8 +682,8 @@
                                             </div>
                                         )}
                                         {activePartner.acceleratorStrategy && (
-                                            <div className="p-3 bg-yellow-50 border-r-4 border-yellow-400 rounded-l-lg">
-                                                <div className="flex items-center gap-2 text-xs font-bold text-yellow-700 uppercase mb-1"><Icons.Rocket size={12} /> אסטרטגיית שת"פ</div>
+                                            <div className="p-3 bg-[#FFFCE8] border-r-4 border-[#CCFF00] rounded-l-lg">
+                                                <div className="flex items-center gap-2 text-xs font-bold text-[#88AA00] uppercase mb-1"><Icons.Rocket size={12} /> אסטרטגיית שת"פ</div>
                                                 <p className="text-sm font-bold text-gray-900 leading-relaxed">{activePartner.acceleratorStrategy}</p>
                                             </div>
                                         )}
@@ -691,7 +697,7 @@
                                     </div>
                                     
                                     <div className="mt-6 mb-6">
-                                        <textarea className="w-full text-sm bg-[#F9F9F9] border-b-2 border-gray-200 focus:border-yellow-400 outline-none p-3 resize-none min-h-[80px] transition-colors placeholder-gray-400 rounded-t-lg" placeholder="הערות אישיות..." value={activePartner.note || ""} onChange={(e) => updateNoteLocalUI(activePartner.id, e.target.value)} onBlur={(e) => saveNote(activePartner.id, e.target.value)} />
+                                        <textarea className="w-full text-sm bg-[#F9F9F9] border-b-2 border-gray-200 focus:border-[#CCFF00] outline-none p-3 resize-none min-h-[80px] transition-colors placeholder-gray-400 rounded-t-lg" placeholder="הערות אישיות..." value={activePartner.note || ""} onChange={(e) => updateNoteLocalUI(activePartner.id, e.target.value)} onBlur={(e) => saveNote(activePartner.id, e.target.value)} />
                                     </div>
                                 </div>
 
@@ -699,12 +705,12 @@
                                 <div className="px-6 py-4 bg-gray-50 border-t border-gray-100">
                                     <div className="grid grid-cols-3 gap-3 mb-4">
                                         <ActionButton href={activePartner.phone ? `tel:${activePartner.phone}` : null} icon={Icons.Phone} label="חיוג" colorClass="bg-white border border-gray-200 text-gray-700 hover:bg-gray-100" />
-                                        <ActionButton href={activePartner.email ? `mailto:${activePartner.email}` : null} icon={Icons.Mail} label="מייל" colorClass="bg-blue-50 text-blue-700 hover:bg-blue-100" />
-                                        <ActionButton href={activePartner.phone ? `https://wa.me/${formatForWhatsapp(activePartner.phone)}` : null} icon={Icons.MessageCircle} label="" colorClass="bg-green-50 text-green-600 hover:bg-green-100" />
+                                        <ActionButton href={activePartner.email ? `mailto:${activePartner.email}` : null} icon={Icons.Mail} label="מייל" colorClass="bg-[#E0F7FA] text-[#006064] hover:bg-[#B2EBF2]" />
+                                        <ActionButton href={activePartner.phone ? `https://wa.me/${formatForWhatsapp(activePartner.phone)}` : null} icon={Icons.MessageCircle} label="" colorClass="bg-[#F0F4C3] text-[#827717] hover:bg-[#E6EE9C]" />
                                     </div>
                                     <div className="flex justify-between items-center pt-2 border-t border-gray-200/50">
                                          <button onClick={() => handleDelete(activePartner.id)} className="text-red-400 hover:text-red-600 text-xs font-bold flex items-center gap-1"><Icons.Trash2 size={14} /> מחק</button>
-                                         <button onClick={() => { setEditingId(activePartner.id); setEditForm(activePartner); setViewingId(null); setIsAddingNew(false); }} className="text-blue-500 hover:text-blue-700 text-xs font-bold flex items-center gap-1"><Icons.Edit3 size={14} /> ערוך פרטים</button>
+                                         <button onClick={() => { setEditingId(activePartner.id); setEditForm(activePartner); setViewingId(null); setIsAddingNew(false); }} className="text-[#006064] hover:text-[#004D51] text-xs font-bold flex items-center gap-1"><Icons.Edit3 size={14} /> ערוך פרטים</button>
                                     </div>
                                 </div>
                             </div>
@@ -712,10 +718,10 @@
                     )}
 
                     {/* STICKY BOTTOM FOOTER (Appears on scroll) */}
-                    <div className={`fixed bottom-0 left-0 right-0 bg-[#17191A] text-white shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.1)] z-30 footer-slide-up ${showBottomBar ? 'footer-visible' : 'footer-hidden'}`}>
+                    <div className={`fixed bottom-0 left-0 right-0 bg-[#050505] text-white shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.1)] z-30 footer-slide-up ${showBottomBar ? 'footer-visible' : 'footer-hidden'}`}>
                         <div className="max-w-7xl mx-auto px-6 h-16 flex justify-between items-center">
                             <div className="flex items-center gap-3">
-                                <Icons.Flash className="text-yellow-400 opacity-80" size={24} />
+                                <Icons.Flash className="text-[#CCFF00] opacity-80" size={24} />
                                 <div className="h-4 w-px bg-white/20"></div>
                                 <span className="text-xs text-gray-400">ניהול שותפים - Psychoflash</span>
                             </div>
@@ -731,7 +737,7 @@
                                 </button>
                                 <button 
                                     onClick={() => { setEditingId('new'); setEditForm({ company: "", category: "", subCategory: "", phone: "", email: "", location: "", valueProp: "" }); setIsAddingNew(true); }}
-                                    className="flex items-center gap-2 px-4 py-2 text-xs font-bold text-black bg-[#FFC700] hover:bg-[#E5B300] rounded transition-colors shadow-sm"
+                                    className="flex items-center gap-2 px-4 py-2 text-xs font-bold text-black bg-[#CCFF00] hover:bg-[#B3E600] rounded transition-colors shadow-sm"
                                 >
                                     <Icons.Plus size={16} strokeWidth={3} />
                                     <span>הוסף שותף</span>
@@ -752,7 +758,7 @@
                                     <p className="text-sm text-gray-600">הדבק כאן קישור ל-Google Sheet שפורסם כ-CSV (File &gt; Share &gt; Publish to web &gt; Comma-separated values).</p>
                                     <div>
                                         <label className="block text-xs font-bold text-gray-500 mb-1 uppercase">URL ל-CSV</label>
-                                        <input className="w-full p-3 bg-gray-50 border border-gray-200 focus:border-blue-500 outline-none text-sm" 
+                                        <input className="w-full p-3 bg-gray-50 border border-gray-200 focus:border-[#00F0FF] outline-none text-sm" 
                                             value={importUrl} onChange={e => setImportUrl(e.target.value)} placeholder="https://docs.google.com/..." />
                                     </div>
                                 </div>
@@ -775,19 +781,18 @@
                                     <button onClick={() => setEditingId(null)} className="text-gray-400 hover:text-red-500 transition-colors"><Icons.X size={24} /></button>
                                 </div>
                                 <div className="p-8 overflow-y-auto grid grid-cols-1 md:grid-cols-2 gap-6">
-                                    <div className="col-span-2 md:col-span-1"><label className="block text-xs font-bold text-gray-400 uppercase mb-1">שם החברה</label><input className="w-full p-3 bg-gray-50 border border-gray-200 focus:border-blue-500 outline-none font-bold" value={editForm.company || ""} onChange={e => setEditForm({...editForm, company: e.target.value})} /></div>
-                                    <div className="col-span-2 md:col-span-1"><label className="block text-xs font-bold text-gray-400 uppercase mb-1">דומיין (לוגו)</label><input className="w-full p-3 bg-gray-50 border border-gray-200 focus:border-blue-500 outline-none" value={editForm.domain || ""} onChange={e => setEditForm({...editForm, domain: e.target.value})} placeholder="example.com" /></div>
-                                    <div className="col-span-2"><label className="block text-xs font-bold text-gray-400 uppercase mb-1">ערך אסטרטגי</label><textarea className="w-full p-3 bg-gray-50 border border-gray-200 focus:border-blue-500 outline-none" rows="2" value={editForm.valueProp || ""} onChange={e => setEditForm({...editForm, valueProp: e.target.value})} /></div>
-                                    <div className="col-span-2"><label className="block text-xs font-bold text-gray-400 uppercase mb-1">אסטרטגיית שת"פ</label><textarea className="w-full p-3 bg-yellow-50 border border-yellow-200 focus:border-yellow-400 outline-none font-medium" rows="2" value={editForm.acceleratorStrategy || ""} onChange={e => setEditForm({...editForm, acceleratorStrategy: e.target.value})} /></div>
-                                    <div><label className="block text-xs font-bold text-gray-400 uppercase mb-1">טלפון</label><input className="w-full p-3 bg-gray-50 border border-gray-200 focus:border-blue-500 outline-none" value={editForm.phone || ""} onChange={e => setEditForm({...editForm, phone: e.target.value})} /></div>
-                                    <div><label className="block text-xs font-bold text-gray-400 uppercase mb-1">מייל</label><input className="w-full p-3 bg-gray-50 border border-gray-200 focus:border-blue-500 outline-none" value={editForm.email || ""} onChange={e => setEditForm({...editForm, email: e.target.value})} /></div>
-                                    <div className="col-span-2 md:col-span-1"><label className="block text-xs font-bold text-gray-400 uppercase mb-1">קטגוריה</label><input className="w-full p-3 bg-gray-50 border border-gray-200 focus:border-blue-500 outline-none" value={editForm.category || ""} onChange={e => setEditForm({...editForm, category: e.target.value})} /></div>
-                                    <div className="col-span-2 md:col-span-1"><label className="block text-xs font-bold text-gray-400 uppercase mb-1">תת קטגוריה</label><input className="w-full p-3 bg-gray-50 border border-gray-200 focus:border-blue-500 outline-none" value={editForm.subCategory || ""} onChange={e => setEditForm({...editForm, subCategory: e.target.value})} /></div>
-                                     <div className="col-span-2 md:col-span-1"><label className="block text-xs font-bold text-gray-400 uppercase mb-1">מנגנון כניסה</label><input className="w-full p-3 bg-gray-50 border border-gray-200 focus:border-blue-500 outline-none" value={editForm.entryMechanism || ""} onChange={e => setEditForm({...editForm, entryMechanism: e.target.value})} /></div>
+                                    <div className="col-span-2 md:col-span-1"><label className="block text-xs font-bold text-gray-400 uppercase mb-1">שם החברה</label><input className="w-full p-3 bg-gray-50 border border-gray-200 focus:border-[#00F0FF] outline-none font-bold" value={editForm.company || ""} onChange={e => setEditForm({...editForm, company: e.target.value})} /></div>
+                                    <div className="col-span-2 md:col-span-1"><label className="block text-xs font-bold text-gray-400 uppercase mb-1">דומיין (לוגו)</label><input className="w-full p-3 bg-gray-50 border border-gray-200 focus:border-[#00F0FF] outline-none" value={editForm.domain || ""} onChange={e => setEditForm({...editForm, domain: e.target.value})} placeholder="example.com" /></div>
+                                    <div className="col-span-2"><label className="block text-xs font-bold text-gray-400 uppercase mb-1">ערך אסטרטגי</label><textarea className="w-full p-3 bg-gray-50 border border-gray-200 focus:border-[#00F0FF] outline-none" rows="2" value={editForm.valueProp || ""} onChange={e => setEditForm({...editForm, valueProp: e.target.value})} /></div>
+                                    <div className="col-span-2"><label className="block text-xs font-bold text-gray-400 uppercase mb-1">אסטרטגיית שת"פ</label><textarea className="w-full p-3 bg-[#FFFCE8] border border-[#CCFF00] focus:border-[#CCFF00] outline-none font-medium" rows="2" value={editForm.acceleratorStrategy || ""} onChange={e => setEditForm({...editForm, acceleratorStrategy: e.target.value})} /></div>
+                                    <div><label className="block text-xs font-bold text-gray-400 uppercase mb-1">טלפון</label><input className="w-full p-3 bg-gray-50 border border-gray-200 focus:border-[#00F0FF] outline-none" value={editForm.phone || ""} onChange={e => setEditForm({...editForm, phone: e.target.value})} /></div>
+                                    <div><label className="block text-xs font-bold text-gray-400 uppercase mb-1">מייל</label><input className="w-full p-3 bg-gray-50 border border-gray-200 focus:border-[#00F0FF] outline-none" value={editForm.email || ""} onChange={e => setEditForm({...editForm, email: e.target.value})} /></div>
+                                    <div className="col-span-2 md:col-span-1"><label className="block text-xs font-bold text-gray-400 uppercase mb-1">קטגוריה</label><input className="w-full p-3 bg-gray-50 border border-gray-200 focus:border-[#00F0FF] outline-none" value={editForm.category || ""} onChange={e => setEditForm({...editForm, category: e.target.value})} /></div>
+                                    <div className="col-span-2 md:col-span-1"><label className="block text-xs font-bold text-gray-400 uppercase mb-1">מנגנון כניסה</label><input className="w-full p-3 bg-gray-50 border border-gray-200 focus:border-[#00F0FF] outline-none" value={editForm.entryMechanism || ""} onChange={e => setEditForm({...editForm, entryMechanism: e.target.value})} /></div>
                                 </div>
                                 <div className="p-6 border-t border-gray-100 flex justify-end gap-4 bg-gray-50">
                                     <button onClick={() => setEditingId(null)} className="px-6 py-3 font-bold text-gray-500 hover:bg-gray-200 transition-colors rounded">ביטול</button>
-                                    <button onClick={handleSave} className="px-8 py-3 font-black text-black bg-[#FFC700] hover:bg-[#E5B300] transition-all shadow-md flex items-center gap-2 rounded"><Icons.Save size={18} /> שמור שינויים</button>
+                                    <button onClick={handleSave} className="px-8 py-3 font-black text-black bg-[#CCFF00] hover:bg-[#B3E600] transition-all shadow-md flex items-center gap-2 rounded"><Icons.Save size={18} /> שמור שינויים</button>
                                 </div>
                             </div>
                         </div>
