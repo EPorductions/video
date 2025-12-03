@@ -25,6 +25,10 @@
         ::-webkit-scrollbar-thumb { background: #FFC700; border-radius: 4px; }
         ::-webkit-scrollbar-thumb:hover { background: #E5B300; }
 
+        /* Hide Scrollbar for Filter Chips */
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+
         .animate-spin { animation: spin 1s linear infinite; }
         @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
         
@@ -63,7 +67,7 @@
 
     <script type="text/babel" data-type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-        import { getAuth, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+        import { getAuth, signInAnonymously, onAuthStateChanged, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
         import { getFirestore, collection, doc, setDoc, updateDoc, deleteDoc, onSnapshot, serverTimestamp, query, orderBy, writeBatch } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
         const React = window.React;
@@ -81,8 +85,6 @@
 
         // Initialize Firebase
         let app, auth, db;
-        
-        // *** BRANDING & DB SEPARATION ***
         const appId = 'psychoflash-network'; 
 
         try {
@@ -167,6 +169,20 @@
                 </a>
             );
         };
+
+        // *** GEMINI-STYLE FILTER CHIP COMPONENT ***
+        const FilterChip = ({ label, active, onClick }) => (
+            <button 
+                onClick={onClick}
+                className={`px-4 py-2 rounded-xl text-sm font-medium transition-all duration-200 whitespace-nowrap ${
+                    active 
+                    ? 'bg-[#cce8ff] text-[#001d35]' // Active State (Gemini blue)
+                    : 'bg-white border border-[#E0E3E7] text-[#444746] hover:bg-[#E9EEF6]' // Inactive State
+                }`}
+            >
+                {label}
+            </button>
+        );
 
         // --- Main App ---
         const App = () => {
@@ -302,25 +318,26 @@
             const handleImport = async () => {
                 if (!user) return;
                 setLoading(true);
-                let csvText = "";
-                
                 try {
-                    // Method 1: Try fetching directly (Google Sheets Published URLs often support CORS)
+                    // Try primary proxy (AllOrigins)
+                    let csvText = "";
                     try {
-                        const response = await fetch(importUrl);
-                        if (response.ok) {
-                            csvText = await response.text();
-                        } else {
-                            throw new Error("Direct fetch failed");
-                        }
-                    } catch (directError) {
-                        console.warn("Direct fetch failed, trying proxy...", directError);
-                        
-                        // Method 2: Fallback to reliable CORS Proxy
-                        const proxyUrl = "https://corsproxy.io/?" + encodeURIComponent(importUrl);
+                        const proxyUrl = "https://api.allorigins.win/raw?url=" + encodeURIComponent(importUrl);
                         const response = await fetch(proxyUrl);
-                        if (!response.ok) throw new Error("Proxy fetch failed");
+                        if (!response.ok) throw new Error("Proxy 1 Error");
                         csvText = await response.text();
+                    } catch (err1) {
+                        console.warn("Primary proxy failed, trying backup...", err1);
+                        // Try backup proxy (CorsProxy.io)
+                        const backupUrl = "https://corsproxy.io/?" + encodeURIComponent(importUrl);
+                        const response = await fetch(backupUrl);
+                         if (!response.ok) throw new Error("Network response was not ok from backup");
+                        csvText = await response.text();
+                    }
+                    
+                    // Validation: Check if response is HTML (Error page) instead of CSV
+                    if (csvText.trim().toLowerCase().startsWith("<!doctype html") || csvText.trim().toLowerCase().startsWith("<html")) {
+                         throw new Error("הקישור החזיר דף HTML במקום קובץ CSV. ודא שהלינק הוא Pubilshed to Web -> CSV.");
                     }
 
                     const rawData = parseCSV(csvText);
@@ -471,38 +488,32 @@
                     {/* FILTERS & LAYOUT TOGGLE */}
                     <div className="sticky top-0 z-30 shadow-md backdrop-blur-md bg-white/90 border-b border-gray-200">
                         <div className="max-w-7xl mx-auto px-6 py-4 flex flex-col gap-4">
+                            
+                            {/* TOP ROW: SEARCH & COUNT */}
                             <div className="flex flex-col md:flex-row gap-4 justify-between items-center">
                                 <div className="relative flex-1 w-full max-w-md">
                                     <input type="text" placeholder="חיפוש חברה, טכנולוגיה..." className="w-full pl-4 pr-10 py-3 bg-gray-100 border border-transparent focus:bg-white focus:border-blue-600 outline-none transition-all rounded-none font-medium" value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} />
                                     <Icons.Search size={18} className="absolute top-3.5 right-3 text-gray-500" />
                                 </div>
                                 
-                                <div className="flex items-center gap-2">
-                                    {/* Layout Toggle Button */}
-                                    <button 
-                                        onClick={() => setLayoutMode(layoutMode === 'detailed' ? 'compact' : 'detailed')}
-                                        className="flex items-center gap-2 px-4 py-3 bg-gray-100 hover:bg-gray-200 text-gray-700 font-bold rounded-none transition-colors border-l border-gray-300"
-                                        title={layoutMode === 'detailed' ? 'עבור לתצוגה מצומצמת' : 'עבור לתצוגה מורחבת'}
-                                    >
-                                        {layoutMode === 'detailed' ? <Icons.Grid size={18} /> : <Icons.Layout size={18} />}
-                                        <span className="hidden md:inline text-xs uppercase tracking-wide">{layoutMode === 'detailed' ? 'תצוגת גריד' : 'תצוגה מלאה'}</span>
-                                    </button>
-                                    
-                                    <div className="flex items-center gap-2 text-sm font-bold text-gray-500 bg-gray-100 px-4 py-3 rounded-none">
-                                        {loading ? <Icons.RefreshCw size={16} className="animate-spin" /> : <Icons.Check size={16} className="text-green-500" />}
-                                        <span>{filteredPartners.length}</span>
-                                    </div>
+                                <div className="flex items-center gap-2 text-sm font-bold text-gray-500 bg-gray-100 px-4 py-3 rounded-none">
+                                    {loading ? <Icons.RefreshCw size={16} className="animate-spin" /> : <Icons.Check size={16} className="text-green-500" />}
+                                    <span>{filteredPartners.length} שותפים</span>
                                 </div>
                             </div>
 
-                            <div className="flex flex-wrap gap-4 items-center text-sm">
-                                <div className="flex items-center gap-2">
-                                    <span className="font-bold text-gray-500">קטגוריה:</span>
-                                    <select className="p-2 bg-gray-50 border border-gray-200 rounded outline-none focus:border-blue-500" value={selectedCategory} onChange={(e) => { setSelectedCategory(e.target.value); setFilterSubCategory("all"); }}>
-                                        {categories.map(cat => <option key={cat} value={cat}>{cat}</option>)}
-                                    </select>
+                            {/* MIDDLE ROW: GEMINI-STYLE CHIPS SCROLL */}
+                            <div className="flex flex-col gap-2">
+                                <div className="flex items-center gap-2 overflow-x-auto pb-2 -mx-4 px-4 md:mx-0 md:px-0 no-scrollbar">
+                                    <FilterChip label="הכל" active={selectedCategory === "הכל"} onClick={() => {setSelectedCategory("הכל"); setFilterSubCategory("all");}} />
+                                    {categories.filter(c => c !== "הכל").map(cat => (
+                                        <FilterChip key={cat} label={cat} active={selectedCategory === cat} onClick={() => {setSelectedCategory(cat); setFilterSubCategory("all");}} />
+                                    ))}
                                 </div>
-                                
+                            </div>
+
+                            {/* BOTTOM ROW: SUB-FILTERS & LAYOUT */}
+                            <div className="flex flex-wrap gap-4 items-center text-sm bg-white p-3 rounded border border-gray-100">
                                 <div className="flex items-center gap-2">
                                     <span className="font-bold text-gray-500">תת-קטגוריה:</span>
                                     <select className="p-2 bg-gray-50 border border-gray-200 rounded outline-none focus:border-blue-500" value={filterSubCategory} onChange={(e) => setFilterSubCategory(e.target.value)} disabled={selectedCategory === 'הכל'}>
@@ -517,6 +528,18 @@
                                         <button onClick={() => setFilterStatus('contacted')} className={`px-3 py-1 rounded text-xs font-bold transition-all ${filterStatus === 'contacted' ? 'bg-green-100 text-green-700 shadow' : 'text-gray-500 hover:text-gray-700'}`}>נוצר קשר</button>
                                         <button onClick={() => setFilterStatus('not_contacted')} className={`px-3 py-1 rounded text-xs font-bold transition-all ${filterStatus === 'not_contacted' ? 'bg-red-50 text-red-600 shadow' : 'text-gray-500 hover:text-gray-700'}`}>טרם טופל</button>
                                     </div>
+                                </div>
+
+                                <div className="h-6 w-px bg-gray-200 mx-2"></div>
+
+                                <div className="flex items-center gap-2">
+                                     <button 
+                                        onClick={() => setLayoutMode(layoutMode === 'detailed' ? 'compact' : 'detailed')}
+                                        className="flex items-center gap-2 text-gray-500 hover:text-black transition-colors"
+                                        title={layoutMode === 'detailed' ? 'עבור לתצוגה מצומצמת' : 'עבור לתצוגה מורחבת'}
+                                    >
+                                        {layoutMode === 'detailed' ? <Icons.Grid size={20} /> : <Icons.Layout size={20} />}
+                                    </button>
                                 </div>
                             </div>
                         </div>
@@ -692,9 +715,7 @@
                     <div className={`fixed bottom-0 left-0 right-0 bg-[#17191A] text-white shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.1)] z-30 footer-slide-up ${showBottomBar ? 'footer-visible' : 'footer-hidden'}`}>
                         <div className="max-w-7xl mx-auto px-6 h-16 flex justify-between items-center">
                             <div className="flex items-center gap-3">
-                                <div className="p-1.5 bg-yellow-400 rounded-full text-black">
-                                    <Icons.Flash size={16} fill="currentColor" />
-                                </div>
+                                <Icons.Flash className="text-yellow-400 opacity-80" size={24} />
                                 <div className="h-4 w-px bg-white/20"></div>
                                 <span className="text-xs text-gray-400">ניהול שותפים - Psychoflash</span>
                             </div>
