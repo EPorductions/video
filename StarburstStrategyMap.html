@@ -54,12 +54,22 @@
         import { getAuth, signInAnonymously, onAuthStateChanged, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
         import { getFirestore, collection, doc, setDoc, updateDoc, deleteDoc, onSnapshot, serverTimestamp, query, orderBy, writeBatch } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
-        // --- Firebase Config ---
-        const firebaseConfig = JSON.parse(__firebase_config);
+        // --- Firebase Config (Updated with User Provided Config) ---
+        const firebaseConfig = {
+            apiKey: "AIzaSyDkEOW4aXGmuO_J-X5xJTw9Iyp0Q2pbUIY",
+            authDomain: "psychoflash-control.firebaseapp.com",
+            projectId: "psychoflash-control",
+            storageBucket: "psychoflash-control.firebasestorage.app",
+            messagingSenderId: "304053769812",
+            appId: "1:304053769812:web:3b55fb16bbbda06b993fc1"
+        };
+
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
         const db = getFirestore(app);
-        const appId = typeof __app_id !== 'undefined' ? __app_id : 'starburst-partners';
+        
+        // Logical App ID for data path structure (not the Firebase App ID)
+        const logicalAppId = typeof __app_id !== 'undefined' ? __app_id : 'starburst-partners';
 
         const React = window.React;
         const { useState, useEffect, useMemo } = React;
@@ -192,14 +202,16 @@
             useEffect(() => {
                 const initAuth = async () => {
                     try {
+                        // Check if we are in an environment that provides a custom token (less likely now with custom config, but good to keep)
                         if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
                             await signInWithCustomToken(auth, __initial_auth_token);
                         } else {
+                            // Fallback to anonymous auth for standalone usage
                             await signInAnonymously(auth);
                         }
                     } catch (e) {
                         console.error("Auth failed", e);
-                        showNotification('error', 'שגיאת התחברות לשרת');
+                        showNotification('error', 'שגיאת התחברות לשרת: ' + e.message);
                         setLoading(false);
                     }
                 };
@@ -220,7 +232,8 @@
             useEffect(() => {
                 if (!user) return;
 
-                const q = collection(db, 'artifacts', appId, 'public', 'data', 'partners');
+                // Use the logicalAppId for path structure to keep data organized
+                const q = collection(db, 'artifacts', logicalAppId, 'public', 'data', 'partners');
 
                 const unsubscribe = onSnapshot(q, (snapshot) => {
                     if (snapshot.empty) {
@@ -241,7 +254,11 @@
                     }
                 }, (err) => {
                     console.error("Sync error:", err);
-                    showNotification('error', 'שגיאה בטעינת נתונים');
+                    if (err.code === 'permission-denied') {
+                         showNotification('error', 'חסרה הרשאה. וודא ש-Anonymous Auth דלוק ב-Firebase Console ושה-Firestore Rules מאפשרים כתיבה.');
+                    } else {
+                         showNotification('error', 'שגיאה בטעינת נתונים');
+                    }
                     setLoading(false);
                 });
 
@@ -252,7 +269,7 @@
             const toggleContact = async (partner) => {
                 if (!user) return;
                 try {
-                    const ref = doc(db, 'artifacts', appId, 'public', 'data', 'partners', partner.id);
+                    const ref = doc(db, 'artifacts', logicalAppId, 'public', 'data', 'partners', partner.id);
                     await updateDoc(ref, { contacted: !partner.contacted });
                     showNotification('success', partner.contacted ? 'סטטוס עודכן: לא נוצר קשר' : 'סטטוס עודכן: נוצר קשר');
                 } catch(e) { console.error(e); showNotification('error', 'שגיאה בעדכון סטטוס'); }
@@ -266,7 +283,7 @@
                 if (!user || !deleteCandidate) return;
                 
                 try {
-                    await deleteDoc(doc(db, 'artifacts', appId, 'public', 'data', 'partners', deleteCandidate.id));
+                    await deleteDoc(doc(db, 'artifacts', logicalAppId, 'public', 'data', 'partners', deleteCandidate.id));
                     setEditingId(null);
                     showNotification('success', 'השותף נמחק בהצלחה');
                 } catch (e) {
@@ -279,7 +296,7 @@
 
             const handleSave = async () => {
                 if (!user) return;
-                const colRef = collection(db, 'artifacts', appId, 'public', 'data', 'partners');
+                const colRef = collection(db, 'artifacts', logicalAppId, 'public', 'data', 'partners');
                 const data = { ...editForm };
                 try {
                     if (isAddingNew) {
@@ -301,7 +318,7 @@
             const saveNote = async (id, text) => {
                 if (!user) return;
                 try {
-                    await updateDoc(doc(db, 'artifacts', appId, 'public', 'data', 'partners', id), { note: text });
+                    await updateDoc(doc(db, 'artifacts', logicalAppId, 'public', 'data', 'partners', id), { note: text });
                 } catch(e) { console.error(e); }
             };
 
@@ -338,7 +355,7 @@
                     });
 
                     let importCount = 0;
-                    const colRef = collection(db, 'artifacts', appId, 'public', 'data', 'partners');
+                    const colRef = collection(db, 'artifacts', logicalAppId, 'public', 'data', 'partners');
                     
                     // Use simple loop for robustness
                     for (let i = headerRowIndex + 1; i < rawData.length; i++) {
