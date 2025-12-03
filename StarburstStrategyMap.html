@@ -34,6 +34,16 @@
             to { transform: translateY(0); opacity: 1; }
         }
         .toast-enter { animation: slideIn 0.3s ease-out forwards; }
+
+        /* FAB Animation */
+        .fab-enter {
+            transform: scale(0) translateY(20px);
+            opacity: 0;
+            animation: fabIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+        }
+        @keyframes fabIn {
+            to { transform: scale(1) translateY(0); opacity: 1; }
+        }
     </style>
 </head>
 <body>
@@ -71,7 +81,9 @@
             X: ({size=20, className=""}) => <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>,
             RefreshCw: ({size=20, className=""}) => <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><polyline points="23 4 23 10 17 10"></polyline><polyline points="1 20 1 14 7 14"></polyline><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path></svg>,
             Check: ({size=20, className=""}) => <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><polyline points="20 6 9 17 4 12"></polyline></svg>,
-            UploadCloud: ({size=20, className=""}) => <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><path d="M4 14.899A7 7 0 1 1 15.71 8h1.79a4.5 4.5 0 0 1 2.5 8.242"/><path d="M12 12v9"/><path d="m16 16-4-4-4 4"/></svg>
+            UploadCloud: ({size=20, className=""}) => <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><path d="M4 14.899A7 7 0 1 1 15.71 8h1.79a4.5 4.5 0 0 1 2.5 8.242"/><path d="M12 12v9"/><path d="m16 16-4-4-4 4"/></svg>,
+            Tag: ({size=20, className=""}) => <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"></path><line x1="7" y1="7" x2="7.01" y2="7"></line></svg>,
+            Briefcase: ({size=20, className=""}) => <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><rect x="2" y="7" width="20" height="14" rx="2" ry="2"></rect><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"></path></svg>
         };
 
         // --- Data ---
@@ -130,14 +142,22 @@
             const [partners, setPartners] = useState(initialPartnersData);
             const [loading, setLoading] = useState(true);
             const [user, setUser] = useState(null);
+            
+            // Filters State
             const [searchTerm, setSearchTerm] = useState("");
             const [selectedCategory, setSelectedCategory] = useState("הכל");
+            const [selectedSubCategory, setSelectedSubCategory] = useState("הכל");
+            const [filterStatus, setFilterStatus] = useState("all"); // 'all', 'contacted', 'not_contacted'
+
             const [editingId, setEditingId] = useState(null);
             const [editForm, setEditForm] = useState({});
             const [isAddingNew, setIsAddingNew] = useState(false);
             const [isImportModalOpen, setIsImportModalOpen] = useState(false);
             const [importUrl, setImportUrl] = useState("https://docs.google.com/spreadsheets/d/e/2PACX-1vQSkgkIvL4h1048RW_HiR-qnodnGw_XoVJZ9x_6sdgkMdTg9FN4ggtcW681YwM2jGSj8YoBAKxFP7Gw/pub?output=csv");
-            const [notification, setNotification] = useState(null); // { type: 'success'|'error', message: '' }
+            const [notification, setNotification] = useState(null);
+            
+            // Scroll State for FABs
+            const [isScrolled, setIsScrolled] = useState(false);
 
             const showNotification = (type, message) => {
                 setNotification({ type, message });
@@ -162,6 +182,19 @@
                 return onAuthStateChanged(auth, (u) => setUser(u));
             }, []);
 
+            // Scroll Listener
+            useEffect(() => {
+                const handleScroll = () => {
+                    if (window.scrollY > 150) {
+                        setIsScrolled(true);
+                    } else {
+                        setIsScrolled(false);
+                    }
+                };
+                window.addEventListener('scroll', handleScroll);
+                return () => window.removeEventListener('scroll', handleScroll);
+            }, []);
+
             // Sync with DB
             useEffect(() => {
                 if (!user) return;
@@ -170,7 +203,6 @@
 
                 const unsubscribe = onSnapshot(q, (snapshot) => {
                     if (snapshot.empty) {
-                        // Seed if empty
                         initialPartnersData.forEach(p => {
                              const { id, ...data } = p;
                              setDoc(doc(q), { ...data, contacted: false, note: "", createdAt: serverTimestamp() });
@@ -205,7 +237,6 @@
                     return;
                 }
                 if (!window.confirm("האם למחוק שותף זה לצמיתות?")) return;
-                
                 try {
                     await deleteDoc(doc(db, 'artifacts', appId, 'public', 'data', 'partners', id));
                     setEditingId(null);
@@ -220,7 +251,6 @@
                 if (!user) return;
                 const colRef = collection(db, 'artifacts', appId, 'public', 'data', 'partners');
                 const data = { ...editForm };
-                
                 try {
                     if (isAddingNew) {
                         await setDoc(doc(colRef), { ...data, contacted: false, note: "", createdAt: serverTimestamp() });
@@ -245,7 +275,6 @@
                 } catch(e) { console.error(e); }
             };
 
-            // Import Logic
             const handleImport = async () => {
                 if (!user) {
                     showNotification('error', 'אנא התחבר למערכת תחילה');
@@ -258,18 +287,14 @@
                     if (!response.ok) throw new Error("Network response was not ok");
                     const csvText = await response.text();
                     const rawData = parseCSV(csvText);
-                    
                     if (rawData.length === 0) throw new Error("קובץ ריק");
 
-                    // Header identification logic
                     const headerRowIndex = rawData.findIndex(row => row.some(cell => 
                         cell.includes('שם החברה') || cell.includes('Company') || cell.includes('חברה')
                     ));
-
                     if (headerRowIndex === -1) throw new Error("לא נמצאה שורת כותרת תקינה ב-CSV");
 
                     const headers = rawData[headerRowIndex].map(h => h.trim());
-                    
                     const keyMap = {
                         "קטגוריה": "category", "תת": "subCategory", "שם החברה": "company", "חברה": "company", 
                         "מנגנון": "entryMechanism", "ערך": "valueProp", "אסטרטגיית": "acceleratorStrategy", 
@@ -283,13 +308,9 @@
                     });
 
                     let importCount = 0;
-                    const batchSize = 500; // Not using real batch here, just simple loop for simplicity with setDoc
-                    // For robust imports we should use batch, but iterating setDoc is fine for small lists
-                    
                     for (let i = headerRowIndex + 1; i < rawData.length; i++) {
                         const row = rawData[i];
                         if (row.length <= 1 && (!row[0] || row[0].trim() === "")) continue;
-
                         const rowData = {};
                         let hasCompany = false;
                         Object.keys(columnIndices).forEach(key => {
@@ -298,16 +319,12 @@
                             rowData[key] = val;
                             if (key === 'company' && val) hasCompany = true;
                         });
-
                         if (hasCompany) {
-                            // Generate a predictable ID or let firestore handle it. Let's generate new doc for import.
-                            // To prevent duplicates, we could query first, but for simplicity we just add.
                             const colRef = collection(db, 'artifacts', appId, 'public', 'data', 'partners');
                             await setDoc(doc(colRef), { ...rowData, contacted: false, note: "", createdAt: serverTimestamp() });
                             importCount++;
                         }
                     }
-            
                     showNotification('success', `יובאו ${importCount} שותפים בהצלחה!`);
                     setIsImportModalOpen(false);
                 } catch (e) {
@@ -318,7 +335,6 @@
                 }
             };
 
-            // Helpers
             const getLogoUrl = (domain, company) => domain ? `https://logo.clearbit.com/${domain}` : `https://ui-avatars.com/api/?name=${encodeURIComponent(company || "?")}&background=random&color=fff`;
             const formatForWhatsapp = (phone) => {
                 if (!phone) return "";
@@ -326,16 +342,25 @@
                 return clean.startsWith('0') ? `972${clean.substring(1)}` : `972${clean}`;
             };
 
-            // Filter
+            // --- Filter Logic ---
             const categories = useMemo(() => ["הכל", ...new Set(partners.map(p => p.category).filter(Boolean))], [partners]);
+            const subCategories = useMemo(() => ["הכל", ...new Set(partners.map(p => p.subCategory).filter(Boolean))], [partners]);
+            
             const filteredPartners = useMemo(() => {
                 return partners.filter(p => {
                     const term = searchTerm.toLowerCase();
                     const matchSearch = (p.company||"").toLowerCase().includes(term) || (p.valueProp||"").toLowerCase().includes(term);
+                    
                     const matchCat = selectedCategory === "הכל" || p.category === selectedCategory;
-                    return matchSearch && matchCat;
+                    const matchSubCat = selectedSubCategory === "הכל" || p.subCategory === selectedSubCategory;
+                    
+                    let matchStatus = true;
+                    if (filterStatus === 'contacted') matchStatus = p.contacted === true;
+                    if (filterStatus === 'not_contacted') matchStatus = !p.contacted;
+
+                    return matchSearch && matchCat && matchSubCat && matchStatus;
                 });
-            }, [partners, searchTerm, selectedCategory]);
+            }, [partners, searchTerm, selectedCategory, selectedSubCategory, filterStatus]);
 
             // Sub-components
             const ActionButton = ({ href, icon: Icon, label, colorClass }) => {
@@ -369,7 +394,7 @@
                                     <h1 className="text-6xl md:text-8xl font-black uppercase leading-[0.85] tracking-tighter mb-4">מאגר<br/>השותפים</h1>
                                     <p className="text-xl text-gray-400 font-light max-w-lg">ניהול קשרים אסטרטגיים בזמן אמת.</p>
                                 </div>
-                                <div className="flex gap-4">
+                                <div className={`flex gap-4 transition-opacity duration-300 ${isScrolled ? 'opacity-0 pointer-events-none' : 'opacity-100'}`}>
                                     <button onClick={() => setIsImportModalOpen(true)} className="group flex items-center gap-3 px-6 py-4 text-lg font-bold text-white border border-white/30 hover:bg-white/10 transition-all rounded-sm">
                                         <Icons.UploadCloud size={24} /> ייבוא מ-CSV
                                     </button>
@@ -383,22 +408,49 @@
 
                     {/* FILTERS */}
                     <div className="sticky top-0 z-30 shadow-md backdrop-blur-md bg-white/90 border-b border-gray-200">
-                        <div className="max-w-7xl mx-auto px-6 py-4 flex flex-col md:flex-row gap-4 items-center justify-between">
-                            <div className="flex items-center gap-4 w-full md:w-auto flex-1">
-                                <div className="relative flex-1 max-w-md">
-                                    <input type="text" placeholder="חיפוש..." className="w-full pl-4 pr-10 py-3 bg-gray-100 border border-transparent focus:bg-white focus:border-blue-600 outline-none transition-all rounded-none font-medium" value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} />
-                                    <Icons.Search size={18} className="absolute top-3.5 right-3 text-gray-500" />
+                        <div className="max-w-7xl mx-auto px-6 py-4 flex flex-col lg:flex-row gap-4 items-center justify-between">
+                            <div className="flex flex-col md:flex-row gap-3 w-full lg:w-auto flex-1 items-stretch">
+                                {/* Search */}
+                                <div className="relative flex-1 min-w-[200px]">
+                                    <input type="text" placeholder="חיפוש חופשי..." className="w-full pl-4 pr-10 py-2.5 bg-gray-100 border border-transparent focus:bg-white focus:border-blue-600 outline-none transition-all rounded-none font-medium text-sm h-full" value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} />
+                                    <Icons.Search size={18} className="absolute top-3 right-3 text-gray-500" />
                                 </div>
-                                <div className="relative w-48">
-                                    <select className="w-full pl-4 pr-10 py-3 bg-gray-100 border border-transparent focus:bg-white focus:border-blue-600 outline-none transition-all appearance-none rounded-none font-bold text-sm" value={selectedCategory} onChange={(e) => setSelectedCategory(e.target.value)}>
-                                        {categories.map(cat => <option key={cat} value={cat}>{cat}</option>)}
-                                    </select>
-                                    <Icons.Filter size={16} className="absolute top-4 right-3 text-gray-500 pointer-events-none" />
+                                
+                                {/* Filters Group */}
+                                <div className="flex gap-2">
+                                    {/* Category */}
+                                    <div className="relative w-40">
+                                        <select className="w-full pl-4 pr-8 py-2.5 bg-gray-100 border border-transparent focus:bg-white focus:border-blue-600 outline-none transition-all appearance-none rounded-none font-bold text-xs h-full" value={selectedCategory} onChange={(e) => setSelectedCategory(e.target.value)}>
+                                            <option value="הכל">כל הקטגוריות</option>
+                                            {categories.filter(c=>c!=="הכל").map(cat => <option key={cat} value={cat}>{cat}</option>)}
+                                        </select>
+                                        <Icons.Filter size={14} className="absolute top-3 right-2 text-gray-500 pointer-events-none" />
+                                    </div>
+
+                                    {/* Sub Category */}
+                                    <div className="relative w-40">
+                                        <select className="w-full pl-4 pr-8 py-2.5 bg-gray-100 border border-transparent focus:bg-white focus:border-blue-600 outline-none transition-all appearance-none rounded-none font-bold text-xs h-full" value={selectedSubCategory} onChange={(e) => setSelectedSubCategory(e.target.value)}>
+                                            <option value="הכל">תת-קטגוריה</option>
+                                            {subCategories.filter(c=>c!=="הכל").map(cat => <option key={cat} value={cat}>{cat}</option>)}
+                                        </select>
+                                        <Icons.Tag size={14} className="absolute top-3 right-2 text-gray-500 pointer-events-none" />
+                                    </div>
+
+                                    {/* Status */}
+                                    <div className="relative w-32">
+                                        <select className="w-full pl-4 pr-8 py-2.5 bg-gray-100 border border-transparent focus:bg-white focus:border-blue-600 outline-none transition-all appearance-none rounded-none font-bold text-xs h-full" value={filterStatus} onChange={(e) => setFilterStatus(e.target.value)}>
+                                            <option value="all">כל הסטטוסים</option>
+                                            <option value="contacted">נוצר קשר</option>
+                                            <option value="not_contacted">לפני פנייה</option>
+                                        </select>
+                                        <Icons.Briefcase size={14} className="absolute top-3 right-2 text-gray-500 pointer-events-none" />
+                                    </div>
                                 </div>
                             </div>
-                            <div className="flex items-center gap-2 text-sm font-bold text-gray-500 bg-gray-100 px-4 py-2 rounded-none">
-                                {loading ? <Icons.RefreshCw size={16} className="animate-spin" /> : <Icons.Check size={16} className="text-green-500" />}
-                                <span>{filteredPartners.length} שותפים</span>
+
+                            <div className="flex items-center gap-2 text-xs font-bold text-gray-500 bg-gray-100 px-3 py-2 rounded-none whitespace-nowrap">
+                                {loading ? <Icons.RefreshCw size={14} className="animate-spin" /> : <Icons.Check size={14} className="text-green-500" />}
+                                <span>{filteredPartners.length} תוצאות</span>
                             </div>
                         </div>
                     </div>
@@ -423,7 +475,10 @@
                                             <div>
                                                 <h2 className="text-2xl font-black text-[#191B1D] leading-none mb-1">{partner.company}</h2>
                                                 <div className="flex items-center gap-1 text-sm text-gray-500 font-medium"><Icons.MapPin size={12} /> {partner.location || "ישראל"}</div>
-                                                <div className="mt-2 inline-block px-2 py-0.5 bg-blue-50 text-blue-700 text-[10px] font-bold uppercase tracking-wide border border-blue-100">{partner.category}</div>
+                                                <div className="flex flex-wrap gap-1 mt-2">
+                                                    <div className="inline-block px-2 py-0.5 bg-blue-50 text-blue-700 text-[10px] font-bold uppercase tracking-wide border border-blue-100">{partner.category}</div>
+                                                    {partner.subCategory && <div className="inline-block px-2 py-0.5 bg-gray-100 text-gray-600 text-[10px] font-bold uppercase tracking-wide border border-gray-200">{partner.subCategory}</div>}
+                                                </div>
                                             </div>
                                         </div>
 
@@ -454,6 +509,18 @@
                             ))}
                         </div>
                     </div>
+
+                    {/* FLOATING ACTION BUTTONS */}
+                    {isScrolled && (
+                        <div className="fixed bottom-8 left-8 flex flex-col gap-4 z-40">
+                             <button onClick={() => setIsImportModalOpen(true)} className="w-14 h-14 bg-white text-gray-600 rounded-full shadow-2xl flex items-center justify-center hover:scale-110 transition-transform fab-enter border border-gray-200" title="ייבוא">
+                                <Icons.UploadCloud size={24} />
+                            </button>
+                            <button onClick={() => { setEditingId('new'); setEditForm({ company: "", category: "", subCategory: "", phone: "", email: "", location: "", valueProp: "" }); setIsAddingNew(true); }} className="w-14 h-14 bg-[#FFC700] text-black rounded-full shadow-2xl flex items-center justify-center hover:scale-110 transition-transform fab-enter" style={{animationDelay: '0.1s'}} title="הוסף שותף">
+                                <Icons.Plus size={32} strokeWidth={3} />
+                            </button>
+                        </div>
+                    )}
 
                     {/* IMPORT MODAL */}
                     {isImportModalOpen && (
@@ -497,6 +564,7 @@
                                     <div><label className="block text-xs font-bold text-gray-400 uppercase mb-1">טלפון</label><input className="w-full p-3 bg-gray-50 border border-gray-200 focus:border-blue-500 outline-none" value={editForm.phone || ""} onChange={e => setEditForm({...editForm, phone: e.target.value})} /></div>
                                     <div><label className="block text-xs font-bold text-gray-400 uppercase mb-1">מייל</label><input className="w-full p-3 bg-gray-50 border border-gray-200 focus:border-blue-500 outline-none" value={editForm.email || ""} onChange={e => setEditForm({...editForm, email: e.target.value})} /></div>
                                     <div className="col-span-2 md:col-span-1"><label className="block text-xs font-bold text-gray-400 uppercase mb-1">קטגוריה</label><input className="w-full p-3 bg-gray-50 border border-gray-200 focus:border-blue-500 outline-none" value={editForm.category || ""} onChange={e => setEditForm({...editForm, category: e.target.value})} /></div>
+                                    <div className="col-span-2 md:col-span-1"><label className="block text-xs font-bold text-gray-400 uppercase mb-1">תת-קטגוריה</label><input className="w-full p-3 bg-gray-50 border border-gray-200 focus:border-blue-500 outline-none" value={editForm.subCategory || ""} onChange={e => setEditForm({...editForm, subCategory: e.target.value})} /></div>
                                     <div className="col-span-2 md:col-span-1"><label className="block text-xs font-bold text-gray-400 uppercase mb-1">מנגנון כניסה</label><input className="w-full p-3 bg-gray-50 border border-gray-200 focus:border-blue-500 outline-none" value={editForm.entryMechanism || ""} onChange={e => setEditForm({...editForm, entryMechanism: e.target.value})} /></div>
                                 </div>
                                 <div className="p-6 border-t border-gray-100 flex justify-between items-center bg-gray-50">
