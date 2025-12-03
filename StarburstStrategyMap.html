@@ -27,6 +27,15 @@
 
         .animate-spin { animation: spin 1s linear infinite; }
         @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+        
+        /* Slow Spin for Background */
+        @keyframes spin-slow {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+        .animate-spin-slow {
+            animation: spin-slow 60s linear infinite;
+        }
 
         /* Toast Animation */
         @keyframes slideIn {
@@ -49,8 +58,13 @@
         }
     </style>
 </head>
-<body>
-    <div id="root"></div>
+<body class="relative overflow-x-hidden">
+    <!-- Static Background Image (Added from snippet) -->
+    <div class="fixed inset-0 z-0 flex items-center justify-center pointer-events-none overflow-hidden">
+        <img src="./INNOVET_ICON-05linear-1.webp" alt="" class="w-[120vw] max-w-none opacity-5 grayscale animate-spin-slow" />
+    </div>
+
+    <div id="root" class="relative z-10"></div>
 
     <script type="text/babel" data-type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
@@ -405,17 +419,23 @@
                                     {/* LOGO HEADER SECTION */}
                                     <div className="flex items-center gap-6 mb-6">
                                         <img 
-                                            src="https://starburst.aero/wp-content/uploads/2020/01/Starburst-Logo-White.png" 
+                                            src="./Starburst-Logo-White-svg-1.webp" 
                                             alt="Starburst" 
                                             className="h-10 md:h-12 object-contain"
                                         />
                                         <div className="h-8 w-px bg-white/30"></div>
-                                        <img 
-                                            src="https://innovet.me/wp-content/uploads/2022/01/Innovet-Logo-White.png" 
-                                            alt="Innovate" 
-                                            className="h-8 md:h-10 object-contain opacity-90"
-                                            onError={(e) => { e.target.style.display = 'none'; }} 
-                                        />
+                                        <div className="flex items-center gap-3">
+                                            <img 
+                                                src="./INNOVET_ICON-05-1.svg" 
+                                                alt="Innovate" 
+                                                className="h-8 md:h-10 object-contain"
+                                                onError={(e) => { e.target.style.display = 'none'; }} 
+                                            />
+                                            <div className="flex flex-col text-white opacity-90">
+                                                <span className="text-sm font-black tracking-tighter leading-none">INNOVET</span>
+                                                <span className="text-[9px] font-bold text-[#FFC700] tracking-widest uppercase">Cohort 2</span>
+                                            </div>
+                                        </div>
                                     </div>
 
                                     <h1 className="text-6xl md:text-8xl font-black uppercase leading-[0.85] tracking-tighter mb-4">מאגר<br/>השותפים</h1>
