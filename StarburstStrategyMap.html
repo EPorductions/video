@@ -25,6 +25,10 @@
         ::-webkit-scrollbar-thumb { background: #C1C1C1; border-radius: 4px; }
         ::-webkit-scrollbar-thumb:hover { background: #A8A8A8; }
 
+        /* Hide Scrollbar for Horizontal List */
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+
         .animate-spin { animation: spin 1s linear infinite; }
         @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
         
@@ -480,14 +484,24 @@
                                 </div>
                             </div>
 
+                            {/* NEW: Scrollable Filter Bar */}
+                            <div className="flex items-center gap-2 overflow-x-auto pb-2 no-scrollbar -mx-6 px-6 md:mx-0 md:px-0">
+                                {categories.map(cat => (
+                                    <button
+                                        key={cat}
+                                        onClick={() => { setSelectedCategory(cat); setFilterSubCategory("all"); }}
+                                        className={`px-4 py-2 rounded-xl text-sm font-medium transition-all duration-200 whitespace-nowrap ${
+                                            selectedCategory === cat
+                                                ? "bg-[#cce8ff] text-[#001d35]"
+                                                : "bg-white border border-[#E0E3E7] text-[#444746] hover:bg-[#E9EEF6]"
+                                        }`}
+                                    >
+                                        {cat}
+                                    </button>
+                                ))}
+                            </div>
+
                             <div className="flex flex-wrap gap-4 items-center text-sm">
-                                <div className="flex items-center gap-2">
-                                    <span className="font-bold text-gray-500">קטגוריה:</span>
-                                    <select className="p-2 bg-gray-50 border border-gray-200 rounded outline-none focus:border-blue-500" value={selectedCategory} onChange={(e) => { setSelectedCategory(e.target.value); setFilterSubCategory("all"); }}>
-                                        {categories.map(cat => <option key={cat} value={cat}>{cat}</option>)}
-                                    </select>
-                                </div>
-                                
                                 <div className="flex items-center gap-2">
                                     <span className="font-bold text-gray-500">תת-קטגוריה:</span>
                                     <select className="p-2 bg-gray-50 border border-gray-200 rounded outline-none focus:border-blue-500" value={filterSubCategory} onChange={(e) => setFilterSubCategory(e.target.value)} disabled={selectedCategory === 'הכל'}>
@@ -519,7 +533,7 @@
                                 {layoutMode === 'detailed' && (
                                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
                                         {filteredPartners.map((partner) => (
-                                            <div key={partner.id} className="bg-white border-2 border-transparent hover:border-blue-600 transition-all duration-300 group flex flex-col relative shadow-sm hover:shadow-xl" style={{ borderColor: partner.contacted ? '#48BB78' : 'transparent' }}>
+                                            <div key={partner.id} className="bg-white border-2 border-transparent hover:border-blue-600 transition-all duration-300 group flex flex-col relative shadow-sm hover:shadow-xl" style={{ borderColor: partner.contacted ? '#48BB78' : 'transparent', backgroundColor: partner.contacted ? '#F0FFF4' : 'white' }}>
                                                 <button onClick={() => toggleContact(partner)} className={`absolute top-0 right-0 px-3 py-1 text-xs font-black uppercase tracking-wider z-10 transition-colors ${partner.contacted ? 'bg-green-500 text-white' : 'bg-gray-200 text-gray-500 hover:bg-gray-300'}`}>
                                                     {partner.contacted ? 'נוצר קשר ✓' : 'לפני פנייה'}
                                                 </button>
@@ -588,7 +602,7 @@
                                                 key={partner.id} 
                                                 onClick={() => setViewingId(partner.id)}
                                                 className="bg-white border hover:border-blue-500 transition-all cursor-pointer shadow-sm hover:shadow-md rounded-lg p-2 flex flex-col items-center justify-center text-center aspect-square relative"
-                                                style={{ borderColor: partner.contacted ? '#48BB78' : undefined }}
+                                                style={{ borderColor: partner.contacted ? '#48BB78' : undefined, backgroundColor: partner.contacted ? '#F0FFF4' : 'white' }}
                                             >
                                                 {partner.contacted && <div className="absolute top-1 right-1 w-2 h-2 rounded-full bg-green-500"></div>}
                                                 <div className="w-10 h-10 md:w-14 md:h-14 mb-2 flex items-center justify-center">
