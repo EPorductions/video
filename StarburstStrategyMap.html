@@ -83,7 +83,8 @@
             Check: ({size=20, className=""}) => <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><polyline points="20 6 9 17 4 12"></polyline></svg>,
             UploadCloud: ({size=20, className=""}) => <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><path d="M4 14.899A7 7 0 1 1 15.71 8h1.79a4.5 4.5 0 0 1 2.5 8.242"/><path d="M12 12v9"/><path d="m16 16-4-4-4 4"/></svg>,
             Tag: ({size=20, className=""}) => <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"></path><line x1="7" y1="7" x2="7.01" y2="7"></line></svg>,
-            Briefcase: ({size=20, className=""}) => <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><rect x="2" y="7" width="20" height="14" rx="2" ry="2"></rect><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"></path></svg>
+            Briefcase: ({size=20, className=""}) => <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><rect x="2" y="7" width="20" height="14" rx="2" ry="2"></rect><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"></path></svg>,
+            AlertTriangle: ({size=20, className=""}) => <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>
         };
 
         // --- Data ---
@@ -137,6 +138,26 @@
             );
         };
 
+        // --- Delete Confirmation Modal ---
+        const DeleteModal = ({ isOpen, onClose, onConfirm, itemName }) => {
+            if (!isOpen) return null;
+            return (
+                <div className="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
+                    <div className="bg-white w-full max-w-sm rounded-lg shadow-2xl p-6 text-center">
+                        <div className="w-16 h-16 bg-red-50 text-red-500 rounded-full flex items-center justify-center mx-auto mb-4">
+                            <Icons.Trash2 size={32} />
+                        </div>
+                        <h3 className="text-xl font-black text-[#191B1D] mb-2">מחיקת שותף</h3>
+                        <p className="text-gray-500 mb-6 text-sm">האם את/ה בטוח/ה שברצונך למחוק את <strong>{itemName}</strong>? פעולה זו אינה הפיכה.</p>
+                        <div className="flex gap-3 justify-center">
+                            <button onClick={onClose} className="px-4 py-2 font-bold text-gray-500 hover:bg-gray-100 rounded transition-colors">ביטול</button>
+                            <button onClick={onConfirm} className="px-6 py-2 font-bold text-white bg-red-500 hover:bg-red-600 rounded shadow-md transition-colors">כן, מחק</button>
+                        </div>
+                    </div>
+                </div>
+            );
+        };
+
         // --- App Component ---
         const App = () => {
             const [partners, setPartners] = useState(initialPartnersData);
@@ -147,7 +168,7 @@
             const [searchTerm, setSearchTerm] = useState("");
             const [selectedCategory, setSelectedCategory] = useState("הכל");
             const [selectedSubCategory, setSelectedSubCategory] = useState("הכל");
-            const [filterStatus, setFilterStatus] = useState("all"); // 'all', 'contacted', 'not_contacted'
+            const [filterStatus, setFilterStatus] = useState("all");
 
             const [editingId, setEditingId] = useState(null);
             const [editForm, setEditForm] = useState({});
@@ -156,6 +177,9 @@
             const [importUrl, setImportUrl] = useState("https://docs.google.com/spreadsheets/d/e/2PACX-1vQSkgkIvL4h1048RW_HiR-qnodnGw_XoVJZ9x_6sdgkMdTg9FN4ggtcW681YwM2jGSj8YoBAKxFP7Gw/pub?output=csv");
             const [notification, setNotification] = useState(null);
             
+            // Delete Logic
+            const [deleteCandidate, setDeleteCandidate] = useState(null); // { id, name }
+
             // Scroll State for FABs
             const [isScrolled, setIsScrolled] = useState(false);
 
@@ -174,7 +198,8 @@
                             await signInAnonymously(auth);
                         }
                     } catch (e) {
-                        console.error("Auth failed, using fallback data only", e);
+                        console.error("Auth failed", e);
+                        showNotification('error', 'שגיאת התחברות לשרת');
                         setLoading(false);
                     }
                 };
@@ -185,11 +210,7 @@
             // Scroll Listener
             useEffect(() => {
                 const handleScroll = () => {
-                    if (window.scrollY > 150) {
-                        setIsScrolled(true);
-                    } else {
-                        setIsScrolled(false);
-                    }
+                    setIsScrolled(window.scrollY > 150);
                 };
                 window.addEventListener('scroll', handleScroll);
                 return () => window.removeEventListener('scroll', handleScroll);
@@ -203,10 +224,15 @@
 
                 const unsubscribe = onSnapshot(q, (snapshot) => {
                     if (snapshot.empty) {
+                        console.log("Collection empty, seeding initial data...");
+                        // Only seed if truly empty to avoid overwrite issues
+                        const batch = writeBatch(db);
                         initialPartnersData.forEach(p => {
                              const { id, ...data } = p;
-                             setDoc(doc(q), { ...data, contacted: false, note: "", createdAt: serverTimestamp() });
+                             const newDocRef = doc(q); // Auto ID for robustness
+                             batch.set(newDocRef, { ...data, contacted: false, note: "", createdAt: serverTimestamp() });
                         });
+                        batch.commit().catch(e => console.error("Seeding failed", e));
                     } else {
                         let docs = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
                         docs.sort((a, b) => (a.company || "").localeCompare(b.company || ""));
@@ -215,6 +241,7 @@
                     }
                 }, (err) => {
                     console.error("Sync error:", err);
+                    showNotification('error', 'שגיאה בטעינת נתונים');
                     setLoading(false);
                 });
 
@@ -231,19 +258,22 @@
                 } catch(e) { console.error(e); showNotification('error', 'שגיאה בעדכון סטטוס'); }
             };
 
-            const handleDelete = async (id) => {
-                if (!user) {
-                    alert("אנא המתן לטעינת המערכת");
-                    return;
-                }
-                if (!window.confirm("האם למחוק שותף זה לצמיתות?")) return;
+            const confirmDelete = (id, name) => {
+                setDeleteCandidate({ id, name });
+            };
+
+            const performDelete = async () => {
+                if (!user || !deleteCandidate) return;
+                
                 try {
-                    await deleteDoc(doc(db, 'artifacts', appId, 'public', 'data', 'partners', id));
+                    await deleteDoc(doc(db, 'artifacts', appId, 'public', 'data', 'partners', deleteCandidate.id));
                     setEditingId(null);
                     showNotification('success', 'השותף נמחק בהצלחה');
                 } catch (e) {
                     console.error("Delete failed:", e);
                     showNotification('error', 'שגיאה במחיקה');
+                } finally {
+                    setDeleteCandidate(null);
                 }
             };
 
@@ -308,6 +338,9 @@
                     });
 
                     let importCount = 0;
+                    const colRef = collection(db, 'artifacts', appId, 'public', 'data', 'partners');
+                    
+                    // Use simple loop for robustness
                     for (let i = headerRowIndex + 1; i < rawData.length; i++) {
                         const row = rawData[i];
                         if (row.length <= 1 && (!row[0] || row[0].trim() === "")) continue;
@@ -320,7 +353,7 @@
                             if (key === 'company' && val) hasCompany = true;
                         });
                         if (hasCompany) {
-                            const colRef = collection(db, 'artifacts', appId, 'public', 'data', 'partners');
+                            // Add new doc
                             await setDoc(doc(colRef), { ...rowData, contacted: false, note: "", createdAt: serverTimestamp() });
                             importCount++;
                         }
@@ -376,6 +409,14 @@
                 <div className="min-h-screen flex flex-col" style={{ backgroundColor: THEME.bg }}>
                     {/* Toast */}
                     {notification && <Toast type={notification.type} message={notification.message} onClose={() => setNotification(null)} />}
+                    
+                    {/* Delete Modal */}
+                    <DeleteModal 
+                        isOpen={!!deleteCandidate} 
+                        onClose={() => setDeleteCandidate(null)} 
+                        onConfirm={performDelete} 
+                        itemName={deleteCandidate?.name} 
+                    />
 
                     <style>{`
                         @import url('https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;700;900&display=swap');
@@ -463,9 +504,16 @@
                                     <button onClick={() => toggleContact(partner)} className={`absolute top-0 right-0 px-3 py-1 text-xs font-black uppercase tracking-wider z-10 transition-colors ${partner.contacted ? 'bg-green-500 text-white' : 'bg-gray-200 text-gray-500 hover:bg-gray-300'}`}>
                                         {partner.contacted ? 'נוצר קשר ✓' : 'לפני פנייה'}
                                     </button>
-                                    <button onClick={() => { setEditingId(partner.id); setEditForm(partner); setIsAddingNew(false); }} className="absolute top-0 left-0 p-2 text-gray-300 hover:text-blue-600 opacity-0 group-hover:opacity-100 transition-opacity z-10">
-                                        <Icons.Edit3 size={18} />
-                                    </button>
+                                    
+                                    {/* Edit & Delete Actions - Updated */}
+                                    <div className="absolute top-0 left-0 p-2 flex gap-1 z-20 opacity-0 group-hover:opacity-100 transition-opacity">
+                                        <button onClick={() => { setEditingId(partner.id); setEditForm(partner); setIsAddingNew(false); }} className="text-gray-400 hover:text-blue-600 bg-white/90 rounded-full p-2 shadow-sm backdrop-blur-sm transition-all hover:scale-110" title="עריכה">
+                                            <Icons.Edit3 size={16} />
+                                        </button>
+                                        <button onClick={(e) => { e.stopPropagation(); confirmDelete(partner.id, partner.company); }} className="text-gray-400 hover:text-red-500 bg-white/90 rounded-full p-2 shadow-sm backdrop-blur-sm transition-all hover:scale-110" title="מחיקה">
+                                            <Icons.Trash2 size={16} />
+                                        </button>
+                                    </div>
 
                                     <div className="p-6 flex-grow">
                                         <div className="flex items-start gap-4 mb-6 mt-4">
@@ -568,7 +616,7 @@
                                     <div className="col-span-2 md:col-span-1"><label className="block text-xs font-bold text-gray-400 uppercase mb-1">מנגנון כניסה</label><input className="w-full p-3 bg-gray-50 border border-gray-200 focus:border-blue-500 outline-none" value={editForm.entryMechanism || ""} onChange={e => setEditForm({...editForm, entryMechanism: e.target.value})} /></div>
                                 </div>
                                 <div className="p-6 border-t border-gray-100 flex justify-between items-center bg-gray-50">
-                                    {!isAddingNew && <button onClick={() => handleDelete(editingId)} className="text-red-500 hover:text-red-700 text-sm font-bold flex items-center gap-2 px-4 py-2"><Icons.Trash2 size={16} /> מחק</button>}
+                                    {!isAddingNew && <button onClick={() => confirmDelete(editingId, editForm.company)} className="text-red-500 hover:text-red-700 text-sm font-bold flex items-center gap-2 px-4 py-2"><Icons.Trash2 size={16} /> מחק</button>}
                                     <div className="flex gap-4">
                                         <button onClick={() => setEditingId(null)} className="px-6 py-3 font-bold text-gray-500 hover:bg-gray-200 transition-colors rounded">ביטול</button>
                                         <button onClick={handleSave} className="px-8 py-3 font-black text-black bg-[#FFC700] hover:bg-[#E5B300] transition-all shadow-md flex items-center gap-2 rounded"><Icons.Save size={18} /> שמור שינויים</button>
