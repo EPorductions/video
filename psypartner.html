@@ -1,0 +1,782 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>מאגר שותפים | Psychoflash</title>
+    
+    <!-- React & ReactDOM -->
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.development.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+    
+    <!-- Babel -->
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;700;900&display=swap');
+        body { font-family: 'Heebo', sans-serif; background-color: #F1F1F1; }
+        
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: #17191A; }
+        ::-webkit-scrollbar-thumb { background: #FFC700; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #E5B300; }
+
+        .animate-spin { animation: spin 1s linear infinite; }
+        @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+        
+        .animate-pulse-slow { animation: pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite; }
+        @keyframes pulse { 0%, 100% { opacity: 0.1; } 50% { opacity: 0.3; } }
+
+        /* Toast Animation */
+        @keyframes slideIn {
+            from { transform: translateY(100%); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+        .toast-enter { animation: slideIn 0.3s ease-out forwards; }
+        
+        /* Footer Animation */
+        .footer-slide-up { transition: transform 0.3s ease-in-out; }
+        .footer-hidden { transform: translateY(100%); }
+        .footer-visible { transform: translateY(0); }
+
+        /* Mobile Grid Fixes */
+        .line-clamp-2 {
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+
+        /* Branding Colors */
+        .bg-psych-dark { background-color: #17191A; }
+        .text-psych-yellow { color: #FFC700; }
+        .border-psych-yellow { border-color: #FFC700; }
+        .bg-psych-yellow { background-color: #FFC700; }
+    </style>
+</head>
+<body>
+    <div id="root"></div>
+
+    <script type="text/babel" data-type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+        import { getAuth, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+        import { getFirestore, collection, doc, setDoc, updateDoc, deleteDoc, onSnapshot, serverTimestamp, query, orderBy, writeBatch } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+
+        const React = window.React;
+        const { useState, useEffect, useMemo } = React;
+
+        // --- Firebase Configuration ---
+        const firebaseConfig = {
+            apiKey: "AIzaSyDkEOW4aXGmuO_J-X5xJTw9Iyp0Q2pbUIY",
+            authDomain: "psychoflash-control.firebaseapp.com",
+            projectId: "psychoflash-control",
+            storageBucket: "psychoflash-control.firebasestorage.app",
+            messagingSenderId: "304053769812",
+            appId: "1:304053769812:web:3b55fb16bbbda06b993fc1"
+        };
+
+        // Initialize Firebase
+        let app, auth, db;
+        
+        // *** BRANDING & DB SEPARATION ***
+        const appId = 'psychoflash-network'; 
+
+        try {
+            app = initializeApp(firebaseConfig);
+            auth = getAuth(app);
+            db = getFirestore(app);
+        } catch (e) {
+            console.error("Failed to initialize Firebase:", e);
+        }
+
+        // --- Icons ---
+        const Icons = {
+            Search: ({size=20, className=""}) => <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>,
+            Filter: ({size=20, className=""}) => <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"></polygon></svg>,
+            Phone: ({size=20, className=""}) => <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path></svg>,
+            Mail: ({size=20, className=""}) => <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path><polyline points="22,6 12,13 2,6"></polyline></svg>,
+            MessageCircle: ({size=20, className=""}) => <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"></path></svg>,
+            MapPin: ({size=20, className=""}) => <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path><circle cx="12" cy="10" r="3"></circle></svg>,
+            Lightbulb: ({size=20, className=""}) => <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><line x1="9" y1="18" x2="15" y2="18"></line><line x1="10" y1="22" x2="14" y2="22"></line><path d="M15.09 14c.18-.98.65-1.74 1.41-2.5A4.65 4.65 0 0 0 16 8c0-4.42-3.58-8-8-8s-8 3.58-8 8c0 2.08.73 3.97 1.92 5.48.1.13.2.25.3.37.66.77 1.12 1.53 1.28 2.5H15.09z"></path></svg>,
+            Rocket: ({size=20, className=""}) => <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><path d="M4.5 16.5c-1.5 1.26-2 5-2 5s3.74-.5 5-2c.71-.84.7-2.13-.09-2.91a2.18 2.18 0 0 0-2.91-.09z"></path><path d="M12 15l-3-3a22 22 0 0 1 2-3.95A12.88 12.88 0 0 1 22 2c0 2.72-.78 7.5-6 11a22.35 22.35 0 0 1-4 2z"></path><path d="M9 12H4s.55-3.03 2-4c1.62-1.08 5 0 5 0"></path><path d="M12 15v5s3.03-.55 4-2c1.08-1.62 0-5 0-5"></path></svg>,
+            Edit3: ({size=20, className=""}) => <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><path d="M12 20h9"></path><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path></svg>,
+            Trash2: ({size=20, className=""}) => <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path><line x1="10" y1="11" x2="10" y2="17"></line><line x1="14" y1="11" x2="14" y2="17"></line></svg>,
+            Plus: ({size=20, className=""}) => <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>,
+            Save: ({size=20, className=""}) => <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path><polyline points="17 21 17 13 7 13 7 21"></polyline><polyline points="7 3 7 8 15 8"></polyline></svg>,
+            X: ({size=20, className=""}) => <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>,
+            RefreshCw: ({size=20, className=""}) => <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><polyline points="23 4 23 10 17 10"></polyline><polyline points="1 20 1 14 7 14"></polyline><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path></svg>,
+            Check: ({size=20, className=""}) => <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><polyline points="20 6 9 17 4 12"></polyline></svg>,
+            UploadCloud: ({size=20, className=""}) => <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><path d="M4 14.899A7 7 0 1 1 15.71 8h1.79a4.5 4.5 0 0 1 2.5 8.242"/><path d="M12 12v9"/><path d="m16 16-4-4-4 4"/></svg>,
+            Zap: ({size=20, className=""}) => <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon></svg>,
+            Grid: ({size=20, className=""}) => <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect></svg>,
+            Layout: ({size=20, className=""}) => <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><line x1="3" y1="9" x2="21" y2="9"></line><line x1="9" y1="21" x2="9" y2="9"></line></svg>,
+            Flash: ({size=24, className=""}) => <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="currentColor" stroke="none" className={className}><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"></path></svg>,
+            AlertTriangle: ({size=20, className=""}) => <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>
+        };
+
+        const THEME = {
+            black: '#191B1D',
+            dark: '#17191A',
+            yellow: '#FFC700',
+            blue: '#1F63C7',
+            bg: '#F1F1F1',
+            gray: '#E3E3E3',
+            white: '#FFFFFF'
+        };
+
+        // --- CSV Parser ---
+        const parseCSV = (str) => {
+            const arr = [];
+            let quote = false;
+            for (let row = 0, col = 0, c = 0; c < str.length; c++) {
+                let cc = str[c], nc = str[c+1];
+                arr[row] = arr[row] || [];
+                arr[row][col] = arr[row][col] || '';
+                if (cc == '"' && quote && nc == '"') { arr[row][col] += cc; ++c; continue; }
+                if (cc == '"') { quote = !quote; continue; }
+                if (cc == ',' && !quote) { ++col; continue; }
+                if (cc == '\r' && nc == '\n' && !quote) { ++row; col = 0; ++c; continue; }
+                if (cc == '\n' && !quote) { ++row; col = 0; continue; }
+                if (cc == '\r' && !quote) { ++row; col = 0; continue; }
+                arr[row][col] += cc;
+            }
+            return arr;
+        };
+
+        // --- Components ---
+        const Toast = ({ type, message, onClose }) => {
+            if (!message) return null;
+            return (
+                <div className={`fixed bottom-20 left-4 z-50 px-6 py-4 rounded-lg shadow-xl flex items-center gap-3 toast-enter transform transition-all duration-300 ${type === 'success' ? 'bg-[#191B1D] text-white border-r-4 border-[#FFC700]' : 'bg-red-600 text-white border-r-4 border-white'}`}>
+                    {type === 'success' ? <Icons.Check size={20} className="text-[#FFC700]" /> : <Icons.AlertTriangle size={20} />}
+                    <span className="font-bold text-sm">{message}</span>
+                    <button onClick={onClose} className="mr-4 text-white/50 hover:text-white"><Icons.X size={16} /></button>
+                </div>
+            );
+        };
+
+        const ActionButton = ({ href, icon: Icon, label, colorClass }) => {
+            if (!href) return null;
+            return (
+                <a href={href} target={href.startsWith('http') ? "_blank" : undefined} className={`flex items-center justify-center gap-2 py-2 px-4 rounded font-bold text-sm transition-all duration-200 flex-1 shadow-sm ${colorClass}`}>
+                    <Icon size={16} /> <span>{label}</span>
+                </a>
+            );
+        };
+
+        // --- Main App ---
+        const App = () => {
+            const [partners, setPartners] = useState([]);
+            const [loading, setLoading] = useState(true);
+            const [user, setUser] = useState(null);
+            const [searchTerm, setSearchTerm] = useState("");
+            const [selectedCategory, setSelectedCategory] = useState("הכל");
+            const [filterStatus, setFilterStatus] = useState("all"); 
+            const [filterSubCategory, setFilterSubCategory] = useState("all");
+            
+            // Layout State: 'compact' (mobile default) vs 'detailed' (desktop default)
+            const [layoutMode, setLayoutMode] = useState(window.innerWidth < 768 ? 'compact' : 'detailed');
+
+            const [editingId, setEditingId] = useState(null);
+            const [viewingId, setViewingId] = useState(null); // For viewing details in compact mode
+            
+            const [editForm, setEditForm] = useState({});
+            const [isAddingNew, setIsAddingNew] = useState(false);
+            const [isImportModalOpen, setIsImportModalOpen] = useState(false);
+            const [importUrl, setImportUrl] = useState("https://docs.google.com/spreadsheets/d/e/2PACX-1vS4Lo4X8Hf9h5Cw0uAI2F6pkcqlot8qW6O2lZq-fNpzrpiIj9aSto2VkNUookJ1FAeCVeIofwPSC8MZ/pub?output=csv");
+            const [notification, setNotification] = useState(null);
+            const [showBottomBar, setShowBottomBar] = useState(false);
+
+            // Derived state for the active partner being viewed
+            const activePartner = useMemo(() => partners.find(p => p.id === viewingId), [partners, viewingId]);
+
+            const showNotification = (type, message) => {
+                setNotification({ type, message });
+                setTimeout(() => setNotification(null), 3500);
+            };
+
+            // Scroll Logic & Resize Logic
+            useEffect(() => {
+                const handleScroll = () => setShowBottomBar(window.scrollY > 250);
+                window.addEventListener('scroll', handleScroll);
+                return () => window.removeEventListener('scroll', handleScroll);
+            }, []);
+
+            // Init Auth
+            useEffect(() => {
+                const initAuth = async () => {
+                    try {
+                        await signInAnonymously(auth);
+                    } catch (e) {
+                        console.error("Auth failed", e);
+                        setLoading(false);
+                    }
+                };
+                initAuth();
+                return onAuthStateChanged(auth, (u) => setUser(u));
+            }, []);
+
+            // Sync with DB
+            useEffect(() => {
+                if (!user) return;
+
+                // *** CRITICAL: USING NEW APP ID PATH ***
+                const q = collection(db, 'artifacts', appId, 'public', 'data', 'partners');
+                const unsubscribe = onSnapshot(q, (snapshot) => {
+                    let docs = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+                    docs.sort((a, b) => (a.company || "").localeCompare(b.company || ""));
+                    setPartners(docs);
+                    setLoading(false);
+                }, (err) => {
+                    console.error("Sync error", err);
+                    setLoading(false);
+                });
+
+                return () => unsubscribe();
+            }, [user]);
+
+            // --- Actions ---
+            const toggleContact = async (partner) => {
+                if (!user) return;
+                try {
+                    const ref = doc(db, 'artifacts', appId, 'public', 'data', 'partners', partner.id);
+                    await updateDoc(ref, { contacted: !partner.contacted });
+                    showNotification('success', partner.contacted ? 'סטטוס עודכן: לא נוצר קשר' : 'סטטוס עודכן: נוצר קשר');
+                } catch(e) { console.error(e); showNotification('error', 'שגיאה בעדכון'); }
+            };
+
+            const handleDelete = async (id) => {
+                if (!user) return;
+                if (!window.confirm("האם למחוק שותף זה לצמיתות?")) return;
+
+                try {
+                    if (!id) throw new Error("Invalid ID");
+                    await deleteDoc(doc(db, 'artifacts', appId, 'public', 'data', 'partners', id));
+                    setViewingId(null);
+                    setEditingId(null);
+                    showNotification('success', 'השותף נמחק בהצלחה');
+                } catch (e) {
+                    console.error("Delete failed:", e);
+                    showNotification('error', 'שגיאה במחיקה');
+                }
+            };
+
+            const handleSave = async () => {
+                if (!user) return;
+                const colRef = collection(db, 'artifacts', appId, 'public', 'data', 'partners');
+                const data = { ...editForm };
+                
+                try {
+                    if (isAddingNew) {
+                        await setDoc(doc(colRef), { ...data, contacted: false, note: "", createdAt: serverTimestamp() });
+                        showNotification('success', 'שותף חדש נוסף בהצלחה');
+                    } else {
+                        await updateDoc(doc(colRef, editingId), data);
+                        showNotification('success', 'הפרטים נשמרו בהצלחה');
+                    }
+                    setEditingId(null);
+                    setEditForm({});
+                    setIsAddingNew(false);
+                } catch(e) {
+                    console.error("Save failed:", e);
+                    showNotification('error', 'שגיאה בשמירה');
+                }
+            };
+
+            const saveNote = async (id, text) => {
+                if (!user) return;
+                try {
+                    await updateDoc(doc(db, 'artifacts', appId, 'public', 'data', 'partners', id), { note: text });
+                } catch(e) { console.error(e); }
+            };
+
+            // Optimistic UI update for notes
+            const updateNoteLocalUI = (id, text) => {
+                 setPartners(prev => prev.map(p => p.id === id ? { ...p, note: text } : p));
+            };
+
+            const handleImport = async () => {
+                if (!user) return;
+                setLoading(true);
+                let csvText = "";
+                
+                try {
+                    // Method 1: Try fetching directly (Google Sheets Published URLs often support CORS)
+                    try {
+                        const response = await fetch(importUrl);
+                        if (response.ok) {
+                            csvText = await response.text();
+                        } else {
+                            throw new Error("Direct fetch failed");
+                        }
+                    } catch (directError) {
+                        console.warn("Direct fetch failed, trying proxy...", directError);
+                        
+                        // Method 2: Fallback to reliable CORS Proxy
+                        const proxyUrl = "https://corsproxy.io/?" + encodeURIComponent(importUrl);
+                        const response = await fetch(proxyUrl);
+                        if (!response.ok) throw new Error("Proxy fetch failed");
+                        csvText = await response.text();
+                    }
+
+                    const rawData = parseCSV(csvText);
+                    
+                    if (rawData.length === 0) throw new Error("קובץ ריק");
+
+                    const headerRowIndex = rawData.findIndex(row => row.some(cell => 
+                        cell.includes('שם החברה') || cell.includes('Company') || cell.includes('חברה')
+                    ));
+
+                    if (headerRowIndex === -1) throw new Error("לא נמצאה שורת כותרת תקינה ב-CSV");
+
+                    const headers = rawData[headerRowIndex].map(h => h.trim());
+                    
+                    const keyMap = {
+                        "קטגוריה": "category", "תת": "subCategory", "שם החברה": "company", "חברה": "company", 
+                        "מנגנון": "entryMechanism", "ערך": "valueProp", "אסטרטגיית": "acceleratorStrategy", 
+                        "תובנה": "insight", "טלפון": "phone", "מייל": "email", "מיקום": "location", "דומיין": "domain"
+                    };
+
+                    const columnIndices = {};
+                    headers.forEach((header, index) => {
+                        const foundKey = Object.keys(keyMap).find(k => header.includes(k));
+                        if (foundKey) columnIndices[keyMap[foundKey]] = index;
+                    });
+
+                    let importCount = 0;
+                    const colRef = collection(db, 'artifacts', appId, 'public', 'data', 'partners');
+                    const batch = writeBatch(db); // Use batch for better performance (up to 500)
+                    let batchCount = 0;
+
+                    for (let i = headerRowIndex + 1; i < rawData.length; i++) {
+                        const row = rawData[i];
+                        if (row.length <= 1 && (!row[0] || row[0].trim() === "")) continue;
+
+                        const rowData = {};
+                        let hasCompany = false;
+                        Object.keys(columnIndices).forEach(key => {
+                            const idx = columnIndices[key];
+                            const val = row[idx] ? row[idx].trim() : "";
+                            rowData[key] = val;
+                            if (key === 'company' && val) hasCompany = true;
+                        });
+
+                        if (hasCompany) {
+                            const newDocRef = doc(colRef);
+                            batch.set(newDocRef, { ...rowData, contacted: false, note: "", createdAt: serverTimestamp() });
+                            batchCount++;
+                            importCount++;
+                        }
+                    }
+
+                    if (batchCount > 0) {
+                        await batch.commit();
+                    }
+            
+                    showNotification('success', `יובאו ${importCount} שותפים בהצלחה!`);
+                    setIsImportModalOpen(false);
+                } catch (e) {
+                    console.error(e);
+                    showNotification('error', 'שגיאה בייבוא הנתונים: ' + e.message);
+                } finally {
+                    setLoading(false);
+                }
+            };
+
+            // Helpers
+            const getLogoUrl = (domain, company) => domain ? `https://logo.clearbit.com/${domain}` : `https://ui-avatars.com/api/?name=${encodeURIComponent(company || "?")}&background=random&color=fff`;
+            const formatForWhatsapp = (phone) => {
+                if (!phone) return "";
+                const clean = phone.replace(/\D/g, '');
+                return clean.startsWith('0') ? `972${clean.substring(1)}` : `972${clean}`;
+            };
+
+            // Filter
+            const categories = useMemo(() => ["הכל", ...new Set(partners.map(p => p.category).filter(Boolean))], [partners]);
+            const subCategories = useMemo(() => {
+                if (selectedCategory === "הכל") return ["הכל"];
+                return ["הכל", ...new Set(partners.filter(p => p.category === selectedCategory).map(p => p.subCategory).filter(Boolean))];
+            }, [partners, selectedCategory]);
+
+            const filteredPartners = useMemo(() => {
+                return partners.filter(p => {
+                    const term = searchTerm.toLowerCase();
+                    const matchSearch = (p.company||"").toLowerCase().includes(term) || (p.valueProp||"").toLowerCase().includes(term);
+                    const matchCat = selectedCategory === "הכל" || p.category === selectedCategory;
+                    const matchSub = filterSubCategory === "all" || filterSubCategory === "הכל" || p.subCategory === filterSubCategory;
+                    
+                    let matchStatus = true;
+                    if (filterStatus === 'contacted') matchStatus = p.contacted;
+                    if (filterStatus === 'not_contacted') matchStatus = !p.contacted;
+
+                    return matchSearch && matchCat && matchSub && matchStatus;
+                });
+            }, [partners, searchTerm, selectedCategory, filterSubCategory, filterStatus]);
+
+            return (
+                <div className="min-h-screen flex flex-col pb-20" style={{ backgroundColor: THEME.bg }}>
+                    {notification && <Toast type={notification.type} message={notification.message} onClose={() => setNotification(null)} />}
+
+                    <style>{`
+                        @import url('https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;700;900&display=swap');
+                        body { font-family: 'Heebo', sans-serif; }
+                    `}</style>
+
+                    {/* HERO */}
+                    <header className="text-white relative overflow-hidden" style={{ backgroundColor: THEME.dark }}>
+                         <div className="absolute right-[-10%] top-[-50%] w-[50%] h-[200%] opacity-5 pointer-events-none" style={{ background: `radial-gradient(circle, ${THEME.yellow} 0%, transparent 70%)` }}></div>
+                         
+                         {/* Psychoflash Branding Element */}
+                         <div className="absolute -left-20 -top-20 z-0 opacity-10 pointer-events-none animate-pulse-slow">
+                            <Icons.Flash size={600} className="text-white" />
+                        </div>
+
+                        <div className="max-w-7xl mx-auto px-6 py-12 relative z-10">
+                            {/* BRANDING HEADER ROW */}
+                            <div className="flex items-center gap-6 mb-8 border-b border-white/10 pb-6">
+                                <div className="flex items-center gap-2 group cursor-pointer hover:opacity-80 transition-opacity">
+                                    <div className="p-2 bg-yellow-400 rounded-full text-black">
+                                        <Icons.Flash size={24} fill="currentColor" />
+                                    </div>
+                                    <span className="text-2xl font-black tracking-tighter uppercase italic">PSYCHOFLASH</span>
+                                </div>
+                            </div>
+
+                            <div className="flex flex-col md:flex-row justify-between items-end gap-8">
+                                <div>
+                                    <div className="flex items-center gap-3 mb-4">
+                                        <span className="text-xs font-bold px-3 py-1 rounded uppercase tracking-widest text-black flex items-center gap-1" style={{ backgroundColor: THEME.yellow }}>
+                                            <Icons.Flash size={12} fill="currentColor" /> NETWORK
+                                        </span>
+                                    </div>
+                                    <h1 className="text-6xl md:text-8xl font-black uppercase leading-[0.85] tracking-tighter mb-4">מאגר<br/>השותפים</h1>
+                                    <p className="text-xl text-gray-400 font-light max-w-lg">ניהול קשרים אסטרטגיים ונטוורקינג למאיץ.</p>
+                                </div>
+                                <div className="flex gap-4">
+                                    <button onClick={() => setIsImportModalOpen(true)} className="group flex items-center gap-3 px-6 py-4 text-lg font-bold text-white border border-white/30 hover:bg-white/10 transition-all rounded-sm">
+                                        <Icons.UploadCloud size={24} /> ייבוא מ-CSV
+                                    </button>
+                                    <button onClick={() => { setEditingId('new'); setEditForm({ company: "", category: "", subCategory: "", phone: "", email: "", location: "", valueProp: "" }); setIsAddingNew(true); }} className="group flex items-center gap-3 px-8 py-4 text-lg font-bold text-black transition-all hover:scale-105 shadow-lg" style={{ backgroundColor: THEME.yellow }}>
+                                        <Icons.Plus size={24} strokeWidth={3} /> הוסף שותף
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </header>
+
+                    {/* FILTERS & LAYOUT TOGGLE */}
+                    <div className="sticky top-0 z-30 shadow-md backdrop-blur-md bg-white/90 border-b border-gray-200">
+                        <div className="max-w-7xl mx-auto px-6 py-4 flex flex-col gap-4">
+                            <div className="flex flex-col md:flex-row gap-4 justify-between items-center">
+                                <div className="relative flex-1 w-full max-w-md">
+                                    <input type="text" placeholder="חיפוש חברה, טכנולוגיה..." className="w-full pl-4 pr-10 py-3 bg-gray-100 border border-transparent focus:bg-white focus:border-blue-600 outline-none transition-all rounded-none font-medium" value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} />
+                                    <Icons.Search size={18} className="absolute top-3.5 right-3 text-gray-500" />
+                                </div>
+                                
+                                <div className="flex items-center gap-2">
+                                    {/* Layout Toggle Button */}
+                                    <button 
+                                        onClick={() => setLayoutMode(layoutMode === 'detailed' ? 'compact' : 'detailed')}
+                                        className="flex items-center gap-2 px-4 py-3 bg-gray-100 hover:bg-gray-200 text-gray-700 font-bold rounded-none transition-colors border-l border-gray-300"
+                                        title={layoutMode === 'detailed' ? 'עבור לתצוגה מצומצמת' : 'עבור לתצוגה מורחבת'}
+                                    >
+                                        {layoutMode === 'detailed' ? <Icons.Grid size={18} /> : <Icons.Layout size={18} />}
+                                        <span className="hidden md:inline text-xs uppercase tracking-wide">{layoutMode === 'detailed' ? 'תצוגת גריד' : 'תצוגה מלאה'}</span>
+                                    </button>
+                                    
+                                    <div className="flex items-center gap-2 text-sm font-bold text-gray-500 bg-gray-100 px-4 py-3 rounded-none">
+                                        {loading ? <Icons.RefreshCw size={16} className="animate-spin" /> : <Icons.Check size={16} className="text-green-500" />}
+                                        <span>{filteredPartners.length}</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div className="flex flex-wrap gap-4 items-center text-sm">
+                                <div className="flex items-center gap-2">
+                                    <span className="font-bold text-gray-500">קטגוריה:</span>
+                                    <select className="p-2 bg-gray-50 border border-gray-200 rounded outline-none focus:border-blue-500" value={selectedCategory} onChange={(e) => { setSelectedCategory(e.target.value); setFilterSubCategory("all"); }}>
+                                        {categories.map(cat => <option key={cat} value={cat}>{cat}</option>)}
+                                    </select>
+                                </div>
+                                
+                                <div className="flex items-center gap-2">
+                                    <span className="font-bold text-gray-500">תת-קטגוריה:</span>
+                                    <select className="p-2 bg-gray-50 border border-gray-200 rounded outline-none focus:border-blue-500" value={filterSubCategory} onChange={(e) => setFilterSubCategory(e.target.value)} disabled={selectedCategory === 'הכל'}>
+                                        {subCategories.map(cat => <option key={cat} value={cat}>{cat}</option>)}
+                                    </select>
+                                </div>
+
+                                <div className="flex items-center gap-2 mr-auto">
+                                    <span className="font-bold text-gray-500">סטטוס:</span>
+                                    <div className="flex bg-gray-100 p-1 rounded">
+                                        <button onClick={() => setFilterStatus('all')} className={`px-3 py-1 rounded text-xs font-bold transition-all ${filterStatus === 'all' ? 'bg-white shadow text-black' : 'text-gray-500 hover:text-gray-700'}`}>הכל</button>
+                                        <button onClick={() => setFilterStatus('contacted')} className={`px-3 py-1 rounded text-xs font-bold transition-all ${filterStatus === 'contacted' ? 'bg-green-100 text-green-700 shadow' : 'text-gray-500 hover:text-gray-700'}`}>נוצר קשר</button>
+                                        <button onClick={() => setFilterStatus('not_contacted')} className={`px-3 py-1 rounded text-xs font-bold transition-all ${filterStatus === 'not_contacted' ? 'bg-red-50 text-red-600 shadow' : 'text-gray-500 hover:text-gray-700'}`}>טרם טופל</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* MAIN CONTENT AREA */}
+                    <div className="max-w-7xl mx-auto px-6 py-6 flex-grow">
+                         {loading && partners.length === 0 ? (
+                            <div className="flex justify-center py-20">
+                                <div className="animate-spin rounded-full h-12 w-12 border-t-4 border-b-4" style={{ borderColor: THEME.blue }}></div>
+                            </div>
+                        ) : (
+                            <>
+                                {/* --- DETAILED VIEW (Cards) --- */}
+                                {layoutMode === 'detailed' && (
+                                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                                        {filteredPartners.map((partner) => (
+                                            <div key={partner.id} className="bg-white border-2 border-transparent hover:border-blue-600 transition-all duration-300 group flex flex-col relative shadow-sm hover:shadow-xl" style={{ borderColor: partner.contacted ? '#48BB78' : 'transparent' }}>
+                                                <button onClick={() => toggleContact(partner)} className={`absolute top-0 right-0 px-3 py-1 text-xs font-black uppercase tracking-wider z-10 transition-colors ${partner.contacted ? 'bg-green-500 text-white' : 'bg-gray-200 text-gray-500 hover:bg-gray-300'}`}>
+                                                    {partner.contacted ? 'נוצר קשר ✓' : 'לפני פנייה'}
+                                                </button>
+                                                
+                                                {/* QUICK ACTIONS (HOVER) */}
+                                                <div className="absolute top-0 left-0 flex z-10 opacity-0 group-hover:opacity-100 transition-opacity bg-gray-100/90 backdrop-blur-sm rounded-br-lg">
+                                                     <button onClick={() => handleDelete(partner.id)} className="p-2 text-gray-400 hover:text-red-600 transition-colors" title="מחק">
+                                                        <Icons.Trash2 size={18} />
+                                                    </button>
+                                                    <button onClick={() => { setEditingId(partner.id); setEditForm(partner); setIsAddingNew(false); }} className="p-2 text-gray-400 hover:text-blue-600 transition-colors border-r border-gray-200" title="ערוך">
+                                                        <Icons.Edit3 size={18} />
+                                                    </button>
+                                                </div>
+
+                                                <div className="p-6 flex-grow flex flex-col">
+                                                    <div className="flex items-start gap-4 mb-6 mt-4">
+                                                        <div className="w-16 h-16 bg-gray-50 border border-gray-100 flex items-center justify-center p-2 shrink-0">
+                                                            <img src={getLogoUrl(partner.domain, partner.company)} alt="" className="w-full h-full object-contain mix-blend-multiply" onError={(e) => e.target.src = `https://ui-avatars.com/api/?name=${partner.company}`} />
+                                                        </div>
+                                                        <div>
+                                                            <h2 className="text-2xl font-black text-[#191B1D] leading-none mb-1">{partner.company}</h2>
+                                                            <div className="flex items-center gap-1 text-sm text-gray-500 font-medium"><Icons.MapPin size={12} /> {partner.location || "ישראל"}</div>
+                                                            <div className="mt-2 inline-block px-2 py-0.5 bg-blue-50 text-blue-700 text-[10px] font-bold uppercase tracking-wide border border-blue-100">{partner.category}</div>
+                                                        </div>
+                                                    </div>
+
+                                                    <div className="space-y-4 flex-grow">
+                                                        {partner.valueProp && (
+                                                            <div>
+                                                                <div className="flex items-center gap-2 text-xs font-bold text-gray-400 uppercase mb-1"><Icons.Lightbulb size={12} /> ערך אסטרטגי</div>
+                                                                <p className="text-sm font-medium text-gray-800 leading-relaxed">{partner.valueProp}</p>
+                                                            </div>
+                                                        )}
+                                                        {partner.acceleratorStrategy && (
+                                                            <div className="p-3 bg-yellow-50 border-r-4 border-yellow-400">
+                                                                <div className="flex items-center gap-2 text-xs font-bold text-yellow-700 uppercase mb-1"><Icons.Rocket size={12} /> אסטרטגיית שת"פ</div>
+                                                                <p className="text-sm font-bold text-gray-900 leading-relaxed">{partner.acceleratorStrategy}</p>
+                                                            </div>
+                                                        )}
+
+                                                        <div className="mt-4 pt-4 border-t border-gray-100 flex flex-col gap-2">
+                                                            {partner.phone && <div className="flex items-center gap-2 text-sm text-gray-600"><Icons.Phone size={14} className="text-gray-400 shrink-0" /><span dir="ltr" className="font-mono tracking-wide">{partner.phone}</span></div>}
+                                                            {partner.email && <div className="flex items-center gap-2 text-sm text-gray-600"><Icons.Mail size={14} className="text-gray-400 shrink-0" /><span className="truncate">{partner.email}</span></div>}
+                                                            {partner.entryMechanism && <div className="flex items-center gap-2 text-sm text-gray-600"><Icons.Zap size={14} className="text-gray-400 shrink-0" /><span><span className="font-bold text-xs text-gray-400">מנגנון:</span> {partner.entryMechanism}</span></div>}
+                                                        </div>
+                                                    </div>
+                                                    <div className="mt-6">
+                                                        <textarea className="w-full text-sm bg-[#F9F9F9] border-b-2 border-gray-200 focus:border-yellow-400 outline-none p-2 resize-none min-h-[60px] transition-colors placeholder-gray-400" placeholder="הערות..." value={partner.note || ""} onChange={(e) => updateNoteLocalUI(partner.id, e.target.value)} onBlur={(e) => saveNote(partner.id, e.target.value)} />
+                                                    </div>
+                                                </div>
+                                                <div className="px-6 py-4 bg-gray-50 border-t border-gray-100 grid grid-cols-3 gap-3">
+                                                    <ActionButton href={partner.phone ? `tel:${partner.phone}` : null} icon={Icons.Phone} label="חיוג" colorClass="bg-white border border-gray-200 text-gray-700 hover:bg-gray-100" />
+                                                    <ActionButton href={partner.email ? `mailto:${partner.email}` : null} icon={Icons.Mail} label="מייל" colorClass="bg-blue-50 text-blue-700 hover:bg-blue-100" />
+                                                    <ActionButton href={partner.phone ? `https://wa.me/${formatForWhatsapp(partner.phone)}` : null} icon={Icons.MessageCircle} label="" colorClass="bg-green-50 text-green-600 hover:bg-green-100" />
+                                                </div>
+                                            </div>
+                                        ))}
+                                    </div>
+                                )}
+
+                                {/* --- COMPACT VIEW (Grid) --- */}
+                                {layoutMode === 'compact' && (
+                                    <div className="grid grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3 md:gap-4">
+                                        {filteredPartners.map((partner) => (
+                                            <div 
+                                                key={partner.id} 
+                                                onClick={() => setViewingId(partner.id)}
+                                                className="bg-white border hover:border-blue-500 transition-all cursor-pointer shadow-sm hover:shadow-md rounded-lg p-2 flex flex-col items-center justify-center text-center aspect-square relative"
+                                                style={{ borderColor: partner.contacted ? '#48BB78' : undefined }}
+                                            >
+                                                {partner.contacted && <div className="absolute top-1 right-1 w-2 h-2 rounded-full bg-green-500"></div>}
+                                                <div className="w-10 h-10 md:w-14 md:h-14 mb-2 flex items-center justify-center">
+                                                    <img src={getLogoUrl(partner.domain, partner.company)} alt="" className="w-full h-full object-contain mix-blend-multiply" onError={(e) => e.target.src = `https://ui-avatars.com/api/?name=${partner.company}`} />
+                                                </div>
+                                                <h3 className="text-[10px] md:text-xs font-bold text-gray-800 leading-tight line-clamp-2">{partner.company}</h3>
+                                            </div>
+                                        ))}
+                                    </div>
+                                )}
+                            </>
+                        )}
+                    </div>
+
+                    {/* VIEWER MODAL (Used in Compact Mode) */}
+                    {activePartner && (
+                        <div className="fixed inset-0 z-40 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm" onClick={() => setViewingId(null)}>
+                            <div className="bg-white w-full max-w-lg shadow-2xl flex flex-col rounded-xl overflow-hidden animate-slide-up relative" onClick={e => e.stopPropagation()}>
+                                {/* Header / Close */}
+                                <div className="absolute top-2 left-2 z-20">
+                                    <button onClick={() => setViewingId(null)} className="p-2 bg-black/10 hover:bg-black/20 rounded-full text-black transition-colors"><Icons.X size={20} /></button>
+                                </div>
+                                
+                                {/* Status Badge */}
+                                <button onClick={() => toggleContact(activePartner)} className={`absolute top-0 right-0 px-4 py-2 text-xs font-black uppercase tracking-wider z-10 transition-colors rounded-bl-xl ${activePartner.contacted ? 'bg-green-500 text-white' : 'bg-gray-200 text-gray-500 hover:bg-gray-300'}`}>
+                                    {activePartner.contacted ? 'נוצר קשר ✓' : 'לפני פנייה'}
+                                </button>
+
+                                {/* Card Content */}
+                                <div className="p-6 pb-0 flex-grow flex flex-col max-h-[70vh] overflow-y-auto">
+                                    <div className="flex items-start gap-4 mb-6 mt-8">
+                                        <div className="w-20 h-20 bg-gray-50 border border-gray-100 flex items-center justify-center p-2 shrink-0 rounded-lg">
+                                            <img src={getLogoUrl(activePartner.domain, activePartner.company)} alt="" className="w-full h-full object-contain mix-blend-multiply" onError={(e) => e.target.src = `https://ui-avatars.com/api/?name=${activePartner.company}`} />
+                                        </div>
+                                        <div>
+                                            <h2 className="text-3xl font-black text-[#191B1D] leading-none mb-1">{activePartner.company}</h2>
+                                            <div className="flex items-center gap-1 text-sm text-gray-500 font-medium"><Icons.MapPin size={12} /> {activePartner.location || "ישראל"}</div>
+                                            <div className="mt-2 inline-block px-2 py-0.5 bg-blue-50 text-blue-700 text-[10px] font-bold uppercase tracking-wide border border-blue-100 rounded">{activePartner.category}</div>
+                                        </div>
+                                    </div>
+
+                                    <div className="space-y-4">
+                                        {activePartner.valueProp && (
+                                            <div>
+                                                <div className="flex items-center gap-2 text-xs font-bold text-gray-400 uppercase mb-1"><Icons.Lightbulb size={12} /> ערך אסטרטגי</div>
+                                                <p className="text-sm font-medium text-gray-800 leading-relaxed bg-gray-50 p-3 rounded-lg border border-gray-100">{activePartner.valueProp}</p>
+                                            </div>
+                                        )}
+                                        {activePartner.acceleratorStrategy && (
+                                            <div className="p-3 bg-yellow-50 border-r-4 border-yellow-400 rounded-l-lg">
+                                                <div className="flex items-center gap-2 text-xs font-bold text-yellow-700 uppercase mb-1"><Icons.Rocket size={12} /> אסטרטגיית שת"פ</div>
+                                                <p className="text-sm font-bold text-gray-900 leading-relaxed">{activePartner.acceleratorStrategy}</p>
+                                            </div>
+                                        )}
+
+                                        {/* Contact Details Block */}
+                                        <div className="pt-4 border-t border-gray-100 flex flex-col gap-3">
+                                            {activePartner.phone && <div className="flex items-center gap-3 text-sm text-gray-700"><div className="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center text-gray-500"><Icons.Phone size={14} /></div><span dir="ltr" className="font-mono tracking-wide font-bold">{activePartner.phone}</span></div>}
+                                            {activePartner.email && <div className="flex items-center gap-3 text-sm text-gray-700"><div className="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center text-gray-500"><Icons.Mail size={14} /></div><span className="truncate font-medium">{activePartner.email}</span></div>}
+                                            {activePartner.entryMechanism && <div className="flex items-center gap-3 text-sm text-gray-700"><div className="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center text-gray-500"><Icons.Zap size={14} /></div><span><span className="font-bold text-xs text-gray-400 uppercase">מנגנון:</span> {activePartner.entryMechanism}</span></div>}
+                                        </div>
+                                    </div>
+                                    
+                                    <div className="mt-6 mb-6">
+                                        <textarea className="w-full text-sm bg-[#F9F9F9] border-b-2 border-gray-200 focus:border-yellow-400 outline-none p-3 resize-none min-h-[80px] transition-colors placeholder-gray-400 rounded-t-lg" placeholder="הערות אישיות..." value={activePartner.note || ""} onChange={(e) => updateNoteLocalUI(activePartner.id, e.target.value)} onBlur={(e) => saveNote(activePartner.id, e.target.value)} />
+                                    </div>
+                                </div>
+
+                                {/* Modal Actions */}
+                                <div className="px-6 py-4 bg-gray-50 border-t border-gray-100">
+                                    <div className="grid grid-cols-3 gap-3 mb-4">
+                                        <ActionButton href={activePartner.phone ? `tel:${activePartner.phone}` : null} icon={Icons.Phone} label="חיוג" colorClass="bg-white border border-gray-200 text-gray-700 hover:bg-gray-100" />
+                                        <ActionButton href={activePartner.email ? `mailto:${activePartner.email}` : null} icon={Icons.Mail} label="מייל" colorClass="bg-blue-50 text-blue-700 hover:bg-blue-100" />
+                                        <ActionButton href={activePartner.phone ? `https://wa.me/${formatForWhatsapp(activePartner.phone)}` : null} icon={Icons.MessageCircle} label="" colorClass="bg-green-50 text-green-600 hover:bg-green-100" />
+                                    </div>
+                                    <div className="flex justify-between items-center pt-2 border-t border-gray-200/50">
+                                         <button onClick={() => handleDelete(activePartner.id)} className="text-red-400 hover:text-red-600 text-xs font-bold flex items-center gap-1"><Icons.Trash2 size={14} /> מחק</button>
+                                         <button onClick={() => { setEditingId(activePartner.id); setEditForm(activePartner); setViewingId(null); setIsAddingNew(false); }} className="text-blue-500 hover:text-blue-700 text-xs font-bold flex items-center gap-1"><Icons.Edit3 size={14} /> ערוך פרטים</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    )}
+
+                    {/* STICKY BOTTOM FOOTER (Appears on scroll) */}
+                    <div className={`fixed bottom-0 left-0 right-0 bg-[#17191A] text-white shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.1)] z-30 footer-slide-up ${showBottomBar ? 'footer-visible' : 'footer-hidden'}`}>
+                        <div className="max-w-7xl mx-auto px-6 h-16 flex justify-between items-center">
+                            <div className="flex items-center gap-3">
+                                <div className="p-1.5 bg-yellow-400 rounded-full text-black">
+                                    <Icons.Flash size={16} fill="currentColor" />
+                                </div>
+                                <div className="h-4 w-px bg-white/20"></div>
+                                <span className="text-xs text-gray-400">ניהול שותפים - Psychoflash</span>
+                            </div>
+                            
+                            {/* Integrated Action Buttons */}
+                            <div className="flex items-center gap-3">
+                                <button 
+                                    onClick={() => setIsImportModalOpen(true)}
+                                    className="flex items-center gap-2 px-4 py-2 text-xs font-bold text-white border border-white/20 hover:bg-white/10 rounded transition-colors"
+                                >
+                                    <Icons.UploadCloud size={16} />
+                                    <span className="hidden md:inline">ייבוא</span>
+                                </button>
+                                <button 
+                                    onClick={() => { setEditingId('new'); setEditForm({ company: "", category: "", subCategory: "", phone: "", email: "", location: "", valueProp: "" }); setIsAddingNew(true); }}
+                                    className="flex items-center gap-2 px-4 py-2 text-xs font-bold text-black bg-[#FFC700] hover:bg-[#E5B300] rounded transition-colors shadow-sm"
+                                >
+                                    <Icons.Plus size={16} strokeWidth={3} />
+                                    <span>הוסף שותף</span>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* IMPORT MODAL */}
+                    {isImportModalOpen && (
+                        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
+                            <div className="bg-white w-full max-w-lg shadow-2xl flex flex-col rounded-lg overflow-hidden">
+                                <div className="p-6 border-b border-gray-100 flex justify-between items-center bg-gray-50">
+                                    <h2 className="text-xl font-black text-[#191B1D]">ייבוא שותפים מ-CSV</h2>
+                                    <button onClick={() => setIsImportModalOpen(false)} className="text-gray-400 hover:text-red-500 transition-colors"><Icons.X size={24} /></button>
+                                </div>
+                                <div className="p-6 space-y-4">
+                                    <p className="text-sm text-gray-600">הדבק כאן קישור ל-Google Sheet שפורסם כ-CSV (File &gt; Share &gt; Publish to web &gt; Comma-separated values).</p>
+                                    <div>
+                                        <label className="block text-xs font-bold text-gray-500 mb-1 uppercase">URL ל-CSV</label>
+                                        <input className="w-full p-3 bg-gray-50 border border-gray-200 focus:border-blue-500 outline-none text-sm" 
+                                            value={importUrl} onChange={e => setImportUrl(e.target.value)} placeholder="https://docs.google.com/..." />
+                                    </div>
+                                </div>
+                                <div className="p-6 border-t border-gray-100 flex justify-end gap-3 bg-gray-50">
+                                    <button onClick={() => setIsImportModalOpen(false)} className="px-4 py-2 font-bold text-gray-500 hover:bg-gray-200 transition-colors rounded">ביטול</button>
+                                    <button onClick={handleImport} className="px-6 py-2 font-bold text-white bg-blue-600 hover:bg-blue-700 transition-all rounded shadow-sm flex items-center gap-2">
+                                        {loading ? <Icons.RefreshCw className="animate-spin" size={16} /> : <Icons.UploadCloud size={16} />} ייבוא נתונים
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    )}
+
+                    {/* EDIT/ADD MODAL */}
+                    {editingId && (
+                        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
+                            <div className="bg-white w-full max-w-2xl shadow-2xl flex flex-col max-h-[90vh] rounded-lg overflow-hidden">
+                                <div className="p-6 border-b border-gray-100 flex justify-between items-center bg-gray-50">
+                                    <h2 className="text-2xl font-black text-[#191B1D]">{isAddingNew ? "הוספת שותף חדש" : "עריכת פרטי שותף"}</h2>
+                                    <button onClick={() => setEditingId(null)} className="text-gray-400 hover:text-red-500 transition-colors"><Icons.X size={24} /></button>
+                                </div>
+                                <div className="p-8 overflow-y-auto grid grid-cols-1 md:grid-cols-2 gap-6">
+                                    <div className="col-span-2 md:col-span-1"><label className="block text-xs font-bold text-gray-400 uppercase mb-1">שם החברה</label><input className="w-full p-3 bg-gray-50 border border-gray-200 focus:border-blue-500 outline-none font-bold" value={editForm.company || ""} onChange={e => setEditForm({...editForm, company: e.target.value})} /></div>
+                                    <div className="col-span-2 md:col-span-1"><label className="block text-xs font-bold text-gray-400 uppercase mb-1">דומיין (לוגו)</label><input className="w-full p-3 bg-gray-50 border border-gray-200 focus:border-blue-500 outline-none" value={editForm.domain || ""} onChange={e => setEditForm({...editForm, domain: e.target.value})} placeholder="example.com" /></div>
+                                    <div className="col-span-2"><label className="block text-xs font-bold text-gray-400 uppercase mb-1">ערך אסטרטגי</label><textarea className="w-full p-3 bg-gray-50 border border-gray-200 focus:border-blue-500 outline-none" rows="2" value={editForm.valueProp || ""} onChange={e => setEditForm({...editForm, valueProp: e.target.value})} /></div>
+                                    <div className="col-span-2"><label className="block text-xs font-bold text-gray-400 uppercase mb-1">אסטרטגיית שת"פ</label><textarea className="w-full p-3 bg-yellow-50 border border-yellow-200 focus:border-yellow-400 outline-none font-medium" rows="2" value={editForm.acceleratorStrategy || ""} onChange={e => setEditForm({...editForm, acceleratorStrategy: e.target.value})} /></div>
+                                    <div><label className="block text-xs font-bold text-gray-400 uppercase mb-1">טלפון</label><input className="w-full p-3 bg-gray-50 border border-gray-200 focus:border-blue-500 outline-none" value={editForm.phone || ""} onChange={e => setEditForm({...editForm, phone: e.target.value})} /></div>
+                                    <div><label className="block text-xs font-bold text-gray-400 uppercase mb-1">מייל</label><input className="w-full p-3 bg-gray-50 border border-gray-200 focus:border-blue-500 outline-none" value={editForm.email || ""} onChange={e => setEditForm({...editForm, email: e.target.value})} /></div>
+                                    <div className="col-span-2 md:col-span-1"><label className="block text-xs font-bold text-gray-400 uppercase mb-1">קטגוריה</label><input className="w-full p-3 bg-gray-50 border border-gray-200 focus:border-blue-500 outline-none" value={editForm.category || ""} onChange={e => setEditForm({...editForm, category: e.target.value})} /></div>
+                                    <div className="col-span-2 md:col-span-1"><label className="block text-xs font-bold text-gray-400 uppercase mb-1">תת קטגוריה</label><input className="w-full p-3 bg-gray-50 border border-gray-200 focus:border-blue-500 outline-none" value={editForm.subCategory || ""} onChange={e => setEditForm({...editForm, subCategory: e.target.value})} /></div>
+                                     <div className="col-span-2 md:col-span-1"><label className="block text-xs font-bold text-gray-400 uppercase mb-1">מנגנון כניסה</label><input className="w-full p-3 bg-gray-50 border border-gray-200 focus:border-blue-500 outline-none" value={editForm.entryMechanism || ""} onChange={e => setEditForm({...editForm, entryMechanism: e.target.value})} /></div>
+                                </div>
+                                <div className="p-6 border-t border-gray-100 flex justify-end gap-4 bg-gray-50">
+                                    <button onClick={() => setEditingId(null)} className="px-6 py-3 font-bold text-gray-500 hover:bg-gray-200 transition-colors rounded">ביטול</button>
+                                    <button onClick={handleSave} className="px-8 py-3 font-black text-black bg-[#FFC700] hover:bg-[#E5B300] transition-all shadow-md flex items-center gap-2 rounded"><Icons.Save size={18} /> שמור שינויים</button>
+                                </div>
+                            </div>
+                        </div>
+                    )}
+                </div>
+            );
+        };
+
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(<App />);
+    </script>
+</body>
+</html>
