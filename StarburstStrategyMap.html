@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>מאגר שותפים אסטרטגיים | Starburst</title>
+    <title>מאגר שותפים אסטרטגיים | Starburst & Innovet</title>
     
     <!-- React & ReactDOM -->
     <script crossorigin src="https://unpkg.com/react@18/umd/react.development.js"></script>
@@ -27,6 +27,8 @@
 
         .animate-spin { animation: spin 1s linear infinite; }
         @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+        
+        .animate-spin-slow { animation: spin 60s linear infinite; }
 
         /* Toast Animation */
         @keyframes slideIn {
@@ -47,6 +49,9 @@
             -webkit-box-orient: vertical;
             overflow: hidden;
         }
+
+        /* Logo Filters */
+        .logo-white { filter: brightness(0) invert(1); }
     </style>
 </head>
 <body>
@@ -398,8 +403,30 @@
 
                     {/* HERO */}
                     <header className="text-white relative overflow-hidden" style={{ backgroundColor: THEME.dark }}>
+                        {/* Background Watermarks - FROM ORIGINAL CODE */}
                          <div className="absolute right-[-10%] top-[-50%] w-[50%] h-[200%] opacity-5 pointer-events-none" style={{ background: `radial-gradient(circle, ${THEME.yellow} 0%, transparent 70%)` }}></div>
-                        <div className="max-w-7xl mx-auto px-6 py-16 relative z-10">
+                         <div className="absolute -left-20 -top-20 z-0 opacity-10 pointer-events-none animate-spin-slow mix-blend-overlay">
+                            <img src="./INNOVET_ICON-05linear-1.webp" alt="" className="w-[600px] h-[600px]" onError={(e) => e.target.style.display = 'none'} />
+                        </div>
+
+                        <div className="max-w-7xl mx-auto px-6 py-12 relative z-10">
+                            {/* LOGOS HEADER ROW */}
+                            <div className="flex items-center gap-6 mb-8 border-b border-white/10 pb-6">
+                                <img 
+                                    src="./INNOVET_ICON-05-1.svg" 
+                                    alt="Innovet" 
+                                    className="h-10 md:h-12 w-auto object-contain logo-white" 
+                                    onError={(e) => e.target.style.display = 'none'}
+                                />
+                                <div className="h-6 w-px bg-white/20"></div>
+                                <img 
+                                    src="./Starburst-Logo-White-svg-1.webp" 
+                                    alt="Starburst" 
+                                    className="h-6 md:h-8 w-auto object-contain" 
+                                    onError={(e) => e.target.style.display = 'none'}
+                                />
+                            </div>
+
                             <div className="flex flex-col md:flex-row justify-between items-end gap-8">
                                 <div>
                                     <div className="flex items-center gap-3 mb-4">
@@ -643,8 +670,9 @@
                     {/* STICKY BOTTOM FOOTER (Appears on scroll) */}
                     <div className={`fixed bottom-0 left-0 right-0 bg-[#17191A] text-white shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.1)] z-30 footer-slide-up ${showBottomBar ? 'footer-visible' : 'footer-hidden'}`}>
                         <div className="max-w-7xl mx-auto px-6 h-16 flex justify-between items-center">
-                            <div className="flex flex-col">
-                                <span className="text-sm font-bold text-[#FFC700] uppercase tracking-wider">STARBURST</span>
+                            <div className="flex items-center gap-3">
+                                <img src="./Starburst-Logo-White-svg-1.webp" alt="Starburst" className="h-6 w-auto opacity-80" onError={(e) => e.target.style.display = 'none'} />
+                                <div className="h-4 w-px bg-white/20"></div>
                                 <span className="text-xs text-gray-400">ניהול שותפים</span>
                             </div>
                             
