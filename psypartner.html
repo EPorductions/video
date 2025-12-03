@@ -15,39 +15,54 @@
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
 
+    <!-- Markdown Parser for AI responses -->
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;700;900&display=swap');
-        body { font-family: 'Heebo', sans-serif; background-color: #F6F6F4; }
-        
-        /* Custom Scrollbar */
-        ::-webkit-scrollbar { width: 8px; }
-        ::-webkit-scrollbar-track { background: #0A0A0A; }
-        ::-webkit-scrollbar-thumb { background: #CCFF00; border-radius: 4px; }
-        ::-webkit-scrollbar-thumb:hover { background: #B3E600; }
+        @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&display=swap'); /* Tech font */
 
-        /* Hide Scrollbar for Filter Chips */
+        :root {
+            /* Light Theme Variables */
+            --primary-brand: #10B981; /* Emerald 500 */
+            --primary-dark: #047857; /* Emerald 700 */
+            --accent-blue: #3B82F6;
+            --bg-body: #F3F4F6; /* Gray 100 */
+            --bg-panel: #FFFFFF;
+            --border-color: #E5E7EB; /* Gray 200 */
+            --text-main: #111827; /* Gray 900 */
+            --text-muted: #6B7280; /* Gray 500 */
+        }
+
+        body { font-family: 'Heebo', sans-serif; background-color: var(--bg-body); color: var(--text-main); }
+        
+        /* Custom Scrollbar - Clean Gray */
+        ::-webkit-scrollbar { width: 8px; height: 8px; }
+        ::-webkit-scrollbar-track { background: #F3F4F6; }
+        ::-webkit-scrollbar-thumb { 
+            background: #D1D5DB; 
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover { background: #9CA3AF; }
+
+        /* Hide Scrollbar for Filter Chips but allow scroll */
         .no-scrollbar::-webkit-scrollbar { display: none; }
         .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
 
         .animate-spin { animation: spin 1s linear infinite; }
         @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
         
-        .animate-pulse-slow { animation: pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite; }
-        @keyframes pulse { 0%, 100% { opacity: 0.1; } 50% { opacity: 0.3; } }
-
-        /* Toast Animation */
+        /* Animations */
         @keyframes slideIn {
             from { transform: translateY(100%); opacity: 0; }
             to { transform: translateY(0); opacity: 1; }
         }
         .toast-enter { animation: slideIn 0.3s ease-out forwards; }
         
-        /* Footer Animation */
         .footer-slide-up { transition: transform 0.3s ease-in-out; }
         .footer-hidden { transform: translateY(100%); }
         .footer-visible { transform: translateY(0); }
 
-        /* Mobile Grid Fixes */
         .line-clamp-2 {
             display: -webkit-box;
             -webkit-line-clamp: 2;
@@ -55,16 +70,35 @@
             overflow: hidden;
         }
 
-        /* Modern Branding Colors */
-        .bg-psych-dark { background-color: #050505; }
-        .text-psych-neon { color: #CCFF00; }
-        .border-psych-neon { border-color: #CCFF00; }
-        .bg-psych-neon { background-color: #CCFF00; }
+        /* Clean Glass/Shadow Effects */
+        .glass-panel {
+            background: #FFFFFF;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            border: 1px solid var(--border-color);
+            border-radius: 0.5rem;
+        }
+
+        .hover-card:hover {
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+            transform: translateY(-2px);
+            border-color: var(--primary-brand);
+        }
         
-        .text-psych-turq { color: #00F0FF; }
-        .bg-psych-turq { background-color: #00F0FF; }
+        .tech-font { font-family: 'Orbitron', sans-serif; letter-spacing: 1px; }
+
+        /* Markdown Styles within AI Modal */
+        .prose h3 { color: var(--text-main); font-weight: bold; margin-top: 1rem; margin-bottom: 0.5rem; }
+        .prose ul { list-style-type: disc; padding-right: 1.5rem; color: var(--text-muted); }
+        .prose p { margin-bottom: 0.8rem; line-height: 1.6; }
+        .prose strong { color: var(--primary-dark); }
         
-        .bg-psych-blonde { background-color: #FFFCE8; }
+        /* Dropdown Animation */
+        @keyframes fadeInScale {
+            from { opacity: 0; transform: scale(0.95) translateY(10px); }
+            to { opacity: 1; transform: scale(1) translateY(0); }
+        }
+        .dropdown-enter { animation: fadeInScale 0.15s ease-out forwards; }
+
     </style>
 </head>
 <body>
@@ -76,7 +110,7 @@
         import { getFirestore, collection, doc, setDoc, updateDoc, deleteDoc, onSnapshot, serverTimestamp, query, orderBy, writeBatch } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
         const React = window.React;
-        const { useState, useEffect, useMemo } = React;
+        const { useState, useEffect, useMemo, useRef } = React;
 
         // --- Firebase Configuration ---
         const firebaseConfig = {
@@ -103,7 +137,6 @@
         // --- Icons ---
         const Icons = {
             Search: ({size=20, className=""}) => <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>,
-            Filter: ({size=20, className=""}) => <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"></polygon></svg>,
             Phone: ({size=20, className=""}) => <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path></svg>,
             Mail: ({size=20, className=""}) => <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path><polyline points="22,6 12,13 2,6"></polyline></svg>,
             MessageCircle: ({size=20, className=""}) => <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"></path></svg>,
@@ -122,18 +155,22 @@
             Grid: ({size=20, className=""}) => <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect></svg>,
             Layout: ({size=20, className=""}) => <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><line x1="3" y1="9" x2="21" y2="9"></line><line x1="9" y1="21" x2="9" y2="9"></line></svg>,
             Flash: ({size=24, className=""}) => <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="currentColor" stroke="none" className={className}><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"></path></svg>,
-            AlertTriangle: ({size=20, className=""}) => <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>
+            AlertTriangle: ({size=20, className=""}) => <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>,
+            Brain: ({size=20, className=""}) => <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><path d="M9.5 2A2.5 2.5 0 0 1 12 4.5v15a2.5 2.5 0 0 1-4.96.44 2.5 2.5 0 0 1-2.96-3.08 3 3 0 0 1-.34-5.58 2.5 2.5 0 0 1 1.32-4.24 2.5 2.5 0 0 1 1.98-3A2.5 2.5 0 0 1 9.5 2Z"/><path d="M14.5 2A2.5 2.5 0 0 0 12 4.5v15a2.5 2.5 0 0 0 4.96.44 2.5 2.5 0 0 0 2.96-3.08 3 3 0 0 0 .34-5.58 2.5 2.5 0 0 0-1.32-4.24 2.5 2.5 0 0 0-1.98-3A2.5 2.5 0 0 0 14.5 2Z"/></svg>,
+            Sparkles: ({size=20, className=""}) => <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><path d="m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1 1.275-1.275L21 12l-5.813-1.912a2 2 0 0 1-1.275-1.275L12 3Z"/></svg>,
+            Copy: ({size=20, className=""}) => <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><rect width="14" height="14" x="8" y="8" rx="2" ry="2"/><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/></svg>,
+            Send: ({size=20, className=""}) => <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon></svg>,
+            Key: ({size=20, className=""}) => <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><path d="M21 2l-2 2m-7.61 7.61a5.5 5.5 0 1 1-7.778 7.778 5.5 5.5 0 0 1 7.777-7.777zm0 0L15.5 7.5m0 0l3 3L22 7l-3-3m-3.5 3.5L19 4"></path></svg>,
+            MoreVertical: ({size=20, className=""}) => <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><circle cx="12" cy="12" r="1"></circle><circle cx="12" cy="5" r="1"></circle><circle cx="12" cy="19" r="1"></circle></svg>
         };
 
-        const THEME = {
-            black: '#000000',
-            dark: '#050505',
-            primary: '#CCFF00', // Neon Green
-            secondary: '#00F0FF', // Turquoise
-            blonde: '#FFFCE8', // Blonde/Cream
-            bg: '#F6F6F4',
-            white: '#FFFFFF',
-            gray: '#E3E3E3'
+        // --- Color Generation Utility ---
+        const generatePalette = (str) => {
+            const basicColors = ['#3B82F6', '#10B981', '#6366F1', '#F59E0B', '#64748B', '#8B5CF6'];
+            let hash = 0;
+            for (let i = 0; i < str.length; i++) hash = str.charCodeAt(i) + ((hash << 5) - hash);
+            const color = basicColors[Math.abs(hash) % basicColors.length];
+            return { base: color, bg: `${color}15`, border: `${color}40`, text: color, hoverBg: `${color}25` };
         };
 
         // --- CSV Parser ---
@@ -159,36 +196,51 @@
         const Toast = ({ type, message, onClose }) => {
             if (!message) return null;
             return (
-                <div className={`fixed bottom-20 left-4 z-50 px-6 py-4 rounded-lg shadow-xl flex items-center gap-3 toast-enter transform transition-all duration-300 ${type === 'success' ? 'bg-[#050505] text-[#CCFF00] border-r-4 border-[#CCFF00]' : 'bg-red-600 text-white border-r-4 border-white'}`}>
-                    {type === 'success' ? <Icons.Check size={20} className="text-[#CCFF00]" /> : <Icons.AlertTriangle size={20} />}
-                    <span className="font-bold text-sm">{message}</span>
-                    <button onClick={onClose} className="mr-4 text-white/50 hover:text-white"><Icons.X size={16} /></button>
+                <div className={`fixed bottom-20 left-4 z-50 px-6 py-4 rounded-lg shadow-xl flex items-center gap-3 toast-enter transform transition-all duration-300 border-r-4 ${type === 'success' ? 'bg-white text-emerald-600 border-emerald-500 shadow-emerald-100' : 'bg-white text-red-600 border-red-500 shadow-red-100'}`}>
+                    {type === 'success' ? <Icons.Check size={20} /> : <Icons.AlertTriangle size={20} />}
+                    <span className="font-bold text-sm tracking-wide text-gray-800">{message}</span>
+                    <button onClick={onClose} className="mr-4 opacity-50 hover:opacity-100 text-gray-500"><Icons.X size={16} /></button>
                 </div>
             );
         };
 
-        const ActionButton = ({ href, icon: Icon, label, colorClass }) => {
-            if (!href) return null;
+        const ActionButton = ({ href, onClick, icon: Icon, label, colorKey }) => {
+            const styles = useMemo(() => generatePalette(colorKey || label || 'default'), [colorKey, label]);
+            
+            if (!href && !onClick) return null;
+            
+            const Component = href ? 'a' : 'button';
+            const props = href ? { href, target: href.startsWith('http') ? "_blank" : undefined } : { onClick };
+
             return (
-                <a href={href} target={href.startsWith('http') ? "_blank" : undefined} className={`flex items-center justify-center gap-2 py-2 px-4 rounded font-bold text-sm transition-all duration-200 flex-1 shadow-sm ${colorClass}`}>
+                <Component 
+                    {...props}
+                    className="flex items-center justify-center gap-2 py-2 px-4 rounded font-bold text-sm transition-all duration-200 flex-1 border"
+                    style={{ backgroundColor: styles.bg, borderColor: styles.border, color: styles.text }}
+                    onMouseEnter={(e) => { e.currentTarget.style.backgroundColor = styles.hoverBg; }}
+                    onMouseLeave={(e) => { e.currentTarget.style.backgroundColor = styles.bg; }}
+                >
                     <Icon size={16} /> <span>{label}</span>
-                </a>
+                </Component>
             );
         };
 
-        // *** GEMINI-STYLE FILTER CHIP COMPONENT ***
-        const FilterChip = ({ label, active, onClick }) => (
-            <button 
-                onClick={onClick}
-                className={`px-4 py-2 rounded-xl text-sm font-medium transition-all duration-200 whitespace-nowrap ${
-                    active 
-                    ? 'bg-[#00F0FF] text-[#004D51]' // Active State (Turquoise)
-                    : 'bg-white border border-[#E0E3E7] text-[#444746] hover:bg-[#E9EEF6]' // Inactive State
-                }`}
-            >
-                {label}
-            </button>
-        );
+        const FilterChip = ({ label, active, onClick }) => {
+            const styles = useMemo(() => generatePalette(label), [label]);
+            return (
+                <button 
+                    onClick={onClick}
+                    className={`px-4 py-2 rounded-xl text-sm font-medium transition-all duration-300 whitespace-nowrap border ${active ? 'shadow-sm' : ''}`}
+                    style={{
+                        backgroundColor: active ? styles.base : '#FFFFFF',
+                        borderColor: active ? styles.base : '#E5E7EB',
+                        color: active ? '#FFFFFF' : '#4B5563',
+                    }}
+                >
+                    {label}
+                </button>
+            );
+        };
 
         // --- Main App ---
         const App = () => {
@@ -200,12 +252,10 @@
             const [filterStatus, setFilterStatus] = useState("all"); 
             const [filterSubCategory, setFilterSubCategory] = useState("all");
             
-            // Layout State: 'compact' (mobile default) vs 'detailed' (desktop default)
             const [layoutMode, setLayoutMode] = useState(window.innerWidth < 768 ? 'compact' : 'detailed');
 
             const [editingId, setEditingId] = useState(null);
-            const [viewingId, setViewingId] = useState(null); // For viewing details in compact mode
-            
+            const [viewingId, setViewingId] = useState(null);
             const [editForm, setEditForm] = useState({});
             const [isAddingNew, setIsAddingNew] = useState(false);
             const [isImportModalOpen, setIsImportModalOpen] = useState(false);
@@ -213,7 +263,16 @@
             const [notification, setNotification] = useState(null);
             const [showBottomBar, setShowBottomBar] = useState(false);
 
-            // Derived state for the active partner being viewed
+            const [aiModalOpen, setAiModalOpen] = useState(false);
+            const [aiActivePartner, setAiActivePartner] = useState(null);
+            const [aiResult, setAiResult] = useState(null);
+            const [aiLoading, setAiLoading] = useState(false);
+            const [apiKey, setApiKey] = useState(localStorage.getItem('gemini_api_key') || "");
+            const [activeAiDropdown, setActiveAiDropdown] = useState(null);
+            const [aiMode, setAiMode] = useState('SYNERGY'); 
+            const [customPromptText, setCustomPromptText] = useState("");
+            const [showKeyInput, setShowKeyInput] = useState(false);
+
             const activePartner = useMemo(() => partners.find(p => p.id === viewingId), [partners, viewingId]);
 
             const showNotification = (type, message) => {
@@ -221,47 +280,205 @@
                 setTimeout(() => setNotification(null), 3500);
             };
 
-            // Scroll Logic & Resize Logic
             useEffect(() => {
                 const handleScroll = () => setShowBottomBar(window.scrollY > 250);
                 window.addEventListener('scroll', handleScroll);
                 return () => window.removeEventListener('scroll', handleScroll);
             }, []);
 
-            // Init Auth
             useEffect(() => {
                 const initAuth = async () => {
-                    try {
-                        await signInAnonymously(auth);
-                    } catch (e) {
-                        console.error("Auth failed", e);
-                        setLoading(false);
-                    }
+                    try { await signInAnonymously(auth); } catch (e) { console.error("Auth failed", e); setLoading(false); }
                 };
                 initAuth();
                 return onAuthStateChanged(auth, (u) => setUser(u));
             }, []);
 
-            // Sync with DB
             useEffect(() => {
                 if (!user) return;
-
-                // *** CRITICAL: USING NEW APP ID PATH ***
                 const q = collection(db, 'artifacts', appId, 'public', 'data', 'partners');
                 const unsubscribe = onSnapshot(q, (snapshot) => {
                     let docs = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
                     docs.sort((a, b) => (a.company || "").localeCompare(b.company || ""));
                     setPartners(docs);
                     setLoading(false);
-                }, (err) => {
-                    console.error("Sync error", err);
-                    setLoading(false);
-                });
-
+                }, (err) => { console.error("Sync error", err); setLoading(false); });
                 return () => unsubscribe();
             }, [user]);
 
-            // --- Actions ---
+            // --- AI Logic (Offline/Live) ---
+            const handleAiOptionClick = (partner, mode) => {
+                setAiActivePartner(partner);
+                setAiMode(mode);
+                setAiResult(null);
+                setCustomPromptText("");
+                setActiveAiDropdown(null);
+                setAiModalOpen(true);
+                
+                // If custom, wait for input. Else, generate immediately.
+                if (mode !== 'CUSTOM') {
+                    setTimeout(() => generateAiSynergy(mode, partner), 100);
+                }
+            };
+
+            const saveApiKey = (key) => {
+                setApiKey(key);
+                localStorage.setItem('gemini_api_key', key);
+                setShowKeyInput(false);
+                showNotification('success', key ? 'מפתח AI נשמר!' : 'מפתח הוסר, עובר למצב אוטומטי');
+            };
+
+            const generateMockResponse = (mode, partner) => {
+                const p = partner || {};
+                const name = p.company || "החברה";
+                const cat = p.category || "טכנולוגיה";
+                const strat = p.acceleratorStrategy || "שיתוף פעולה אסטרטגי";
+                const val = p.valueProp || "פתרון חדשני";
+
+                return new Promise(resolve => {
+                    setTimeout(() => {
+                        let res = "";
+                        if (mode === 'SYNERGY') {
+                            res = `
+### ⚡ ניתוח סינרגיה (אוטומטי)
+**The Pitch**: 
+${name} מובילה חדשנות בתחום ה-${cat} עם פתרון המבוסס על ${val}.
+
+**The Synergy**: 
+החיבור עם Psychoflash הוא טבעי לאור המיקוד שלנו ב-${strat}. הטכנולוגיה שלהם יכולה להאיץ את הפיתוח של סטארטאפים בפורטפוליו שלנו.
+
+**Action Item**: 
+מומלץ לתאם שיחת היכרות ראשונית לבחינת ${val} ולבדוק התאמה לתוכנית המאיץ.
+                            `;
+                        } else if (mode === 'EMAIL') {
+                            res = `
+### 📧 טיוטת פנייה (אוטומטית)
+**נושא:** שיתוף פעולה אסטרטגי עם Psychoflash Accelerator
+
+היי,
+
+ראיתי את העבודה המרשימה ש-${name} עושה בתחום ה-${cat}, וחשבתי שיש כאן פוטנציאל מעניין לסינרגיה.
+
+ב-Psychoflash אנחנו מחפשים שותפים בדיוק עם פרופיל כמו שלכם - ${val} - כדי לקדם חדשנות משותפת. אשמח לתאם שיחה קצרה לבחון איך נוכל לייצר ערך הדדי.
+
+זמין לשיחה,
+[השם שלך]
+                            `;
+                        } else if (mode === 'MEETING') {
+                            res = `
+### 💬 נקודות לשיחה (אוטומטי)
+1. **הצגת הערך:** כיצד הפתרון של ${name} בתחום ה-${cat} משתלב בחזון של Psychoflash?
+2. **בחינת האסטרטגיה:** דיון על ${strat} ואיך זה פוגש את צרכי המאיץ.
+3. **מודל עבודה:** האם נכון להתחיל בפיילוט או בשותפות אסטרטגית מלאה?
+4. **טכנולוגיה:** העמקה ב-${val} והיתרונות התחרותיים.
+5. **צעדים הבאים:** הגדרת POC או פגישת המשך עם הצוות הטכני.
+                            `;
+                        }
+                        resolve(res);
+                    }, 1500);
+                });
+            };
+
+            // NEW: Fallback mechanism for fetching models
+            const fetchGeminiResponse = async (prompt) => {
+                const models = [
+                    'gemini-1.5-flash-latest', 
+                    'gemini-1.5-flash-001', 
+                    'gemini-1.5-flash',
+                    'gemini-pro',
+                    'gemini-1.0-pro'
+                ];
+                
+                let lastError = null;
+
+                for (const model of models) {
+                    try {
+                        const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`, {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }] })
+                        });
+
+                        const data = await response.json();
+                        
+                        if (data.error) {
+                            // If it's a specific "not found" or "not supported", try next model
+                            if (data.error.message.includes("not found") || data.error.message.includes("not supported")) {
+                                console.warn(`Model ${model} failed, trying next...`);
+                                lastError = data.error.message;
+                                continue;
+                            }
+                            throw new Error(data.error.message);
+                        }
+                        
+                        return data.candidates?.[0]?.content?.parts?.[0]?.text;
+                    } catch (e) {
+                        lastError = e.message;
+                        // If it's a network error or authentication error (403), stop trying other models as they will fail too
+                        if (e.message.includes("403") || e.message.includes("API key")) {
+                            throw e;
+                        }
+                        continue;
+                    }
+                }
+                throw new Error(`All models failed. Last error: ${lastError}`);
+            };
+
+            const generateAiSynergy = async (mode = aiMode, partner = aiActivePartner) => {
+                if (mode === 'CUSTOM' && !customPromptText.trim()) return;
+
+                setAiLoading(true);
+                setAiResult(null);
+
+                // --- OFFLINE / MOCK MODE ---
+                // If no API Key is present, utilize the sophisticated mock engine
+                if (!apiKey && mode !== 'CUSTOM') {
+                    const mockRes = await generateMockResponse(mode, partner);
+                    setAiResult(mockRes);
+                    setAiLoading(false);
+                    return;
+                }
+                
+                // If Custom mode and no key, prompt user
+                if (!apiKey && mode === 'CUSTOM') {
+                    setAiResult("⚠️ **נדרש מפתח API עבור בקשות אישיות**\n\nכדי לשלוח שאלות חופשיות למודל, יש להגדיר מפתח Gemini API בהגדרות (אייקון המפתח למעלה).\n\nחשוב לדעת: מנוי 'Gemini Advanced' (ChatGPT) אינו מספק גישה ל-API. יש להוציא מפתח בחינם מ-Google AI Studio.\n\nעבור פעולות סטנדרטיות (סינרגיה, מייל, פגישה) המערכת עובדת מצוין גם ללא מפתח במצב אוטומטי.");
+                    setAiLoading(false);
+                    return;
+                }
+
+                // --- LIVE API MODE ---
+                const partnerDataStr = `
+                    Company Name: ${partner.company}
+                    Category: ${partner.category || 'General Tech'}
+                    Value Proposition: ${partner.valueProp || 'N/A'}
+                    Strategy: ${partner.acceleratorStrategy || 'N/A'}
+                    Location: ${partner.location || 'Israel'}
+                `;
+
+                let promptInstructions = "";
+                switch(mode) {
+                    case 'EMAIL': promptInstructions = "Write a cold email in Hebrew to set up a meeting for Psychoflash accelerator. Professional tone."; break;
+                    case 'MEETING': promptInstructions = "Create a list of 5 talking points in Hebrew for a meeting focusing on collaboration."; break;
+                    case 'CUSTOM': promptInstructions = `${customPromptText}\nAnswer in Hebrew.`; break;
+                    case 'SYNERGY': default: promptInstructions = "Analyze synergy. Hebrew. Markdown: Pitch, Synergy, Action Item."; break;
+                }
+
+                const prompt = `Act as a biz-dev expert for 'Psychoflash'. Partner: ${partnerDataStr}. Task: ${promptInstructions}`;
+
+                try {
+                    const text = await fetchGeminiResponse(prompt);
+                    setAiResult(text || "No response generated.");
+                } catch (e) {
+                    let errorMsg = e.message;
+                    if (errorMsg.includes("403") || errorMsg.includes("API key not valid")) {
+                        errorMsg = "מפתח ה-API אינו תקין. וודא שלקחת אותו מ-Google AI Studio ולא מהמנוי האישי.";
+                    }
+                    setAiResult(`❌ שגיאה: ${errorMsg}`);
+                } finally {
+                    setAiLoading(false);
+                }
+            };
+
             const toggleContact = async (partner) => {
                 if (!user) return;
                 try {
@@ -274,24 +491,18 @@
             const handleDelete = async (id) => {
                 if (!user) return;
                 if (!window.confirm("האם למחוק שותף זה לצמיתות?")) return;
-
                 try {
-                    if (!id) throw new Error("Invalid ID");
                     await deleteDoc(doc(db, 'artifacts', appId, 'public', 'data', 'partners', id));
                     setViewingId(null);
                     setEditingId(null);
                     showNotification('success', 'השותף נמחק בהצלחה');
-                } catch (e) {
-                    console.error("Delete failed:", e);
-                    showNotification('error', 'שגיאה במחיקה');
-                }
+                } catch (e) { console.error("Delete failed:", e); showNotification('error', 'שגיאה במחיקה'); }
             };
 
             const handleSave = async () => {
                 if (!user) return;
                 const colRef = collection(db, 'artifacts', appId, 'public', 'data', 'partners');
                 const data = { ...editForm };
-                
                 try {
                     if (isAddingNew) {
                         await setDoc(doc(colRef), { ...data, contacted: false, note: "", createdAt: serverTimestamp() });
@@ -300,23 +511,15 @@
                         await updateDoc(doc(colRef, editingId), data);
                         showNotification('success', 'הפרטים נשמרו בהצלחה');
                     }
-                    setEditingId(null);
-                    setEditForm({});
-                    setIsAddingNew(false);
-                } catch(e) {
-                    console.error("Save failed:", e);
-                    showNotification('error', 'שגיאה בשמירה');
-                }
+                    setEditingId(null); setEditForm({}); setIsAddingNew(false);
+                } catch(e) { console.error("Save failed:", e); showNotification('error', 'שגיאה בשמירה'); }
             };
 
             const saveNote = async (id, text) => {
                 if (!user) return;
-                try {
-                    await updateDoc(doc(db, 'artifacts', appId, 'public', 'data', 'partners', id), { note: text });
-                } catch(e) { console.error(e); }
+                try { await updateDoc(doc(db, 'artifacts', appId, 'public', 'data', 'partners', id), { note: text }); } catch(e) { console.error(e); }
             };
 
-            // Optimistic UI update for notes
             const updateNoteLocalUI = (id, text) => {
                  setPartners(prev => prev.map(p => p.id === id ? { ...p, note: text } : p));
             };
@@ -325,7 +528,6 @@
                 if (!user) return;
                 setLoading(true);
                 try {
-                    // Try primary proxy (AllOrigins)
                     let csvText = "";
                     try {
                         const proxyUrl = "https://api.allorigins.win/raw?url=" + encodeURIComponent(importUrl);
@@ -333,21 +535,17 @@
                         if (!response.ok) throw new Error("Proxy 1 Error");
                         csvText = await response.text();
                     } catch (err1) {
-                        console.warn("Primary proxy failed, trying backup...", err1);
-                        // Try backup proxy (CorsProxy.io)
                         const backupUrl = "https://corsproxy.io/?" + encodeURIComponent(importUrl);
                         const response = await fetch(backupUrl);
                          if (!response.ok) throw new Error("Network response was not ok from backup");
                         csvText = await response.text();
                     }
                     
-                    // Validation: Check if response is HTML (Error page) instead of CSV
                     if (csvText.trim().toLowerCase().startsWith("<!doctype html") || csvText.trim().toLowerCase().startsWith("<html")) {
                          throw new Error("הקישור החזיר דף HTML במקום קובץ CSV. ודא שהלינק הוא Pubilshed to Web -> CSV.");
                     }
 
                     const rawData = parseCSV(csvText);
-                    
                     if (rawData.length === 0) throw new Error("קובץ ריק");
 
                     const headerRowIndex = rawData.findIndex(row => row.some(cell => 
@@ -358,12 +556,7 @@
 
                     const headers = rawData[headerRowIndex].map(h => h.trim());
                     
-                    const keyMap = {
-                        "קטגוריה": "category", "תת": "subCategory", "שם החברה": "company", "חברה": "company", 
-                        "מנגנון": "entryMechanism", "ערך": "valueProp", "אסטרטגיית": "acceleratorStrategy", 
-                        "תובנה": "insight", "טלפון": "phone", "מייל": "email", "מיקום": "location", "דומיין": "domain"
-                    };
-
+                    const keyMap = { "קטגוריה": "category", "תת": "subCategory", "שם החברה": "company", "חברה": "company", "מנגנון": "entryMechanism", "ערך": "valueProp", "אסטרטגיית": "acceleratorStrategy", "תובנה": "insight", "טלפון": "phone", "מייל": "email", "מיקום": "location", "דומיין": "domain" };
                     const columnIndices = {};
                     headers.forEach((header, index) => {
                         const foundKey = Object.keys(keyMap).find(k => header.includes(k));
@@ -372,13 +565,12 @@
 
                     let importCount = 0;
                     const colRef = collection(db, 'artifacts', appId, 'public', 'data', 'partners');
-                    const batch = writeBatch(db); // Use batch for better performance (up to 500)
+                    const batch = writeBatch(db);
                     let batchCount = 0;
 
                     for (let i = headerRowIndex + 1; i < rawData.length; i++) {
                         const row = rawData[i];
                         if (row.length <= 1 && (!row[0] || row[0].trim() === "")) continue;
-
                         const rowData = {};
                         let hasCompany = false;
                         Object.keys(columnIndices).forEach(key => {
@@ -395,30 +587,20 @@
                             importCount++;
                         }
                     }
-
-                    if (batchCount > 0) {
-                        await batch.commit();
-                    }
-            
+                    if (batchCount > 0) await batch.commit();
                     showNotification('success', `יובאו ${importCount} שותפים בהצלחה!`);
                     setIsImportModalOpen(false);
-                } catch (e) {
-                    console.error(e);
-                    showNotification('error', 'שגיאה בייבוא הנתונים: ' + e.message);
-                } finally {
-                    setLoading(false);
-                }
+                } catch (e) { console.error(e); showNotification('error', 'שגיאה בייבוא הנתונים: ' + e.message);
+                } finally { setLoading(false); }
             };
 
-            // Helpers
-            const getLogoUrl = (domain, company) => domain ? `https://logo.clearbit.com/${domain}` : `https://ui-avatars.com/api/?name=${encodeURIComponent(company || "?")}&background=random&color=fff`;
+            const getLogoUrl = (domain, company) => domain ? `https://logo.clearbit.com/${domain}` : `https://ui-avatars.com/api/?name=${encodeURIComponent(company || "?")}&background=random&color=047857`;
             const formatForWhatsapp = (phone) => {
                 if (!phone) return "";
                 const clean = phone.replace(/\D/g, '');
                 return clean.startsWith('0') ? `972${clean.substring(1)}` : `972${clean}`;
             };
 
-            // Filter
             const categories = useMemo(() => ["הכל", ...new Set(partners.map(p => p.category).filter(Boolean))], [partners]);
             const subCategories = useMemo(() => {
                 if (selectedCategory === "הכל") return ["הכל"];
@@ -431,84 +613,58 @@
                     const matchSearch = (p.company||"").toLowerCase().includes(term) || (p.valueProp||"").toLowerCase().includes(term);
                     const matchCat = selectedCategory === "הכל" || p.category === selectedCategory;
                     const matchSub = filterSubCategory === "all" || filterSubCategory === "הכל" || p.subCategory === filterSubCategory;
-                    
                     let matchStatus = true;
                     if (filterStatus === 'contacted') matchStatus = p.contacted;
                     if (filterStatus === 'not_contacted') matchStatus = !p.contacted;
-
                     return matchSearch && matchCat && matchSub && matchStatus;
                 });
             }, [partners, searchTerm, selectedCategory, filterSubCategory, filterStatus]);
 
             return (
-                <div className="min-h-screen flex flex-col pb-20" style={{ backgroundColor: THEME.bg }}>
+                <div className="min-h-screen flex flex-col pb-20 bg-gray-50" onClick={() => setActiveAiDropdown(null)}>
                     {notification && <Toast type={notification.type} message={notification.message} onClose={() => setNotification(null)} />}
 
-                    <style>{`
-                        @import url('https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;700;900&display=swap');
-                        body { font-family: 'Heebo', sans-serif; }
-                    `}</style>
-
                     {/* HERO */}
-                    <header className="text-white relative overflow-hidden" style={{ backgroundColor: THEME.dark }}>
-                         <div className="absolute right-[-10%] top-[-50%] w-[50%] h-[200%] opacity-20 pointer-events-none" style={{ background: `radial-gradient(circle, ${THEME.primary} 0%, transparent 70%)` }}></div>
-                         
-                         {/* Psychoflash Branding Element */}
-                         <div className="absolute -left-20 -top-20 z-0 opacity-20 pointer-events-none animate-pulse-slow text-[#CCFF00]">
-                            <Icons.Flash size={600} fill="currentColor" />
-                        </div>
+                    <header className="relative overflow-hidden border-b border-gray-200 bg-white">
+                         <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/carbon-fibre.png')] opacity-[0.03] pointer-events-none"></div>
+                         <div className="absolute -left-20 -top-20 z-0 opacity-[0.05] pointer-events-none text-emerald-500"><Icons.Flash size={600} fill="currentColor" /></div>
 
                         <div className="max-w-7xl mx-auto px-6 py-12 relative z-10">
-                            {/* BRANDING HEADER ROW */}
-                            <div className="flex items-center gap-6 mb-8 border-b border-[#CCFF00]/20 pb-6">
-                                <div className="flex items-center gap-2 group cursor-pointer hover:opacity-80 transition-opacity">
-                                    <div className="p-2 bg-[#CCFF00] rounded-full text-black">
-                                        <Icons.Flash size={24} fill="currentColor" />
-                                    </div>
-                                    <span className="text-2xl font-black tracking-tighter uppercase italic text-[#CCFF00]">PSYCHOFLASH</span>
+                            <div className="flex items-center gap-6 mb-8 border-b border-emerald-100 pb-6">
+                                <div className="flex items-center gap-3 group cursor-pointer hover:opacity-80 transition-opacity">
+                                    <div className="p-2 bg-emerald-500 rounded-none rotate-3 shadow-sm"><Icons.Flash size={24} className="text-white rotate-[-3deg]" fill="currentColor" /></div>
+                                    <span className="text-3xl font-black tracking-tighter uppercase italic text-gray-900 tech-font">PSYCHOFLASH</span>
                                 </div>
                             </div>
-
                             <div className="flex flex-col md:flex-row justify-between items-end gap-8">
                                 <div>
                                     <div className="flex items-center gap-3 mb-4">
-                                        <span className="text-xs font-bold px-3 py-1 rounded uppercase tracking-widest text-black flex items-center gap-1 bg-[#CCFF00]">
-                                            <Icons.Flash size={12} fill="currentColor" /> NETWORK
-                                        </span>
+                                        <span className="text-xs font-bold px-3 py-1 bg-emerald-50 text-emerald-700 border border-emerald-200 rounded uppercase tracking-[0.2em] flex items-center gap-2"><div className="w-2 h-2 bg-emerald-500 rounded-full animate-pulse"></div> NETWORK V2.0</span>
                                     </div>
-                                    <h1 className="text-6xl md:text-8xl font-black uppercase leading-[0.85] tracking-tighter mb-4 text-white">מאגר<br/>השותפים</h1>
-                                    <p className="text-xl text-[#00F0FF] font-light max-w-lg">ניהול קשרים אסטרטגיים ונטוורקינג למאיץ.</p>
+                                    <h1 className="text-6xl md:text-8xl font-black uppercase leading-[0.85] tracking-tighter mb-4 text-gray-900">מאגר<br/><span className="text-transparent bg-clip-text bg-gradient-to-l from-emerald-600 to-teal-500">השותפים</span></h1>
+                                    <p className="text-xl text-gray-500 font-light max-w-lg">ניהול קשרים אסטרטגיים ונטוורקינג למאיץ.</p>
                                 </div>
                                 <div className="flex gap-4">
-                                    <button onClick={() => setIsImportModalOpen(true)} className="group flex items-center gap-3 px-6 py-4 text-lg font-bold text-white border border-white/30 hover:bg-white/10 transition-all rounded-sm">
-                                        <Icons.UploadCloud size={24} /> ייבוא מ-CSV
-                                    </button>
-                                    <button onClick={() => { setEditingId('new'); setEditForm({ company: "", category: "", subCategory: "", phone: "", email: "", location: "", valueProp: "" }); setIsAddingNew(true); }} className="group flex items-center gap-3 px-8 py-4 text-lg font-bold text-black transition-all hover:scale-105 shadow-lg bg-[#CCFF00] hover:bg-[#B3E600]">
-                                        <Icons.Plus size={24} strokeWidth={3} /> הוסף שותף
-                                    </button>
+                                    <button onClick={() => setIsImportModalOpen(true)} className="group flex items-center gap-3 px-6 py-4 text-lg font-bold text-gray-700 border border-gray-300 hover:border-emerald-500 bg-white hover:bg-gray-50 transition-all shadow-sm"><Icons.UploadCloud size={24} className="group-hover:text-emerald-500 transition-colors" /> ייבוא מ-CSV</button>
+                                    <button onClick={() => { setEditingId('new'); setEditForm({ company: "", category: "", subCategory: "", phone: "", email: "", location: "", valueProp: "" }); setIsAddingNew(true); }} className="group flex items-center gap-3 px-8 py-4 text-lg font-bold text-white bg-emerald-600 hover:bg-emerald-700 hover:shadow-lg transition-all shadow-md"><Icons.Plus size={24} strokeWidth={3} /> הוסף שותף</button>
                                 </div>
                             </div>
                         </div>
                     </header>
 
-                    {/* FILTERS & LAYOUT TOGGLE */}
-                    <div className="sticky top-0 z-30 shadow-md backdrop-blur-md bg-white/90 border-b border-gray-200">
+                    {/* FILTERS & LAYOUT */}
+                    <div className="sticky top-0 z-30 backdrop-blur-xl bg-white/90 border-b border-gray-200 shadow-sm">
                         <div className="max-w-7xl mx-auto px-6 py-4 flex flex-col gap-4">
-                            
-                            {/* TOP ROW: SEARCH & COUNT */}
                             <div className="flex flex-col md:flex-row gap-4 justify-between items-center">
                                 <div className="relative flex-1 w-full max-w-md">
-                                    <input type="text" placeholder="חיפוש חברה, טכנולוגיה..." className="w-full pl-4 pr-10 py-3 bg-gray-100 border border-transparent focus:bg-white focus:border-[#00F0FF] outline-none transition-all rounded-none font-medium" value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} />
-                                    <Icons.Search size={18} className="absolute top-3.5 right-3 text-gray-500" />
+                                    <input type="text" placeholder="חיפוש חברה, טכנולוגיה..." className="w-full pl-4 pr-10 py-3 bg-gray-50 border border-gray-300 text-gray-900 focus:border-emerald-500 focus:bg-white outline-none transition-all rounded-lg font-medium placeholder-gray-400" value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} />
+                                    <Icons.Search size={18} className="absolute top-3.5 right-3 text-gray-400" />
                                 </div>
-                                
-                                <div className="flex items-center gap-2 text-sm font-bold text-gray-500 bg-gray-100 px-4 py-3 rounded-none">
-                                    {loading ? <Icons.RefreshCw size={16} className="animate-spin text-[#00F0FF]" /> : <Icons.Check size={16} className="text-[#CCFF00]" />}
+                                <div className="flex items-center gap-2 text-sm font-bold text-gray-600 bg-gray-50 border border-gray-200 px-4 py-3 rounded-lg">
+                                    {loading ? <Icons.RefreshCw size={16} className="animate-spin text-teal-500" /> : <Icons.Check size={16} className="text-emerald-600" />}
                                     <span>{filteredPartners.length} שותפים</span>
                                 </div>
                             </div>
-
-                            {/* MIDDLE ROW: GEMINI-STYLE CHIPS SCROLL */}
                             <div className="flex flex-col gap-2">
                                 <div className="flex items-center gap-2 overflow-x-auto pb-2 -mx-4 px-4 md:mx-0 md:px-0 no-scrollbar">
                                     <FilterChip label="הכל" active={selectedCategory === "הכל"} onClick={() => {setSelectedCategory("הכל"); setFilterSubCategory("all");}} />
@@ -517,128 +673,83 @@
                                     ))}
                                 </div>
                             </div>
-
-                            {/* BOTTOM ROW: SUB-FILTERS & LAYOUT */}
-                            <div className="flex flex-wrap gap-4 items-center text-sm bg-white p-3 rounded border border-gray-100">
-                                <div className="flex items-center gap-2">
-                                    <span className="font-bold text-gray-500">תת-קטגוריה:</span>
-                                    <select className="p-2 bg-gray-50 border border-gray-200 rounded outline-none focus:border-[#00F0FF]" value={filterSubCategory} onChange={(e) => setFilterSubCategory(e.target.value)} disabled={selectedCategory === 'הכל'}>
-                                        {subCategories.map(cat => <option key={cat} value={cat}>{cat}</option>)}
-                                    </select>
-                                </div>
-
-                                <div className="flex items-center gap-2 mr-auto">
-                                    <span className="font-bold text-gray-500">סטטוס:</span>
-                                    <div className="flex bg-gray-100 p-1 rounded">
-                                        <button onClick={() => setFilterStatus('all')} className={`px-3 py-1 rounded text-xs font-bold transition-all ${filterStatus === 'all' ? 'bg-white shadow text-black' : 'text-gray-500 hover:text-gray-700'}`}>הכל</button>
-                                        <button onClick={() => setFilterStatus('contacted')} className={`px-3 py-1 rounded text-xs font-bold transition-all ${filterStatus === 'contacted' ? 'bg-[#CCFF00]/20 text-[#88AA00] shadow' : 'text-gray-500 hover:text-gray-700'}`}>נוצר קשר</button>
-                                        <button onClick={() => setFilterStatus('not_contacted')} className={`px-3 py-1 rounded text-xs font-bold transition-all ${filterStatus === 'not_contacted' ? 'bg-red-50 text-red-600 shadow' : 'text-gray-500 hover:text-gray-700'}`}>טרם טופל</button>
-                                    </div>
-                                </div>
-
-                                <div className="h-6 w-px bg-gray-200 mx-2"></div>
-
-                                <div className="flex items-center gap-2">
-                                     <button 
-                                        onClick={() => setLayoutMode(layoutMode === 'detailed' ? 'compact' : 'detailed')}
-                                        className="flex items-center gap-2 text-gray-500 hover:text-black transition-colors"
-                                        title={layoutMode === 'detailed' ? 'עבור לתצוגה מצומצמת' : 'עבור לתצוגה מורחבת'}
-                                    >
-                                        {layoutMode === 'detailed' ? <Icons.Grid size={20} /> : <Icons.Layout size={20} />}
-                                    </button>
-                                </div>
+                            <div className="flex flex-wrap gap-4 items-center text-sm bg-gray-50 p-3 border border-gray-200 rounded-lg">
+                                <div className="flex items-center gap-2"><span className="font-bold text-gray-500">תת-קטגוריה:</span><select className="p-2 bg-white text-gray-700 border border-gray-300 outline-none focus:border-emerald-500 rounded" value={filterSubCategory} onChange={(e) => setFilterSubCategory(e.target.value)} disabled={selectedCategory === 'הכל'}>{subCategories.map(cat => <option key={cat} value={cat}>{cat}</option>)}</select></div>
+                                <div className="flex items-center gap-2 mr-auto"><span className="font-bold text-gray-500">סטטוס:</span><div className="flex bg-white p-1 border border-gray-200 rounded"><button onClick={() => setFilterStatus('all')} className={`px-3 py-1 text-xs font-bold transition-all rounded ${filterStatus === 'all' ? 'bg-gray-800 text-white' : 'text-gray-500 hover:text-gray-700'}`}>הכל</button><button onClick={() => setFilterStatus('contacted')} className={`px-3 py-1 text-xs font-bold transition-all rounded ${filterStatus === 'contacted' ? 'bg-emerald-100 text-emerald-700' : 'text-gray-500 hover:text-gray-700'}`}>נוצר קשר</button><button onClick={() => setFilterStatus('not_contacted')} className={`px-3 py-1 text-xs font-bold transition-all rounded ${filterStatus === 'not_contacted' ? 'bg-red-50 text-red-600' : 'text-gray-500 hover:text-gray-700'}`}>טרם טופל</button></div></div>
+                                <div className="h-6 w-px bg-gray-300 mx-2"></div>
+                                <div className="flex items-center gap-2"><button onClick={() => setLayoutMode(layoutMode === 'detailed' ? 'compact' : 'detailed')} className="flex items-center gap-2 text-gray-500 hover:text-emerald-600 transition-colors">{layoutMode === 'detailed' ? <Icons.Grid size={20} /> : <Icons.Layout size={20} />}</button></div>
                             </div>
                         </div>
                     </div>
 
-                    {/* MAIN CONTENT AREA */}
+                    {/* MAIN CONTENT */}
                     <div className="max-w-7xl mx-auto px-6 py-6 flex-grow">
                          {loading && partners.length === 0 ? (
-                            <div className="flex justify-center py-20">
-                                <div className="animate-spin rounded-full h-12 w-12 border-t-4 border-b-4 border-[#00F0FF]"></div>
-                            </div>
+                            <div className="flex justify-center py-20"><div className="animate-spin rounded-full h-12 w-12 border-t-4 border-b-4 border-emerald-500"></div></div>
                         ) : (
                             <>
-                                {/* --- DETAILED VIEW (Cards) --- */}
+                                {/* DETAILED VIEW */}
                                 {layoutMode === 'detailed' && (
                                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-                                        {filteredPartners.map((partner) => (
-                                            <div key={partner.id} className="bg-white border-2 border-transparent hover:border-[#00F0FF] transition-all duration-300 group flex flex-col relative shadow-sm hover:shadow-xl" style={{ borderColor: partner.contacted ? '#CCFF00' : 'transparent' }}>
-                                                <button onClick={() => toggleContact(partner)} className={`absolute top-0 right-0 px-3 py-1 text-xs font-black uppercase tracking-wider z-10 transition-colors ${partner.contacted ? 'bg-[#CCFF00] text-black' : 'bg-gray-200 text-gray-500 hover:bg-gray-300'}`}>
-                                                    {partner.contacted ? 'נוצר קשר ✓' : 'לפני פנייה'}
-                                                </button>
-                                                
-                                                {/* QUICK ACTIONS (HOVER) */}
-                                                <div className="absolute top-0 left-0 flex z-10 opacity-0 group-hover:opacity-100 transition-opacity bg-gray-100/90 backdrop-blur-sm rounded-br-lg">
-                                                     <button onClick={() => handleDelete(partner.id)} className="p-2 text-gray-400 hover:text-red-600 transition-colors" title="מחק">
-                                                        <Icons.Trash2 size={18} />
-                                                    </button>
-                                                    <button onClick={() => { setEditingId(partner.id); setEditForm(partner); setIsAddingNew(false); }} className="p-2 text-gray-400 hover:text-[#00F0FF] transition-colors border-r border-gray-200" title="ערוך">
-                                                        <Icons.Edit3 size={18} />
-                                                    </button>
-                                                </div>
-
-                                                <div className="p-6 flex-grow flex flex-col">
-                                                    <div className="flex items-start gap-4 mb-6 mt-4">
-                                                        <div className="w-16 h-16 bg-gray-50 border border-gray-100 flex items-center justify-center p-2 shrink-0">
-                                                            <img src={getLogoUrl(partner.domain, partner.company)} alt="" className="w-full h-full object-contain mix-blend-multiply" onError={(e) => e.target.src = `https://ui-avatars.com/api/?name=${partner.company}`} />
-                                                        </div>
-                                                        <div>
-                                                            <h2 className="text-2xl font-black text-[#191B1D] leading-none mb-1">{partner.company}</h2>
-                                                            <div className="flex items-center gap-1 text-sm text-gray-500 font-medium"><Icons.MapPin size={12} /> {partner.location || "ישראל"}</div>
-                                                            <div className="mt-2 inline-block px-2 py-0.5 bg-[#E0F7FA] text-[#006064] text-[10px] font-bold uppercase tracking-wide border border-[#B2EBF2]">{partner.category}</div>
-                                                        </div>
+                                        {filteredPartners.map((partner) => {
+                                            const categoryPalette = generatePalette(partner.category || 'default');
+                                            return (
+                                                <div key={partner.id} className="glass-panel hover-card group flex flex-col relative transition-all duration-300 bg-white" style={{ borderColor: partner.contacted ? '#10B981' : undefined }}>
+                                                    <button onClick={() => toggleContact(partner)} className={`absolute top-0 right-0 px-3 py-1 text-xs font-bold uppercase tracking-wider z-10 transition-colors rounded-bl-lg border-b border-l border-white ${partner.contacted ? 'bg-emerald-500 text-white' : 'bg-gray-100 text-gray-500 hover:bg-gray-200'}`}>{partner.contacted ? 'נוצר קשר ✓' : 'לפני פנייה'}</button>
+                                                    <div className="absolute top-0 left-0 flex z-10 opacity-0 group-hover:opacity-100 transition-opacity bg-white border-r border-b border-gray-200 shadow-sm rounded-br-lg">
+                                                         <button onClick={() => handleDelete(partner.id)} className="p-2 text-gray-400 hover:text-red-500 transition-colors border-l border-gray-100" title="מחק"><Icons.Trash2 size={16} /></button>
+                                                        <button onClick={() => { setEditingId(partner.id); setEditForm(partner); setIsAddingNew(false); }} className="p-2 text-gray-400 hover:text-teal-600 transition-colors" title="ערוך"><Icons.Edit3 size={16} /></button>
                                                     </div>
-
-                                                    <div className="space-y-4 flex-grow">
-                                                        {partner.valueProp && (
+                                                    <div className="p-6 flex-grow flex flex-col">
+                                                        <div className="flex items-start gap-4 mb-6 mt-4">
+                                                            <div className="w-16 h-16 bg-white border border-gray-100 shadow-sm flex items-center justify-center p-2 shrink-0 rounded-lg"><img src={getLogoUrl(partner.domain, partner.company)} alt="" className="w-full h-full object-contain" onError={(e) => e.target.src = `https://ui-avatars.com/api/?name=${partner.company}&background=random&color=047857`} /></div>
                                                             <div>
-                                                                <div className="flex items-center gap-2 text-xs font-bold text-gray-400 uppercase mb-1"><Icons.Lightbulb size={12} /> ערך אסטרטגי</div>
-                                                                <p className="text-sm font-medium text-gray-800 leading-relaxed">{partner.valueProp}</p>
+                                                                <h2 className="text-2xl font-black text-gray-900 leading-none mb-1 tracking-tight">{partner.company}</h2>
+                                                                <div className="flex items-center gap-1 text-sm text-gray-500 font-medium"><Icons.MapPin size={12} /> {partner.location || "ישראל"}</div>
+                                                                <div className="mt-2 inline-block px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide border rounded-md" style={{ backgroundColor: categoryPalette.bg, color: categoryPalette.text, borderColor: categoryPalette.border }}>{partner.category}</div>
                                                             </div>
-                                                        )}
-                                                        {partner.acceleratorStrategy && (
-                                                            <div className="p-3 bg-[#FFFCE8] border-r-4 border-[#CCFF00]">
-                                                                <div className="flex items-center gap-2 text-xs font-bold text-[#88AA00] uppercase mb-1"><Icons.Rocket size={12} /> אסטרטגיית שת"פ</div>
-                                                                <p className="text-sm font-bold text-gray-900 leading-relaxed">{partner.acceleratorStrategy}</p>
+                                                        </div>
+                                                        <div className="space-y-4 flex-grow">
+                                                            {partner.valueProp && (<div><div className="flex items-center gap-2 text-xs font-bold text-gray-400 uppercase mb-1"><Icons.Lightbulb size={12} /> ערך אסטרטגי</div><p className="text-sm font-medium text-gray-700 leading-relaxed">{partner.valueProp}</p></div>)}
+                                                            {partner.acceleratorStrategy && (<div className="p-3 bg-gray-50 border-r-4 rounded-r-none rounded-l-md" style={{ borderRightColor: categoryPalette.base }}><div className="flex items-center gap-2 text-xs font-bold uppercase mb-1" style={{ color: categoryPalette.base }}><Icons.Rocket size={12} /> אסטרטגיית שת"פ</div><p className="text-sm font-bold text-gray-800 leading-relaxed">{partner.acceleratorStrategy}</p></div>)}
+                                                            <div className="mt-4 pt-4 border-t border-gray-100 flex flex-col gap-2">
+                                                                {partner.phone && <div className="flex items-center gap-2 text-sm text-gray-500"><Icons.Phone size={14} className="text-gray-400 shrink-0" /><span dir="ltr" className="font-mono tracking-wide">{partner.phone}</span></div>}
+                                                                {partner.email && <div className="flex items-center gap-2 text-sm text-gray-500"><Icons.Mail size={14} className="text-gray-400 shrink-0" /><span className="truncate">{partner.email}</span></div>}
                                                             </div>
-                                                        )}
-
-                                                        <div className="mt-4 pt-4 border-t border-gray-100 flex flex-col gap-2">
-                                                            {partner.phone && <div className="flex items-center gap-2 text-sm text-gray-600"><Icons.Phone size={14} className="text-gray-400 shrink-0" /><span dir="ltr" className="font-mono tracking-wide">{partner.phone}</span></div>}
-                                                            {partner.email && <div className="flex items-center gap-2 text-sm text-gray-600"><Icons.Mail size={14} className="text-gray-400 shrink-0" /><span className="truncate">{partner.email}</span></div>}
-                                                            {partner.entryMechanism && <div className="flex items-center gap-2 text-sm text-gray-600"><Icons.Zap size={14} className="text-gray-400 shrink-0" /><span><span className="font-bold text-xs text-gray-400">מנגנון:</span> {partner.entryMechanism}</span></div>}
+                                                        </div>
+                                                        <div className="mt-6"><textarea className="w-full text-sm bg-gray-50 border-b border-gray-200 focus:border-emerald-500 outline-none p-2 resize-none min-h-[40px] transition-colors placeholder-gray-400 text-gray-700" placeholder="הערות..." value={partner.note || ""} onChange={(e) => updateNoteLocalUI(partner.id, e.target.value)} onBlur={(e) => saveNote(partner.id, e.target.value)} /></div>
+                                                    </div>
+                                                    <div className="px-6 py-4 bg-gray-50 border-t border-gray-100 grid grid-cols-4 gap-2 rounded-b-lg relative">
+                                                        <ActionButton href={partner.phone ? `tel:${partner.phone}` : null} icon={Icons.Phone} label="" colorKey="phone" />
+                                                        <ActionButton href={partner.email ? `mailto:${partner.email}` : null} icon={Icons.Mail} label="" colorKey="email" />
+                                                        <ActionButton href={partner.phone ? `https://wa.me/${formatForWhatsapp(partner.phone)}` : null} icon={Icons.MessageCircle} label="" colorKey="whatsapp" />
+                                                        <div className="relative">
+                                                            <button onClick={(e) => { e.stopPropagation(); setActiveAiDropdown(activeAiDropdown === partner.id ? null : partner.id); }} className={`w-full flex items-center justify-center gap-2 py-2 px-2 rounded font-bold text-sm transition-all duration-200 border ${activeAiDropdown === partner.id ? 'bg-blue-100 border-blue-300 text-blue-700 shadow-inner' : 'bg-white border-blue-100 text-blue-600 hover:bg-blue-50'}`}><Icons.Sparkles size={18} /></button>
+                                                            {activeAiDropdown === partner.id && (
+                                                                <div className="absolute bottom-full left-0 right-0 mb-2 bg-white border border-gray-200 shadow-xl rounded-lg overflow-hidden z-20 dropdown-enter w-48 -mr-16 md:mr-0">
+                                                                    <div className="p-2 bg-gray-50 border-b border-gray-100 text-[10px] font-bold text-gray-500 uppercase tracking-wider text-center">פעולות AI</div>
+                                                                    <button onClick={() => handleAiOptionClick(partner, 'SYNERGY')} className="w-full text-right px-4 py-2 text-sm text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors flex items-center gap-2"><Icons.Flash size={14} className="text-yellow-500"/> ניתוח סינרגיה</button>
+                                                                    <button onClick={() => handleAiOptionClick(partner, 'EMAIL')} className="w-full text-right px-4 py-2 text-sm text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors flex items-center gap-2"><Icons.Mail size={14} className="text-blue-500"/> ניסוח פנייה</button>
+                                                                    <button onClick={() => handleAiOptionClick(partner, 'MEETING')} className="w-full text-right px-4 py-2 text-sm text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors flex items-center gap-2"><Icons.MessageCircle size={14} className="text-green-500"/> הכנה לשיחה</button>
+                                                                    <div className="h-px bg-gray-100 my-1"></div>
+                                                                    <button onClick={() => handleAiOptionClick(partner, 'CUSTOM')} className="w-full text-right px-4 py-2 text-sm font-bold text-purple-600 hover:bg-purple-50 transition-colors flex items-center gap-2"><Icons.Sparkles size={14} className="text-purple-500"/> בקשה אישית...</button>
+                                                                </div>
+                                                            )}
                                                         </div>
                                                     </div>
-                                                    <div className="mt-6">
-                                                        <textarea className="w-full text-sm bg-[#F9F9F9] border-b-2 border-gray-200 focus:border-[#CCFF00] outline-none p-2 resize-none min-h-[60px] transition-colors placeholder-gray-400" placeholder="הערות..." value={partner.note || ""} onChange={(e) => updateNoteLocalUI(partner.id, e.target.value)} onBlur={(e) => saveNote(partner.id, e.target.value)} />
-                                                    </div>
                                                 </div>
-                                                <div className="px-6 py-4 bg-gray-50 border-t border-gray-100 grid grid-cols-3 gap-3">
-                                                    <ActionButton href={partner.phone ? `tel:${partner.phone}` : null} icon={Icons.Phone} label="חיוג" colorClass="bg-white border border-gray-200 text-gray-700 hover:bg-gray-100" />
-                                                    <ActionButton href={partner.email ? `mailto:${partner.email}` : null} icon={Icons.Mail} label="מייל" colorClass="bg-[#E0F7FA] text-[#006064] hover:bg-[#B2EBF2]" />
-                                                    <ActionButton href={partner.phone ? `https://wa.me/${formatForWhatsapp(partner.phone)}` : null} icon={Icons.MessageCircle} label="" colorClass="bg-[#F0F4C3] text-[#827717] hover:bg-[#E6EE9C]" />
-                                                </div>
-                                            </div>
-                                        ))}
+                                            );
+                                        })}
                                     </div>
                                 )}
-
-                                {/* --- COMPACT VIEW (Grid) --- */}
+                                {/* COMPACT VIEW */}
                                 {layoutMode === 'compact' && (
                                     <div className="grid grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3 md:gap-4">
                                         {filteredPartners.map((partner) => (
-                                            <div 
-                                                key={partner.id} 
-                                                onClick={() => setViewingId(partner.id)}
-                                                className="bg-white border hover:border-[#00F0FF] transition-all cursor-pointer shadow-sm hover:shadow-md rounded-lg p-2 flex flex-col items-center justify-center text-center aspect-square relative"
-                                                style={{ borderColor: partner.contacted ? '#CCFF00' : undefined }}
-                                            >
-                                                {partner.contacted && <div className="absolute top-1 right-1 w-2 h-2 rounded-full bg-[#CCFF00]"></div>}
-                                                <div className="w-10 h-10 md:w-14 md:h-14 mb-2 flex items-center justify-center">
-                                                    <img src={getLogoUrl(partner.domain, partner.company)} alt="" className="w-full h-full object-contain mix-blend-multiply" onError={(e) => e.target.src = `https://ui-avatars.com/api/?name=${partner.company}`} />
-                                                </div>
-                                                <h3 className="text-[10px] md:text-xs font-bold text-gray-800 leading-tight line-clamp-2">{partner.company}</h3>
+                                            <div key={partner.id} onClick={() => setViewingId(partner.id)} className="bg-white border border-gray-200 hover:border-emerald-500 transition-all cursor-pointer shadow-sm hover:shadow-md rounded-lg p-2 flex flex-col items-center justify-center text-center aspect-square relative group" style={{ borderColor: partner.contacted ? '#10B981' : undefined }}>
+                                                {partner.contacted && <div className="absolute top-1 right-1 w-2 h-2 bg-emerald-500 rounded-full"></div>}
+                                                <div className="w-10 h-10 md:w-14 md:h-14 mb-2 flex items-center justify-center filter grayscale group-hover:grayscale-0 transition-all"><img src={getLogoUrl(partner.domain, partner.company)} alt="" className="w-full h-full object-contain" onError={(e) => e.target.src = `https://ui-avatars.com/api/?name=${partner.company}`} /></div>
+                                                <h3 className="text-[10px] md:text-xs font-bold text-gray-500 group-hover:text-gray-900 leading-tight line-clamp-2">{partner.company}</h3>
                                             </div>
                                         ))}
                                     </div>
@@ -647,153 +758,138 @@
                         )}
                     </div>
 
-                    {/* VIEWER MODAL (Used in Compact Mode) */}
-                    {activePartner && (
-                        <div className="fixed inset-0 z-40 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm" onClick={() => setViewingId(null)}>
-                            <div className="bg-white w-full max-w-lg shadow-2xl flex flex-col rounded-xl overflow-hidden animate-slide-up relative" onClick={e => e.stopPropagation()}>
-                                {/* Header / Close */}
-                                <div className="absolute top-2 left-2 z-20">
-                                    <button onClick={() => setViewingId(null)} className="p-2 bg-black/10 hover:bg-black/20 rounded-full text-black transition-colors"><Icons.X size={20} /></button>
+                    {/* AI MODAL */}
+                    {aiModalOpen && (
+                        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40 backdrop-blur-sm" onClick={(e) => e.stopPropagation()}>
+                            <div className="bg-white w-full max-w-2xl shadow-2xl flex flex-col rounded-xl overflow-hidden border border-gray-200 animate-slide-up relative">
+                                <div className="p-4 border-b border-gray-100 flex justify-between items-center bg-gray-50">
+                                    <div className="flex items-center gap-3">
+                                        <Icons.Brain className="text-blue-500" size={24} />
+                                        <h2 className="text-xl font-black text-gray-800 tracking-wide">
+                                            AI ASSISTANT 
+                                            <span className={`text-sm font-normal opacity-70 ml-2 px-2 py-0.5 rounded ${apiKey ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-500'}`}>
+                                                {apiKey ? 'Live Model' : 'Auto Mode'}
+                                            </span>
+                                        </h2>
+                                    </div>
+                                    <div className="flex items-center gap-2">
+                                        <button onClick={() => setShowKeyInput(!showKeyInput)} className="text-gray-400 hover:text-blue-500 transition-colors p-2 rounded-full hover:bg-gray-100" title="API Settings"><Icons.Key size={20} /></button>
+                                        <button onClick={() => setAiModalOpen(false)} className="text-gray-400 hover:text-gray-600 p-2"><Icons.X size={24} /></button>
+                                    </div>
                                 </div>
                                 
-                                {/* Status Badge */}
-                                <button onClick={() => toggleContact(activePartner)} className={`absolute top-0 right-0 px-4 py-2 text-xs font-black uppercase tracking-wider z-10 transition-colors rounded-bl-xl ${activePartner.contacted ? 'bg-[#CCFF00] text-black' : 'bg-gray-200 text-gray-500 hover:bg-gray-300'}`}>
-                                    {activePartner.contacted ? 'נוצר קשר ✓' : 'לפני פנייה'}
-                                </button>
+                                {showKeyInput && (
+                                    <div className="bg-gray-50 p-4 border-b border-gray-200 animate-slideIn">
+                                        <p className="text-xs text-gray-500 mb-2">מפתח API מאפשר שימוש במודל Gemini בזמן אמת עבור בקשות מורכבות. ללא מפתח, המערכת עובדת במצב אוטומטי (תבניות).</p>
+                                        <div className="flex gap-2">
+                                            <input type="password" placeholder="Enter Gemini API Key (Optional)" className="flex-1 p-2 text-sm border border-gray-300 rounded outline-none focus:border-blue-500" value={apiKey} onChange={(e) => setApiKey(e.target.value)} />
+                                            <button onClick={() => saveApiKey(apiKey)} className="px-4 py-2 bg-blue-600 text-white text-xs font-bold rounded hover:bg-blue-700">שמור</button>
+                                        </div>
+                                    </div>
+                                )}
+                                
+                                <div className="p-6 overflow-y-auto max-h-[70vh] bg-white">
+                                    {aiMode === 'CUSTOM' && !aiResult && !aiLoading && (
+                                        <div className="mb-6 animate-slideIn">
+                                            <label className="block text-sm font-bold text-gray-700 mb-2">מה תרצה לבקש מה-AI לגבי {aiActivePartner?.company}?</label>
+                                            <textarea className="w-full p-4 border border-gray-300 rounded-lg focus:border-blue-500 focus:ring-2 focus:ring-blue-100 outline-none min-h-[100px] text-gray-800" placeholder="למשל: תמצאי לי את המתחרים העיקריים שלהם, או תנסחי לי הודעת לינקדאין קצרה..." value={customPromptText} onChange={(e) => setCustomPromptText(e.target.value)} />
+                                            <div className="flex justify-end mt-3">
+                                                <button onClick={() => generateAiSynergy()} disabled={!customPromptText.trim()} className={`px-6 py-2 rounded-lg font-bold text-white flex items-center gap-2 shadow-md transition-all ${customPromptText.trim() ? 'bg-blue-600 hover:bg-blue-700 hover:scale-105' : 'bg-gray-300 cursor-not-allowed'}`}><Icons.Send size={16} /> שלח בקשה</button>
+                                            </div>
+                                        </div>
+                                    )}
 
-                                {/* Card Content */}
+                                    {aiLoading ? (
+                                        <div className="flex flex-col items-center justify-center py-20 gap-4">
+                                            <div className="animate-spin rounded-full h-12 w-12 border-t-4 border-b-4 border-blue-500"></div>
+                                            <p className="text-blue-500 animate-pulse font-medium">ה-AI חושב...</p>
+                                        </div>
+                                    ) : aiResult ? (
+                                        <div className="prose prose-blue max-w-none text-gray-700 animate-slideIn">
+                                            <div className="flex items-center gap-2 mb-4 pb-2 border-b border-gray-100">
+                                                <span className="text-xs font-bold px-2 py-1 bg-blue-50 text-blue-600 rounded uppercase">{aiMode === 'CUSTOM' ? 'תשובה אישית' : aiMode}</span>
+                                            </div>
+                                            <div dangerouslySetInnerHTML={{ __html: marked.parse(aiResult) }}></div>
+                                        </div>
+                                    ) : null}
+                                </div>
+                                
+                                {aiResult && (
+                                    <div className="p-4 border-t border-gray-100 bg-gray-50 flex justify-end gap-3">
+                                        <button onClick={() => { setAiResult(null); if(aiMode !== 'CUSTOM') generateAiSynergy(); }} className="px-4 py-2 text-gray-500 hover:text-gray-700 font-bold text-sm flex items-center gap-2"><Icons.RefreshCw size={14} /> {aiMode === 'CUSTOM' ? 'שאלה חדשה' : 'נסה שוב'}</button>
+                                        <button onClick={() => { navigator.clipboard.writeText(aiResult); showNotification('success', 'הטקסט הועתק!'); }} className="px-6 py-2 bg-white border border-gray-300 hover:border-emerald-500 text-gray-700 font-bold text-sm flex items-center gap-2 transition-all rounded-lg"><Icons.Copy size={16} /> העתק הכל</button>
+                                    </div>
+                                )}
+                            </div>
+                        </div>
+                    )}
+
+                    {/* VIEWER MODAL (Compact Mode) */}
+                    {activePartner && (
+                        <div className="fixed inset-0 z-40 flex items-center justify-center p-4 bg-black/40 backdrop-blur-sm" onClick={() => setViewingId(null)}>
+                            <div className="bg-white w-full max-w-lg shadow-2xl flex flex-col rounded-xl overflow-hidden border border-gray-200 relative animate-slide-up" onClick={e => e.stopPropagation()}>
+                                <div className="absolute top-2 left-2 z-20"><button onClick={() => setViewingId(null)} className="p-2 bg-white/80 hover:bg-gray-100 rounded-full text-gray-600 transition-colors shadow-sm"><Icons.X size={20} /></button></div>
+                                <button onClick={() => toggleContact(activePartner)} className={`absolute top-0 right-0 px-4 py-2 text-xs font-black uppercase tracking-wider z-10 transition-colors rounded-bl-xl border-b border-l border-white ${activePartner.contacted ? 'bg-emerald-500 text-white' : 'bg-gray-100 text-gray-500 hover:bg-gray-200'}`}>{activePartner.contacted ? 'נוצר קשר ✓' : 'לפני פנייה'}</button>
                                 <div className="p-6 pb-0 flex-grow flex flex-col max-h-[70vh] overflow-y-auto">
                                     <div className="flex items-start gap-4 mb-6 mt-8">
-                                        <div className="w-20 h-20 bg-gray-50 border border-gray-100 flex items-center justify-center p-2 shrink-0 rounded-lg">
-                                            <img src={getLogoUrl(activePartner.domain, activePartner.company)} alt="" className="w-full h-full object-contain mix-blend-multiply" onError={(e) => e.target.src = `https://ui-avatars.com/api/?name=${activePartner.company}`} />
-                                        </div>
-                                        <div>
-                                            <h2 className="text-3xl font-black text-[#191B1D] leading-none mb-1">{activePartner.company}</h2>
-                                            <div className="flex items-center gap-1 text-sm text-gray-500 font-medium"><Icons.MapPin size={12} /> {activePartner.location || "ישראל"}</div>
-                                            <div className="mt-2 inline-block px-2 py-0.5 bg-[#E0F7FA] text-[#006064] text-[10px] font-bold uppercase tracking-wide border border-[#B2EBF2] rounded">{activePartner.category}</div>
-                                        </div>
+                                        <div className="w-20 h-20 bg-white border border-gray-100 shadow-md flex items-center justify-center p-2 shrink-0 rounded-lg"><img src={getLogoUrl(activePartner.domain, activePartner.company)} alt="" className="w-full h-full object-contain" onError={(e) => e.target.src = `https://ui-avatars.com/api/?name=${activePartner.company}`} /></div>
+                                        <div><h2 className="text-3xl font-black text-gray-900 leading-none mb-1">{activePartner.company}</h2><div className="flex items-center gap-1 text-sm text-gray-500 font-medium"><Icons.MapPin size={12} /> {activePartner.location || "ישראל"}</div><div className="mt-2 text-xs font-bold text-emerald-600 uppercase tracking-wide">{activePartner.category}</div></div>
                                     </div>
-
                                     <div className="space-y-4">
-                                        {activePartner.valueProp && (
-                                            <div>
-                                                <div className="flex items-center gap-2 text-xs font-bold text-gray-400 uppercase mb-1"><Icons.Lightbulb size={12} /> ערך אסטרטגי</div>
-                                                <p className="text-sm font-medium text-gray-800 leading-relaxed bg-gray-50 p-3 rounded-lg border border-gray-100">{activePartner.valueProp}</p>
-                                            </div>
-                                        )}
-                                        {activePartner.acceleratorStrategy && (
-                                            <div className="p-3 bg-[#FFFCE8] border-r-4 border-[#CCFF00] rounded-l-lg">
-                                                <div className="flex items-center gap-2 text-xs font-bold text-[#88AA00] uppercase mb-1"><Icons.Rocket size={12} /> אסטרטגיית שת"פ</div>
-                                                <p className="text-sm font-bold text-gray-900 leading-relaxed">{activePartner.acceleratorStrategy}</p>
-                                            </div>
-                                        )}
-
-                                        {/* Contact Details Block */}
-                                        <div className="pt-4 border-t border-gray-100 flex flex-col gap-3">
-                                            {activePartner.phone && <div className="flex items-center gap-3 text-sm text-gray-700"><div className="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center text-gray-500"><Icons.Phone size={14} /></div><span dir="ltr" className="font-mono tracking-wide font-bold">{activePartner.phone}</span></div>}
-                                            {activePartner.email && <div className="flex items-center gap-3 text-sm text-gray-700"><div className="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center text-gray-500"><Icons.Mail size={14} /></div><span className="truncate font-medium">{activePartner.email}</span></div>}
-                                            {activePartner.entryMechanism && <div className="flex items-center gap-3 text-sm text-gray-700"><div className="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center text-gray-500"><Icons.Zap size={14} /></div><span><span className="font-bold text-xs text-gray-400 uppercase">מנגנון:</span> {activePartner.entryMechanism}</span></div>}
-                                        </div>
+                                        {activePartner.valueProp && (<div><div className="flex items-center gap-2 text-xs font-bold text-gray-400 uppercase mb-1"><Icons.Lightbulb size={12} /> ערך אסטרטגי</div><p className="text-sm font-medium text-gray-700 leading-relaxed bg-gray-50 p-3 border border-gray-100 rounded-lg">{activePartner.valueProp}</p></div>)}
+                                        {activePartner.acceleratorStrategy && (<div className="p-3 bg-emerald-50 border-r-4 border-emerald-500 rounded-lg"><div className="flex items-center gap-2 text-xs font-bold text-emerald-700 uppercase mb-1"><Icons.Rocket size={12} /> אסטרטגיית שת"פ</div><p className="text-sm font-bold text-gray-900 leading-relaxed">{activePartner.acceleratorStrategy}</p></div>)}
                                     </div>
-                                    
-                                    <div className="mt-6 mb-6">
-                                        <textarea className="w-full text-sm bg-[#F9F9F9] border-b-2 border-gray-200 focus:border-[#CCFF00] outline-none p-3 resize-none min-h-[80px] transition-colors placeholder-gray-400 rounded-t-lg" placeholder="הערות אישיות..." value={activePartner.note || ""} onChange={(e) => updateNoteLocalUI(activePartner.id, e.target.value)} onBlur={(e) => saveNote(activePartner.id, e.target.value)} />
-                                    </div>
+                                    <div className="mt-6 mb-6"><textarea className="w-full text-sm bg-gray-50 border-b border-gray-200 focus:border-emerald-500 outline-none p-3 resize-none min-h-[80px] transition-colors placeholder-gray-400 text-gray-700" placeholder="הערות אישיות..." value={activePartner.note || ""} onChange={(e) => updateNoteLocalUI(activePartner.id, e.target.value)} onBlur={(e) => saveNote(activePartner.id, e.target.value)} /></div>
                                 </div>
-
-                                {/* Modal Actions */}
                                 <div className="px-6 py-4 bg-gray-50 border-t border-gray-100">
-                                    <div className="grid grid-cols-3 gap-3 mb-4">
-                                        <ActionButton href={activePartner.phone ? `tel:${activePartner.phone}` : null} icon={Icons.Phone} label="חיוג" colorClass="bg-white border border-gray-200 text-gray-700 hover:bg-gray-100" />
-                                        <ActionButton href={activePartner.email ? `mailto:${activePartner.email}` : null} icon={Icons.Mail} label="מייל" colorClass="bg-[#E0F7FA] text-[#006064] hover:bg-[#B2EBF2]" />
-                                        <ActionButton href={activePartner.phone ? `https://wa.me/${formatForWhatsapp(activePartner.phone)}` : null} icon={Icons.MessageCircle} label="" colorClass="bg-[#F0F4C3] text-[#827717] hover:bg-[#E6EE9C]" />
+                                    <div className="grid grid-cols-4 gap-2 mb-4">
+                                        <ActionButton href={activePartner.phone ? `tel:${activePartner.phone}` : null} icon={Icons.Phone} label="" colorKey="phone" />
+                                        <ActionButton href={activePartner.email ? `mailto:${activePartner.email}` : null} icon={Icons.Mail} label="" colorKey="email" />
+                                        <ActionButton href={activePartner.phone ? `https://wa.me/${formatForWhatsapp(activePartner.phone)}` : null} icon={Icons.MessageCircle} label="" colorKey="whatsapp" />
+                                        <button onClick={() => { setViewingId(null); handleAiOptionClick(activePartner, 'SYNERGY'); }} className="flex items-center justify-center gap-2 py-2 px-2 rounded font-bold text-sm border border-blue-200 text-blue-600 bg-blue-50 hover:bg-blue-100 transition-all"><Icons.Sparkles size={18} /></button>
                                     </div>
-                                    <div className="flex justify-between items-center pt-2 border-t border-gray-200/50">
-                                         <button onClick={() => handleDelete(activePartner.id)} className="text-red-400 hover:text-red-600 text-xs font-bold flex items-center gap-1"><Icons.Trash2 size={14} /> מחק</button>
-                                         <button onClick={() => { setEditingId(activePartner.id); setEditForm(activePartner); setViewingId(null); setIsAddingNew(false); }} className="text-[#006064] hover:text-[#004D51] text-xs font-bold flex items-center gap-1"><Icons.Edit3 size={14} /> ערוך פרטים</button>
+                                    <div className="flex justify-between items-center pt-2 border-t border-gray-200">
+                                         <button onClick={() => handleDelete(activePartner.id)} className="text-red-600 hover:text-red-800 text-xs font-bold flex items-center gap-1 transition-colors"><Icons.Trash2 size={14} /> מחק</button>
+                                         <button onClick={() => { setEditingId(activePartner.id); setEditForm(activePartner); setViewingId(null); setIsAddingNew(false); }} className="text-gray-500 hover:text-gray-900 text-xs font-bold flex items-center gap-1 transition-colors"><Icons.Edit3 size={14} /> ערוך פרטים</button>
                                     </div>
                                 </div>
                             </div>
                         </div>
                     )}
 
-                    {/* STICKY BOTTOM FOOTER (Appears on scroll) */}
-                    <div className={`fixed bottom-0 left-0 right-0 bg-[#050505] text-white shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.1)] z-30 footer-slide-up ${showBottomBar ? 'footer-visible' : 'footer-hidden'}`}>
+                    {/* FOOTER & MODALS (Add/Edit, Import) - KEPT SAME */}
+                    <div className={`fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 text-gray-800 z-30 footer-slide-up shadow-lg ${showBottomBar ? 'footer-visible' : 'footer-hidden'}`}>
                         <div className="max-w-7xl mx-auto px-6 h-16 flex justify-between items-center">
-                            <div className="flex items-center gap-3">
-                                <Icons.Flash className="text-[#CCFF00] opacity-80" size={24} />
-                                <div className="h-4 w-px bg-white/20"></div>
-                                <span className="text-xs text-gray-400">ניהול שותפים - Psychoflash</span>
-                            </div>
-                            
-                            {/* Integrated Action Buttons */}
-                            <div className="flex items-center gap-3">
-                                <button 
-                                    onClick={() => setIsImportModalOpen(true)}
-                                    className="flex items-center gap-2 px-4 py-2 text-xs font-bold text-white border border-white/20 hover:bg-white/10 rounded transition-colors"
-                                >
-                                    <Icons.UploadCloud size={16} />
-                                    <span className="hidden md:inline">ייבוא</span>
-                                </button>
-                                <button 
-                                    onClick={() => { setEditingId('new'); setEditForm({ company: "", category: "", subCategory: "", phone: "", email: "", location: "", valueProp: "" }); setIsAddingNew(true); }}
-                                    className="flex items-center gap-2 px-4 py-2 text-xs font-bold text-black bg-[#CCFF00] hover:bg-[#B3E600] rounded transition-colors shadow-sm"
-                                >
-                                    <Icons.Plus size={16} strokeWidth={3} />
-                                    <span>הוסף שותף</span>
-                                </button>
-                            </div>
+                            <div className="flex items-center gap-3"><Icons.Flash className="text-emerald-500" size={24} /><div className="h-4 w-px bg-gray-300"></div><span className="text-xs text-gray-500">Psychoflash Admin</span></div>
+                            <div className="flex items-center gap-3"><button onClick={() => { setEditingId('new'); setEditForm({ company: "", category: "", subCategory: "", phone: "", email: "", location: "", valueProp: "" }); setIsAddingNew(true); }} className="flex items-center gap-2 px-4 py-2 text-xs font-bold text-white bg-emerald-600 hover:bg-emerald-700 rounded-lg transition-colors shadow-md"><Icons.Plus size={16} strokeWidth={3} /><span>הוסף שותף</span></button></div>
                         </div>
                     </div>
 
-                    {/* IMPORT MODAL */}
                     {isImportModalOpen && (
-                        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
-                            <div className="bg-white w-full max-w-lg shadow-2xl flex flex-col rounded-lg overflow-hidden">
-                                <div className="p-6 border-b border-gray-100 flex justify-between items-center bg-gray-50">
-                                    <h2 className="text-xl font-black text-[#191B1D]">ייבוא שותפים מ-CSV</h2>
-                                    <button onClick={() => setIsImportModalOpen(false)} className="text-gray-400 hover:text-red-500 transition-colors"><Icons.X size={24} /></button>
-                                </div>
-                                <div className="p-6 space-y-4">
-                                    <p className="text-sm text-gray-600">הדבק כאן קישור ל-Google Sheet שפורסם כ-CSV (File &gt; Share &gt; Publish to web &gt; Comma-separated values).</p>
-                                    <div>
-                                        <label className="block text-xs font-bold text-gray-500 mb-1 uppercase">URL ל-CSV</label>
-                                        <input className="w-full p-3 bg-gray-50 border border-gray-200 focus:border-[#00F0FF] outline-none text-sm" 
-                                            value={importUrl} onChange={e => setImportUrl(e.target.value)} placeholder="https://docs.google.com/..." />
-                                    </div>
-                                </div>
-                                <div className="p-6 border-t border-gray-100 flex justify-end gap-3 bg-gray-50">
-                                    <button onClick={() => setIsImportModalOpen(false)} className="px-4 py-2 font-bold text-gray-500 hover:bg-gray-200 transition-colors rounded">ביטול</button>
-                                    <button onClick={handleImport} className="px-6 py-2 font-bold text-white bg-blue-600 hover:bg-blue-700 transition-all rounded shadow-sm flex items-center gap-2">
-                                        {loading ? <Icons.RefreshCw className="animate-spin" size={16} /> : <Icons.UploadCloud size={16} />} ייבוא נתונים
-                                    </button>
-                                </div>
+                        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40 backdrop-blur-sm">
+                            <div className="bg-white w-full max-w-lg shadow-2xl flex flex-col rounded-xl overflow-hidden border border-gray-200">
+                                <div className="p-6 border-b border-gray-100 flex justify-between items-center bg-gray-50"><h2 className="text-xl font-black text-gray-800">ייבוא שותפים מ-CSV</h2><button onClick={() => setIsImportModalOpen(false)} className="text-gray-400 hover:text-gray-600 transition-colors"><Icons.X size={24} /></button></div>
+                                <div className="p-6 space-y-4"><p className="text-sm text-gray-500">הדבק כאן קישור ל-Google Sheet שפורסם כ-CSV.</p><div><label className="block text-xs font-bold text-emerald-600 mb-1 uppercase">URL ל-CSV</label><input className="w-full p-3 bg-gray-50 border border-gray-300 focus:border-emerald-500 text-gray-900 outline-none text-sm font-mono rounded-lg" value={importUrl} onChange={e => setImportUrl(e.target.value)} /></div></div>
+                                <div className="p-6 border-t border-gray-100 flex justify-end gap-3 bg-gray-50"><button onClick={() => setIsImportModalOpen(false)} className="px-4 py-2 font-bold text-gray-500 hover:bg-gray-200 transition-colors rounded-lg">ביטול</button><button onClick={handleImport} className="px-6 py-2 font-bold text-white bg-blue-600 hover:bg-blue-700 transition-all rounded-lg shadow-sm flex items-center gap-2">{loading ? <Icons.RefreshCw className="animate-spin" size={16} /> : <Icons.UploadCloud size={16} />} ייבוא נתונים</button></div>
                             </div>
                         </div>
                     )}
 
-                    {/* EDIT/ADD MODAL */}
                     {editingId && (
-                        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
-                            <div className="bg-white w-full max-w-2xl shadow-2xl flex flex-col max-h-[90vh] rounded-lg overflow-hidden">
-                                <div className="p-6 border-b border-gray-100 flex justify-between items-center bg-gray-50">
-                                    <h2 className="text-2xl font-black text-[#191B1D]">{isAddingNew ? "הוספת שותף חדש" : "עריכת פרטי שותף"}</h2>
-                                    <button onClick={() => setEditingId(null)} className="text-gray-400 hover:text-red-500 transition-colors"><Icons.X size={24} /></button>
+                        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40 backdrop-blur-sm">
+                            <div className="bg-white w-full max-w-2xl shadow-2xl flex flex-col max-h-[90vh] rounded-xl overflow-hidden border border-gray-200">
+                                <div className="p-6 border-b border-gray-100 flex justify-between items-center bg-gray-50"><h2 className="text-2xl font-black text-gray-900">{isAddingNew ? "הוספת שותף חדש" : "עריכת פרטי שותף"}</h2><button onClick={() => setEditingId(null)} className="text-gray-400 hover:text-gray-600 transition-colors"><Icons.X size={24} /></button></div>
+                                <div className="p-8 overflow-y-auto grid grid-cols-1 md:grid-cols-2 gap-6 bg-white">
+                                    <div className="col-span-2 md:col-span-1"><label className="block text-xs font-bold text-gray-500 uppercase mb-1">שם החברה</label><input className="w-full p-3 bg-gray-50 border border-gray-300 focus:border-emerald-500 text-gray-900 outline-none font-bold rounded-lg" value={editForm.company || ""} onChange={e => setEditForm({...editForm, company: e.target.value})} /></div>
+                                    <div className="col-span-2 md:col-span-1"><label className="block text-xs font-bold text-gray-500 uppercase mb-1">דומיין (לוגו)</label><input className="w-full p-3 bg-gray-50 border border-gray-300 focus:border-emerald-500 text-gray-900 outline-none rounded-lg" value={editForm.domain || ""} onChange={e => setEditForm({...editForm, domain: e.target.value})} placeholder="example.com" /></div>
+                                    <div className="col-span-2"><label className="block text-xs font-bold text-gray-500 uppercase mb-1">ערך אסטרטגי</label><textarea className="w-full p-3 bg-gray-50 border border-gray-300 focus:border-emerald-500 text-gray-900 outline-none rounded-lg" rows="2" value={editForm.valueProp || ""} onChange={e => setEditForm({...editForm, valueProp: e.target.value})} /></div>
+                                    <div className="col-span-2"><label className="block text-xs font-bold text-emerald-600 uppercase mb-1">אסטרטגיית שת"פ</label><textarea className="w-full p-3 bg-emerald-50 border border-emerald-200 focus:border-emerald-500 focus:shadow-sm text-gray-900 outline-none font-medium rounded-lg" rows="2" value={editForm.acceleratorStrategy || ""} onChange={e => setEditForm({...editForm, acceleratorStrategy: e.target.value})} /></div>
+                                    <div><label className="block text-xs font-bold text-gray-500 uppercase mb-1">טלפון</label><input className="w-full p-3 bg-gray-50 border border-gray-300 focus:border-emerald-500 text-gray-900 outline-none rounded-lg" value={editForm.phone || ""} onChange={e => setEditForm({...editForm, phone: e.target.value})} /></div>
+                                    <div><label className="block text-xs font-bold text-gray-500 uppercase mb-1">מייל</label><input className="w-full p-3 bg-gray-50 border border-gray-300 focus:border-emerald-500 text-gray-900 outline-none rounded-lg" value={editForm.email || ""} onChange={e => setEditForm({...editForm, email: e.target.value})} /></div>
+                                    <div className="col-span-2 md:col-span-1"><label className="block text-xs font-bold text-gray-500 uppercase mb-1">קטגוריה</label><input className="w-full p-3 bg-gray-50 border border-gray-300 focus:border-emerald-500 text-gray-900 outline-none rounded-lg" value={editForm.category || ""} onChange={e => setEditForm({...editForm, category: e.target.value})} /></div>
+                                    <div className="col-span-2 md:col-span-1"><label className="block text-xs font-bold text-gray-500 uppercase mb-1">מנגנון כניסה</label><input className="w-full p-3 bg-gray-50 border border-gray-300 focus:border-emerald-500 text-gray-900 outline-none rounded-lg" value={editForm.entryMechanism || ""} onChange={e => setEditForm({...editForm, entryMechanism: e.target.value})} /></div>
                                 </div>
-                                <div className="p-8 overflow-y-auto grid grid-cols-1 md:grid-cols-2 gap-6">
-                                    <div className="col-span-2 md:col-span-1"><label className="block text-xs font-bold text-gray-400 uppercase mb-1">שם החברה</label><input className="w-full p-3 bg-gray-50 border border-gray-200 focus:border-[#00F0FF] outline-none font-bold" value={editForm.company || ""} onChange={e => setEditForm({...editForm, company: e.target.value})} /></div>
-                                    <div className="col-span-2 md:col-span-1"><label className="block text-xs font-bold text-gray-400 uppercase mb-1">דומיין (לוגו)</label><input className="w-full p-3 bg-gray-50 border border-gray-200 focus:border-[#00F0FF] outline-none" value={editForm.domain || ""} onChange={e => setEditForm({...editForm, domain: e.target.value})} placeholder="example.com" /></div>
-                                    <div className="col-span-2"><label className="block text-xs font-bold text-gray-400 uppercase mb-1">ערך אסטרטגי</label><textarea className="w-full p-3 bg-gray-50 border border-gray-200 focus:border-[#00F0FF] outline-none" rows="2" value={editForm.valueProp || ""} onChange={e => setEditForm({...editForm, valueProp: e.target.value})} /></div>
-                                    <div className="col-span-2"><label className="block text-xs font-bold text-gray-400 uppercase mb-1">אסטרטגיית שת"פ</label><textarea className="w-full p-3 bg-[#FFFCE8] border border-[#CCFF00] focus:border-[#CCFF00] outline-none font-medium" rows="2" value={editForm.acceleratorStrategy || ""} onChange={e => setEditForm({...editForm, acceleratorStrategy: e.target.value})} /></div>
-                                    <div><label className="block text-xs font-bold text-gray-400 uppercase mb-1">טלפון</label><input className="w-full p-3 bg-gray-50 border border-gray-200 focus:border-[#00F0FF] outline-none" value={editForm.phone || ""} onChange={e => setEditForm({...editForm, phone: e.target.value})} /></div>
-                                    <div><label className="block text-xs font-bold text-gray-400 uppercase mb-1">מייל</label><input className="w-full p-3 bg-gray-50 border border-gray-200 focus:border-[#00F0FF] outline-none" value={editForm.email || ""} onChange={e => setEditForm({...editForm, email: e.target.value})} /></div>
-                                    <div className="col-span-2 md:col-span-1"><label className="block text-xs font-bold text-gray-400 uppercase mb-1">קטגוריה</label><input className="w-full p-3 bg-gray-50 border border-gray-200 focus:border-[#00F0FF] outline-none" value={editForm.category || ""} onChange={e => setEditForm({...editForm, category: e.target.value})} /></div>
-                                    <div className="col-span-2 md:col-span-1"><label className="block text-xs font-bold text-gray-400 uppercase mb-1">מנגנון כניסה</label><input className="w-full p-3 bg-gray-50 border border-gray-200 focus:border-[#00F0FF] outline-none" value={editForm.entryMechanism || ""} onChange={e => setEditForm({...editForm, entryMechanism: e.target.value})} /></div>
-                                </div>
-                                <div className="p-6 border-t border-gray-100 flex justify-end gap-4 bg-gray-50">
-                                    <button onClick={() => setEditingId(null)} className="px-6 py-3 font-bold text-gray-500 hover:bg-gray-200 transition-colors rounded">ביטול</button>
-                                    <button onClick={handleSave} className="px-8 py-3 font-black text-black bg-[#CCFF00] hover:bg-[#B3E600] transition-all shadow-md flex items-center gap-2 rounded"><Icons.Save size={18} /> שמור שינויים</button>
-                                </div>
+                                <div className="p-6 border-t border-gray-100 flex justify-end gap-4 bg-gray-50"><button onClick={() => setEditingId(null)} className="px-6 py-3 font-bold text-gray-500 hover:bg-gray-200 transition-colors rounded-lg">ביטול</button><button onClick={handleSave} className="px-8 py-3 font-black text-white bg-emerald-600 hover:bg-emerald-700 transition-all shadow-md flex items-center gap-2 rounded-lg"><Icons.Save size={18} /> שמור שינויים</button></div>
                             </div>
                         </div>
                     )}
