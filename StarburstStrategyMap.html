@@ -39,6 +39,14 @@
         .footer-slide-up { transition: transform 0.3s ease-in-out; }
         .footer-hidden { transform: translateY(100%); }
         .footer-visible { transform: translateY(0); }
+
+        /* Mobile Grid Fixes */
+        .line-clamp-2 {
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
     </style>
 </head>
 <body>
@@ -92,7 +100,9 @@
             RefreshCw: ({size=20, className=""}) => <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><polyline points="23 4 23 10 17 10"></polyline><polyline points="1 20 1 14 7 14"></polyline><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path></svg>,
             Check: ({size=20, className=""}) => <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><polyline points="20 6 9 17 4 12"></polyline></svg>,
             UploadCloud: ({size=20, className=""}) => <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><path d="M4 14.899A7 7 0 1 1 15.71 8h1.79a4.5 4.5 0 0 1 2.5 8.242"/><path d="M12 12v9"/><path d="m16 16-4-4-4 4"/></svg>,
-            Zap: ({size=20, className=""}) => <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon></svg>
+            Zap: ({size=20, className=""}) => <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon></svg>,
+            Grid: ({size=20, className=""}) => <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect></svg>,
+            Layout: ({size=20, className=""}) => <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><line x1="3" y1="9" x2="21" y2="9"></line><line x1="9" y1="21" x2="9" y2="9"></line></svg>
         };
 
         const THEME = {
@@ -154,7 +164,13 @@
             const [selectedCategory, setSelectedCategory] = useState("הכל");
             const [filterStatus, setFilterStatus] = useState("all"); 
             const [filterSubCategory, setFilterSubCategory] = useState("all");
+            
+            // Layout State: 'compact' (mobile default) vs 'detailed' (desktop default)
+            const [layoutMode, setLayoutMode] = useState(window.innerWidth < 768 ? 'compact' : 'detailed');
+
             const [editingId, setEditingId] = useState(null);
+            const [viewingId, setViewingId] = useState(null); // For viewing details in compact mode
+            
             const [editForm, setEditForm] = useState({});
             const [isAddingNew, setIsAddingNew] = useState(false);
             const [isImportModalOpen, setIsImportModalOpen] = useState(false);
@@ -162,17 +178,17 @@
             const [notification, setNotification] = useState(null);
             const [showBottomBar, setShowBottomBar] = useState(false);
 
+            // Derived state for the active partner being viewed
+            const activePartner = useMemo(() => partners.find(p => p.id === viewingId), [partners, viewingId]);
+
             const showNotification = (type, message) => {
                 setNotification({ type, message });
                 setTimeout(() => setNotification(null), 3500);
             };
 
-            // Scroll Logic for Sticky Bottom Bar
+            // Scroll Logic & Resize Logic
             useEffect(() => {
-                const handleScroll = () => {
-                    // Show bottom bar when scrolled past header (approx 250px)
-                    setShowBottomBar(window.scrollY > 250);
-                };
+                const handleScroll = () => setShowBottomBar(window.scrollY > 250);
                 window.addEventListener('scroll', handleScroll);
                 return () => window.removeEventListener('scroll', handleScroll);
             }, []);
@@ -224,9 +240,9 @@
                 if (!window.confirm("האם למחוק שותף זה לצמיתות?")) return;
 
                 try {
-                    // Ensure we have a valid ID before deleting
                     if (!id) throw new Error("Invalid ID");
                     await deleteDoc(doc(db, 'artifacts', appId, 'public', 'data', 'partners', id));
+                    setViewingId(null);
                     setEditingId(null);
                     showNotification('success', 'השותף נמחק בהצלחה');
                 } catch (e) {
@@ -380,7 +396,7 @@
                         body { font-family: 'Heebo', sans-serif; }
                     `}</style>
 
-                    {/* HERO (Disappears on scroll) */}
+                    {/* HERO */}
                     <header className="text-white relative overflow-hidden" style={{ backgroundColor: THEME.dark }}>
                          <div className="absolute right-[-10%] top-[-50%] w-[50%] h-[200%] opacity-5 pointer-events-none" style={{ background: `radial-gradient(circle, ${THEME.yellow} 0%, transparent 70%)` }}></div>
                         <div className="max-w-7xl mx-auto px-6 py-16 relative z-10">
@@ -404,7 +420,7 @@
                         </div>
                     </header>
 
-                    {/* FILTERS */}
+                    {/* FILTERS & LAYOUT TOGGLE */}
                     <div className="sticky top-0 z-30 shadow-md backdrop-blur-md bg-white/90 border-b border-gray-200">
                         <div className="max-w-7xl mx-auto px-6 py-4 flex flex-col gap-4">
                             <div className="flex flex-col md:flex-row gap-4 justify-between items-center">
@@ -412,9 +428,22 @@
                                     <input type="text" placeholder="חיפוש חברה, טכנולוגיה..." className="w-full pl-4 pr-10 py-3 bg-gray-100 border border-transparent focus:bg-white focus:border-blue-600 outline-none transition-all rounded-none font-medium" value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} />
                                     <Icons.Search size={18} className="absolute top-3.5 right-3 text-gray-500" />
                                 </div>
-                                <div className="flex items-center gap-2 text-sm font-bold text-gray-500 bg-gray-100 px-4 py-2 rounded-none">
-                                    {loading ? <Icons.RefreshCw size={16} className="animate-spin" /> : <Icons.Check size={16} className="text-green-500" />}
-                                    <span>{filteredPartners.length} שותפים נמצאו</span>
+                                
+                                <div className="flex items-center gap-2">
+                                    {/* Layout Toggle Button */}
+                                    <button 
+                                        onClick={() => setLayoutMode(layoutMode === 'detailed' ? 'compact' : 'detailed')}
+                                        className="flex items-center gap-2 px-4 py-3 bg-gray-100 hover:bg-gray-200 text-gray-700 font-bold rounded-none transition-colors border-l border-gray-300"
+                                        title={layoutMode === 'detailed' ? 'עבור לתצוגה מצומצמת' : 'עבור לתצוגה מורחבת'}
+                                    >
+                                        {layoutMode === 'detailed' ? <Icons.Grid size={18} /> : <Icons.Layout size={18} />}
+                                        <span className="hidden md:inline text-xs uppercase tracking-wide">{layoutMode === 'detailed' ? 'תצוגת גריד' : 'תצוגה מלאה'}</span>
+                                    </button>
+                                    
+                                    <div className="flex items-center gap-2 text-sm font-bold text-gray-500 bg-gray-100 px-4 py-3 rounded-none">
+                                        {loading ? <Icons.RefreshCw size={16} className="animate-spin" /> : <Icons.Check size={16} className="text-green-500" />}
+                                        <span>{filteredPartners.length}</span>
+                                    </div>
                                 </div>
                             </div>
 
@@ -445,95 +474,174 @@
                         </div>
                     </div>
 
-                    {/* GRID */}
-                    <div className="max-w-7xl mx-auto px-6 py-12 flex-grow">
+                    {/* MAIN CONTENT AREA */}
+                    <div className="max-w-7xl mx-auto px-6 py-6 flex-grow">
                          {loading && partners.length === 0 ? (
                             <div className="flex justify-center py-20">
                                 <div className="animate-spin rounded-full h-12 w-12 border-t-4 border-b-4" style={{ borderColor: THEME.blue }}></div>
                             </div>
                         ) : (
-                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-                                {filteredPartners.map((partner) => (
-                                    <div key={partner.id} className="bg-white border-2 border-transparent hover:border-blue-600 transition-all duration-300 group flex flex-col relative shadow-sm hover:shadow-xl" style={{ borderColor: partner.contacted ? '#48BB78' : 'transparent' }}>
-                                        <button onClick={() => toggleContact(partner)} className={`absolute top-0 right-0 px-3 py-1 text-xs font-black uppercase tracking-wider z-10 transition-colors ${partner.contacted ? 'bg-green-500 text-white' : 'bg-gray-200 text-gray-500 hover:bg-gray-300'}`}>
-                                            {partner.contacted ? 'נוצר קשר ✓' : 'לפני פנייה'}
-                                        </button>
-                                        
-                                        {/* QUICK ACTIONS (HOVER) */}
-                                        <div className="absolute top-0 left-0 flex z-10 opacity-0 group-hover:opacity-100 transition-opacity bg-gray-100/90 backdrop-blur-sm rounded-br-lg">
-                                             <button onClick={() => handleDelete(partner.id)} className="p-2 text-gray-400 hover:text-red-600 transition-colors" title="מחק">
-                                                <Icons.Trash2 size={18} />
-                                            </button>
-                                            <button onClick={() => { setEditingId(partner.id); setEditForm(partner); setIsAddingNew(false); }} className="p-2 text-gray-400 hover:text-blue-600 transition-colors border-r border-gray-200" title="ערוך">
-                                                <Icons.Edit3 size={18} />
-                                            </button>
-                                        </div>
+                            <>
+                                {/* --- DETAILED VIEW (Cards) --- */}
+                                {layoutMode === 'detailed' && (
+                                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                                        {filteredPartners.map((partner) => (
+                                            <div key={partner.id} className="bg-white border-2 border-transparent hover:border-blue-600 transition-all duration-300 group flex flex-col relative shadow-sm hover:shadow-xl" style={{ borderColor: partner.contacted ? '#48BB78' : 'transparent' }}>
+                                                <button onClick={() => toggleContact(partner)} className={`absolute top-0 right-0 px-3 py-1 text-xs font-black uppercase tracking-wider z-10 transition-colors ${partner.contacted ? 'bg-green-500 text-white' : 'bg-gray-200 text-gray-500 hover:bg-gray-300'}`}>
+                                                    {partner.contacted ? 'נוצר קשר ✓' : 'לפני פנייה'}
+                                                </button>
+                                                
+                                                {/* QUICK ACTIONS (HOVER) */}
+                                                <div className="absolute top-0 left-0 flex z-10 opacity-0 group-hover:opacity-100 transition-opacity bg-gray-100/90 backdrop-blur-sm rounded-br-lg">
+                                                     <button onClick={() => handleDelete(partner.id)} className="p-2 text-gray-400 hover:text-red-600 transition-colors" title="מחק">
+                                                        <Icons.Trash2 size={18} />
+                                                    </button>
+                                                    <button onClick={() => { setEditingId(partner.id); setEditForm(partner); setIsAddingNew(false); }} className="p-2 text-gray-400 hover:text-blue-600 transition-colors border-r border-gray-200" title="ערוך">
+                                                        <Icons.Edit3 size={18} />
+                                                    </button>
+                                                </div>
 
-                                        <div className="p-6 flex-grow flex flex-col">
-                                            <div className="flex items-start gap-4 mb-6 mt-4">
-                                                <div className="w-16 h-16 bg-gray-50 border border-gray-100 flex items-center justify-center p-2 shrink-0">
+                                                <div className="p-6 flex-grow flex flex-col">
+                                                    <div className="flex items-start gap-4 mb-6 mt-4">
+                                                        <div className="w-16 h-16 bg-gray-50 border border-gray-100 flex items-center justify-center p-2 shrink-0">
+                                                            <img src={getLogoUrl(partner.domain, partner.company)} alt="" className="w-full h-full object-contain mix-blend-multiply" onError={(e) => e.target.src = `https://ui-avatars.com/api/?name=${partner.company}`} />
+                                                        </div>
+                                                        <div>
+                                                            <h2 className="text-2xl font-black text-[#191B1D] leading-none mb-1">{partner.company}</h2>
+                                                            <div className="flex items-center gap-1 text-sm text-gray-500 font-medium"><Icons.MapPin size={12} /> {partner.location || "ישראל"}</div>
+                                                            <div className="mt-2 inline-block px-2 py-0.5 bg-blue-50 text-blue-700 text-[10px] font-bold uppercase tracking-wide border border-blue-100">{partner.category}</div>
+                                                        </div>
+                                                    </div>
+
+                                                    <div className="space-y-4 flex-grow">
+                                                        {partner.valueProp && (
+                                                            <div>
+                                                                <div className="flex items-center gap-2 text-xs font-bold text-gray-400 uppercase mb-1"><Icons.Lightbulb size={12} /> ערך אסטרטגי</div>
+                                                                <p className="text-sm font-medium text-gray-800 leading-relaxed">{partner.valueProp}</p>
+                                                            </div>
+                                                        )}
+                                                        {partner.acceleratorStrategy && (
+                                                            <div className="p-3 bg-yellow-50 border-r-4 border-yellow-400">
+                                                                <div className="flex items-center gap-2 text-xs font-bold text-yellow-700 uppercase mb-1"><Icons.Rocket size={12} /> אסטרטגיית שת"פ</div>
+                                                                <p className="text-sm font-bold text-gray-900 leading-relaxed">{partner.acceleratorStrategy}</p>
+                                                            </div>
+                                                        )}
+
+                                                        <div className="mt-4 pt-4 border-t border-gray-100 flex flex-col gap-2">
+                                                            {partner.phone && <div className="flex items-center gap-2 text-sm text-gray-600"><Icons.Phone size={14} className="text-gray-400 shrink-0" /><span dir="ltr" className="font-mono tracking-wide">{partner.phone}</span></div>}
+                                                            {partner.email && <div className="flex items-center gap-2 text-sm text-gray-600"><Icons.Mail size={14} className="text-gray-400 shrink-0" /><span className="truncate">{partner.email}</span></div>}
+                                                            {partner.entryMechanism && <div className="flex items-center gap-2 text-sm text-gray-600"><Icons.Zap size={14} className="text-gray-400 shrink-0" /><span><span className="font-bold text-xs text-gray-400">מנגנון:</span> {partner.entryMechanism}</span></div>}
+                                                        </div>
+                                                    </div>
+                                                    <div className="mt-6">
+                                                        <textarea className="w-full text-sm bg-[#F9F9F9] border-b-2 border-gray-200 focus:border-yellow-400 outline-none p-2 resize-none min-h-[60px] transition-colors placeholder-gray-400" placeholder="הערות..." value={partner.note || ""} onChange={(e) => updateNoteLocalUI(partner.id, e.target.value)} onBlur={(e) => saveNote(partner.id, e.target.value)} />
+                                                    </div>
+                                                </div>
+                                                <div className="px-6 py-4 bg-gray-50 border-t border-gray-100 grid grid-cols-3 gap-3">
+                                                    <ActionButton href={partner.phone ? `tel:${partner.phone}` : null} icon={Icons.Phone} label="חיוג" colorClass="bg-white border border-gray-200 text-gray-700 hover:bg-gray-100" />
+                                                    <ActionButton href={partner.email ? `mailto:${partner.email}` : null} icon={Icons.Mail} label="מייל" colorClass="bg-blue-50 text-blue-700 hover:bg-blue-100" />
+                                                    <ActionButton href={partner.phone ? `https://wa.me/${formatForWhatsapp(partner.phone)}` : null} icon={Icons.MessageCircle} label="" colorClass="bg-green-50 text-green-600 hover:bg-green-100" />
+                                                </div>
+                                            </div>
+                                        ))}
+                                    </div>
+                                )}
+
+                                {/* --- COMPACT VIEW (Grid) --- */}
+                                {layoutMode === 'compact' && (
+                                    <div className="grid grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3 md:gap-4">
+                                        {filteredPartners.map((partner) => (
+                                            <div 
+                                                key={partner.id} 
+                                                onClick={() => setViewingId(partner.id)}
+                                                className="bg-white border hover:border-blue-500 transition-all cursor-pointer shadow-sm hover:shadow-md rounded-lg p-2 flex flex-col items-center justify-center text-center aspect-square relative"
+                                                style={{ borderColor: partner.contacted ? '#48BB78' : undefined }}
+                                            >
+                                                {partner.contacted && <div className="absolute top-1 right-1 w-2 h-2 rounded-full bg-green-500"></div>}
+                                                <div className="w-10 h-10 md:w-14 md:h-14 mb-2 flex items-center justify-center">
                                                     <img src={getLogoUrl(partner.domain, partner.company)} alt="" className="w-full h-full object-contain mix-blend-multiply" onError={(e) => e.target.src = `https://ui-avatars.com/api/?name=${partner.company}`} />
                                                 </div>
-                                                <div>
-                                                    <h2 className="text-2xl font-black text-[#191B1D] leading-none mb-1">{partner.company}</h2>
-                                                    <div className="flex items-center gap-1 text-sm text-gray-500 font-medium"><Icons.MapPin size={12} /> {partner.location || "ישראל"}</div>
-                                                    <div className="mt-2 inline-block px-2 py-0.5 bg-blue-50 text-blue-700 text-[10px] font-bold uppercase tracking-wide border border-blue-100">{partner.category}</div>
-                                                </div>
+                                                <h3 className="text-[10px] md:text-xs font-bold text-gray-800 leading-tight line-clamp-2">{partner.company}</h3>
                                             </div>
-
-                                            <div className="space-y-4 flex-grow">
-                                                {partner.valueProp && (
-                                                    <div>
-                                                        <div className="flex items-center gap-2 text-xs font-bold text-gray-400 uppercase mb-1"><Icons.Lightbulb size={12} /> ערך אסטרטגי</div>
-                                                        <p className="text-sm font-medium text-gray-800 leading-relaxed">{partner.valueProp}</p>
-                                                    </div>
-                                                )}
-                                                {partner.acceleratorStrategy && (
-                                                    <div className="p-3 bg-yellow-50 border-r-4 border-yellow-400">
-                                                        <div className="flex items-center gap-2 text-xs font-bold text-yellow-700 uppercase mb-1"><Icons.Rocket size={12} /> אסטרטגיית שת"פ</div>
-                                                        <p className="text-sm font-bold text-gray-900 leading-relaxed">{partner.acceleratorStrategy}</p>
-                                                    </div>
-                                                )}
-
-                                                {/* --- NEW: VISIBLE DETAILS BLOCK --- */}
-                                                <div className="mt-4 pt-4 border-t border-gray-100 flex flex-col gap-2">
-                                                    {partner.phone && (
-                                                        <div className="flex items-center gap-2 text-sm text-gray-600">
-                                                            <Icons.Phone size={14} className="text-gray-400 shrink-0" />
-                                                            <span dir="ltr" className="font-mono tracking-wide">{partner.phone}</span>
-                                                        </div>
-                                                    )}
-                                                    {partner.email && (
-                                                        <div className="flex items-center gap-2 text-sm text-gray-600">
-                                                            <Icons.Mail size={14} className="text-gray-400 shrink-0" />
-                                                            <span className="truncate">{partner.email}</span>
-                                                        </div>
-                                                    )}
-                                                    {partner.entryMechanism && (
-                                                        <div className="flex items-center gap-2 text-sm text-gray-600">
-                                                            <Icons.Zap size={14} className="text-gray-400 shrink-0" />
-                                                            <span><span className="font-bold text-xs text-gray-400">מנגנון:</span> {partner.entryMechanism}</span>
-                                                        </div>
-                                                    )}
-                                                </div>
-                                            </div>
-                                            <div className="mt-6">
-                                                <textarea className="w-full text-sm bg-[#F9F9F9] border-b-2 border-gray-200 focus:border-yellow-400 outline-none p-2 resize-none min-h-[60px] transition-colors placeholder-gray-400" placeholder="הערות..." value={partner.note || ""} onChange={(e) => updateNoteLocalUI(partner.id, e.target.value)} onBlur={(e) => saveNote(partner.id, e.target.value)} />
-                                            </div>
-                                        </div>
-                                        <div className="px-6 py-4 bg-gray-50 border-t border-gray-100 grid grid-cols-3 gap-3">
-                                            <ActionButton href={partner.phone ? `tel:${partner.phone}` : null} icon={Icons.Phone} label="חיוג" colorClass="bg-white border border-gray-200 text-gray-700 hover:bg-gray-100" />
-                                            <ActionButton href={partner.email ? `mailto:${partner.email}` : null} icon={Icons.Mail} label="מייל" colorClass="bg-blue-50 text-blue-700 hover:bg-blue-100" />
-                                            <ActionButton href={partner.phone ? `https://wa.me/${formatForWhatsapp(partner.phone)}` : null} icon={Icons.MessageCircle} label="" colorClass="bg-green-50 text-green-600 hover:bg-green-100" />
-                                        </div>
+                                        ))}
                                     </div>
-                                ))}
-                            </div>
+                                )}
+                            </>
                         )}
                     </div>
 
+                    {/* VIEWER MODAL (Used in Compact Mode) */}
+                    {activePartner && (
+                        <div className="fixed inset-0 z-40 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm" onClick={() => setViewingId(null)}>
+                            <div className="bg-white w-full max-w-lg shadow-2xl flex flex-col rounded-xl overflow-hidden animate-slide-up relative" onClick={e => e.stopPropagation()}>
+                                {/* Header / Close */}
+                                <div className="absolute top-2 left-2 z-20">
+                                    <button onClick={() => setViewingId(null)} className="p-2 bg-black/10 hover:bg-black/20 rounded-full text-black transition-colors"><Icons.X size={20} /></button>
+                                </div>
+                                
+                                {/* Status Badge */}
+                                <button onClick={() => toggleContact(activePartner)} className={`absolute top-0 right-0 px-4 py-2 text-xs font-black uppercase tracking-wider z-10 transition-colors rounded-bl-xl ${activePartner.contacted ? 'bg-green-500 text-white' : 'bg-gray-200 text-gray-500 hover:bg-gray-300'}`}>
+                                    {activePartner.contacted ? 'נוצר קשר ✓' : 'לפני פנייה'}
+                                </button>
+
+                                {/* Card Content */}
+                                <div className="p-6 pb-0 flex-grow flex flex-col max-h-[70vh] overflow-y-auto">
+                                    <div className="flex items-start gap-4 mb-6 mt-8">
+                                        <div className="w-20 h-20 bg-gray-50 border border-gray-100 flex items-center justify-center p-2 shrink-0 rounded-lg">
+                                            <img src={getLogoUrl(activePartner.domain, activePartner.company)} alt="" className="w-full h-full object-contain mix-blend-multiply" onError={(e) => e.target.src = `https://ui-avatars.com/api/?name=${activePartner.company}`} />
+                                        </div>
+                                        <div>
+                                            <h2 className="text-3xl font-black text-[#191B1D] leading-none mb-1">{activePartner.company}</h2>
+                                            <div className="flex items-center gap-1 text-sm text-gray-500 font-medium"><Icons.MapPin size={12} /> {activePartner.location || "ישראל"}</div>
+                                            <div className="mt-2 inline-block px-2 py-0.5 bg-blue-50 text-blue-700 text-[10px] font-bold uppercase tracking-wide border border-blue-100 rounded">{activePartner.category}</div>
+                                        </div>
+                                    </div>
+
+                                    <div className="space-y-4">
+                                        {activePartner.valueProp && (
+                                            <div>
+                                                <div className="flex items-center gap-2 text-xs font-bold text-gray-400 uppercase mb-1"><Icons.Lightbulb size={12} /> ערך אסטרטגי</div>
+                                                <p className="text-sm font-medium text-gray-800 leading-relaxed bg-gray-50 p-3 rounded-lg border border-gray-100">{activePartner.valueProp}</p>
+                                            </div>
+                                        )}
+                                        {activePartner.acceleratorStrategy && (
+                                            <div className="p-3 bg-yellow-50 border-r-4 border-yellow-400 rounded-l-lg">
+                                                <div className="flex items-center gap-2 text-xs font-bold text-yellow-700 uppercase mb-1"><Icons.Rocket size={12} /> אסטרטגיית שת"פ</div>
+                                                <p className="text-sm font-bold text-gray-900 leading-relaxed">{activePartner.acceleratorStrategy}</p>
+                                            </div>
+                                        )}
+
+                                        {/* Contact Details Block */}
+                                        <div className="pt-4 border-t border-gray-100 flex flex-col gap-3">
+                                            {activePartner.phone && <div className="flex items-center gap-3 text-sm text-gray-700"><div className="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center text-gray-500"><Icons.Phone size={14} /></div><span dir="ltr" className="font-mono tracking-wide font-bold">{activePartner.phone}</span></div>}
+                                            {activePartner.email && <div className="flex items-center gap-3 text-sm text-gray-700"><div className="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center text-gray-500"><Icons.Mail size={14} /></div><span className="truncate font-medium">{activePartner.email}</span></div>}
+                                            {activePartner.entryMechanism && <div className="flex items-center gap-3 text-sm text-gray-700"><div className="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center text-gray-500"><Icons.Zap size={14} /></div><span><span className="font-bold text-xs text-gray-400 uppercase">מנגנון:</span> {activePartner.entryMechanism}</span></div>}
+                                        </div>
+                                    </div>
+                                    
+                                    <div className="mt-6 mb-6">
+                                        <textarea className="w-full text-sm bg-[#F9F9F9] border-b-2 border-gray-200 focus:border-yellow-400 outline-none p-3 resize-none min-h-[80px] transition-colors placeholder-gray-400 rounded-t-lg" placeholder="הערות אישיות..." value={activePartner.note || ""} onChange={(e) => updateNoteLocalUI(activePartner.id, e.target.value)} onBlur={(e) => saveNote(activePartner.id, e.target.value)} />
+                                    </div>
+                                </div>
+
+                                {/* Modal Actions */}
+                                <div className="px-6 py-4 bg-gray-50 border-t border-gray-100">
+                                    <div className="grid grid-cols-3 gap-3 mb-4">
+                                        <ActionButton href={activePartner.phone ? `tel:${activePartner.phone}` : null} icon={Icons.Phone} label="חיוג" colorClass="bg-white border border-gray-200 text-gray-700 hover:bg-gray-100" />
+                                        <ActionButton href={activePartner.email ? `mailto:${activePartner.email}` : null} icon={Icons.Mail} label="מייל" colorClass="bg-blue-50 text-blue-700 hover:bg-blue-100" />
+                                        <ActionButton href={activePartner.phone ? `https://wa.me/${formatForWhatsapp(activePartner.phone)}` : null} icon={Icons.MessageCircle} label="" colorClass="bg-green-50 text-green-600 hover:bg-green-100" />
+                                    </div>
+                                    <div className="flex justify-between items-center pt-2 border-t border-gray-200/50">
+                                         <button onClick={() => handleDelete(activePartner.id)} className="text-red-400 hover:text-red-600 text-xs font-bold flex items-center gap-1"><Icons.Trash2 size={14} /> מחק</button>
+                                         <button onClick={() => { setEditingId(activePartner.id); setEditForm(activePartner); setViewingId(null); setIsAddingNew(false); }} className="text-blue-500 hover:text-blue-700 text-xs font-bold flex items-center gap-1"><Icons.Edit3 size={14} /> ערוך פרטים</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    )}
+
                     {/* STICKY BOTTOM FOOTER (Appears on scroll) */}
-                    <div className={`fixed bottom-0 left-0 right-0 bg-[#17191A] text-white shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.1)] z-40 footer-slide-up ${showBottomBar ? 'footer-visible' : 'footer-hidden'}`}>
+                    <div className={`fixed bottom-0 left-0 right-0 bg-[#17191A] text-white shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.1)] z-30 footer-slide-up ${showBottomBar ? 'footer-visible' : 'footer-hidden'}`}>
                         <div className="max-w-7xl mx-auto px-6 h-16 flex justify-between items-center">
                             <div className="flex flex-col">
                                 <span className="text-sm font-bold text-[#FFC700] uppercase tracking-wider">STARBURST</span>
