@@ -265,7 +265,7 @@
         const App = () => {
             // --- 💡 HARDCODED API KEY (Optional) 💡 ---
             // Paste your key inside the quotes below to auto-load it.
-            const HARDCODED_API_KEY = "AIzaSyD93hfZIPNGBm0uF0T0yWiCv16lE4nKfqw"; 
+            const HARDCODED_API_KEY = "PASTE_YOUR_KEY_HERE"; 
 
             const [partners, setPartners] = useState([]);
             const [loading, setLoading] = useState(true);
@@ -394,6 +394,20 @@
                 try {
                     await updateDoc(doc(db, 'artifacts', appId, 'public', 'data', 'partners', id), { note: text });
                 } catch(e) { console.error(e); }
+            };
+            
+            // New function to save AI insights to the database
+            const saveAiToPartner = async (partnerId, content) => {
+                if (!user) return;
+                try {
+                    await updateDoc(doc(db, 'artifacts', appId, 'public', 'data', 'partners', partnerId), { 
+                        aiAnalysis: content 
+                    });
+                    showNotification('success', 'התובנה נשמרה בכרטיס השותף');
+                } catch(e) { 
+                    console.error(e); 
+                    showNotification('error', 'שגיאה בשמירה');
+                }
             };
 
             const updateNoteLocalUI = (id, text) => {
@@ -569,8 +583,6 @@
                 // Failover Mechanism for Models
                 // Includes specific models from user feedback
                 const modelsToTry = [
-                    "gemini-2.0-flash",
-                    "gemini-2.5-flash",
                     "gemini-1.5-flash",
                     "gemini-1.5-flash-latest",
                     "gemini-pro"
@@ -770,6 +782,16 @@
                                                     </div>
 
                                                     <div className="space-y-4 flex-grow">
+                                                        {/* AI Saved Analysis Block (NEW) */}
+                                                        {partner.aiAnalysis && (
+                                                            <div className="bg-purple-50 border border-purple-100 rounded-lg p-3 text-sm mb-3">
+                                                                <div className="flex items-center gap-2 mb-1 text-purple-700 font-bold text-xs uppercase">
+                                                                    <Icons.Sparkles size={12} /> תובנות AI שמורות
+                                                                </div>
+                                                                <div className="prose prose-sm prose-purple max-w-none text-gray-700 line-clamp-4 text-xs leading-relaxed" dangerouslySetInnerHTML={{ __html: marked.parse(partner.aiAnalysis) }}></div>
+                                                            </div>
+                                                        )}
+
                                                         {partner.valueProp && (
                                                             <div>
                                                                 <div className="flex items-center gap-2 text-xs font-bold text-gray-400 uppercase mb-1"><Icons.Lightbulb size={12} /> ערך אסטרטגי</div>
@@ -914,9 +936,15 @@
                                         )}
                                         
                                         {aiContentResult && !isGeneratingAI && (
-                                            <button onClick={() => copyToClipboard(aiContentResult)} className="absolute top-2 left-2 p-2 bg-white rounded-full shadow-sm hover:bg-gray-100 text-purple-600 transition-colors" title="העתק">
-                                                <Icons.Copy size={16} />
-                                            </button>
+                                            <div className="absolute top-2 left-2 flex gap-2">
+                                                {/* New: Save Button inside result area */}
+                                                <button onClick={() => saveAiToPartner(aiPartner.id, aiContentResult)} className="p-2 bg-white rounded-full shadow-sm hover:bg-green-50 text-green-600 transition-colors border border-transparent hover:border-green-200" title="שמור בכרטיס שותף">
+                                                    <Icons.Save size={16} />
+                                                </button>
+                                                <button onClick={() => copyToClipboard(aiContentResult)} className="p-2 bg-white rounded-full shadow-sm hover:bg-gray-100 text-purple-600 transition-colors" title="העתק">
+                                                    <Icons.Copy size={16} />
+                                                </button>
+                                            </div>
                                         )}
                                     </div>
                                 </div>
@@ -955,6 +983,16 @@
                                     </div>
 
                                     <div className="space-y-4">
+                                        {/* AI Saved Analysis Block (NEW) - For Compact View Modal */}
+                                        {activePartner.aiAnalysis && (
+                                            <div className="bg-purple-50 border border-purple-100 rounded-lg p-3 text-sm mb-3">
+                                                <div className="flex items-center gap-2 mb-1 text-purple-700 font-bold text-xs uppercase">
+                                                    <Icons.Sparkles size={12} /> תובנות AI שמורות
+                                                </div>
+                                                <div className="prose prose-sm prose-purple max-w-none text-gray-700 line-clamp-4 text-xs leading-relaxed" dangerouslySetInnerHTML={{ __html: marked.parse(activePartner.aiAnalysis) }}></div>
+                                            </div>
+                                        )}
+
                                         {activePartner.valueProp && (
                                             <div>
                                                 <div className="flex items-center gap-2 text-xs font-bold text-gray-400 uppercase mb-1"><Icons.Lightbulb size={12} /> ערך אסטרטגי</div>
