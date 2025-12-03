@@ -91,7 +91,8 @@
             X: ({size=20, className=""}) => <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>,
             RefreshCw: ({size=20, className=""}) => <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><polyline points="23 4 23 10 17 10"></polyline><polyline points="1 20 1 14 7 14"></polyline><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path></svg>,
             Check: ({size=20, className=""}) => <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><polyline points="20 6 9 17 4 12"></polyline></svg>,
-            UploadCloud: ({size=20, className=""}) => <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><path d="M4 14.899A7 7 0 1 1 15.71 8h1.79a4.5 4.5 0 0 1 2.5 8.242"/><path d="M12 12v9"/><path d="m16 16-4-4-4 4"/></svg>
+            UploadCloud: ({size=20, className=""}) => <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><path d="M4 14.899A7 7 0 1 1 15.71 8h1.79a4.5 4.5 0 0 1 2.5 8.242"/><path d="M12 12v9"/><path d="m16 16-4-4-4 4"/></svg>,
+            Zap: ({size=20, className=""}) => <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon></svg>
         };
 
         const THEME = {
@@ -468,9 +469,9 @@
                                             </button>
                                         </div>
 
-                                        <div className="p-6 flex-grow">
+                                        <div className="p-6 flex-grow flex flex-col">
                                             <div className="flex items-start gap-4 mb-6 mt-4">
-                                                <div className="w-16 h-16 bg-gray-50 border border-gray-100 flex items-center justify-center p-2">
+                                                <div className="w-16 h-16 bg-gray-50 border border-gray-100 flex items-center justify-center p-2 shrink-0">
                                                     <img src={getLogoUrl(partner.domain, partner.company)} alt="" className="w-full h-full object-contain mix-blend-multiply" onError={(e) => e.target.src = `https://ui-avatars.com/api/?name=${partner.company}`} />
                                                 </div>
                                                 <div>
@@ -480,7 +481,7 @@
                                                 </div>
                                             </div>
 
-                                            <div className="space-y-4">
+                                            <div className="space-y-4 flex-grow">
                                                 {partner.valueProp && (
                                                     <div>
                                                         <div className="flex items-center gap-2 text-xs font-bold text-gray-400 uppercase mb-1"><Icons.Lightbulb size={12} /> ערך אסטרטגי</div>
@@ -493,6 +494,28 @@
                                                         <p className="text-sm font-bold text-gray-900 leading-relaxed">{partner.acceleratorStrategy}</p>
                                                     </div>
                                                 )}
+
+                                                {/* --- NEW: VISIBLE DETAILS BLOCK --- */}
+                                                <div className="mt-4 pt-4 border-t border-gray-100 flex flex-col gap-2">
+                                                    {partner.phone && (
+                                                        <div className="flex items-center gap-2 text-sm text-gray-600">
+                                                            <Icons.Phone size={14} className="text-gray-400 shrink-0" />
+                                                            <span dir="ltr" className="font-mono tracking-wide">{partner.phone}</span>
+                                                        </div>
+                                                    )}
+                                                    {partner.email && (
+                                                        <div className="flex items-center gap-2 text-sm text-gray-600">
+                                                            <Icons.Mail size={14} className="text-gray-400 shrink-0" />
+                                                            <span className="truncate">{partner.email}</span>
+                                                        </div>
+                                                    )}
+                                                    {partner.entryMechanism && (
+                                                        <div className="flex items-center gap-2 text-sm text-gray-600">
+                                                            <Icons.Zap size={14} className="text-gray-400 shrink-0" />
+                                                            <span><span className="font-bold text-xs text-gray-400">מנגנון:</span> {partner.entryMechanism}</span>
+                                                        </div>
+                                                    )}
+                                                </div>
                                             </div>
                                             <div className="mt-6">
                                                 <textarea className="w-full text-sm bg-[#F9F9F9] border-b-2 border-gray-200 focus:border-yellow-400 outline-none p-2 resize-none min-h-[60px] transition-colors placeholder-gray-400" placeholder="הערות..." value={partner.note || ""} onChange={(e) => updateNoteLocalUI(partner.id, e.target.value)} onBlur={(e) => saveNote(partner.id, e.target.value)} />
