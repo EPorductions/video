@@ -112,6 +112,10 @@
         const React = window.React;
         const { useState, useEffect, useMemo, useRef } = React;
 
+        // --- 1. HARDCODED API KEY (Paste your key inside the quotes below) ---
+        // דוגמה: const HARDCODED_API_KEY = "AIzaSy...";
+        const HARDCODED_API_KEY = "AIzaSyD93hfZIPNGBm0uF0T0yWiCv16lE4nKfqw"; 
+
         // --- Firebase Configuration ---
         const firebaseConfig = {
             apiKey: "AIzaSyDkEOW4aXGmuO_J-X5xJTw9Iyp0Q2pbUIY",
@@ -161,7 +165,8 @@
             Copy: ({size=20, className=""}) => <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><rect width="14" height="14" x="8" y="8" rx="2" ry="2"/><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/></svg>,
             Send: ({size=20, className=""}) => <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon></svg>,
             Key: ({size=20, className=""}) => <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><path d="M21 2l-2 2m-7.61 7.61a5.5 5.5 0 1 1-7.778 7.778 5.5 5.5 0 0 1 7.777-7.777zm0 0L15.5 7.5m0 0l3 3L22 7l-3-3m-3.5 3.5L19 4"></path></svg>,
-            MoreVertical: ({size=20, className=""}) => <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><circle cx="12" cy="12" r="1"></circle><circle cx="12" cy="5" r="1"></circle><circle cx="12" cy="19" r="1"></circle></svg>
+            Settings: ({size=20, className=""}) => <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>,
+            DownloadCloud: ({size=20, className=""}) => <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><polyline points="8 17 12 21 16 17"></polyline><line x1="12" y1="12" x2="12" y2="21"></line><path d="M20.88 18.09A5 5 0 0 0 18 9h-1.26A8 8 0 1 0 3 16.29"></path></svg>
         };
 
         // --- Color Generation Utility ---
@@ -173,7 +178,6 @@
             return { base: color, bg: `${color}15`, border: `${color}40`, text: color, hoverBg: `${color}25` };
         };
 
-        // --- CSV Parser ---
         const parseCSV = (str) => {
             const arr = [];
             let quote = false;
@@ -206,20 +210,10 @@
 
         const ActionButton = ({ href, onClick, icon: Icon, label, colorKey }) => {
             const styles = useMemo(() => generatePalette(colorKey || label || 'default'), [colorKey, label]);
-            
-            if (!href && !onClick) return null;
-            
             const Component = href ? 'a' : 'button';
             const props = href ? { href, target: href.startsWith('http') ? "_blank" : undefined } : { onClick };
-
             return (
-                <Component 
-                    {...props}
-                    className="flex items-center justify-center gap-2 py-2 px-4 rounded font-bold text-sm transition-all duration-200 flex-1 border"
-                    style={{ backgroundColor: styles.bg, borderColor: styles.border, color: styles.text }}
-                    onMouseEnter={(e) => { e.currentTarget.style.backgroundColor = styles.hoverBg; }}
-                    onMouseLeave={(e) => { e.currentTarget.style.backgroundColor = styles.bg; }}
-                >
+                <Component {...props} className="flex items-center justify-center gap-2 py-2 px-4 rounded font-bold text-sm transition-all duration-200 flex-1 border" style={{ backgroundColor: styles.bg, borderColor: styles.border, color: styles.text }} onMouseEnter={(e) => { e.currentTarget.style.backgroundColor = styles.hoverBg; }} onMouseLeave={(e) => { e.currentTarget.style.backgroundColor = styles.bg; }}>
                     <Icon size={16} /> <span>{label}</span>
                 </Component>
             );
@@ -228,15 +222,7 @@
         const FilterChip = ({ label, active, onClick }) => {
             const styles = useMemo(() => generatePalette(label), [label]);
             return (
-                <button 
-                    onClick={onClick}
-                    className={`px-4 py-2 rounded-xl text-sm font-medium transition-all duration-300 whitespace-nowrap border ${active ? 'shadow-sm' : ''}`}
-                    style={{
-                        backgroundColor: active ? styles.base : '#FFFFFF',
-                        borderColor: active ? styles.base : '#E5E7EB',
-                        color: active ? '#FFFFFF' : '#4B5563',
-                    }}
-                >
+                <button onClick={onClick} className={`px-4 py-2 rounded-xl text-sm font-medium transition-all duration-300 whitespace-nowrap border ${active ? 'shadow-sm' : ''}`} style={{ backgroundColor: active ? styles.base : '#FFFFFF', borderColor: active ? styles.base : '#E5E7EB', color: active ? '#FFFFFF' : '#4B5563', }}>
                     {label}
                 </button>
             );
@@ -251,7 +237,6 @@
             const [selectedCategory, setSelectedCategory] = useState("הכל");
             const [filterStatus, setFilterStatus] = useState("all"); 
             const [filterSubCategory, setFilterSubCategory] = useState("all");
-            
             const [layoutMode, setLayoutMode] = useState(window.innerWidth < 768 ? 'compact' : 'detailed');
 
             const [editingId, setEditingId] = useState(null);
@@ -263,15 +248,27 @@
             const [notification, setNotification] = useState(null);
             const [showBottomBar, setShowBottomBar] = useState(false);
 
+            // AI State
             const [aiModalOpen, setAiModalOpen] = useState(false);
             const [aiActivePartner, setAiActivePartner] = useState(null);
             const [aiResult, setAiResult] = useState(null);
             const [aiLoading, setAiLoading] = useState(false);
-            const [apiKey, setApiKey] = useState(localStorage.getItem('gemini_api_key') || "");
+            
+            // API Key Logic - Check Hardcoded first, then LocalStorage
+            const [apiKey, setApiKey] = useState(() => {
+                if (HARDCODED_API_KEY && HARDCODED_API_KEY.length > 5) return HARDCODED_API_KEY;
+                return localStorage.getItem('gemini_api_key') || "";
+            });
+            
+            // Updated default model to one you have
+            const [apiModel, setApiModel] = useState(localStorage.getItem('gemini_model') || "gemini-2.5-flash"); 
+            const [availableModels, setAvailableModels] = useState([]);
+            
             const [activeAiDropdown, setActiveAiDropdown] = useState(null);
             const [aiMode, setAiMode] = useState('SYNERGY'); 
             const [customPromptText, setCustomPromptText] = useState("");
             const [showKeyInput, setShowKeyInput] = useState(false);
+            const [testConnectionStatus, setTestConnectionStatus] = useState(null);
 
             const activePartner = useMemo(() => partners.find(p => p.id === viewingId), [partners, viewingId]);
 
@@ -306,7 +303,40 @@
                 return () => unsubscribe();
             }, [user]);
 
-            // --- AI Logic (Offline/Live) ---
+            // --- AUTO MODEL DISCOVERY ---
+            const fetchAvailableModels = async (key) => {
+                const k = key || apiKey;
+                if (!k) return;
+                
+                try {
+                    const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models?key=${k}`);
+                    const data = await response.json();
+                    
+                    if (data.models) {
+                        const validModels = data.models
+                            .filter(m => m.supportedGenerationMethods && m.supportedGenerationMethods.includes("generateContent"))
+                            .map(m => m.name.replace("models/", ""));
+                        
+                        setAvailableModels(validModels);
+                        
+                        if (validModels.length > 0 && !validModels.includes(apiModel)) {
+                            // Try to find a 2.5 flash model first
+                            const betterModel = validModels.find(m => m.includes("2.5-flash")) || validModels[0];
+                            setApiModel(betterModel);
+                            localStorage.setItem('gemini_model', betterModel);
+                        }
+                        return validModels;
+                    }
+                } catch (e) {
+                    console.error("Failed to fetch models", e);
+                }
+                return [];
+            };
+
+            useEffect(() => {
+                if(apiKey) fetchAvailableModels(apiKey);
+            }, []);
+
             const handleAiOptionClick = (partner, mode) => {
                 setAiActivePartner(partner);
                 setAiMode(mode);
@@ -314,84 +344,77 @@
                 setCustomPromptText("");
                 setActiveAiDropdown(null);
                 setAiModalOpen(true);
-                
-                // If custom, wait for input. Else, generate immediately.
                 if (mode !== 'CUSTOM') {
                     setTimeout(() => generateAiSynergy(mode, partner), 100);
                 }
             };
 
-            const saveApiKey = (key) => {
+            const saveApiKey = async (key) => {
                 setApiKey(key);
                 localStorage.setItem('gemini_api_key', key);
-                setShowKeyInput(false);
-                showNotification('success', key ? 'מפתח AI נשמר!' : 'מפתח הוסר, עובר למצב אוטומטי');
+                setTestConnectionStatus('loading');
+                const models = await fetchAvailableModels(key);
+                
+                if (models && models.length > 0) {
+                    setTestConnectionStatus('success');
+                    showNotification('success', 'מפתח תקין! מודלים נטענו.');
+                } else {
+                    setTestConnectionStatus('error');
+                    setAiResult('❌ המפתח נשמר, אך לא הצלחנו למצוא מודלים זמינים. בדוק הרשאות או אזור.');
+                }
+            };
+
+            const saveModel = (model) => {
+                setApiModel(model);
+                localStorage.setItem('gemini_model', model);
+                setTestConnectionStatus(null);
+            };
+
+            const testConnection = async () => {
+                setTestConnectionStatus('loading');
+                try {
+                    await fetchGeminiResponse("Hello", true); 
+                    setTestConnectionStatus('success');
+                    showNotification('success', 'חיבור תקין!');
+                } catch (e) {
+                    setTestConnectionStatus('error');
+                    setAiResult(`❌ שגיאת חיבור: ${e.message}`);
+                }
             };
 
             const generateMockResponse = (mode, partner) => {
                 const p = partner || {};
                 const name = p.company || "החברה";
                 const cat = p.category || "טכנולוגיה";
-                const strat = p.acceleratorStrategy || "שיתוף פעולה אסטרטגי";
-                const val = p.valueProp || "פתרון חדשני";
-
                 return new Promise(resolve => {
                     setTimeout(() => {
                         let res = "";
-                        if (mode === 'SYNERGY') {
-                            res = `
-### ⚡ ניתוח סינרגיה (אוטומטי)
-**The Pitch**: 
-${name} מובילה חדשנות בתחום ה-${cat} עם פתרון המבוסס על ${val}.
-
-**The Synergy**: 
-החיבור עם Psychoflash הוא טבעי לאור המיקוד שלנו ב-${strat}. הטכנולוגיה שלהם יכולה להאיץ את הפיתוח של סטארטאפים בפורטפוליו שלנו.
-
-**Action Item**: 
-מומלץ לתאם שיחת היכרות ראשונית לבחינת ${val} ולבדוק התאמה לתוכנית המאיץ.
-                            `;
-                        } else if (mode === 'EMAIL') {
-                            res = `
-### 📧 טיוטת פנייה (אוטומטית)
-**נושא:** שיתוף פעולה אסטרטגי עם Psychoflash Accelerator
-
-היי,
-
-ראיתי את העבודה המרשימה ש-${name} עושה בתחום ה-${cat}, וחשבתי שיש כאן פוטנציאל מעניין לסינרגיה.
-
-ב-Psychoflash אנחנו מחפשים שותפים בדיוק עם פרופיל כמו שלכם - ${val} - כדי לקדם חדשנות משותפת. אשמח לתאם שיחה קצרה לבחון איך נוכל לייצר ערך הדדי.
-
-זמין לשיחה,
-[השם שלך]
-                            `;
-                        } else if (mode === 'MEETING') {
-                            res = `
-### 💬 נקודות לשיחה (אוטומטי)
-1. **הצגת הערך:** כיצד הפתרון של ${name} בתחום ה-${cat} משתלב בחזון של Psychoflash?
-2. **בחינת האסטרטגיה:** דיון על ${strat} ואיך זה פוגש את צרכי המאיץ.
-3. **מודל עבודה:** האם נכון להתחיל בפיילוט או בשותפות אסטרטגית מלאה?
-4. **טכנולוגיה:** העמקה ב-${val} והיתרונות התחרותיים.
-5. **צעדים הבאים:** הגדרת POC או פגישת המשך עם הצוות הטכני.
-                            `;
-                        }
+                        if (mode === 'SYNERGY') res = `### ⚡ ניתוח סינרגיה (אוטומטי)\n**The Pitch**: ${name} מובילה בתחום ה-${cat}.\n**The Synergy**: חיבור טבעי ל-Psychoflash.\n**Action Item**: תיאום פגישה.`;
+                        else if (mode === 'EMAIL') res = `### 📧 טיוטת פנייה (אוטומטית)\nהיי, ראיתי את העבודה שלכם ב-${name}... אשמח להיפגש.`;
+                        else if (mode === 'MEETING') res = `### 💬 נקודות לשיחה (אוטומטי)\n1. ערך משותף\n2. מודל עסקי\n3. בדיקת היתכנות`;
                         resolve(res);
                     }, 1500);
                 });
             };
 
-            // NEW: Fallback mechanism for fetching models
-            const fetchGeminiResponse = async (prompt) => {
-                const models = [
-                    'gemini-1.5-flash-latest', 
-                    'gemini-1.5-flash-001', 
+            const fetchGeminiResponse = async (prompt, testOnly = false) => {
+                // Updated fallback models based on your screenshot
+                const fallbackModels = [
+                    'gemini-2.5-flash',
+                    'gemini-2.5-pro',
+                    'gemini-2.0-flash-exp',
+                    'gemini-2.0-flash',
                     'gemini-1.5-flash',
-                    'gemini-pro',
-                    'gemini-1.0-pro'
+                    'gemini-pro'
                 ];
+                
+                const modelsToTry = availableModels.length > 0 ? [apiModel, ...availableModels] : [apiModel, ...fallbackModels];
+                const uniqueModels = [...new Set(modelsToTry)];
                 
                 let lastError = null;
 
-                for (const model of models) {
+                for (const model of uniqueModels) {
+                    if(!model) continue;
                     try {
                         const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`, {
                             method: 'POST',
@@ -402,22 +425,18 @@ ${name} מובילה חדשנות בתחום ה-${cat} עם פתרון המבו�
                         const data = await response.json();
                         
                         if (data.error) {
-                            // If it's a specific "not found" or "not supported", try next model
-                            if (data.error.message.includes("not found") || data.error.message.includes("not supported")) {
-                                console.warn(`Model ${model} failed, trying next...`);
-                                lastError = data.error.message;
-                                continue;
-                            }
-                            throw new Error(data.error.message);
+                            if (testOnly && model === apiModel) throw new Error(data.error.message);
+                            if (data.error.message.includes("API key")) throw new Error("API Key invalid");
+                            
+                            console.warn(`Model ${model} failed: ${data.error.message}`);
+                            lastError = data.error.message;
+                            continue;
                         }
                         
                         return data.candidates?.[0]?.content?.parts?.[0]?.text;
                     } catch (e) {
                         lastError = e.message;
-                        // If it's a network error or authentication error (403), stop trying other models as they will fail too
-                        if (e.message.includes("403") || e.message.includes("API key")) {
-                            throw e;
-                        }
+                        if (e.message.includes("API Key invalid")) throw e;
                         continue;
                     }
                 }
@@ -430,8 +449,6 @@ ${name} מובילה חדשנות בתחום ה-${cat} עם פתרון המבו�
                 setAiLoading(true);
                 setAiResult(null);
 
-                // --- OFFLINE / MOCK MODE ---
-                // If no API Key is present, utilize the sophisticated mock engine
                 if (!apiKey && mode !== 'CUSTOM') {
                     const mockRes = await generateMockResponse(mode, partner);
                     setAiResult(mockRes);
@@ -439,28 +456,19 @@ ${name} מובילה חדשנות בתחום ה-${cat} עם פתרון המבו�
                     return;
                 }
                 
-                // If Custom mode and no key, prompt user
                 if (!apiKey && mode === 'CUSTOM') {
-                    setAiResult("⚠️ **נדרש מפתח API עבור בקשות אישיות**\n\nכדי לשלוח שאלות חופשיות למודל, יש להגדיר מפתח Gemini API בהגדרות (אייקון המפתח למעלה).\n\nחשוב לדעת: מנוי 'Gemini Advanced' (ChatGPT) אינו מספק גישה ל-API. יש להוציא מפתח בחינם מ-Google AI Studio.\n\nעבור פעולות סטנדרטיות (סינרגיה, מייל, פגישה) המערכת עובדת מצוין גם ללא מפתח במצב אוטומטי.");
+                    setAiResult("⚠️ **נדרש מפתח API עבור בקשות אישיות**");
                     setAiLoading(false);
                     return;
                 }
 
-                // --- LIVE API MODE ---
-                const partnerDataStr = `
-                    Company Name: ${partner.company}
-                    Category: ${partner.category || 'General Tech'}
-                    Value Proposition: ${partner.valueProp || 'N/A'}
-                    Strategy: ${partner.acceleratorStrategy || 'N/A'}
-                    Location: ${partner.location || 'Israel'}
-                `;
-
+                const partnerDataStr = `Company: ${partner.company}, Category: ${partner.category}, Value: ${partner.valueProp}, Strategy: ${partner.acceleratorStrategy}`;
                 let promptInstructions = "";
                 switch(mode) {
-                    case 'EMAIL': promptInstructions = "Write a cold email in Hebrew to set up a meeting for Psychoflash accelerator. Professional tone."; break;
-                    case 'MEETING': promptInstructions = "Create a list of 5 talking points in Hebrew for a meeting focusing on collaboration."; break;
+                    case 'EMAIL': promptInstructions = "Write a cold email in Hebrew for Psychoflash accelerator."; break;
+                    case 'MEETING': promptInstructions = "5 talking points in Hebrew for collaboration."; break;
                     case 'CUSTOM': promptInstructions = `${customPromptText}\nAnswer in Hebrew.`; break;
-                    case 'SYNERGY': default: promptInstructions = "Analyze synergy. Hebrew. Markdown: Pitch, Synergy, Action Item."; break;
+                    case 'SYNERGY': default: promptInstructions = "Analyze synergy in Hebrew. Markdown: Pitch, Synergy, Action Item."; break;
                 }
 
                 const prompt = `Act as a biz-dev expert for 'Psychoflash'. Partner: ${partnerDataStr}. Task: ${promptInstructions}`;
@@ -469,210 +477,47 @@ ${name} מובילה חדשנות בתחום ה-${cat} עם פתרון המבו�
                     const text = await fetchGeminiResponse(prompt);
                     setAiResult(text || "No response generated.");
                 } catch (e) {
-                    let errorMsg = e.message;
-                    if (errorMsg.includes("403") || errorMsg.includes("API key not valid")) {
-                        errorMsg = "מפתח ה-API אינו תקין. וודא שלקחת אותו מ-Google AI Studio ולא מהמנוי האישי.";
-                    }
-                    setAiResult(`❌ שגיאה: ${errorMsg}`);
+                    setAiResult(`❌ שגיאה: ${e.message}`);
                 } finally {
                     setAiLoading(false);
                 }
             };
 
-            const toggleContact = async (partner) => {
-                if (!user) return;
-                try {
-                    const ref = doc(db, 'artifacts', appId, 'public', 'data', 'partners', partner.id);
-                    await updateDoc(ref, { contacted: !partner.contacted });
-                    showNotification('success', partner.contacted ? 'סטטוס עודכן: לא נוצר קשר' : 'סטטוס עודכן: נוצר קשר');
-                } catch(e) { console.error(e); showNotification('error', 'שגיאה בעדכון'); }
-            };
-
-            const handleDelete = async (id) => {
-                if (!user) return;
-                if (!window.confirm("האם למחוק שותף זה לצמיתות?")) return;
-                try {
-                    await deleteDoc(doc(db, 'artifacts', appId, 'public', 'data', 'partners', id));
-                    setViewingId(null);
-                    setEditingId(null);
-                    showNotification('success', 'השותף נמחק בהצלחה');
-                } catch (e) { console.error("Delete failed:", e); showNotification('error', 'שגיאה במחיקה'); }
-            };
-
-            const handleSave = async () => {
-                if (!user) return;
-                const colRef = collection(db, 'artifacts', appId, 'public', 'data', 'partners');
-                const data = { ...editForm };
-                try {
-                    if (isAddingNew) {
-                        await setDoc(doc(colRef), { ...data, contacted: false, note: "", createdAt: serverTimestamp() });
-                        showNotification('success', 'שותף חדש נוסף בהצלחה');
-                    } else {
-                        await updateDoc(doc(colRef, editingId), data);
-                        showNotification('success', 'הפרטים נשמרו בהצלחה');
-                    }
-                    setEditingId(null); setEditForm({}); setIsAddingNew(false);
-                } catch(e) { console.error("Save failed:", e); showNotification('error', 'שגיאה בשמירה'); }
-            };
-
-            const saveNote = async (id, text) => {
-                if (!user) return;
-                try { await updateDoc(doc(db, 'artifacts', appId, 'public', 'data', 'partners', id), { note: text }); } catch(e) { console.error(e); }
-            };
-
-            const updateNoteLocalUI = (id, text) => {
-                 setPartners(prev => prev.map(p => p.id === id ? { ...p, note: text } : p));
-            };
-
-            const handleImport = async () => {
-                if (!user) return;
-                setLoading(true);
-                try {
-                    let csvText = "";
-                    try {
-                        const proxyUrl = "https://api.allorigins.win/raw?url=" + encodeURIComponent(importUrl);
-                        const response = await fetch(proxyUrl);
-                        if (!response.ok) throw new Error("Proxy 1 Error");
-                        csvText = await response.text();
-                    } catch (err1) {
-                        const backupUrl = "https://corsproxy.io/?" + encodeURIComponent(importUrl);
-                        const response = await fetch(backupUrl);
-                         if (!response.ok) throw new Error("Network response was not ok from backup");
-                        csvText = await response.text();
-                    }
-                    
-                    if (csvText.trim().toLowerCase().startsWith("<!doctype html") || csvText.trim().toLowerCase().startsWith("<html")) {
-                         throw new Error("הקישור החזיר דף HTML במקום קובץ CSV. ודא שהלינק הוא Pubilshed to Web -> CSV.");
-                    }
-
-                    const rawData = parseCSV(csvText);
-                    if (rawData.length === 0) throw new Error("קובץ ריק");
-
-                    const headerRowIndex = rawData.findIndex(row => row.some(cell => 
-                        cell.includes('שם החברה') || cell.includes('Company') || cell.includes('חברה')
-                    ));
-
-                    if (headerRowIndex === -1) throw new Error("לא נמצאה שורת כותרת תקינה ב-CSV");
-
-                    const headers = rawData[headerRowIndex].map(h => h.trim());
-                    
-                    const keyMap = { "קטגוריה": "category", "תת": "subCategory", "שם החברה": "company", "חברה": "company", "מנגנון": "entryMechanism", "ערך": "valueProp", "אסטרטגיית": "acceleratorStrategy", "תובנה": "insight", "טלפון": "phone", "מייל": "email", "מיקום": "location", "דומיין": "domain" };
-                    const columnIndices = {};
-                    headers.forEach((header, index) => {
-                        const foundKey = Object.keys(keyMap).find(k => header.includes(k));
-                        if (foundKey) columnIndices[keyMap[foundKey]] = index;
-                    });
-
-                    let importCount = 0;
-                    const colRef = collection(db, 'artifacts', appId, 'public', 'data', 'partners');
-                    const batch = writeBatch(db);
-                    let batchCount = 0;
-
-                    for (let i = headerRowIndex + 1; i < rawData.length; i++) {
-                        const row = rawData[i];
-                        if (row.length <= 1 && (!row[0] || row[0].trim() === "")) continue;
-                        const rowData = {};
-                        let hasCompany = false;
-                        Object.keys(columnIndices).forEach(key => {
-                            const idx = columnIndices[key];
-                            const val = row[idx] ? row[idx].trim() : "";
-                            rowData[key] = val;
-                            if (key === 'company' && val) hasCompany = true;
-                        });
-
-                        if (hasCompany) {
-                            const newDocRef = doc(colRef);
-                            batch.set(newDocRef, { ...rowData, contacted: false, note: "", createdAt: serverTimestamp() });
-                            batchCount++;
-                            importCount++;
-                        }
-                    }
-                    if (batchCount > 0) await batch.commit();
-                    showNotification('success', `יובאו ${importCount} שותפים בהצלחה!`);
-                    setIsImportModalOpen(false);
-                } catch (e) { console.error(e); showNotification('error', 'שגיאה בייבוא הנתונים: ' + e.message);
-                } finally { setLoading(false); }
-            };
-
+            const toggleContact = async (partner) => { if(!user) return; try { await updateDoc(doc(db, 'artifacts', appId, 'public', 'data', 'partners', partner.id), { contacted: !partner.contacted }); showNotification('success', 'סטטוס עודכן'); } catch(e) { console.error(e); } };
+            const handleDelete = async (id) => { if(!user) return; if(!confirm("למחוק?")) return; try { await deleteDoc(doc(db, 'artifacts', appId, 'public', 'data', 'partners', id)); setViewingId(null); setEditingId(null); showNotification('success', 'נמחק'); } catch(e) { console.error(e); } };
+            const handleSave = async () => { if(!user) return; try { if(isAddingNew) await setDoc(doc(collection(db, 'artifacts', appId, 'public', 'data', 'partners')), { ...editForm, contacted: false, createdAt: serverTimestamp() }); else await updateDoc(doc(collection(db, 'artifacts', appId, 'public', 'data', 'partners'), editingId), editForm); setEditingId(null); setIsAddingNew(false); showNotification('success', 'נשמר'); } catch(e) { console.error(e); } };
+            const saveNote = async (id, text) => { if(!user) return; try { await updateDoc(doc(db, 'artifacts', appId, 'public', 'data', 'partners', id), { note: text }); } catch(e) {} };
+            const updateNoteLocalUI = (id, text) => { setPartners(prev => prev.map(p => p.id === id ? { ...p, note: text } : p)); };
+            const handleImport = async () => { if (!user) return; setLoading(true); try { let csvText = ""; try { csvText = await (await fetch("https://api.allorigins.win/raw?url=" + encodeURIComponent(importUrl))).text(); } catch (err1) { csvText = await (await fetch("https://corsproxy.io/?" + encodeURIComponent(importUrl))).text(); } const rawData = parseCSV(csvText); const headerRowIndex = rawData.findIndex(row => row.some(cell => cell.includes('שם החברה') || cell.includes('Company'))); const headers = rawData[headerRowIndex].map(h => h.trim()); const keyMap = { "קטגוריה": "category", "תת": "subCategory", "שם החברה": "company", "חברה": "company", "מנגנון": "entryMechanism", "ערך": "valueProp", "אסטרטגיית": "acceleratorStrategy", "תובנה": "insight", "טלפון": "phone", "מייל": "email", "מיקום": "location", "דומיין": "domain" }; const columnIndices = {}; headers.forEach((header, index) => { const foundKey = Object.keys(keyMap).find(k => header.includes(k)); if (foundKey) columnIndices[keyMap[foundKey]] = index; }); const batch = writeBatch(db); let count=0; for (let i = headerRowIndex + 1; i < rawData.length; i++) { const row = rawData[i]; if(row.length > 1 && (row[columnIndices['company']] || "")) { const d = {}; Object.keys(columnIndices).forEach(k => d[k] = row[columnIndices[k]] || ""); batch.set(doc(collection(db, 'artifacts', appId, 'public', 'data', 'partners')), {...d, contacted: false, createdAt: serverTimestamp()}); count++; } } if(count>0) await batch.commit(); showNotification('success', `יובאו ${count}`); setIsImportModalOpen(false); } catch (e) { showNotification('error', e.message); } finally { setLoading(false); } };
             const getLogoUrl = (domain, company) => domain ? `https://logo.clearbit.com/${domain}` : `https://ui-avatars.com/api/?name=${encodeURIComponent(company || "?")}&background=random&color=047857`;
-            const formatForWhatsapp = (phone) => {
-                if (!phone) return "";
-                const clean = phone.replace(/\D/g, '');
-                return clean.startsWith('0') ? `972${clean.substring(1)}` : `972${clean}`;
-            };
+            const formatForWhatsapp = (phone) => { if (!phone) return ""; const clean = phone.replace(/\D/g, ''); return clean.startsWith('0') ? `972${clean.substring(1)}` : `972${clean}`; };
 
             const categories = useMemo(() => ["הכל", ...new Set(partners.map(p => p.category).filter(Boolean))], [partners]);
-            const subCategories = useMemo(() => {
-                if (selectedCategory === "הכל") return ["הכל"];
-                return ["הכל", ...new Set(partners.filter(p => p.category === selectedCategory).map(p => p.subCategory).filter(Boolean))];
-            }, [partners, selectedCategory]);
-
-            const filteredPartners = useMemo(() => {
-                return partners.filter(p => {
-                    const term = searchTerm.toLowerCase();
-                    const matchSearch = (p.company||"").toLowerCase().includes(term) || (p.valueProp||"").toLowerCase().includes(term);
-                    const matchCat = selectedCategory === "הכל" || p.category === selectedCategory;
-                    const matchSub = filterSubCategory === "all" || filterSubCategory === "הכל" || p.subCategory === filterSubCategory;
-                    let matchStatus = true;
-                    if (filterStatus === 'contacted') matchStatus = p.contacted;
-                    if (filterStatus === 'not_contacted') matchStatus = !p.contacted;
-                    return matchSearch && matchCat && matchSub && matchStatus;
-                });
-            }, [partners, searchTerm, selectedCategory, filterSubCategory, filterStatus]);
+            const subCategories = useMemo(() => { if (selectedCategory === "הכל") return ["הכל"]; return ["הכל", ...new Set(partners.filter(p => p.category === selectedCategory).map(p => p.subCategory).filter(Boolean))]; }, [partners, selectedCategory]);
+            const filteredPartners = useMemo(() => { return partners.filter(p => { const term = searchTerm.toLowerCase(); const matchSearch = (p.company||"").toLowerCase().includes(term) || (p.valueProp||"").toLowerCase().includes(term); const matchCat = selectedCategory === "הכל" || p.category === selectedCategory; const matchSub = filterSubCategory === "all" || filterSubCategory === "הכל" || p.subCategory === filterSubCategory; let matchStatus = true; if (filterStatus === 'contacted') matchStatus = p.contacted; if (filterStatus === 'not_contacted') matchStatus = !p.contacted; return matchSearch && matchCat && matchSub && matchStatus; }); }, [partners, searchTerm, selectedCategory, filterSubCategory, filterStatus]);
 
             return (
                 <div className="min-h-screen flex flex-col pb-20 bg-gray-50" onClick={() => setActiveAiDropdown(null)}>
                     {notification && <Toast type={notification.type} message={notification.message} onClose={() => setNotification(null)} />}
-
-                    {/* HERO */}
                     <header className="relative overflow-hidden border-b border-gray-200 bg-white">
                          <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/carbon-fibre.png')] opacity-[0.03] pointer-events-none"></div>
                          <div className="absolute -left-20 -top-20 z-0 opacity-[0.05] pointer-events-none text-emerald-500"><Icons.Flash size={600} fill="currentColor" /></div>
-
                         <div className="max-w-7xl mx-auto px-6 py-12 relative z-10">
-                            <div className="flex items-center gap-6 mb-8 border-b border-emerald-100 pb-6">
-                                <div className="flex items-center gap-3 group cursor-pointer hover:opacity-80 transition-opacity">
-                                    <div className="p-2 bg-emerald-500 rounded-none rotate-3 shadow-sm"><Icons.Flash size={24} className="text-white rotate-[-3deg]" fill="currentColor" /></div>
-                                    <span className="text-3xl font-black tracking-tighter uppercase italic text-gray-900 tech-font">PSYCHOFLASH</span>
-                                </div>
-                            </div>
+                            <div className="flex items-center gap-6 mb-8 border-b border-emerald-100 pb-6"><div className="flex items-center gap-3 group cursor-pointer hover:opacity-80 transition-opacity"><div className="p-2 bg-emerald-500 rounded-none rotate-3 shadow-sm"><Icons.Flash size={24} className="text-white rotate-[-3deg]" fill="currentColor" /></div><span className="text-3xl font-black tracking-tighter uppercase italic text-gray-900 tech-font">PSYCHOFLASH</span></div></div>
                             <div className="flex flex-col md:flex-row justify-between items-end gap-8">
-                                <div>
-                                    <div className="flex items-center gap-3 mb-4">
-                                        <span className="text-xs font-bold px-3 py-1 bg-emerald-50 text-emerald-700 border border-emerald-200 rounded uppercase tracking-[0.2em] flex items-center gap-2"><div className="w-2 h-2 bg-emerald-500 rounded-full animate-pulse"></div> NETWORK V2.0</span>
-                                    </div>
-                                    <h1 className="text-6xl md:text-8xl font-black uppercase leading-[0.85] tracking-tighter mb-4 text-gray-900">מאגר<br/><span className="text-transparent bg-clip-text bg-gradient-to-l from-emerald-600 to-teal-500">השותפים</span></h1>
-                                    <p className="text-xl text-gray-500 font-light max-w-lg">ניהול קשרים אסטרטגיים ונטוורקינג למאיץ.</p>
-                                </div>
-                                <div className="flex gap-4">
-                                    <button onClick={() => setIsImportModalOpen(true)} className="group flex items-center gap-3 px-6 py-4 text-lg font-bold text-gray-700 border border-gray-300 hover:border-emerald-500 bg-white hover:bg-gray-50 transition-all shadow-sm"><Icons.UploadCloud size={24} className="group-hover:text-emerald-500 transition-colors" /> ייבוא מ-CSV</button>
-                                    <button onClick={() => { setEditingId('new'); setEditForm({ company: "", category: "", subCategory: "", phone: "", email: "", location: "", valueProp: "" }); setIsAddingNew(true); }} className="group flex items-center gap-3 px-8 py-4 text-lg font-bold text-white bg-emerald-600 hover:bg-emerald-700 hover:shadow-lg transition-all shadow-md"><Icons.Plus size={24} strokeWidth={3} /> הוסף שותף</button>
-                                </div>
+                                <div><div className="flex items-center gap-3 mb-4"><span className="text-xs font-bold px-3 py-1 bg-emerald-50 text-emerald-700 border border-emerald-200 rounded uppercase tracking-[0.2em] flex items-center gap-2"><div className="w-2 h-2 bg-emerald-500 rounded-full animate-pulse"></div> NETWORK V2.0</span></div><h1 className="text-6xl md:text-8xl font-black uppercase leading-[0.85] tracking-tighter mb-4 text-gray-900">מאגר<br/><span className="text-transparent bg-clip-text bg-gradient-to-l from-emerald-600 to-teal-500">השותפים</span></h1><p className="text-xl text-gray-500 font-light max-w-lg">ניהול קשרים אסטרטגיים ונטוורקינג למאיץ.</p></div>
+                                <div className="flex gap-4"><button onClick={() => setIsImportModalOpen(true)} className="group flex items-center gap-3 px-6 py-4 text-lg font-bold text-gray-700 border border-gray-300 hover:border-emerald-500 bg-white hover:bg-gray-50 transition-all shadow-sm"><Icons.UploadCloud size={24} className="group-hover:text-emerald-500 transition-colors" /> ייבוא מ-CSV</button><button onClick={() => { setEditingId('new'); setEditForm({}); setIsAddingNew(true); }} className="group flex items-center gap-3 px-8 py-4 text-lg font-bold text-white bg-emerald-600 hover:bg-emerald-700 hover:shadow-lg transition-all shadow-md"><Icons.Plus size={24} strokeWidth={3} /> הוסף שותף</button></div>
                             </div>
                         </div>
                     </header>
 
-                    {/* FILTERS & LAYOUT */}
                     <div className="sticky top-0 z-30 backdrop-blur-xl bg-white/90 border-b border-gray-200 shadow-sm">
                         <div className="max-w-7xl mx-auto px-6 py-4 flex flex-col gap-4">
                             <div className="flex flex-col md:flex-row gap-4 justify-between items-center">
-                                <div className="relative flex-1 w-full max-w-md">
-                                    <input type="text" placeholder="חיפוש חברה, טכנולוגיה..." className="w-full pl-4 pr-10 py-3 bg-gray-50 border border-gray-300 text-gray-900 focus:border-emerald-500 focus:bg-white outline-none transition-all rounded-lg font-medium placeholder-gray-400" value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} />
-                                    <Icons.Search size={18} className="absolute top-3.5 right-3 text-gray-400" />
-                                </div>
-                                <div className="flex items-center gap-2 text-sm font-bold text-gray-600 bg-gray-50 border border-gray-200 px-4 py-3 rounded-lg">
-                                    {loading ? <Icons.RefreshCw size={16} className="animate-spin text-teal-500" /> : <Icons.Check size={16} className="text-emerald-600" />}
-                                    <span>{filteredPartners.length} שותפים</span>
-                                </div>
+                                <div className="relative flex-1 w-full max-w-md"><input type="text" placeholder="חיפוש חברה, טכנולוגיה..." className="w-full pl-4 pr-10 py-3 bg-gray-50 border border-gray-300 text-gray-900 focus:border-emerald-500 focus:bg-white outline-none transition-all rounded-lg font-medium placeholder-gray-400" value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} /><Icons.Search size={18} className="absolute top-3.5 right-3 text-gray-400" /></div>
+                                <div className="flex items-center gap-2 text-sm font-bold text-gray-600 bg-gray-50 border border-gray-200 px-4 py-3 rounded-lg">{loading ? <Icons.RefreshCw size={16} className="animate-spin text-teal-500" /> : <Icons.Check size={16} className="text-emerald-600" />}<span>{filteredPartners.length} שותפים</span></div>
                             </div>
-                            <div className="flex flex-col gap-2">
-                                <div className="flex items-center gap-2 overflow-x-auto pb-2 -mx-4 px-4 md:mx-0 md:px-0 no-scrollbar">
-                                    <FilterChip label="הכל" active={selectedCategory === "הכל"} onClick={() => {setSelectedCategory("הכל"); setFilterSubCategory("all");}} />
-                                    {categories.filter(c => c !== "הכל").map(cat => (
-                                        <FilterChip key={cat} label={cat} active={selectedCategory === cat} onClick={() => {setSelectedCategory(cat); setFilterSubCategory("all");}} />
-                                    ))}
-                                </div>
-                            </div>
+                            <div className="flex flex-col gap-2"><div className="flex items-center gap-2 overflow-x-auto pb-2 -mx-4 px-4 md:mx-0 md:px-0 no-scrollbar"><FilterChip label="הכל" active={selectedCategory === "הכל"} onClick={() => {setSelectedCategory("הכל"); setFilterSubCategory("all");}} />{categories.filter(c => c !== "הכל").map(cat => (<FilterChip key={cat} label={cat} active={selectedCategory === cat} onClick={() => {setSelectedCategory(cat); setFilterSubCategory("all");}} />))}</div></div>
                             <div className="flex flex-wrap gap-4 items-center text-sm bg-gray-50 p-3 border border-gray-200 rounded-lg">
                                 <div className="flex items-center gap-2"><span className="font-bold text-gray-500">תת-קטגוריה:</span><select className="p-2 bg-white text-gray-700 border border-gray-300 outline-none focus:border-emerald-500 rounded" value={filterSubCategory} onChange={(e) => setFilterSubCategory(e.target.value)} disabled={selectedCategory === 'הכל'}>{subCategories.map(cat => <option key={cat} value={cat}>{cat}</option>)}</select></div>
                                 <div className="flex items-center gap-2 mr-auto"><span className="font-bold text-gray-500">סטטוס:</span><div className="flex bg-white p-1 border border-gray-200 rounded"><button onClick={() => setFilterStatus('all')} className={`px-3 py-1 text-xs font-bold transition-all rounded ${filterStatus === 'all' ? 'bg-gray-800 text-white' : 'text-gray-500 hover:text-gray-700'}`}>הכל</button><button onClick={() => setFilterStatus('contacted')} className={`px-3 py-1 text-xs font-bold transition-all rounded ${filterStatus === 'contacted' ? 'bg-emerald-100 text-emerald-700' : 'text-gray-500 hover:text-gray-700'}`}>נוצר קשר</button><button onClick={() => setFilterStatus('not_contacted')} className={`px-3 py-1 text-xs font-bold transition-all rounded ${filterStatus === 'not_contacted' ? 'bg-red-50 text-red-600' : 'text-gray-500 hover:text-gray-700'}`}>טרם טופל</button></div></div>
@@ -682,79 +527,64 @@ ${name} מובילה חדשנות בתחום ה-${cat} עם פתרון המבו�
                         </div>
                     </div>
 
-                    {/* MAIN CONTENT */}
                     <div className="max-w-7xl mx-auto px-6 py-6 flex-grow">
-                         {loading && partners.length === 0 ? (
-                            <div className="flex justify-center py-20"><div className="animate-spin rounded-full h-12 w-12 border-t-4 border-b-4 border-emerald-500"></div></div>
-                        ) : (
-                            <>
-                                {/* DETAILED VIEW */}
-                                {layoutMode === 'detailed' && (
-                                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-                                        {filteredPartners.map((partner) => {
-                                            const categoryPalette = generatePalette(partner.category || 'default');
-                                            return (
-                                                <div key={partner.id} className="glass-panel hover-card group flex flex-col relative transition-all duration-300 bg-white" style={{ borderColor: partner.contacted ? '#10B981' : undefined }}>
-                                                    <button onClick={() => toggleContact(partner)} className={`absolute top-0 right-0 px-3 py-1 text-xs font-bold uppercase tracking-wider z-10 transition-colors rounded-bl-lg border-b border-l border-white ${partner.contacted ? 'bg-emerald-500 text-white' : 'bg-gray-100 text-gray-500 hover:bg-gray-200'}`}>{partner.contacted ? 'נוצר קשר ✓' : 'לפני פנייה'}</button>
-                                                    <div className="absolute top-0 left-0 flex z-10 opacity-0 group-hover:opacity-100 transition-opacity bg-white border-r border-b border-gray-200 shadow-sm rounded-br-lg">
-                                                         <button onClick={() => handleDelete(partner.id)} className="p-2 text-gray-400 hover:text-red-500 transition-colors border-l border-gray-100" title="מחק"><Icons.Trash2 size={16} /></button>
-                                                        <button onClick={() => { setEditingId(partner.id); setEditForm(partner); setIsAddingNew(false); }} className="p-2 text-gray-400 hover:text-teal-600 transition-colors" title="ערוך"><Icons.Edit3 size={16} /></button>
+                         {loading && partners.length === 0 ? (<div className="flex justify-center py-20"><div className="animate-spin rounded-full h-12 w-12 border-t-4 border-b-4 border-emerald-500"></div></div>) : (
+                            layoutMode === 'detailed' ? (
+                                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                                    {filteredPartners.map((partner) => {
+                                        const categoryPalette = generatePalette(partner.category || 'default');
+                                        return (
+                                            <div key={partner.id} className="glass-panel hover-card group flex flex-col relative transition-all duration-300 bg-white" style={{ borderColor: partner.contacted ? '#10B981' : undefined }}>
+                                                <button onClick={() => toggleContact(partner)} className={`absolute top-0 right-0 px-3 py-1 text-xs font-bold uppercase tracking-wider z-10 transition-colors rounded-bl-lg border-b border-l border-white ${partner.contacted ? 'bg-emerald-500 text-white' : 'bg-gray-100 text-gray-500 hover:bg-gray-200'}`}>{partner.contacted ? 'נוצר קשר ✓' : 'לפני פנייה'}</button>
+                                                <div className="absolute top-0 left-0 flex z-10 opacity-0 group-hover:opacity-100 transition-opacity bg-white border-r border-b border-gray-200 shadow-sm rounded-br-lg">
+                                                     <button onClick={() => handleDelete(partner.id)} className="p-2 text-gray-400 hover:text-red-500 transition-colors border-l border-gray-100"><Icons.Trash2 size={16} /></button>
+                                                    <button onClick={() => { setEditingId(partner.id); setEditForm(partner); setIsAddingNew(false); }} className="p-2 text-gray-400 hover:text-teal-600 transition-colors"><Icons.Edit3 size={16} /></button>
+                                                </div>
+                                                <div className="p-6 flex-grow flex flex-col">
+                                                    <div className="flex items-start gap-4 mb-6 mt-4">
+                                                        <div className="w-16 h-16 bg-white border border-gray-100 shadow-sm flex items-center justify-center p-2 shrink-0 rounded-lg"><img src={getLogoUrl(partner.domain, partner.company)} alt="" className="w-full h-full object-contain" onError={(e) => e.target.src = `https://ui-avatars.com/api/?name=${partner.company}&background=random&color=047857`} /></div>
+                                                        <div><h2 className="text-2xl font-black text-gray-900 leading-none mb-1 tracking-tight">{partner.company}</h2><div className="flex items-center gap-1 text-sm text-gray-500 font-medium"><Icons.MapPin size={12} /> {partner.location || "ישראל"}</div><div className="mt-2 inline-block px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide border rounded-md" style={{ backgroundColor: categoryPalette.bg, color: categoryPalette.text, borderColor: categoryPalette.border }}>{partner.category}</div></div>
                                                     </div>
-                                                    <div className="p-6 flex-grow flex flex-col">
-                                                        <div className="flex items-start gap-4 mb-6 mt-4">
-                                                            <div className="w-16 h-16 bg-white border border-gray-100 shadow-sm flex items-center justify-center p-2 shrink-0 rounded-lg"><img src={getLogoUrl(partner.domain, partner.company)} alt="" className="w-full h-full object-contain" onError={(e) => e.target.src = `https://ui-avatars.com/api/?name=${partner.company}&background=random&color=047857`} /></div>
-                                                            <div>
-                                                                <h2 className="text-2xl font-black text-gray-900 leading-none mb-1 tracking-tight">{partner.company}</h2>
-                                                                <div className="flex items-center gap-1 text-sm text-gray-500 font-medium"><Icons.MapPin size={12} /> {partner.location || "ישראל"}</div>
-                                                                <div className="mt-2 inline-block px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide border rounded-md" style={{ backgroundColor: categoryPalette.bg, color: categoryPalette.text, borderColor: categoryPalette.border }}>{partner.category}</div>
-                                                            </div>
-                                                        </div>
-                                                        <div className="space-y-4 flex-grow">
-                                                            {partner.valueProp && (<div><div className="flex items-center gap-2 text-xs font-bold text-gray-400 uppercase mb-1"><Icons.Lightbulb size={12} /> ערך אסטרטגי</div><p className="text-sm font-medium text-gray-700 leading-relaxed">{partner.valueProp}</p></div>)}
-                                                            {partner.acceleratorStrategy && (<div className="p-3 bg-gray-50 border-r-4 rounded-r-none rounded-l-md" style={{ borderRightColor: categoryPalette.base }}><div className="flex items-center gap-2 text-xs font-bold uppercase mb-1" style={{ color: categoryPalette.base }}><Icons.Rocket size={12} /> אסטרטגיית שת"פ</div><p className="text-sm font-bold text-gray-800 leading-relaxed">{partner.acceleratorStrategy}</p></div>)}
-                                                            <div className="mt-4 pt-4 border-t border-gray-100 flex flex-col gap-2">
-                                                                {partner.phone && <div className="flex items-center gap-2 text-sm text-gray-500"><Icons.Phone size={14} className="text-gray-400 shrink-0" /><span dir="ltr" className="font-mono tracking-wide">{partner.phone}</span></div>}
-                                                                {partner.email && <div className="flex items-center gap-2 text-sm text-gray-500"><Icons.Mail size={14} className="text-gray-400 shrink-0" /><span className="truncate">{partner.email}</span></div>}
-                                                            </div>
-                                                        </div>
-                                                        <div className="mt-6"><textarea className="w-full text-sm bg-gray-50 border-b border-gray-200 focus:border-emerald-500 outline-none p-2 resize-none min-h-[40px] transition-colors placeholder-gray-400 text-gray-700" placeholder="הערות..." value={partner.note || ""} onChange={(e) => updateNoteLocalUI(partner.id, e.target.value)} onBlur={(e) => saveNote(partner.id, e.target.value)} /></div>
+                                                    <div className="space-y-4 flex-grow">
+                                                        {partner.valueProp && (<div><div className="flex items-center gap-2 text-xs font-bold text-gray-400 uppercase mb-1"><Icons.Lightbulb size={12} /> ערך אסטרטגי</div><p className="text-sm font-medium text-gray-700 leading-relaxed">{partner.valueProp}</p></div>)}
+                                                        {partner.acceleratorStrategy && (<div className="p-3 bg-gray-50 border-r-4 rounded-r-none rounded-l-md" style={{ borderRightColor: categoryPalette.base }}><div className="flex items-center gap-2 text-xs font-bold uppercase mb-1" style={{ color: categoryPalette.base }}><Icons.Rocket size={12} /> אסטרטגיית שת"פ</div><p className="text-sm font-bold text-gray-800 leading-relaxed">{partner.acceleratorStrategy}</p></div>)}
+                                                        <div className="mt-4 pt-4 border-t border-gray-100 flex flex-col gap-2">{partner.phone && <div className="flex items-center gap-2 text-sm text-gray-500"><Icons.Phone size={14} className="text-gray-400 shrink-0" /><span dir="ltr" className="font-mono tracking-wide">{partner.phone}</span></div>}{partner.email && <div className="flex items-center gap-2 text-sm text-gray-500"><Icons.Mail size={14} className="text-gray-400 shrink-0" /><span className="truncate">{partner.email}</span></div>}</div>
                                                     </div>
-                                                    <div className="px-6 py-4 bg-gray-50 border-t border-gray-100 grid grid-cols-4 gap-2 rounded-b-lg relative">
-                                                        <ActionButton href={partner.phone ? `tel:${partner.phone}` : null} icon={Icons.Phone} label="" colorKey="phone" />
-                                                        <ActionButton href={partner.email ? `mailto:${partner.email}` : null} icon={Icons.Mail} label="" colorKey="email" />
-                                                        <ActionButton href={partner.phone ? `https://wa.me/${formatForWhatsapp(partner.phone)}` : null} icon={Icons.MessageCircle} label="" colorKey="whatsapp" />
-                                                        <div className="relative">
-                                                            <button onClick={(e) => { e.stopPropagation(); setActiveAiDropdown(activeAiDropdown === partner.id ? null : partner.id); }} className={`w-full flex items-center justify-center gap-2 py-2 px-2 rounded font-bold text-sm transition-all duration-200 border ${activeAiDropdown === partner.id ? 'bg-blue-100 border-blue-300 text-blue-700 shadow-inner' : 'bg-white border-blue-100 text-blue-600 hover:bg-blue-50'}`}><Icons.Sparkles size={18} /></button>
-                                                            {activeAiDropdown === partner.id && (
-                                                                <div className="absolute bottom-full left-0 right-0 mb-2 bg-white border border-gray-200 shadow-xl rounded-lg overflow-hidden z-20 dropdown-enter w-48 -mr-16 md:mr-0">
-                                                                    <div className="p-2 bg-gray-50 border-b border-gray-100 text-[10px] font-bold text-gray-500 uppercase tracking-wider text-center">פעולות AI</div>
-                                                                    <button onClick={() => handleAiOptionClick(partner, 'SYNERGY')} className="w-full text-right px-4 py-2 text-sm text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors flex items-center gap-2"><Icons.Flash size={14} className="text-yellow-500"/> ניתוח סינרגיה</button>
-                                                                    <button onClick={() => handleAiOptionClick(partner, 'EMAIL')} className="w-full text-right px-4 py-2 text-sm text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors flex items-center gap-2"><Icons.Mail size={14} className="text-blue-500"/> ניסוח פנייה</button>
-                                                                    <button onClick={() => handleAiOptionClick(partner, 'MEETING')} className="w-full text-right px-4 py-2 text-sm text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors flex items-center gap-2"><Icons.MessageCircle size={14} className="text-green-500"/> הכנה לשיחה</button>
-                                                                    <div className="h-px bg-gray-100 my-1"></div>
-                                                                    <button onClick={() => handleAiOptionClick(partner, 'CUSTOM')} className="w-full text-right px-4 py-2 text-sm font-bold text-purple-600 hover:bg-purple-50 transition-colors flex items-center gap-2"><Icons.Sparkles size={14} className="text-purple-500"/> בקשה אישית...</button>
-                                                                </div>
-                                                            )}
-                                                        </div>
+                                                    <div className="mt-6"><textarea className="w-full text-sm bg-gray-50 border-b border-gray-200 focus:border-emerald-500 outline-none p-2 resize-none min-h-[40px] transition-colors placeholder-gray-400 text-gray-700" placeholder="הערות..." value={partner.note || ""} onChange={(e) => updateNoteLocalUI(partner.id, e.target.value)} onBlur={(e) => saveNote(partner.id, e.target.value)} /></div>
+                                                </div>
+                                                <div className="px-6 py-4 bg-gray-50 border-t border-gray-100 grid grid-cols-4 gap-2 rounded-b-lg relative">
+                                                    <ActionButton href={partner.phone ? `tel:${partner.phone}` : null} icon={Icons.Phone} label="" colorKey="phone" />
+                                                    <ActionButton href={partner.email ? `mailto:${partner.email}` : null} icon={Icons.Mail} label="" colorKey="email" />
+                                                    <ActionButton href={partner.phone ? `https://wa.me/${formatForWhatsapp(partner.phone)}` : null} icon={Icons.MessageCircle} label="" colorKey="whatsapp" />
+                                                    <div className="relative">
+                                                        <button onClick={(e) => { e.stopPropagation(); setActiveAiDropdown(activeAiDropdown === partner.id ? null : partner.id); }} className={`w-full flex items-center justify-center gap-2 py-2 px-2 rounded font-bold text-sm transition-all duration-200 border ${activeAiDropdown === partner.id ? 'bg-blue-100 border-blue-300 text-blue-700 shadow-inner' : 'bg-white border-blue-100 text-blue-600 hover:bg-blue-50'}`}><Icons.Sparkles size={18} /></button>
+                                                        {activeAiDropdown === partner.id && (
+                                                            <div className="absolute bottom-full left-0 right-0 mb-2 bg-white border border-gray-200 shadow-xl rounded-lg overflow-hidden z-20 dropdown-enter w-48 -mr-16 md:mr-0">
+                                                                <div className="p-2 bg-gray-50 border-b border-gray-100 text-[10px] font-bold text-gray-500 uppercase tracking-wider text-center">פעולות AI</div>
+                                                                <button onClick={() => handleAiOptionClick(partner, 'SYNERGY')} className="w-full text-right px-4 py-2 text-sm text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors flex items-center gap-2"><Icons.Flash size={14} className="text-yellow-500"/> ניתוח סינרגיה</button>
+                                                                <button onClick={() => handleAiOptionClick(partner, 'EMAIL')} className="w-full text-right px-4 py-2 text-sm text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors flex items-center gap-2"><Icons.Mail size={14} className="text-blue-500"/> ניסוח פנייה</button>
+                                                                <button onClick={() => handleAiOptionClick(partner, 'MEETING')} className="w-full text-right px-4 py-2 text-sm text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors flex items-center gap-2"><Icons.MessageCircle size={14} className="text-green-500"/> הכנה לשיחה</button>
+                                                                <div className="h-px bg-gray-100 my-1"></div>
+                                                                <button onClick={() => handleAiOptionClick(partner, 'CUSTOM')} className="w-full text-right px-4 py-2 text-sm font-bold text-purple-600 hover:bg-purple-50 transition-colors flex items-center gap-2"><Icons.Sparkles size={14} className="text-purple-500"/> בקשה אישית...</button>
+                                                            </div>
+                                                        )}
                                                     </div>
                                                 </div>
-                                            );
-                                        })}
-                                    </div>
-                                )}
-                                {/* COMPACT VIEW */}
-                                {layoutMode === 'compact' && (
-                                    <div className="grid grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3 md:gap-4">
-                                        {filteredPartners.map((partner) => (
-                                            <div key={partner.id} onClick={() => setViewingId(partner.id)} className="bg-white border border-gray-200 hover:border-emerald-500 transition-all cursor-pointer shadow-sm hover:shadow-md rounded-lg p-2 flex flex-col items-center justify-center text-center aspect-square relative group" style={{ borderColor: partner.contacted ? '#10B981' : undefined }}>
-                                                {partner.contacted && <div className="absolute top-1 right-1 w-2 h-2 bg-emerald-500 rounded-full"></div>}
-                                                <div className="w-10 h-10 md:w-14 md:h-14 mb-2 flex items-center justify-center filter grayscale group-hover:grayscale-0 transition-all"><img src={getLogoUrl(partner.domain, partner.company)} alt="" className="w-full h-full object-contain" onError={(e) => e.target.src = `https://ui-avatars.com/api/?name=${partner.company}`} /></div>
-                                                <h3 className="text-[10px] md:text-xs font-bold text-gray-500 group-hover:text-gray-900 leading-tight line-clamp-2">{partner.company}</h3>
                                             </div>
-                                        ))}
-                                    </div>
-                                )}
-                            </>
+                                        );
+                                    })}
+                                </div>
+                            ) : (
+                                <div className="grid grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3 md:gap-4">
+                                    {filteredPartners.map((partner) => (
+                                        <div key={partner.id} onClick={() => setViewingId(partner.id)} className="bg-white border border-gray-200 hover:border-emerald-500 transition-all cursor-pointer shadow-sm hover:shadow-md rounded-lg p-2 flex flex-col items-center justify-center text-center aspect-square relative group" style={{ borderColor: partner.contacted ? '#10B981' : undefined }}>
+                                            {partner.contacted && <div className="absolute top-1 right-1 w-2 h-2 bg-emerald-500 rounded-full"></div>}
+                                            <div className="w-10 h-10 md:w-14 md:h-14 mb-2 flex items-center justify-center filter grayscale group-hover:grayscale-0 transition-all"><img src={getLogoUrl(partner.domain, partner.company)} alt="" className="w-full h-full object-contain" onError={(e) => e.target.src = `https://ui-avatars.com/api/?name=${partner.company}`} /></div>
+                                            <h3 className="text-[10px] md:text-xs font-bold text-gray-500 group-hover:text-gray-900 leading-tight line-clamp-2">{partner.company}</h3>
+                                        </div>
+                                    ))}
+                                </div>
+                            )
                         )}
                     </div>
 
@@ -765,25 +595,47 @@ ${name} מובילה חדשנות בתחום ה-${cat} עם פתרון המבו�
                                 <div className="p-4 border-b border-gray-100 flex justify-between items-center bg-gray-50">
                                     <div className="flex items-center gap-3">
                                         <Icons.Brain className="text-blue-500" size={24} />
-                                        <h2 className="text-xl font-black text-gray-800 tracking-wide">
-                                            AI ASSISTANT 
-                                            <span className={`text-sm font-normal opacity-70 ml-2 px-2 py-0.5 rounded ${apiKey ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-500'}`}>
-                                                {apiKey ? 'Live Model' : 'Auto Mode'}
-                                            </span>
-                                        </h2>
+                                        <h2 className="text-xl font-black text-gray-800 tracking-wide">AI ASSISTANT <span className={`text-sm font-normal opacity-70 ml-2 px-2 py-0.5 rounded ${apiKey ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-500'}`}>{apiKey ? 'Live' : 'Auto'}</span></h2>
                                     </div>
                                     <div className="flex items-center gap-2">
-                                        <button onClick={() => setShowKeyInput(!showKeyInput)} className="text-gray-400 hover:text-blue-500 transition-colors p-2 rounded-full hover:bg-gray-100" title="API Settings"><Icons.Key size={20} /></button>
+                                        <button onClick={() => setShowKeyInput(!showKeyInput)} className={`transition-colors p-2 rounded-full ${showKeyInput ? 'bg-blue-100 text-blue-600' : 'text-gray-400 hover:bg-gray-100'}`} title="Settings"><Icons.Settings size={20} /></button>
                                         <button onClick={() => setAiModalOpen(false)} className="text-gray-400 hover:text-gray-600 p-2"><Icons.X size={24} /></button>
                                     </div>
                                 </div>
                                 
                                 {showKeyInput && (
-                                    <div className="bg-gray-50 p-4 border-b border-gray-200 animate-slideIn">
-                                        <p className="text-xs text-gray-500 mb-2">מפתח API מאפשר שימוש במודל Gemini בזמן אמת עבור בקשות מורכבות. ללא מפתח, המערכת עובדת במצב אוטומטי (תבניות).</p>
-                                        <div className="flex gap-2">
-                                            <input type="password" placeholder="Enter Gemini API Key (Optional)" className="flex-1 p-2 text-sm border border-gray-300 rounded outline-none focus:border-blue-500" value={apiKey} onChange={(e) => setApiKey(e.target.value)} />
-                                            <button onClick={() => saveApiKey(apiKey)} className="px-4 py-2 bg-blue-600 text-white text-xs font-bold rounded hover:bg-blue-700">שמור</button>
+                                    <div className="bg-gray-50 p-4 border-b border-gray-200 animate-slideIn space-y-3">
+                                        <p className="text-xs text-gray-500 font-medium">הגדרות API וחיבור למודל</p>
+                                        <div className="flex flex-col gap-2">
+                                            <input type="password" placeholder="Gemini API Key" className="w-full p-2 text-sm border border-gray-300 rounded outline-none focus:border-blue-500" value={apiKey} onChange={(e) => setApiKey(e.target.value)} />
+                                            <div className="flex gap-2">
+                                                <select value={apiModel} onChange={(e) => saveModel(e.target.value)} className="flex-1 p-2 text-sm border border-gray-300 rounded outline-none focus:border-blue-500 bg-white">
+                                                    {availableModels.length > 0 ? (
+                                                        availableModels.map(m => <option key={m} value={m}>{m}</option>)
+                                                    ) : (
+                                                        <>
+                                                            <option value="gemini-2.5-flash">Gemini 2.5 Flash (מומלץ)</option>
+                                                            <option value="gemini-2.5-pro">Gemini 2.5 Pro</option>
+                                                            <option value="gemini-2.0-flash-exp">Gemini 2.0 Flash Exp</option>
+                                                            <option value="gemini-2.0-flash">Gemini 2.0 Flash</option>
+                                                            <option value="gemini-1.5-flash">Gemini 1.5 Flash</option>
+                                                        </>
+                                                    )}
+                                                </select>
+                                                <button onClick={() => saveApiKey(apiKey)} className="px-4 py-2 bg-blue-600 text-white text-xs font-bold rounded hover:bg-blue-700">
+                                                    {availableModels.length > 0 ? 'שמור' : 'טען מודלים'}
+                                                </button>
+                                            </div>
+                                            <div className="flex justify-between items-center mt-2">
+                                                <button onClick={testConnection} disabled={!apiKey || testConnectionStatus === 'loading'} className={`text-xs font-bold px-3 py-1 rounded border flex items-center gap-2 ${testConnectionStatus === 'success' ? 'bg-green-100 text-green-700 border-green-200' : testConnectionStatus === 'error' ? 'bg-red-100 text-red-700 border-red-200' : 'bg-white text-gray-600 border-gray-300 hover:bg-gray-50'}`}>
+                                                    {testConnectionStatus === 'loading' ? <Icons.RefreshCw className="animate-spin" size={12}/> : testConnectionStatus === 'success' ? <Icons.Check size={12}/> : <Icons.Zap size={12}/>}
+                                                    {testConnectionStatus === 'loading' ? 'בודק...' : testConnectionStatus === 'success' ? 'חיבור תקין' : testConnectionStatus === 'error' ? 'שגיאה' : 'בדיקת חיבור'}
+                                                </button>
+                                                <a href="https://aistudio.google.com/app/apikey" target="_blank" className="text-xs text-blue-500 underline flex items-center gap-1">קבל מפתח <Icons.DownloadCloud size={12}/></a>
+                                            </div>
+                                            {availableModels.length > 0 && (
+                                                <p className="text-[10px] text-green-600 font-medium">✓ נמצאו {availableModels.length} מודלים זמינים לחשבון שלך</p>
+                                            )}
                                         </div>
                                     </div>
                                 )}
@@ -792,26 +644,11 @@ ${name} מובילה חדשנות בתחום ה-${cat} עם פתרון המבו�
                                     {aiMode === 'CUSTOM' && !aiResult && !aiLoading && (
                                         <div className="mb-6 animate-slideIn">
                                             <label className="block text-sm font-bold text-gray-700 mb-2">מה תרצה לבקש מה-AI לגבי {aiActivePartner?.company}?</label>
-                                            <textarea className="w-full p-4 border border-gray-300 rounded-lg focus:border-blue-500 focus:ring-2 focus:ring-blue-100 outline-none min-h-[100px] text-gray-800" placeholder="למשל: תמצאי לי את המתחרים העיקריים שלהם, או תנסחי לי הודעת לינקדאין קצרה..." value={customPromptText} onChange={(e) => setCustomPromptText(e.target.value)} />
-                                            <div className="flex justify-end mt-3">
-                                                <button onClick={() => generateAiSynergy()} disabled={!customPromptText.trim()} className={`px-6 py-2 rounded-lg font-bold text-white flex items-center gap-2 shadow-md transition-all ${customPromptText.trim() ? 'bg-blue-600 hover:bg-blue-700 hover:scale-105' : 'bg-gray-300 cursor-not-allowed'}`}><Icons.Send size={16} /> שלח בקשה</button>
-                                            </div>
+                                            <textarea className="w-full p-4 border border-gray-300 rounded-lg focus:border-blue-500 focus:ring-2 focus:ring-blue-100 outline-none min-h-[100px] text-gray-800" placeholder="למשל: תמצאי לי את המתחרים העיקריים שלהם..." value={customPromptText} onChange={(e) => setCustomPromptText(e.target.value)} />
+                                            <div className="flex justify-end mt-3"><button onClick={() => generateAiSynergy()} disabled={!customPromptText.trim()} className={`px-6 py-2 rounded-lg font-bold text-white flex items-center gap-2 shadow-md transition-all ${customPromptText.trim() ? 'bg-blue-600 hover:bg-blue-700 hover:scale-105' : 'bg-gray-300 cursor-not-allowed'}`}><Icons.Send size={16} /> שלח בקשה</button></div>
                                         </div>
                                     )}
-
-                                    {aiLoading ? (
-                                        <div className="flex flex-col items-center justify-center py-20 gap-4">
-                                            <div className="animate-spin rounded-full h-12 w-12 border-t-4 border-b-4 border-blue-500"></div>
-                                            <p className="text-blue-500 animate-pulse font-medium">ה-AI חושב...</p>
-                                        </div>
-                                    ) : aiResult ? (
-                                        <div className="prose prose-blue max-w-none text-gray-700 animate-slideIn">
-                                            <div className="flex items-center gap-2 mb-4 pb-2 border-b border-gray-100">
-                                                <span className="text-xs font-bold px-2 py-1 bg-blue-50 text-blue-600 rounded uppercase">{aiMode === 'CUSTOM' ? 'תשובה אישית' : aiMode}</span>
-                                            </div>
-                                            <div dangerouslySetInnerHTML={{ __html: marked.parse(aiResult) }}></div>
-                                        </div>
-                                    ) : null}
+                                    {aiLoading ? (<div className="flex flex-col items-center justify-center py-20 gap-4"><div className="animate-spin rounded-full h-12 w-12 border-t-4 border-b-4 border-blue-500"></div><p className="text-blue-500 animate-pulse font-medium">ה-AI חושב...</p></div>) : aiResult ? (<div className="prose prose-blue max-w-none text-gray-700 animate-slideIn"><div className="flex items-center gap-2 mb-4 pb-2 border-b border-gray-100"><span className="text-xs font-bold px-2 py-1 bg-blue-50 text-blue-600 rounded uppercase">{aiMode === 'CUSTOM' ? 'תשובה אישית' : aiMode}</span></div><div dangerouslySetInnerHTML={{ __html: marked.parse(aiResult) }}></div></div>) : null}
                                 </div>
                                 
                                 {aiResult && (
@@ -824,7 +661,7 @@ ${name} מובילה חדשנות בתחום ה-${cat} עם פתרון המבו�
                         </div>
                     )}
 
-                    {/* VIEWER MODAL (Compact Mode) */}
+                    {/* VIEWER/EDIT/IMPORT MODALS REMAIN UNCHANGED */}
                     {activePartner && (
                         <div className="fixed inset-0 z-40 flex items-center justify-center p-4 bg-black/40 backdrop-blur-sm" onClick={() => setViewingId(null)}>
                             <div className="bg-white w-full max-w-lg shadow-2xl flex flex-col rounded-xl overflow-hidden border border-gray-200 relative animate-slide-up" onClick={e => e.stopPropagation()}>
@@ -857,42 +694,15 @@ ${name} מובילה חדשנות בתחום ה-${cat} עם פתרון המבו�
                         </div>
                     )}
 
-                    {/* FOOTER & MODALS (Add/Edit, Import) - KEPT SAME */}
                     <div className={`fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 text-gray-800 z-30 footer-slide-up shadow-lg ${showBottomBar ? 'footer-visible' : 'footer-hidden'}`}>
                         <div className="max-w-7xl mx-auto px-6 h-16 flex justify-between items-center">
                             <div className="flex items-center gap-3"><Icons.Flash className="text-emerald-500" size={24} /><div className="h-4 w-px bg-gray-300"></div><span className="text-xs text-gray-500">Psychoflash Admin</span></div>
-                            <div className="flex items-center gap-3"><button onClick={() => { setEditingId('new'); setEditForm({ company: "", category: "", subCategory: "", phone: "", email: "", location: "", valueProp: "" }); setIsAddingNew(true); }} className="flex items-center gap-2 px-4 py-2 text-xs font-bold text-white bg-emerald-600 hover:bg-emerald-700 rounded-lg transition-colors shadow-md"><Icons.Plus size={16} strokeWidth={3} /><span>הוסף שותף</span></button></div>
+                            <div className="flex items-center gap-3"><button onClick={() => { setEditingId('new'); setEditForm({}); setIsAddingNew(true); }} className="flex items-center gap-2 px-4 py-2 text-xs font-bold text-white bg-emerald-600 hover:bg-emerald-700 rounded-lg transition-colors shadow-md"><Icons.Plus size={16} strokeWidth={3} /><span>הוסף שותף</span></button></div>
                         </div>
                     </div>
 
-                    {isImportModalOpen && (
-                        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40 backdrop-blur-sm">
-                            <div className="bg-white w-full max-w-lg shadow-2xl flex flex-col rounded-xl overflow-hidden border border-gray-200">
-                                <div className="p-6 border-b border-gray-100 flex justify-between items-center bg-gray-50"><h2 className="text-xl font-black text-gray-800">ייבוא שותפים מ-CSV</h2><button onClick={() => setIsImportModalOpen(false)} className="text-gray-400 hover:text-gray-600 transition-colors"><Icons.X size={24} /></button></div>
-                                <div className="p-6 space-y-4"><p className="text-sm text-gray-500">הדבק כאן קישור ל-Google Sheet שפורסם כ-CSV.</p><div><label className="block text-xs font-bold text-emerald-600 mb-1 uppercase">URL ל-CSV</label><input className="w-full p-3 bg-gray-50 border border-gray-300 focus:border-emerald-500 text-gray-900 outline-none text-sm font-mono rounded-lg" value={importUrl} onChange={e => setImportUrl(e.target.value)} /></div></div>
-                                <div className="p-6 border-t border-gray-100 flex justify-end gap-3 bg-gray-50"><button onClick={() => setIsImportModalOpen(false)} className="px-4 py-2 font-bold text-gray-500 hover:bg-gray-200 transition-colors rounded-lg">ביטול</button><button onClick={handleImport} className="px-6 py-2 font-bold text-white bg-blue-600 hover:bg-blue-700 transition-all rounded-lg shadow-sm flex items-center gap-2">{loading ? <Icons.RefreshCw className="animate-spin" size={16} /> : <Icons.UploadCloud size={16} />} ייבוא נתונים</button></div>
-                            </div>
-                        </div>
-                    )}
-
-                    {editingId && (
-                        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40 backdrop-blur-sm">
-                            <div className="bg-white w-full max-w-2xl shadow-2xl flex flex-col max-h-[90vh] rounded-xl overflow-hidden border border-gray-200">
-                                <div className="p-6 border-b border-gray-100 flex justify-between items-center bg-gray-50"><h2 className="text-2xl font-black text-gray-900">{isAddingNew ? "הוספת שותף חדש" : "עריכת פרטי שותף"}</h2><button onClick={() => setEditingId(null)} className="text-gray-400 hover:text-gray-600 transition-colors"><Icons.X size={24} /></button></div>
-                                <div className="p-8 overflow-y-auto grid grid-cols-1 md:grid-cols-2 gap-6 bg-white">
-                                    <div className="col-span-2 md:col-span-1"><label className="block text-xs font-bold text-gray-500 uppercase mb-1">שם החברה</label><input className="w-full p-3 bg-gray-50 border border-gray-300 focus:border-emerald-500 text-gray-900 outline-none font-bold rounded-lg" value={editForm.company || ""} onChange={e => setEditForm({...editForm, company: e.target.value})} /></div>
-                                    <div className="col-span-2 md:col-span-1"><label className="block text-xs font-bold text-gray-500 uppercase mb-1">דומיין (לוגו)</label><input className="w-full p-3 bg-gray-50 border border-gray-300 focus:border-emerald-500 text-gray-900 outline-none rounded-lg" value={editForm.domain || ""} onChange={e => setEditForm({...editForm, domain: e.target.value})} placeholder="example.com" /></div>
-                                    <div className="col-span-2"><label className="block text-xs font-bold text-gray-500 uppercase mb-1">ערך אסטרטגי</label><textarea className="w-full p-3 bg-gray-50 border border-gray-300 focus:border-emerald-500 text-gray-900 outline-none rounded-lg" rows="2" value={editForm.valueProp || ""} onChange={e => setEditForm({...editForm, valueProp: e.target.value})} /></div>
-                                    <div className="col-span-2"><label className="block text-xs font-bold text-emerald-600 uppercase mb-1">אסטרטגיית שת"פ</label><textarea className="w-full p-3 bg-emerald-50 border border-emerald-200 focus:border-emerald-500 focus:shadow-sm text-gray-900 outline-none font-medium rounded-lg" rows="2" value={editForm.acceleratorStrategy || ""} onChange={e => setEditForm({...editForm, acceleratorStrategy: e.target.value})} /></div>
-                                    <div><label className="block text-xs font-bold text-gray-500 uppercase mb-1">טלפון</label><input className="w-full p-3 bg-gray-50 border border-gray-300 focus:border-emerald-500 text-gray-900 outline-none rounded-lg" value={editForm.phone || ""} onChange={e => setEditForm({...editForm, phone: e.target.value})} /></div>
-                                    <div><label className="block text-xs font-bold text-gray-500 uppercase mb-1">מייל</label><input className="w-full p-3 bg-gray-50 border border-gray-300 focus:border-emerald-500 text-gray-900 outline-none rounded-lg" value={editForm.email || ""} onChange={e => setEditForm({...editForm, email: e.target.value})} /></div>
-                                    <div className="col-span-2 md:col-span-1"><label className="block text-xs font-bold text-gray-500 uppercase mb-1">קטגוריה</label><input className="w-full p-3 bg-gray-50 border border-gray-300 focus:border-emerald-500 text-gray-900 outline-none rounded-lg" value={editForm.category || ""} onChange={e => setEditForm({...editForm, category: e.target.value})} /></div>
-                                    <div className="col-span-2 md:col-span-1"><label className="block text-xs font-bold text-gray-500 uppercase mb-1">מנגנון כניסה</label><input className="w-full p-3 bg-gray-50 border border-gray-300 focus:border-emerald-500 text-gray-900 outline-none rounded-lg" value={editForm.entryMechanism || ""} onChange={e => setEditForm({...editForm, entryMechanism: e.target.value})} /></div>
-                                </div>
-                                <div className="p-6 border-t border-gray-100 flex justify-end gap-4 bg-gray-50"><button onClick={() => setEditingId(null)} className="px-6 py-3 font-bold text-gray-500 hover:bg-gray-200 transition-colors rounded-lg">ביטול</button><button onClick={handleSave} className="px-8 py-3 font-black text-white bg-emerald-600 hover:bg-emerald-700 transition-all shadow-md flex items-center gap-2 rounded-lg"><Icons.Save size={18} /> שמור שינויים</button></div>
-                            </div>
-                        </div>
-                    )}
+                    {isImportModalOpen && (<div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40 backdrop-blur-sm"><div className="bg-white w-full max-w-lg shadow-2xl flex flex-col rounded-xl overflow-hidden border border-gray-200"><div className="p-6 border-b border-gray-100 flex justify-between items-center bg-gray-50"><h2 className="text-xl font-black text-gray-800">ייבוא שותפים מ-CSV</h2><button onClick={() => setIsImportModalOpen(false)} className="text-gray-400 hover:text-gray-600 transition-colors"><Icons.X size={24} /></button></div><div className="p-6 space-y-4"><p className="text-sm text-gray-500">הדבק כאן קישור ל-Google Sheet שפורסם כ-CSV.</p><div><label className="block text-xs font-bold text-emerald-600 mb-1 uppercase">URL ל-CSV</label><input className="w-full p-3 bg-gray-50 border border-gray-300 focus:border-emerald-500 text-gray-900 outline-none text-sm font-mono rounded-lg" value={importUrl} onChange={e => setImportUrl(e.target.value)} /></div></div><div className="p-6 border-t border-gray-100 flex justify-end gap-3 bg-gray-50"><button onClick={() => setIsImportModalOpen(false)} className="px-4 py-2 font-bold text-gray-500 hover:bg-gray-200 transition-colors rounded-lg">ביטול</button><button onClick={handleImport} className="px-6 py-2 font-bold text-white bg-blue-600 hover:bg-blue-700 transition-all rounded-lg shadow-sm flex items-center gap-2">{loading ? <Icons.RefreshCw className="animate-spin" size={16} /> : <Icons.UploadCloud size={16} />} ייבוא נתונים</button></div></div></div>)}
+                    {editingId && (<div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40 backdrop-blur-sm"><div className="bg-white w-full max-w-2xl shadow-2xl flex flex-col max-h-[90vh] rounded-xl overflow-hidden border border-gray-200"><div className="p-6 border-b border-gray-100 flex justify-between items-center bg-gray-50"><h2 className="text-2xl font-black text-gray-900">{isAddingNew ? "הוספת שותף חדש" : "עריכת פרטי שותף"}</h2><button onClick={() => setEditingId(null)} className="text-gray-400 hover:text-gray-600 transition-colors"><Icons.X size={24} /></button></div><div className="p-8 overflow-y-auto grid grid-cols-1 md:grid-cols-2 gap-6 bg-white"><div className="col-span-2 md:col-span-1"><label className="block text-xs font-bold text-gray-500 uppercase mb-1">שם החברה</label><input className="w-full p-3 bg-gray-50 border border-gray-300 focus:border-emerald-500 text-gray-900 outline-none font-bold rounded-lg" value={editForm.company || ""} onChange={e => setEditForm({...editForm, company: e.target.value})} /></div><div className="col-span-2 md:col-span-1"><label className="block text-xs font-bold text-gray-500 uppercase mb-1">דומיין (לוגו)</label><input className="w-full p-3 bg-gray-50 border border-gray-300 focus:border-emerald-500 text-gray-900 outline-none rounded-lg" value={editForm.domain || ""} onChange={e => setEditForm({...editForm, domain: e.target.value})} placeholder="example.com" /></div><div className="col-span-2"><label className="block text-xs font-bold text-gray-500 uppercase mb-1">ערך אסטרטגי</label><textarea className="w-full p-3 bg-gray-50 border border-gray-300 focus:border-emerald-500 text-gray-900 outline-none rounded-lg" rows="2" value={editForm.valueProp || ""} onChange={e => setEditForm({...editForm, valueProp: e.target.value})} /></div><div className="col-span-2"><label className="block text-xs font-bold text-emerald-600 uppercase mb-1">אסטרטגיית שת"פ</label><textarea className="w-full p-3 bg-emerald-50 border border-emerald-200 focus:border-emerald-500 focus:shadow-sm text-gray-900 outline-none font-medium rounded-lg" rows="2" value={editForm.acceleratorStrategy || ""} onChange={e => setEditForm({...editForm, acceleratorStrategy: e.target.value})} /></div><div><label className="block text-xs font-bold text-gray-500 uppercase mb-1">טלפון</label><input className="w-full p-3 bg-gray-50 border border-gray-300 focus:border-emerald-500 text-gray-900 outline-none rounded-lg" value={editForm.phone || ""} onChange={e => setEditForm({...editForm, phone: e.target.value})} /></div><div><label className="block text-xs font-bold text-gray-500 uppercase mb-1">מייל</label><input className="w-full p-3 bg-gray-50 border border-gray-300 focus:border-emerald-500 text-gray-900 outline-none rounded-lg" value={editForm.email || ""} onChange={e => setEditForm({...editForm, email: e.target.value})} /></div><div className="col-span-2 md:col-span-1"><label className="block text-xs font-bold text-gray-500 uppercase mb-1">קטגוריה</label><input className="w-full p-3 bg-gray-50 border border-gray-300 focus:border-emerald-500 text-gray-900 outline-none rounded-lg" value={editForm.category || ""} onChange={e => setEditForm({...editForm, category: e.target.value})} /></div><div className="col-span-2 md:col-span-1"><label className="block text-xs font-bold text-gray-500 uppercase mb-1">מנגנון כניסה</label><input className="w-full p-3 bg-gray-50 border border-gray-300 focus:border-emerald-500 text-gray-900 outline-none rounded-lg" value={editForm.entryMechanism || ""} onChange={e => setEditForm({...editForm, entryMechanism: e.target.value})} /></div></div><div className="p-6 border-t border-gray-100 flex justify-end gap-4 bg-gray-50"><button onClick={() => setEditingId(null)} className="px-6 py-3 font-bold text-gray-500 hover:bg-gray-200 transition-colors rounded-lg">ביטול</button><button onClick={handleSave} className="px-8 py-3 font-black text-white bg-emerald-600 hover:bg-emerald-700 transition-all shadow-md flex items-center gap-2 rounded-lg"><Icons.Save size={18} /> שמור שינויים</button></div></div></div>)}
                 </div>
             );
         };
