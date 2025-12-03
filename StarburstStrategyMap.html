@@ -20,14 +20,18 @@
         body { font-family: 'Heebo', sans-serif; background-color: #F1F1F1; }
         
         /* Custom Scrollbar */
-        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar { width: 8px; height: 8px; }
         ::-webkit-scrollbar-track { background: #F1F1F1; }
         ::-webkit-scrollbar-thumb { background: #C1C1C1; border-radius: 4px; }
         ::-webkit-scrollbar-thumb:hover { background: #A8A8A8; }
 
-        /* Hide Scrollbar for Horizontal List */
+        /* Hide Scrollbar for Horizontal List but allow functionality */
         .no-scrollbar::-webkit-scrollbar { display: none; }
         .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+
+        /* Cursor styles for dragging */
+        .cursor-grab { cursor: grab; }
+        .cursor-grabbing { cursor: grabbing; }
 
         .animate-spin { animation: spin 1s linear infinite; }
         @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
@@ -63,9 +67,9 @@
     </style>
 </head>
 <body class="relative overflow-x-hidden">
-    <!-- Static Background Image (Added from snippet) -->
+    <!-- Static Background Image -->
     <div class="fixed inset-0 z-0 flex items-center justify-center pointer-events-none overflow-hidden">
-        <img src="./INNOVET_ICON-05linear-1.webp" alt="" class="w-[120vw] max-w-none opacity-5 grayscale animate-spin-slow" />
+        <img src="./INNOVET_LOGO_HOR_NEG-02-2.svg" alt="" class="w-full h-full object-cover opacity-5" />
     </div>
 
     <div id="root" class="relative z-10"></div>
@@ -76,7 +80,7 @@
         import { getFirestore, collection, doc, setDoc, updateDoc, deleteDoc, onSnapshot, serverTimestamp, query, orderBy, writeBatch } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
         const React = window.React;
-        const { useState, useEffect, useMemo } = React;
+        const { useState, useEffect, useMemo, useRef } = React;
 
         // --- Firebase Configuration ---
         const firebaseConfig = {
@@ -99,6 +103,64 @@
         } catch (e) {
             console.error("Failed to initialize Firebase:", e);
         }
+
+        // --- Custom Hooks ---
+        // Draggable Scroll Hook
+        const useDraggableScroll = (ref) => {
+            useEffect(() => {
+                const el = ref.current;
+                if (!el) return;
+
+                let isDown = false;
+                let startX;
+                let scrollLeft;
+
+                const onMouseDown = (e) => {
+                    // Only allow left click
+                    if (e.button !== 0) return;
+                    isDown = true;
+                    el.classList.add('cursor-grabbing');
+                    el.classList.remove('cursor-grab');
+                    startX = e.pageX - el.offsetLeft;
+                    scrollLeft = el.scrollLeft;
+                };
+
+                const onMouseLeave = () => {
+                    isDown = false;
+                    el.classList.remove('cursor-grabbing');
+                    el.classList.add('cursor-grab');
+                };
+
+                const onMouseUp = () => {
+                    isDown = false;
+                    el.classList.remove('cursor-grabbing');
+                    el.classList.add('cursor-grab');
+                };
+
+                const onMouseMove = (e) => {
+                    if (!isDown) return;
+                    e.preventDefault();
+                    const x = e.pageX - el.offsetLeft;
+                    const walk = (x - startX) * 1.5; // Scroll speed multiplier
+                    el.scrollLeft = scrollLeft - walk;
+                };
+
+                // Add initial class
+                el.classList.add('cursor-grab');
+
+                el.addEventListener('mousedown', onMouseDown);
+                el.addEventListener('mouseleave', onMouseLeave);
+                el.addEventListener('mouseup', onMouseUp);
+                el.addEventListener('mousemove', onMouseMove);
+
+                return () => {
+                    el.removeEventListener('mousedown', onMouseDown);
+                    el.removeEventListener('mouseleave', onMouseLeave);
+                    el.removeEventListener('mouseup', onMouseUp);
+                    el.removeEventListener('mousemove', onMouseMove);
+                };
+            }, [ref]);
+        };
 
         // --- Icons ---
         const Icons = {
@@ -195,6 +257,12 @@
             const [importUrl, setImportUrl] = useState("https://docs.google.com/spreadsheets/d/e/2PACX-1vQSkgkIvL4h1048RW_HiR-qnodnGw_XoVJZ9x_6sdgkMdTg9FN4ggtcW681YwM2jGSj8YoBAKxFP7Gw/pub?output=csv");
             const [notification, setNotification] = useState(null);
             const [showBottomBar, setShowBottomBar] = useState(false);
+
+            // Ref for horizontal scrolling categories
+            const categoryListRef = useRef(null);
+            
+            // Apply drag-to-scroll hook
+            useDraggableScroll(categoryListRef);
 
             // Derived state for the active partner being viewed
             const activePartner = useMemo(() => partners.find(p => p.id === viewingId), [partners, viewingId]);
@@ -437,7 +505,7 @@
                                             />
                                             <div className="flex flex-col text-white opacity-90">
                                                 <span className="text-sm font-black tracking-tighter leading-none">INNOVET</span>
-                                                <span className="text-[9px] font-bold text-[#FFC700] tracking-widest uppercase">Amit Ben Baruch</span>
+                                                <span className="text-[9px] font-bold text-[#FFC700] tracking-widest uppercase">Cohort 2</span>
                                             </div>
                                         </div>
                                     </div>
@@ -484,8 +552,8 @@
                                 </div>
                             </div>
 
-                            {/* NEW: Scrollable Filter Bar */}
-                            <div className="flex items-center gap-2 overflow-x-auto pb-2 no-scrollbar -mx-6 px-6 md:mx-0 md:px-0">
+                            {/* NEW: Scrollable Filter Bar with Drag-to-Scroll */}
+                            <div ref={categoryListRef} className="flex items-center gap-2 overflow-x-auto pb-2 no-scrollbar -mx-6 px-6 md:mx-0 md:px-0 cursor-grab">
                                 {categories.map(cat => (
                                     <button
                                         key={cat}
