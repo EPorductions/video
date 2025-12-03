@@ -19,11 +19,11 @@
         @import url('https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;700;900&display=swap');
         body { font-family: 'Heebo', sans-serif; background-color: #F1F1F1; }
         
-        /* Custom Scrollbar */
-        ::-webkit-scrollbar { width: 8px; height: 8px; }
+        /* Custom Scrollbar - YELLOW THEME */
+        ::-webkit-scrollbar { width: 10px; height: 10px; }
         ::-webkit-scrollbar-track { background: #F1F1F1; }
-        ::-webkit-scrollbar-thumb { background: #C1C1C1; border-radius: 4px; }
-        ::-webkit-scrollbar-thumb:hover { background: #A8A8A8; }
+        ::-webkit-scrollbar-thumb { background: #FFC700; border-radius: 5px; border: 2px solid #F1F1F1; }
+        ::-webkit-scrollbar-thumb:hover { background: #E5B300; }
 
         /* Hide Scrollbar for Horizontal List but allow functionality */
         .no-scrollbar::-webkit-scrollbar { display: none; }
@@ -116,7 +116,6 @@
                 let scrollLeft;
 
                 const onMouseDown = (e) => {
-                    // Only allow left click
                     if (e.button !== 0) return;
                     isDown = true;
                     el.classList.add('cursor-grabbing');
@@ -141,13 +140,11 @@
                     if (!isDown) return;
                     e.preventDefault();
                     const x = e.pageX - el.offsetLeft;
-                    const walk = (x - startX) * 1.5; // Scroll speed multiplier
+                    const walk = (x - startX) * 1.5;
                     el.scrollLeft = scrollLeft - walk;
                 };
 
-                // Add initial class
                 el.classList.add('cursor-grab');
-
                 el.addEventListener('mousedown', onMouseDown);
                 el.addEventListener('mouseleave', onMouseLeave);
                 el.addEventListener('mouseup', onMouseUp);
@@ -182,7 +179,9 @@
             UploadCloud: ({size=20, className=""}) => <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><path d="M4 14.899A7 7 0 1 1 15.71 8h1.79a4.5 4.5 0 0 1 2.5 8.242"/><path d="M12 12v9"/><path d="m16 16-4-4-4 4"/></svg>,
             Zap: ({size=20, className=""}) => <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon></svg>,
             Grid: ({size=20, className=""}) => <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect></svg>,
-            Layout: ({size=20, className=""}) => <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><line x1="3" y1="9" x2="21" y2="9"></line><line x1="9" y1="21" x2="9" y2="9"></line></svg>
+            Layout: ({size=20, className=""}) => <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><line x1="3" y1="9" x2="21" y2="9"></line><line x1="9" y1="21" x2="9" y2="9"></line></svg>,
+            Sparkles: ({size=20, className=""}) => <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><path d="m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1 1.275-1.275L21 12l-5.813-1.912a2 2 0 0 1-1.275-1.275L12 3Z"/><path d="M5 3v4"/><path d="M9 5H5"/><path d="M19 19v2"/><path d="M21 21h-2"/></svg>,
+            Copy: ({size=20, className=""}) => <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><rect width="14" height="14" x="8" y="8" rx="2" ry="2"/><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/></svg>
         };
 
         const THEME = {
@@ -226,12 +225,18 @@
             );
         };
 
-        const ActionButton = ({ href, icon: Icon, label, colorClass }) => {
-            if (!href) return null;
+        const ActionButton = ({ href, onClick, icon: Icon, label, colorClass, className="" }) => {
+            if (href) {
+                return (
+                    <a href={href} target={href.startsWith('http') ? "_blank" : undefined} className={`flex items-center justify-center gap-2 py-2 px-4 rounded font-bold text-sm transition-all duration-200 flex-1 shadow-sm cursor-pointer ${colorClass} ${className}`}>
+                        <Icon size={16} /> <span>{label}</span>
+                    </a>
+                );
+            }
             return (
-                <a href={href} target={href.startsWith('http') ? "_blank" : undefined} className={`flex items-center justify-center gap-2 py-2 px-4 rounded font-bold text-sm transition-all duration-200 flex-1 shadow-sm ${colorClass}`}>
+                <button onClick={onClick} className={`flex items-center justify-center gap-2 py-2 px-4 rounded font-bold text-sm transition-all duration-200 flex-1 shadow-sm cursor-pointer ${colorClass} ${className}`}>
                     <Icon size={16} /> <span>{label}</span>
-                </a>
+                </button>
             );
         };
 
@@ -245,12 +250,18 @@
             const [filterStatus, setFilterStatus] = useState("all"); 
             const [filterSubCategory, setFilterSubCategory] = useState("all");
             
-            // Layout State: 'compact' (mobile default) vs 'detailed' (desktop default)
             const [layoutMode, setLayoutMode] = useState(window.innerWidth < 768 ? 'compact' : 'detailed');
 
             const [editingId, setEditingId] = useState(null);
-            const [viewingId, setViewingId] = useState(null); // For viewing details in compact mode
+            const [viewingId, setViewingId] = useState(null);
             
+            // AI Mock State
+            const [showAIModal, setShowAIModal] = useState(false);
+            const [aiPartner, setAiPartner] = useState(null);
+            const [aiContentType, setAiContentType] = useState('pitch'); // 'pitch', 'message', 'synergy'
+            const [aiContentResult, setAiContentResult] = useState("");
+            const [isGeneratingAI, setIsGeneratingAI] = useState(false);
+
             const [editForm, setEditForm] = useState({});
             const [isAddingNew, setIsAddingNew] = useState(false);
             const [isImportModalOpen, setIsImportModalOpen] = useState(false);
@@ -258,13 +269,9 @@
             const [notification, setNotification] = useState(null);
             const [showBottomBar, setShowBottomBar] = useState(false);
 
-            // Ref for horizontal scrolling categories
             const categoryListRef = useRef(null);
-            
-            // Apply drag-to-scroll hook
             useDraggableScroll(categoryListRef);
 
-            // Derived state for the active partner being viewed
             const activePartner = useMemo(() => partners.find(p => p.id === viewingId), [partners, viewingId]);
 
             const showNotification = (type, message) => {
@@ -272,14 +279,12 @@
                 setTimeout(() => setNotification(null), 3500);
             };
 
-            // Scroll Logic & Resize Logic
             useEffect(() => {
                 const handleScroll = () => setShowBottomBar(window.scrollY > 250);
                 window.addEventListener('scroll', handleScroll);
                 return () => window.removeEventListener('scroll', handleScroll);
             }, []);
 
-            // Init Auth
             useEffect(() => {
                 const initAuth = async () => {
                     try {
@@ -293,10 +298,8 @@
                 return onAuthStateChanged(auth, (u) => setUser(u));
             }, []);
 
-            // Sync with DB
             useEffect(() => {
                 if (!user) return;
-
                 const q = collection(db, 'artifacts', appId, 'public', 'data', 'partners');
                 const unsubscribe = onSnapshot(q, (snapshot) => {
                     let docs = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
@@ -307,11 +310,9 @@
                     console.error("Sync error", err);
                     setLoading(false);
                 });
-
                 return () => unsubscribe();
             }, [user]);
 
-            // --- Actions ---
             const toggleContact = async (partner) => {
                 if (!user) return;
                 try {
@@ -324,7 +325,6 @@
             const handleDelete = async (id) => {
                 if (!user) return;
                 if (!window.confirm("האם למחוק שותף זה לצמיתות?")) return;
-
                 try {
                     if (!id) throw new Error("Invalid ID");
                     await deleteDoc(doc(db, 'artifacts', appId, 'public', 'data', 'partners', id));
@@ -341,7 +341,6 @@
                 if (!user) return;
                 const colRef = collection(db, 'artifacts', appId, 'public', 'data', 'partners');
                 const data = { ...editForm };
-                
                 try {
                     if (isAddingNew) {
                         await setDoc(doc(colRef), { ...data, contacted: false, note: "", createdAt: serverTimestamp() });
@@ -366,7 +365,6 @@
                 } catch(e) { console.error(e); }
             };
 
-            // Optimistic UI update for notes
             const updateNoteLocalUI = (id, text) => {
                  setPartners(prev => prev.map(p => p.id === id ? { ...p, note: text } : p));
             };
@@ -380,38 +378,23 @@
                     if (!response.ok) throw new Error("Network response was not ok");
                     const csvText = await response.text();
                     const rawData = parseCSV(csvText);
-                    
                     if (rawData.length === 0) throw new Error("קובץ ריק");
-
-                    const headerRowIndex = rawData.findIndex(row => row.some(cell => 
-                        cell.includes('שם החברה') || cell.includes('Company') || cell.includes('חברה')
-                    ));
-
+                    const headerRowIndex = rawData.findIndex(row => row.some(cell => cell.includes('שם החברה') || cell.includes('Company') || cell.includes('חברה')));
                     if (headerRowIndex === -1) throw new Error("לא נמצאה שורת כותרת תקינה ב-CSV");
-
                     const headers = rawData[headerRowIndex].map(h => h.trim());
-                    
-                    const keyMap = {
-                        "קטגוריה": "category", "תת": "subCategory", "שם החברה": "company", "חברה": "company", 
-                        "מנגנון": "entryMechanism", "ערך": "valueProp", "אסטרטגיית": "acceleratorStrategy", 
-                        "תובנה": "insight", "טלפון": "phone", "מייל": "email", "מיקום": "location", "דומיין": "domain"
-                    };
-
+                    const keyMap = { "קטגוריה": "category", "תת": "subCategory", "שם החברה": "company", "חברה": "company", "מנגנון": "entryMechanism", "ערך": "valueProp", "אסטרטגיית": "acceleratorStrategy", "תובנה": "insight", "טלפון": "phone", "מייל": "email", "מיקום": "location", "דומיין": "domain" };
                     const columnIndices = {};
                     headers.forEach((header, index) => {
                         const foundKey = Object.keys(keyMap).find(k => header.includes(k));
                         if (foundKey) columnIndices[keyMap[foundKey]] = index;
                     });
-
                     let importCount = 0;
                     const colRef = collection(db, 'artifacts', appId, 'public', 'data', 'partners');
-                    const batch = writeBatch(db); // Use batch for better performance (up to 500)
+                    const batch = writeBatch(db);
                     let batchCount = 0;
-
                     for (let i = headerRowIndex + 1; i < rawData.length; i++) {
                         const row = rawData[i];
                         if (row.length <= 1 && (!row[0] || row[0].trim() === "")) continue;
-
                         const rowData = {};
                         let hasCompany = false;
                         Object.keys(columnIndices).forEach(key => {
@@ -420,7 +403,6 @@
                             rowData[key] = val;
                             if (key === 'company' && val) hasCompany = true;
                         });
-
                         if (hasCompany) {
                             const newDocRef = doc(colRef);
                             batch.set(newDocRef, { ...rowData, contacted: false, note: "", createdAt: serverTimestamp() });
@@ -428,11 +410,7 @@
                             importCount++;
                         }
                     }
-
-                    if (batchCount > 0) {
-                        await batch.commit();
-                    }
-            
+                    if (batchCount > 0) await batch.commit();
                     showNotification('success', `יובאו ${importCount} שותפים בהצלחה!`);
                     setIsImportModalOpen(false);
                 } catch (e) {
@@ -443,7 +421,6 @@
                 }
             };
 
-            // Helpers
             const getLogoUrl = (domain, company) => domain ? `https://logo.clearbit.com/${domain}` : `https://ui-avatars.com/api/?name=${encodeURIComponent(company || "?")}&background=random&color=fff`;
             const formatForWhatsapp = (phone) => {
                 if (!phone) return "";
@@ -451,7 +428,6 @@
                 return clean.startsWith('0') ? `972${clean.substring(1)}` : `972${clean}`;
             };
 
-            // Filter
             const categories = useMemo(() => ["הכל", ...new Set(partners.map(p => p.category).filter(Boolean))], [partners]);
             const subCategories = useMemo(() => {
                 if (selectedCategory === "הכל") return ["הכל"];
@@ -464,14 +440,55 @@
                     const matchSearch = (p.company||"").toLowerCase().includes(term) || (p.valueProp||"").toLowerCase().includes(term);
                     const matchCat = selectedCategory === "הכל" || p.category === selectedCategory;
                     const matchSub = filterSubCategory === "all" || filterSubCategory === "הכל" || p.subCategory === filterSubCategory;
-                    
                     let matchStatus = true;
                     if (filterStatus === 'contacted') matchStatus = p.contacted;
                     if (filterStatus === 'not_contacted') matchStatus = !p.contacted;
-
                     return matchSearch && matchCat && matchSub && matchStatus;
                 });
             }, [partners, searchTerm, selectedCategory, filterSubCategory, filterStatus]);
+
+            // --- AI Logic (Mock) ---
+            const openAIModal = (partner) => {
+                setAiPartner(partner);
+                setAiContentType('pitch');
+                setAiContentResult("");
+                setShowAIModal(true);
+            };
+
+            const generateAIContent = async () => {
+                if (!aiPartner) return;
+                setIsGeneratingAI(true);
+                setAiContentResult("");
+
+                // Simulating API latency
+                await new Promise(resolve => setTimeout(resolve, 1500));
+
+                let result = "";
+                const company = aiPartner.company || "החברה";
+                const strategy = aiPartner.acceleratorStrategy || "אסטרטגיה כללית";
+                const value = aiPartner.valueProp || "ערך ייחודי";
+                const contact = "איש קשר"; 
+
+                switch (aiContentType) {
+                    case 'pitch':
+                        result = `**פיץ' קצר ל-${company}:**\n\nשלום ${contact},\nשמי [השם שלך] מ-Starburst. אני פונה אליכם כי זיהיתי פוטנציאל אדיר ב-${company} בתחום ה-${aiPartner.category || "חדשנות"}. \n\nאנו רואים הזדמנות לשיתוף פעולה סביב "${strategy}", ומאמינים שהטכנולוגיה שלכם יכולה להביא ערך משמעותי של "${value}". אשמח לתאם שיחה קצרה לבדיקת היתכנות.`;
+                        break;
+                    case 'message':
+                        result = `**הודעת פנייה (LinkedIn/Email):**\n\nהיי, \nנתקלתי בפעילות של ${company} ורציתי לבחון אפשרות לשיתוף פעולה אסטרטגי. \nאנחנו ב-Starburst מתמקדים בקידום סטארטאפים בתחום, והפתרון שלכם נראה מאוד רלוונטי למהלכים שאנו מקדמים כרגע בנושא ${strategy}.\n\nהאם תהיה פנוי לשיחה קצרה השבוע?`;
+                        break;
+                    case 'synergy':
+                        result = `**ניתוח סינרגיה עם ${company}:**\n\n1. **נקודת החיבור:** החברה מתמחה ב-${value}, מה שמשלים את הצורך שלנו בפתרונות עבור ${strategy}.\n2. **הזדמנות עסקית:** שילוב הטכנולוגיה שלהם יאפשר לנו להציע למשקיעים/לקוחות ערך מוסף בתחום ה-${aiPartner.subCategory || "טכנולוגיה"}.\n3. **פעולה מומלצת:** ליזום פיילוט ממוקד סביב מנגנון הכניסה "${aiPartner.entryMechanism || "POC"}" לבדיקת התאמה ראשונית.`;
+                        break;
+                }
+                
+                setAiContentResult(result);
+                setIsGeneratingAI(false);
+            };
+
+            const copyToClipboard = (text) => {
+                navigator.clipboard.writeText(text);
+                showNotification('success', 'הטקסט הועתק ללוח!');
+            };
 
             return (
                 <div className="min-h-screen flex flex-col pb-20" style={{ backgroundColor: THEME.bg }}>
@@ -535,7 +552,6 @@
                                 </div>
                                 
                                 <div className="flex items-center gap-2">
-                                    {/* Layout Toggle Button */}
                                     <button 
                                         onClick={() => setLayoutMode(layoutMode === 'detailed' ? 'compact' : 'detailed')}
                                         className="flex items-center gap-2 px-4 py-3 bg-gray-100 hover:bg-gray-200 text-gray-700 font-bold rounded-none transition-colors border-l border-gray-300"
@@ -552,7 +568,6 @@
                                 </div>
                             </div>
 
-                            {/* NEW: Scrollable Filter Bar with Drag-to-Scroll */}
                             <div ref={categoryListRef} className="flex items-center gap-2 overflow-x-auto pb-2 no-scrollbar -mx-6 px-6 md:mx-0 md:px-0 cursor-grab">
                                 {categories.map(cat => (
                                     <button
@@ -606,7 +621,6 @@
                                                     {partner.contacted ? 'נוצר קשר ✓' : 'לפני פנייה'}
                                                 </button>
                                                 
-                                                {/* QUICK ACTIONS (HOVER) */}
                                                 <div className="absolute top-0 left-0 flex z-10 opacity-0 group-hover:opacity-100 transition-opacity bg-gray-100/90 backdrop-blur-sm rounded-br-lg">
                                                      <button onClick={() => handleDelete(partner.id)} className="p-2 text-gray-400 hover:text-red-600 transition-colors" title="מחק">
                                                         <Icons.Trash2 size={18} />
@@ -652,10 +666,11 @@
                                                         <textarea className="w-full text-sm bg-[#F9F9F9] border-b-2 border-gray-200 focus:border-yellow-400 outline-none p-2 resize-none min-h-[60px] transition-colors placeholder-gray-400" placeholder="הערות..." value={partner.note || ""} onChange={(e) => updateNoteLocalUI(partner.id, e.target.value)} onBlur={(e) => saveNote(partner.id, e.target.value)} />
                                                     </div>
                                                 </div>
-                                                <div className="px-6 py-4 bg-gray-50 border-t border-gray-100 grid grid-cols-3 gap-3">
+                                                <div className="px-6 py-4 bg-gray-50 border-t border-gray-100 grid grid-cols-4 gap-2">
                                                     <ActionButton href={partner.phone ? `tel:${partner.phone}` : null} icon={Icons.Phone} label="חיוג" colorClass="bg-white border border-gray-200 text-gray-700 hover:bg-gray-100" />
                                                     <ActionButton href={partner.email ? `mailto:${partner.email}` : null} icon={Icons.Mail} label="מייל" colorClass="bg-blue-50 text-blue-700 hover:bg-blue-100" />
                                                     <ActionButton href={partner.phone ? `https://wa.me/${formatForWhatsapp(partner.phone)}` : null} icon={Icons.MessageCircle} label="" colorClass="bg-green-50 text-green-600 hover:bg-green-100" />
+                                                    <ActionButton onClick={() => openAIModal(partner)} icon={Icons.Sparkles} label="AI" colorClass="bg-purple-100 text-purple-700 hover:bg-purple-200" />
                                                 </div>
                                             </div>
                                         ))}
@@ -685,21 +700,71 @@
                         )}
                     </div>
 
+                    {/* AI MODAL */}
+                    {showAIModal && (
+                        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm" onClick={() => setShowAIModal(false)}>
+                            <div className="bg-white w-full max-w-lg shadow-2xl flex flex-col rounded-xl overflow-hidden animate-slide-up" onClick={e => e.stopPropagation()}>
+                                <div className="bg-gradient-to-r from-purple-600 to-blue-600 p-6 text-white flex justify-between items-start">
+                                    <div>
+                                        <h2 className="text-2xl font-black flex items-center gap-2"><Icons.Sparkles size={24} /> Gemini AI Partner Sync</h2>
+                                        <p className="text-purple-100 text-sm opacity-90 mt-1">יצירת תוכן חכם עבור {aiPartner?.company}</p>
+                                    </div>
+                                    <button onClick={() => setShowAIModal(false)} className="text-white/80 hover:text-white"><Icons.X size={24}/></button>
+                                </div>
+                                
+                                <div className="p-6">
+                                    <div className="flex gap-2 mb-6 bg-gray-100 p-1 rounded-lg">
+                                        <button onClick={() => setAiContentType('pitch')} className={`flex-1 py-2 text-sm font-bold rounded-md transition-all ${aiContentType === 'pitch' ? 'bg-white shadow text-purple-700' : 'text-gray-500 hover:text-gray-700'}`}>Pitch</button>
+                                        <button onClick={() => setAiContentType('message')} className={`flex-1 py-2 text-sm font-bold rounded-md transition-all ${aiContentType === 'message' ? 'bg-white shadow text-purple-700' : 'text-gray-500 hover:text-gray-700'}`}>Message</button>
+                                        <button onClick={() => setAiContentType('synergy')} className={`flex-1 py-2 text-sm font-bold rounded-md transition-all ${aiContentType === 'synergy' ? 'bg-white shadow text-purple-700' : 'text-gray-500 hover:text-gray-700'}`}>Synergy</button>
+                                    </div>
+
+                                    <div className="bg-purple-50 border border-purple-100 rounded-lg p-4 min-h-[200px] relative">
+                                        {isGeneratingAI ? (
+                                            <div className="absolute inset-0 flex flex-col items-center justify-center text-purple-600">
+                                                <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-purple-600 mb-2"></div>
+                                                <span className="text-xs font-bold animate-pulse">Gemini מנתח נתונים...</span>
+                                            </div>
+                                        ) : aiContentResult ? (
+                                            <div className="text-sm text-gray-800 whitespace-pre-wrap leading-relaxed">
+                                                {aiContentResult}
+                                            </div>
+                                        ) : (
+                                            <div className="flex flex-col items-center justify-center h-full text-gray-400 py-10">
+                                                <Icons.Sparkles size={40} className="mb-2 opacity-20" />
+                                                <p className="text-xs">לחץ על כפתור היצירה למטה</p>
+                                            </div>
+                                        )}
+                                        
+                                        {aiContentResult && !isGeneratingAI && (
+                                            <button onClick={() => copyToClipboard(aiContentResult)} className="absolute top-2 left-2 p-2 bg-white rounded-full shadow-sm hover:bg-gray-100 text-purple-600 transition-colors" title="העתק">
+                                                <Icons.Copy size={16} />
+                                            </button>
+                                        )}
+                                    </div>
+                                </div>
+
+                                <div className="p-6 border-t border-gray-100 bg-gray-50 flex justify-end">
+                                    <button onClick={generateAIContent} disabled={isGeneratingAI} className="px-6 py-3 bg-purple-600 hover:bg-purple-700 text-white font-bold rounded-lg shadow-md flex items-center gap-2 transition-all disabled:opacity-50 disabled:cursor-not-allowed">
+                                        <Icons.Sparkles size={18} /> 
+                                        {isGeneratingAI ? 'מייצר תוכן...' : 'צור תוכן חכם'}
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    )}
+
                     {/* VIEWER MODAL (Used in Compact Mode) */}
                     {activePartner && (
                         <div className="fixed inset-0 z-40 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm" onClick={() => setViewingId(null)}>
                             <div className="bg-white w-full max-w-lg shadow-2xl flex flex-col rounded-xl overflow-hidden animate-slide-up relative" onClick={e => e.stopPropagation()}>
-                                {/* Header / Close */}
                                 <div className="absolute top-2 left-2 z-20">
                                     <button onClick={() => setViewingId(null)} className="p-2 bg-black/10 hover:bg-black/20 rounded-full text-black transition-colors"><Icons.X size={20} /></button>
                                 </div>
-                                
-                                {/* Status Badge */}
                                 <button onClick={() => toggleContact(activePartner)} className={`absolute top-0 right-0 px-4 py-2 text-xs font-black uppercase tracking-wider z-10 transition-colors rounded-bl-xl ${activePartner.contacted ? 'bg-green-500 text-white' : 'bg-gray-200 text-gray-500 hover:bg-gray-300'}`}>
                                     {activePartner.contacted ? 'נוצר קשר ✓' : 'לפני פנייה'}
                                 </button>
 
-                                {/* Card Content */}
                                 <div className="p-6 pb-0 flex-grow flex flex-col max-h-[70vh] overflow-y-auto">
                                     <div className="flex items-start gap-4 mb-6 mt-8">
                                         <div className="w-20 h-20 bg-gray-50 border border-gray-100 flex items-center justify-center p-2 shrink-0 rounded-lg">
@@ -726,7 +791,6 @@
                                             </div>
                                         )}
 
-                                        {/* Contact Details Block */}
                                         <div className="pt-4 border-t border-gray-100 flex flex-col gap-3">
                                             {activePartner.phone && <div className="flex items-center gap-3 text-sm text-gray-700"><div className="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center text-gray-500"><Icons.Phone size={14} /></div><span dir="ltr" className="font-mono tracking-wide font-bold">{activePartner.phone}</span></div>}
                                             {activePartner.email && <div className="flex items-center gap-3 text-sm text-gray-700"><div className="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center text-gray-500"><Icons.Mail size={14} /></div><span className="truncate font-medium">{activePartner.email}</span></div>}
@@ -739,12 +803,12 @@
                                     </div>
                                 </div>
 
-                                {/* Modal Actions */}
                                 <div className="px-6 py-4 bg-gray-50 border-t border-gray-100">
-                                    <div className="grid grid-cols-3 gap-3 mb-4">
+                                    <div className="grid grid-cols-4 gap-2 mb-4">
                                         <ActionButton href={activePartner.phone ? `tel:${activePartner.phone}` : null} icon={Icons.Phone} label="חיוג" colorClass="bg-white border border-gray-200 text-gray-700 hover:bg-gray-100" />
                                         <ActionButton href={activePartner.email ? `mailto:${activePartner.email}` : null} icon={Icons.Mail} label="מייל" colorClass="bg-blue-50 text-blue-700 hover:bg-blue-100" />
                                         <ActionButton href={activePartner.phone ? `https://wa.me/${formatForWhatsapp(activePartner.phone)}` : null} icon={Icons.MessageCircle} label="" colorClass="bg-green-50 text-green-600 hover:bg-green-100" />
+                                        <ActionButton onClick={() => { setViewingId(null); openAIModal(activePartner); }} icon={Icons.Sparkles} label="AI" colorClass="bg-purple-100 text-purple-700 hover:bg-purple-200" />
                                     </div>
                                     <div className="flex justify-between items-center pt-2 border-t border-gray-200/50">
                                          <button onClick={() => handleDelete(activePartner.id)} className="text-red-400 hover:text-red-600 text-xs font-bold flex items-center gap-1"><Icons.Trash2 size={14} /> מחק</button>
