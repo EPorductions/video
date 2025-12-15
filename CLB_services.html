@@ -11,167 +11,7 @@
     
     <!-- Lucide Icons -->
     <script src="https://unpkg.com/lucide@latest"></script>
- <style>
-        :root {
-            --primary: #00f2ff;
-            --secondary: #bd00ff;
-            --text-main: #1e293b;
-            --bg-page: #f8fafc;
-        }
 
-        body {
-            font-family: 'Heebo', sans-serif;
-            background-color: var(--bg-page);
-            color: var(--text-main);
-            overflow-x: hidden;
-            -webkit-font-smoothing: antialiased;
-            -moz-osx-font-smoothing: grayscale;
-            text-rendering: optimizeLegibility;
-        }
-
-        .font-teko { font-family: 'Teko', sans-serif; }
-
-        .service-card {
-            background: rgba(255, 255, 255, 0.95);
-            backdrop-filter: blur(10px);
-            border: 1px solid #e2e8f0;
-            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-            position: relative;
-            overflow: hidden;
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
-            transform: translateZ(0); 
-        }
-        
-        .service-card:hover {
-            transform: translateY(-4px);
-            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.01);
-            border-color: #94a3b8;
-        }
-
-        .service-card::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            right: 0;
-            width: 4px;
-            height: 100%;
-            background: transparent;
-            transition: background 0.3s ease;
-        }
-        
-        .service-card:hover::before {
-            background: linear-gradient(to bottom, #2563eb, #00f2ff);
-        }
-
-        /* כרטיס AI */
-        .ai-card {
-            border: 1px solid #c084fc;
-            background: linear-gradient(to bottom right, #ffffff, #f3e8ff);
-        }
-        .ai-card:hover::before {
-            background: linear-gradient(to bottom, #9333ea, #c084fc);
-        }
-
-        .highlight-blue {
-            background: linear-gradient(120deg, #e0f2fe 0%, #e0f2fe 100%);
-            background-repeat: no-repeat;
-            background-size: 100% 40%;
-            background-position: 0 85%;
-            padding: 0 2px;
-            font-weight: 700;
-            color: #0369a1;
-        }
-
-        .highlight-text {
-            color: #1e293b;
-            font-weight: 600;
-            background-color: #f1f5f9;
-            padding: 2px 6px;
-            border-radius: 4px;
-            white-space: nowrap; 
-        }
-
-        .price-breakdown {
-            font-size: 0.75rem;
-            color: #64748b;
-            background-color: #f8fafc;
-            padding: 4px 8px;
-            border-radius: 4px;
-            border: 1px dashed #cbd5e1;
-            margin-top: 4px;
-            display: inline-block;
-        }
-        
-        .equipment-note {
-            font-size: 0.7rem;
-            color: #ef4444;
-            margin-top: 4px;
-            font-weight: 500;
-            display: flex;
-            align-items: center;
-            justify-content: flex-end;
-            gap: 4px;
-            flex-wrap: wrap;
-        }
-        
-        .addon-item {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            font-size: 0.85rem;
-            border-bottom: 1px dashed #e2e8f0;
-            padding-bottom: 4px;
-            margin-bottom: 4px;
-            color: #475569;
-        }
-
-        /* עיצוב תמונות */
-        .card-image-landscape {
-            width: 100%;
-            height: 200px;
-            object-fit: cover;
-            border-radius: 12px;
-            margin-bottom: 16px;
-            border: 1px solid #e2e8f0;
-        }
-
-        .card-image-portrait {
-            width: 100%;
-            height: 100%;
-            min-height: 250px;
-            object-fit: cover;
-            border-radius: 12px;
-            border: 1px solid #e2e8f0;
-        }
-
-        @media (min-width: 768px) {
-            .card-image-landscape {
-                height: auto;
-                max-height: 240px;
-                margin-bottom: 0;
-                margin-left: 24px;
-                width: 300px;
-                flex-shrink: 0;
-            }
-             .card-image-portrait {
-                width: 200px;
-                flex-shrink: 0;
-                margin-left: 24px;
-            }
-        }
-
-        @media print {
-            .no-print { display: none !important; }
-            body { background: white; padding: 0; font-size: 11pt; width: 100%; }
-            .service-card { break-inside: avoid; box-shadow: none; border: 1px solid #ccc; margin-bottom: 15px; page-break-inside: avoid; }
-            header { margin-bottom: 20px; flex-direction: row !important; }
-            h1, h2, h3 { color: black !important; }
-            .bg-slate-50 { background-color: #f8fafc !important; -webkit-print-color-adjust: exact; } 
-            * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
-            .text-\[13vw\] { font-size: 3rem !important; }
-            .card-image-landscape, .card-image-portrait { border: 1px solid #ddd; }
-        }
-    </style>
     <style>
         :root {
             --primary: #00f2ff;
@@ -233,6 +73,17 @@
             white-space: nowrap; 
         }
 
+        .price-breakdown {
+            font-size: 0.75rem;
+            color: #64748b;
+            background-color: #f8fafc;
+            padding: 4px 8px;
+            border-radius: 4px;
+            border: 1px dashed #cbd5e1;
+            margin-top: 4px;
+            display: inline-block;
+        }
+        
         .price-item-row {
             display: flex;
             justify-content: space-between;
@@ -302,7 +153,7 @@
         <!-- צד ימין -->
         <div class="text-center md:text-right w-full md:w-auto">
             <div class="inline-block px-4 py-1.5 bg-blue-50 text-blue-800 rounded-lg text-xs font-bold uppercase tracking-widest mb-4 border border-blue-100">
-                הצעת מחיר עבור
+                סיכום והצעת מחיר
             </div>
             <div class="flex flex-col md:flex-row items-center md:items-end gap-4 sm:gap-6 mb-2">
                 <!-- לוגו המרכז האקדמי -->
@@ -321,7 +172,7 @@
                 <div class="absolute -top-4 -right-4 w-6 h-6 sm:w-8 sm:h-8 bg-blue-500 rounded-full blur-xl opacity-20 animate-pulse"></div>
             </div>
             <div class="text-xs sm:text-sm text-slate-400 mt-2 font-mono tracking-widest uppercase">Orian Edelenyi // מהנדס תוכן ויזואלי</div>
-            <div class="text-[0.65rem] sm:text-xs text-slate-400 mt-1">* כל המחירים אינם כוללים מע"מ</div>
+            <div class="text-[0.65rem] sm:text-xs text-slate-400 mt-1">* המחירים אינם כוללים מע"מ</div>
         </div>
     </header>
 
@@ -331,23 +182,23 @@
             <div class="w-10 h-10 sm:w-12 sm:h-12 rounded-2xl bg-gradient-to-br from-blue-500 to-blue-700 flex items-center justify-center text-white shadow-lg shadow-blue-500/30 shrink-0">
                 <i data-lucide="video" class="w-5 h-5 sm:w-6 sm:h-6"></i>
             </div>
-            <h2 class="text-2xl sm:text-3xl font-black text-slate-800">חבילות צילום וצוות</h2>
+            <h2 class="text-2xl sm:text-3xl font-black text-slate-800">צוות וציוד צילום</h2>
         </div>
 
         <div class="service-card p-5 sm:p-6 md:p-8 rounded-3xl flex flex-col md:flex-row gap-6 sm:gap-8 items-start">
             <img src="assets/0.jpg" alt="Camera Crew" class="card-image-landscape md:order-last">
             
             <div class="flex-1 md:order-first">
-                <h3 class="text-xl sm:text-2xl font-bold text-slate-900 mb-3">צילום מולטי-קאמרה (Blackmagic)</h3>
+                <h3 class="text-xl sm:text-2xl font-bold text-slate-900 mb-3">הפקת מולטי-קאמרה קולנועית (Blackmagic)</h3>
                 <p class="text-slate-600 text-base sm:text-lg mb-4">
-                    שרשרת צילום קולנועית. אנחנו מדברים על מערך Blackmagic מלא, ללא עירוב מצלמות פשוטות. בחבילה המלאה אנחנו מגיעים שני צלמים כדי לתפוס גם זוויות בטוחות וגם שוטים בתנועה (גימבל/סטדי) שנותנים את הנפח בשידור.
+                    הפקת צילום במערך מולטי-קאמרה קולנועי (Blackmagic). הפריסה כוללת צוות כפול לכיסוי סטטי ודינאמי (Steadicam/Gimbal) ליצירת עומק ונפח בתוצרים הסופיים.
                 </p>
                 <div class="bg-blue-50/50 rounded-xl p-4 border border-blue-100">
-                    <div class="font-bold text-blue-900 mb-2 text-sm">חבילת פרימיום (המפרט המומלץ):</div>
+                    <div class="font-bold text-blue-900 mb-2 text-sm">מפרט טכני - חבילת פרימיום:</div>
                     <ul class="grid grid-cols-1 gap-1 text-sm text-slate-700">
-                        <li class="flex items-center gap-2"><i data-lucide="check" class="w-3 h-3 text-blue-500"></i> 2 אנשי צוות (צלם ראשי + צלם רונין/סטדי)</li>
+                        <li class="flex items-center gap-2"><i data-lucide="check" class="w-3 h-3 text-blue-500"></i> 2 אנשי צוות (צלם ראשי + מפעיל סטדיקאם)</li>
                         <li class="flex items-center gap-2"><i data-lucide="check" class="w-3 h-3 text-blue-500"></i> 4 גופי מצלמה מסונכרנים</li>
-                        <li class="flex items-center gap-2"><i data-lucide="check" class="w-3 h-3 text-blue-500"></i> כולל מערכת אלחוטית לניידות מלאה באולם</li>
+                        <li class="flex items-center gap-2"><i data-lucide="check" class="w-3 h-3 text-blue-500"></i> מערכת וידאו אלחוטית לניידות מלאה</li>
                     </ul>
                 </div>
             </div>
@@ -358,19 +209,19 @@
                 
                 <div class="flex-1 space-y-1">
                     <div class="price-item-row bg-blue-50 px-2 rounded-lg -mx-2">
-                        <span class="text-sm font-bold text-blue-900">חבילת פרימיום (4 מצלמות + 2 צלמים)</span>
+                        <span class="text-sm font-bold text-blue-900">פרימיום (4 מצלמות + 2 צלמים)</span>
                         <span class="font-teko font-bold text-xl text-blue-600">₪5,500</span>
                     </div>
                     <div class="price-item-row">
-                        <span class="text-sm text-slate-600">סטנדרט: צלם אחד + 2 מצלמות</span>
+                        <span class="text-sm text-slate-600">סטנדרט (צלם אחד + 2 מצלמות)</span>
                         <span class="font-teko font-bold text-lg text-slate-600">₪2,500</span>
                     </div>
                     <div class="price-item-row">
-                        <span class="text-sm text-slate-600">צלם בלבד (ללא ציוד הקפי)</span>
+                        <span class="text-sm text-slate-600">בסיסי (צלם אחד)</span>
                         <span class="font-teko font-bold text-lg text-slate-600">₪1,800</span>
                     </div>
                     <div class="price-item-row">
-                        <span class="text-sm text-slate-600">תוספת מצלמה (עד 6 סה"כ)</span>
+                        <span class="text-sm text-slate-600">תוספת מצלמה בודדת</span>
                         <span class="font-teko font-bold text-lg text-slate-600">₪500</span>
                     </div>
                 </div>
@@ -384,47 +235,47 @@
             <div class="w-10 h-10 sm:w-12 sm:h-12 rounded-2xl bg-gradient-to-br from-purple-500 to-purple-700 flex items-center justify-center text-white shadow-lg shadow-purple-500/30 shrink-0">
                 <i data-lucide="radio" class="w-5 h-5 sm:w-6 sm:h-6"></i>
             </div>
-            <h2 class="text-2xl sm:text-3xl font-black text-slate-800">ניתוב, שידור ואינטרנט</h2>
+            <h2 class="text-2xl sm:text-3xl font-black text-slate-800">שידור וניתוב</h2>
         </div>
 
         <div class="service-card p-5 sm:p-6 md:p-8 rounded-3xl flex flex-col md:flex-row gap-6 sm:gap-8 items-start">
             <img src="assets/pic (3).jpg" alt="Broadcast Control" class="card-image-landscape md:order-last">
             
             <div class="flex-1 md:order-first">
-                <h3 class="text-xl sm:text-2xl font-bold text-slate-900 mb-3">ניהול שידור וניתוב (vMix)</h3>
+                <h3 class="text-xl sm:text-2xl font-bold text-slate-900 mb-3">עמדת שידור וניתוב (vMix)</h3>
                 <p class="text-slate-600 text-base sm:text-lg mb-4">
-                    אנחנו מקימים עמדת שידור מלאה מבוססת vMix. זה לא רק "לעבור בין מצלמות" - זה ניהול ליינאפ מלא. אנחנו מטעינים מראש את כל השמות (Lower Thirds), אג'נדה של הכנס שרצה על המסך בהפסקות, שילוב סרטונים ומצגות תוך כדי שידור, והכל יוצא נקי ללייב סטרים (יוטיוב/פייסבוק).
+                    עמדת שידור וניתוב (Broadcast Control) מבוססת vMix. ניהול ליינאפ מלא בזמן אמת: שילוב כותרות (Lower Thirds), אג'נדה דינמית, מעברונים ממותגים ואינטגרציה של מצגות ווידאו לתוך השידור (Picture in Picture).
                 </p>
                  <div class="flex flex-wrap gap-2 text-sm text-slate-600 font-medium mb-4">
                     <span class="bg-purple-50 px-3 py-1 rounded text-purple-700">ניהול אג'נדה</span>
-                    <span class="bg-purple-50 px-3 py-1 rounded text-purple-700">Lower Thirds</span>
-                    <span class="bg-purple-50 px-3 py-1 rounded text-purple-700">שילוב מצגות בשידור</span>
+                    <span class="bg-purple-50 px-3 py-1 rounded text-purple-700">מיתוג שמות (Lower Thirds)</span>
+                    <span class="bg-purple-50 px-3 py-1 rounded text-purple-700">אינטגרציית מצגות בשידור</span>
                 </div>
                 <div class="text-xs text-red-500 font-medium bg-red-50 p-2 rounded border border-red-100 inline-block">
-                    * אינטרנט לא כלול - תלוי במיקום האירוע. ייתכן ויידרש סיור שטח או חיבור קווי ייעודי.
+                    * אינטרנט לא כלול - תלוי במיקום. ייתכן ויידרש סיור שטח או תשתית ייעודית.
                 </div>
             </div>
 
             <!-- תמחור מודולרי -->
             <div class="w-full md:w-96 bg-white rounded-xl border border-slate-200 p-4 shadow-sm self-stretch flex flex-col">
-                <div class="text-xs font-bold text-slate-400 uppercase mb-3 tracking-wider border-b border-slate-100 pb-2">מחירון שידור ותקשורת</div>
+                <div class="text-xs font-bold text-slate-400 uppercase mb-3 tracking-wider border-b border-slate-100 pb-2">עלויות שידור ותקשורת</div>
                 
                 <div class="flex-1 space-y-0">
                     <!-- נתב -->
                     <div class="price-item-row bg-purple-50 px-2 rounded-lg -mx-2">
-                        <span class="text-sm font-bold text-purple-900">נתב + vMix + במאי שידור + Zoom</span>
+                        <span class="text-sm font-bold text-purple-900">חבילת שידור מלאה (vMix + במאי)</span>
                         <span class="font-teko font-bold text-xl text-purple-600">₪3,600</span>
                     </div>
                     
                     <!-- לייב בסיסי -->
                     <div class="price-item-row">
-                        <span class="text-sm text-slate-600">שידור לייב בסיסי (כולל חיתוך סינקים)</span>
+                        <span class="text-sm text-slate-600">שידור בסיסי (כולל חיתוך סינקים)</span>
                         <span class="font-teko font-bold text-lg text-slate-600">₪1,500</span>
                     </div>
 
                     <!-- מעגל סגור -->
                     <div class="price-item-row">
-                        <span class="text-sm text-slate-600">חיבור למעגל סגור (IMAG) לאולם</span>
+                        <span class="text-sm text-slate-600">חיבור למסכים באולם (IMAG)</span>
                         <span class="font-teko font-bold text-lg text-slate-600">+₪1,000</span>
                     </div>
 
@@ -464,14 +315,14 @@
             <!-- סאונד -->
             <div class="service-card p-5 rounded-2xl flex flex-col justify-between">
                 <div>
-                    <h3 class="text-lg font-bold text-slate-900 mb-3">ציוד הגברה וסאונד</h3>
+                    <h3 class="text-lg font-bold text-slate-900 mb-3">מפרט הגברה וסאונד</h3>
                     <div class="space-y-3">
                         <div class="price-item-row border-b border-dashed border-slate-200 pb-2">
                             <span class="text-sm text-slate-700">מיקסר + 4 מיק' אלחוטיים</span>
                             <span class="font-teko font-bold text-xl text-orange-600">₪500</span>
                         </div>
                         <div class="price-item-row border-b border-dashed border-slate-200 pb-2">
-                            <span class="text-sm text-slate-700">איש סאונד</span>
+                            <span class="text-sm text-slate-700">סאונדמן (איש צוות)</span>
                             <span class="font-teko font-bold text-xl text-orange-600">₪1200</span>
                         </div>
                     </div>
@@ -481,14 +332,14 @@
             <!-- תאורה -->
             <div class="service-card p-5 rounded-2xl flex flex-col justify-between">
                 <div>
-                    <h3 class="text-lg font-bold text-slate-900 mb-3">תאורת אולפן ושטח</h3>
+                    <h3 class="text-lg font-bold text-slate-900 mb-3">מפרט תאורה</h3>
                     <div class="space-y-3">
                         <div class="price-item-row border-b border-dashed border-slate-200 pb-2">
-                            <span class="text-sm text-slate-700">סט תאורה PRO (פנס 1200D + 2x300D)&nbsp; או בסגנון</span>
+                            <span class="text-sm text-slate-700">סט תאורה PRO (ראשי + משלימים)</span>
                             <span class="font-teko font-bold text-xl text-yellow-600">₪1200</span>
                         </div>
                         <div class="price-item-row border-b border-dashed border-slate-200 pb-2">
-                            <span class="text-sm text-slate-700">סט תאורה STD (פנס 1200D + 2x120D) או בסגנון</span>
+                            <span class="text-sm text-slate-700">סט תאורה STD</span>
                             <span class="font-teko font-bold text-xl text-yellow-600">₪600</span>
                         </div>
                     </div>
@@ -503,14 +354,15 @@
             <div class="w-10 h-10 sm:w-12 sm:h-12 rounded-2xl bg-gradient-to-br from-emerald-500 to-emerald-700 flex items-center justify-center text-white shadow-lg shadow-emerald-500/30 shrink-0">
                 <i data-lucide="monitor" class="w-5 h-5 sm:w-6 sm:h-6"></i>
             </div>
-            <h2 class="text-2xl sm:text-3xl font-black text-slate-800">ניהול ויזואלי ומסכים</h2>
+            <h2 class="text-2xl sm:text-3xl font-black text-slate-800">ניהול ויזואלי ומצגות</h2>
         </div>
 
         <div class="service-card p-5 sm:p-6 md:p-8 rounded-3xl flex flex-col md:flex-row gap-6 sm:gap-8 items-start bg-slate-50/50 border-slate-200">
             <div class="flex-1">
-                <h3 class="text-xl font-bold text-slate-900 mb-3">ניהול מצגות והקרנה</h3>
+                <h3 class="text-xl font-bold text-slate-900 mb-3">ניהול תוכן לבמה (Show Control)</h3>
                 <p class="text-slate-600 text-sm mb-4 leading-relaxed">
-                מערך תצוגה טכני מלא לבמה ולקהל. כולל מחשבים נפרדים למצגות (Main/Backup), מסכי עזר לדוברים כדי שלא יצטרכו להסתובב אחורה,  קליקר</p>
+                    ניהול טכני מלא של התוכן הוויזואלי. הקמת עמדת קונטרול הכוללת יתירות (Main/Backup) למצגות, מסכי 'ביטחון' (Confidence Monitors) לדוברים לשליטה מלאה בטקסט ובזמנים מבלי להפנות גב לקהל.
+                </p>
                 <div class="w-full md:w-3/4">
                     <img src="assets/pic (1).jpg" alt="Visual Control" class="w-full h-40 object-cover rounded-xl border border-slate-200">
                 </div>
@@ -518,19 +370,19 @@
             
             <!-- תמחור מודולרי -->
             <div class="w-full md:w-80 bg-white rounded-xl border border-slate-200 p-4 shadow-sm">
-                <div class="text-xs font-bold text-slate-400 uppercase mb-3 tracking-wider border-b border-slate-100 pb-2">מרכיבי הקרנה</div>
+                <div class="text-xs font-bold text-slate-400 uppercase mb-3 tracking-wider border-b border-slate-100 pb-2">מרכיבי המערכת</div>
                 
                 <div class="space-y-0">
                     <div class="price-item-row">
-                        <span class="text-sm font-medium text-slate-700">מפעיל טכני / מפעיל זום&nbsp;</span>
+                        <span class="text-sm font-medium text-slate-700">מפעיל טכני (משמרת מלאה)</span>
                         <span class="font-teko font-bold text-lg text-emerald-600">₪1,800</span>
                     </div>
                     <div class="price-item-row">
-                        <span class="text-sm text-slate-600">עמדת מחשב מצגות</span>
+                        <span class="text-sm text-slate-600">עמדת מחשב מצגות (יתירות מלאה)</span>
                         <span class="font-teko font-bold text-lg text-slate-600">₪1000</span>
                     </div>
                     <div class="price-item-row">
-                        <span class="text-sm text-slate-600">מסך 32" על סטנד</span>
+                        <span class="text-sm text-slate-600">מסך 32" על סטנד (Speaker View)</span>
                         <span class="font-teko font-bold text-lg text-slate-600">₪400</span>
                     </div>
                     <div class="price-item-row">
@@ -538,13 +390,13 @@
                         <span class="font-teko font-bold text-lg text-slate-600">₪200</span>
                     </div>
                     <div class="price-item-row">
-                        <span class="text-sm text-slate-600">מארז גרפי ממותג&nbsp;&nbsp;</span>
+                        <span class="text-sm text-slate-600">מארז גרפי ממותג (Graphics Pack)</span>
                         <span class="font-teko font-bold text-lg text-slate-600">₪600</span>
                     </div>
                 </div>
                 
                 <div class="mt-3 pt-3 border-t border-slate-200 flex justify-between items-end">
-                    <div class="text-xs text-slate-400">סה"כ חבילה<br>(לפני מע"מ)</div>
+                    <div class="text-xs text-slate-400">סה"כ חבילת ויזואל<br>(לפני מע"מ)</div>
                     <div class="font-teko font-bold text-2xl text-emerald-600 leading-none">₪4,000</div>
                 </div>
             </div>
@@ -565,7 +417,7 @@
                 <div class="flex justify-between items-center border-b border-slate-100 pb-3">
                     <div>
                         <div class="font-bold text-slate-800">עריכת וידאו Offline</div>
-                        <div class="text-xs text-slate-500">עריכה לפי תסריט / סיפור, תיקון צבע בסיסי, ליטוש תמונה</div>
+                        <div class="text-xs text-slate-500">עריכת Storytelling, בחירת שוטים ורצף עלילתי</div>
                     </div>
                     <div class="font-teko font-bold text-xl text-indigo-600">₪2,200</div>
                 </div>
@@ -574,20 +426,23 @@
                 <div class="flex justify-between items-center border-b border-slate-100 pb-3">
                     <div>
                         <div class="font-bold text-slate-800">עיצוב פסקול ומיקס סאונד</div>
-                        <div class="text-xs text-slate-500">ניקוי רעשים, יצירת מוזיקה</div>
+                        <div class="text-xs text-slate-500">מיקס, ניקוי רעשים (Denoise) ואיזון עוצמות (Mastering)</div>
                     </div>
                     <div class="font-teko font-bold text-xl text-indigo-600">₪800</div>
                 </div>
 
-                <!-- פריט 3 -->
-                <!-- פריט 4 -->
+                <!-- פריט 3: תיקוני צבע -->
+              
+                
+                 <!-- פריט 4: אנימציה -->
+                
+
                 <!-- פריט 5 -->
                 <div class="flex justify-between items-center border-b border-slate-100 pb-3">
                     <div>
                         <div class="font-bold text-slate-800">עריכת Online AI ואפקטים</div>
                         <div class="text-xs text-slate-500">
-                          <p> התאמות מדוייקות למיתו, יצירת סרט ונים למוצר,&nbsp; &nbsp;&nbsp;</p>
-                          <p>הטמעת אובייקטים / החלפה / יצירת שוטים / לוגו</p>
+                          הטמעת אלמנטים גרפיים, תיקוני AI מתקדמים, החלפת רקעים/אובייקטים ופיינל-טאץ'
                         </div>
                     </div>
                     <div class="font-teko font-bold text-xl text-indigo-600">₪3,500</div>
@@ -604,8 +459,8 @@
             </div>
 
             <div class="mt-6 flex flex-wrap gap-4 text-xs text-slate-500 bg-slate-50 p-3 rounded-lg">
-                <span class="flex items-center gap-1"><i data-lucide="info" class="w-3 h-3"></i> כולל עד 2 סבבי תיקונים ללא עלות</span>
-                <span class="flex items-center gap-1"><i data-lucide="clock" class="w-3 h-3"></i> שעות נוספות בחדר עריכה יחויבו בנפרד</span>
+                <span class="flex items-center gap-1"><i data-lucide="info" class="w-3 h-3"></i> המחיר כולל עד 2 סבבי תיקונים</span>
+                <span class="flex items-center gap-1"><i data-lucide="clock" class="w-3 h-3"></i> שעות עריכה נוספות יחויבו בנפרד</span>
             </div>
         </div>
     </section>
@@ -628,22 +483,22 @@
             <!-- קוביה 2 -->
             <div class="bg-white border border-slate-200 p-4 sm:p-5 rounded-2xl text-center hover:border-purple-400 transition-all hover:shadow-lg group">
                 <div class="text-purple-500 mb-2 flex justify-center group-hover:scale-110 transition-transform"><i data-lucide="film" class="w-6 h-6 sm:w-7 sm:h-7"></i></div>
-                <div class="font-bold text-slate-800 text-sm sm:text-base">עריכת וידאו</div>
-                <div class="text-xs sm:text-sm text-slate-400 mb-2">Premiere Pro</div>
+                <div class="font-bold text-slate-800 text-sm sm:text-base">עריכת וידאו Offline</div>
+                <div class="text-xs sm:text-sm text-slate-400 mb-2">סביבת עבודה ADOBE</div>
                 <div class="text-2xl sm:text-3xl font-teko font-bold text-slate-900">₪250</div>
             </div>
             <!-- קוביה 3 -->
             <div class="bg-white border border-slate-200 p-4 sm:p-5 rounded-2xl text-center hover:border-orange-400 transition-all hover:shadow-lg group">
                 <div class="text-orange-500 mb-2 flex justify-center group-hover:scale-110 transition-transform"><i data-lucide="move-3d" class="w-6 h-6 sm:w-7 sm:h-7"></i></div>
-                <div class="font-bold text-slate-800 text-sm sm:text-base">אנימציה & Motion</div>
-                <div class="text-xs sm:text-sm text-slate-400 mb-2">After Effects</div>
+                <div class="font-bold text-slate-800 text-sm sm:text-base">אנימציה &amp; AI</div>
+                <div class="text-xs sm:text-sm text-slate-400 mb-2">עריכת Online AI ואפקטים</div>
                 <div class="text-2xl sm:text-3xl font-teko font-bold text-slate-900">₪450</div>
             </div>
             <!-- קוביה 4 -->
             <div class="bg-white border border-slate-200 p-4 sm:p-5 rounded-2xl text-center hover:border-pink-400 transition-all hover:shadow-lg group">
                 <div class="text-pink-500 mb-2 flex justify-center group-hover:scale-110 transition-transform"><i data-lucide="palette" class="w-6 h-6 sm:w-7 sm:h-7"></i></div>
                 <div class="font-bold text-slate-800 text-sm sm:text-base">עיצוב גרפי</div>
-                <div class="text-xs sm:text-sm text-slate-400 mb-2">Photoshop / Figma</div>
+                <div class="text-xs sm:text-sm text-slate-400 mb-2">Photoshop / Nano Banana Pro</div>
                 <div class="text-2xl sm:text-3xl font-teko font-bold text-slate-900">₪350</div>
             </div>
             <!-- קוביה 5 -->
@@ -664,7 +519,7 @@
             <div class="bg-white border border-slate-200 p-4 sm:p-5 rounded-2xl text-center hover:border-teal-400 transition-all hover:shadow-lg group">
                 <div class="text-teal-500 mb-2 flex justify-center group-hover:scale-110 transition-transform"><i data-lucide="sparkles" class="w-6 h-6 sm:w-7 sm:h-7"></i></div>
                 <div class="font-bold text-slate-800 text-sm sm:text-base">ניהול תוכן ו-AI</div>
-                <div class="text-xs sm:text-sm text-slate-400 mb-2">Prompting / Social</div>
+                <div class="text-xs sm:text-sm text-slate-400 mb-2">Prompting / WEB</div>
                 <div class="text-2xl sm:text-3xl font-teko font-bold text-slate-900">₪350</div>
             </div>
              <!-- קוביה 8 -->
