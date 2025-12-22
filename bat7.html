@@ -73,6 +73,9 @@
             border: 1px dotted var(--accent-gold); pointer-events: none; opacity: 0.6;
         }
         
+        .stitched-gold::after { border-color: var(--accent-gold); opacity: 0.8; }
+        .stitched-gold::before { border-color: var(--accent-terracotta); }
+
         .horizontal-scroll-container {
             display: flex;
             flex-direction: row;
@@ -106,20 +109,6 @@
         @keyframes weaveVert { 0% { height: 0; } 100% { height: 100%; } }
         @keyframes weaveHoriz { 0% { width: 0; } 100% { width: 100%; } }
 
-        /* Badge Styles */
-        .badge-new {
-            background-color: var(--accent-terracotta);
-            color: white;
-            font-weight: bold;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
-        }
-        .badge-featured {
-            background-color: var(--accent-gold);
-            color: white;
-            font-weight: bold;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
-        }
-
         @media (max-width: 768px) {
             .horizontal-scroll-container { scroll-snap-type: x mandatory; }
         }
@@ -129,7 +118,7 @@
     <div id="root"></div>
 
     <script type="text/babel">
-        const { useState, useEffect, useRef, useLayoutEffect } = React;
+        const { useState, useEffect, useRef, useLayoutEffect, useMemo } = React;
 
         // --- Icons ---
         const Icons = {
@@ -138,9 +127,10 @@
             ArrowLeft: () => <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>,
             Mail: () => <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path><polyline points="22,6 12,13 2,6"></polyline></svg>,
             Phone: () => <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path></svg>,
+            Star: () => <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" stroke="none"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>
         };
 
-        // --- Content Dictionary ---
+        // --- Content ---
         const content = {
             he: {
                 name: "בת שבע ליבנה",
@@ -160,15 +150,13 @@
                 emailLabel: "אימייל",
                 phoneLabel: "טלפון",
                 rights: "© 2025 כל הזכויות שמורות לבת שבע ליבנה",
+                featuredTitle: "אוסף חדש",
+                newBadge: "חדש",
                 categories: { 
                     cat1: "מרקמים",
                     cat2: "טבע וצבע",
                     cat3: "אריגה חופשית",
                     cat4: "חוטים מספרים"
-                },
-                badges: {
-                    new: "יצירה חדשה",
-                    featured: "נבחרים"
                 }
             },
             en: {
@@ -189,53 +177,100 @@
                 emailLabel: "Email",
                 phoneLabel: "Phone",
                 rights: "© 2025 All Rights Reserved",
+                featuredTitle: "New Collection",
+                newBadge: "New",
                 categories: { 
                     cat1: "Textures",
                     cat2: "Nature & Color",
                     cat3: "Free Weaving",
                     cat4: "Narrative Threads"
-                },
-                badges: {
-                    new: "New Creation",
-                    featured: "Featured"
                 }
             }
         };
 
-        // --- Data Generation (Logic Updated for "Infinite" & Stars) ---
-        const getCategoriesData = (t) => {
-            // Attempt to load up to 100 images. Broken links will be hidden by SmartCard.
-            const allImages = Array.from({ length: 100 }, (_, i) => i + 1);
-            
-            const makeImg = (id) => {
-                let badge = null;
-                // Feature Logic: 
-                // 1 = Newest
-                // 2, 3 = Featured/New Products
-                if (id === 1) badge = 'new';
-                else if (id === 2 || id === 3) badge = 'featured';
+        // --- Data Generation Logic ---
+        const MAX_POTENTIAL_IMAGES = 100; // Limit for "infinite" attempt
+        
+        // Helper to structure image data
+        const makeImg = (id, role, t) => ({ 
+            id, 
+            src: `bat7_pics/pic (${id}).jpg`, 
+            fallback: `bat7_pics/pic (${id}).jpeg`, 
+            title: `${t.role} ${id}`, 
+            year: '2025',
+            role: role // 'new', 'featured', 'standard'
+        });
 
-                return { 
-                    id, 
-                    src: `bat7_pics/pic (${id}).jpg`, 
-                    fallback: `bat7_pics/pic (${id}).jpeg`, 
-                    title: `${t.role} ${id}`, 
-                    year: '2024',
-                    badge: badge // Add badge property
-                };
+        const getGalleryData = (t) => {
+            // Define special IDs
+            const newestId = 1;
+            const featuredIds = [2, 3];
+            
+            const newCollection = {
+                title: t.featuredTitle,
+                main: makeImg(newestId, 'new', t),
+                subs: featuredIds.map(id => makeImg(id, 'featured', t))
             };
 
-            // Distribute images among categories roughly evenly or by logic
-            // We slice effectively "infinite" lists here, they will just stop rendering when file not found.
-            return [
-                { id: 'cat1', title: t.categories.cat1, items: allImages.slice(0, 10).map(makeImg) },
-                { id: 'cat2', title: t.categories.cat2, items: allImages.slice(10, 30).map(makeImg) },
-                { id: 'cat3', title: t.categories.cat3, items: allImages.slice(30, 60).map(makeImg) },
-                { id: 'cat4', title: t.categories.cat4, items: allImages.slice(60, 100).map(makeImg) }
+            // Generate remaining IDs dynamically for categories
+            // We start from 4 up to MAX. Categories are assigned round-robin.
+            const categories = [
+                { id: 'cat1', title: t.categories.cat1, items: [] },
+                { id: 'cat2', title: t.categories.cat2, items: [] },
+                { id: 'cat3', title: t.categories.cat3, items: [] },
+                { id: 'cat4', title: t.categories.cat4, items: [] }
             ];
+
+            for (let i = 4; i <= MAX_POTENTIAL_IMAGES; i++) {
+                const catIndex = (i - 4) % 4; // Round robin distribution
+                categories[catIndex].items.push(makeImg(i, 'standard', t));
+            }
+
+            return { newCollection, categories };
         };
 
         // --- Components ---
+
+        // Robust Gallery Item that hides itself completely on error
+        const GalleryItem = ({ item, onClick, className, isFeatured, badgeText }) => {
+            const [isVisible, setIsVisible] = useState(true);
+            const [src, setSrc] = useState(item.src);
+            
+            const handleError = () => {
+                if (src === item.src && item.fallback) {
+                    setSrc(item.fallback);
+                } else {
+                    // If fallback also fails, hide the entire component
+                    setIsVisible(false);
+                }
+            };
+
+            if (!isVisible) return null;
+
+            return (
+                <div className={`${className} ${isFeatured ? 'stitched-gold' : 'stitched'} group relative cursor-pointer transition-all duration-500 ease-out hover:-translate-y-2`} onClick={() => onClick(item)}>
+                    <div className="w-full h-full p-2 bg-white relative overflow-hidden">
+                        <img 
+                            src={src} 
+                            alt={item.title} 
+                            className="w-full h-full object-cover transition-all duration-700 group-hover:scale-105" 
+                            onError={handleError}
+                            loading="lazy"
+                            draggable="false"
+                        />
+                        {badgeText && (
+                            <div className="absolute top-4 left-4 bg-[#d66853] text-white text-xs font-bold px-3 py-1 shadow-md z-10 tracking-wider uppercase">
+                                {badgeText}
+                            </div>
+                        )}
+                    </div>
+                    <div className="absolute inset-0 bg-gradient-to-t from-[#2d2420]/90 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex flex-col justify-end p-6 text-right" dir="rtl">
+                        <span className="text-[#e09f3e] text-sm font-mono mb-1">{item.year}</span>
+                        <h3 className="text-2xl serif text-[#f4f1ea]">{item.title}</h3>
+                    </div>
+                </div>
+            );
+        };
 
         const Intro = ({ onComplete }) => {
             const [visible, setVisible] = useState(true);
@@ -257,71 +292,6 @@
             );
         };
 
-        const SmartImage = ({ src, fallback, alt, className, onLoadError }) => {
-            const [currentSrc, setCurrentSrc] = useState(src);
-            const [error, setError] = useState(false);
-
-            const handleError = () => {
-                if (currentSrc === src && fallback) {
-                    setCurrentSrc(fallback);
-                } else {
-                    setError(true);
-                    if (onLoadError) onLoadError();
-                }
-            };
-
-            if (error) return null;
-
-            return (
-                <img 
-                    src={currentSrc} 
-                    alt={alt} 
-                    className={className} 
-                    onError={handleError}
-                    loading="lazy"
-                    draggable="false"
-                />
-            );
-        };
-
-        // NEW: Smart Card Component - Hides itself completely if image fails
-        const ArtCard = ({ item, onClick, t }) => {
-            const [visible, setVisible] = useState(true);
-
-            if (!visible) return null;
-
-            const badgeText = item.badge ? t.badges[item.badge] : null;
-            const badgeClass = item.badge === 'new' ? 'badge-new' : 'badge-featured';
-
-            return (
-                <div 
-                    className={`relative group cursor-pointer transition-all duration-500 ease-out flex-shrink-0 snap-center w-[80vw] md:w-[45vh] aspect-[3/4] stitched hover:-translate-y-2`} 
-                    onClick={() => onClick(item)}
-                >
-                    <div className="w-full h-full p-2 bg-white relative">
-                        <SmartImage 
-                            src={item.src} 
-                            fallback={item.fallback} 
-                            alt={item.title} 
-                            className="w-full h-full object-cover transition-all duration-700" 
-                            onLoadError={() => setVisible(false)} // Hide card on failure
-                        />
-                        
-                        {/* Render Badge if exists */}
-                        {badgeText && (
-                            <div className={`absolute top-4 right-4 px-3 py-1 text-xs uppercase tracking-wider rounded-sm z-20 ${badgeClass}`}>
-                                {badgeText}
-                            </div>
-                        )}
-                    </div>
-                    <div className="absolute inset-0 bg-gradient-to-t from-[#2d2420]/90 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex flex-col justify-end p-6 text-right" dir="rtl">
-                        <span className="text-[#e09f3e] text-sm font-mono mb-1">{item.year}</span>
-                        <h3 className="text-2xl serif text-[#f4f1ea]">{item.title}</h3>
-                    </div>
-                </div>
-            );
-        };
-
         const Hero = ({ t, sectionRef, id, onLeft, onRight, onText }) => (
             <section id={id} ref={sectionRef} className="snap-center min-w-[100vw] h-[100vh] h-[100dvh] relative flex items-center justify-center overflow-hidden flex-shrink-0 bg-[#fbf9f4] z-20 layout-transition border-l border-r border-[#d66853]/20">
                 <div className="absolute inset-0 opacity-20 select-none pointer-events-none">
@@ -331,7 +301,7 @@
                 <div className="relative z-10 text-center px-4 select-none flex flex-col items-center justify-center w-full h-full max-w-[95vw]">
                     <div className="relative p-3 bg-white shadow-xl mb-8 transform rotate-1 stitched hover:rotate-0 transition-transform duration-700">
                         <div className="w-[70vw] md:w-[25vw] aspect-[3/4] overflow-hidden bg-[#e8e4dc]">
-                            <SmartImage src="bat7_pics/artist.jpeg" fallback="bat7_pics/artist.jpg" alt={t.name} className="w-full h-full object-cover transition-all duration-700 hover:scale-105" />
+                            <img src="bat7_pics/artist.jpeg" className="w-full h-full object-cover transition-all duration-700 hover:scale-105" onError={(e) => e.target.src="bat7_pics/artist.jpg"} />
                         </div>
                         <div className="absolute -top-4 left-1/2 -translate-x-1/2 w-24 h-8 bg-[#f4f1ea] opacity-90 shadow-sm rotate-[-2deg] border border-[#ccc]"></div>
                     </div>
@@ -346,6 +316,42 @@
             </section>
         );
 
+        const FeaturedSection = ({ data, t, onImageClick, reversed }) => (
+            <div className={`flex ${reversed ? 'flex-row-reverse' : 'flex-row'} items-center gap-8 md:gap-20 px-4 md:px-20 border-l border-[#d66853]/10 snap-center h-full layout-transition relative bg-[#fbf9f4]`}>
+                 <div className="h-[50vh] md:h-[60vh] flex flex-col justify-center items-center opacity-100 sticky left-0 z-10">
+                    <div className="w-1 h-12 md:h-24 bg-gradient-to-b from-transparent via-[#e09f3e] to-transparent mb-4 md:mb-6"></div>
+                    <h2 className="vertical-text text-3xl md:text-6xl serif tracking-widest text-[#d66853] font-black whitespace-nowrap drop-shadow-sm flex items-center gap-4">
+                        <span className="opacity-50 text-xl"><Icons.Star /></span> {t.featuredTitle}
+                    </h2>
+                    <div className="w-1 h-12 md:h-24 bg-gradient-to-b from-transparent via-[#e09f3e] to-transparent mt-4 md:mt-6"></div>
+                </div>
+
+                <div className={`flex ${reversed ? 'flex-row-reverse' : 'flex-row'} items-center gap-6 md:gap-12`}>
+                    {/* Main Hero Product (ID 1) */}
+                    <GalleryItem 
+                        item={data.main} 
+                        onClick={onImageClick} 
+                        className="w-[85vw] md:w-[60vh] aspect-[3/4] z-10 shadow-2xl" 
+                        isFeatured={true}
+                        badgeText={t.newBadge}
+                    />
+                    
+                    {/* Secondary Featured (ID 2, 3) */}
+                    <div className="flex flex-col gap-6 md:gap-12">
+                        {data.subs.map(item => (
+                            <GalleryItem 
+                                key={item.id}
+                                item={item}
+                                onClick={onImageClick}
+                                className="w-[60vw] md:w-[35vh] aspect-[1/1]"
+                                isFeatured={false}
+                            />
+                        ))}
+                    </div>
+                </div>
+            </div>
+        );
+
         const AboutSection = ({ t, sectionRef, reversed }) => (
              <section ref={sectionRef} className="snap-center min-w-[100vw] md:min-w-[80vw] h-[100vh] h-[100dvh] bg-[#f0ebe0] flex items-center justify-center relative flex-shrink-0 border-l border-r border-[#d66853]/10 layout-transition">
                 <div className="absolute inset-0 opacity-10" style={{backgroundImage: 'radial-gradient(#d66853 1px, transparent 1px)', backgroundSize: '20px 20px'}}></div>
@@ -358,7 +364,7 @@
                         </div>
                         <div className={`order-1 ${reversed ? 'md:order-1' : 'md:order-2'} flex items-center justify-center w-full h-full`}>
                              <div className="relative w-[80vw] md:w-[35vw] aspect-[3/4] bg-white p-3 shadow-xl transform rotate-2 hover:rotate-0 transition-transform duration-700 stitched">
-                                <SmartImage src="bat7_pics/pic (1).jpg" fallback="bat7_pics/pic (1).jpeg" alt="About Art" className="w-full h-full object-cover" />
+                                <img src="bat7_pics/pic (1).jpg" className="w-full h-full object-cover" onError={(e) => e.target.src="bat7_pics/pic (1).jpeg"} />
                              </div>
                         </div>
                     </div>
@@ -366,7 +372,7 @@
             </section>
         );
 
-        const ContactSection = ({ t, sectionRef, reversed }) => (
+        const ContactSection = ({ t, sectionRef }) => (
             <section ref={sectionRef} className="snap-center min-w-[100vw] md:min-w-[60vw] h-[100vh] h-[100dvh] bg-[#2d2420] text-[#f4f1ea] flex items-center justify-center relative flex-shrink-0 border-l border-r border-white/5 layout-transition">
                <div className="absolute inset-0 opacity-5" style={{backgroundImage: 'repeating-linear-gradient(45deg, #d66853 0, #d66853 1px, transparent 0, transparent 50%)', backgroundSize: '20px 20px'}}></div>
                <div className="w-full h-full overflow-y-auto custom-scrollbar flex flex-col items-center justify-center p-6 pt-24 md:pt-6 relative z-10">
@@ -386,22 +392,32 @@
                    </div>
                </div>
            </section>
-       );
-
-        const CategoryCluster = ({ category, onImageClick, reversed, t }) => (
-            <div className={`flex ${reversed ? 'flex-row-reverse' : 'flex-row'} items-center gap-6 md:gap-16 px-4 md:px-16 border-l border-[#d66853]/10 snap-center h-full layout-transition relative`}>
-                <div className="h-[50vh] md:h-[60vh] flex flex-col justify-center items-center opacity-80 sticky left-0 z-10">
-                    <div className="w-1 h-12 md:h-24 bg-gradient-to-b from-transparent via-[#d66853] to-transparent mb-4 md:mb-6"></div>
-                    <h2 className="vertical-text text-3xl md:text-5xl serif tracking-widest text-[#2d2420] font-bold whitespace-nowrap opacity-60 drop-shadow-sm">{category.title}</h2>
-                    <div className="w-1 h-12 md:h-24 bg-gradient-to-b from-transparent via-[#2a9d8f] to-transparent mt-4 md:mt-6"></div>
-                </div>
-                <div className={`flex ${reversed ? 'flex-row-reverse' : 'flex-row'} gap-6 md:gap-12 items-center`}>
-                    {category.items.map((item, idx) => (
-                        <ArtCard key={`${category.id}-${item.id}-${idx}`} item={item} onClick={onImageClick} t={t} />
-                    ))}
-                </div>
-            </div>
         );
+
+        const CategoryCluster = ({ category, onImageClick, reversed }) => {
+            // Check if there are any valid items (handled by parent logic usually, but here visuals)
+            if(!category.items.length) return null;
+
+            return (
+                <div className={`flex ${reversed ? 'flex-row-reverse' : 'flex-row'} items-center gap-6 md:gap-16 px-4 md:px-16 border-l border-[#d66853]/10 snap-center h-full layout-transition relative`}>
+                    <div className="h-[50vh] md:h-[60vh] flex flex-col justify-center items-center opacity-80 sticky left-0 z-10">
+                        <div className="w-1 h-12 md:h-24 bg-gradient-to-b from-transparent via-[#d66853] to-transparent mb-4 md:mb-6"></div>
+                        <h2 className="vertical-text text-3xl md:text-5xl serif tracking-widest text-[#2d2420] font-bold whitespace-nowrap opacity-60 drop-shadow-sm">{category.title}</h2>
+                        <div className="w-1 h-12 md:h-24 bg-gradient-to-b from-transparent via-[#2a9d8f] to-transparent mt-4 md:mt-6"></div>
+                    </div>
+                    <div className={`flex ${reversed ? 'flex-row-reverse' : 'flex-row'} gap-6 md:gap-12 items-center`}>
+                        {category.items.map((item, idx) => (
+                            <GalleryItem 
+                                key={`${category.id}-${item.id}`}
+                                item={item}
+                                onClick={onImageClick}
+                                className="w-[80vw] md:w-[45vh] aspect-[3/4]"
+                            />
+                        ))}
+                    </div>
+                </div>
+            );
+        };
 
         const App = () => {
             const [lang, setLang] = useState('he');
@@ -424,7 +440,7 @@
             
             const brandRef = useRef(null);
 
-            // CHANGED: Use Refs for Physics to avoid crash on mutation
+            // Refactored to useRef to fix "Cannot create property 'current' on boolean 'false'"
             const isDown = useRef(false);
             const startX = useRef(0);
             const scrollLeft = useRef(0);
@@ -433,9 +449,11 @@
             const momentumID = useRef(null);
             const lastMoveTime = useRef(Date.now());
             const lastMoveX = useRef(0);
-            
+            const isScrollingRef = useRef(false); 
+
             const t = content[lang];
-            const data = getCategoriesData(t);
+            // Memoize data so it doesn't regenerate on every scroll
+            const { newCollection, categories } = useMemo(() => getGalleryData(t), [t]);
 
             // Init Force Center
             useLayoutEffect(() => {
@@ -458,6 +476,7 @@
                 
                 const currentScroll = scrollContainerRef.current.scrollLeft;
                 
+                // Define potential targets for each navigation item
                 const targetMap = {
                     home: [heroRef, heroCloneLeftRef, heroCloneRightRef],
                     about: [aboutMainRef, aboutLeftRef],
@@ -467,15 +486,18 @@
                 const potentialRefs = targetMap[target];
                 if (!potentialRefs) return;
 
+                // Filter valid refs and find closest
                 const validRefs = potentialRefs.filter(r => r.current);
                 if (validRefs.length === 0) return;
 
+                // Sort by distance
                 validRefs.sort((a, b) => {
                     const posA = a.current.offsetLeft;
                     const posB = b.current.offsetLeft;
                     return Math.abs(currentScroll - posA) - Math.abs(currentScroll - posB);
                 });
 
+                // Scroll to winner
                 validRefs[0].current.scrollIntoView({ behavior: 'smooth' });
             };
 
@@ -493,6 +515,7 @@
                     const homeCloneLeftX = heroCloneLeftRef.current.offsetLeft;
                     const viewW = window.innerWidth;
 
+                    // SEAMLESS JUMP LOGIC
                     let jumpDelta = 0;
                     if (currentScroll >= homeCloneRightX - 10) { 
                         const offsetIntoClone = currentScroll - homeCloneRightX;
@@ -515,6 +538,7 @@
                         scrollLeft.current += jumpDelta; 
                     }
 
+                    // Sticky Brand Name Visibility ONLY (Nav remains visible)
                     if (brandRef.current) {
                         const threshold = viewW * 0.6;
                         const distMain = Math.abs(currentScroll - homeMainX);
@@ -543,7 +567,6 @@
                 const container = scrollContainerRef.current;
                 if (!container) return;
                 let wheelTimeout;
-                const isScrollingRef = { current: false };
                 const handleWheel = (e) => {
                     if (window.innerWidth > 768) {
                         if (Math.abs(e.deltaY) > 5 || Math.abs(e.deltaX) > 5) {
@@ -566,7 +589,7 @@
             const momentumLoop = () => {
                 if (!scrollContainerRef.current) return;
                 scrollContainerRef.current.scrollLeft -= velX.current;
-                velX.current *= 0.95; 
+                velX.current *= 0.95; // Friction
                 if (Math.abs(velX.current) > 0.5) momentumID.current = requestAnimationFrame(momentumLoop); else velX.current = 0;
             };
             const handleMouseDown = (e) => {
@@ -608,6 +631,7 @@
                     <div className="grain"></div>
                     {!introDone && <Intro onComplete={() => setIntroDone(true)} />}
                     
+                    {/* Header - Only brand element fades out now */}
                     <nav className="fixed top-0 left-0 w-full p-6 md:p-8 flex justify-between items-start z-50 text-[#3d342b] pointer-events-none">
                         <div ref={brandRef} className={`flex flex-col pointer-events-auto brand-element`} style={{opacity: 0, transform: 'translateY(-20px)'}}>
                             <span className="text-xl md:text-2xl font-bold tracking-tighter serif uppercase text-[#d66853] drop-shadow-sm font-black">{t.name}</span>
@@ -637,10 +661,11 @@
                     >
                         {/* LEFT MIRROR SECTION (Reversed Order) */}
                         <div ref={heroCloneLeftRef}><Hero id="hero-left" t={t} isClone={true} onLeft={() => scrollByAmount(-window.innerWidth)} onRight={() => scrollByAmount(window.innerWidth)} /></div>
-                        <ContactSection t={t} sectionRef={contactLeftRef} reversed={true} />
-                        {[...data].reverse().map((cat) => (
-                            <CategoryCluster key={`left-${cat.id}`} category={cat} onImageClick={setSelectedImg} reversed={true} t={t} />
+                        <ContactSection t={t} sectionRef={contactLeftRef} />
+                        {[...categories].reverse().map((cat) => (
+                            <CategoryCluster key={`left-${cat.id}`} category={cat} onImageClick={setSelectedImg} reversed={true} />
                         ))}
+                        <FeaturedSection data={newCollection} t={t} onImageClick={setSelectedImg} reversed={true} />
                         <AboutSection t={t} sectionRef={aboutLeftRef} reversed={true} />
 
                         {/* MAIN SECTION (Start Here) */}
@@ -655,8 +680,9 @@
                         
                         {/* RIGHT SECTION (Normal Order) */}
                         <AboutSection t={t} sectionRef={aboutMainRef} />
-                        {data.map((cat) => (
-                            <CategoryCluster key={`right-${cat.id}`} category={cat} onImageClick={setSelectedImg} t={t} />
+                        <FeaturedSection data={newCollection} t={t} onImageClick={setSelectedImg} />
+                        {categories.map((cat) => (
+                            <CategoryCluster key={`right-${cat.id}`} category={cat} onImageClick={setSelectedImg} />
                         ))}
                         <ContactSection t={t} sectionRef={contactRef} />
                         
@@ -675,6 +701,7 @@
                                     <div className="w-12 h-1 bg-[#d66853] mb-6 ml-auto"></div>
                                     <h3 className="text-4xl md:text-5xl serif text-[#f4f1ea] mb-2">{selectedImg.title}</h3>
                                     <p className="text-[#e09f3e] font-mono text-base tracking-widest">{selectedImg.year}</p>
+                                    {selectedImg.role === 'new' && <span className="inline-block mt-4 px-3 py-1 bg-[#e09f3e] text-[#2d2420] font-bold text-xs uppercase">{t.newBadge}</span>}
                                 </div>
                             </div>
                         </div>
