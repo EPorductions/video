@@ -364,7 +364,7 @@
                         </div>
                         <div className={`order-1 ${reversed ? 'md:order-1' : 'md:order-2'} flex items-center justify-center w-full h-full`}>
                              <div className="relative w-[80vw] md:w-[35vw] aspect-[3/4] bg-white p-3 shadow-xl transform rotate-2 hover:rotate-0 transition-transform duration-700 stitched">
-                                <img src="bat7_pics/pic (1).jpg" className="w-full h-full object-cover" onError={(e) => e.target.src="bat7_pics/pic (1).jpeg"} />
+                                <img src="bat7_pics/atrtist_about.jpg" className="w-full h-full object-cover" onError={(e) => { if (e.target.src.endsWith('atrtist_about.jpg')) { e.target.src = "bat7_pics/atrtist_about.jpeg"; } }} />
                              </div>
                         </div>
                     </div>
