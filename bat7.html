@@ -106,6 +106,20 @@
         @keyframes weaveVert { 0% { height: 0; } 100% { height: 100%; } }
         @keyframes weaveHoriz { 0% { width: 0; } 100% { width: 100%; } }
 
+        /* Badge Styles */
+        .badge-new {
+            background-color: var(--accent-terracotta);
+            color: white;
+            font-weight: bold;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+        }
+        .badge-featured {
+            background-color: var(--accent-gold);
+            color: white;
+            font-weight: bold;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+        }
+
         @media (max-width: 768px) {
             .horizontal-scroll-container { scroll-snap-type: x mandatory; }
         }
@@ -126,7 +140,7 @@
             Phone: () => <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path></svg>,
         };
 
-        // --- Content ---
+        // --- Content Dictionary ---
         const content = {
             he: {
                 name: "בת שבע ליבנה",
@@ -151,6 +165,10 @@
                     cat2: "טבע וצבע",
                     cat3: "אריגה חופשית",
                     cat4: "חוטים מספרים"
+                },
+                badges: {
+                    new: "יצירה חדשה",
+                    featured: "נבחרים"
                 }
             },
             en: {
@@ -176,25 +194,44 @@
                     cat2: "Nature & Color",
                     cat3: "Free Weaving",
                     cat4: "Narrative Threads"
+                },
+                badges: {
+                    new: "New Creation",
+                    featured: "Featured"
                 }
             }
         };
 
-        // --- Data Generation ---
+        // --- Data Generation (Logic Updated for "Infinite" & Stars) ---
         const getCategoriesData = (t) => {
-            const allImages = Array.from({ length: 31 }, (_, i) => i + 1);
-            const makeImg = (id) => ({ 
-                id, 
-                src: `bat7_pics/pic (${id}).jpg`, 
-                fallback: `bat7_pics/pic (${id}).jpeg`, 
-                title: `${t.role} ${id}`, 
-                year: '2024' 
-            });
+            // Attempt to load up to 100 images. Broken links will be hidden by SmartCard.
+            const allImages = Array.from({ length: 100 }, (_, i) => i + 1);
+            
+            const makeImg = (id) => {
+                let badge = null;
+                // Feature Logic: 
+                // 1 = Newest
+                // 2, 3 = Featured/New Products
+                if (id === 1) badge = 'new';
+                else if (id === 2 || id === 3) badge = 'featured';
+
+                return { 
+                    id, 
+                    src: `bat7_pics/pic (${id}).jpg`, 
+                    fallback: `bat7_pics/pic (${id}).jpeg`, 
+                    title: `${t.role} ${id}`, 
+                    year: '2024',
+                    badge: badge // Add badge property
+                };
+            };
+
+            // Distribute images among categories roughly evenly or by logic
+            // We slice effectively "infinite" lists here, they will just stop rendering when file not found.
             return [
-                { id: 'cat1', title: t.categories.cat1, items: allImages.slice(0, 8).map(makeImg) },
-                { id: 'cat2', title: t.categories.cat2, items: allImages.slice(8, 16).map(makeImg) },
-                { id: 'cat3', title: t.categories.cat3, items: allImages.slice(16, 24).map(makeImg) },
-                { id: 'cat4', title: t.categories.cat4, items: allImages.slice(24, 31).map(makeImg) }
+                { id: 'cat1', title: t.categories.cat1, items: allImages.slice(0, 10).map(makeImg) },
+                { id: 'cat2', title: t.categories.cat2, items: allImages.slice(10, 30).map(makeImg) },
+                { id: 'cat3', title: t.categories.cat3, items: allImages.slice(30, 60).map(makeImg) },
+                { id: 'cat4', title: t.categories.cat4, items: allImages.slice(60, 100).map(makeImg) }
             ];
         };
 
@@ -220,12 +257,69 @@
             );
         };
 
-        const SmartImage = ({ src, fallback, alt, className }) => {
+        const SmartImage = ({ src, fallback, alt, className, onLoadError }) => {
             const [currentSrc, setCurrentSrc] = useState(src);
             const [error, setError] = useState(false);
-            const handleError = () => { if (currentSrc === src && fallback) setCurrentSrc(fallback); else setError(true); };
+
+            const handleError = () => {
+                if (currentSrc === src && fallback) {
+                    setCurrentSrc(fallback);
+                } else {
+                    setError(true);
+                    if (onLoadError) onLoadError();
+                }
+            };
+
             if (error) return null;
-            return <img src={currentSrc} alt={alt} className={className} onError={handleError} loading="lazy" draggable="false" />;
+
+            return (
+                <img 
+                    src={currentSrc} 
+                    alt={alt} 
+                    className={className} 
+                    onError={handleError}
+                    loading="lazy"
+                    draggable="false"
+                />
+            );
+        };
+
+        // NEW: Smart Card Component - Hides itself completely if image fails
+        const ArtCard = ({ item, onClick, t }) => {
+            const [visible, setVisible] = useState(true);
+
+            if (!visible) return null;
+
+            const badgeText = item.badge ? t.badges[item.badge] : null;
+            const badgeClass = item.badge === 'new' ? 'badge-new' : 'badge-featured';
+
+            return (
+                <div 
+                    className={`relative group cursor-pointer transition-all duration-500 ease-out flex-shrink-0 snap-center w-[80vw] md:w-[45vh] aspect-[3/4] stitched hover:-translate-y-2`} 
+                    onClick={() => onClick(item)}
+                >
+                    <div className="w-full h-full p-2 bg-white relative">
+                        <SmartImage 
+                            src={item.src} 
+                            fallback={item.fallback} 
+                            alt={item.title} 
+                            className="w-full h-full object-cover transition-all duration-700" 
+                            onLoadError={() => setVisible(false)} // Hide card on failure
+                        />
+                        
+                        {/* Render Badge if exists */}
+                        {badgeText && (
+                            <div className={`absolute top-4 right-4 px-3 py-1 text-xs uppercase tracking-wider rounded-sm z-20 ${badgeClass}`}>
+                                {badgeText}
+                            </div>
+                        )}
+                    </div>
+                    <div className="absolute inset-0 bg-gradient-to-t from-[#2d2420]/90 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex flex-col justify-end p-6 text-right" dir="rtl">
+                        <span className="text-[#e09f3e] text-sm font-mono mb-1">{item.year}</span>
+                        <h3 className="text-2xl serif text-[#f4f1ea]">{item.title}</h3>
+                    </div>
+                </div>
+            );
         };
 
         const Hero = ({ t, sectionRef, id, onLeft, onRight, onText }) => (
@@ -294,7 +388,7 @@
            </section>
        );
 
-        const CategoryCluster = ({ category, onImageClick, reversed }) => (
+        const CategoryCluster = ({ category, onImageClick, reversed, t }) => (
             <div className={`flex ${reversed ? 'flex-row-reverse' : 'flex-row'} items-center gap-6 md:gap-16 px-4 md:px-16 border-l border-[#d66853]/10 snap-center h-full layout-transition relative`}>
                 <div className="h-[50vh] md:h-[60vh] flex flex-col justify-center items-center opacity-80 sticky left-0 z-10">
                     <div className="w-1 h-12 md:h-24 bg-gradient-to-b from-transparent via-[#d66853] to-transparent mb-4 md:mb-6"></div>
@@ -303,15 +397,7 @@
                 </div>
                 <div className={`flex ${reversed ? 'flex-row-reverse' : 'flex-row'} gap-6 md:gap-12 items-center`}>
                     {category.items.map((item, idx) => (
-                        <div key={`${category.id}-${item.id}-${idx}`} className={`relative group cursor-pointer transition-all duration-500 ease-out flex-shrink-0 snap-center w-[80vw] md:w-[45vh] aspect-[3/4] stitched hover:-translate-y-2`} onClick={() => onImageClick(item)}>
-                            <div className="w-full h-full p-2 bg-white">
-                                <SmartImage src={item.src} fallback={item.fallback} alt={item.title} className="w-full h-full object-cover transition-all duration-700" />
-                            </div>
-                            <div className="absolute inset-0 bg-gradient-to-t from-[#2d2420]/90 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex flex-col justify-end p-6 text-right" dir="rtl">
-                                <span className="text-[#e09f3e] text-sm font-mono mb-1">{item.year}</span>
-                                <h3 className="text-2xl serif text-[#f4f1ea]">{item.title}</h3>
-                            </div>
-                        </div>
+                        <ArtCard key={`${category.id}-${item.id}-${idx}`} item={item} onClick={onImageClick} t={t} />
                     ))}
                 </div>
             </div>
@@ -338,15 +424,16 @@
             
             const brandRef = useRef(null);
 
-            const [isDown, setIsDown] = useState(false);
-            const [startX, setStartX] = useState(0);
-            const [scrollLeft, setScrollLeft] = useState(0);
-            const [velX, setVelX] = useState(0);
+            // CHANGED: Use Refs for Physics to avoid crash on mutation
+            const isDown = useRef(false);
+            const startX = useRef(0);
+            const scrollLeft = useRef(0);
+            const velX = useRef(0);
+            
             const momentumID = useRef(null);
             const lastMoveTime = useRef(Date.now());
             const lastMoveX = useRef(0);
-            const isScrollingRef = useRef(false); 
-
+            
             const t = content[lang];
             const data = getCategoriesData(t);
 
@@ -371,7 +458,6 @@
                 
                 const currentScroll = scrollContainerRef.current.scrollLeft;
                 
-                // Define potential targets for each navigation item
                 const targetMap = {
                     home: [heroRef, heroCloneLeftRef, heroCloneRightRef],
                     about: [aboutMainRef, aboutLeftRef],
@@ -381,18 +467,15 @@
                 const potentialRefs = targetMap[target];
                 if (!potentialRefs) return;
 
-                // Filter valid refs and find closest
                 const validRefs = potentialRefs.filter(r => r.current);
                 if (validRefs.length === 0) return;
 
-                // Sort by distance
                 validRefs.sort((a, b) => {
                     const posA = a.current.offsetLeft;
                     const posB = b.current.offsetLeft;
                     return Math.abs(currentScroll - posA) - Math.abs(currentScroll - posB);
                 });
 
-                // Scroll to winner
                 validRefs[0].current.scrollIntoView({ behavior: 'smooth' });
             };
 
@@ -410,7 +493,6 @@
                     const homeCloneLeftX = heroCloneLeftRef.current.offsetLeft;
                     const viewW = window.innerWidth;
 
-                    // SEAMLESS JUMP LOGIC
                     let jumpDelta = 0;
                     if (currentScroll >= homeCloneRightX - 10) { 
                         const offsetIntoClone = currentScroll - homeCloneRightX;
@@ -433,7 +515,6 @@
                         scrollLeft.current += jumpDelta; 
                     }
 
-                    // Sticky Brand Name Visibility ONLY (Nav remains visible)
                     if (brandRef.current) {
                         const threshold = viewW * 0.6;
                         const distMain = Math.abs(currentScroll - homeMainX);
@@ -462,6 +543,7 @@
                 const container = scrollContainerRef.current;
                 if (!container) return;
                 let wheelTimeout;
+                const isScrollingRef = { current: false };
                 const handleWheel = (e) => {
                     if (window.innerWidth > 768) {
                         if (Math.abs(e.deltaY) > 5 || Math.abs(e.deltaX) > 5) {
@@ -484,7 +566,7 @@
             const momentumLoop = () => {
                 if (!scrollContainerRef.current) return;
                 scrollContainerRef.current.scrollLeft -= velX.current;
-                velX.current *= 0.95; // Friction
+                velX.current *= 0.95; 
                 if (Math.abs(velX.current) > 0.5) momentumID.current = requestAnimationFrame(momentumLoop); else velX.current = 0;
             };
             const handleMouseDown = (e) => {
@@ -492,8 +574,8 @@
                 isDown.current = true; cancelMomentum();
                 if(scrollContainerRef.current) { 
                     scrollContainerRef.current.classList.add('is-dragging'); 
-                    setStartX(e.pageX - scrollContainerRef.current.offsetLeft); 
-                    setScrollLeft(scrollContainerRef.current.scrollLeft); 
+                    startX.current = e.pageX - scrollContainerRef.current.offsetLeft; 
+                    scrollLeft.current = scrollContainerRef.current.scrollLeft; 
                     lastMoveX.current = e.pageX; lastMoveTime.current = Date.now(); 
                 }
             };
@@ -526,7 +608,6 @@
                     <div className="grain"></div>
                     {!introDone && <Intro onComplete={() => setIntroDone(true)} />}
                     
-                    {/* Header - Only brand element fades out now */}
                     <nav className="fixed top-0 left-0 w-full p-6 md:p-8 flex justify-between items-start z-50 text-[#3d342b] pointer-events-none">
                         <div ref={brandRef} className={`flex flex-col pointer-events-auto brand-element`} style={{opacity: 0, transform: 'translateY(-20px)'}}>
                             <span className="text-xl md:text-2xl font-bold tracking-tighter serif uppercase text-[#d66853] drop-shadow-sm font-black">{t.name}</span>
@@ -558,7 +639,7 @@
                         <div ref={heroCloneLeftRef}><Hero id="hero-left" t={t} isClone={true} onLeft={() => scrollByAmount(-window.innerWidth)} onRight={() => scrollByAmount(window.innerWidth)} /></div>
                         <ContactSection t={t} sectionRef={contactLeftRef} reversed={true} />
                         {[...data].reverse().map((cat) => (
-                            <CategoryCluster key={`left-${cat.id}`} category={cat} onImageClick={setSelectedImg} reversed={true} />
+                            <CategoryCluster key={`left-${cat.id}`} category={cat} onImageClick={setSelectedImg} reversed={true} t={t} />
                         ))}
                         <AboutSection t={t} sectionRef={aboutLeftRef} reversed={true} />
 
@@ -575,7 +656,7 @@
                         {/* RIGHT SECTION (Normal Order) */}
                         <AboutSection t={t} sectionRef={aboutMainRef} />
                         {data.map((cat) => (
-                            <CategoryCluster key={`right-${cat.id}`} category={cat} onImageClick={setSelectedImg} />
+                            <CategoryCluster key={`right-${cat.id}`} category={cat} onImageClick={setSelectedImg} t={t} />
                         ))}
                         <ContactSection t={t} sectionRef={contactRef} />
                         
