@@ -41,13 +41,19 @@
                         }
                     },
                     animation: {
+                        'fade-in-up': 'fadeInUp 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards',
                         'spin-slow': 'spin 60s linear infinite',
-                        'pop': 'pop 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275)',
+                        'pulse-slow': 'pulse 3s infinite',
+                        'pop': 'pop 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards',
                     },
                     keyframes: {
+                        fadeInUp: {
+                            '0%': { opacity: '0', transform: 'translateY(20px)' },
+                            '100%': { opacity: '1', transform: 'translateY(0)' },
+                        },
                         pop: {
-                            '0%': { transform: 'scale(1)' },
-                            '50%': { transform: 'scale(1.2)' },
+                            '0%': { transform: 'scale(0.9)' },
+                            '50%': { transform: 'scale(1.1)' },
                             '100%': { transform: 'scale(1)' },
                         }
                     }
@@ -65,19 +71,8 @@
         ::-webkit-scrollbar-thumb { background: #FFC700; border-radius: 4px; }
         ::-webkit-scrollbar-thumb:hover { background: #E5B300; }
 
-        /* Star Animations */
-        .star-btn { transition: transform 0.1s ease; }
-        .star-btn:active { transform: scale(0.9); }
-        
         /* Smooth inputs */
-        input:focus, select:focus, textarea:focus { outline: none; border-color: #FFC700; ring: 2px solid rgba(255, 199, 0, 0.2); transition: all 0.3s ease; }
-        
-        /* General Transitions */
-        .smooth-transition { transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
-        
-        /* Mount Animation Class (Managed by React) */
-        .mount-hidden { opacity: 0; transform: translateY(20px); }
-        .mount-visible { opacity: 1; transform: translateY(0); transition: opacity 0.6s ease-out, transform 0.6s cubic-bezier(0.34, 1.56, 0.64, 1); }
+        input:focus, select:focus, textarea:focus { outline: none; border-color: #FFC700; ring: 2px solid rgba(255, 199, 0, 0.2); }
 
         /* Weight Slider */
         input[type=range].weight-slider {
@@ -95,11 +90,10 @@
             border-radius: 50%;
             background: #1F63C7;
             cursor: pointer;
-            transition: background 0.15s ease-in-out, transform 0.1s;
+            transition: background 0.15s ease-in-out;
         }
         input[type=range].weight-slider::-webkit-slider-thumb:hover {
             background: #FFC700;
-            transform: scale(1.2);
         }
         
         @media print {
@@ -107,6 +101,8 @@
             body { background: white; }
             .card { box-shadow: none; border: 1px solid #ddd; }
             header, .fixed-bottom { display: none !important; }
+            /* Force background printing */
+            * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
         }
     </style>
 </head>
@@ -122,14 +118,14 @@
     <div id="root" class="flex-grow z-10"></div>
 
     <script type="text/babel">
-        const { useState, useEffect, useMemo, useRef } = React;
+        const { useState, useEffect, useMemo, useRef, memo, useCallback } = React;
 
         // --- ICONS ---
         const Icons = {
             Rocket: ({size=20}) => <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M4.5 16.5c-1.5 1.26-2 5-2 5s3.74-.5 5-2c.71-.84.7-2.13-.09-2.91a2.18 2.18 0 0 0-2.91-.09z"></path><path d="M12 15l-3-3a22 22 0 0 1 2-3.95A12.88 12.88 0 0 1 22 2c0 2.72-.78 7.5-6 11a22.35 22.35 0 0 1-4 2z"></path><path d="M9 12H4s.55-3.03 2-4c1.62-1.08 5 0 5 0"></path><path d="M12 15v5s3.03-.55 4-2c1.08-1.62 0-5 0-5"></path></svg>,
-            Star: ({size=20, fill, className}) => <svg className={className} width={size} height={size} viewBox="0 0 24 24" fill={fill || "none"} stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>,
+            Star: ({size=20, fill, className}) => <svg width={size} height={size} viewBox="0 0 24 24" fill={fill || "none"} stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>,
             Heart: ({size=20}) => <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path></svg>,
-            Check: ({size=20, className}) => <svg className={className} width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>,
+            Check: ({size=20}) => <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>,
             Alert: ({size=20}) => <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>,
             Search: ({size=20}) => <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>,
             Beer: ({size=20}) => <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M17 11h1a3 3 0 0 1 0 6h-1"></path><path d="M9 12v6"></path><path d="M13 12v6"></path><path d="M14 7.5c-1.79 1.15-3.53 1.15-5.33 0-1.79-1.15-3.53-1.15-5.33 0-1.79 1.15-3.53 1.15-5.34 0C-4.79 6.35-4.79 3 2.5 3c1.79 0 3.53 0 5.33 1.15C9.62 5.3 11.37 5.3 13.16 4.15c1.79-1.15 3.53-1.15 5.33 0 1.79 1.15 3.53 1.15 5.33 0 2.92-1.85 2.92 1.5.84 4.5"></path><path d="M3.5 7.5v9a2 2 0 0 0 2 2h13a2 2 0 0 0 2-2v-9"></path></svg>,
@@ -147,28 +143,164 @@
             Scale: ({size=20}) => <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m16 16 3-8 3 8c-.87.65-1.92 1-3 1s-2.13-.35-3-1Z"/><path d="m2 16 3-8 3 8c-.87.65-1.92 1-3 1s-2.13-.35-3-1Z"/><path d="M7 21h10"/><path d="M12 3v18"/><path d="M3 7h2c2 0 5-1 7-2 2 1 5 2 7 2h2"/></svg>
         };
 
-        // --- UTILS ---
-        const MountAnimator = ({ children, className = "", delay = 0 }) => {
-            const [mounted, setMounted] = useState(false);
-            useEffect(() => {
-                const timer = setTimeout(() => setMounted(true), delay);
-                return () => clearTimeout(timer);
-            }, [delay]);
+        // --- STATIC DATA DEFINITIONS (Outside Component to prevent re-renders) ---
 
-            return (
-                <div className={`${className} ${mounted ? 'mount-visible' : 'mount-hidden'}`}>
-                    {children}
-                </div>
-            );
+        const universalCriteria = [
+            { 
+                id: 'coachability', 
+                label: 'יכולת למידה (Coachability)', 
+                desc: 'פתיחות למשוב, צניעות, חוסר אגו (Kill Switch)', 
+                critical: true,
+                questions: [
+                    "ספר לי על פידבק קשה שקיבלת לאחרונה - איך הגבת?",
+                    "מה היית משנה בהתנהלות שלך במיזם הקודם?",
+                    "האם אתה מוכן לשנות את הרעיון שלך ב-180 מעלות אם השוק יכתיב זאת?"
+                ]
+            },
+            { 
+                id: 'passion', 
+                label: 'אישיות ומניע (הניצוץ)', 
+                desc: 'ניצוץ בעיניים, טון אנרגטי, חיבור רגשי לבעיה', 
+                questions: [
+                    "למה דווקא את/ה? למה דווקא עכשיו?",
+                    "מה גורם לך לקום בבוקר עבור הבעיה הזו?",
+                    "עד כמה זה בוער בך ברמה האישית?"
+                ]
+            },
+            { 
+                id: 'team', 
+                label: 'שחקן קבוצתי', 
+                desc: 'שימוש ב"אנחנו", מתן קרדיט, דינמיקה ופרגון', 
+                questions: [
+                    "מי בצוות שלך משלים את החולשות שלך?",
+                    "תאר קונפליקט שהיה לך עם שותף וכיצד נפתר.",
+                    "האם אתה מדבר ב'אני' או ב'אנחנו'?"
+                ]
+            }
+        ];
+
+        const roleConfig = {
+            'CEO': {
+                title: 'המנכ"ל (Visionary)',
+                icon: Icons.Rocket,
+                criteria: [
+                    { id: 'role1', label: 'חזון וסטוריטלינג', desc: 'האם המועמד מצליח לנסח חזון בצורה תמציתית, חדה וכריזמטית?', questions: ["תן לי את ה-Elevator Pitch ב-30 שניות.", "איפה החברה תהיה בעוד 5 שנים?", "איך אתה מסביר את הפתרון לסבתא שלך?"] },
+                    { id: 'role2', label: 'גיוס הון ואסטרטגיה', desc: 'הבנה עסקית, יכולת עמידה מול משקיעים, מכירת החלום', questions: ["מי הלקוח הראשון שישלם? למה?", "מה מודל ההכנסות?", "איך נראה ה-Go-to-Market שלכם?"] },
+                    { id: 'role3', label: 'חוסן מנטלי', desc: 'עמידות בלחצים, קבלת החלטות באי-ודאות', questions: ["ספר על הרגע הכי קשה שלך כיזם.", "איך אתה מתמודד עם דחייה?", "מה יקרה אם תיכשלו?"] },
+                    { id: 'role4', label: 'הבנת שוק (Market)', desc: 'היכרות עם הכאב, הלקוח והמתחרים', questions: ["מי המתחרה שהכי מפחיד אותך?", "למה הפתרון הזה לא קיים עד היום?", "מה ה-Unfair Advantage שלכם?"] }
+                ],
+                traits: ['חוסן מנטלי', 'כריזמה', 'אסטרטגיה'] 
+            },
+            'CTO': {
+                title: 'הטכנולוג (Architect)',
+                icon: Icons.Code,
+                criteria: [
+                    { id: 'role1', label: 'Hands-on Coding', desc: 'האם כותב קוד בעצמו? (קריטי). לא "מנהל מצגות".', critical: true, questions: ["מה הסטאק הטכנולוגי שבחרת ולמה?", "הראה לי את ה-GitHub שלך.", "האם כתבת את ה-MVP בעצמך?"] },
+                    { id: 'role2', label: 'עומק טכנולוגי (Deep Tech)', desc: 'הבנה בארכיטקטורה, AI, סייבר או חומרה', questions: ["מה האתגר הטכנולוגי הכי גדול במוצר?", "איך תתמודדו עם Scale?", "האם יש כאן IP אמיתי?"] },
+                    { id: 'role3', label: 'מגנט למהנדסים', desc: 'יכולת טכנית שמושכת טאלנטים אחרים לצוות', questions: ["מי המהנדס הכי טוב שעבדת איתו ולמה שיבוא לעבוד איתך?", "איך אתה מנהל קוד וצוות?"] },
+                    { id: 'role4', label: 'ניהול מוצר (Product Sense)', desc: 'חיבור בין טכנולוגיה לערך עסקי', questions: ["איך הטכנולוגיה משרתת את הביזנס?", "איך אתה מתעדף פיצ'רים?", "האם אתה מבין את חווית המשתמש?"] }
+                ],
+                traits: ['כתיבת קוד', 'פתרון בעיות', 'ארכיטקטורה']
+            },
+            'COO': {
+                title: 'הביצועיסט (Operator)',
+                icon: Icons.Settings,
+                criteria: [
+                    { id: 'role1', label: 'ביצוע ואופרציה (Execution)', desc: 'הורדת החזון לקרקע, ניהול שוטף, סדר מתוך כאוס', questions: ["איך נראה יום עבודה טיפוסי שלך?", "תן דוגמה לפרויקט מורכב שניהלת מא' עד ת'."] },
+                    { id: 'role2', label: 'סדר וארגון (Process)', desc: 'בניית תהליכים, ניהול זמן, ירידה לפרטים', questions: ["איך אתה מודד הצלחה (KPIs)?", "באיזה כלים אתה משתמש לניהול משימות?"] },
+                    { id: 'role3', label: 'פיננסי/משפטי', desc: 'שליטה בתקציב, חוזים, רגולציה ועבודה מול IAI', questions: ["האם יש לך ניסיון עם תקציבים?", "איך תתמודד עם הבירוקרטיה של תאגיד כמו IAI?"] },
+                    { id: 'role4', label: 'ניהול משאבים', desc: 'יעילות, תכנון מול ביצוע, יחסי אנוש', questions: ["איך אתה מנהל קונפליקטים בצוות?", "איך תתעדף משאבים מוגבלים?"] }
+                ],
+                traits: ['ירידה לפרטים', 'רגולציה', 'תפעול']
+            }
         };
 
-        // --- SCOUT APP COMPONENT ---
+        const signalsData = {
+            green: [
+                {id:'serial', label:'יזם סדרתי (גם כישלון נחשב)'}, 
+                {id:'domain', label:'Domain Expert (מומחיות תוכן)'}, 
+                {id:'tech', label:'רקע טכנולוגי עמוק (8200/תואר)'}, 
+                {id:'partners', label:'הצליח לגייס שותפים חזקים'}
+            ],
+            red: [
+                {id:'solo', label:'Solo Founder (ללא שותפים)'}, 
+                {id:'outsourcing', label:'מיקור חוץ מלא (אין טכנולוגיה בבית)'}, 
+                {id:'arrogance', label:'יהירות / חוסר צניעות (ערך ליבה)'}, 
+                {id:'parttime', label:'משרה חלקית / חוסר מחויבות'}
+            ]
+        };
+
+        // --- SUB-COMPONENTS (MEMOIZED TO PREVENT FLICKER) ---
+
+        const SectionCard = memo(({ title, icon: Icon, children, className = "" }) => (
+            <div className={`bg-white rounded-xl shadow-lg border border-gray-100 p-6 md:p-8 mb-8 animate-fade-in-up relative overflow-hidden ${className}`}>
+                <div className="flex items-center gap-4 mb-8 pb-4 border-b border-gray-100">
+                    <div className="p-3 bg-innovet-yellow text-innovet-black rounded-lg shadow-sm">
+                        <Icon size={24} />
+                    </div>
+                    <h2 className="text-2xl font-black text-innovet-black uppercase tracking-tight leading-none">{title}</h2>
+                </div>
+                {children}
+            </div>
+        ));
+
+        const CheckBox = memo(({ label, checked, onChange, isCritical = false }) => (
+            <div 
+                onClick={onChange} 
+                className={`flex items-center gap-4 p-4 border-2 rounded-xl cursor-pointer transition-all duration-200 select-none ${checked ? (isCritical ? 'border-innovet-success bg-green-50' : 'border-innovet-blue bg-blue-50') : 'border-gray-100 bg-white hover:border-gray-300 hover:bg-gray-50'}`}
+            >
+                <div className={`w-6 h-6 rounded border-2 flex items-center justify-center shrink-0 transition-colors ${checked ? 'bg-innovet-success border-innovet-success' : 'bg-white border-gray-300'}`}>
+                    {checked && <Icons.Check size={14} className="text-white" />}
+                </div>
+                <span className={`font-bold text-sm ${checked ? 'text-innovet-black' : 'text-gray-500'}`}>{label}</span>
+            </div>
+        ));
+
+        const WeightSlider = memo(({ id, currentWeight, onChange }) => (
+            <div className="mt-2 p-2 bg-gray-100 rounded-lg animate-fade-in-up">
+                <div className="flex justify-between items-center text-[10px] uppercase font-bold text-gray-500 mb-1">
+                    <span>משקל</span>
+                    <span>{Math.round(currentWeight * 100)}%</span>
+                </div>
+                <input 
+                    type="range" 
+                    min="0" 
+                    max="50" 
+                    step="1"
+                    value={Math.round(currentWeight * 100)}
+                    onChange={(e) => onChange(id, parseInt(e.target.value))}
+                    className="weight-slider"
+                />
+            </div>
+        ));
+
+        const StarRating = memo(({ value, onChange, isCritical, max = 10 }) => (
+            <div className="flex items-center gap-1 bg-gray-50 p-2 rounded-xl border border-gray-100 justify-between select-none">
+                {[...Array(max)].map((_, i) => {
+                    const v = i + 1;
+                    const isActive = v <= value;
+                    return (
+                        <button 
+                            key={v} 
+                            onClick={() => onChange(v)} 
+                            className="star-btn focus:outline-none p-1 flex-1 flex justify-center group"
+                        >
+                            <Icons.Star 
+                                size={20} 
+                                className={`star-icon transition-all duration-200 ${isActive ? (isCritical && value <= 3 ? 'text-red-500 fill-current' : 'text-innovet-yellow fill-current drop-shadow-sm') : 'text-gray-200 fill-none'}`} 
+                            />
+                        </button>
+                    );
+                })}
+                <span className={`mr-2 font-mono font-black text-lg w-8 text-center transition-all duration-300 ${isCritical && value <= 3 ? 'text-red-500 animate-pulse' : 'text-gray-800'}`}>{value}</span>
+            </div>
+        ));
+
+        // --- MAIN APP COMPONENT ---
         const App = () => {
-            // State
             const [candidate, setCandidate] = useState({ name: '', role: 'CEO', interviewer: '' });
             const [gates, setGates] = useState({ champion: false, problem: false, materials: false });
             
-            // Criteria Weights State (Editable)
             const [weights, setWeights] = useState({
                 coachability: 0.20,
                 passion: 0.15,
@@ -180,10 +312,9 @@
             });
             const [isWeightEditMode, setIsWeightEditMode] = useState(false);
             
-            // Initial Scores
             const [scores, setScores] = useState({ 
-                coachability: 5, passion: 5, team: 5, // Universal
-                role1: 5, role2: 5, role3: 5, role4: 5 // Role Specific
+                coachability: 5, passion: 5, team: 5, 
+                role1: 5, role2: 5, role3: 5, role4: 5 
             });
             
             const [spark, setSpark] = useState({ why: '', scars: '', beer: 3 }); 
@@ -192,84 +323,37 @@
             const [showMailDraft, setShowMailDraft] = useState(false);
             const [openQuestion, setOpenQuestion] = useState(null);
 
-            // --- DATA CONFIGURATION ---
-            const universalCriteria = [
-                { id: 'coachability', label: 'יכולת למידה (Coachability)', desc: 'פתיחות למשוב, צניעות, חוסר אגו (Kill Switch)', critical: true, questions: ["ספר לי על פידבק קשה שקיבלת.", "מה היית משנה בדיעבד?", "האם תשנה את הרעיון אם השוק יכתיב זאת?"] },
-                { id: 'passion', label: 'אישיות ומניע (הניצוץ)', desc: 'ניצוץ בעיניים, טון אנרגטי, חיבור רגשי לבעיה', questions: ["למה דווקא את/ה?", "מה גורם לך לקום בבוקר לזה?"] },
-                { id: 'team', label: 'שחקן קבוצתי', desc: 'שימוש ב"אנחנו", מתן קרדיט, דינמיקה ופרגון', questions: ["מי משלים את החולשות שלך?", "תאר קונפליקט עם שותף."] }
-            ];
-
-            const roleConfig = {
-                'CEO': {
-                    title: 'המנכ"ל (Visionary)',
-                    icon: Icons.Rocket,
-                    criteria: [
-                        { id: 'role1', label: 'חזון וסטוריטלינג', desc: 'האם המועמד מצליח לנסח חזון בצורה תמציתית, חדה וכריזמטית?', questions: ["תן לי את ה-Elevator Pitch ב-30 שניות.", "איפה החברה תהיה בעוד 5 שנים?"] },
-                        { id: 'role2', label: 'גיוס הון ואסטרטגיה', desc: 'הבנה עסקית, יכולת עמידה מול משקיעים, מכירת החלום', questions: ["מי הלקוח הראשון שישלם? למה?", "מה מודל ההכנסות?"] },
-                        { id: 'role3', label: 'חוסן מנטלי', desc: 'עמידות בלחצים, קבלת החלטות באי-ודאות', questions: ["ספר על הרגע הכי קשה שלך כיזם.", "איך אתה מתמודד עם דחייה?"] },
-                        { id: 'role4', label: 'הבנת שוק (Market)', desc: 'היכרות עם הכאב, הלקוח והמתחרים', questions: ["מי המתחרה שהכי מפחיד אותך?", "מה ה-Unfair Advantage שלכם?"] }
-                    ],
-                    traits: ['חוסן מנטלי', 'כריזמה', 'אסטרטגיה'] 
-                },
-                'CTO': {
-                    title: 'הטכנולוג (Architect)',
-                    icon: Icons.Code,
-                    criteria: [
-                        { id: 'role1', label: 'Hands-on Coding', desc: 'האם כותב קוד בעצמו? (קריטי). לא "מנהל מצגות".', critical: true, questions: ["מה הסטאק הטכנולוגי שבחרת ולמה?", "הראה לי GitHub."] },
-                        { id: 'role2', label: 'עומק טכנולוגי (Deep Tech)', desc: 'הבנה בארכיטקטורה, AI, סייבר או חומרה', questions: ["מה האתגר הטכנולוגי הכי גדול?", "איך תתמודדו עם Scale?"] },
-                        { id: 'role3', label: 'מגנט למהנדסים', desc: 'יכולת טכנית שמושכת טאלנטים אחרים לצוות', questions: ["מי המהנדס הכי טוב שעבדת איתו ולמה שיבוא איתך?"] },
-                        { id: 'role4', label: 'ניהול מוצר (Product Sense)', desc: 'חיבור בין טכנולוגיה לערך עסקי', questions: ["איך הטכנולוגיה משרתת את הביזנס?", "איך אתה מתעדף פיצ'רים?"] }
-                    ],
-                    traits: ['כתיבת קוד', 'פתרון בעיות', 'ארכיטקטורה']
-                },
-                'COO': {
-                    title: 'הביצועיסט (Operator)',
-                    icon: Icons.Settings,
-                    criteria: [
-                        { id: 'role1', label: 'ביצוע ואופרציה (Execution)', desc: 'הורדת החזון לקרקע, ניהול שוטף, סדר מתוך כאוס', questions: ["איך נראה יום עבודה טיפוסי שלך?", "תן דוגמה לפרויקט מורכב שניהלת."] },
-                        { id: 'role2', label: 'סדר וארגון (Process)', desc: 'בניית תהליכים, ניהול זמן, ירידה לפרטים', questions: ["איך אתה מודד הצלחה (KPIs)?", "באיזה כלים אתה משתמש?"] },
-                        { id: 'role3', label: 'פיננסי/משפטי', desc: 'שליטה בתקציב, חוזים, רגולציה ועבודה מול IAI', questions: ["האם יש לך ניסיון עם תקציבים?", "איך תתמודד עם בירוקרטיה?"] },
-                        { id: 'role4', label: 'ניהול משאבים', desc: 'יעילות, תכנון מול ביצוע, יחסי אנוש', questions: ["איך אתה מנהל קונפליקטים בצוות?", "איך תתעדף משאבים מוגבלים?"] }
-                    ],
-                    traits: ['ירידה לפרטים', 'רגולציה', 'תפעול']
-                }
-            };
-
             const activeRoleConfig = roleConfig[candidate.role];
-
-            const signalsData = {
-                green: [
-                    {id:'serial', label:'יזם סדרתי (גם כישלון נחשב)'}, 
-                    {id:'domain', label:'Domain Expert (מומחיות תוכן)'}, 
-                    {id:'tech', label:'רקע טכנולוגי עמוק (8200/תואר)'}, 
-                    {id:'partners', label:'הצליח לגייס שותפים חזקים'}
-                ],
-                red: [
-                    {id:'solo', label:'Solo Founder (ללא שותפים)'}, 
-                    {id:'outsourcing', label:'מיקור חוץ מלא (אין טכנולוגיה בבית)'}, 
-                    {id:'arrogance', label:'יהירות / חוסר צניעות (ערך ליבה)'}, 
-                    {id:'parttime', label:'משרה חלקית / חוסר מחויבות'}
-                ]
-            };
 
             // --- LOGIC ---
             const isPassedGate0 = gates.champion && gates.problem && gates.materials;
+            
+            // Kill Switch Logic
             const isCoachabilityFail = scores.coachability <= 3;
             const isRoleFail = activeRoleConfig.criteria.some(c => c.critical && scores[c.id] <= 3);
             const isFail = isCoachabilityFail || isRoleFail;
 
-            const handleWeightChange = (id, newVal) => {
+            const handleWeightChange = useCallback((id, newVal) => {
                 const newWeight = Math.max(0, Math.min(100, newVal)) / 100;
                 const oldWeight = weights[id];
-                const activeKeys = [...universalCriteria.map(c => c.id), ...activeRoleConfig.criteria.map(c => c.id)];
+                
+                const activeKeys = [
+                    ...universalCriteria.map(c => c.id),
+                    ...activeRoleConfig.criteria.map(c => c.id)
+                ];
+                
                 const otherKeys = activeKeys.filter(k => k !== id);
                 const currentOthersSum = otherKeys.reduce((sum, key) => sum + weights[key], 0);
+
                 const newWeights = { ...weights, [id]: newWeight };
 
                 if (currentOthersSum > 0) {
                     const targetOthersSum = 1.0 - newWeight;
                     const ratio = targetOthersSum / currentOthersSum;
-                    otherKeys.forEach(k => { newWeights[k] = weights[k] * ratio; });
+                    
+                    otherKeys.forEach(k => {
+                        newWeights[k] = weights[k] * ratio;
+                    });
                 } else {
                     if (otherKeys.length > 0) {
                          const split = (1.0 - newWeight) / otherKeys.length;
@@ -277,33 +361,47 @@
                     }
                 }
                 setWeights(newWeights);
-            };
+            }, [weights, activeRoleConfig]);
 
+            // Reset weights on role change
             useEffect(() => {
                 setWeights({
-                    coachability: 0.20, passion: 0.15, team: 0.10,
-                    role1: 0.20, role2: 0.15, role3: 0.10, role4: 0.10
+                    coachability: 0.20,
+                    passion: 0.15,
+                    team: 0.10,
+                    role1: 0.20, 
+                    role2: 0.15, 
+                    role3: 0.10, 
+                    role4: 0.10
                 });
             }, [candidate.role]);
 
             const totalScore = useMemo(() => {
-                if (!allGatesPassed()) return 0;
+                if (!isPassedGate0) return 0;
+
                 let sum = 0;
-                universalCriteria.forEach(c => { sum += (scores[c.id] * 10 * weights[c.id]); });
-                activeRoleConfig.criteria.forEach(c => { sum += (scores[c.id] * 10 * weights[c.id]); });
-                sum += (flags.green.length * 3);
-                sum -= (flags.red.length * 5);
+                // Add Universal Scores
+                universalCriteria.forEach(c => {
+                    sum += (scores[c.id] * 10 * weights[c.id]);
+                });
+                // Add Role Specific Scores
+                activeRoleConfig.criteria.forEach(c => {
+                    sum += (scores[c.id] * 10 * weights[c.id]);
+                });
+
+                // Bonus/Penalty Logic
+                sum += (flags.green.length * 3); 
+                sum -= (flags.red.length * 5);   
+                
+                // Beer Test Bonus
                 if (spark.beer >= 4) sum += 2;
                 if (spark.beer <= 2) sum -= 2;
-                return Math.max(0, Math.min(100, Math.round(sum)));
-            }, [scores, flags, spark.beer, candidate.role, gates, weights]);
 
-            function allGatesPassed() {
-                return gates.champion && gates.problem && gates.materials;
-            }
+                return Math.max(0, Math.min(100, Math.round(sum)));
+            }, [scores, flags, spark.beer, candidate.role, isPassedGate0, weights]);
 
             const getDecision = () => {
-                if (!allGatesPassed()) return { text: 'חסרים תנאי סף', sub: 'יש להשלים את שלב 0', color: 'bg-gray-700 text-gray-300' };
+                if (!isPassedGate0) return { text: 'חסרים תנאי סף', sub: 'יש להשלים את שלב 0', color: 'bg-gray-700 text-gray-300' };
                 if (isFail) return { text: 'פסילה מיידית', sub: 'נכשל במדד קריטי (Kill Switch)', color: 'bg-red-600 text-white' };
                 if (totalScore >= 80) return { text: 'עבר (Green)', sub: 'לקדם לחוזה/בדיקת היתכנות', color: 'bg-green-500 text-white' };
                 if (totalScore >= 60) return { text: 'המתנה (Yellow)', sub: 'דורש חידוד או שותף', color: 'bg-innovet-yellow text-black' };
@@ -323,91 +421,18 @@
                 if (scores.role2 < 6) weakPoints.push(`חסר לנו עומק בנושא ${activeRoleConfig.criteria[1].label} כדי להתקדם.`);
                 if (scores.coachability < 6) weakPoints.push("ההתאמה לדינמיקה האינטנסיבית של תוכנית מאיץ דורשת עוד בשלות.");
                 if (flags.red.includes('solo')) weakPoints.push("בשלב זה, אנו מחפשים צוותים מלאים ולא יזמים בודדים.");
-                let feedback = weakPoints.length > 0 ? weakPoints.join(" ") : "התחרות במחזור זה הייתה קשה במיוחד, וחיפשנו התאמה מאוד ספציפית לאתגרים של IAI.";
-                return `היי ${candidate.name || "יזם"},\n\nתודה רבה על הזמן שהקדשת לפגוש אותנו. רצינו לעדכן שלצערי לא נמשיך בתהליך למחזור הקרוב.\n\nחשוב לנו לתת ערך ולא רק תשובה שלילית: ${feedback}\n\nנשמח להישאר בקשר ולהזמין אותך לאירועים פתוחים של קהילת Innovet ("Friends of Innovet") כדי שנוכל לבחון שוב בעתיד.\n\nבהצלחה,\nצוות Innovet`;
+                return `היי ${candidate.name || "יזם"},\n\nתודה רבה על הזמן שהקדשת לפגוש אותנו. רצינו לעדכן שלצערי לא נמשיך בתהליך למחזור הקרוב.\n\nחשוב לנו לתת ערך ולא רק תשובה שלילית: ${weakPoints.length > 0 ? weakPoints.join(" ") : "התחרות במחזור זה הייתה קשה במיוחד."}\n\nנשמח להישאר בקשר ולהזמין אותך לאירועים פתוחים של קהילת Innovet ("Friends of Innovet") כדי שנוכל לבחון שוב בעתיד.\n\nבהצלחה,\nצוות Innovet`;
             };
 
             const resetApp = () => {
                 if(confirm('לאפס את כל הנתונים?')) window.location.reload();
             };
 
-            // --- UI COMPONENTS ---
-
-            const SectionCard = ({ title, icon: Icon, children, className = "" }) => (
-                <div className={`bg-white rounded-xl shadow-lg border border-gray-100 p-6 md:p-8 mb-8 smooth-transition relative overflow-hidden ${className}`}>
-                    <div className="flex items-center gap-4 mb-8 pb-4 border-b border-gray-100">
-                        <div className="p-3 bg-innovet-yellow text-innovet-black rounded-lg shadow-sm">
-                            <Icon size={24} />
-                        </div>
-                        <h2 className="text-2xl font-black text-innovet-black uppercase tracking-tight leading-none">{title}</h2>
-                    </div>
-                    {children}
-                </div>
-            );
-
-            const CheckBox = ({ label, checked, onChange, isCritical = false }) => (
-                <div 
-                    onClick={onChange} 
-                    className={`flex items-center gap-4 p-4 border-2 rounded-xl cursor-pointer smooth-transition ${checked ? (isCritical ? 'border-innovet-success bg-green-50' : 'border-innovet-blue bg-blue-50') : 'border-gray-100 bg-white hover:border-gray-300 hover:bg-gray-50'}`}
-                >
-                    <div className={`w-6 h-6 rounded border-2 flex items-center justify-center shrink-0 transition-colors ${checked ? 'bg-innovet-success border-innovet-success' : 'bg-white border-gray-300'}`}>
-                        {checked && <Icons.Check size={14} className="text-white" />}
-                    </div>
-                    <span className={`font-bold text-sm ${checked ? 'text-innovet-black' : 'text-gray-500'}`}>{label}</span>
-                </div>
-            );
-
-            const WeightSlider = ({ id, currentWeight, onChange }) => (
-                <div className="mt-2 p-2 bg-gray-100 rounded-lg animate-fade-in">
-                    <div className="flex justify-between items-center text-[10px] uppercase font-bold text-gray-500 mb-1">
-                        <span>משקל</span>
-                        <span>{Math.round(currentWeight * 100)}%</span>
-                    </div>
-                    <input 
-                        type="range" 
-                        min="0" 
-                        max="50" 
-                        step="1"
-                        value={Math.round(currentWeight * 100)}
-                        onChange={(e) => onChange(id, parseInt(e.target.value))}
-                        className="weight-slider"
-                    />
-                </div>
-            );
-
-            const StarRating = ({ value, onChange, isCritical, max = 10 }) => {
-                const [hover, setHover] = useState(0);
-
-                return (
-                    <div className="flex items-center gap-1 bg-gray-50 p-2 rounded-xl border border-gray-100 justify-between smooth-transition hover:border-gray-300" onMouseLeave={() => setHover(0)}>
-                        {[...Array(max)].map((_, i) => {
-                            const v = i + 1;
-                            const isActive = v <= (hover || value);
-                            return (
-                                <button 
-                                    key={v} 
-                                    onClick={() => onChange(v)} 
-                                    onMouseEnter={() => setHover(v)}
-                                    className={`star-btn focus:outline-none p-1 flex-1 flex justify-center ${isActive ? 'animate-pop' : ''}`}
-                                >
-                                    <Icons.Star 
-                                        size={20} 
-                                        className={`transition-colors duration-200 ${isActive ? (isCritical && (hover || value) <= 3 ? 'text-red-500' : 'text-innovet-yellow drop-shadow-sm') : 'text-gray-200'}`} 
-                                        fill={isActive ? "currentColor" : "none"}
-                                    />
-                                </button>
-                            );
-                        })}
-                        <span className={`mr-2 font-mono font-black text-lg w-8 text-center transition-colors duration-300 ${isCritical && (hover || value) <= 3 ? 'text-red-500' : 'text-gray-800'}`}>{hover || value}</span>
-                    </div>
-                );
-            };
-
             return (
                 <div className="flex-grow flex flex-col">
                     
                     {/* --- HEADER --- */}
-                    <header className="bg-innovet-dark text-white relative overflow-hidden shadow-xl z-50 sticky top-0 border-b border-gray-800 transition-all duration-300">
+                    <header className="bg-innovet-dark text-white relative overflow-hidden shadow-xl z-50 sticky top-0 border-b border-gray-800">
                         <div className="absolute top-[-50%] right-[-10%] w-[50%] h-[200%] opacity-10 pointer-events-none" style={{background: 'radial-gradient(circle, #FFC700 0%, transparent 70%)'}}></div>
                         <div className="max-w-5xl mx-auto px-6 py-4 relative z-10 flex justify-between items-center">
                             <div className="flex items-center gap-4 cursor-pointer" onClick={() => window.scrollTo(0,0)}>
@@ -428,7 +453,7 @@
                                 <div className="hidden md:block h-8 w-px bg-white/20"></div>
                                 <div className="hidden md:block text-right">
                                     <div className="text-[9px] font-bold text-gray-400 uppercase tracking-widest mb-0.5">ציון נוכחי</div>
-                                    <div className={`text-3xl font-black font-mono leading-none smooth-transition ${isFail ? 'text-red-500' : 'text-white'}`}>
+                                    <div className={`text-3xl font-black font-mono leading-none transition-colors duration-300 ${isFail ? 'text-red-500' : 'text-white'}`}>
                                         {totalScore}
                                     </div>
                                 </div>
@@ -441,252 +466,244 @@
                         <div className="max-w-4xl mx-auto p-4 md:p-8 space-y-8 -mt-6 relative z-20">
 
                             {/* SECTION 1: IDENTITY & GATES */}
-                            <MountAnimator delay={100}>
-                                <div className="bg-white rounded-2xl shadow-lg border border-gray-100 p-8 relative overflow-hidden smooth-transition">
-                                    <div className="absolute top-0 left-0 w-2 h-full bg-innovet-yellow"></div>
-                                    <div className="flex items-center gap-3 mb-6 pb-4 border-b border-gray-100">
-                                        <div className="bg-gray-900 text-white p-2 rounded-lg"><Icons.Search size={20}/></div>
-                                        <h2 className="text-2xl font-black text-innovet-black">פרטי מועמד ושער כניסה</h2>
+                            <div className="bg-white rounded-2xl shadow-lg border border-gray-100 p-8 animate-fade-in-up relative overflow-hidden">
+                                <div className="absolute top-0 left-0 w-2 h-full bg-innovet-yellow"></div>
+                                <div className="flex items-center gap-3 mb-6 pb-4 border-b border-gray-100">
+                                    <div className="bg-gray-900 text-white p-2 rounded-lg"><Icons.Search size={20}/></div>
+                                    <h2 className="text-2xl font-black text-innovet-black">פרטי מועמד ושער כניסה</h2>
+                                </div>
+
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+                                    <div>
+                                        <label className="block text-xs font-bold text-gray-400 uppercase mb-2">שם המועמד (Champion)</label>
+                                        <input type="text" value={candidate.name} onChange={e => setCandidate({...candidate, name: e.target.value})} className="w-full bg-gray-50 border-b-2 border-gray-200 px-4 py-3 text-xl font-bold focus:border-innovet-yellow transition bg-transparent" placeholder="ישראל ישראלי" />
+                                    </div>
+                                    <div>
+                                        <label className="block text-xs font-bold text-gray-400 uppercase mb-2">תפקיד מיועד</label>
+                                        <div className="flex bg-gray-100 p-1 rounded-lg">
+                                            {['CEO', 'CTO', 'COO'].map(role => (
+                                                <button key={role} onClick={() => setCandidate({...candidate, role})} className={`flex-1 py-2 text-sm font-black rounded-md transition-all ${candidate.role === role ? 'bg-innovet-black text-white shadow-md animate-pop' : 'text-gray-400 hover:text-gray-600'}`}>{role}</button>
+                                            ))}
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div className="bg-gray-50 rounded-xl p-6 border border-gray-200">
+                                    <h3 className="font-bold text-sm text-gray-500 uppercase tracking-widest mb-4 flex items-center gap-2"><Icons.Lock size={14}/> תנאי סף (Pass/Fail Gate)</h3>
+                                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                                        <CheckBox label="Champion מזוהה ומחויב" checked={gates.champion} onChange={() => setGates({...gates, champion: !gates.champion})} isCritical={true} />
+                                        <CheckBox label="הגדרת בעיה ברורה" checked={gates.problem} onChange={() => setGates({...gates, problem: !gates.problem})} isCritical={true} />
+                                        <CheckBox label="בשלות להגשה (חומרים)" checked={gates.materials} onChange={() => setGates({...gates, materials: !gates.materials})} isCritical={true} />
+                                    </div>
+                                    {!isPassedGate0 && <div className="mt-4 text-xs font-bold text-orange-500 flex items-center gap-2 animate-pulse bg-white p-2 rounded border border-orange-100 shadow-sm w-fit"><Icons.Alert size={14}/> חובה לסמן את כל תנאי הסף כדי לקבל ציון תקין.</div>}
+                                </div>
+                            </div>
+
+                            {/* MAIN EVALUATION - ONLY IF GATES PASSED (Or show visually disabled) */}
+                            <div className={`space-y-8 transition-opacity duration-500 ${!isPassedGate0 ? 'opacity-50 pointer-events-none grayscale' : 'opacity-100'}`}>
+                                
+                                {/* SECTION 2: SPARK INDEX */}
+                                <SectionCard title="מדד הניצוץ (Spark Index)" icon={Icons.Heart} className="border-t-4 border-t-pink-500">
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                                        <div className="space-y-6">
+                                            <div>
+                                                <label className="block font-bold text-innovet-black mb-2">1. ה"למה" האישי (The Why)</label>
+                                                <textarea value={spark.why} onChange={e => setSpark({...spark, why: e.target.value})} className="w-full bg-gray-50 border border-gray-200 rounded-xl p-4 text-sm min-h-[100px] transition-colors focus:border-innovet-blue" placeholder="האם הוא פותר בעיה שכאבה לו אישית? האם יש לו 'חשבון פתוח'?"></textarea>
+                                            </div>
+                                            <div>
+                                                <label className="block font-bold text-innovet-black mb-2">2. צלקות עבר (Scar Tissue)</label>
+                                                <textarea value={spark.scars} onChange={e => setSpark({...spark, scars: e.target.value})} className="w-full bg-gray-50 border border-gray-200 rounded-xl p-4 text-sm min-h-[100px] transition-colors focus:border-innovet-blue" placeholder="מתי נכשלו וכאב להם? האם הם יודעים להיות פגיעים?"></textarea>
+                                            </div>
+                                        </div>
+                                        <div className="flex flex-col justify-center bg-yellow-50 p-6 rounded-2xl border border-yellow-100">
+                                            <div className="flex items-center gap-3 mb-2 justify-center">
+                                                <div className="bg-white p-2 rounded-full shadow-sm text-innovet-yellow"><Icons.Beer size={20}/></div>
+                                                <h4 className="font-bold text-xl text-innovet-black">מבחן הבירה</h4>
+                                            </div>
+                                            <p className="text-xs text-gray-500 text-center mb-6 px-4">אם הייתם תקועים איתו בשדה תעופה ב-2 בלילה, הייתם סובלים או מצליחים לייצר שיחה?</p>
+                                            <div className="bg-white p-4 rounded-xl shadow-sm border border-gray-100">
+                                                <StarRating value={spark.beer} onChange={(v) => setSpark({...spark, beer: v})} max={5} />
+                                            </div>
+                                        </div>
+                                    </div>
+                                </SectionCard>
+
+                                {/* SECTION 3: SCREENING (Dynamic based on Role) */}
+                                <SectionCard title={`הערכת סף (${candidate.role})`} icon={Icons.Star}>
+                                    <div className="grid grid-cols-1 gap-6">
+                                        
+                                        {/* 3A: Universal Criteria */}
+                                        <div className="text-xs font-bold text-gray-400 uppercase tracking-widest border-b border-gray-200 pb-2 mb-2">מדדים אוניברסליים</div>
+                                        {universalCriteria.map((c) => (
+                                            <div key={c.id} className="bg-gray-50 p-5 rounded-xl border border-gray-100 hover:border-innovet-blue transition-colors group">
+                                                <div className="flex flex-col md:flex-row justify-between md:items-center gap-4 mb-3">
+                                                    <div>
+                                                        <h3 className="text-lg font-black text-innovet-black flex items-center gap-2">
+                                                            {c.label}
+                                                            <span className="text-[10px] font-normal bg-white px-2 py-0.5 rounded border text-gray-500 transition-all duration-300">{Math.round(weights[c.id] * 100)}%</span>
+                                                        </h3>
+                                                        <p className="text-xs text-gray-500 mt-1">{c.desc}</p>
+                                                        
+                                                        {/* INTERVIEW QUESTIONS TOGGLE */}
+                                                        {c.questions && (
+                                                            <div className="mt-2">
+                                                                <button 
+                                                                    onClick={() => setOpenQuestion(openQuestion === c.id ? null : c.id)}
+                                                                    className="text-xs font-bold text-innovet-blue hover:underline flex items-center gap-1 transition-colors"
+                                                                >
+                                                                    <Icons.Bulb size={12}/> {openQuestion === c.id ? 'הסתר שאלות' : 'שאלות למראיין'}
+                                                                </button>
+                                                                {openQuestion === c.id && (
+                                                                    <ul className="mt-2 bg-blue-50 p-3 rounded-lg text-xs text-gray-700 space-y-1 list-disc list-inside animate-fade-in-up">
+                                                                        {c.questions.map((q, idx) => <li key={idx}>{q}</li>)}
+                                                                    </ul>
+                                                                )}
+                                                            </div>
+                                                        )}
+
+                                                        {/* WEIGHT SLIDER */}
+                                                        {isWeightEditMode && (
+                                                            <WeightSlider id={c.id} currentWeight={weights[c.id]} onChange={handleWeightChange} />
+                                                        )}
+                                                    </div>
+                                                    <div className="min-w-[200px]">
+                                                        <StarRating value={scores[c.id]} onChange={(v) => setScores(prev => ({...prev, [c.id]: v}))} isCritical={c.critical} />
+                                                    </div>
+                                                </div>
+                                                {c.critical && scores[c.id] <= 3 && (
+                                                    <div className="bg-red-50 text-red-600 text-xs font-bold p-2 rounded flex items-center gap-2 animate-pulse">
+                                                        <Icons.Alert size={14}/> ציון נמוך כאן מהווה עילת פסילה אוטומטית (Kill Switch).
+                                                    </div>
+                                                )}
+                                            </div>
+                                        ))}
+
+                                        {/* 3B: Role Specific Criteria */}
+                                        <div className="text-xs font-bold text-innovet-blue uppercase tracking-widest border-b border-blue-100 pb-2 mb-2 mt-4 flex items-center gap-2">
+                                            <activeRoleConfig.icon size={14} /> מדדים ייחודיים ל-{candidate.role}
+                                        </div>
+                                        {activeRoleConfig.criteria.map((c) => (
+                                            <div key={c.id} className="bg-blue-50/50 p-5 rounded-xl border border-blue-100 hover:border-innovet-blue transition-colors group">
+                                                <div className="flex flex-col md:flex-row justify-between md:items-center gap-4 mb-3">
+                                                    <div>
+                                                        <h3 className="text-lg font-black text-innovet-black flex items-center gap-2">
+                                                            {c.label}
+                                                            <span className="text-[10px] font-normal bg-white px-2 py-0.5 rounded border text-gray-500 transition-all duration-300">{Math.round(weights[c.id] * 100)}%</span>
+                                                        </h3>
+                                                        <p className="text-xs text-gray-500 mt-1">{c.desc}</p>
+
+                                                        {/* INTERVIEW QUESTIONS TOGGLE (ROLE) */}
+                                                        {c.questions && (
+                                                            <div className="mt-2">
+                                                                <button 
+                                                                    onClick={() => setOpenQuestion(openQuestion === c.id ? null : c.id)}
+                                                                    className="text-xs font-bold text-innovet-blue hover:underline flex items-center gap-1 transition-colors"
+                                                                >
+                                                                    <Icons.Bulb size={12}/> {openQuestion === c.id ? 'הסתר שאלות' : 'שאלות למראיין'}
+                                                                </button>
+                                                                {openQuestion === c.id && (
+                                                                    <ul className="mt-2 bg-white p-3 rounded-lg text-xs text-gray-700 space-y-1 list-disc list-inside shadow-sm border border-blue-100 animate-fade-in-up">
+                                                                        {c.questions.map((q, idx) => <li key={idx}>{q}</li>)}
+                                                                    </ul>
+                                                                )}
+                                                            </div>
+                                                        )}
+
+                                                        {/* WEIGHT SLIDER */}
+                                                        {isWeightEditMode && (
+                                                            <WeightSlider id={c.id} currentWeight={weights[c.id]} onChange={handleWeightChange} />
+                                                        )}
+                                                    </div>
+                                                    <div className="min-w-[200px]">
+                                                        <StarRating value={scores[c.id]} onChange={(v) => setScores(prev => ({...prev, [c.id]: v}))} isCritical={c.critical} />
+                                                    </div>
+                                                </div>
+                                                {c.critical && scores[c.id] <= 3 && (
+                                                    <div className="bg-red-50 text-red-600 text-xs font-bold p-2 rounded flex items-center gap-2 animate-pulse">
+                                                        <Icons.Alert size={14}/> ציון נמוך כאן מהווה עילת פסילה אוטומטית (Kill Switch).
+                                                    </div>
+                                                )}
+                                            </div>
+                                        ))}
+
+                                    </div>
+                                </SectionCard>
+
+                                {/* SECTION 4: DEEP DIVE & SIGNALS */}
+                                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                                    <div className="bg-white rounded-2xl shadow-lg border border-gray-100 p-8 h-full">
+                                        <div className="flex items-center gap-3 mb-6 pb-4 border-b border-gray-100">
+                                            <div className="bg-innovet-blue p-2 text-white rounded-lg"><Icons.Briefcase size={20}/></div>
+                                            <h2 className="text-xl font-black text-innovet-black">בדיקת נאותות (Signals)</h2>
+                                        </div>
+                                        
+                                        <div className="space-y-6">
+                                            <div>
+                                                <h4 className="text-xs font-bold text-green-600 uppercase tracking-widest mb-3 bg-green-50 w-fit px-2 py-1 rounded">Green Flags (בונוס)</h4>
+                                                <div className="space-y-2">
+                                                    {signalsData.green.map(s => (
+                                                        <label key={s.id} className={`flex items-center gap-3 p-3 rounded-lg border cursor-pointer transition-all ${flags.green.includes(s.id) ? 'border-green-500 bg-green-50' : 'border-gray-100 hover:bg-gray-50'}`}>
+                                                            <input type="checkbox" checked={flags.green.includes(s.id)} onChange={() => toggleFlag('green', s.id)} className="w-4 h-4 accent-green-600" />
+                                                            <span className="text-sm font-bold text-gray-700">{s.label}</span>
+                                                        </label>
+                                                    ))}
+                                                </div>
+                                            </div>
+                                            <div>
+                                                <h4 className="text-xs font-bold text-red-600 uppercase tracking-widest mb-3 bg-red-50 w-fit px-2 py-1 rounded">Red Flags (קנס)</h4>
+                                                <div className="space-y-2">
+                                                    {signalsData.red.map(s => (
+                                                        <label key={s.id} className={`flex items-center gap-3 p-3 rounded-lg border cursor-pointer transition-all ${flags.red.includes(s.id) ? 'border-red-500 bg-red-50' : 'border-gray-100 hover:bg-gray-50'}`}>
+                                                            <input type="checkbox" checked={flags.red.includes(s.id)} onChange={() => toggleFlag('red', s.id)} className="w-4 h-4 accent-red-600" />
+                                                            <span className="text-sm font-bold text-gray-700">{s.label}</span>
+                                                        </label>
+                                                    ))}
+                                                </div>
+                                            </div>
+                                        </div>
                                     </div>
 
-                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
-                                        <div>
-                                            <label className="block text-xs font-bold text-gray-400 uppercase mb-2">שם המועמד (Champion)</label>
-                                            <input type="text" value={candidate.name} onChange={e => setCandidate({...candidate, name: e.target.value})} className="w-full bg-gray-50 border-b-2 border-gray-200 px-4 py-3 text-xl font-bold focus:border-innovet-yellow transition bg-transparent" placeholder="ישראל ישראלי" />
+                                    <div className="bg-white rounded-2xl shadow-lg border border-gray-100 p-8 h-full flex flex-col">
+                                        <div className="flex items-center gap-3 mb-6 pb-4 border-b border-gray-100">
+                                            <div className="bg-innovet-blue p-2 text-white rounded-lg"><Icons.User size={20}/></div>
+                                            <h2 className="text-xl font-black text-innovet-black">פרופיל אישיות (DISC)</h2>
                                         </div>
-                                        <div>
-                                            <label className="block text-xs font-bold text-gray-400 uppercase mb-2">תפקיד מיועד</label>
-                                            <div className="flex bg-gray-100 p-1 rounded-lg">
-                                                {['CEO', 'CTO', 'COO'].map(role => (
-                                                    <button key={role} onClick={() => setCandidate({...candidate, role})} className={`flex-1 py-2 text-sm font-black rounded-md transition-all ${candidate.role === role ? 'bg-innovet-black text-white shadow-md' : 'text-gray-400 hover:text-gray-600'}`}>{role}</button>
+
+                                        <div className="bg-blue-50 p-6 rounded-2xl border border-blue-100 mb-6 flex-grow text-center">
+                                            <div className="text-lg font-black text-innovet-blue mb-1">תכונות נדרשות ל-{candidate.role}</div>
+                                            <div className="flex flex-wrap gap-2 justify-center mt-4">
+                                                {activeRoleConfig.traits.map(t => (
+                                                    <span key={t} className="px-3 py-1 bg-white rounded-full text-xs font-bold text-gray-700 border border-blue-100 shadow-sm">{t}</span>
                                                 ))}
                                             </div>
                                         </div>
-                                    </div>
 
-                                    <div className="bg-gray-50 rounded-xl p-6 border border-gray-200">
-                                        <h3 className="font-bold text-sm text-gray-500 uppercase tracking-widest mb-4 flex items-center gap-2"><Icons.Lock size={14}/> תנאי סף (Pass/Fail Gate)</h3>
-                                        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                                            <CheckBox label="Champion מזוהה ומחויב" checked={gates.champion} onChange={() => setGates({...gates, champion: !gates.champion})} isCritical={true} />
-                                            <CheckBox label="הגדרת בעיה ברורה" checked={gates.problem} onChange={() => setGates({...gates, problem: !gates.problem})} isCritical={true} />
-                                            <CheckBox label="בשלות להגשה (חומרים)" checked={gates.materials} onChange={() => setGates({...gates, materials: !gates.materials})} isCritical={true} />
+                                        <div className="pt-6 border-t border-gray-100">
+                                            <label className="block text-xs font-bold text-gray-400 uppercase mb-3">סמן פרופיל דומיננטי</label>
+                                            <div className="grid grid-cols-4 gap-2">
+                                                {['D', 'I', 'S', 'C'].map(d => (
+                                                    <button key={d} onClick={() => setDisc(d)} className={`py-3 rounded-lg font-black text-lg border-2 transition-all ${disc === d ? 'bg-innovet-black text-white border-innovet-black shadow-md' : 'bg-white text-gray-300 border-gray-200 hover:border-gray-300'}`}>
+                                                        {d}
+                                                    </button>
+                                                ))}
+                                            </div>
+                                            <div className="text-center mt-3 text-[10px] text-gray-400 font-bold uppercase tracking-wider">
+                                                {disc === 'D' && 'Dominance: ממוקד תוצאות'}
+                                                {disc === 'I' && 'Influence: נלהב ושכנע'}
+                                                {disc === 'S' && 'Steadiness: יציב ותומך'}
+                                                {disc === 'C' && 'Conscientiousness: אנליטי'}
+                                                {!disc && 'בחר פרופיל'}
+                                            </div>
                                         </div>
-                                        {!isPassedGate0 && <div className="mt-4 text-xs font-bold text-orange-500 flex items-center gap-2 animate-pulse bg-white p-2 rounded border border-orange-100 shadow-sm w-fit"><Icons.Alert size={14}/> חובה לסמן את כל תנאי הסף כדי לקבל ציון תקין.</div>}
                                     </div>
                                 </div>
-                            </MountAnimator>
-
-                            {/* MAIN EVALUATION - ONLY IF GATES PASSED (Or show visually disabled) */}
-                            <div className={`space-y-8 smooth-transition duration-500 ${!isPassedGate0 ? 'opacity-50 pointer-events-none grayscale' : 'opacity-100'}`}>
-                                
-                                {/* SECTION 2: SPARK INDEX */}
-                                <MountAnimator delay={200}>
-                                    <SectionCard title="מדד הניצוץ (Spark Index)" icon={Icons.Heart} className="border-t-4 border-t-pink-500">
-                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                                            <div className="space-y-6">
-                                                <div>
-                                                    <label className="block font-bold text-innovet-black mb-2">1. ה"למה" האישי (The Why)</label>
-                                                    <textarea value={spark.why} onChange={e => setSpark({...spark, why: e.target.value})} className="w-full bg-gray-50 border border-gray-200 rounded-xl p-4 text-sm min-h-[100px]" placeholder="האם הוא פותר בעיה שכאבה לו אישית? האם יש לו 'חשבון פתוח'?"></textarea>
-                                                </div>
-                                                <div>
-                                                    <label className="block font-bold text-innovet-black mb-2">2. צלקות עבר (Scar Tissue)</label>
-                                                    <textarea value={spark.scars} onChange={e => setSpark({...spark, scars: e.target.value})} className="w-full bg-gray-50 border border-gray-200 rounded-xl p-4 text-sm min-h-[100px]" placeholder="מתי נכשלו וכאב להם? האם הם יודעים להיות פגיעים?"></textarea>
-                                                </div>
-                                            </div>
-                                            <div className="flex flex-col justify-center bg-yellow-50 p-6 rounded-2xl border border-yellow-100">
-                                                <div className="flex items-center gap-3 mb-2 justify-center">
-                                                    <div className="bg-white p-2 rounded-full shadow-sm text-innovet-yellow"><Icons.Beer size={20}/></div>
-                                                    <h4 className="font-bold text-xl text-innovet-black">מבחן הבירה</h4>
-                                                </div>
-                                                <p className="text-xs text-gray-500 text-center mb-6 px-4">אם הייתם תקועים איתו בשדה תעופה ב-2 בלילה, הייתם סובלים או מצליחים לייצר שיחה?</p>
-                                                <div className="bg-white p-4 rounded-xl shadow-sm border border-gray-100">
-                                                    <StarRating value={spark.beer} onChange={(v) => setSpark({...spark, beer: v})} max={5} />
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </SectionCard>
-                                </MountAnimator>
-
-                                {/* SECTION 3: SCREENING (Dynamic based on Role) */}
-                                <MountAnimator delay={300}>
-                                    <SectionCard title={`הערכת סף (${candidate.role})`} icon={Icons.Star}>
-                                        <div className="grid grid-cols-1 gap-6">
-                                            
-                                            {/* 3A: Universal Criteria */}
-                                            <div className="text-xs font-bold text-gray-400 uppercase tracking-widest border-b border-gray-200 pb-2 mb-2">מדדים אוניברסליים</div>
-                                            {universalCriteria.map((c) => (
-                                                <div key={c.id} className="bg-gray-50 p-5 rounded-xl border border-gray-100 hover:border-innovet-blue smooth-transition group">
-                                                    <div className="flex flex-col md:flex-row justify-between md:items-center gap-4 mb-3">
-                                                        <div>
-                                                            <h3 className="text-lg font-black text-innovet-black flex items-center gap-2">
-                                                                {c.label}
-                                                                <span className="text-[10px] font-normal bg-white px-2 py-0.5 rounded border text-gray-500">{Math.round(weights[c.id] * 100)}%</span>
-                                                            </h3>
-                                                            <p className="text-xs text-gray-500 mt-1">{c.desc}</p>
-                                                            
-                                                            {/* INTERVIEW QUESTIONS TOGGLE */}
-                                                            {c.questions && (
-                                                                <div className="mt-2">
-                                                                    <button 
-                                                                        onClick={() => setOpenQuestion(openQuestion === c.id ? null : c.id)}
-                                                                        className="text-xs font-bold text-innovet-blue hover:underline flex items-center gap-1"
-                                                                    >
-                                                                        <Icons.Bulb size={12}/> {openQuestion === c.id ? 'הסתר שאלות' : 'שאלות למראיין'}
-                                                                    </button>
-                                                                    {openQuestion === c.id && (
-                                                                        <ul className="mt-2 bg-blue-50 p-3 rounded-lg text-xs text-gray-700 space-y-1 list-disc list-inside animate-fade-in">
-                                                                            {c.questions.map((q, idx) => <li key={idx}>{q}</li>)}
-                                                                        </ul>
-                                                                    )}
-                                                                </div>
-                                                            )}
-
-                                                            {/* WEIGHT SLIDER */}
-                                                            {isWeightEditMode && (
-                                                                <WeightSlider id={c.id} currentWeight={weights[c.id]} onChange={handleWeightChange} />
-                                                            )}
-                                                        </div>
-                                                        <div className="min-w-[200px]">
-                                                            <StarRating value={scores[c.id]} onChange={(v) => setScores({...scores, [c.id]: v})} isCritical={c.critical} />
-                                                        </div>
-                                                    </div>
-                                                    {c.critical && scores[c.id] <= 3 && (
-                                                        <div className="bg-red-50 text-red-600 text-xs font-bold p-2 rounded flex items-center gap-2 animate-pulse">
-                                                            <Icons.Alert size={14}/> ציון נמוך כאן מהווה עילת פסילה אוטומטית (Kill Switch).
-                                                        </div>
-                                                    )}
-                                                </div>
-                                            ))}
-
-                                            {/* 3B: Role Specific Criteria */}
-                                            <div className="text-xs font-bold text-innovet-blue uppercase tracking-widest border-b border-blue-100 pb-2 mb-2 mt-4 flex items-center gap-2">
-                                                <activeRoleConfig.icon size={14} /> מדדים ייחודיים ל-{candidate.role}
-                                            </div>
-                                            {activeRoleConfig.criteria.map((c) => (
-                                                <div key={c.id} className="bg-blue-50/50 p-5 rounded-xl border border-blue-100 hover:border-innovet-blue smooth-transition group">
-                                                    <div className="flex flex-col md:flex-row justify-between md:items-center gap-4 mb-3">
-                                                        <div>
-                                                            <h3 className="text-lg font-black text-innovet-black flex items-center gap-2">
-                                                                {c.label}
-                                                                <span className="text-[10px] font-normal bg-white px-2 py-0.5 rounded border text-gray-500">{Math.round(weights[c.id] * 100)}%</span>
-                                                            </h3>
-                                                            <p className="text-xs text-gray-500 mt-1">{c.desc}</p>
-
-                                                            {/* INTERVIEW QUESTIONS TOGGLE (ROLE) */}
-                                                            {c.questions && (
-                                                                <div className="mt-2">
-                                                                    <button 
-                                                                        onClick={() => setOpenQuestion(openQuestion === c.id ? null : c.id)}
-                                                                        className="text-xs font-bold text-innovet-blue hover:underline flex items-center gap-1"
-                                                                    >
-                                                                        <Icons.Bulb size={12}/> {openQuestion === c.id ? 'הסתר שאלות' : 'שאלות למראיין'}
-                                                                    </button>
-                                                                    {openQuestion === c.id && (
-                                                                        <ul className="mt-2 bg-white p-3 rounded-lg text-xs text-gray-700 space-y-1 list-disc list-inside shadow-sm border border-blue-100 animate-fade-in">
-                                                                            {c.questions.map((q, idx) => <li key={idx}>{q}</li>)}
-                                                                        </ul>
-                                                                    )}
-                                                                </div>
-                                                            )}
-
-                                                            {/* WEIGHT SLIDER */}
-                                                            {isWeightEditMode && (
-                                                                <WeightSlider id={c.id} currentWeight={weights[c.id]} onChange={handleWeightChange} />
-                                                            )}
-                                                        </div>
-                                                        <div className="min-w-[200px]">
-                                                            <StarRating value={scores[c.id]} onChange={(v) => setScores({...scores, [c.id]: v})} isCritical={c.critical} />
-                                                        </div>
-                                                    </div>
-                                                    {c.critical && scores[c.id] <= 3 && (
-                                                        <div className="bg-red-50 text-red-600 text-xs font-bold p-2 rounded flex items-center gap-2 animate-pulse">
-                                                            <Icons.Alert size={14}/> ציון נמוך כאן מהווה עילת פסילה אוטומטית (Kill Switch).
-                                                        </div>
-                                                    )}
-                                                </div>
-                                            ))}
-
-                                        </div>
-                                    </SectionCard>
-                                </MountAnimator>
-
-                                {/* SECTION 4: DEEP DIVE & SIGNALS */}
-                                <MountAnimator delay={400}>
-                                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                                        <div className="bg-white rounded-2xl shadow-lg border border-gray-100 p-8 h-full smooth-transition">
-                                            <div className="flex items-center gap-3 mb-6 pb-4 border-b border-gray-100">
-                                                <div className="bg-innovet-blue p-2 text-white rounded-lg"><Icons.Briefcase size={20}/></div>
-                                                <h2 className="text-xl font-black text-innovet-black">בדיקת נאותות (Signals)</h2>
-                                            </div>
-                                            
-                                            <div className="space-y-6">
-                                                <div>
-                                                    <h4 className="text-xs font-bold text-green-600 uppercase tracking-widest mb-3 bg-green-50 w-fit px-2 py-1 rounded">Green Flags (בונוס)</h4>
-                                                    <div className="space-y-2">
-                                                        {signalsData.green.map(s => (
-                                                            <label key={s.id} className={`flex items-center gap-3 p-3 rounded-lg border cursor-pointer smooth-transition ${flags.green.includes(s.id) ? 'border-green-500 bg-green-50' : 'border-gray-100 hover:bg-gray-50'}`}>
-                                                                <input type="checkbox" checked={flags.green.includes(s.id)} onChange={() => toggleFlag('green', s.id)} className="w-4 h-4 accent-green-600" />
-                                                                <span className="text-sm font-bold text-gray-700">{s.label}</span>
-                                                            </label>
-                                                        ))}
-                                                    </div>
-                                                </div>
-                                                <div>
-                                                    <h4 className="text-xs font-bold text-red-600 uppercase tracking-widest mb-3 bg-red-50 w-fit px-2 py-1 rounded">Red Flags (קנס)</h4>
-                                                    <div className="space-y-2">
-                                                        {signalsData.red.map(s => (
-                                                            <label key={s.id} className={`flex items-center gap-3 p-3 rounded-lg border cursor-pointer smooth-transition ${flags.red.includes(s.id) ? 'border-red-500 bg-red-50' : 'border-gray-100 hover:bg-gray-50'}`}>
-                                                                <input type="checkbox" checked={flags.red.includes(s.id)} onChange={() => toggleFlag('red', s.id)} className="w-4 h-4 accent-red-600" />
-                                                                <span className="text-sm font-bold text-gray-700">{s.label}</span>
-                                                            </label>
-                                                        ))}
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </div>
-
-                                        <div className="bg-white rounded-2xl shadow-lg border border-gray-100 p-8 h-full flex flex-col smooth-transition">
-                                            <div className="flex items-center gap-3 mb-6 pb-4 border-b border-gray-100">
-                                                <div className="bg-innovet-blue p-2 text-white rounded-lg"><Icons.User size={20}/></div>
-                                                <h2 className="text-xl font-black text-innovet-black">פרופיל אישיות (DISC)</h2>
-                                            </div>
-
-                                            <div className="bg-blue-50 p-6 rounded-2xl border border-blue-100 mb-6 flex-grow text-center">
-                                                <div className="text-lg font-black text-innovet-blue mb-1">תכונות נדרשות ל-{candidate.role}</div>
-                                                <div className="flex flex-wrap gap-2 justify-center mt-4">
-                                                    {activeRoleConfig.traits.map(t => (
-                                                        <span key={t} className="px-3 py-1 bg-white rounded-full text-xs font-bold text-gray-700 border border-blue-100 shadow-sm">{t}</span>
-                                                    ))}
-                                                </div>
-                                            </div>
-
-                                            <div className="pt-6 border-t border-gray-100">
-                                                <label className="block text-xs font-bold text-gray-400 uppercase mb-3">סמן פרופיל דומיננטי</label>
-                                                <div className="grid grid-cols-4 gap-2">
-                                                    {['D', 'I', 'S', 'C'].map(d => (
-                                                        <button key={d} onClick={() => setDisc(d)} className={`py-3 rounded-lg font-black text-lg border-2 smooth-transition ${disc === d ? 'bg-innovet-black text-white border-innovet-black shadow-md' : 'bg-white text-gray-300 border-gray-200 hover:border-gray-300'}`}>
-                                                            {d}
-                                                        </button>
-                                                    ))}
-                                                </div>
-                                                <div className="text-center mt-3 text-[10px] text-gray-400 font-bold uppercase tracking-wider">
-                                                    {disc === 'D' && 'Dominance: ממוקד תוצאות'}
-                                                    {disc === 'I' && 'Influence: נלהב ושכנע'}
-                                                    {disc === 'S' && 'Steadiness: יציב ותומך'}
-                                                    {disc === 'C' && 'Conscientiousness: אנליטי'}
-                                                    {!disc && 'בחר פרופיל'}
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </MountAnimator>
 
                             </div>
                         </div>
                     </main>
 
                     {/* --- STICKY FOOTER --- */}
-                    <div className="fixed bottom-0 left-0 w-full bg-innovet-dark text-white shadow-[0_-10px_40px_rgba(0,0,0,0.3)] border-t border-gray-800 z-40 smooth-transition no-print">
+                    <div className="fixed bottom-0 left-0 w-full bg-innovet-dark text-white shadow-[0_-10px_40px_rgba(0,0,0,0.3)] border-t border-gray-800 z-40 animate-fade-in-up no-print">
                         <div className="max-w-6xl mx-auto px-6 py-4 flex flex-col md:flex-row items-center justify-between gap-4">
                             
                             <div className="flex items-center gap-6 w-full md:w-auto">
@@ -704,12 +721,12 @@
                             <div className="flex items-center gap-6 ml-auto">
                                 <div className="text-right">
                                     <div className="text-[10px] text-gray-500 font-bold uppercase tracking-widest">ציון סופי</div>
-                                    <div className={`text-4xl font-black font-mono leading-none smooth-transition ${getDecision().color.includes('red') ? 'text-red-500' : 'text-white'}`}>
+                                    <div className={`text-4xl font-black font-mono leading-none transition-colors duration-300 ${getDecision().color.includes('red') ? 'text-red-500' : 'text-white'}`}>
                                         {totalScore}
                                     </div>
                                 </div>
                                 
-                                <div className={`px-6 py-3 rounded-lg shadow-lg flex flex-col items-center justify-center min-w-[180px] smooth-transition ${getDecision().color}`}>
+                                <div className={`px-6 py-3 rounded-lg shadow-lg flex flex-col items-center justify-center min-w-[180px] transition-colors duration-300 ${getDecision().color}`}>
                                     <span className="font-black uppercase tracking-widest text-sm">{getDecision().text}</span>
                                     <span className="text-[10px] font-medium opacity-90 truncate max-w-[200px]">{getDecision().sub}</span>
                                 </div>
@@ -730,7 +747,7 @@
                         
                         {/* Soft Landing Email Drawer */}
                         {showMailDraft && (
-                            <div className="bg-gray-900 border-t border-gray-800 p-6 animate-fade-in absolute bottom-full left-0 w-full shadow-2xl">
+                            <div className="bg-gray-900 border-t border-gray-800 p-6 animate-fade-in-up absolute bottom-full left-0 w-full shadow-2xl">
                                 <div className="max-w-3xl mx-auto">
                                     <div className="flex justify-between items-center mb-2 text-white">
                                         <h3 className="font-bold text-innovet-yellow flex items-center gap-2"><Icons.Mail size={16}/> טיוטת "נחיתה רכה" (Not Yet + Value)</h3>
