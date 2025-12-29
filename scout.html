@@ -74,7 +74,7 @@
         /* Smooth inputs */
         input:focus, select:focus, textarea:focus { outline: none; border-color: #FFC700; ring: 2px solid rgba(255, 199, 0, 0.2); }
 
-        /* Weight Slider - Improved */
+        /* Weight Slider - Improved for Dragging */
         input[type=range].weight-slider {
             -webkit-appearance: none;
             width: 100%;
@@ -82,18 +82,22 @@
             background: #E5E7EB;
             border-radius: 3px;
             outline: none;
-            cursor: pointer;
+            cursor: grab;
+        }
+        input[type=range].weight-slider:active {
+            cursor: grabbing;
         }
         input[type=range].weight-slider::-webkit-slider-thumb {
             -webkit-appearance: none;
-            width: 18px;
-            height: 18px;
+            width: 20px;
+            height: 20px;
             border-radius: 50%;
             background: #1F63C7;
             cursor: grab;
             transition: transform 0.1s ease, background 0.2s;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-            margin-top: -6px; /* Center thumb */
+            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+            margin-top: -7px;
+            border: 2px solid white;
         }
         input[type=range].weight-slider::-webkit-slider-runnable-track {
             width: 100%;
@@ -101,6 +105,10 @@
             cursor: pointer;
             background: #E5E7EB;
             border-radius: 3px;
+        }
+        input[type=range].weight-slider::-webkit-slider-thumb:hover {
+            transform: scale(1.1);
+            background: #FFC700;
         }
         input[type=range].weight-slider::-webkit-slider-thumb:active {
             cursor: grabbing;
@@ -113,7 +121,7 @@
             transition: transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275); 
         }
         .star-btn:hover { 
-            transform: scale(1.3) translateY(-2px); 
+            transform: scale(1.2) translateY(-2px); 
         }
         .star-btn:active { 
             transform: scale(0.9); 
@@ -165,9 +173,9 @@
             Scale: ({size=20}) => <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m16 16 3-8 3 8c-.87.65-1.92 1-3 1s-2.13-.35-3-1Z"/><path d="m2 16 3-8 3 8c-.87.65-1.92 1-3 1s-2.13-.35-3-1Z"/><path d="M7 21h10"/><path d="M12 3v18"/><path d="M3 7h2c2 0 5-1 7-2 2 1 5 2 7 2h2"/></svg>
         };
 
-        // --- STATIC CONFIG (DEFINED OUTSIDE TO PREVENT RE-RENDERS) ---
-
-        const universalCriteria = [
+        // --- CONSTANT DATA ---
+        
+        const UNIVERSAL_CRITERIA = [
             { 
                 id: 'coachability', 
                 label: 'יכולת למידה (Coachability)', 
@@ -201,7 +209,7 @@
             }
         ];
 
-        const roleConfig = {
+        const ROLE_CONFIG = {
             'CEO': {
                 title: 'המנכ"ל (Visionary)',
                 icon: Icons.Rocket,
@@ -237,7 +245,7 @@
             }
         };
 
-        const signalsData = {
+        const SIGNALS_DATA = {
             green: [
                 {id:'serial', label:'יזם סדרתי (גם כישלון נחשב)'}, 
                 {id:'domain', label:'Domain Expert (מומחיות תוכן)'}, 
@@ -252,7 +260,7 @@
             ]
         };
 
-        // --- SUB-COMPONENTS (MEMOIZED) ---
+        // --- SUB-COMPONENTS (Memoized) ---
 
         const SectionCard = memo(({ title, icon: Icon, children, className = "" }) => (
             <div className={`bg-white rounded-xl shadow-lg border border-gray-100 p-6 md:p-8 mb-8 animate-fade-in-up relative overflow-hidden ${className}`}>
@@ -278,7 +286,8 @@
             </div>
         ));
 
-        const WeightSlider = memo(({ id, currentWeight, onChange }) => (
+        // Intelligent Weight Slider: Recalculates others to maintain 100% total
+        const WeightSlider = memo(({ id, currentWeight, onWeightChange }) => (
             <div className="mt-2 p-2 bg-gray-100 rounded-lg animate-fade-in-up">
                 <div className="flex justify-between items-center text-[10px] uppercase font-bold text-gray-500 mb-1">
                     <span>משקל</span>
@@ -287,10 +296,10 @@
                 <input 
                     type="range" 
                     min="0" 
-                    max="50" 
+                    max="100" 
                     step="1"
                     value={Math.round(currentWeight * 100)}
-                    onChange={(e) => onChange(id, parseInt(e.target.value))}
+                    onChange={(e) => onWeightChange(id, parseInt(e.target.value))}
                     className="weight-slider"
                 />
             </div>
@@ -324,10 +333,11 @@
 
         // --- MAIN APP COMPONENT ---
         const App = () => {
+            // State
             const [candidate, setCandidate] = useState({ name: '', role: 'CEO', interviewer: '' });
             const [gates, setGates] = useState({ champion: false, problem: false, materials: false });
             
-            // Weights State
+            // Weights State (Percentages 0-1)
             const [weights, setWeights] = useState({
                 coachability: 0.20,
                 passion: 0.15,
@@ -345,38 +355,74 @@
                 role1: 0, role2: 0, role3: 0, role4: 0 
             });
             
-            const [spark, setSpark] = useState({ why: '', scars: '', beer: 0 }); // 0 = unrated
+            const [spark, setSpark] = useState({ why: '', scars: '', beer: 0 }); 
             const [flags, setFlags] = useState({ green: [], red: [] });
             const [disc, setDisc] = useState(null);
             const [showMailDraft, setShowMailDraft] = useState(false);
             const [openQuestion, setOpenQuestion] = useState(null);
 
-            const activeRoleConfig = roleConfig[candidate.role];
+            const activeRoleConfig = ROLE_CONFIG[candidate.role];
 
             // --- LOGIC ---
             const isPassedGate0 = gates.champion && gates.problem && gates.materials;
             
-            // Logic: Fail only if scored (>0) AND low
+            // Fail Logic
             const isCoachabilityFail = scores.coachability > 0 && scores.coachability <= 3;
             const isRoleFail = activeRoleConfig.criteria.some(c => c.critical && scores[c.id] > 0 && scores[c.id] <= 3);
             const isFail = isCoachabilityFail || isRoleFail;
 
-            // Check if all scores are filled
-            const totalItems = universalCriteria.length + activeRoleConfig.criteria.length + 1; // +1 for beer
+            // Completion Logic
+            const totalItems = UNIVERSAL_CRITERIA.length + activeRoleConfig.criteria.length + 1; // +1 Beer
             const filledItems = Object.values(scores).filter(v => v > 0).length + (spark.beer > 0 ? 1 : 0);
             const isComplete = filledItems === totalItems;
 
+            // Smart Weight Distribution Algorithm
             const handleWeightChange = useCallback((id, newVal) => {
                 const newWeight = Math.max(0, Math.min(100, newVal)) / 100;
-                // Simplified weight update without complex rebalancing for smooth drag
-                setWeights(prev => ({ ...prev, [id]: newWeight }));
-            }, []);
+                
+                setWeights(prev => {
+                    const oldWeight = prev[id];
+                    const diff = newWeight - oldWeight;
+                    
+                    const activeKeys = [
+                        ...UNIVERSAL_CRITERIA.map(c => c.id),
+                        ...activeRoleConfig.criteria.map(c => c.id)
+                    ];
+                    const otherKeys = activeKeys.filter(k => k !== id);
+                    const sumOthers = otherKeys.reduce((sum, k) => sum + prev[k], 0);
+                    
+                    const nextWeights = { ...prev, [id]: newWeight };
+                    
+                    if (sumOthers > 0) {
+                        // Distribute difference proportionally
+                        otherKeys.forEach(k => {
+                            const ratio = prev[k] / sumOthers;
+                            nextWeights[k] = Math.max(0, prev[k] - (diff * ratio));
+                        });
+                    } else {
+                         // Fallback if others are 0
+                         const split = (1.0 - newWeight) / otherKeys.length;
+                         otherKeys.forEach(k => nextWeights[k] = split);
+                    }
+                    return nextWeights;
+                });
+            }, [activeRoleConfig]);
 
-            // Reset scores on role change
+            // Reset scores/weights on role change
             useEffect(() => {
                 setScores({ 
                     coachability: 0, passion: 0, team: 0, 
                     role1: 0, role2: 0, role3: 0, role4: 0 
+                });
+                // Reset weights to defaults
+                setWeights({
+                    coachability: 0.20,
+                    passion: 0.15,
+                    team: 0.10,
+                    role1: 0.20, 
+                    role2: 0.15, 
+                    role3: 0.10, 
+                    role4: 0.10
                 });
             }, [candidate.role]);
 
@@ -384,27 +430,16 @@
                 if (!isPassedGate0) return 0;
 
                 let sum = 0;
-                let currentTotalWeight = 0;
-
-                // Add Universal Scores
-                universalCriteria.forEach(c => {
-                    if (scores[c.id] > 0) {
-                        sum += (scores[c.id] * 10 * weights[c.id]);
-                        currentTotalWeight += weights[c.id];
-                    }
+                // Universal
+                UNIVERSAL_CRITERIA.forEach(c => {
+                    if (scores[c.id] > 0) sum += (scores[c.id] * 10 * weights[c.id]);
                 });
-                // Add Role Specific Scores
+                // Role Specific
                 activeRoleConfig.criteria.forEach(c => {
-                    if (scores[c.id] > 0) {
-                        sum += (scores[c.id] * 10 * weights[c.id]);
-                        currentTotalWeight += weights[c.id];
-                    }
+                    if (scores[c.id] > 0) sum += (scores[c.id] * 10 * weights[c.id]);
                 });
 
-                // Normalize if partially filled (optional, currently strictly additive based on weight)
-                // Better approach: Calculate max potential based on filled weights
-                
-                // Bonus/Penalty Logic
+                // Bonus/Penalty
                 sum += (flags.green.length * 3); 
                 sum -= (flags.red.length * 5);   
                 
@@ -541,6 +576,7 @@
                                             <p className="text-xs text-gray-500 text-center mb-6 px-4">אם הייתם תקועים איתו בשדה תעופה ב-2 בלילה, הייתם סובלים או מצליחים לייצר שיחה?</p>
                                             <div className="bg-white p-4 rounded-xl shadow-sm border border-gray-100">
                                                 <StarRating value={spark.beer} onChange={(v) => setSpark({...spark, beer: v})} max={5} />
+                                                {spark.beer === 0 && <div className="text-center text-[10px] text-red-500 font-bold mt-1">חסר דירוג</div>}
                                             </div>
                                         </div>
                                     </div>
@@ -552,14 +588,14 @@
                                         
                                         {/* 3A: Universal Criteria */}
                                         <div className="text-xs font-bold text-gray-400 uppercase tracking-widest border-b border-gray-200 pb-2 mb-2">מדדים אוניברסליים</div>
-                                        {universalCriteria.map((c) => (
+                                        {UNIVERSAL_CRITERIA.map((c) => (
                                             <div key={c.id} className={`bg-gray-50 p-5 rounded-xl border transition-colors group ${scores[c.id] === 0 ? 'border-l-4 border-l-red-400 border-gray-100' : 'border-gray-100 hover:border-innovet-blue'}`}>
                                                 <div className="flex flex-col md:flex-row justify-between md:items-center gap-4 mb-3">
                                                     <div>
                                                         <h3 className="text-lg font-black text-innovet-black flex items-center gap-2">
                                                             {c.label}
                                                             <span className="text-[10px] font-normal bg-white px-2 py-0.5 rounded border text-gray-500 transition-all duration-300">{Math.round(weights[c.id] * 100)}%</span>
-                                                            {scores[c.id] === 0 && <span className="text-[10px] font-bold text-red-500 animate-pulse">נדרש מילוי</span>}
+                                                            {scores[c.id] === 0 && <span className="text-[10px] font-bold text-red-500 animate-pulse">חסר דירוג</span>}
                                                         </h3>
                                                         <p className="text-xs text-gray-500 mt-1">{c.desc}</p>
                                                         
@@ -582,7 +618,7 @@
 
                                                         {/* WEIGHT SLIDER */}
                                                         {isWeightEditMode && (
-                                                            <WeightSlider id={c.id} currentWeight={weights[c.id]} onChange={handleWeightChange} />
+                                                            <WeightSlider id={c.id} currentWeight={weights[c.id]} onWeightChange={handleWeightChange} />
                                                         )}
                                                     </div>
                                                     <div className="min-w-[200px]">
@@ -608,7 +644,7 @@
                                                         <h3 className="text-lg font-black text-innovet-black flex items-center gap-2">
                                                             {c.label}
                                                             <span className="text-[10px] font-normal bg-white px-2 py-0.5 rounded border text-gray-500 transition-all duration-300">{Math.round(weights[c.id] * 100)}%</span>
-                                                            {scores[c.id] === 0 && <span className="text-[10px] font-bold text-red-500 animate-pulse">נדרש מילוי</span>}
+                                                            {scores[c.id] === 0 && <span className="text-[10px] font-bold text-red-500 animate-pulse">חסר דירוג</span>}
                                                         </h3>
                                                         <p className="text-xs text-gray-500 mt-1">{c.desc}</p>
 
@@ -661,7 +697,7 @@
                                             <div>
                                                 <h4 className="text-xs font-bold text-green-600 uppercase tracking-widest mb-3 bg-green-50 w-fit px-2 py-1 rounded">Green Flags (בונוס)</h4>
                                                 <div className="space-y-2">
-                                                    {signalsData.green.map(s => (
+                                                    {SIGNALS_DATA.green.map(s => (
                                                         <label key={s.id} className={`flex items-center gap-3 p-3 rounded-lg border cursor-pointer transition-all ${flags.green.includes(s.id) ? 'border-green-500 bg-green-50' : 'border-gray-100 hover:bg-gray-50'}`}>
                                                             <input type="checkbox" checked={flags.green.includes(s.id)} onChange={() => toggleFlag('green', s.id)} className="w-4 h-4 accent-green-600" />
                                                             <span className="text-sm font-bold text-gray-700">{s.label}</span>
@@ -672,7 +708,7 @@
                                             <div>
                                                 <h4 className="text-xs font-bold text-red-600 uppercase tracking-widest mb-3 bg-red-50 w-fit px-2 py-1 rounded">Red Flags (קנס)</h4>
                                                 <div className="space-y-2">
-                                                    {signalsData.red.map(s => (
+                                                    {SIGNALS_DATA.red.map(s => (
                                                         <label key={s.id} className={`flex items-center gap-3 p-3 rounded-lg border cursor-pointer transition-all ${flags.red.includes(s.id) ? 'border-red-500 bg-red-50' : 'border-gray-100 hover:bg-gray-50'}`}>
                                                             <input type="checkbox" checked={flags.red.includes(s.id)} onChange={() => toggleFlag('red', s.id)} className="w-4 h-4 accent-red-600" />
                                                             <span className="text-sm font-bold text-gray-700">{s.label}</span>
