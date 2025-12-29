@@ -35,7 +35,7 @@
 
     <!-- Babel for JSX -->
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
-API
+
     <script>
         tailwind.config = {
             theme: {
@@ -166,13 +166,13 @@ API
         // You MUST generate a new API key in the Google Cloud Console and paste it below.
         // Ensure "Identity Toolkit API" and "Generative Language API" are enabled for this project.
         const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : {
-  apiKey: "AIzaSyDkEOW4aXGmuO_J-X5xJTw9Iyp0Q2pbUIY",
+           apiKey: "AIzaSyDkEOW4aXGmuO_J-X5xJTw9Iyp0Q2pbUIY",
   authDomain: "psychoflash-control.firebaseapp.com",
   projectId: "psychoflash-control",
   storageBucket: "psychoflash-control.firebasestorage.app",
   messagingSenderId: "304053769812",
   appId: "1:304053769812:web:3b55fb16bbbda06b993fc1"
-};
+        };
         
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
@@ -180,7 +180,7 @@ API
         const appId = typeof __app_id !== 'undefined' ? __app_id : 'innovet-scout-master';
 
         // --- GEMINI API SETUP ---
-        const apiKey = "AIzaSyCBllK_3bUol_LvnPyxTXOcgSOdJGs1-Us"; 
+        const apiKey = "AIzaSyBbYwQlSumZYyCKf5xaXqqFlvTkGiWJYIQ"; 
         const GEMINI_API_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${apiKey}`;
 
         const callGemini = async (promptText, fileObj = null) => {
@@ -554,9 +554,25 @@ API
                 }
             }, []);
 
+            // Helper to check if profile is effectively empty
+            const hasDataToSave = () => {
+                const hasCandidateInfo = candidate.name.trim().length > 0 || (candidate.interviewer && candidate.interviewer.trim().length > 0);
+                const hasProfileInfo = Object.values(profile).some(val => val && val.trim().length > 0);
+                const hasScores = Object.values(scores).some(val => val > 0);
+                const hasSpark = spark.why.trim().length > 0 || spark.scars.trim().length > 0 || spark.beer > 0;
+                const hasFlags = flags.green.length > 0 || flags.red.length > 0;
+                const hasDisc = disc !== null;
+                
+                return hasCandidateInfo || hasProfileInfo || hasScores || hasSpark || hasFlags || hasDisc;
+            };
+
             // --- AUTO SAVE EFFECT (Debounced) ---
             useEffect(() => {
                 if (view === 'dashboard' && currentProfileId && user) {
+                    
+                    // SKIP SAVE IF EMPTY
+                    if (!hasDataToSave()) return;
+
                     const timer = setTimeout(async () => {
                         const profileData = {
                             candidate, profile, gates, weights, scores, spark, flags, disc, customQuestions,
@@ -1046,7 +1062,7 @@ API
                                                         <div className="mt-2">
                                                             <button onClick={() => setOpenQuestion(openQuestion === c.id ? null : c.id)} className="text-xs font-bold text-innovet-blue hover:underline flex items-center gap-1"><Icons.Bulb size={12}/> שאלות למראיין</button>
                                                             {openQuestion === c.id && (
-                                                                <ul className="mt-2 bg-blue-50 p-3 rounded-lg text-xs text-gray-700 space-y-1 list-disc list-inside animate-fade-in-up">
+                                                                <ul className="mt-2 bg-white p-3 rounded-lg text-xs text-gray-700 space-y-1 list-disc list-inside animate-fade-in-up">
                                                                     {/* SHOW CUSTOM QUESTIONS IF EXIST, ELSE DEFAULT */}
                                                                     {(customQuestions[c.id] || c.questions).map((q, idx) => <li key={idx} className={customQuestions[c.id] ? "font-bold text-purple-700" : ""}>{q}</li>)}
                                                                 </ul>
