@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Innovet Scout | Master Edition</title>
+    <title>Innovet Scout | Master Edition (AI Powered)</title>
     
     <!-- React & ReactDOM -->
     <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
@@ -22,6 +22,9 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;700;800;900&display=swap" rel="stylesheet">
+
+    <!-- Markdown Parser for AI responses -->
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
 
     <script>
         tailwind.config = {
@@ -45,6 +48,7 @@
                         'spin-slow': 'spin 60s linear infinite',
                         'pulse-slow': 'pulse 3s infinite',
                         'pop': 'pop 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards',
+                        'shimmer': 'shimmer 2s linear infinite',
                     },
                     keyframes: {
                         fadeInUp: {
@@ -55,6 +59,10 @@
                             '0%': { transform: 'scale(0.9)' },
                             '50%': { transform: 'scale(1.1)' },
                             '100%': { transform: 'scale(1)' },
+                        },
+                        shimmer: {
+                            '0%': { backgroundPosition: '-1000px 0' },
+                            '100%': { backgroundPosition: '1000px 0' }
                         }
                     }
                 }
@@ -118,6 +126,13 @@
             transition: fill 0.2s ease, stroke 0.2s ease;
         }
 
+        /* AI Shimmer Effect */
+        .ai-shimmer {
+            background: linear-gradient(to right, #eff6ff 4%, #dbeafe 25%, #eff6ff 36%);
+            background-size: 1000px 100%;
+            animation: shimmer 2s infinite linear;
+        }
+
         @media print {
             .no-print { display: none !important; }
             body { background: white; }
@@ -141,6 +156,44 @@
     <script type="text/babel">
         const { useState, useEffect, useMemo, useRef, memo, useCallback } = React;
 
+        // --- GEMINI API SETUP ---
+        const apiKey = ""; // API Key provided by environment
+        const GEMINI_API_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${apiKey}`;
+
+        // Updated callGemini to support images
+        const callGemini = async (promptText, imageBase64 = null) => {
+            try {
+                const parts = [{ text: promptText }];
+                
+                if (imageBase64) {
+                    // Extract base64 data strictly
+                    const base64Data = imageBase64.split(',')[1] || imageBase64;
+                    parts.push({
+                        inlineData: {
+                            mimeType: "image/png", // Assuming generic image or PNG for compatibility
+                            data: base64Data
+                        }
+                    });
+                }
+
+                const response = await fetch(GEMINI_API_URL, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        contents: [{ parts: parts }]
+                    })
+                });
+                
+                if (!response.ok) throw new Error('API Error');
+                
+                const data = await response.json();
+                return data.candidates?.[0]?.content?.parts?.[0]?.text || "שגיאה בקבלת תשובה";
+            } catch (error) {
+                console.error("Gemini Error:", error);
+                return null;
+            }
+        };
+
         // --- ICONS ---
         const Icons = {
             Rocket: ({size=20}) => <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M4.5 16.5c-1.5 1.26-2 5-2 5s3.74-.5 5-2c.71-.84.7-2.13-.09-2.91a2.18 2.18 0 0 0-2.91-.09z"></path><path d="M12 15l-3-3a22 22 0 0 1 2-3.95A12.88 12.88 0 0 1 22 2c0 2.72-.78 7.5-6 11a22.35 22.35 0 0 1-4 2z"></path><path d="M9 12H4s.55-3.03 2-4c1.62-1.08 5 0 5 0"></path><path d="M12 15v5s3.03-.55 4-2c1.08-1.62 0-5 0-5"></path></svg>,
@@ -149,7 +202,7 @@
             Check: ({size=20}) => <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>,
             Alert: ({size=20}) => <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>,
             Search: ({size=20}) => <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>,
-            Beer: ({size=20}) => <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M17 11h1a3 3 0 0 1 0 6h-1"></path><path d="M9 12v6"></path><path d="M13 12v6"></path><path d="M14 7.5c-1.79 1.15-3.53 1.15-5.33 0-1.79-1.15-3.53-1.15-5.33 0-1.79 1.15-3.53 1.15-5.34 0C-4.79 6.35-4.79 3 2.5 3c1.79 0 3.53 0 5.33 1.15C9.62 5.3 11.37 5.3 13.16 4.15c1.79-1.15 3.53-1.15 5.33 0 1.79 1.15 3.53 1.15 5.33 0 2.92-1.85 2.92 1.5.84 4.5"></path><path d="M3.5 7.5v9a2 2 0 0 0 2 2h13a2 2 0 0 0 2-2v-9"></path></svg>,
+            Beer: ({size=20}) => <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M17 11h1a3 3 0 0 1 0 6h-1"></path><path d="M9 12v6"></path><path d="M13 12v6"></path><path d="M14 7.5c-1.79 1.15-3.53 1.15-5.33 0-1.79-1.15-3.53-1.15-5.34 0C-4.79 6.35-4.79 3 2.5 3c1.79 0 3.53 0 5.33 1.15C9.62 5.3 11.37 5.3 13.16 4.15c1.79-1.15 3.53-1.15 5.33 0 1.79 1.15 3.53 1.15 5.33 0 2.92-1.85 2.92 1.5.84 4.5"></path><path d="M3.5 7.5v9a2 2 0 0 0 2 2h13a2 2 0 0 0 2-2v-9"></path></svg>,
             Mail: ({size=20}) => <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path><polyline points="22,6 12,13 2,6"></polyline></svg>,
             Lock: ({size=20}) => <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect width="18" height="11" x="3" y="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>,
             Printer: ({size=20}) => <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"></rect></svg>,
@@ -161,7 +214,12 @@
             Settings: ({size=20}) => <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>,
             Bulb: ({size=20}) => <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="9" y1="18" x2="15" y2="18"></line><line x1="10" y1="22" x2="14" y2="22"></line><path d="M15.09 14c.18-.98.65-1.74 1.41-2.5A4.65 4.65 0 0 0 16 8c0-4.42-3.58-8-8-8s-8 3.58-8 8c0 2.08.73 3.97 1.92 5.48.1.13.2.25.3.37.66.77 1.12 1.53 1.28 2.5H15.09z"></path></svg>,
             Info: ({size=20}) => <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg>,
-            Scale: ({size=20}) => <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m16 16 3-8 3 8c-.87.65-1.92 1-3 1s-2.13-.35-3-1Z"/><path d="m2 16 3-8 3 8c-.87.65-1.92 1-3 1s-2.13-.35-3-1Z"/><path d="M7 21h10"/><path d="M12 3v18"/><path d="M3 7h2c2 0 5-1 7-2 2 1 5 2 7 2h2"/></svg>
+            Scale: ({size=20}) => <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m16 16 3-8 3 8c-.87.65-1.92 1-3 1s-2.13-.35-3-1Z"/><path d="m2 16 3-8 3 8c-.87.65-1.92 1-3 1s-2.13-.35-3-1Z"/><path d="M7 21h10"/><path d="M12 3v18"/><path d="M3 7h2c2 0 5-1 7-2 2 1 5 2 7 2h2"/></svg>,
+            Badge: ({size=20}) => <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>,
+            Share: ({size=20}) => <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"></path><polyline points="16 6 12 2 8 6"></polyline><line x1="12" y1="2" x2="12" y2="15"></line></svg>,
+            Link: ({size=20}) => <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path></svg>,
+            Sparkle: ({size=20}) => <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1 1.275-1.275L21 12l-5.813-1.912a2 2 0 0 1-1.275-1.275L12 3Z" /></svg>,
+            Upload: ({size=20}) => <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
         };
 
         // --- CONSTANT DATA ---
@@ -334,6 +392,15 @@
         const App = () => {
             // State
             const [candidate, setCandidate] = useState({ name: '', role: 'CEO', interviewer: '' });
+            // UPDATED PROFILE STATE with new fields
+            const [profile, setProfile] = useState({ 
+                domain: '', 
+                experience: '', 
+                cofounder: '',
+                tools: '',
+                cv: '',
+                platforms: ''
+            }); 
             const [gates, setGates] = useState({ champion: false, problem: false, materials: false });
             
             // Weights State
@@ -358,8 +425,18 @@
             const [flags, setFlags] = useState({ green: [], red: [] });
             const [disc, setDisc] = useState(null);
             const [showMailDraft, setShowMailDraft] = useState(false);
+            const [emailContent, setEmailContent] = useState("");
+            const [isGeneratingEmail, setIsGeneratingEmail] = useState(false);
             const [openQuestion, setOpenQuestion] = useState(null);
+            const [copied, setCopied] = useState(false); // FOR WHATSAPP COPY
 
+            // AI Analysis State
+            const [aiAnalysis, setAiAnalysis] = useState(null);
+            const [isAnalyzingSpark, setIsAnalyzingSpark] = useState(false);
+            const [isAnalyzingCV, setIsAnalyzingCV] = useState(false);
+            const [rawCVText, setRawCVText] = useState(""); // For manual copy paste
+
+            const fileInputRef = useRef(null);
             const activeRoleConfig = ROLE_CONFIG[candidate.role];
 
             // --- LOGIC ---
@@ -467,14 +544,143 @@
                 });
             };
 
-            const generateSoftLandingEmail = () => {
-                const weakPoints = [];
-                if (scores.role1 > 0 && scores.role1 < 6) weakPoints.push(`התרשמנו מהפוטנציאל, אך הרגשנו שנושא ה${activeRoleConfig.criteria[0].label} דורש עוד הבשלה.`);
-                if (scores.role2 > 0 && scores.role2 < 6) weakPoints.push(`חסר לנו עומק בנושא ${activeRoleConfig.criteria[1].label} כדי להתקדם.`);
-                if (scores.coachability > 0 && scores.coachability < 6) weakPoints.push("ההתאמה לדינמיקה האינטנסיבית של תוכנית מאיץ דורשת עוד בשלות.");
-                if (flags.red.includes('solo')) weakPoints.push("בשלב זה, אנו מחפשים צוותים מלאים ולא יזמים בודדים.");
+            // --- AI FUNCTIONS ---
+
+            const handleAnalyzeSpark = async () => {
+                if (!spark.why && !spark.scars) return alert("אנא מלא תוכן ב'למה' או 'צלקות' לפני הניתוח");
                 
-                return `היי ${candidate.name || "יזם"},\n\nתודה רבה על הזמן שהקדשת לפגוש אותנו. רצינו לעדכן שלצערי לא נמשיך בתהליך למחזור הקרוב.\n\nחשוב לנו לתת ערך ולא רק תשובה שלילית: ${weakPoints.length > 0 ? weakPoints.join(" ") : "התחרות במחזור זה הייתה קשה במיוחד."}\n\nנשמח להישאר בקשר ולהזמין אותך לאירועים פתוחים של קהילת Innovet ("Friends of Innovet") כדי שנוכל לבחון שוב בעתיד.\n\nבהצלחה,\nצוות Innovet`;
+                setIsAnalyzingSpark(true);
+                const prompt = `
+                    Analyze the following founder statements regarding their startup motivation.
+                    Candidate Name: ${candidate.name}
+                    'The Why' (Motivation): "${spark.why}"
+                    'Scar Tissue' (Past failures/pain): "${spark.scars}"
+                    
+                    Provide a brief psychological assessment in Hebrew (bullet points) focusing on:
+                    1. Authenticity (Is it personal or generic?)
+                    2. Resilience potential (Did they learn from scars?)
+                    3. Red flags (E.g. ego, blaming others)
+                    
+                    Format as nice Markdown. Keep it short, professional and direct.
+                `;
+
+                const result = await callGemini(prompt);
+                setAiAnalysis(result);
+                setIsAnalyzingSpark(false);
+            };
+
+            const handleCVParse = async (file = null) => {
+                setIsAnalyzingCV(true);
+                let prompt = `
+                    Extract the following details from this CV/Profile in Hebrew:
+                    - Name (Full Name)
+                    - Professional Domain (e.g., Fintech, Cyber)
+                    - Key Tools/Skills (comma separated)
+                    - Relevant Experience (Short summary, 1 sentence)
+                    - Suggested Role (CEO, CTO, or COO based on skills - Choose ONLY ONE)
+                    - What co-founder they might need (based on their role)
+                    
+                    Return purely JSON format like this:
+                    { 
+                        "name": "...", 
+                        "domain": "...", 
+                        "tools": "...", 
+                        "experience": "...", 
+                        "role": "CEO/CTO/COO", 
+                        "cofounder": "...",
+                        "linkedin": "..." 
+                    }
+                `;
+                
+                let imageBase64 = null;
+
+                if (file) {
+                    const reader = new FileReader();
+                    reader.readAsDataURL(file);
+                    await new Promise(resolve => reader.onload = resolve);
+                    imageBase64 = reader.result;
+                    prompt += "\n Analyze the attached image of the resume.";
+                } else if (rawCVText.trim()) {
+                    prompt += `\n Analyze this raw text from the resume: \n"${rawCVText}"`;
+                } else {
+                    setIsAnalyzingCV(false);
+                    return alert("אנא העלה קובץ תמונה או הדבק טקסט.");
+                }
+
+                try {
+                    const result = await callGemini(prompt, imageBase64);
+                    // Try to parse JSON from the markdown response
+                    const jsonMatch = result.match(/\{[\s\S]*\}/);
+                    if (jsonMatch) {
+                        const data = JSON.parse(jsonMatch[0]);
+                        setCandidate(prev => ({ ...prev, name: data.name || prev.name, role: data.role || prev.role }));
+                        setProfile(prev => ({
+                            ...prev,
+                            domain: data.domain || prev.domain,
+                            experience: data.experience || prev.experience,
+                            tools: data.tools || prev.tools,
+                            cofounder: data.cofounder || prev.cofounder,
+                            cv: data.linkedin || prev.cv
+                        }));
+                    } else {
+                        alert("לא הצלחנו לפענח את המידע. אנא נסה שוב.");
+                    }
+                } catch (e) {
+                    console.error(e);
+                    alert("שגיאה בניתוח הקובץ.");
+                } finally {
+                    setIsAnalyzingCV(false);
+                }
+            };
+
+            const handleGenerateSmartEmail = async () => {
+                setShowMailDraft(true);
+                if (emailContent) return; // Don't regenerate if exists
+
+                setIsGeneratingEmail(true);
+                
+                // Collect weak points
+                const weakPoints = [];
+                if (scores.role1 > 0 && scores.role1 < 6) weakPoints.push(activeRoleConfig.criteria[0].label);
+                if (scores.role2 > 0 && scores.role2 < 6) weakPoints.push(activeRoleConfig.criteria[1].label);
+                if (scores.coachability > 0 && scores.coachability < 6) weakPoints.push("יכולת קבלת משוב (Coachability)");
+                if (flags.red.includes('solo')) weakPoints.push("חסרונו של צוות מייסדים (Solo Founder)");
+                if (flags.red.includes('outsourcing')) weakPoints.push("תלות בפיתוח חיצוני");
+
+                const prompt = `
+                    Write a gentle, empathetic rejection email (Soft Landing) in Hebrew for a startup founder named "${candidate.name || 'יזם'}".
+                    
+                    Context: They applied to the Innovet accelerator.
+                    The specific reasons for rejection (weak points identified in interview) are: ${weakPoints.join(", ")}.
+                    
+                    Guidelines:
+                    - Tone: Empathetic, encouraging, professional, "Founder-friendly".
+                    - Structure: Thank them -> Gentle rejection -> Constructive specific feedback based on the weak points above -> Suggest joining the "Friends of Innovet" community -> Wishing luck.
+                    - Do NOT be robotic. Sound like a human investor.
+                    - Output ONLY the email body text.
+                `;
+
+                const result = await callGemini(prompt);
+                setEmailContent(result);
+                setIsGeneratingEmail(false);
+            };
+            
+            // WHATSAPP GENERATOR UPDATED
+            const generateWhatsAppIntro = () => {
+                return `👋 היי, אני ${candidate.name || '[שם מלא]'}
+🚀 התחום שלי: ${profile.domain || '[תחום מקצועי]'}
+🛠️ כלים וכישורים: ${profile.tools || '[פירוט כלים]'}
+💼 ניסיון: ${profile.experience || '[פירוט ניסיון]'}
+🤝 מחפש/ת: ${profile.cofounder || '[סוג קו-פאונדר]'}
+🔗 תיק עבודות/פרופיל: ${profile.platforms || '[לינק]'}
+📄 קו"ח/לינקדאין: ${profile.cv || '[לינק]'}
+#Innovet_Profile`;
+            };
+
+            const copyToWhatsApp = () => {
+                navigator.clipboard.writeText(generateWhatsAppIntro());
+                setCopied(true);
+                setTimeout(() => setCopied(false), 2000);
             };
 
             const resetApp = () => {
@@ -494,7 +700,9 @@
                                 </div>
                                 <div className="flex flex-col">
                                     <h1 className="text-xl font-black tracking-tight leading-none text-white">INNOVET <span className="text-innovet-yellow">SCOUT</span></h1>
-                                    <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Master Protocol</p>
+                                    <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest flex items-center gap-1">
+                                        Master Protocol <span className="bg-gradient-to-r from-purple-400 to-pink-600 text-transparent bg-clip-text font-black">AI POWERED ✨</span>
+                                    </p>
                                 </div>
                             </div>
                             
@@ -552,10 +760,107 @@
                                 </div>
                             </div>
 
+                            {/* NEW SECTION: PARTICIPANT PROFILE (ID CARD) - EXPANDED WITH CV UPLOAD */}
+                            <SectionCard title="תעודת זהות משתתף (Participant Profile)" icon={Icons.Badge} className="border-t-4 border-t-purple-500">
+                                
+                                {/* AI CV PARSER AREA */}
+                                <div className="bg-gradient-to-r from-purple-50 to-indigo-50 border border-purple-100 rounded-xl p-6 mb-8 relative overflow-hidden">
+                                    {isAnalyzingCV && <div className="absolute inset-0 bg-white/50 ai-shimmer z-10"></div>}
+                                    <div className="flex flex-col md:flex-row items-start md:items-center gap-4 mb-4">
+                                        <div className="bg-purple-600 text-white p-2 rounded-lg shadow-sm"><Icons.Upload size={20}/></div>
+                                        <div>
+                                            <h3 className="font-bold text-lg text-purple-900">ניתוח קו"ח אוטומטי (Auto-Fill)</h3>
+                                            <p className="text-xs text-purple-600">העלה תמונה של קו"ח/לינקדאין או הדבק טקסט לניתוח מהיר ע"י AI</p>
+                                        </div>
+                                    </div>
+                                    
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                        <div className="relative group">
+                                            <input 
+                                                type="file" 
+                                                accept="image/*" 
+                                                ref={fileInputRef}
+                                                onChange={(e) => handleCVParse(e.target.files[0])}
+                                                className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-20"
+                                            />
+                                            <div className="border-2 border-dashed border-purple-200 rounded-xl p-4 flex flex-col items-center justify-center h-24 bg-white group-hover:border-purple-400 transition-colors">
+                                                <Icons.Upload size={24} className="text-purple-300 mb-2"/>
+                                                <span className="text-xs font-bold text-purple-500">לחץ להעלאת תמונה</span>
+                                            </div>
+                                        </div>
+                                        <div className="relative">
+                                            <textarea 
+                                                value={rawCVText}
+                                                onChange={(e) => setRawCVText(e.target.value)}
+                                                placeholder="או הדבק כאן טקסט מקורות החיים..."
+                                                className="w-full h-24 p-3 rounded-xl border border-purple-200 text-xs resize-none focus:border-purple-500 bg-white"
+                                            ></textarea>
+                                            {rawCVText && (
+                                                <button 
+                                                    onClick={() => handleCVParse(null)}
+                                                    className="absolute bottom-2 left-2 bg-purple-600 text-white text-[10px] font-bold px-3 py-1 rounded-full shadow-sm hover:bg-purple-700 transition"
+                                                >
+                                                    נתח טקסט
+                                                </button>
+                                            )}
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                                    <div className="space-y-4">
+                                        <div>
+                                            <label className="block font-bold text-innovet-black mb-2 flex items-center gap-2"><div className="w-2 h-2 rounded-full bg-purple-500"></div> תחום מקצועי (World of Content)</label>
+                                            <input type="text" value={profile.domain} onChange={e => setProfile({...profile, domain: e.target.value})} className="w-full bg-gray-50 border border-gray-200 rounded-lg p-3 text-sm focus:border-purple-500 transition" placeholder="למשל: FinTech, AI, Cyber, EdTech..." />
+                                        </div>
+                                        <div>
+                                            <label className="block font-bold text-innovet-black mb-2 flex items-center gap-2"><div className="w-2 h-2 rounded-full bg-purple-500"></div> כלים וכישורים (Tools)</label>
+                                            <input type="text" value={profile.tools} onChange={e => setProfile({...profile, tools: e.target.value})} className="w-full bg-gray-50 border border-gray-200 rounded-lg p-3 text-sm focus:border-purple-500 transition" placeholder="Figma, Python, React, Sales, Jira..." />
+                                        </div>
+                                        <div>
+                                            <label className="block font-bold text-innovet-black mb-2 flex items-center gap-2"><div className="w-2 h-2 rounded-full bg-purple-500"></div> סוג הקו-פאונדר המבוקש</label>
+                                            <input type="text" value={profile.cofounder} onChange={e => setProfile({...profile, cofounder: e.target.value})} className="w-full bg-gray-50 border border-gray-200 rounded-lg p-3 text-sm focus:border-purple-500 transition" placeholder="למשל: CTO טכנולוגי, מנכ''ל עם ניסיון בגיוס..." />
+                                        </div>
+                                        <div>
+                                            <label className="block font-bold text-innovet-black mb-2 flex items-center gap-2"><div className="w-2 h-2 rounded-full bg-purple-500"></div> ניסיון רלוונטי</label>
+                                            <textarea value={profile.experience} onChange={e => setProfile({...profile, experience: e.target.value})} className="w-full bg-gray-50 border border-gray-200 rounded-lg p-3 text-sm min-h-[80px] focus:border-purple-500 transition" placeholder="ניסיון קודם, תפקידים, רקע צבאי/אקדמי..."></textarea>
+                                        </div>
+                                        
+                                        {/* NEW LINK FIELDS */}
+                                        <div className="grid grid-cols-2 gap-4">
+                                            <div>
+                                                <label className="block font-bold text-innovet-black mb-2 flex items-center gap-2 text-xs"><Icons.Link size={12}/> לינק לקו"ח / LinkedIn</label>
+                                                <input type="text" value={profile.cv} onChange={e => setProfile({...profile, cv: e.target.value})} className="w-full bg-gray-50 border border-gray-200 rounded-lg p-2 text-sm focus:border-purple-500 transition" placeholder="https://linkedin.com..." />
+                                            </div>
+                                            <div>
+                                                <label className="block font-bold text-innovet-black mb-2 flex items-center gap-2 text-xs"><Icons.Link size={12}/> פלטפורמות / תיק עבודות</label>
+                                                <input type="text" value={profile.platforms} onChange={e => setProfile({...profile, platforms: e.target.value})} className="w-full bg-gray-50 border border-gray-200 rounded-lg p-2 text-sm focus:border-purple-500 transition" placeholder="BACE44, Wix, Lovable..." />
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                    <div className="bg-purple-50 p-6 rounded-2xl border border-purple-100 flex flex-col h-full">
+                                        <h4 className="font-bold text-lg text-purple-900 mb-4 flex items-center gap-2 border-b border-purple-100 pb-2">
+                                            <Icons.Share size={18}/> תבנית להיכרות בוואטסאפ
+                                        </h4>
+                                        <div className="bg-white p-4 rounded-xl border border-purple-100 shadow-sm flex-grow font-mono text-xs whitespace-pre-wrap text-gray-700 relative overflow-y-auto max-h-[250px]">
+                                            {generateWhatsAppIntro()}
+                                        </div>
+                                        <button 
+                                            onClick={copyToWhatsApp} 
+                                            className={`mt-4 w-full py-3 rounded-lg font-bold transition-all flex items-center justify-center gap-2 ${copied ? 'bg-green-500 text-white' : 'bg-purple-600 text-white hover:bg-purple-700 hover:shadow-lg'}`}
+                                        >
+                                            {copied ? <span className="flex items-center gap-2"><Icons.Check size={18}/> הועתק!</span> : <span>העתק ללוח</span>}
+                                        </button>
+                                    </div>
+                                </div>
+                            </SectionCard>
+
+
                             {/* MAIN EVALUATION - ONLY IF GATES PASSED (Or show visually disabled) */}
                             <div className={`space-y-8 transition-opacity duration-500 ${!isPassedGate0 ? 'opacity-50 pointer-events-none grayscale' : 'opacity-100'}`}>
                                 
-                                {/* SECTION 2: SPARK INDEX */}
+                                {/* SECTION 2: SPARK INDEX - UPGRADED WITH AI */}
                                 <SectionCard title="מדד הניצוץ (Spark Index)" icon={Icons.Heart} className="border-t-4 border-t-pink-500">
                                     <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                                         <div className="space-y-6">
@@ -567,6 +872,28 @@
                                                 <label className="block font-bold text-innovet-black mb-2">2. צלקות עבר (Scar Tissue)</label>
                                                 <textarea value={spark.scars} onChange={e => setSpark({...spark, scars: e.target.value})} className="w-full bg-gray-50 border border-gray-200 rounded-xl p-4 text-sm min-h-[100px] transition-colors focus:border-innovet-blue" placeholder="מתי נכשלו וכאב להם? האם הם יודעים להיות פגיעים?"></textarea>
                                             </div>
+                                            
+                                            {/* AI Button */}
+                                            <button 
+                                                onClick={handleAnalyzeSpark} 
+                                                disabled={isAnalyzingSpark}
+                                                className={`w-full py-3 rounded-xl font-bold text-sm shadow-sm transition-all flex items-center justify-center gap-2 ${isAnalyzingSpark ? 'bg-gray-100 text-gray-400 cursor-not-allowed' : 'bg-gradient-to-r from-pink-500 to-purple-600 text-white hover:shadow-lg hover:scale-[1.02]'}`}
+                                            >
+                                                {isAnalyzingSpark ? (
+                                                    <><Icons.Refresh size={16} className="animate-spin" /> מנתח נתונים...</>
+                                                ) : (
+                                                    <><Icons.Sparkle size={16} /> נתח ניצוץ עם Gemini AI</>
+                                                )}
+                                            </button>
+
+                                            {/* AI Result */}
+                                            {aiAnalysis && (
+                                                <div className="bg-purple-50 border border-purple-200 rounded-xl p-4 animate-fade-in-up">
+                                                    <div className="text-xs font-bold text-purple-600 uppercase mb-2 flex items-center gap-2"><Icons.Sparkle size={12}/> תובנות AI</div>
+                                                    <div className="prose prose-sm prose-purple text-xs leading-relaxed" dangerouslySetInnerHTML={{__html: marked.parse(aiAnalysis)}}></div>
+                                                </div>
+                                            )}
+
                                         </div>
                                         <div className="flex flex-col justify-center bg-yellow-50 p-6 rounded-2xl border border-yellow-100">
                                             <div className="flex items-center gap-3 mb-2 justify-center">
@@ -789,9 +1116,16 @@
 
                                 {/* Soft Landing Button - Shows only if Rejected */}
                                 {getDecision().text.includes('נדחה') && (
-                                    <button onClick={() => setShowMailDraft(!showMailDraft)} className="bg-gray-800 hover:bg-gray-700 text-white p-3 rounded-lg transition-colors relative group" title='מייל "נחיתה רכה"'>
-                                        <Icons.Mail size={20} />
-                                        <span className="absolute -top-10 left-1/2 -translate-x-1/2 bg-black text-white text-xs py-1 px-2 rounded opacity-0 group-hover:opacity-100 transition whitespace-nowrap">נחיתה רכה</span>
+                                    <button 
+                                        onClick={handleGenerateSmartEmail} 
+                                        className="bg-gray-800 hover:bg-gray-700 text-white p-3 rounded-lg transition-colors relative group border border-gray-700" 
+                                        title='צור מייל "נחיתה רכה" עם AI'
+                                    >
+                                        <div className="relative">
+                                            <Icons.Mail size={20} />
+                                            <div className="absolute -top-2 -right-2 text-yellow-400 animate-pulse"><Icons.Sparkle size={10} fill="currentColor" /></div>
+                                        </div>
+                                        <span className="absolute -top-10 left-1/2 -translate-x-1/2 bg-black text-white text-xs py-1 px-2 rounded opacity-0 group-hover:opacity-100 transition whitespace-nowrap">נחיתה רכה (AI)</span>
                                     </button>
                                 )}
 
@@ -801,16 +1135,37 @@
                             </div>
                         </div>
                         
-                        {/* Soft Landing Email Drawer */}
+                        {/* Soft Landing Email Drawer - UPGRADED */}
                         {showMailDraft && (
-                            <div className="bg-gray-900 border-t border-gray-800 p-6 animate-fade-in-up absolute bottom-full left-0 w-full shadow-2xl">
+                            <div className="bg-gray-900 border-t border-gray-800 p-6 animate-fade-in-up absolute bottom-full left-0 w-full shadow-2xl z-50">
                                 <div className="max-w-3xl mx-auto">
                                     <div className="flex justify-between items-center mb-2 text-white">
-                                        <h3 className="font-bold text-innovet-yellow flex items-center gap-2"><Icons.Mail size={16}/> טיוטת "נחיתה רכה" (Not Yet + Value)</h3>
-                                        <button onClick={() => navigator.clipboard.writeText(generateSoftLandingEmail())} className="text-xs text-gray-400 font-bold hover:text-white uppercase tracking-wider">העתק ללוח</button>
+                                        <h3 className="font-bold text-innovet-yellow flex items-center gap-2">
+                                            <Icons.Sparkle size={16} /> מייל "נחיתה רכה" חכם (Gemini Powered)
+                                        </h3>
+                                        <div className="flex gap-4">
+                                            <button onClick={() => setShowMailDraft(false)} className="text-xs text-gray-500 hover:text-white">סגור</button>
+                                            <button onClick={() => navigator.clipboard.writeText(emailContent)} className="text-xs text-gray-400 font-bold hover:text-white uppercase tracking-wider flex items-center gap-1">
+                                                <Icons.Check size={12}/> העתק
+                                            </button>
+                                        </div>
                                     </div>
-                                    <textarea readOnly className="w-full h-40 p-4 rounded-xl border border-gray-700 text-sm bg-gray-800 text-gray-200 font-sans leading-relaxed focus:outline-none resize-none" value={generateSoftLandingEmail()}></textarea>
-                                    <p className="text-xs text-gray-500 mt-2">* הטקסט נוצר אוטומטית על בסיס נקודות החולשה שסומנו בדירוג.</p>
+                                    
+                                    <div className="relative rounded-xl overflow-hidden border border-gray-700 bg-gray-800">
+                                        {isGeneratingEmail && (
+                                            <div className="absolute inset-0 z-10 ai-shimmer opacity-20 pointer-events-none"></div>
+                                        )}
+                                        <textarea 
+                                            readOnly={isGeneratingEmail}
+                                            onChange={(e) => setEmailContent(e.target.value)}
+                                            className={`w-full h-48 p-4 text-sm bg-transparent text-gray-200 font-sans leading-relaxed focus:outline-none resize-none transition-opacity ${isGeneratingEmail ? 'opacity-50' : 'opacity-100'}`} 
+                                            value={isGeneratingEmail ? "Gemini מנסח כעת את המייל ברגישות ואמפתיה..." : emailContent}
+                                        ></textarea>
+                                    </div>
+                                    <p className="text-xs text-gray-500 mt-2 flex items-center gap-1">
+                                        <Icons.Info size={12}/> 
+                                        המייל מיוצר בזמן אמת ע"ב נתוני הדירוג הספציפיים של המועמד.
+                                    </p>
                                 </div>
                             </div>
                         )}
