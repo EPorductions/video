@@ -35,7 +35,7 @@
 
     <!-- Babel for JSX -->
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
-
+API
     <script>
         tailwind.config = {
             theme: {
@@ -166,13 +166,13 @@
         // You MUST generate a new API key in the Google Cloud Console and paste it below.
         // Ensure "Identity Toolkit API" and "Generative Language API" are enabled for this project.
         const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : {
-            apiKey: "AIzaSyCBllK_3bUol_LvnPyxTXOcgSOdJGs1-Us", // <--- REPLACE THIS WITH NEW KEY
-            authDomain: "psychoflash-control.firebaseapp.com",
-            projectId: "psychoflash-control",
-            storageBucket: "psychoflash-control.firebasestorage.app",
-            messagingSenderId: "304053769812",
-            appId: "1:304053769812:web:3b55fb16bbbda06b993fc1"
-        };
+  apiKey: "AIzaSyDkEOW4aXGmuO_J-X5xJTw9Iyp0Q2pbUIY",
+  authDomain: "psychoflash-control.firebaseapp.com",
+  projectId: "psychoflash-control",
+  storageBucket: "psychoflash-control.firebasestorage.app",
+  messagingSenderId: "304053769812",
+  appId: "1:304053769812:web:3b55fb16bbbda06b993fc1"
+};
         
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
