@@ -3,14 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Innovet Scout | Master Edition (AI Powered)</title>
-    
-    <!-- React & ReactDOM -->
-    <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
-    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
-    
-    <!-- Babel -->
-    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <title>Innovet Scout | Master Edition (Cloud Sync)</title>
     
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
@@ -23,8 +16,25 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;700;800;900&display=swap" rel="stylesheet">
 
-    <!-- Markdown Parser for AI responses -->
+    <!-- Markdown Parser & Mammoth (Global Scripts) -->
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.6.0/mammoth.browser.min.js"></script>
+
+    <!-- Import Map for React & Firebase -->
+    <script type="importmap">
+    {
+        "imports": {
+            "react": "https://esm.sh/react@18.2.0",
+            "react-dom/client": "https://esm.sh/react-dom@18.2.0/client",
+            "firebase/app": "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js",
+            "firebase/auth": "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js",
+            "firebase/firestore": "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js"
+        }
+    }
+    </script>
+
+    <!-- Babel for JSX -->
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
 
     <script>
         tailwind.config = {
@@ -82,7 +92,7 @@
         /* Smooth inputs */
         input:focus, select:focus, textarea:focus { outline: none; border-color: #FFC700; ring: 2px solid rgba(255, 199, 0, 0.2); }
 
-        /* Weight Slider - Refined for Smoothness */
+        /* Weight Slider */
         input[type=range].weight-slider {
             -webkit-appearance: none;
             width: 100%;
@@ -102,7 +112,7 @@
             box-shadow: 0 2px 4px rgba(0,0,0,0.2);
             margin-top: -6px;
             border: 2px solid white;
-            transition: transform 0.1s ease; /* Only transform animates on interaction */
+            transition: transform 0.1s ease;
         }
         input[type=range].weight-slider:active::-webkit-slider-thumb {
             cursor: grabbing;
@@ -111,22 +121,12 @@
         }
 
         /* Star Button Interactions */
-        .star-btn { 
-            transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
-        }
-        .star-btn:hover { 
-            transform: scale(1.25); 
-        }
-        .star-btn:active { 
-            transform: scale(0.9); 
-        }
-        
-        /* Star Fill Animation */
-        .star-svg path, .star-svg polygon {
-            transition: fill 0.2s ease, stroke 0.2s ease;
-        }
+        .star-btn { transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1); }
+        .star-btn:hover { transform: scale(1.25); }
+        .star-btn:active { transform: scale(0.9); }
+        .star-svg path, .star-svg polygon { transition: fill 0.2s ease, stroke 0.2s ease; }
 
-        /* AI Shimmer Effect */
+        /* AI Shimmer */
         .ai-shimmer {
             background: linear-gradient(to right, #eff6ff 4%, #dbeafe 25%, #eff6ff 36%);
             background-size: 1000px 100%;
@@ -153,39 +153,36 @@
 
     <div id="root" class="flex-grow z-10"></div>
 
-    <script type="text/babel">
-        const { useState, useEffect, useMemo, useRef, memo, useCallback } = React;
+    <script type="text/babel" data-type="module">
+        import React, { useState, useEffect, useMemo, useRef, memo, useCallback } from 'react';
+        import { createRoot } from 'react-dom/client';
+        import { initializeApp } from 'firebase/app';
+        import { getAuth, signInWithCustomToken, signInAnonymously, onAuthStateChanged } from 'firebase/auth';
+        import { getFirestore, collection, doc, setDoc, updateDoc, deleteDoc, onSnapshot, serverTimestamp, query, orderBy } from 'firebase/firestore';
+
+        // --- FIREBASE CONFIGURATION ---
+        const firebaseConfig = JSON.parse(__firebase_config);
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+        const appId = typeof __app_id !== 'undefined' ? __app_id : 'innovet-scout-master';
 
         // --- GEMINI API SETUP ---
-        const apiKey = ""; // API Key provided by environment
+        const apiKey = ""; 
         const GEMINI_API_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${apiKey}`;
 
-        // Updated callGemini to support images
-        const callGemini = async (promptText, imageBase64 = null) => {
+        const callGemini = async (promptText, fileObj = null) => {
             try {
                 const parts = [{ text: promptText }];
-                
-                if (imageBase64) {
-                    // Extract base64 data strictly
-                    const base64Data = imageBase64.split(',')[1] || imageBase64;
-                    parts.push({
-                        inlineData: {
-                            mimeType: "image/png", // Assuming generic image or PNG for compatibility
-                            data: base64Data
-                        }
-                    });
+                if (fileObj) {
+                    parts.push({ inlineData: { mimeType: fileObj.mimeType, data: fileObj.data } });
                 }
-
                 const response = await fetch(GEMINI_API_URL, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        contents: [{ parts: parts }]
-                    })
+                    body: JSON.stringify({ contents: [{ parts: parts }] })
                 });
-                
                 if (!response.ok) throw new Error('API Error');
-                
                 const data = await response.json();
                 return data.candidates?.[0]?.content?.parts?.[0]?.text || "שגיאה בקבלת תשובה";
             } catch (error) {
@@ -202,7 +199,7 @@
             Check: ({size=20}) => <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>,
             Alert: ({size=20}) => <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>,
             Search: ({size=20}) => <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>,
-            Beer: ({size=20}) => <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M17 11h1a3 3 0 0 1 0 6h-1"></path><path d="M9 12v6"></path><path d="M13 12v6"></path><path d="M14 7.5c-1.79 1.15-3.53 1.15-5.33 0-1.79-1.15-3.53-1.15-5.34 0C-4.79 6.35-4.79 3 2.5 3c1.79 0 3.53 0 5.33 1.15C9.62 5.3 11.37 5.3 13.16 4.15c1.79-1.15 3.53-1.15 5.33 0 1.79 1.15 3.53 1.15 5.33 0 2.92-1.85 2.92 1.5.84 4.5"></path><path d="M3.5 7.5v9a2 2 0 0 0 2 2h13a2 2 0 0 0 2-2v-9"></path></svg>,
+            Beer: ({size=20}) => <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M17 11h1a3 3 0 0 1 0 6h-1"></path><path d="M9 12v6"></path><path d="M13 12v6"></path><path d="M14 7.5c-1.79 1.15-3.53 1.15-5.33 0-1.79-1.15-3.53-1.15-5.33 0-1.79 1.15-3.53 1.15-5.34 0C-4.79 6.35-4.79 3 2.5 3c1.79 0 3.53 0 5.33 1.15C9.62 5.3 11.37 5.3 13.16 4.15c1.79-1.15 3.53-1.15 5.33 0 1.79 1.15 3.53 1.15 5.33 0 2.92-1.85 2.92 1.5.84 4.5"></path><path d="M3.5 7.5v9a2 2 0 0 0 2 2h13a2 2 0 0 0 2-2v-9"></path></svg>,
             Mail: ({size=20}) => <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path><polyline points="22,6 12,13 2,6"></polyline></svg>,
             Lock: ({size=20}) => <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect width="18" height="11" x="3" y="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>,
             Printer: ({size=20}) => <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"></rect></svg>,
@@ -211,7 +208,7 @@
             User: ({size=20}) => <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>,
             Code: ({size=20}) => <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="16 18 22 12 16 6"></polyline><polyline points="8 6 2 12 8 18"></polyline></svg>,
             TrendingUp: ({size=20}) => <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"></polyline><polyline points="17 6 23 6 23 12"></polyline></svg>,
-            Settings: ({size=20}) => <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>,
+            Settings: ({size=20}) => <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>,
             Bulb: ({size=20}) => <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="9" y1="18" x2="15" y2="18"></line><line x1="10" y1="22" x2="14" y2="22"></line><path d="M15.09 14c.18-.98.65-1.74 1.41-2.5A4.65 4.65 0 0 0 16 8c0-4.42-3.58-8-8-8s-8 3.58-8 8c0 2.08.73 3.97 1.92 5.48.1.13.2.25.3.37.66.77 1.12 1.53 1.28 2.5H15.09z"></path></svg>,
             Info: ({size=20}) => <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg>,
             Scale: ({size=20}) => <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m16 16 3-8 3 8c-.87.65-1.92 1-3 1s-2.13-.35-3-1Z"/><path d="m2 16 3-8 3 8c-.87.65-1.92 1-3 1s-2.13-.35-3-1Z"/><path d="M7 21h10"/><path d="M12 3v18"/><path d="M3 7h2c2 0 5-1 7-2 2 1 5 2 7 2h2"/></svg>,
@@ -219,7 +216,11 @@
             Share: ({size=20}) => <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"></path><polyline points="16 6 12 2 8 6"></polyline><line x1="12" y1="2" x2="12" y2="15"></line></svg>,
             Link: ({size=20}) => <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path></svg>,
             Sparkle: ({size=20}) => <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1 1.275-1.275L21 12l-5.813-1.912a2 2 0 0 1-1.275-1.275L12 3Z" /></svg>,
-            Upload: ({size=20}) => <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+            Upload: ({size=20}) => <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>,
+            Plus: ({size=20}) => <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>,
+            Trash: ({size=20}) => <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>,
+            Home: ({size=20}) => <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg>,
+            Save: ({size=20}) => <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path><polyline points="17 21 17 13 7 13 7 21"></polyline><polyline points="7 3 7 8 15 8"></polyline></svg>
         };
 
         // --- CONSTANT DATA ---
@@ -309,10 +310,10 @@
             ]
         };
 
-        // --- SUB-COMPONENTS (Memoized) ---
+        // --- SUB-COMPONENTS ---
 
-        const SectionCard = memo(({ title, icon: Icon, children, className = "" }) => (
-            <div className={`bg-white rounded-xl shadow-lg border border-gray-100 p-6 md:p-8 mb-8 animate-fade-in-up relative overflow-hidden ${className}`}>
+        const SectionCard = memo(({ title, icon: Icon, children, className = "", id = "" }) => (
+            <div id={id} className={`bg-white rounded-xl shadow-lg border border-gray-100 p-6 md:p-8 mb-8 animate-fade-in-up relative overflow-hidden ${className}`}>
                 <div className="flex items-center gap-4 mb-8 pb-4 border-b border-gray-100">
                     <div className="p-3 bg-innovet-yellow text-innovet-black rounded-lg shadow-sm">
                         <Icon size={24} />
@@ -335,7 +336,6 @@
             </div>
         ));
 
-        // Intelligent Weight Slider: Recalculates others to maintain 100% total
         const WeightSlider = memo(({ id, currentWeight, onWeightChange }) => (
             <div className="mt-2 p-2 bg-gray-100 rounded-lg animate-fade-in-up">
                 <div className="flex justify-between items-center text-[10px] uppercase font-bold text-gray-500 mb-1">
@@ -354,7 +354,6 @@
             </div>
         ));
 
-        // Star Rating with Hover & 0 State
         const StarRating = memo(({ value, onChange, isCritical, max = 10 }) => {
             const [hoverValue, setHoverValue] = useState(0);
 
@@ -388,144 +387,285 @@
             );
         });
 
+        // --- PROFILES INDEX COMPONENT ---
+        const ProfilesIndex = ({ profiles, onLoad, onDelete, onNew, loading }) => {
+            if (loading) {
+                return (
+                    <div className="flex flex-col items-center justify-center min-h-[60vh]">
+                        <div className="animate-spin text-innovet-yellow mb-4"><Icons.Refresh size={48}/></div>
+                        <p className="text-gray-400 font-bold">טוען פרופילים...</p>
+                    </div>
+                );
+            }
+
+            return (
+                <div className="max-w-4xl mx-auto p-8 animate-fade-in-up">
+                    <div className="flex justify-between items-center mb-8">
+                        <h2 className="text-3xl font-black text-innovet-black">פרופילים שמורים</h2>
+                        {/* Clear + Button */}
+                        <button 
+                            onClick={onNew} 
+                            className="bg-innovet-yellow text-innovet-black px-6 py-3 rounded-xl font-black shadow-lg hover:bg-yellow-400 hover:scale-105 transition flex items-center gap-2"
+                        >
+                            <Icons.Plus size={24} strokeWidth={3} /> פרופיל חדש
+                        </button>
+                    </div>
+
+                    {profiles.length === 0 ? (
+                        <div className="text-center py-20 bg-white rounded-2xl border border-dashed border-gray-300">
+                            <Icons.Search size={48} className="mx-auto text-gray-300 mb-4" />
+                            <p className="text-gray-500 font-bold">אין פרופילים שמורים עדיין.</p>
+                            <p className="text-sm text-gray-400">צור פרופיל חדש כדי להתחיל.</p>
+                        </div>
+                    ) : (
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            {profiles.map(p => (
+                                <div key={p.id} className="bg-white p-6 rounded-xl shadow-sm border border-gray-100 hover:shadow-md transition relative group cursor-pointer" onClick={() => onLoad(p)}>
+                                    <div className="absolute top-4 left-4 opacity-0 group-hover:opacity-100 transition z-10">
+                                        <button onClick={(e) => { e.stopPropagation(); onDelete(p.id); }} className="text-red-400 hover:text-red-600 p-2 bg-red-50 rounded-full hover:bg-red-100">
+                                            <Icons.Trash size={16} />
+                                        </button>
+                                    </div>
+                                    <div>
+                                        <div className="flex justify-between items-start mb-2">
+                                            <div>
+                                                <h3 className="font-black text-lg text-innovet-black">{p.candidate?.name || "ללא שם"}</h3>
+                                                <span className="text-xs font-bold text-gray-400 uppercase">{p.candidate?.role}</span>
+                                            </div>
+                                            <div className="text-2xl font-black font-mono text-gray-200">{p.totalScore || '--'}</div>
+                                        </div>
+                                        <div className="text-xs text-gray-500 mt-4 flex items-center gap-2">
+                                            <Icons.Briefcase size={12}/> {p.profile?.domain || 'אין תחום'}
+                                        </div>
+                                        <div className="text-[10px] text-gray-400 mt-2">
+                                            נערך לאחרונה: {p.lastUpdated ? new Date(p.lastUpdated?.seconds ? p.lastUpdated.seconds * 1000 : p.lastUpdated).toLocaleDateString('he-IL') : 'Unknown'}
+                                        </div>
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+                    )}
+                </div>
+            );
+        };
+
         // --- MAIN APP COMPONENT ---
         const App = () => {
-            // State
+            const [view, setView] = useState('index'); 
+            const [savedProfiles, setSavedProfiles] = useState([]);
+            const [currentProfileId, setCurrentProfileId] = useState(null);
+            const [user, setUser] = useState(null);
+            const [loadingAuth, setLoadingAuth] = useState(true);
+            const [loadingData, setLoadingData] = useState(true);
+
+            // Data State
             const [candidate, setCandidate] = useState({ name: '', role: 'CEO', interviewer: '' });
-            // UPDATED PROFILE STATE with new fields
             const [profile, setProfile] = useState({ 
-                domain: '', 
-                experience: '', 
-                cofounder: '',
-                tools: '',
-                cv: '',
-                platforms: ''
+                domain: '', experience: '', cofounder: '', tools: '', cv: '', platforms: ''
             }); 
             const [gates, setGates] = useState({ champion: false, problem: false, materials: false });
-            
-            // Weights State
             const [weights, setWeights] = useState({
-                coachability: 0.20,
-                passion: 0.15,
-                team: 0.10,
-                role1: 0.20, 
-                role2: 0.15, 
-                role3: 0.10, 
-                role4: 0.10
+                coachability: 0.20, passion: 0.15, team: 0.10,
+                role1: 0.20, role2: 0.15, role3: 0.10, role4: 0.10
             });
             const [isWeightEditMode, setIsWeightEditMode] = useState(false);
-            
-            // Initial Scores (All 0 by default)
             const [scores, setScores] = useState({ 
-                coachability: 0, passion: 0, team: 0, 
-                role1: 0, role2: 0, role3: 0, role4: 0 
+                coachability: 0, passion: 0, team: 0, role1: 0, role2: 0, role3: 0, role4: 0 
             });
-            
-            const [spark, setSpark] = useState({ why: '', scars: '', beer: 0 }); // 0 = unrated
+            const [spark, setSpark] = useState({ why: '', scars: '', beer: 0 }); 
             const [flags, setFlags] = useState({ green: [], red: [] });
             const [disc, setDisc] = useState(null);
             const [showMailDraft, setShowMailDraft] = useState(false);
             const [emailContent, setEmailContent] = useState("");
             const [isGeneratingEmail, setIsGeneratingEmail] = useState(false);
             const [openQuestion, setOpenQuestion] = useState(null);
-            const [copied, setCopied] = useState(false); // FOR WHATSAPP COPY
-
-            // AI Analysis State
+            const [copied, setCopied] = useState(false); 
             const [aiAnalysis, setAiAnalysis] = useState(null);
             const [isAnalyzingSpark, setIsAnalyzingSpark] = useState(false);
             const [isAnalyzingCV, setIsAnalyzingCV] = useState(false);
-            const [rawCVText, setRawCVText] = useState(""); // For manual copy paste
+            const [rawCVText, setRawCVText] = useState("");
+            const [customQuestions, setCustomQuestions] = useState({});
 
             const fileInputRef = useRef(null);
             const activeRoleConfig = ROLE_CONFIG[candidate.role];
 
-            // --- LOGIC ---
+            // --- AUTH & FIRESTORE SETUP ---
+            useEffect(() => {
+                const initAuth = async () => {
+                    if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
+                        await signInWithCustomToken(auth, __initial_auth_token);
+                    } else {
+                        await signInAnonymously(auth);
+                    }
+                };
+                initAuth();
+                const unsubscribe = onAuthStateChanged(auth, (u) => {
+                    setUser(u);
+                    setLoadingAuth(false);
+                });
+                return () => unsubscribe();
+            }, []);
+
+            useEffect(() => {
+                if (!user) return;
+                const collectionName = 'profiles';
+                const profilesRef = collection(db, 'artifacts', appId, 'public', 'data', collectionName);
+                const q = query(profilesRef, orderBy('lastUpdated', 'desc'));
+
+                const unsubscribe = onSnapshot(q, (snapshot) => {
+                    const docs = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+                    setSavedProfiles(docs);
+                    setLoadingData(false);
+
+                    // Auto-Redirect to New Profile if Empty on Load
+                    if (docs.length === 0 && view === 'index' && !loadingData) {
+                        handleNewProfile();
+                    }
+                });
+                return () => unsubscribe();
+            }, [user]);
+
+            // --- AUTO SAVE EFFECT (Debounced) ---
+            useEffect(() => {
+                if (view === 'dashboard' && currentProfileId && user) {
+                    const timer = setTimeout(async () => {
+                        const profileData = {
+                            candidate, profile, gates, weights, scores, spark, flags, disc, customQuestions,
+                            lastUpdated: serverTimestamp(),
+                            totalScore: calculateTotalScore() // Calculate and save for index view
+                        };
+                        try {
+                            const docRef = doc(db, 'artifacts', appId, 'public', 'data', 'profiles', currentProfileId);
+                            // Using setDoc with merge to avoid overwriting if document doesn't exist yet (though we create it on "New")
+                            // Actually, on "New" we should probably create the doc immediately or wait for first edit.
+                            // To keep it simple, we'll use setDoc with merge: true
+                            await setDoc(docRef, profileData, { merge: true });
+                        } catch (e) {
+                            console.error("Auto-save failed", e);
+                        }
+                    }, 2000); // 2 second debounce
+                    return () => clearTimeout(timer);
+                }
+            }, [candidate, profile, gates, weights, scores, spark, flags, disc, customQuestions, view, currentProfileId, user]);
+
+            // --- HELPER: Calculate Score ---
             const isPassedGate0 = gates.champion && gates.problem && gates.materials;
             
-            // Fail Logic
+            const calculateTotalScore = useCallback(() => {
+                if (!isPassedGate0) return 0;
+                let sum = 0;
+                UNIVERSAL_CRITERIA.forEach(c => { if (scores[c.id] > 0) sum += (scores[c.id] * 10 * weights[c.id]); });
+                activeRoleConfig.criteria.forEach(c => { if (scores[c.id] > 0) sum += (scores[c.id] * 10 * weights[c.id]); });
+                sum += (flags.green.length * 3); 
+                sum -= (flags.red.length * 5);   
+                if (spark.beer >= 4) sum += 2;
+                if (spark.beer > 0 && spark.beer <= 2) sum -= 2;
+                return Math.max(0, Math.min(100, Math.round(sum)));
+            }, [scores, flags, spark.beer, candidate.role, isPassedGate0, weights, activeRoleConfig]);
+
+            const totalScore = useMemo(() => calculateTotalScore(), [calculateTotalScore]);
+
+            // --- NAVIGATION HANDLERS ---
+            const handleNewProfile = async () => {
+                // Reset State
+                setCandidate({ name: '', role: 'CEO', interviewer: '' });
+                setProfile({ domain: '', experience: '', cofounder: '', tools: '', cv: '', platforms: '' });
+                setGates({ champion: false, problem: false, materials: false });
+                setScores({ coachability: 0, passion: 0, team: 0, role1: 0, role2: 0, role3: 0, role4: 0 });
+                setSpark({ why: '', scars: '', beer: 0 });
+                setFlags({ green: [], red: [] });
+                setDisc(null);
+                setCustomQuestions({});
+                setAiAnalysis(null);
+                setWeights({
+                    coachability: 0.20, passion: 0.15, team: 0.10,
+                    role1: 0.20, role2: 0.15, role3: 0.10, role4: 0.10
+                });
+                
+                // Create new ID
+                const newRef = doc(collection(db, 'artifacts', appId, 'public', 'data', 'profiles'));
+                setCurrentProfileId(newRef.id);
+                setView('dashboard');
+            };
+
+            const handleLoadProfile = (p) => {
+                setCurrentProfileId(p.id);
+                setCandidate(p.candidate || { name: '', role: 'CEO' });
+                setProfile(p.profile || {});
+                setGates(p.gates || {});
+                setScores(p.scores || {});
+                setSpark(p.spark || {});
+                setFlags(p.flags || { green: [], red: [] });
+                setDisc(p.disc);
+                setWeights(p.weights || {
+                    coachability: 0.20, passion: 0.15, team: 0.10,
+                    role1: 0.20, role2: 0.15, role3: 0.10, role4: 0.10
+                });
+                setCustomQuestions(p.customQuestions || {});
+                setView('dashboard');
+            };
+
+            const handleDeleteProfile = async (id) => {
+                if(!confirm('האם למחוק פרופיל זה?')) return;
+                await deleteDoc(doc(db, 'artifacts', appId, 'public', 'data', 'profiles', id));
+            };
+
+            const handleManualSave = async () => {
+                // Validation: Gate 0
+                if (!gates.champion || !gates.problem || !gates.materials) {
+                    alert("חסרים תנאי סף (Gate 0). אנא השלם אותם כדי לשמור/לסיים.");
+                    document.getElementById('gates-section').scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    // We highlight the area momentarily
+                    const el = document.getElementById('gates-section');
+                    if(el) {
+                        el.classList.add('ring-4', 'ring-red-500');
+                        setTimeout(() => el.classList.remove('ring-4', 'ring-red-500'), 1000);
+                    }
+                    return;
+                }
+
+                // Force save immediately
+                const profileData = {
+                    candidate, profile, gates, weights, scores, spark, flags, disc, customQuestions,
+                    lastUpdated: serverTimestamp(),
+                    totalScore: totalScore
+                };
+                
+                await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'profiles', currentProfileId), profileData, { merge: true });
+                setView('index');
+            };
+
+            // --- LOGIC: Fail/Pass ---
             const isCoachabilityFail = scores.coachability > 0 && scores.coachability <= 3;
             const isRoleFail = activeRoleConfig.criteria.some(c => c.critical && scores[c.id] > 0 && scores[c.id] <= 3);
             const isFail = isCoachabilityFail || isRoleFail;
 
-            // Completion Logic
-            const totalItems = UNIVERSAL_CRITERIA.length + activeRoleConfig.criteria.length + 1; // +1 for beer
+            const totalItems = UNIVERSAL_CRITERIA.length + activeRoleConfig.criteria.length + 1; 
             const filledItems = Object.values(scores).filter(v => v > 0).length + (spark.beer > 0 ? 1 : 0);
             const isComplete = filledItems === totalItems;
             const missingCount = totalItems - filledItems;
 
-            // Smart Weight Distribution Algorithm
             const handleWeightChange = useCallback((id, newVal) => {
                 const newWeight = Math.max(0, Math.min(100, newVal)) / 100;
-                
                 setWeights(prev => {
                     const oldWeight = prev[id];
                     const diff = newWeight - oldWeight;
-                    
-                    const activeKeys = [
-                        ...UNIVERSAL_CRITERIA.map(c => c.id),
-                        ...activeRoleConfig.criteria.map(c => c.id)
-                    ];
+                    const activeKeys = [...UNIVERSAL_CRITERIA.map(c => c.id), ...activeRoleConfig.criteria.map(c => c.id)];
                     const otherKeys = activeKeys.filter(k => k !== id);
                     const sumOthers = otherKeys.reduce((sum, k) => sum + prev[k], 0);
-                    
                     const nextWeights = { ...prev, [id]: newWeight };
-                    
                     if (sumOthers > 0) {
-                        // Distribute difference proportionally
                         otherKeys.forEach(k => {
                             const ratio = prev[k] / sumOthers;
                             nextWeights[k] = Math.max(0, prev[k] - (diff * ratio));
                         });
                     } else {
-                         // Fallback if others are 0
                          const split = (1.0 - newWeight) / otherKeys.length;
                          otherKeys.forEach(k => nextWeights[k] = split);
                     }
                     return nextWeights;
                 });
             }, [activeRoleConfig]);
-
-            // Reset scores/weights on role change
-            useEffect(() => {
-                setScores({ 
-                    coachability: 0, passion: 0, team: 0, 
-                    role1: 0, role2: 0, role3: 0, role4: 0 
-                });
-                // Reset weights to defaults
-                setWeights({
-                    coachability: 0.20,
-                    passion: 0.15,
-                    team: 0.10,
-                    role1: 0.20, 
-                    role2: 0.15, 
-                    role3: 0.10, 
-                    role4: 0.10
-                });
-            }, [candidate.role]);
-
-            const totalScore = useMemo(() => {
-                if (!isPassedGate0) return 0;
-
-                let sum = 0;
-                // Add Universal Scores
-                UNIVERSAL_CRITERIA.forEach(c => {
-                    if (scores[c.id] > 0) sum += (scores[c.id] * 10 * weights[c.id]);
-                });
-                // Add Role Specific Scores
-                activeRoleConfig.criteria.forEach(c => {
-                    if (scores[c.id] > 0) sum += (scores[c.id] * 10 * weights[c.id]);
-                });
-
-                // Bonus/Penalty Logic
-                sum += (flags.green.length * 3); 
-                sum -= (flags.red.length * 5);   
-                
-                // Beer Test Bonus
-                if (spark.beer >= 4) sum += 2;
-                if (spark.beer > 0 && spark.beer <= 2) sum -= 2;
-
-                return Math.max(0, Math.min(100, Math.round(sum)));
-            }, [scores, flags, spark.beer, candidate.role, isPassedGate0, weights]);
 
             const getDecision = () => {
                 if (!isPassedGate0) return { text: 'חסרים תנאי סף', sub: 'יש להשלים את שלב 0', color: 'bg-gray-700 text-gray-300' };
@@ -544,26 +684,10 @@
                 });
             };
 
-            // --- AI FUNCTIONS ---
-
             const handleAnalyzeSpark = async () => {
                 if (!spark.why && !spark.scars) return alert("אנא מלא תוכן ב'למה' או 'צלקות' לפני הניתוח");
-                
                 setIsAnalyzingSpark(true);
-                const prompt = `
-                    Analyze the following founder statements regarding their startup motivation.
-                    Candidate Name: ${candidate.name}
-                    'The Why' (Motivation): "${spark.why}"
-                    'Scar Tissue' (Past failures/pain): "${spark.scars}"
-                    
-                    Provide a brief psychological assessment in Hebrew (bullet points) focusing on:
-                    1. Authenticity (Is it personal or generic?)
-                    2. Resilience potential (Did they learn from scars?)
-                    3. Red flags (E.g. ego, blaming others)
-                    
-                    Format as nice Markdown. Keep it short, professional and direct.
-                `;
-
+                const prompt = `Analyze the following founder statements regarding their startup motivation. Candidate: ${candidate.name} 'The Why': "${spark.why}" 'Scar Tissue': "${spark.scars}" Provide a brief psychological assessment in Hebrew (bullet points).`;
                 const result = await callGemini(prompt);
                 setAiAnalysis(result);
                 setIsAnalyzingSpark(false);
@@ -572,45 +696,68 @@
             const handleCVParse = async (file = null) => {
                 setIsAnalyzingCV(true);
                 let prompt = `
-                    Extract the following details from this CV/Profile in Hebrew:
-                    - Name (Full Name)
-                    - Professional Domain (e.g., Fintech, Cyber)
-                    - Key Tools/Skills (comma separated)
-                    - Relevant Experience (Short summary, 1 sentence)
-                    - Suggested Role (CEO, CTO, or COO based on skills - Choose ONLY ONE)
-                    - What co-founder they might need (based on their role)
+                    Extract details from this CV/Profile in Hebrew and perform dynamic question adaptation.
                     
-                    Return purely JSON format like this:
+                    Target Role: ${candidate.role}
+
+                    Task 1: Extract Data
+                    - Name (Full Name)
+                    - Professional Domain
+                    - Key Tools/Skills
+                    - Relevant Experience (Short summary)
+                    - Suggested Role (CEO/CTO/COO)
+                    - Co-founder needed?
+
+                    Task 2: Dynamic Interview Questions
+                    Based on the candidate's weaknesses, gaps, or unique background in the CV, generate 2-3 SHARP, SPECIFIC interview questions for specific criteria IDs.
+                    For example, if they lack management experience, add a question to 'team' or 'role1'. If they are technical but lack sales, add to 'role2' (for CEO).
+                    
+                    Return PURE JSON format:
                     { 
                         "name": "...", 
                         "domain": "...", 
                         "tools": "...", 
                         "experience": "...", 
-                        "role": "CEO/CTO/COO", 
+                        "role": "CEO", 
                         "cofounder": "...",
-                        "linkedin": "..." 
+                        "linkedin": "...",
+                        "customQuestions": {
+                            "team": ["NEW AI Question 1", "NEW AI Question 2"],
+                            "role1": ["NEW AI Question based on CV"]
+                        }
                     }
                 `;
                 
-                let imageBase64 = null;
-
-                if (file) {
-                    const reader = new FileReader();
-                    reader.readAsDataURL(file);
-                    await new Promise(resolve => reader.onload = resolve);
-                    imageBase64 = reader.result;
-                    prompt += "\n Analyze the attached image of the resume.";
-                } else if (rawCVText.trim()) {
-                    prompt += `\n Analyze this raw text from the resume: \n"${rawCVText}"`;
-                } else {
-                    setIsAnalyzingCV(false);
-                    return alert("אנא העלה קובץ תמונה או הדבק טקסט.");
-                }
+                let fileObj = null;
 
                 try {
-                    const result = await callGemini(prompt, imageBase64);
-                    // Try to parse JSON from the markdown response
+                    if (file) {
+                        const fileType = file.type;
+                        if (fileType.includes("wordprocessingml") || file.name.endsWith(".docx")) {
+                            const arrayBuffer = await file.arrayBuffer();
+                            const result = await mammoth.extractRawText({ arrayBuffer: arrayBuffer });
+                            prompt += `\n\nAnalyze this raw text from the DOCX resume:\n"${result.value}"`;
+                        } else {
+                            const reader = new FileReader();
+                            reader.readAsDataURL(file);
+                            await new Promise(resolve => reader.onload = resolve);
+                            const base64Data = reader.result.split(',')[1];
+                            let mimeType = "image/png";
+                            if (fileType === "application/pdf") mimeType = "application/pdf";
+                            else if (fileType.startsWith("image/")) mimeType = fileType;
+                            fileObj = { mimeType: mimeType, data: base64Data };
+                            prompt += `\n Analyze the attached file.`;
+                        }
+                    } else if (rawCVText.trim()) {
+                        prompt += `\n Analyze this raw text: \n"${rawCVText}"`;
+                    } else {
+                        setIsAnalyzingCV(false);
+                        return alert("אנא העלה קובץ או הדבק טקסט.");
+                    }
+
+                    const result = await callGemini(prompt, fileObj);
                     const jsonMatch = result.match(/\{[\s\S]*\}/);
+                    
                     if (jsonMatch) {
                         const data = JSON.parse(jsonMatch[0]);
                         setCandidate(prev => ({ ...prev, name: data.name || prev.name, role: data.role || prev.role }));
@@ -622,6 +769,10 @@
                             cofounder: data.cofounder || prev.cofounder,
                             cv: data.linkedin || prev.cv
                         }));
+                        
+                        if (data.customQuestions) {
+                            setCustomQuestions(prev => ({ ...prev, ...data.customQuestions }));
+                        }
                     } else {
                         alert("לא הצלחנו לפענח את המידע. אנא נסה שוב.");
                     }
@@ -635,37 +786,20 @@
 
             const handleGenerateSmartEmail = async () => {
                 setShowMailDraft(true);
-                if (emailContent) return; // Don't regenerate if exists
-
+                if (emailContent) return; 
                 setIsGeneratingEmail(true);
-                
-                // Collect weak points
                 const weakPoints = [];
                 if (scores.role1 > 0 && scores.role1 < 6) weakPoints.push(activeRoleConfig.criteria[0].label);
                 if (scores.role2 > 0 && scores.role2 < 6) weakPoints.push(activeRoleConfig.criteria[1].label);
-                if (scores.coachability > 0 && scores.coachability < 6) weakPoints.push("יכולת קבלת משוב (Coachability)");
-                if (flags.red.includes('solo')) weakPoints.push("חסרונו של צוות מייסדים (Solo Founder)");
-                if (flags.red.includes('outsourcing')) weakPoints.push("תלות בפיתוח חיצוני");
-
-                const prompt = `
-                    Write a gentle, empathetic rejection email (Soft Landing) in Hebrew for a startup founder named "${candidate.name || 'יזם'}".
-                    
-                    Context: They applied to the Innovet accelerator.
-                    The specific reasons for rejection (weak points identified in interview) are: ${weakPoints.join(", ")}.
-                    
-                    Guidelines:
-                    - Tone: Empathetic, encouraging, professional, "Founder-friendly".
-                    - Structure: Thank them -> Gentle rejection -> Constructive specific feedback based on the weak points above -> Suggest joining the "Friends of Innovet" community -> Wishing luck.
-                    - Do NOT be robotic. Sound like a human investor.
-                    - Output ONLY the email body text.
-                `;
-
+                if (scores.coachability > 0 && scores.coachability < 6) weakPoints.push("יכולת קבלת משוב");
+                if (flags.red.includes('solo')) weakPoints.push("חסרונו של צוות מייסדים");
+                
+                const prompt = `Write a gentle rejection email in Hebrew for "${candidate.name}". Weaknesses: ${weakPoints.join(", ")}. Tone: Empathetic investor. Output only email body.`;
                 const result = await callGemini(prompt);
                 setEmailContent(result);
                 setIsGeneratingEmail(false);
             };
             
-            // WHATSAPP GENERATOR UPDATED
             const generateWhatsAppIntro = () => {
                 return `👋 היי, אני ${candidate.name || '[שם מלא]'}
 🚀 התחום שלי: ${profile.domain || '[תחום מקצועי]'}
@@ -683,9 +817,30 @@
                 setTimeout(() => setCopied(false), 2000);
             };
 
-            const resetApp = () => {
-                if(confirm('לאפס את כל הנתונים?')) window.location.reload();
-            };
+            // --- VIEW RENDER ---
+            if (view === 'index') {
+                return (
+                    <div className="min-h-screen bg-gray-50 flex flex-col">
+                        <header className="bg-innovet-dark text-white p-6 shadow-md z-10">
+                             <div className="max-w-5xl mx-auto flex items-center justify-between">
+                                <div className="flex items-center gap-4">
+                                    <div className="p-2 bg-white/10 rounded-xl backdrop-blur-sm border border-white/10">
+                                        <Icons.Rocket size={24} className="text-innovet-yellow" />
+                                    </div>
+                                    <h1 className="text-xl font-black text-white">INNOVET <span className="text-innovet-yellow">SCOUT</span></h1>
+                                </div>
+                             </div>
+                        </header>
+                        <ProfilesIndex 
+                            profiles={savedProfiles} 
+                            onLoad={handleLoadProfile} 
+                            onDelete={handleDeleteProfile}
+                            onNew={handleNewProfile}
+                            loading={loadingData}
+                        />
+                    </div>
+                );
+            }
 
             return (
                 <div className="flex-grow flex flex-col">
@@ -694,14 +849,14 @@
                     <header className="bg-innovet-dark text-white relative overflow-hidden shadow-xl z-50 sticky top-0 border-b border-gray-800">
                         <div className="absolute top-[-50%] right-[-10%] w-[50%] h-[200%] opacity-10 pointer-events-none" style={{background: 'radial-gradient(circle, #FFC700 0%, transparent 70%)'}}></div>
                         <div className="max-w-5xl mx-auto px-6 py-4 relative z-10 flex justify-between items-center">
-                            <div className="flex items-center gap-4 cursor-pointer" onClick={() => window.scrollTo(0,0)}>
-                                <div className="p-2 bg-white/10 rounded-xl backdrop-blur-sm border border-white/10">
-                                    <Icons.Rocket size={24} className="text-innovet-yellow" />
+                            <div className="flex items-center gap-4 cursor-pointer" onClick={() => setView('index')}>
+                                <div className="p-2 bg-gray-800 rounded-xl hover:bg-gray-700 transition">
+                                    <Icons.Home size={20} className="text-gray-300" />
                                 </div>
                                 <div className="flex flex-col">
                                     <h1 className="text-xl font-black tracking-tight leading-none text-white">INNOVET <span className="text-innovet-yellow">SCOUT</span></h1>
                                     <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest flex items-center gap-1">
-                                        Master Protocol <span className="bg-gradient-to-r from-purple-400 to-pink-600 text-transparent bg-clip-text font-black">AI POWERED ✨</span>
+                                        Master Protocol <span className="text-green-400">AUTO-SAVE ON</span>
                                     </p>
                                 </div>
                             </div>
@@ -710,7 +865,12 @@
                                 <button onClick={() => setIsWeightEditMode(!isWeightEditMode)} className={`transition-colors p-2 rounded ${isWeightEditMode ? 'bg-innovet-yellow text-black' : 'text-gray-400 hover:text-white'}`} title="עריכת משקלים">
                                     <Icons.Scale size={20}/>
                                 </button>
-                                <button onClick={resetApp} className="text-gray-400 hover:text-white transition-colors"><Icons.Refresh size={20}/></button>
+                                
+                                {/* MANUAL SAVE BUTTON (NEW) */}
+                                <button onClick={handleManualSave} className="bg-innovet-yellow hover:bg-yellow-400 text-black px-4 py-2 rounded-lg font-black text-sm flex items-center gap-2 shadow-lg transition-all hover:scale-105" title="שמור וצא">
+                                    <Icons.Save size={16} /> <span className="hidden md:inline">שמור וצא</span>
+                                </button>
+
                                 <div className="hidden md:block h-8 w-px bg-white/20"></div>
                                 <div className="hidden md:block text-right">
                                     <div className="text-[9px] font-bold text-gray-400 uppercase tracking-widest mb-0.5">ציון נוכחי</div>
@@ -727,7 +887,7 @@
                         <div className="max-w-4xl mx-auto p-4 md:p-8 space-y-8 -mt-6 relative z-20">
 
                             {/* SECTION 1: IDENTITY & GATES */}
-                            <div className="bg-white rounded-2xl shadow-lg border border-gray-100 p-8 animate-fade-in-up relative overflow-hidden">
+                            <div id="gates-section" className="bg-white rounded-2xl shadow-lg border border-gray-100 p-8 animate-fade-in-up relative overflow-hidden transition-all duration-300">
                                 <div className="absolute top-0 left-0 w-2 h-full bg-innovet-yellow"></div>
                                 <div className="flex items-center gap-3 mb-6 pb-4 border-b border-gray-100">
                                     <div className="bg-gray-900 text-white p-2 rounded-lg"><Icons.Search size={20}/></div>
@@ -760,324 +920,136 @@
                                 </div>
                             </div>
 
-                            {/* NEW SECTION: PARTICIPANT PROFILE (ID CARD) - EXPANDED WITH CV UPLOAD */}
+                            {/* SECTION: PARTICIPANT PROFILE */}
                             <SectionCard title="תעודת זהות משתתף (Participant Profile)" icon={Icons.Badge} className="border-t-4 border-t-purple-500">
-                                
-                                {/* AI CV PARSER AREA */}
                                 <div className="bg-gradient-to-r from-purple-50 to-indigo-50 border border-purple-100 rounded-xl p-6 mb-8 relative overflow-hidden">
                                     {isAnalyzingCV && <div className="absolute inset-0 bg-white/50 ai-shimmer z-10"></div>}
                                     <div className="flex flex-col md:flex-row items-start md:items-center gap-4 mb-4">
                                         <div className="bg-purple-600 text-white p-2 rounded-lg shadow-sm"><Icons.Upload size={20}/></div>
                                         <div>
-                                            <h3 className="font-bold text-lg text-purple-900">ניתוח קו"ח אוטומטי (Auto-Fill)</h3>
-                                            <p className="text-xs text-purple-600">העלה תמונה של קו"ח/לינקדאין או הדבק טקסט לניתוח מהיר ע"י AI</p>
+                                            <h3 className="font-bold text-lg text-purple-900">ניתוח קו"ח אוטומטי (AI)</h3>
+                                            <p className="text-xs text-purple-600">העלה קובץ לניתוח וייצור שאלות מותאמות אישית</p>
                                         </div>
                                     </div>
-                                    
                                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                         <div className="relative group">
-                                            <input 
-                                                type="file" 
-                                                accept="image/*" 
-                                                ref={fileInputRef}
-                                                onChange={(e) => handleCVParse(e.target.files[0])}
-                                                className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-20"
-                                            />
+                                            <input type="file" accept="image/*,application/pdf,application/vnd.openxmlformats-officedocument.wordprocessingml.document" ref={fileInputRef} onChange={(e) => handleCVParse(e.target.files[0])} className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-20" />
                                             <div className="border-2 border-dashed border-purple-200 rounded-xl p-4 flex flex-col items-center justify-center h-24 bg-white group-hover:border-purple-400 transition-colors">
                                                 <Icons.Upload size={24} className="text-purple-300 mb-2"/>
-                                                <span className="text-xs font-bold text-purple-500">לחץ להעלאת תמונה</span>
+                                                <span className="text-xs font-bold text-purple-500">העלה קובץ (PDF/DOCX)</span>
                                             </div>
                                         </div>
                                         <div className="relative">
-                                            <textarea 
-                                                value={rawCVText}
-                                                onChange={(e) => setRawCVText(e.target.value)}
-                                                placeholder="או הדבק כאן טקסט מקורות החיים..."
-                                                className="w-full h-24 p-3 rounded-xl border border-purple-200 text-xs resize-none focus:border-purple-500 bg-white"
-                                            ></textarea>
-                                            {rawCVText && (
-                                                <button 
-                                                    onClick={() => handleCVParse(null)}
-                                                    className="absolute bottom-2 left-2 bg-purple-600 text-white text-[10px] font-bold px-3 py-1 rounded-full shadow-sm hover:bg-purple-700 transition"
-                                                >
-                                                    נתח טקסט
-                                                </button>
-                                            )}
+                                            <textarea value={rawCVText} onChange={(e) => setRawCVText(e.target.value)} placeholder="או הדבק טקסט..." className="w-full h-24 p-3 rounded-xl border border-purple-200 text-xs resize-none focus:border-purple-500 bg-white"></textarea>
+                                            {rawCVText && <button onClick={() => handleCVParse(null)} className="absolute bottom-2 left-2 bg-purple-600 text-white text-[10px] font-bold px-3 py-1 rounded-full shadow-sm hover:bg-purple-700 transition">נתח טקסט</button>}
                                         </div>
                                     </div>
                                 </div>
-
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                                     <div className="space-y-4">
-                                        <div>
-                                            <label className="block font-bold text-innovet-black mb-2 flex items-center gap-2"><div className="w-2 h-2 rounded-full bg-purple-500"></div> תחום מקצועי (World of Content)</label>
-                                            <input type="text" value={profile.domain} onChange={e => setProfile({...profile, domain: e.target.value})} className="w-full bg-gray-50 border border-gray-200 rounded-lg p-3 text-sm focus:border-purple-500 transition" placeholder="למשל: FinTech, AI, Cyber, EdTech..." />
-                                        </div>
-                                        <div>
-                                            <label className="block font-bold text-innovet-black mb-2 flex items-center gap-2"><div className="w-2 h-2 rounded-full bg-purple-500"></div> כלים וכישורים (Tools)</label>
-                                            <input type="text" value={profile.tools} onChange={e => setProfile({...profile, tools: e.target.value})} className="w-full bg-gray-50 border border-gray-200 rounded-lg p-3 text-sm focus:border-purple-500 transition" placeholder="Figma, Python, React, Sales, Jira..." />
-                                        </div>
-                                        <div>
-                                            <label className="block font-bold text-innovet-black mb-2 flex items-center gap-2"><div className="w-2 h-2 rounded-full bg-purple-500"></div> סוג הקו-פאונדר המבוקש</label>
-                                            <input type="text" value={profile.cofounder} onChange={e => setProfile({...profile, cofounder: e.target.value})} className="w-full bg-gray-50 border border-gray-200 rounded-lg p-3 text-sm focus:border-purple-500 transition" placeholder="למשל: CTO טכנולוגי, מנכ''ל עם ניסיון בגיוס..." />
-                                        </div>
-                                        <div>
-                                            <label className="block font-bold text-innovet-black mb-2 flex items-center gap-2"><div className="w-2 h-2 rounded-full bg-purple-500"></div> ניסיון רלוונטי</label>
-                                            <textarea value={profile.experience} onChange={e => setProfile({...profile, experience: e.target.value})} className="w-full bg-gray-50 border border-gray-200 rounded-lg p-3 text-sm min-h-[80px] focus:border-purple-500 transition" placeholder="ניסיון קודם, תפקידים, רקע צבאי/אקדמי..."></textarea>
-                                        </div>
-                                        
-                                        {/* NEW LINK FIELDS */}
-                                        <div className="grid grid-cols-2 gap-4">
-                                            <div>
-                                                <label className="block font-bold text-innovet-black mb-2 flex items-center gap-2 text-xs"><Icons.Link size={12}/> לינק לקו"ח / LinkedIn</label>
-                                                <input type="text" value={profile.cv} onChange={e => setProfile({...profile, cv: e.target.value})} className="w-full bg-gray-50 border border-gray-200 rounded-lg p-2 text-sm focus:border-purple-500 transition" placeholder="https://linkedin.com..." />
-                                            </div>
-                                            <div>
-                                                <label className="block font-bold text-innovet-black mb-2 flex items-center gap-2 text-xs"><Icons.Link size={12}/> פלטפורמות / תיק עבודות</label>
-                                                <input type="text" value={profile.platforms} onChange={e => setProfile({...profile, platforms: e.target.value})} className="w-full bg-gray-50 border border-gray-200 rounded-lg p-2 text-sm focus:border-purple-500 transition" placeholder="BACE44, Wix, Lovable..." />
-                                            </div>
-                                        </div>
+                                        <div><label className="block font-bold text-innovet-black mb-2 text-xs">תחום מקצועי</label><input type="text" value={profile.domain} onChange={e => setProfile({...profile, domain: e.target.value})} className="w-full bg-gray-50 border border-gray-200 rounded-lg p-3 text-sm" placeholder="למשל: FinTech, AI..." /></div>
+                                        <div><label className="block font-bold text-innovet-black mb-2 text-xs">כלים וכישורים</label><input type="text" value={profile.tools} onChange={e => setProfile({...profile, tools: e.target.value})} className="w-full bg-gray-50 border border-gray-200 rounded-lg p-3 text-sm" placeholder="Python, React..." /></div>
+                                        <div><label className="block font-bold text-innovet-black mb-2 text-xs">קו-פאונדר מבוקש</label><input type="text" value={profile.cofounder} onChange={e => setProfile({...profile, cofounder: e.target.value})} className="w-full bg-gray-50 border border-gray-200 rounded-lg p-3 text-sm" placeholder="CTO טכנולוגי..." /></div>
+                                        <div><label className="block font-bold text-innovet-black mb-2 text-xs">ניסיון רלוונטי</label><textarea value={profile.experience} onChange={e => setProfile({...profile, experience: e.target.value})} className="w-full bg-gray-50 border border-gray-200 rounded-lg p-3 text-sm min-h-[80px]" placeholder="פירוט ניסיון..."></textarea></div>
                                     </div>
-                                    
                                     <div className="bg-purple-50 p-6 rounded-2xl border border-purple-100 flex flex-col h-full">
-                                        <h4 className="font-bold text-lg text-purple-900 mb-4 flex items-center gap-2 border-b border-purple-100 pb-2">
-                                            <Icons.Share size={18}/> תבנית להיכרות בוואטסאפ
-                                        </h4>
-                                        <div className="bg-white p-4 rounded-xl border border-purple-100 shadow-sm flex-grow font-mono text-xs whitespace-pre-wrap text-gray-700 relative overflow-y-auto max-h-[250px]">
-                                            {generateWhatsAppIntro()}
-                                        </div>
-                                        <button 
-                                            onClick={copyToWhatsApp} 
-                                            className={`mt-4 w-full py-3 rounded-lg font-bold transition-all flex items-center justify-center gap-2 ${copied ? 'bg-green-500 text-white' : 'bg-purple-600 text-white hover:bg-purple-700 hover:shadow-lg'}`}
-                                        >
-                                            {copied ? <span className="flex items-center gap-2"><Icons.Check size={18}/> הועתק!</span> : <span>העתק ללוח</span>}
-                                        </button>
+                                        <h4 className="font-bold text-lg text-purple-900 mb-4 flex items-center gap-2 border-b border-purple-100 pb-2"><Icons.Share size={18}/> היכרות בוואטסאפ</h4>
+                                        <div className="bg-white p-4 rounded-xl border border-purple-100 shadow-sm flex-grow font-mono text-xs whitespace-pre-wrap text-gray-700 relative overflow-y-auto max-h-[250px]">{generateWhatsAppIntro()}</div>
+                                        <button onClick={copyToWhatsApp} className={`mt-4 w-full py-3 rounded-lg font-bold transition-all flex items-center justify-center gap-2 ${copied ? 'bg-green-500 text-white' : 'bg-purple-600 text-white hover:bg-purple-700'}`}>{copied ? 'הועתק!' : 'העתק ללוח'}</button>
                                     </div>
                                 </div>
                             </SectionCard>
 
 
-                            {/* MAIN EVALUATION - ONLY IF GATES PASSED (Or show visually disabled) */}
+                            {/* MAIN EVALUATION */}
                             <div className={`space-y-8 transition-opacity duration-500 ${!isPassedGate0 ? 'opacity-50 pointer-events-none grayscale' : 'opacity-100'}`}>
                                 
-                                {/* SECTION 2: SPARK INDEX - UPGRADED WITH AI */}
                                 <SectionCard title="מדד הניצוץ (Spark Index)" icon={Icons.Heart} className="border-t-4 border-t-pink-500">
                                     <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                                         <div className="space-y-6">
-                                            <div>
-                                                <label className="block font-bold text-innovet-black mb-2">1. ה"למה" האישי (The Why)</label>
-                                                <textarea value={spark.why} onChange={e => setSpark({...spark, why: e.target.value})} className="w-full bg-gray-50 border border-gray-200 rounded-xl p-4 text-sm min-h-[100px] transition-colors focus:border-innovet-blue" placeholder="האם הוא פותר בעיה שכאבה לו אישית? האם יש לו 'חשבון פתוח'?"></textarea>
-                                            </div>
-                                            <div>
-                                                <label className="block font-bold text-innovet-black mb-2">2. צלקות עבר (Scar Tissue)</label>
-                                                <textarea value={spark.scars} onChange={e => setSpark({...spark, scars: e.target.value})} className="w-full bg-gray-50 border border-gray-200 rounded-xl p-4 text-sm min-h-[100px] transition-colors focus:border-innovet-blue" placeholder="מתי נכשלו וכאב להם? האם הם יודעים להיות פגיעים?"></textarea>
-                                            </div>
-                                            
-                                            {/* AI Button */}
-                                            <button 
-                                                onClick={handleAnalyzeSpark} 
-                                                disabled={isAnalyzingSpark}
-                                                className={`w-full py-3 rounded-xl font-bold text-sm shadow-sm transition-all flex items-center justify-center gap-2 ${isAnalyzingSpark ? 'bg-gray-100 text-gray-400 cursor-not-allowed' : 'bg-gradient-to-r from-pink-500 to-purple-600 text-white hover:shadow-lg hover:scale-[1.02]'}`}
-                                            >
-                                                {isAnalyzingSpark ? (
-                                                    <><Icons.Refresh size={16} className="animate-spin" /> מנתח נתונים...</>
-                                                ) : (
-                                                    <><Icons.Sparkle size={16} /> נתח ניצוץ עם Gemini AI</>
-                                                )}
-                                            </button>
-
-                                            {/* AI Result */}
-                                            {aiAnalysis && (
-                                                <div className="bg-purple-50 border border-purple-200 rounded-xl p-4 animate-fade-in-up">
-                                                    <div className="text-xs font-bold text-purple-600 uppercase mb-2 flex items-center gap-2"><Icons.Sparkle size={12}/> תובנות AI</div>
-                                                    <div className="prose prose-sm prose-purple text-xs leading-relaxed" dangerouslySetInnerHTML={{__html: marked.parse(aiAnalysis)}}></div>
-                                                </div>
-                                            )}
-
+                                            <div><label className="block font-bold text-innovet-black mb-2">1. ה"למה" האישי</label><textarea value={spark.why} onChange={e => setSpark({...spark, why: e.target.value})} className="w-full bg-gray-50 border border-gray-200 rounded-xl p-4 text-sm min-h-[100px]" placeholder="המוטיבציה האישית..."></textarea></div>
+                                            <div><label className="block font-bold text-innovet-black mb-2">2. צלקות עבר</label><textarea value={spark.scars} onChange={e => setSpark({...spark, scars: e.target.value})} className="w-full bg-gray-50 border border-gray-200 rounded-xl p-4 text-sm min-h-[100px]" placeholder="כישלונות וכאב..."></textarea></div>
+                                            <button onClick={handleAnalyzeSpark} disabled={isAnalyzingSpark} className={`w-full py-3 rounded-xl font-bold text-sm shadow-sm transition-all flex items-center justify-center gap-2 ${isAnalyzingSpark ? 'bg-gray-100 text-gray-400' : 'bg-gradient-to-r from-pink-500 to-purple-600 text-white'}`}>{isAnalyzingSpark ? 'מנתח נתונים...' : 'נתח ניצוץ עם Gemini AI'}</button>
+                                            {aiAnalysis && <div className="bg-purple-50 border border-purple-200 rounded-xl p-4 animate-fade-in-up"><div className="text-xs font-bold text-purple-600 uppercase mb-2">תובנות AI</div><div className="prose prose-sm prose-purple text-xs leading-relaxed" dangerouslySetInnerHTML={{__html: marked.parse(aiAnalysis)}}></div></div>}
                                         </div>
                                         <div className="flex flex-col justify-center bg-yellow-50 p-6 rounded-2xl border border-yellow-100">
-                                            <div className="flex items-center gap-3 mb-2 justify-center">
-                                                <div className="bg-white p-2 rounded-full shadow-sm text-innovet-yellow"><Icons.Beer size={20}/></div>
-                                                <h4 className="font-bold text-xl text-innovet-black">מבחן הבירה</h4>
-                                            </div>
-                                            <p className="text-xs text-gray-500 text-center mb-6 px-4">אם הייתם תקועים איתו בשדה תעופה ב-2 בלילה, הייתם סובלים או מצליחים לייצר שיחה?</p>
-                                            <div className="bg-white p-4 rounded-xl shadow-sm border border-gray-100">
-                                                <StarRating value={spark.beer} onChange={(v) => setSpark({...spark, beer: v})} max={5} />
-                                                {spark.beer === 0 && <div className="text-center text-[10px] text-red-500 font-bold mt-1">חסר דירוג</div>}
-                                            </div>
+                                            <div className="flex items-center gap-3 mb-2 justify-center"><div className="bg-white p-2 rounded-full shadow-sm text-innovet-yellow"><Icons.Beer size={20}/></div><h4 className="font-bold text-xl text-innovet-black">מבחן הבירה</h4></div>
+                                            <p className="text-xs text-gray-500 text-center mb-6">האם היית נתקע איתו בשדה תעופה?</p>
+                                            <div className="bg-white p-4 rounded-xl shadow-sm border border-gray-100"><StarRating value={spark.beer} onChange={(v) => setSpark({...spark, beer: v})} max={5} /></div>
                                         </div>
                                     </div>
                                 </SectionCard>
 
-                                {/* SECTION 3: SCREENING (Dynamic based on Role) */}
                                 <SectionCard title={`הערכת סף (${candidate.role})`} icon={Icons.Star}>
                                     <div className="grid grid-cols-1 gap-6">
-                                        
-                                        {/* 3A: Universal Criteria */}
                                         <div className="text-xs font-bold text-gray-400 uppercase tracking-widest border-b border-gray-200 pb-2 mb-2">מדדים אוניברסליים</div>
                                         {UNIVERSAL_CRITERIA.map((c) => (
-                                            <div key={c.id} className={`bg-gray-50 p-5 rounded-xl border transition-colors group ${scores[c.id] === 0 ? 'border-l-4 border-l-red-400 border-gray-100' : 'border-gray-100 hover:border-innovet-blue'}`}>
+                                            <div key={c.id} className={`bg-gray-50 p-5 rounded-xl border transition-colors ${scores[c.id] === 0 ? 'border-l-4 border-l-red-400 border-gray-100' : 'border-gray-100'}`}>
                                                 <div className="flex flex-col md:flex-row justify-between md:items-center gap-4 mb-3">
                                                     <div>
                                                         <h3 className="text-lg font-black text-innovet-black flex items-center gap-2">
                                                             {c.label}
-                                                            <span className="text-[10px] font-normal bg-white px-2 py-0.5 rounded border text-gray-500 transition-all duration-300">{Math.round(weights[c.id] * 100)}%</span>
-                                                            {scores[c.id] === 0 && <span className="text-[10px] font-bold text-red-500 animate-pulse">נדרש מילוי</span>}
+                                                            {/* AI CUSTOM QUESTIONS BADGE */}
+                                                            {customQuestions[c.id] && <span className="bg-purple-100 text-purple-600 text-[9px] px-2 py-0.5 rounded-full flex items-center gap-1"><Icons.Sparkle size={8}/> מותאם אישית</span>}
+                                                            <span className="text-[10px] font-normal bg-white px-2 py-0.5 rounded border text-gray-500">{Math.round(weights[c.id] * 100)}%</span>
                                                         </h3>
                                                         <p className="text-xs text-gray-500 mt-1">{c.desc}</p>
-                                                        
-                                                        {/* INTERVIEW QUESTIONS TOGGLE */}
-                                                        {c.questions && (
-                                                            <div className="mt-2">
-                                                                <button 
-                                                                    onClick={() => setOpenQuestion(openQuestion === c.id ? null : c.id)}
-                                                                    className="text-xs font-bold text-innovet-blue hover:underline flex items-center gap-1 transition-colors"
-                                                                >
-                                                                    <Icons.Bulb size={12}/> {openQuestion === c.id ? 'הסתר שאלות' : 'שאלות למראיין'}
-                                                                </button>
-                                                                {openQuestion === c.id && (
-                                                                    <ul className="mt-2 bg-blue-50 p-3 rounded-lg text-xs text-gray-700 space-y-1 list-disc list-inside animate-fade-in-up">
-                                                                        {c.questions.map((q, idx) => <li key={idx}>{q}</li>)}
-                                                                    </ul>
-                                                                )}
-                                                            </div>
-                                                        )}
-
-                                                        {/* WEIGHT SLIDER */}
-                                                        {isWeightEditMode && (
-                                                            <WeightSlider id={c.id} currentWeight={weights[c.id]} onWeightChange={handleWeightChange} />
-                                                        )}
+                                                        <div className="mt-2">
+                                                            <button onClick={() => setOpenQuestion(openQuestion === c.id ? null : c.id)} className="text-xs font-bold text-innovet-blue hover:underline flex items-center gap-1"><Icons.Bulb size={12}/> שאלות למראיין</button>
+                                                            {openQuestion === c.id && (
+                                                                <ul className="mt-2 bg-blue-50 p-3 rounded-lg text-xs text-gray-700 space-y-1 list-disc list-inside animate-fade-in-up">
+                                                                    {/* SHOW CUSTOM QUESTIONS IF EXIST, ELSE DEFAULT */}
+                                                                    {(customQuestions[c.id] || c.questions).map((q, idx) => <li key={idx} className={customQuestions[c.id] ? "font-bold text-purple-700" : ""}>{q}</li>)}
+                                                                </ul>
+                                                            )}
+                                                        </div>
+                                                        {isWeightEditMode && <WeightSlider id={c.id} currentWeight={weights[c.id]} onWeightChange={handleWeightChange} />}
                                                     </div>
-                                                    <div className="min-w-[200px]">
-                                                        <StarRating value={scores[c.id]} onChange={(v) => setScores(prev => ({...prev, [c.id]: v}))} isCritical={c.critical} />
-                                                    </div>
+                                                    <div className="min-w-[200px]"><StarRating value={scores[c.id]} onChange={(v) => setScores(prev => ({...prev, [c.id]: v}))} isCritical={c.critical} /></div>
                                                 </div>
-                                                {c.critical && scores[c.id] > 0 && scores[c.id] <= 3 && (
-                                                    <div className="bg-red-50 text-red-600 text-xs font-bold p-2 rounded flex items-center gap-2 animate-pulse">
-                                                        <Icons.Alert size={14}/> ציון נמוך כאן מהווה עילת פסילה אוטומטית (Kill Switch).
-                                                    </div>
-                                                )}
                                             </div>
                                         ))}
 
-                                        {/* 3B: Role Specific Criteria */}
-                                        <div className="text-xs font-bold text-innovet-blue uppercase tracking-widest border-b border-blue-100 pb-2 mb-2 mt-4 flex items-center gap-2">
-                                            <activeRoleConfig.icon size={14} /> מדדים ייחודיים ל-{candidate.role}
-                                        </div>
+                                        <div className="text-xs font-bold text-innovet-blue uppercase tracking-widest border-b border-blue-100 pb-2 mb-2 mt-4 flex items-center gap-2"><activeRoleConfig.icon size={14} /> מדדים ייחודיים</div>
                                         {activeRoleConfig.criteria.map((c) => (
-                                            <div key={c.id} className={`bg-blue-50/50 p-5 rounded-xl border transition-colors group ${scores[c.id] === 0 ? 'border-l-4 border-l-red-400 border-blue-100' : 'border-blue-100 hover:border-innovet-blue'}`}>
+                                            <div key={c.id} className={`bg-blue-50/50 p-5 rounded-xl border transition-colors ${scores[c.id] === 0 ? 'border-l-4 border-l-red-400 border-blue-100' : 'border-blue-100'}`}>
                                                 <div className="flex flex-col md:flex-row justify-between md:items-center gap-4 mb-3">
                                                     <div>
                                                         <h3 className="text-lg font-black text-innovet-black flex items-center gap-2">
                                                             {c.label}
-                                                            <span className="text-[10px] font-normal bg-white px-2 py-0.5 rounded border text-gray-500 transition-all duration-300">{Math.round(weights[c.id] * 100)}%</span>
-                                                            {scores[c.id] === 0 && <span className="text-[10px] font-bold text-red-500 animate-pulse">נדרש מילוי</span>}
+                                                            {customQuestions[c.id] && <span className="bg-purple-100 text-purple-600 text-[9px] px-2 py-0.5 rounded-full flex items-center gap-1"><Icons.Sparkle size={8}/> מותאם אישית</span>}
+                                                            <span className="text-[10px] font-normal bg-white px-2 py-0.5 rounded border text-gray-500">{Math.round(weights[c.id] * 100)}%</span>
                                                         </h3>
                                                         <p className="text-xs text-gray-500 mt-1">{c.desc}</p>
-
-                                                        {/* INTERVIEW QUESTIONS TOGGLE (ROLE) */}
-                                                        {c.questions && (
-                                                            <div className="mt-2">
-                                                                <button 
-                                                                    onClick={() => setOpenQuestion(openQuestion === c.id ? null : c.id)}
-                                                                    className="text-xs font-bold text-innovet-blue hover:underline flex items-center gap-1 transition-colors"
-                                                                >
-                                                                    <Icons.Bulb size={12}/> {openQuestion === c.id ? 'הסתר שאלות' : 'שאלות למראיין'}
-                                                                </button>
-                                                                {openQuestion === c.id && (
-                                                                    <ul className="mt-2 bg-white p-3 rounded-lg text-xs text-gray-700 space-y-1 list-disc list-inside shadow-sm border border-blue-100 animate-fade-in-up">
-                                                                        {c.questions.map((q, idx) => <li key={idx}>{q}</li>)}
-                                                                    </ul>
-                                                                )}
-                                                            </div>
-                                                        )}
-
-                                                        {/* WEIGHT SLIDER */}
-                                                        {isWeightEditMode && (
-                                                            <WeightSlider id={c.id} currentWeight={weights[c.id]} onChange={handleWeightChange} />
-                                                        )}
+                                                        <div className="mt-2">
+                                                            <button onClick={() => setOpenQuestion(openQuestion === c.id ? null : c.id)} className="text-xs font-bold text-innovet-blue hover:underline flex items-center gap-1"><Icons.Bulb size={12}/> שאלות למראיין</button>
+                                                            {openQuestion === c.id && (
+                                                                <ul className="mt-2 bg-white p-3 rounded-lg text-xs text-gray-700 space-y-1 list-disc list-inside shadow-sm border border-blue-100 animate-fade-in-up">
+                                                                     {(customQuestions[c.id] || c.questions).map((q, idx) => <li key={idx} className={customQuestions[c.id] ? "font-bold text-purple-700" : ""}>{q}</li>)}
+                                                                </ul>
+                                                            )}
+                                                        </div>
+                                                        {isWeightEditMode && <WeightSlider id={c.id} currentWeight={weights[c.id]} onChange={handleWeightChange} />}
                                                     </div>
-                                                    <div className="min-w-[200px]">
-                                                        <StarRating value={scores[c.id]} onChange={(v) => setScores(prev => ({...prev, [c.id]: v}))} isCritical={c.critical} />
-                                                    </div>
+                                                    <div className="min-w-[200px]"><StarRating value={scores[c.id]} onChange={(v) => setScores(prev => ({...prev, [c.id]: v}))} isCritical={c.critical} /></div>
                                                 </div>
-                                                {c.critical && scores[c.id] > 0 && scores[c.id] <= 3 && (
-                                                    <div className="bg-red-50 text-red-600 text-xs font-bold p-2 rounded flex items-center gap-2 animate-pulse">
-                                                        <Icons.Alert size={14}/> ציון נמוך כאן מהווה עילת פסילה אוטומטית (Kill Switch).
-                                                    </div>
-                                                )}
                                             </div>
                                         ))}
-
                                     </div>
                                 </SectionCard>
 
-                                {/* SECTION 4: DEEP DIVE & SIGNALS */}
                                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                                     <div className="bg-white rounded-2xl shadow-lg border border-gray-100 p-8 h-full">
-                                        <div className="flex items-center gap-3 mb-6 pb-4 border-b border-gray-100">
-                                            <div className="bg-innovet-blue p-2 text-white rounded-lg"><Icons.Briefcase size={20}/></div>
-                                            <h2 className="text-xl font-black text-innovet-black">בדיקת נאותות (Signals)</h2>
-                                        </div>
-                                        
+                                        <div className="flex items-center gap-3 mb-6 pb-4 border-b border-gray-100"><div className="bg-innovet-blue p-2 text-white rounded-lg"><Icons.Briefcase size={20}/></div><h2 className="text-xl font-black text-innovet-black">בדיקת נאותות (Signals)</h2></div>
                                         <div className="space-y-6">
-                                            <div>
-                                                <h4 className="text-xs font-bold text-green-600 uppercase tracking-widest mb-3 bg-green-50 w-fit px-2 py-1 rounded">Green Flags (בונוס)</h4>
-                                                <div className="space-y-2">
-                                                    {SIGNALS_DATA.green.map(s => (
-                                                        <label key={s.id} className={`flex items-center gap-3 p-3 rounded-lg border cursor-pointer transition-all ${flags.green.includes(s.id) ? 'border-green-500 bg-green-50' : 'border-gray-100 hover:bg-gray-50'}`}>
-                                                            <input type="checkbox" checked={flags.green.includes(s.id)} onChange={() => toggleFlag('green', s.id)} className="w-4 h-4 accent-green-600" />
-                                                            <span className="text-sm font-bold text-gray-700">{s.label}</span>
-                                                        </label>
-                                                    ))}
-                                                </div>
-                                            </div>
-                                            <div>
-                                                <h4 className="text-xs font-bold text-red-600 uppercase tracking-widest mb-3 bg-red-50 w-fit px-2 py-1 rounded">Red Flags (קנס)</h4>
-                                                <div className="space-y-2">
-                                                    {SIGNALS_DATA.red.map(s => (
-                                                        <label key={s.id} className={`flex items-center gap-3 p-3 rounded-lg border cursor-pointer transition-all ${flags.red.includes(s.id) ? 'border-red-500 bg-red-50' : 'border-gray-100 hover:bg-gray-50'}`}>
-                                                            <input type="checkbox" checked={flags.red.includes(s.id)} onChange={() => toggleFlag('red', s.id)} className="w-4 h-4 accent-red-600" />
-                                                            <span className="text-sm font-bold text-gray-700">{s.label}</span>
-                                                        </label>
-                                                    ))}
-                                                </div>
-                                            </div>
+                                            <div><h4 className="text-xs font-bold text-green-600 uppercase tracking-widest mb-3 bg-green-50 w-fit px-2 py-1 rounded">Green Flags</h4><div className="space-y-2">{SIGNALS_DATA.green.map(s => (<label key={s.id} className={`flex items-center gap-3 p-3 rounded-lg border cursor-pointer ${flags.green.includes(s.id) ? 'border-green-500 bg-green-50' : 'border-gray-100'}`}><input type="checkbox" checked={flags.green.includes(s.id)} onChange={() => toggleFlag('green', s.id)} className="w-4 h-4 accent-green-600" /><span className="text-sm font-bold text-gray-700">{s.label}</span></label>))}</div></div>
+                                            <div><h4 className="text-xs font-bold text-red-600 uppercase tracking-widest mb-3 bg-red-50 w-fit px-2 py-1 rounded">Red Flags</h4><div className="space-y-2">{SIGNALS_DATA.red.map(s => (<label key={s.id} className={`flex items-center gap-3 p-3 rounded-lg border cursor-pointer ${flags.red.includes(s.id) ? 'border-red-500 bg-red-50' : 'border-gray-100'}`}><input type="checkbox" checked={flags.red.includes(s.id)} onChange={() => toggleFlag('red', s.id)} className="w-4 h-4 accent-red-600" /><span className="text-sm font-bold text-gray-700">{s.label}</span></label>))}</div></div>
                                         </div>
                                     </div>
-
                                     <div className="bg-white rounded-2xl shadow-lg border border-gray-100 p-8 h-full flex flex-col">
-                                        <div className="flex items-center gap-3 mb-6 pb-4 border-b border-gray-100">
-                                            <div className="bg-innovet-blue p-2 text-white rounded-lg"><Icons.User size={20}/></div>
-                                            <h2 className="text-xl font-black text-innovet-black">פרופיל אישיות (DISC)</h2>
-                                        </div>
-
-                                        <div className="bg-blue-50 p-6 rounded-2xl border border-blue-100 mb-6 flex-grow text-center">
-                                            <div className="text-lg font-black text-innovet-blue mb-1">תכונות נדרשות ל-{candidate.role}</div>
-                                            <div className="flex flex-wrap gap-2 justify-center mt-4">
-                                                {activeRoleConfig.traits.map(t => (
-                                                    <span key={t} className="px-3 py-1 bg-white rounded-full text-xs font-bold text-gray-700 border border-blue-100 shadow-sm">{t}</span>
-                                                ))}
-                                            </div>
-                                        </div>
-
-                                        <div className="pt-6 border-t border-gray-100">
-                                            <label className="block text-xs font-bold text-gray-400 uppercase mb-3">סמן פרופיל דומיננטי</label>
-                                            <div className="grid grid-cols-4 gap-2">
-                                                {['D', 'I', 'S', 'C'].map(d => (
-                                                    <button key={d} onClick={() => setDisc(d)} className={`py-3 rounded-lg font-black text-lg border-2 transition-all ${disc === d ? 'bg-innovet-black text-white border-innovet-black shadow-md' : 'bg-white text-gray-300 border-gray-200 hover:border-gray-300'}`}>
-                                                        {d}
-                                                    </button>
-                                                ))}
-                                            </div>
-                                            <div className="text-center mt-3 text-[10px] text-gray-400 font-bold uppercase tracking-wider">
-                                                {disc === 'D' && 'Dominance: ממוקד תוצאות'}
-                                                {disc === 'I' && 'Influence: נלהב ושכנע'}
-                                                {disc === 'S' && 'Steadiness: יציב ותומך'}
-                                                {disc === 'C' && 'Conscientiousness: אנליטי'}
-                                                {!disc && 'בחר פרופיל'}
-                                            </div>
-                                        </div>
+                                        <div className="flex items-center gap-3 mb-6 pb-4 border-b border-gray-100"><div className="bg-innovet-blue p-2 text-white rounded-lg"><Icons.User size={20}/></div><h2 className="text-xl font-black text-innovet-black">פרופיל אישיות (DISC)</h2></div>
+                                        <div className="bg-blue-50 p-6 rounded-2xl border border-blue-100 mb-6 flex-grow text-center"><div className="text-lg font-black text-innovet-blue mb-1">תכונות נדרשות ל-{candidate.role}</div><div className="flex flex-wrap gap-2 justify-center mt-4">{activeRoleConfig.traits.map(t => (<span key={t} className="px-3 py-1 bg-white rounded-full text-xs font-bold text-gray-700 border border-blue-100 shadow-sm">{t}</span>))}</div></div>
+                                        <div className="pt-6 border-t border-gray-100"><label className="block text-xs font-bold text-gray-400 uppercase mb-3">סמן פרופיל דומיננטי</label><div className="grid grid-cols-4 gap-2">{['D', 'I', 'S', 'C'].map(d => (<button key={d} onClick={() => setDisc(d)} className={`py-3 rounded-lg font-black text-lg border-2 transition-all ${disc === d ? 'bg-innovet-black text-white border-innovet-black shadow-md' : 'bg-white text-gray-300 border-gray-200'}`}>{d}</button>))}</div></div>
                                     </div>
                                 </div>
 
@@ -1085,97 +1057,29 @@
                         </div>
                     </main>
 
-                    {/* --- STICKY FOOTER --- */}
+                    {/* --- FOOTER --- */}
                     <div className="fixed bottom-0 left-0 w-full bg-innovet-dark text-white shadow-[0_-10px_40px_rgba(0,0,0,0.3)] border-t border-gray-800 z-40 animate-fade-in-up no-print">
                         <div className="max-w-6xl mx-auto px-6 py-4 flex flex-col md:flex-row items-center justify-between gap-4">
-                            
                             <div className="flex items-center gap-6 w-full md:w-auto">
-                                <div>
-                                    <div className="text-[10px] text-gray-500 font-bold uppercase tracking-widest">מועמד</div>
-                                    <div className="font-bold text-lg leading-none">{candidate.name || '-'}</div>
-                                </div>
+                                <div><div className="text-[10px] text-gray-500 font-bold uppercase tracking-widest">מועמד</div><div className="font-bold text-lg leading-none">{candidate.name || '-'}</div></div>
                                 <div className="h-8 w-px bg-gray-700 hidden md:block"></div>
-                                <div className="hidden md:block">
-                                    <div className="text-[10px] text-gray-500 font-bold uppercase tracking-widest">תפקיד</div>
-                                    <div className="font-bold text-lg leading-none text-innovet-yellow">{candidate.role}</div>
-                                </div>
+                                <div className="hidden md:block"><div className="text-[10px] text-gray-500 font-bold uppercase tracking-widest">תפקיד</div><div className="font-bold text-lg leading-none text-innovet-yellow">{candidate.role}</div></div>
                             </div>
-
                             <div className="flex items-center gap-6 ml-auto">
-                                <div className="text-right">
-                                    <div className="text-[10px] text-gray-500 font-bold uppercase tracking-widest">ציון סופי</div>
-                                    <div className={`text-4xl font-black font-mono leading-none transition-colors duration-300 ${!isComplete ? 'text-gray-500' : (getDecision().color.includes('red') ? 'text-red-500' : 'text-white')}`}>
-                                        {isComplete ? totalScore : '--'}
-                                    </div>
-                                </div>
-                                
-                                <div className={`px-6 py-3 rounded-lg shadow-lg flex flex-col items-center justify-center min-w-[180px] transition-colors duration-300 ${getDecision().color}`}>
-                                    <span className="font-black uppercase tracking-widest text-sm">{getDecision().text}</span>
-                                    <span className="text-[10px] font-medium opacity-90 truncate max-w-[200px]">{getDecision().sub}</span>
-                                </div>
-
-                                {/* Soft Landing Button - Shows only if Rejected */}
-                                {getDecision().text.includes('נדחה') && (
-                                    <button 
-                                        onClick={handleGenerateSmartEmail} 
-                                        className="bg-gray-800 hover:bg-gray-700 text-white p-3 rounded-lg transition-colors relative group border border-gray-700" 
-                                        title='צור מייל "נחיתה רכה" עם AI'
-                                    >
-                                        <div className="relative">
-                                            <Icons.Mail size={20} />
-                                            <div className="absolute -top-2 -right-2 text-yellow-400 animate-pulse"><Icons.Sparkle size={10} fill="currentColor" /></div>
-                                        </div>
-                                        <span className="absolute -top-10 left-1/2 -translate-x-1/2 bg-black text-white text-xs py-1 px-2 rounded opacity-0 group-hover:opacity-100 transition whitespace-nowrap">נחיתה רכה (AI)</span>
-                                    </button>
-                                )}
-
-                                <button onClick={() => window.print()} className="bg-white text-black hover:bg-innovet-yellow hover:text-black p-3 rounded-lg transition-colors" title="הדפס דוח">
-                                    <Icons.Printer size={20} />
-                                </button>
+                                <div className="text-right"><div className="text-[10px] text-gray-500 font-bold uppercase tracking-widest">ציון סופי</div><div className={`text-4xl font-black font-mono leading-none transition-colors duration-300 ${!isComplete ? 'text-gray-500' : (getDecision().color.includes('red') ? 'text-red-500' : 'text-white')}`}>{isComplete ? totalScore : '--'}</div></div>
+                                <div className={`px-6 py-3 rounded-lg shadow-lg flex flex-col items-center justify-center min-w-[180px] transition-colors duration-300 ${getDecision().color}`}><span className="font-black uppercase tracking-widest text-sm">{getDecision().text}</span><span className="text-[10px] font-medium opacity-90 truncate max-w-[200px]">{getDecision().sub}</span></div>
+                                {getDecision().text.includes('נדחה') && (<button onClick={handleGenerateSmartEmail} className="bg-gray-800 hover:bg-gray-700 text-white p-3 rounded-lg transition-colors relative group border border-gray-700" title='צור מייל "נחיתה רכה" עם AI'><div className="relative"><Icons.Mail size={20} /><div className="absolute -top-2 -right-2 text-yellow-400 animate-pulse"><Icons.Sparkle size={10} fill="currentColor" /></div></div></button>)}
+                                <button onClick={() => window.print()} className="bg-white text-black hover:bg-innovet-yellow hover:text-black p-3 rounded-lg transition-colors" title="הדפס דוח"><Icons.Printer size={20} /></button>
                             </div>
                         </div>
-                        
-                        {/* Soft Landing Email Drawer - UPGRADED */}
-                        {showMailDraft && (
-                            <div className="bg-gray-900 border-t border-gray-800 p-6 animate-fade-in-up absolute bottom-full left-0 w-full shadow-2xl z-50">
-                                <div className="max-w-3xl mx-auto">
-                                    <div className="flex justify-between items-center mb-2 text-white">
-                                        <h3 className="font-bold text-innovet-yellow flex items-center gap-2">
-                                            <Icons.Sparkle size={16} /> מייל "נחיתה רכה" חכם (Gemini Powered)
-                                        </h3>
-                                        <div className="flex gap-4">
-                                            <button onClick={() => setShowMailDraft(false)} className="text-xs text-gray-500 hover:text-white">סגור</button>
-                                            <button onClick={() => navigator.clipboard.writeText(emailContent)} className="text-xs text-gray-400 font-bold hover:text-white uppercase tracking-wider flex items-center gap-1">
-                                                <Icons.Check size={12}/> העתק
-                                            </button>
-                                        </div>
-                                    </div>
-                                    
-                                    <div className="relative rounded-xl overflow-hidden border border-gray-700 bg-gray-800">
-                                        {isGeneratingEmail && (
-                                            <div className="absolute inset-0 z-10 ai-shimmer opacity-20 pointer-events-none"></div>
-                                        )}
-                                        <textarea 
-                                            readOnly={isGeneratingEmail}
-                                            onChange={(e) => setEmailContent(e.target.value)}
-                                            className={`w-full h-48 p-4 text-sm bg-transparent text-gray-200 font-sans leading-relaxed focus:outline-none resize-none transition-opacity ${isGeneratingEmail ? 'opacity-50' : 'opacity-100'}`} 
-                                            value={isGeneratingEmail ? "Gemini מנסח כעת את המייל ברגישות ואמפתיה..." : emailContent}
-                                        ></textarea>
-                                    </div>
-                                    <p className="text-xs text-gray-500 mt-2 flex items-center gap-1">
-                                        <Icons.Info size={12}/> 
-                                        המייל מיוצר בזמן אמת ע"ב נתוני הדירוג הספציפיים של המועמד.
-                                    </p>
-                                </div>
-                            </div>
-                        )}
+                        {showMailDraft && (<div className="bg-gray-900 border-t border-gray-800 p-6 animate-fade-in-up absolute bottom-full left-0 w-full shadow-2xl z-50"><div className="max-w-3xl mx-auto"><div className="flex justify-between items-center mb-2 text-white"><h3 className="font-bold text-innovet-yellow flex items-center gap-2"><Icons.Sparkle size={16} /> מייל "נחיתה רכה" חכם</h3><div className="flex gap-4"><button onClick={() => setShowMailDraft(false)} className="text-xs text-gray-500 hover:text-white">סגור</button><button onClick={() => navigator.clipboard.writeText(emailContent)} className="text-xs text-gray-400 font-bold hover:text-white uppercase tracking-wider flex items-center gap-1"><Icons.Check size={12}/> העתק</button></div></div><div className="relative rounded-xl overflow-hidden border border-gray-700 bg-gray-800"><textarea readOnly={isGeneratingEmail} onChange={(e) => setEmailContent(e.target.value)} className={`w-full h-48 p-4 text-sm bg-transparent text-gray-200 font-sans leading-relaxed focus:outline-none resize-none transition-opacity ${isGeneratingEmail ? 'opacity-50' : 'opacity-100'}`} value={isGeneratingEmail ? "Gemini מנסח כעת את המייל..." : emailContent}></textarea></div></div></div>)}
                     </div>
 
                 </div>
             );
         };
 
-        const root = ReactDOM.createRoot(document.getElementById('root'));
+        const root = createRoot(document.getElementById('root'));
         root.render(<App />);
     </script>
 </body>
