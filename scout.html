@@ -161,6 +161,8 @@
         import { getFirestore, collection, doc, setDoc, updateDoc, deleteDoc, onSnapshot, serverTimestamp, query, orderBy } from 'firebase/firestore';
 
         // --- FIREBASE CONFIGURATION (SAFE FOR LOCAL USE) ---
+        // כאן התיקון שהוספנו:
+        // אם המשתנה __firebase_config לא קיים (כמו בגיט), הקוד משתמש באובייקט שאתה תמלא.
         const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : {
             apiKey: "AIzaSyDkEOW4aXGmuO_J-X5xJTw9Iyp0Q2pbUIY",
             authDomain: "psychoflash-control.firebaseapp.com",
@@ -176,8 +178,7 @@
         const appId = typeof __app_id !== 'undefined' ? __app_id : 'innovet-scout-master';
 
         // --- GEMINI API SETUP ---
-        // Using the same API key for Gemini. Ensure "Generative Language API" is enabled in your Google Cloud Console for this project.
-        const apiKey = "AIzaSyDkEOW4aXGmuO_J-X5xJTw9Iyp0Q2pbUIY"; 
+        const apiKey = "AIzaSyBbYwQlSumZYyCKf5xaXqqFlvTkGiWJYIQ"; 
         const GEMINI_API_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${apiKey}`;
 
         const callGemini = async (promptText, fileObj = null) => {
@@ -191,7 +192,7 @@
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ contents: [{ parts: parts }] })
                 });
-                if (!response.ok) throw new Error(`API Error: ${response.status} ${response.statusText}`);
+                if (!response.ok) throw new Error('API Error');
                 const data = await response.json();
                 return data.candidates?.[0]?.content?.parts?.[0]?.text || "שגיאה בקבלת תשובה";
             } catch (error) {
@@ -776,11 +777,6 @@
                     }
 
                     const result = await callGemini(prompt, fileObj);
-                    
-                    if (!result) { 
-                        throw new Error("No response from AI");
-                    }
-
                     const jsonMatch = result.match(/\{[\s\S]*\}/);
                     
                     if (jsonMatch) {
