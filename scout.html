@@ -1,0 +1,754 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Innovet Scout | Master Edition</title>
+    
+    <!-- React & ReactDOM -->
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+    
+    <!-- Babel -->
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;700;800;900&display=swap" rel="stylesheet">
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: { sans: ['Heebo', 'sans-serif'] },
+                    colors: {
+                        innovet: {
+                            black: '#191B1D',
+                            dark: '#17191A',
+                            yellow: '#FFC700',
+                            blue: '#1F63C7',
+                            bg: '#F1F1F1',
+                            gray: '#E3E3E3',
+                            success: '#10B981',
+                            danger: '#EF4444'
+                        }
+                    },
+                    animation: {
+                        'fade-in': 'fadeIn 0.5s cubic-bezier(0.4, 0, 0.2, 1) forwards',
+                        'spin-slow': 'spin 60s linear infinite',
+                    },
+                    keyframes: {
+                        fadeIn: {
+                            '0%': { opacity: '0', transform: 'translateY(10px)' },
+                            '100%': { opacity: '1', transform: 'translateY(0)' },
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        body { background-color: #F1F1F1; color: #191B1D; overflow-x: hidden; scroll-behavior: smooth; }
+        
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar { width: 8px; height: 8px; }
+        ::-webkit-scrollbar-track { background: #F1F1F1; }
+        ::-webkit-scrollbar-thumb { background: #FFC700; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #E5B300; }
+
+        /* Star Animations */
+        .star-btn { transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1); }
+        .star-btn:hover { transform: scale(1.2); }
+        .star-btn:active { transform: scale(0.9); }
+        .star-icon { transition: color 0.2s ease; }
+        .star-icon:hover { transform: rotate(15deg); }
+
+        /* Smooth inputs */
+        input:focus, select:focus, textarea:focus { outline: none; border-color: #FFC700; ring: 2px solid rgba(255, 199, 0, 0.2); }
+
+        /* Weight Slider */
+        input[type=range].weight-slider {
+            -webkit-appearance: none;
+            width: 100%;
+            height: 4px;
+            background: #E5E7EB;
+            border-radius: 2px;
+            outline: none;
+        }
+        input[type=range].weight-slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            background: #1F63C7;
+            cursor: pointer;
+            transition: background 0.15s ease-in-out;
+        }
+        input[type=range].weight-slider::-webkit-slider-thumb:hover {
+            background: #FFC700;
+        }
+        
+        @media print {
+            .no-print { display: none !important; }
+            body { background: white; }
+            .card { box-shadow: none; border: 1px solid #ddd; }
+            header, .fixed-bottom { display: none !important; }
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col relative">
+
+    <!-- Background Decoration -->
+    <div class="fixed inset-0 z-0 flex items-center justify-center pointer-events-none overflow-hidden">
+        <svg class="w-[120vw] max-w-none opacity-[0.03] animate-spin-slow" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+            <path fill="#000" d="M44.7,-76.4C58.9,-69.2,71.8,-59.1,81.6,-46.6C91.4,-34.1,98.2,-19.2,95.8,-5.2C93.5,8.8,82,21.9,71,33.4C60,44.9,49.5,54.8,37.6,63.1C25.7,71.4,12.4,78.1,-0.6,79.1C-13.6,80.1,-26.7,75.4,-38.7,67.6C-50.7,59.8,-61.6,48.9,-70.6,36.1C-79.6,23.3,-86.7,8.6,-85.4,-5.5C-84.1,-19.6,-74.4,-33.1,-63.3,-43.8C-52.2,-54.5,-39.7,-62.4,-26.8,-70.3C-13.9,-78.2,-0.6,-86.1,13.2,-86.6C27,-87.1,44,-80.1,44.7,-76.4Z" transform="translate(100 100)" />
+        </svg>
+    </div>
+
+    <div id="root" class="flex-grow z-10"></div>
+
+    <script type="text/babel">
+        const { useState, useEffect, useMemo, useRef } = React;
+
+        // --- ICONS ---
+        const Icons = {
+            Rocket: ({size=20}) => <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M4.5 16.5c-1.5 1.26-2 5-2 5s3.74-.5 5-2c.71-.84.7-2.13-.09-2.91a2.18 2.18 0 0 0-2.91-.09z"></path><path d="M12 15l-3-3a22 22 0 0 1 2-3.95A12.88 12.88 0 0 1 22 2c0 2.72-.78 7.5-6 11a22.35 22.35 0 0 1-4 2z"></path><path d="M9 12H4s.55-3.03 2-4c1.62-1.08 5 0 5 0"></path><path d="M12 15v5s3.03-.55 4-2c1.08-1.62 0-5 0-5"></path></svg>,
+            Star: ({size=20, fill}) => <svg width={size} height={size} viewBox="0 0 24 24" fill={fill || "none"} stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>,
+            Heart: ({size=20}) => <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path></svg>,
+            Check: ({size=20}) => <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>,
+            Alert: ({size=20}) => <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>,
+            Search: ({size=20}) => <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>,
+            Beer: ({size=20}) => <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M17 11h1a3 3 0 0 1 0 6h-1"></path><path d="M9 12v6"></path><path d="M13 12v6"></path><path d="M14 7.5c-1.79 1.15-3.53 1.15-5.33 0-1.79-1.15-3.53-1.15-5.33 0-1.79 1.15-3.53 1.15-5.34 0C-4.79 6.35-4.79 3 2.5 3c1.79 0 3.53 0 5.33 1.15C9.62 5.3 11.37 5.3 13.16 4.15c1.79-1.15 3.53-1.15 5.33 0 1.79 1.15 3.53 1.15 5.33 0 2.92-1.85 2.92 1.5.84 4.5"></path><path d="M3.5 7.5v9a2 2 0 0 0 2 2h13a2 2 0 0 0 2-2v-9"></path></svg>,
+            Mail: ({size=20}) => <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path><polyline points="22,6 12,13 2,6"></polyline></svg>,
+            Lock: ({size=20}) => <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect width="18" height="11" x="3" y="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>,
+            Printer: ({size=20}) => <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"></rect></svg>,
+            Refresh: ({size=20}) => <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8"/><path d="M21 3v5h-5"/><path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16"/><path d="M8 16H3v5"/></svg>,
+            Briefcase: ({size=20}) => <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="2" y="7" width="20" height="14" rx="2" ry="2"></rect><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"></path></svg>,
+            User: ({size=20}) => <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>,
+            Code: ({size=20}) => <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="16 18 22 12 16 6"></polyline><polyline points="8 6 2 12 8 18"></polyline></svg>,
+            TrendingUp: ({size=20}) => <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"></polyline><polyline points="17 6 23 6 23 12"></polyline></svg>,
+            Settings: ({size=20}) => <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>,
+            Bulb: ({size=20}) => <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="9" y1="18" x2="15" y2="18"></line><line x1="10" y1="22" x2="14" y2="22"></line><path d="M15.09 14c.18-.98.65-1.74 1.41-2.5A4.65 4.65 0 0 0 16 8c0-4.42-3.58-8-8-8s-8 3.58-8 8c0 2.08.73 3.97 1.92 5.48.1.13.2.25.3.37.66.77 1.12 1.53 1.28 2.5H15.09z"></path></svg>,
+            Info: ({size=20}) => <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg>,
+            Scale: ({size=20}) => <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m16 16 3-8 3 8c-.87.65-1.92 1-3 1s-2.13-.35-3-1Z"/><path d="m2 16 3-8 3 8c-.87.65-1.92 1-3 1s-2.13-.35-3-1Z"/><path d="M7 21h10"/><path d="M12 3v18"/><path d="M3 7h2c2 0 5-1 7-2 2 1 5 2 7 2h2"/></svg>
+        };
+
+        // --- SCOUT APP COMPONENT ---
+        const App = () => {
+            // State
+            const [candidate, setCandidate] = useState({ name: '', role: 'CEO', interviewer: '' });
+            const [gates, setGates] = useState({ champion: false, problem: false, materials: false });
+            
+            // Criteria Weights State (Editable)
+            const [weights, setWeights] = useState({
+                coachability: 0.20,
+                passion: 0.15,
+                team: 0.10,
+                role1: 0.20, 
+                role2: 0.15, 
+                role3: 0.10, 
+                role4: 0.10
+            });
+            const [isWeightEditMode, setIsWeightEditMode] = useState(false);
+            
+            // Initial Scores (All 5 by default)
+            const [scores, setScores] = useState({ 
+                coachability: 5, passion: 5, team: 5, // Universal
+                role1: 5, role2: 5, role3: 5, role4: 5 // Role Specific
+            });
+            
+            const [spark, setSpark] = useState({ why: '', scars: '', beer: 3 }); 
+            const [flags, setFlags] = useState({ green: [], red: [] });
+            const [disc, setDisc] = useState(null);
+            const [showMailDraft, setShowMailDraft] = useState(false);
+            const [openQuestion, setOpenQuestion] = useState(null);
+
+            // --- DATA CONFIGURATION ---
+            
+            const universalCriteria = [
+                { id: 'coachability', label: 'יכולת למידה (Coachability)', desc: 'פתיחות למשוב, צניעות, חוסר אגו (Kill Switch)', critical: true, questions: ["ספר לי על פידבק קשה שקיבלת.", "מה היית משנה בדיעבד?", "האם תשנה את הרעיון אם השוק יכתיב זאת?"] },
+                { id: 'passion', label: 'אישיות ומניע (הניצוץ)', desc: 'ניצוץ בעיניים, טון אנרגטי, חיבור רגשי לבעיה', questions: ["למה דווקא את/ה?", "מה גורם לך לקום בבוקר לזה?"] },
+                { id: 'team', label: 'שחקן קבוצתי', desc: 'שימוש ב"אנחנו", מתן קרדיט, דינמיקה ופרגון', questions: ["מי משלים את החולשות שלך?", "תאר קונפליקט עם שותף."] }
+            ];
+
+            const roleConfig = {
+                'CEO': {
+                    title: 'המנכ"ל (Visionary)',
+                    icon: Icons.Rocket,
+                    criteria: [
+                        { id: 'role1', label: 'חזון וסטוריטלינג', desc: 'האם המועמד מצליח לנסח חזון בצורה תמציתית, חדה וכריזמטית?', questions: ["תן לי את ה-Elevator Pitch ב-30 שניות.", "איפה החברה תהיה בעוד 5 שנים?"] },
+                        { id: 'role2', label: 'גיוס הון ואסטרטגיה', desc: 'הבנה עסקית, יכולת עמידה מול משקיעים, מכירת החלום', questions: ["מי הלקוח הראשון שישלם? למה?", "מה מודל ההכנסות?"] },
+                        { id: 'role3', label: 'חוסן מנטלי', desc: 'עמידות בלחצים, קבלת החלטות באי-ודאות', questions: ["ספר על הרגע הכי קשה שלך כיזם.", "איך אתה מתמודד עם דחייה?"] },
+                        { id: 'role4', label: 'הבנת שוק (Market)', desc: 'היכרות עם הכאב, הלקוח והמתחרים', questions: ["מי המתחרה שהכי מפחיד אותך?", "מה ה-Unfair Advantage שלכם?"] }
+                    ],
+                    traits: ['חוסן מנטלי', 'כריזמה', 'אסטרטגיה'] 
+                },
+                'CTO': {
+                    title: 'הטכנולוג (Architect)',
+                    icon: Icons.Code,
+                    criteria: [
+                        { id: 'role1', label: 'Hands-on Coding', desc: 'האם כותב קוד בעצמו? (קריטי). לא "מנהל מצגות".', critical: true, questions: ["מה הסטאק הטכנולוגי שבחרת ולמה?", "הראה לי GitHub."] },
+                        { id: 'role2', label: 'עומק טכנולוגי (Deep Tech)', desc: 'הבנה בארכיטקטורה, AI, סייבר או חומרה', questions: ["מה האתגר הטכנולוגי הכי גדול?", "איך תתמודדו עם Scale?"] },
+                        { id: 'role3', label: 'מגנט למהנדסים', desc: 'יכולת טכנית שמושכת טאלנטים אחרים לצוות', questions: ["מי המהנדס הכי טוב שעבדת איתו ולמה שיבוא איתך?"] },
+                        { id: 'role4', label: 'ניהול מוצר (Product Sense)', desc: 'חיבור בין טכנולוגיה לערך עסקי', questions: ["איך הטכנולוגיה משרתת את הביזנס?", "איך אתה מתעדף פיצ'רים?"] }
+                    ],
+                    traits: ['כתיבת קוד', 'פתרון בעיות', 'ארכיטקטורה']
+                },
+                'COO': {
+                    title: 'הביצועיסט (Operator)',
+                    icon: Icons.Settings,
+                    criteria: [
+                        { id: 'role1', label: 'ביצוע ואופרציה (Execution)', desc: 'הורדת החזון לקרקע, ניהול שוטף, סדר מתוך כאוס', questions: ["איך נראה יום עבודה טיפוסי שלך?", "תן דוגמה לפרויקט מורכב שניהלת."] },
+                        { id: 'role2', label: 'סדר וארגון (Process)', desc: 'בניית תהליכים, ניהול זמן, ירידה לפרטים', questions: ["איך אתה מודד הצלחה (KPIs)?", "באיזה כלים אתה משתמש?"] },
+                        { id: 'role3', label: 'פיננסי/משפטי', desc: 'שליטה בתקציב, חוזים, רגולציה ועבודה מול IAI', questions: ["האם יש לך ניסיון עם תקציבים?", "איך תתמודד עם בירוקרטיה?"] },
+                        { id: 'role4', label: 'ניהול משאבים', desc: 'יעילות, תכנון מול ביצוע, יחסי אנוש', questions: ["איך אתה מנהל קונפליקטים בצוות?", "איך תתעדף משאבים מוגבלים?"] }
+                    ],
+                    traits: ['ירידה לפרטים', 'רגולציה', 'תפעול']
+                }
+            };
+
+            const activeRoleConfig = roleConfig[candidate.role];
+
+            const signalsData = {
+                green: [
+                    {id:'serial', label:'יזם סדרתי (גם כישלון נחשב)'}, 
+                    {id:'domain', label:'Domain Expert (מומחיות תוכן)'}, 
+                    {id:'tech', label:'רקע טכנולוגי עמוק (8200/תואר)'}, 
+                    {id:'partners', label:'הצליח לגייס שותפים חזקים'}
+                ],
+                red: [
+                    {id:'solo', label:'Solo Founder (ללא שותפים)'}, 
+                    {id:'outsourcing', label:'מיקור חוץ מלא (אין טכנולוגיה בבית)'}, 
+                    {id:'arrogance', label:'יהירות / חוסר צניעות (ערך ליבה)'}, 
+                    {id:'parttime', label:'משרה חלקית / חוסר מחויבות'}
+                ]
+            };
+
+            // --- LOGIC ---
+            const isPassedGate0 = gates.champion && gates.problem && gates.materials;
+            
+            // Kill Switch Logic
+            const isCoachabilityFail = scores.coachability <= 3;
+            const isRoleFail = activeRoleConfig.criteria.some(c => c.critical && scores[c.id] <= 3);
+            const isFail = isCoachabilityFail || isRoleFail;
+
+            // WEIGHT ADJUSTMENT LOGIC
+            const handleWeightChange = (id, newVal) => {
+                // newVal is 0-100 integer. Convert to float 0-1
+                const newWeight = Math.max(0, Math.min(100, newVal)) / 100;
+                const oldWeight = weights[id];
+                const delta = newWeight - oldWeight;
+
+                // Identify other active keys to distribute the delta
+                // Active keys = universal IDs + role specific IDs
+                const activeKeys = [
+                    ...universalCriteria.map(c => c.id),
+                    ...activeRoleConfig.criteria.map(c => c.id)
+                ];
+                
+                const otherKeys = activeKeys.filter(k => k !== id);
+                
+                // Calculate current sum of other keys
+                const currentOthersSum = otherKeys.reduce((sum, key) => sum + weights[key], 0);
+
+                const newWeights = { ...weights, [id]: newWeight };
+
+                if (currentOthersSum > 0) {
+                    // Distribute delta proportionally inversely
+                    // Actually, simpler: Subtract proportional amount from others to keep sum 1.0
+                    // target sum for others = 1.0 - newWeight
+                    const targetOthersSum = 1.0 - newWeight;
+                    // ratio
+                    const ratio = targetOthersSum / currentOthersSum;
+                    
+                    otherKeys.forEach(k => {
+                        newWeights[k] = weights[k] * ratio;
+                    });
+                } else {
+                    // If others sum is 0 (unlikely but possible), reset them evenly or just leave them
+                    if (otherKeys.length > 0) {
+                         const split = (1.0 - newWeight) / otherKeys.length;
+                         otherKeys.forEach(k => newWeights[k] = split);
+                    }
+                }
+
+                setWeights(newWeights);
+            };
+
+            // Reset weights when role changes to defaults
+            useEffect(() => {
+                setWeights({
+                    coachability: 0.20,
+                    passion: 0.15,
+                    team: 0.10,
+                    role1: 0.20, 
+                    role2: 0.15, 
+                    role3: 0.10, 
+                    role4: 0.10
+                });
+            }, [candidate.role]);
+
+            const totalScore = useMemo(() => {
+                if (!allGatesPassed()) return 0;
+
+                let sum = 0;
+                // Add Universal Scores
+                universalCriteria.forEach(c => {
+                    sum += (scores[c.id] * 10 * weights[c.id]);
+                });
+                // Add Role Specific Scores
+                activeRoleConfig.criteria.forEach(c => {
+                    sum += (scores[c.id] * 10 * weights[c.id]);
+                });
+
+                // Bonus/Penalty Logic
+                sum += (flags.green.length * 3); // Bonus for green flags
+                sum -= (flags.red.length * 5);   // Higher penalty for red flags
+                
+                // Beer Test Bonus (small)
+                if (spark.beer >= 4) sum += 2;
+                if (spark.beer <= 2) sum -= 2;
+
+                return Math.max(0, Math.min(100, Math.round(sum)));
+            }, [scores, flags, spark.beer, candidate.role, gates, weights]);
+
+            function allGatesPassed() {
+                return gates.champion && gates.problem && gates.materials;
+            }
+
+            const getDecision = () => {
+                if (!allGatesPassed()) return { text: 'חסרים תנאי סף', sub: 'יש להשלים את שלב 0', color: 'bg-gray-700 text-gray-300' };
+                if (isFail) return { text: 'פסילה מיידית', sub: 'נכשל במדד קריטי (Kill Switch)', color: 'bg-red-600 text-white' };
+                if (totalScore >= 80) return { text: 'עבר (Green)', sub: 'לקדם לחוזה/בדיקת היתכנות', color: 'bg-green-500 text-white' };
+                if (totalScore >= 60) return { text: 'המתנה (Yellow)', sub: 'דורש חידוד או שותף', color: 'bg-innovet-yellow text-black' };
+                return { text: 'נדחה (Red)', sub: 'אי התאמה בשלב זה', color: 'bg-red-500 text-white' };
+            };
+
+            const toggleFlag = (type, id) => {
+                setFlags(prev => {
+                    const list = prev[type];
+                    return { ...prev, [type]: list.includes(id) ? list.filter(x => x !== id) : [...list, id] };
+                });
+            };
+
+            const generateSoftLandingEmail = () => {
+                const weakPoints = [];
+                if (scores.role1 < 6) weakPoints.push(`התרשמנו מהפוטנציאל, אך הרגשנו שנושא ה${activeRoleConfig.criteria[0].label} דורש עוד הבשלה.`);
+                if (scores.role2 < 6) weakPoints.push(`חסר לנו עומק בנושא ${activeRoleConfig.criteria[1].label} כדי להתקדם.`);
+                if (scores.coachability < 6) weakPoints.push("ההתאמה לדינמיקה האינטנסיבית של תוכנית מאיץ דורשת עוד בשלות.");
+                if (flags.red.includes('solo')) weakPoints.push("בשלב זה, אנו מחפשים צוותים מלאים ולא יזמים בודדים.");
+                let feedback = weakPoints.length > 0 ? weakPoints.join(" ") : "התחרות במחזור זה הייתה קשה במיוחד, וחיפשנו התאמה מאוד ספציפית לאתגרים של IAI.";
+                return `היי ${candidate.name || "יזם"},\n\nתודה רבה על הזמן שהקדשת לפגוש אותנו. רצינו לעדכן שלצערי לא נמשיך בתהליך למחזור הקרוב.\n\nחשוב לנו לתת ערך ולא רק תשובה שלילית: ${feedback}\n\nנשמח להישאר בקשר ולהזמין אותך לאירועים פתוחים של קהילת Innovet ("Friends of Innovet") כדי שנוכל לבחון שוב בעתיד.\n\nבהצלחה,\nצוות Innovet`;
+            };
+
+            const resetApp = () => {
+                if(confirm('לאפס את כל הנתונים?')) window.location.reload();
+            };
+
+            // --- UI COMPONENTS ---
+
+            const SectionCard = ({ title, icon: Icon, children, className = "" }) => (
+                <div className={`bg-white rounded-xl shadow-lg border border-gray-100 p-6 md:p-8 mb-8 animate-fade-in relative overflow-hidden ${className}`}>
+                    <div className="flex items-center gap-4 mb-8 pb-4 border-b border-gray-100">
+                        <div className="p-3 bg-innovet-yellow text-innovet-black rounded-lg shadow-sm">
+                            <Icon size={24} />
+                        </div>
+                        <h2 className="text-2xl font-black text-innovet-black uppercase tracking-tight leading-none">{title}</h2>
+                    </div>
+                    {children}
+                </div>
+            );
+
+            const CheckBox = ({ label, checked, onChange, isCritical = false }) => (
+                <div 
+                    onClick={onChange} 
+                    className={`flex items-center gap-4 p-4 border-2 rounded-xl cursor-pointer transition-all ${checked ? (isCritical ? 'border-innovet-success bg-green-50' : 'border-innovet-blue bg-blue-50') : 'border-gray-100 bg-white hover:border-gray-300 hover:bg-gray-50'}`}
+                >
+                    <div className={`w-6 h-6 rounded border-2 flex items-center justify-center shrink-0 transition-colors ${checked ? 'bg-innovet-success border-innovet-success' : 'bg-white border-gray-300'}`}>
+                        {checked && <Icons.Check size={14} className="text-white" />}
+                    </div>
+                    <span className={`font-bold text-sm ${checked ? 'text-innovet-black' : 'text-gray-500'}`}>{label}</span>
+                </div>
+            );
+
+            const WeightSlider = ({ id, currentWeight, onChange }) => (
+                <div className="mt-2 p-2 bg-gray-100 rounded-lg animate-fade-in">
+                    <div className="flex justify-between items-center text-[10px] uppercase font-bold text-gray-500 mb-1">
+                        <span>משקל</span>
+                        <span>{Math.round(currentWeight * 100)}%</span>
+                    </div>
+                    <input 
+                        type="range" 
+                        min="0" 
+                        max="50" 
+                        step="1"
+                        value={Math.round(currentWeight * 100)}
+                        onChange={(e) => onChange(id, parseInt(e.target.value))}
+                        className="weight-slider"
+                    />
+                </div>
+            );
+
+            const StarRating = ({ value, onChange, isCritical, max = 10 }) => (
+                <div className="flex items-center gap-1 bg-gray-50 p-2 rounded-xl border border-gray-100 justify-between">
+                    {[...Array(max)].map((_, i) => {
+                        const v = i + 1;
+                        return (
+                            <button key={v} onClick={() => onChange(v)} className="star-btn focus:outline-none p-1 flex-1 flex justify-center">
+                                <Icons.Star size={20} className={`star-icon ${v <= value ? (isCritical && value <= 3 ? 'text-red-500' : 'text-innovet-yellow drop-shadow-sm') : 'text-gray-200'}`} fill="currentColor"/>
+                            </button>
+                        );
+                    })}
+                    <span className={`mr-2 font-mono font-black text-lg w-8 text-center ${isCritical && value <= 3 ? 'text-red-500' : 'text-gray-800'}`}>{value}</span>
+                </div>
+            );
+
+            return (
+                <div className="flex-grow flex flex-col">
+                    
+                    {/* --- HEADER --- */}
+                    <header className="bg-innovet-dark text-white relative overflow-hidden shadow-xl z-50 sticky top-0 border-b border-gray-800">
+                        <div className="absolute top-[-50%] right-[-10%] w-[50%] h-[200%] opacity-10 pointer-events-none" style={{background: 'radial-gradient(circle, #FFC700 0%, transparent 70%)'}}></div>
+                        <div className="max-w-5xl mx-auto px-6 py-4 relative z-10 flex justify-between items-center">
+                            <div className="flex items-center gap-4 cursor-pointer" onClick={() => window.scrollTo(0,0)}>
+                                <div className="p-2 bg-white/10 rounded-xl backdrop-blur-sm border border-white/10">
+                                    <Icons.Rocket size={24} className="text-innovet-yellow" />
+                                </div>
+                                <div className="flex flex-col">
+                                    <h1 className="text-xl font-black tracking-tight leading-none text-white">INNOVET <span className="text-innovet-yellow">SCOUT</span></h1>
+                                    <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Master Protocol</p>
+                                </div>
+                            </div>
+                            
+                            <div className="flex items-center gap-6">
+                                <button onClick={() => setIsWeightEditMode(!isWeightEditMode)} className={`transition-colors p-2 rounded ${isWeightEditMode ? 'bg-innovet-yellow text-black' : 'text-gray-400 hover:text-white'}`} title="עריכת משקלים">
+                                    <Icons.Scale size={20}/>
+                                </button>
+                                <button onClick={resetApp} className="text-gray-400 hover:text-white transition-colors"><Icons.Refresh size={20}/></button>
+                                <div className="hidden md:block h-8 w-px bg-white/20"></div>
+                                <div className="hidden md:block text-right">
+                                    <div className="text-[9px] font-bold text-gray-400 uppercase tracking-widest mb-0.5">ציון נוכחי</div>
+                                    <div className={`text-3xl font-black font-mono leading-none ${isFail ? 'text-red-500' : 'text-white'}`}>
+                                        {totalScore}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </header>
+
+                    {/* --- MAIN CONTENT --- */}
+                    <main className="flex-grow bg-gray-50 pb-40">
+                        <div className="max-w-4xl mx-auto p-4 md:p-8 space-y-8 -mt-6 relative z-20">
+
+                            {/* SECTION 1: IDENTITY & GATES */}
+                            <div className="bg-white rounded-2xl shadow-lg border border-gray-100 p-8 animate-fade-in relative overflow-hidden">
+                                <div className="absolute top-0 left-0 w-2 h-full bg-innovet-yellow"></div>
+                                <div className="flex items-center gap-3 mb-6 pb-4 border-b border-gray-100">
+                                    <div className="bg-gray-900 text-white p-2 rounded-lg"><Icons.Search size={20}/></div>
+                                    <h2 className="text-2xl font-black text-innovet-black">פרטי מועמד ושער כניסה</h2>
+                                </div>
+
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+                                    <div>
+                                        <label className="block text-xs font-bold text-gray-400 uppercase mb-2">שם המועמד (Champion)</label>
+                                        <input type="text" value={candidate.name} onChange={e => setCandidate({...candidate, name: e.target.value})} className="w-full bg-gray-50 border-b-2 border-gray-200 px-4 py-3 text-xl font-bold focus:border-innovet-yellow transition bg-transparent" placeholder="ישראל ישראלי" />
+                                    </div>
+                                    <div>
+                                        <label className="block text-xs font-bold text-gray-400 uppercase mb-2">תפקיד מיועד</label>
+                                        <div className="flex bg-gray-100 p-1 rounded-lg">
+                                            {['CEO', 'CTO', 'COO'].map(role => (
+                                                <button key={role} onClick={() => setCandidate({...candidate, role})} className={`flex-1 py-2 text-sm font-black rounded-md transition-all ${candidate.role === role ? 'bg-innovet-black text-white shadow-md' : 'text-gray-400 hover:text-gray-600'}`}>{role}</button>
+                                            ))}
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div className="bg-gray-50 rounded-xl p-6 border border-gray-200">
+                                    <h3 className="font-bold text-sm text-gray-500 uppercase tracking-widest mb-4 flex items-center gap-2"><Icons.Lock size={14}/> תנאי סף (Pass/Fail Gate)</h3>
+                                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                                        <CheckBox label="Champion מזוהה ומחויב" checked={gates.champion} onChange={() => setGates({...gates, champion: !gates.champion})} isCritical={true} />
+                                        <CheckBox label="הגדרת בעיה ברורה" checked={gates.problem} onChange={() => setGates({...gates, problem: !gates.problem})} isCritical={true} />
+                                        <CheckBox label="בשלות להגשה (חומרים)" checked={gates.materials} onChange={() => setGates({...gates, materials: !gates.materials})} isCritical={true} />
+                                    </div>
+                                    {!isPassedGate0 && <div className="mt-4 text-xs font-bold text-orange-500 flex items-center gap-2 animate-pulse bg-white p-2 rounded border border-orange-100 shadow-sm w-fit"><Icons.Alert size={14}/> חובה לסמן את כל תנאי הסף כדי לקבל ציון תקין.</div>}
+                                </div>
+                            </div>
+
+                            {/* MAIN EVALUATION - ONLY IF GATES PASSED (Or show visually disabled) */}
+                            <div className={`space-y-8 transition-opacity duration-500 ${!isPassedGate0 ? 'opacity-50 pointer-events-none grayscale' : 'opacity-100'}`}>
+                                
+                                {/* SECTION 2: SPARK INDEX */}
+                                <SectionCard title="מדד הניצוץ (Spark Index)" icon={Icons.Heart} className="border-t-4 border-t-pink-500">
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                                        <div className="space-y-6">
+                                            <div>
+                                                <label className="block font-bold text-innovet-black mb-2">1. ה"למה" האישי (The Why)</label>
+                                                <textarea value={spark.why} onChange={e => setSpark({...spark, why: e.target.value})} className="w-full bg-gray-50 border border-gray-200 rounded-xl p-4 text-sm min-h-[100px]" placeholder="האם הוא פותר בעיה שכאבה לו אישית? האם יש לו 'חשבון פתוח'?"></textarea>
+                                            </div>
+                                            <div>
+                                                <label className="block font-bold text-innovet-black mb-2">2. צלקות עבר (Scar Tissue)</label>
+                                                <textarea value={spark.scars} onChange={e => setSpark({...spark, scars: e.target.value})} className="w-full bg-gray-50 border border-gray-200 rounded-xl p-4 text-sm min-h-[100px]" placeholder="מתי נכשלו וכאב להם? האם הם יודעים להיות פגיעים?"></textarea>
+                                            </div>
+                                        </div>
+                                        <div className="flex flex-col justify-center bg-yellow-50 p-6 rounded-2xl border border-yellow-100">
+                                            <div className="flex items-center gap-3 mb-2 justify-center">
+                                                <div className="bg-white p-2 rounded-full shadow-sm text-innovet-yellow"><Icons.Beer size={20}/></div>
+                                                <h4 className="font-bold text-xl text-innovet-black">מבחן הבירה</h4>
+                                            </div>
+                                            <p className="text-xs text-gray-500 text-center mb-6 px-4">אם הייתם תקועים איתו בשדה תעופה ב-2 בלילה, הייתם סובלים או מצליחים לייצר שיחה?</p>
+                                            <div className="bg-white p-4 rounded-xl shadow-sm border border-gray-100">
+                                                <StarRating value={spark.beer} onChange={(v) => setSpark({...spark, beer: v})} max={5} />
+                                            </div>
+                                        </div>
+                                    </div>
+                                </SectionCard>
+
+                                {/* SECTION 3: SCREENING (Dynamic based on Role) */}
+                                <SectionCard title={`הערכת סף (${candidate.role})`} icon={Icons.Star}>
+                                    <div className="grid grid-cols-1 gap-6">
+                                        
+                                        {/* 3A: Universal Criteria */}
+                                        <div className="text-xs font-bold text-gray-400 uppercase tracking-widest border-b border-gray-200 pb-2 mb-2">מדדים אוניברסליים</div>
+                                        {universalCriteria.map((c) => (
+                                            <div key={c.id} className="bg-gray-50 p-5 rounded-xl border border-gray-100 hover:border-innovet-blue transition-colors group">
+                                                <div className="flex flex-col md:flex-row justify-between md:items-center gap-4 mb-3">
+                                                    <div>
+                                                        <h3 className="text-lg font-black text-innovet-black flex items-center gap-2">
+                                                            {c.label}
+                                                            <span className="text-[10px] font-normal bg-white px-2 py-0.5 rounded border text-gray-500">{Math.round(weights[c.id] * 100)}%</span>
+                                                        </h3>
+                                                        <p className="text-xs text-gray-500 mt-1">{c.desc}</p>
+                                                        
+                                                        {/* INTERVIEW QUESTIONS TOGGLE */}
+                                                        {c.questions && (
+                                                            <div className="mt-2">
+                                                                <button 
+                                                                    onClick={() => setOpenQuestion(openQuestion === c.id ? null : c.id)}
+                                                                    className="text-xs font-bold text-innovet-blue hover:underline flex items-center gap-1"
+                                                                >
+                                                                    <Icons.Bulb size={12}/> {openQuestion === c.id ? 'הסתר שאלות' : 'שאלות למראיין'}
+                                                                </button>
+                                                                {openQuestion === c.id && (
+                                                                    <ul className="mt-2 bg-blue-50 p-3 rounded-lg text-xs text-gray-700 space-y-1 list-disc list-inside">
+                                                                        {c.questions.map((q, idx) => <li key={idx}>{q}</li>)}
+                                                                    </ul>
+                                                                )}
+                                                            </div>
+                                                        )}
+
+                                                        {/* WEIGHT SLIDER */}
+                                                        {isWeightEditMode && (
+                                                            <WeightSlider id={c.id} currentWeight={weights[c.id]} onChange={handleWeightChange} />
+                                                        )}
+                                                    </div>
+                                                    <div className="min-w-[200px]">
+                                                        <StarRating value={scores[c.id]} onChange={(v) => setScores({...scores, [c.id]: v})} isCritical={c.critical} />
+                                                    </div>
+                                                </div>
+                                                {c.critical && scores[c.id] <= 3 && (
+                                                    <div className="bg-red-50 text-red-600 text-xs font-bold p-2 rounded flex items-center gap-2 animate-pulse">
+                                                        <Icons.Alert size={14}/> ציון נמוך כאן מהווה עילת פסילה אוטומטית (Kill Switch).
+                                                    </div>
+                                                )}
+                                            </div>
+                                        ))}
+
+                                        {/* 3B: Role Specific Criteria */}
+                                        <div className="text-xs font-bold text-innovet-blue uppercase tracking-widest border-b border-blue-100 pb-2 mb-2 mt-4 flex items-center gap-2">
+                                            <activeRoleConfig.icon size={14} /> מדדים ייחודיים ל-{candidate.role}
+                                        </div>
+                                        {activeRoleConfig.criteria.map((c) => (
+                                            <div key={c.id} className="bg-blue-50/50 p-5 rounded-xl border border-blue-100 hover:border-innovet-blue transition-colors group">
+                                                <div className="flex flex-col md:flex-row justify-between md:items-center gap-4 mb-3">
+                                                    <div>
+                                                        <h3 className="text-lg font-black text-innovet-black flex items-center gap-2">
+                                                            {c.label}
+                                                            <span className="text-[10px] font-normal bg-white px-2 py-0.5 rounded border text-gray-500">{Math.round(weights[c.id] * 100)}%</span>
+                                                        </h3>
+                                                        <p className="text-xs text-gray-500 mt-1">{c.desc}</p>
+
+                                                        {/* INTERVIEW QUESTIONS TOGGLE (ROLE) */}
+                                                        {c.questions && (
+                                                            <div className="mt-2">
+                                                                <button 
+                                                                    onClick={() => setOpenQuestion(openQuestion === c.id ? null : c.id)}
+                                                                    className="text-xs font-bold text-innovet-blue hover:underline flex items-center gap-1"
+                                                                >
+                                                                    <Icons.Bulb size={12}/> {openQuestion === c.id ? 'הסתר שאלות' : 'שאלות למראיין'}
+                                                                </button>
+                                                                {openQuestion === c.id && (
+                                                                    <ul className="mt-2 bg-white p-3 rounded-lg text-xs text-gray-700 space-y-1 list-disc list-inside shadow-sm border border-blue-100">
+                                                                        {c.questions.map((q, idx) => <li key={idx}>{q}</li>)}
+                                                                    </ul>
+                                                                )}
+                                                            </div>
+                                                        )}
+
+                                                        {/* WEIGHT SLIDER */}
+                                                        {isWeightEditMode && (
+                                                            <WeightSlider id={c.id} currentWeight={weights[c.id]} onChange={handleWeightChange} />
+                                                        )}
+                                                    </div>
+                                                    <div className="min-w-[200px]">
+                                                        <StarRating value={scores[c.id]} onChange={(v) => setScores({...scores, [c.id]: v})} isCritical={c.critical} />
+                                                    </div>
+                                                </div>
+                                                {c.critical && scores[c.id] <= 3 && (
+                                                    <div className="bg-red-50 text-red-600 text-xs font-bold p-2 rounded flex items-center gap-2 animate-pulse">
+                                                        <Icons.Alert size={14}/> ציון נמוך כאן מהווה עילת פסילה אוטומטית (Kill Switch).
+                                                    </div>
+                                                )}
+                                            </div>
+                                        ))}
+
+                                    </div>
+                                </SectionCard>
+
+                                {/* SECTION 4: DEEP DIVE & SIGNALS */}
+                                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                                    <div className="bg-white rounded-2xl shadow-lg border border-gray-100 p-8 h-full">
+                                        <div className="flex items-center gap-3 mb-6 pb-4 border-b border-gray-100">
+                                            <div className="bg-innovet-blue p-2 text-white rounded-lg"><Icons.Briefcase size={20}/></div>
+                                            <h2 className="text-xl font-black text-innovet-black">בדיקת נאותות (Signals)</h2>
+                                        </div>
+                                        
+                                        <div className="space-y-6">
+                                            <div>
+                                                <h4 className="text-xs font-bold text-green-600 uppercase tracking-widest mb-3 bg-green-50 w-fit px-2 py-1 rounded">Green Flags (בונוס)</h4>
+                                                <div className="space-y-2">
+                                                    {signalsData.green.map(s => (
+                                                        <label key={s.id} className={`flex items-center gap-3 p-3 rounded-lg border cursor-pointer transition-all ${flags.green.includes(s.id) ? 'border-green-500 bg-green-50' : 'border-gray-100 hover:bg-gray-50'}`}>
+                                                            <input type="checkbox" checked={flags.green.includes(s.id)} onChange={() => toggleFlag('green', s.id)} className="w-4 h-4 accent-green-600" />
+                                                            <span className="text-sm font-bold text-gray-700">{s.label}</span>
+                                                        </label>
+                                                    ))}
+                                                </div>
+                                            </div>
+                                            <div>
+                                                <h4 className="text-xs font-bold text-red-600 uppercase tracking-widest mb-3 bg-red-50 w-fit px-2 py-1 rounded">Red Flags (קנס)</h4>
+                                                <div className="space-y-2">
+                                                    {signalsData.red.map(s => (
+                                                        <label key={s.id} className={`flex items-center gap-3 p-3 rounded-lg border cursor-pointer transition-all ${flags.red.includes(s.id) ? 'border-red-500 bg-red-50' : 'border-gray-100 hover:bg-gray-50'}`}>
+                                                            <input type="checkbox" checked={flags.red.includes(s.id)} onChange={() => toggleFlag('red', s.id)} className="w-4 h-4 accent-red-600" />
+                                                            <span className="text-sm font-bold text-gray-700">{s.label}</span>
+                                                        </label>
+                                                    ))}
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div className="bg-white rounded-2xl shadow-lg border border-gray-100 p-8 h-full flex flex-col">
+                                        <div className="flex items-center gap-3 mb-6 pb-4 border-b border-gray-100">
+                                            <div className="bg-innovet-blue p-2 text-white rounded-lg"><Icons.User size={20}/></div>
+                                            <h2 className="text-xl font-black text-innovet-black">פרופיל אישיות (DISC)</h2>
+                                        </div>
+
+                                        <div className="bg-blue-50 p-6 rounded-2xl border border-blue-100 mb-6 flex-grow text-center">
+                                            <div className="text-lg font-black text-innovet-blue mb-1">תכונות נדרשות ל-{candidate.role}</div>
+                                            <div className="flex flex-wrap gap-2 justify-center mt-4">
+                                                {activeRoleConfig.traits.map(t => (
+                                                    <span key={t} className="px-3 py-1 bg-white rounded-full text-xs font-bold text-gray-700 border border-blue-100 shadow-sm">{t}</span>
+                                                ))}
+                                            </div>
+                                        </div>
+
+                                        <div className="pt-6 border-t border-gray-100">
+                                            <label className="block text-xs font-bold text-gray-400 uppercase mb-3">סמן פרופיל דומיננטי</label>
+                                            <div className="grid grid-cols-4 gap-2">
+                                                {['D', 'I', 'S', 'C'].map(d => (
+                                                    <button key={d} onClick={() => setDisc(d)} className={`py-3 rounded-lg font-black text-lg border-2 transition-all ${disc === d ? 'bg-innovet-black text-white border-innovet-black shadow-md' : 'bg-white text-gray-300 border-gray-200 hover:border-gray-300'}`}>
+                                                        {d}
+                                                    </button>
+                                                ))}
+                                            </div>
+                                            <div className="text-center mt-3 text-[10px] text-gray-400 font-bold uppercase tracking-wider">
+                                                {disc === 'D' && 'Dominance: ממוקד תוצאות'}
+                                                {disc === 'I' && 'Influence: נלהב ושכנע'}
+                                                {disc === 'S' && 'Steadiness: יציב ותומך'}
+                                                {disc === 'C' && 'Conscientiousness: אנליטי'}
+                                                {!disc && 'בחר פרופיל'}
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                            </div>
+                        </div>
+                    </main>
+
+                    {/* --- STICKY FOOTER --- */}
+                    <div className="fixed bottom-0 left-0 w-full bg-innovet-dark text-white shadow-[0_-10px_40px_rgba(0,0,0,0.3)] border-t border-gray-800 z-40 animate-fade-in no-print">
+                        <div className="max-w-6xl mx-auto px-6 py-4 flex flex-col md:flex-row items-center justify-between gap-4">
+                            
+                            <div className="flex items-center gap-6 w-full md:w-auto">
+                                <div>
+                                    <div className="text-[10px] text-gray-500 font-bold uppercase tracking-widest">מועמד</div>
+                                    <div className="font-bold text-lg leading-none">{candidate.name || '-'}</div>
+                                </div>
+                                <div className="h-8 w-px bg-gray-700 hidden md:block"></div>
+                                <div className="hidden md:block">
+                                    <div className="text-[10px] text-gray-500 font-bold uppercase tracking-widest">תפקיד</div>
+                                    <div className="font-bold text-lg leading-none text-innovet-yellow">{candidate.role}</div>
+                                </div>
+                            </div>
+
+                            <div className="flex items-center gap-6 ml-auto">
+                                <div className="text-right">
+                                    <div className="text-[10px] text-gray-500 font-bold uppercase tracking-widest">ציון סופי</div>
+                                    <div className={`text-4xl font-black font-mono leading-none ${getDecision().color.includes('red') ? 'text-red-500' : 'text-white'}`}>
+                                        {totalScore}
+                                    </div>
+                                </div>
+                                
+                                <div className={`px-6 py-3 rounded-lg shadow-lg flex flex-col items-center justify-center min-w-[180px] transition-colors ${getDecision().color}`}>
+                                    <span className="font-black uppercase tracking-widest text-sm">{getDecision().text}</span>
+                                    <span className="text-[10px] font-medium opacity-90 truncate max-w-[200px]">{getDecision().sub}</span>
+                                </div>
+
+                                {/* Soft Landing Button - Shows only if Rejected */}
+                                {getDecision().text.includes('נדחה') && (
+                                    <button onClick={() => setShowMailDraft(!showMailDraft)} className="bg-gray-800 hover:bg-gray-700 text-white p-3 rounded-lg transition-colors relative group" title='מייל "נחיתה רכה"'>
+                                        <Icons.Mail size={20} />
+                                        <span className="absolute -top-10 left-1/2 -translate-x-1/2 bg-black text-white text-xs py-1 px-2 rounded opacity-0 group-hover:opacity-100 transition whitespace-nowrap">נחיתה רכה</span>
+                                    </button>
+                                )}
+
+                                <button onClick={() => window.print()} className="bg-white text-black hover:bg-innovet-yellow hover:text-black p-3 rounded-lg transition-colors" title="הדפס דוח">
+                                    <Icons.Printer size={20} />
+                                </button>
+                            </div>
+                        </div>
+                        
+                        {/* Soft Landing Email Drawer */}
+                        {showMailDraft && (
+                            <div className="bg-gray-900 border-t border-gray-800 p-6 animate-fade-in absolute bottom-full left-0 w-full shadow-2xl">
+                                <div className="max-w-3xl mx-auto">
+                                    <div className="flex justify-between items-center mb-2 text-white">
+                                        <h3 className="font-bold text-innovet-yellow flex items-center gap-2"><Icons.Mail size={16}/> טיוטת "נחיתה רכה" (Not Yet + Value)</h3>
+                                        <button onClick={() => navigator.clipboard.writeText(generateSoftLandingEmail())} className="text-xs text-gray-400 font-bold hover:text-white uppercase tracking-wider">העתק ללוח</button>
+                                    </div>
+                                    <textarea readOnly className="w-full h-40 p-4 rounded-xl border border-gray-700 text-sm bg-gray-800 text-gray-200 font-sans leading-relaxed focus:outline-none resize-none" value={generateSoftLandingEmail()}></textarea>
+                                    <p className="text-xs text-gray-500 mt-2">* הטקסט נוצר אוטומטית על בסיס נקודות החולשה שסומנו בדירוג.</p>
+                                </div>
+                            </div>
+                        )}
+                    </div>
+
+                </div>
+            );
+        };
+
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(<App />);
+    </script>
+</body>
+</html>
