@@ -161,15 +161,13 @@
         import { getFirestore, collection, doc, setDoc, updateDoc, deleteDoc, onSnapshot, serverTimestamp, query, orderBy } from 'firebase/firestore';
 
         // --- FIREBASE CONFIGURATION (SAFE FOR LOCAL USE) ---
-        // כאן התיקון שהוספנו:
-        // אם המשתנה __firebase_config לא קיים (כמו בגיט), הקוד משתמש באובייקט שאתה תמלא.
         const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : {
            apiKey: "AIzaSyDkEOW4aXGmuO_J-X5xJTw9Iyp0Q2pbUIY",
-  authDomain: "psychoflash-control.firebaseapp.com",
-  projectId: "psychoflash-control",
-  storageBucket: "psychoflash-control.firebasestorage.app",
-  messagingSenderId: "304053769812",
-  appId: "1:304053769812:web:3b55fb16bbbda06b993fc1"
+           authDomain: "psychoflash-control.firebaseapp.com",
+           projectId: "psychoflash-control",
+           storageBucket: "psychoflash-control.firebasestorage.app",
+           messagingSenderId: "304053769812",
+           appId: "1:304053769812:web:3b55fb16bbbda06b993fc1"
         };
         
         const app = initializeApp(firebaseConfig);
@@ -178,7 +176,9 @@
         const appId = typeof __app_id !== 'undefined' ? __app_id : 'innovet-scout-master';
 
         // --- GEMINI API SETUP ---
-        const apiKey = "AIzaSyBbYwQlSumZYyCKf5xaXqqFlvTkGiWJYIQ"; 
+        // Changed to empty string for preview environment injection
+        // If downloading, place your API Key here.
+        const apiKey = "AIzaSyD93hfZIPNGBm0uF0T0yWiCv16lE4nKfqw"; 
         const GEMINI_API_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${apiKey}`;
 
         const callGemini = async (promptText, fileObj = null) => {
@@ -192,11 +192,17 @@
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ contents: [{ parts: parts }] })
                 });
-                if (!response.ok) throw new Error('API Error');
+                
+                if (!response.ok) {
+                    const errorDetails = await response.text();
+                    console.error("Gemini API Error:", response.status, errorDetails);
+                    throw new Error(`API Error: ${response.status}`);
+                }
+                
                 const data = await response.json();
                 return data.candidates?.[0]?.content?.parts?.[0]?.text || "שגיאה בקבלת תשובה";
             } catch (error) {
-                console.error("Gemini Error:", error);
+                console.error("Gemini Critical Error:", error);
                 return null;
             }
         };
@@ -568,7 +574,7 @@
                 UNIVERSAL_CRITERIA.forEach(c => { if (scores[c.id] > 0) sum += (scores[c.id] * 10 * weights[c.id]); });
                 activeRoleConfig.criteria.forEach(c => { if (scores[c.id] > 0) sum += (scores[c.id] * 10 * weights[c.id]); });
                 sum += (flags.green.length * 3); 
-                sum -= (flags.red.length * 5);   
+                sum -= (flags.red.length * 5);    
                 if (spark.beer >= 4) sum += 2;
                 if (spark.beer > 0 && spark.beer <= 2) sum -= 2;
                 return Math.max(0, Math.min(100, Math.round(sum)));
@@ -710,7 +716,11 @@
                 setIsAnalyzingSpark(true);
                 const prompt = `Analyze the following founder statements regarding their startup motivation. Candidate: ${candidate.name} 'The Why': "${spark.why}" 'Scar Tissue': "${spark.scars}" Provide a brief psychological assessment in Hebrew (bullet points).`;
                 const result = await callGemini(prompt);
-                setAiAnalysis(result);
+                if (result) {
+                    setAiAnalysis(result);
+                } else {
+                    alert("שגיאה בניתוח הניצוץ. אנא נסה שוב.");
+                }
                 setIsAnalyzingSpark(false);
             };
 
@@ -777,6 +787,12 @@
                     }
 
                     const result = await callGemini(prompt, fileObj);
+                    
+                    // Added safety check here
+                    if (!result) {
+                        throw new Error("No response from AI");
+                    }
+
                     const jsonMatch = result.match(/\{[\s\S]*\}/);
                     
                     if (jsonMatch) {
@@ -799,7 +815,7 @@
                     }
                 } catch (e) {
                     console.error(e);
-                    alert("שגיאה בניתוח הקובץ.");
+                    alert("שגיאה בניתוח הקובץ: " + e.message);
                 } finally {
                     setIsAnalyzingCV(false);
                 }
@@ -817,7 +833,11 @@
                 
                 const prompt = `Write a gentle rejection email in Hebrew for "${candidate.name}". Weaknesses: ${weakPoints.join(", ")}. Tone: Empathetic investor. Output only email body.`;
                 const result = await callGemini(prompt);
-                setEmailContent(result);
+                if (result) {
+                    setEmailContent(result);
+                } else {
+                    setEmailContent("שגיאה ביצירת המייל. נסה שוב.");
+                }
                 setIsGeneratingEmail(false);
             };
             
