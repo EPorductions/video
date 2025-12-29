@@ -74,26 +74,49 @@
         /* Smooth inputs */
         input:focus, select:focus, textarea:focus { outline: none; border-color: #FFC700; ring: 2px solid rgba(255, 199, 0, 0.2); }
 
-        /* Weight Slider */
+        /* Weight Slider - Improved */
         input[type=range].weight-slider {
             -webkit-appearance: none;
             width: 100%;
-            height: 4px;
+            height: 6px;
             background: #E5E7EB;
-            border-radius: 2px;
+            border-radius: 3px;
             outline: none;
+            cursor: pointer;
         }
         input[type=range].weight-slider::-webkit-slider-thumb {
             -webkit-appearance: none;
-            width: 16px;
-            height: 16px;
+            width: 18px;
+            height: 18px;
             border-radius: 50%;
             background: #1F63C7;
-            cursor: pointer;
-            transition: background 0.15s ease-in-out;
+            cursor: grab;
+            transition: transform 0.1s ease, background 0.2s;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            margin-top: -6px; /* Center thumb */
         }
-        input[type=range].weight-slider::-webkit-slider-thumb:hover {
+        input[type=range].weight-slider::-webkit-slider-runnable-track {
+            width: 100%;
+            height: 6px;
+            cursor: pointer;
+            background: #E5E7EB;
+            border-radius: 3px;
+        }
+        input[type=range].weight-slider::-webkit-slider-thumb:active {
+            cursor: grabbing;
+            transform: scale(1.2);
             background: #FFC700;
+        }
+
+        /* Star Button Interactions */
+        .star-btn { 
+            transition: transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275); 
+        }
+        .star-btn:hover { 
+            transform: scale(1.3) translateY(-2px); 
+        }
+        .star-btn:active { 
+            transform: scale(0.9); 
         }
         
         @media print {
@@ -101,7 +124,6 @@
             body { background: white; }
             .card { box-shadow: none; border: 1px solid #ddd; }
             header, .fixed-bottom { display: none !important; }
-            /* Force background printing */
             * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
         }
     </style>
@@ -143,7 +165,7 @@
             Scale: ({size=20}) => <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m16 16 3-8 3 8c-.87.65-1.92 1-3 1s-2.13-.35-3-1Z"/><path d="m2 16 3-8 3 8c-.87.65-1.92 1-3 1s-2.13-.35-3-1Z"/><path d="M7 21h10"/><path d="M12 3v18"/><path d="M3 7h2c2 0 5-1 7-2 2 1 5 2 7 2h2"/></svg>
         };
 
-        // --- STATIC DATA DEFINITIONS (Outside Component to prevent re-renders) ---
+        // --- STATIC CONFIG (DEFINED OUTSIDE TO PREVENT RE-RENDERS) ---
 
         const universalCriteria = [
             { 
@@ -208,7 +230,7 @@
                 criteria: [
                     { id: 'role1', label: 'ביצוע ואופרציה (Execution)', desc: 'הורדת החזון לקרקע, ניהול שוטף, סדר מתוך כאוס', questions: ["איך נראה יום עבודה טיפוסי שלך?", "תן דוגמה לפרויקט מורכב שניהלת מא' עד ת'."] },
                     { id: 'role2', label: 'סדר וארגון (Process)', desc: 'בניית תהליכים, ניהול זמן, ירידה לפרטים', questions: ["איך אתה מודד הצלחה (KPIs)?", "באיזה כלים אתה משתמש לניהול משימות?"] },
-                    { id: 'role3', label: 'פיננסי/משפטי', desc: 'שליטה בתקציב, חוזים, רגולציה ועבודה מול IAI', questions: ["האם יש לך ניסיון עם תקציבים?", "איך תתמודד עם הבירוקרטיה של תאגיד כמו IAI?"] },
+                    { id: 'role3', label: 'פיננסי/משפטי', desc: 'שליטה בתקציב, חוזים, רגולציה ועבודה מול IAI', questions: ["האם יש לך ניסיון עם תקציבים?", "איך תתמודד עם בירוקרטיה של תאגיד כמו IAI?"] },
                     { id: 'role4', label: 'ניהול משאבים', desc: 'יעילות, תכנון מול ביצוע, יחסי אנוש', questions: ["איך אתה מנהל קונפליקטים בצוות?", "איך תתעדף משאבים מוגבלים?"] }
                 ],
                 traits: ['ירידה לפרטים', 'רגולציה', 'תפעול']
@@ -230,7 +252,7 @@
             ]
         };
 
-        // --- SUB-COMPONENTS (MEMOIZED TO PREVENT FLICKER) ---
+        // --- SUB-COMPONENTS (MEMOIZED) ---
 
         const SectionCard = memo(({ title, icon: Icon, children, className = "" }) => (
             <div className={`bg-white rounded-xl shadow-lg border border-gray-100 p-6 md:p-8 mb-8 animate-fade-in-up relative overflow-hidden ${className}`}>
@@ -274,33 +296,38 @@
             </div>
         ));
 
-        const StarRating = memo(({ value, onChange, isCritical, max = 10 }) => (
-            <div className="flex items-center gap-1 bg-gray-50 p-2 rounded-xl border border-gray-100 justify-between select-none">
-                {[...Array(max)].map((_, i) => {
-                    const v = i + 1;
-                    const isActive = v <= value;
-                    return (
-                        <button 
-                            key={v} 
-                            onClick={() => onChange(v)} 
-                            className="star-btn focus:outline-none p-1 flex-1 flex justify-center group"
-                        >
-                            <Icons.Star 
-                                size={20} 
-                                className={`star-icon transition-all duration-200 ${isActive ? (isCritical && value <= 3 ? 'text-red-500 fill-current' : 'text-innovet-yellow fill-current drop-shadow-sm') : 'text-gray-200 fill-none'}`} 
-                            />
-                        </button>
-                    );
-                })}
-                <span className={`mr-2 font-mono font-black text-lg w-8 text-center transition-all duration-300 ${isCritical && value <= 3 ? 'text-red-500 animate-pulse' : 'text-gray-800'}`}>{value}</span>
-            </div>
-        ));
+        const StarRating = memo(({ value, onChange, isCritical, max = 10 }) => {
+            return (
+                <div className={`flex items-center gap-1 bg-gray-50 p-2 rounded-xl border transition-all duration-300 select-none ${value === 0 ? 'border-gray-100' : 'border-blue-100 bg-blue-50/30'}`}>
+                    {[...Array(max)].map((_, i) => {
+                        const v = i + 1;
+                        const isActive = v <= value;
+                        return (
+                            <button 
+                                key={v} 
+                                onClick={() => onChange(v)} 
+                                className="star-btn focus:outline-none p-1 flex-1 flex justify-center group"
+                            >
+                                <Icons.Star 
+                                    size={20} 
+                                    className={`star-icon transition-all duration-300 ${isActive ? (isCritical && value <= 3 ? 'text-red-500 fill-current' : 'text-innovet-yellow fill-current drop-shadow-sm') : 'text-gray-300 fill-none'}`} 
+                                />
+                            </button>
+                        );
+                    })}
+                    <span className={`mr-2 font-mono font-black text-lg w-8 text-center transition-all duration-300 ${value === 0 ? 'text-gray-300 text-xs' : (isCritical && value <= 3 ? 'text-red-500 animate-pulse' : 'text-gray-800')}`}>
+                        {value === 0 ? '?' : value}
+                    </span>
+                </div>
+            );
+        });
 
         // --- MAIN APP COMPONENT ---
         const App = () => {
             const [candidate, setCandidate] = useState({ name: '', role: 'CEO', interviewer: '' });
             const [gates, setGates] = useState({ champion: false, problem: false, materials: false });
             
+            // Weights State
             const [weights, setWeights] = useState({
                 coachability: 0.20,
                 passion: 0.15,
@@ -312,12 +339,13 @@
             });
             const [isWeightEditMode, setIsWeightEditMode] = useState(false);
             
+            // Initial Scores (All 0 by default)
             const [scores, setScores] = useState({ 
-                coachability: 5, passion: 5, team: 5, 
-                role1: 5, role2: 5, role3: 5, role4: 5 
+                coachability: 0, passion: 0, team: 0, 
+                role1: 0, role2: 0, role3: 0, role4: 0 
             });
             
-            const [spark, setSpark] = useState({ why: '', scars: '', beer: 3 }); 
+            const [spark, setSpark] = useState({ why: '', scars: '', beer: 0 }); // 0 = unrated
             const [flags, setFlags] = useState({ green: [], red: [] });
             const [disc, setDisc] = useState(null);
             const [showMailDraft, setShowMailDraft] = useState(false);
@@ -328,51 +356,27 @@
             // --- LOGIC ---
             const isPassedGate0 = gates.champion && gates.problem && gates.materials;
             
-            // Kill Switch Logic
-            const isCoachabilityFail = scores.coachability <= 3;
-            const isRoleFail = activeRoleConfig.criteria.some(c => c.critical && scores[c.id] <= 3);
+            // Logic: Fail only if scored (>0) AND low
+            const isCoachabilityFail = scores.coachability > 0 && scores.coachability <= 3;
+            const isRoleFail = activeRoleConfig.criteria.some(c => c.critical && scores[c.id] > 0 && scores[c.id] <= 3);
             const isFail = isCoachabilityFail || isRoleFail;
+
+            // Check if all scores are filled
+            const totalItems = universalCriteria.length + activeRoleConfig.criteria.length + 1; // +1 for beer
+            const filledItems = Object.values(scores).filter(v => v > 0).length + (spark.beer > 0 ? 1 : 0);
+            const isComplete = filledItems === totalItems;
 
             const handleWeightChange = useCallback((id, newVal) => {
                 const newWeight = Math.max(0, Math.min(100, newVal)) / 100;
-                const oldWeight = weights[id];
-                
-                const activeKeys = [
-                    ...universalCriteria.map(c => c.id),
-                    ...activeRoleConfig.criteria.map(c => c.id)
-                ];
-                
-                const otherKeys = activeKeys.filter(k => k !== id);
-                const currentOthersSum = otherKeys.reduce((sum, key) => sum + weights[key], 0);
+                // Simplified weight update without complex rebalancing for smooth drag
+                setWeights(prev => ({ ...prev, [id]: newWeight }));
+            }, []);
 
-                const newWeights = { ...weights, [id]: newWeight };
-
-                if (currentOthersSum > 0) {
-                    const targetOthersSum = 1.0 - newWeight;
-                    const ratio = targetOthersSum / currentOthersSum;
-                    
-                    otherKeys.forEach(k => {
-                        newWeights[k] = weights[k] * ratio;
-                    });
-                } else {
-                    if (otherKeys.length > 0) {
-                         const split = (1.0 - newWeight) / otherKeys.length;
-                         otherKeys.forEach(k => newWeights[k] = split);
-                    }
-                }
-                setWeights(newWeights);
-            }, [weights, activeRoleConfig]);
-
-            // Reset weights on role change
+            // Reset scores on role change
             useEffect(() => {
-                setWeights({
-                    coachability: 0.20,
-                    passion: 0.15,
-                    team: 0.10,
-                    role1: 0.20, 
-                    role2: 0.15, 
-                    role3: 0.10, 
-                    role4: 0.10
+                setScores({ 
+                    coachability: 0, passion: 0, team: 0, 
+                    role1: 0, role2: 0, role3: 0, role4: 0 
                 });
             }, [candidate.role]);
 
@@ -380,22 +384,33 @@
                 if (!isPassedGate0) return 0;
 
                 let sum = 0;
+                let currentTotalWeight = 0;
+
                 // Add Universal Scores
                 universalCriteria.forEach(c => {
-                    sum += (scores[c.id] * 10 * weights[c.id]);
+                    if (scores[c.id] > 0) {
+                        sum += (scores[c.id] * 10 * weights[c.id]);
+                        currentTotalWeight += weights[c.id];
+                    }
                 });
                 // Add Role Specific Scores
                 activeRoleConfig.criteria.forEach(c => {
-                    sum += (scores[c.id] * 10 * weights[c.id]);
+                    if (scores[c.id] > 0) {
+                        sum += (scores[c.id] * 10 * weights[c.id]);
+                        currentTotalWeight += weights[c.id];
+                    }
                 });
 
+                // Normalize if partially filled (optional, currently strictly additive based on weight)
+                // Better approach: Calculate max potential based on filled weights
+                
                 // Bonus/Penalty Logic
                 sum += (flags.green.length * 3); 
                 sum -= (flags.red.length * 5);   
                 
                 // Beer Test Bonus
                 if (spark.beer >= 4) sum += 2;
-                if (spark.beer <= 2) sum -= 2;
+                if (spark.beer > 0 && spark.beer <= 2) sum -= 2;
 
                 return Math.max(0, Math.min(100, Math.round(sum)));
             }, [scores, flags, spark.beer, candidate.role, isPassedGate0, weights]);
@@ -403,6 +418,8 @@
             const getDecision = () => {
                 if (!isPassedGate0) return { text: 'חסרים תנאי סף', sub: 'יש להשלים את שלב 0', color: 'bg-gray-700 text-gray-300' };
                 if (isFail) return { text: 'פסילה מיידית', sub: 'נכשל במדד קריטי (Kill Switch)', color: 'bg-red-600 text-white' };
+                if (!isComplete) return { text: 'הערכה בתהליך...', sub: `${filledItems}/${totalItems} מדדים הושלמו`, color: 'bg-gray-800 text-white' };
+                
                 if (totalScore >= 80) return { text: 'עבר (Green)', sub: 'לקדם לחוזה/בדיקת היתכנות', color: 'bg-green-500 text-white' };
                 if (totalScore >= 60) return { text: 'המתנה (Yellow)', sub: 'דורש חידוד או שותף', color: 'bg-innovet-yellow text-black' };
                 return { text: 'נדחה (Red)', sub: 'אי התאמה בשלב זה', color: 'bg-red-500 text-white' };
@@ -417,10 +434,11 @@
 
             const generateSoftLandingEmail = () => {
                 const weakPoints = [];
-                if (scores.role1 < 6) weakPoints.push(`התרשמנו מהפוטנציאל, אך הרגשנו שנושא ה${activeRoleConfig.criteria[0].label} דורש עוד הבשלה.`);
-                if (scores.role2 < 6) weakPoints.push(`חסר לנו עומק בנושא ${activeRoleConfig.criteria[1].label} כדי להתקדם.`);
-                if (scores.coachability < 6) weakPoints.push("ההתאמה לדינמיקה האינטנסיבית של תוכנית מאיץ דורשת עוד בשלות.");
+                if (scores.role1 > 0 && scores.role1 < 6) weakPoints.push(`התרשמנו מהפוטנציאל, אך הרגשנו שנושא ה${activeRoleConfig.criteria[0].label} דורש עוד הבשלה.`);
+                if (scores.role2 > 0 && scores.role2 < 6) weakPoints.push(`חסר לנו עומק בנושא ${activeRoleConfig.criteria[1].label} כדי להתקדם.`);
+                if (scores.coachability > 0 && scores.coachability < 6) weakPoints.push("ההתאמה לדינמיקה האינטנסיבית של תוכנית מאיץ דורשת עוד בשלות.");
                 if (flags.red.includes('solo')) weakPoints.push("בשלב זה, אנו מחפשים צוותים מלאים ולא יזמים בודדים.");
+                
                 return `היי ${candidate.name || "יזם"},\n\nתודה רבה על הזמן שהקדשת לפגוש אותנו. רצינו לעדכן שלצערי לא נמשיך בתהליך למחזור הקרוב.\n\nחשוב לנו לתת ערך ולא רק תשובה שלילית: ${weakPoints.length > 0 ? weakPoints.join(" ") : "התחרות במחזור זה הייתה קשה במיוחד."}\n\nנשמח להישאר בקשר ולהזמין אותך לאירועים פתוחים של קהילת Innovet ("Friends of Innovet") כדי שנוכל לבחון שוב בעתיד.\n\nבהצלחה,\nצוות Innovet`;
             };
 
@@ -535,12 +553,13 @@
                                         {/* 3A: Universal Criteria */}
                                         <div className="text-xs font-bold text-gray-400 uppercase tracking-widest border-b border-gray-200 pb-2 mb-2">מדדים אוניברסליים</div>
                                         {universalCriteria.map((c) => (
-                                            <div key={c.id} className="bg-gray-50 p-5 rounded-xl border border-gray-100 hover:border-innovet-blue transition-colors group">
+                                            <div key={c.id} className={`bg-gray-50 p-5 rounded-xl border transition-colors group ${scores[c.id] === 0 ? 'border-l-4 border-l-red-400 border-gray-100' : 'border-gray-100 hover:border-innovet-blue'}`}>
                                                 <div className="flex flex-col md:flex-row justify-between md:items-center gap-4 mb-3">
                                                     <div>
                                                         <h3 className="text-lg font-black text-innovet-black flex items-center gap-2">
                                                             {c.label}
                                                             <span className="text-[10px] font-normal bg-white px-2 py-0.5 rounded border text-gray-500 transition-all duration-300">{Math.round(weights[c.id] * 100)}%</span>
+                                                            {scores[c.id] === 0 && <span className="text-[10px] font-bold text-red-500 animate-pulse">נדרש מילוי</span>}
                                                         </h3>
                                                         <p className="text-xs text-gray-500 mt-1">{c.desc}</p>
                                                         
@@ -570,7 +589,7 @@
                                                         <StarRating value={scores[c.id]} onChange={(v) => setScores(prev => ({...prev, [c.id]: v}))} isCritical={c.critical} />
                                                     </div>
                                                 </div>
-                                                {c.critical && scores[c.id] <= 3 && (
+                                                {c.critical && scores[c.id] > 0 && scores[c.id] <= 3 && (
                                                     <div className="bg-red-50 text-red-600 text-xs font-bold p-2 rounded flex items-center gap-2 animate-pulse">
                                                         <Icons.Alert size={14}/> ציון נמוך כאן מהווה עילת פסילה אוטומטית (Kill Switch).
                                                     </div>
@@ -583,12 +602,13 @@
                                             <activeRoleConfig.icon size={14} /> מדדים ייחודיים ל-{candidate.role}
                                         </div>
                                         {activeRoleConfig.criteria.map((c) => (
-                                            <div key={c.id} className="bg-blue-50/50 p-5 rounded-xl border border-blue-100 hover:border-innovet-blue transition-colors group">
+                                            <div key={c.id} className={`bg-blue-50/50 p-5 rounded-xl border transition-colors group ${scores[c.id] === 0 ? 'border-l-4 border-l-red-400 border-blue-100' : 'border-blue-100 hover:border-innovet-blue'}`}>
                                                 <div className="flex flex-col md:flex-row justify-between md:items-center gap-4 mb-3">
                                                     <div>
                                                         <h3 className="text-lg font-black text-innovet-black flex items-center gap-2">
                                                             {c.label}
                                                             <span className="text-[10px] font-normal bg-white px-2 py-0.5 rounded border text-gray-500 transition-all duration-300">{Math.round(weights[c.id] * 100)}%</span>
+                                                            {scores[c.id] === 0 && <span className="text-[10px] font-bold text-red-500 animate-pulse">נדרש מילוי</span>}
                                                         </h3>
                                                         <p className="text-xs text-gray-500 mt-1">{c.desc}</p>
 
@@ -618,7 +638,7 @@
                                                         <StarRating value={scores[c.id]} onChange={(v) => setScores(prev => ({...prev, [c.id]: v}))} isCritical={c.critical} />
                                                     </div>
                                                 </div>
-                                                {c.critical && scores[c.id] <= 3 && (
+                                                {c.critical && scores[c.id] > 0 && scores[c.id] <= 3 && (
                                                     <div className="bg-red-50 text-red-600 text-xs font-bold p-2 rounded flex items-center gap-2 animate-pulse">
                                                         <Icons.Alert size={14}/> ציון נמוך כאן מהווה עילת פסילה אוטומטית (Kill Switch).
                                                     </div>
