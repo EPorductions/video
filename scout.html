@@ -74,7 +74,7 @@
         /* Smooth inputs */
         input:focus, select:focus, textarea:focus { outline: none; border-color: #FFC700; ring: 2px solid rgba(255, 199, 0, 0.2); }
 
-        /* Weight Slider - Improved for Dragging */
+        /* Weight Slider - Refined for Smoothness */
         input[type=range].weight-slider {
             -webkit-appearance: none;
             width: 100%;
@@ -82,35 +82,21 @@
             background: #E5E7EB;
             border-radius: 3px;
             outline: none;
-            cursor: grab;
-        }
-        input[type=range].weight-slider:active {
-            cursor: grabbing;
+            cursor: pointer;
         }
         input[type=range].weight-slider::-webkit-slider-thumb {
             -webkit-appearance: none;
-            width: 20px;
-            height: 20px;
+            width: 18px;
+            height: 18px;
             border-radius: 50%;
             background: #1F63C7;
             cursor: grab;
-            transition: transform 0.1s ease, background 0.2s;
             box-shadow: 0 2px 4px rgba(0,0,0,0.2);
-            margin-top: -7px;
+            margin-top: -6px;
             border: 2px solid white;
+            transition: transform 0.1s ease; /* Only transform animates on interaction */
         }
-        input[type=range].weight-slider::-webkit-slider-runnable-track {
-            width: 100%;
-            height: 6px;
-            cursor: pointer;
-            background: #E5E7EB;
-            border-radius: 3px;
-        }
-        input[type=range].weight-slider::-webkit-slider-thumb:hover {
-            transform: scale(1.1);
-            background: #FFC700;
-        }
-        input[type=range].weight-slider::-webkit-slider-thumb:active {
+        input[type=range].weight-slider:active::-webkit-slider-thumb {
             cursor: grabbing;
             transform: scale(1.2);
             background: #FFC700;
@@ -118,15 +104,20 @@
 
         /* Star Button Interactions */
         .star-btn { 
-            transition: transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275); 
+            transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
         }
         .star-btn:hover { 
-            transform: scale(1.2) translateY(-2px); 
+            transform: scale(1.25); 
         }
         .star-btn:active { 
             transform: scale(0.9); 
         }
         
+        /* Star Fill Animation */
+        .star-svg path, .star-svg polygon {
+            transition: fill 0.2s ease, stroke 0.2s ease;
+        }
+
         @media print {
             .no-print { display: none !important; }
             body { background: white; }
@@ -153,7 +144,7 @@
         // --- ICONS ---
         const Icons = {
             Rocket: ({size=20}) => <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M4.5 16.5c-1.5 1.26-2 5-2 5s3.74-.5 5-2c.71-.84.7-2.13-.09-2.91a2.18 2.18 0 0 0-2.91-.09z"></path><path d="M12 15l-3-3a22 22 0 0 1 2-3.95A12.88 12.88 0 0 1 22 2c0 2.72-.78 7.5-6 11a22.35 22.35 0 0 1-4 2z"></path><path d="M9 12H4s.55-3.03 2-4c1.62-1.08 5 0 5 0"></path><path d="M12 15v5s3.03-.55 4-2c1.08-1.62 0-5 0-5"></path></svg>,
-            Star: ({size=20, fill, className}) => <svg width={size} height={size} viewBox="0 0 24 24" fill={fill || "none"} stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>,
+            Star: ({size=20, fill, className}) => <svg width={size} height={size} viewBox="0 0 24 24" fill={fill || "none"} stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={`star-svg ${className}`}><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>,
             Heart: ({size=20}) => <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path></svg>,
             Check: ({size=20}) => <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>,
             Alert: ({size=20}) => <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>,
@@ -305,21 +296,29 @@
             </div>
         ));
 
+        // Star Rating with Hover & 0 State
         const StarRating = memo(({ value, onChange, isCritical, max = 10 }) => {
+            const [hoverValue, setHoverValue] = useState(0);
+
             return (
-                <div className={`flex items-center gap-1 bg-gray-50 p-2 rounded-xl border transition-all duration-300 select-none ${value === 0 ? 'border-gray-100' : 'border-blue-100 bg-blue-50/30'}`}>
+                <div 
+                    className={`flex items-center gap-1 bg-gray-50 p-2 rounded-xl border transition-all duration-300 select-none ${value === 0 ? 'border-gray-200' : 'border-blue-100 bg-blue-50/30'}`}
+                    onMouseLeave={() => setHoverValue(0)}
+                >
                     {[...Array(max)].map((_, i) => {
                         const v = i + 1;
-                        const isActive = v <= value;
+                        const isFilled = v <= (hoverValue || value);
+                        
                         return (
                             <button 
                                 key={v} 
                                 onClick={() => onChange(v)} 
+                                onMouseEnter={() => setHoverValue(v)}
                                 className="star-btn focus:outline-none p-1 flex-1 flex justify-center group"
                             >
                                 <Icons.Star 
                                     size={20} 
-                                    className={`star-icon transition-all duration-300 ${isActive ? (isCritical && value <= 3 ? 'text-red-500 fill-current' : 'text-innovet-yellow fill-current drop-shadow-sm') : 'text-gray-300 fill-none'}`} 
+                                    className={`star-icon transition-all duration-200 ${isFilled ? (isCritical && (hoverValue || value) <= 3 ? 'text-red-500 fill-current' : 'text-innovet-yellow fill-current drop-shadow-sm') : 'text-gray-200 fill-none'}`} 
                                 />
                             </button>
                         );
@@ -337,7 +336,7 @@
             const [candidate, setCandidate] = useState({ name: '', role: 'CEO', interviewer: '' });
             const [gates, setGates] = useState({ champion: false, problem: false, materials: false });
             
-            // Weights State (Percentages 0-1)
+            // Weights State
             const [weights, setWeights] = useState({
                 coachability: 0.20,
                 passion: 0.15,
@@ -355,7 +354,7 @@
                 role1: 0, role2: 0, role3: 0, role4: 0 
             });
             
-            const [spark, setSpark] = useState({ why: '', scars: '', beer: 0 }); 
+            const [spark, setSpark] = useState({ why: '', scars: '', beer: 0 }); // 0 = unrated
             const [flags, setFlags] = useState({ green: [], red: [] });
             const [disc, setDisc] = useState(null);
             const [showMailDraft, setShowMailDraft] = useState(false);
@@ -372,9 +371,10 @@
             const isFail = isCoachabilityFail || isRoleFail;
 
             // Completion Logic
-            const totalItems = UNIVERSAL_CRITERIA.length + activeRoleConfig.criteria.length + 1; // +1 Beer
+            const totalItems = UNIVERSAL_CRITERIA.length + activeRoleConfig.criteria.length + 1; // +1 for beer
             const filledItems = Object.values(scores).filter(v => v > 0).length + (spark.beer > 0 ? 1 : 0);
             const isComplete = filledItems === totalItems;
+            const missingCount = totalItems - filledItems;
 
             // Smart Weight Distribution Algorithm
             const handleWeightChange = useCallback((id, newVal) => {
@@ -430,16 +430,16 @@
                 if (!isPassedGate0) return 0;
 
                 let sum = 0;
-                // Universal
+                // Add Universal Scores
                 UNIVERSAL_CRITERIA.forEach(c => {
                     if (scores[c.id] > 0) sum += (scores[c.id] * 10 * weights[c.id]);
                 });
-                // Role Specific
+                // Add Role Specific Scores
                 activeRoleConfig.criteria.forEach(c => {
                     if (scores[c.id] > 0) sum += (scores[c.id] * 10 * weights[c.id]);
                 });
 
-                // Bonus/Penalty
+                // Bonus/Penalty Logic
                 sum += (flags.green.length * 3); 
                 sum -= (flags.red.length * 5);   
                 
@@ -453,7 +453,7 @@
             const getDecision = () => {
                 if (!isPassedGate0) return { text: 'חסרים תנאי סף', sub: 'יש להשלים את שלב 0', color: 'bg-gray-700 text-gray-300' };
                 if (isFail) return { text: 'פסילה מיידית', sub: 'נכשל במדד קריטי (Kill Switch)', color: 'bg-red-600 text-white' };
-                if (!isComplete) return { text: 'הערכה בתהליך...', sub: `${filledItems}/${totalItems} מדדים הושלמו`, color: 'bg-gray-800 text-white' };
+                if (!isComplete) return { text: 'הערכה בתהליך...', sub: `נותרו ${missingCount} מדדים`, color: 'bg-gray-800 text-white' };
                 
                 if (totalScore >= 80) return { text: 'עבר (Green)', sub: 'לקדם לחוזה/בדיקת היתכנות', color: 'bg-green-500 text-white' };
                 if (totalScore >= 60) return { text: 'המתנה (Yellow)', sub: 'דורש חידוד או שותף', color: 'bg-innovet-yellow text-black' };
@@ -506,8 +506,8 @@
                                 <div className="hidden md:block h-8 w-px bg-white/20"></div>
                                 <div className="hidden md:block text-right">
                                     <div className="text-[9px] font-bold text-gray-400 uppercase tracking-widest mb-0.5">ציון נוכחי</div>
-                                    <div className={`text-3xl font-black font-mono leading-none transition-colors duration-300 ${isFail ? 'text-red-500' : 'text-white'}`}>
-                                        {totalScore}
+                                    <div className={`text-3xl font-black font-mono leading-none transition-colors duration-300 ${!isComplete ? 'text-gray-500' : (isFail ? 'text-red-500' : 'text-white')}`}>
+                                        {isComplete ? totalScore : '--'}
                                     </div>
                                 </div>
                             </div>
@@ -595,7 +595,7 @@
                                                         <h3 className="text-lg font-black text-innovet-black flex items-center gap-2">
                                                             {c.label}
                                                             <span className="text-[10px] font-normal bg-white px-2 py-0.5 rounded border text-gray-500 transition-all duration-300">{Math.round(weights[c.id] * 100)}%</span>
-                                                            {scores[c.id] === 0 && <span className="text-[10px] font-bold text-red-500 animate-pulse">חסר דירוג</span>}
+                                                            {scores[c.id] === 0 && <span className="text-[10px] font-bold text-red-500 animate-pulse">נדרש מילוי</span>}
                                                         </h3>
                                                         <p className="text-xs text-gray-500 mt-1">{c.desc}</p>
                                                         
@@ -644,7 +644,7 @@
                                                         <h3 className="text-lg font-black text-innovet-black flex items-center gap-2">
                                                             {c.label}
                                                             <span className="text-[10px] font-normal bg-white px-2 py-0.5 rounded border text-gray-500 transition-all duration-300">{Math.round(weights[c.id] * 100)}%</span>
-                                                            {scores[c.id] === 0 && <span className="text-[10px] font-bold text-red-500 animate-pulse">חסר דירוג</span>}
+                                                            {scores[c.id] === 0 && <span className="text-[10px] font-bold text-red-500 animate-pulse">נדרש מילוי</span>}
                                                         </h3>
                                                         <p className="text-xs text-gray-500 mt-1">{c.desc}</p>
 
@@ -777,8 +777,8 @@
                             <div className="flex items-center gap-6 ml-auto">
                                 <div className="text-right">
                                     <div className="text-[10px] text-gray-500 font-bold uppercase tracking-widest">ציון סופי</div>
-                                    <div className={`text-4xl font-black font-mono leading-none transition-colors duration-300 ${getDecision().color.includes('red') ? 'text-red-500' : 'text-white'}`}>
-                                        {totalScore}
+                                    <div className={`text-4xl font-black font-mono leading-none transition-colors duration-300 ${!isComplete ? 'text-gray-500' : (getDecision().color.includes('red') ? 'text-red-500' : 'text-white')}`}>
+                                        {isComplete ? totalScore : '--'}
                                     </div>
                                 </div>
                                 
