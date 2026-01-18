@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Infinity V12 - Robust</title>
+    <title>Infinity V13 - VFX Content</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;700&display=swap');
@@ -127,12 +127,12 @@
     <!-- Main UI -->
     <div id="ui-layer" class="hidden-ui">
         <div class="p-3 bg-black/50 border-b border-white/10 flex justify-between items-center shrink-0">
-            <h1 class="text-lg font-bold text-green-400">Mixer V12</h1>
+            <h1 class="text-lg font-bold text-green-400">Mixer V13</h1>
             <button onclick="app.toggleUI()" class="text-xl text-gray-400">✕</button>
         </div>
 
         <div class="p-2 bg-black">
-            <input type="text" placeholder="חפש..." class="w-full bg-gray-900 border border-gray-700 rounded p-2 text-sm" oninput="app.handleSearch(this.value)">
+            <input type="text" placeholder="חפש לפי טכניקה, אובייקט..." class="w-full bg-gray-900 border border-gray-700 rounded p-2 text-sm" oninput="app.handleSearch(this.value)">
         </div>
 
         <div class="tab-bar">
@@ -182,18 +182,122 @@
     </div>
 
     <script>
-        // --- DATA ---
+        // --- DATA UPDATED FOR VFX/AFTER EFFECTS CONTEXT ---
         const VIDEO_DATABASE = [
-            { id: 'LvdGbCkZAiY', title: "ניסוי סטודיו וירטואלי", brand: "טכנולוגיית שידור", concept: "BTS", objects: ["אולפן", "מסך"], duration: 180, highlights: [{start:0, desc:"Intro"}, {start:19, desc:"Single Shot"}] },
-            { id: 'zUmTkhqFhgw', title: "מידות ומשקל", brand: "גלריה", concept: "Art", objects: ["סרטי מדידה", "רצפת פרקט"], duration: 120, highlights: [{start:3, desc:"Measuring"}, {start:10, desc:"Close up"}] },
-            { id: '1bA6cTw1DJ4', title: "מאחורי הקלעים: שחר חסון", brand: "שחר חסון", concept: "BTS", objects: ["בום", "מצלמה"], duration: 60, highlights: [{start:0, desc:"Rehearsal"}] },
-            { id: 'T9vEvAcai_I', title: "סיכום מופע ענק", brand: "מופעי קיץ", concept: "Showreel", objects: ["במה", "לד"], duration: 60, highlights: [{start:0, desc:"Intro"}] },
-            { id: 'WSL1iYAyj4I', title: "מחול גרפיטי", brand: "אמנותי", concept: "Clip", objects: ["גרפיטי", "צבע"], duration: 180, highlights: [{start:9, desc:"Red Hood"}] },
-            { id: 'J1fY6H1cj3A', title: "ממשק קיוסק", brand: "בורסת המותגים", concept: "UI/UX", objects: ["מסך"], duration: 30, highlights: [{start:0, desc:"GAP"}] },
-            { id: 'aydTo0aZRtA', title: "סרט פרישה", brand: "שיבא", concept: "Tribute", objects: ["קורקינט"], duration: 70, highlights: [{start:21, desc:"Scooter"}] },
-            { id: 'p02kAntlIyY', title: "להקת ג'מעא", brand: "ג'מעא", concept: "Show", objects: ["גיטרה"], duration: 180, highlights: [{start:33, desc:"Circle"}] },
-            { id: 'NT_4d8sSdls', title: "סנובורד אקסטרים", brand: "JBL", concept: "Extreme", objects: ["שלג"], duration: 40, highlights: [{start:5, desc:"POV"}] },
-            { id: 'jCVjX_K0swc', title: "תיעוד עבודה", brand: "פנימי", concept: "Screencast", objects: ["אקסל"], duration: 60, highlights: [{start:0, desc:"Excel"}] }
+            { 
+                id: 'LvdGbCkZAiY', 
+                title: "קליפ מוזיקלי - שילוב AI", 
+                brand: "AI Generation", 
+                concept: "יצירת תוכן גנרטיבי", 
+                objects: ["דמויות AI", "רקעים משתנים", "Interpolation", "Glitch"], 
+                duration: 180, 
+                highlights: [
+                    {start:0, desc:"Intro: יצירת דמויות ב-AI"}, 
+                    {start:19, desc:"Morphing בין סגנונות"}
+                ] 
+            },
+            { 
+                id: 'zUmTkhqFhgw', 
+                title: "סרטון הסברה - GreenTea", 
+                brand: "Motion Graphics", 
+                concept: "אינפוגרפיקה והנפשה", 
+                objects: ["Shape Layers", "אייקונים", "טקסט קינטי", "Transitions"], 
+                duration: 120, 
+                highlights: [
+                    {start:3, desc:"הנפשת לוגו וכותרת"}, 
+                    {start:10, desc:"תרשים זרימה מונפש"}
+                ] 
+            },
+            { 
+                id: '1bA6cTw1DJ4', 
+                title: "ברכה מונפשת - מוטי", 
+                brand: "Character Animation", 
+                concept: "Cut-out / Duik", 
+                objects: ["ריג דמות", "Puppet Tool", "רקע וקטורי", "בלוני דיבור"], 
+                duration: 60, 
+                highlights: [
+                    {start:0, desc:"כניסת דמות (Walk Cycle)"}
+                ] 
+            },
+            { 
+                id: 'T9vEvAcai_I', 
+                title: "קומפוזיציה - רחפן ים", 
+                brand: "VFX / Compositing", 
+                concept: "הטמעה (Embedding)", 
+                objects: ["Chroma Key", "השתקפויות", "שכבת ים", "Color Match"], 
+                duration: 60, 
+                highlights: [
+                    {start:0, desc:"לפני/אחרי Keying"},
+                    {start:5, desc:"שילוב רקע מלאכותי"}
+                ] 
+            },
+            { 
+                id: 'WSL1iYAyj4I', 
+                title: "הנפשת עטיפה - גבריאל", 
+                brand: "2.5D Parallax", 
+                concept: "הינדוס ויזואלי", 
+                objects: ["הפרדת שכבות", "Camera 3D", "חלקיקים (Particles)", "אווירה"], 
+                duration: 180, 
+                highlights: [
+                    {start:9, desc:"תנועת מצלמה (Parallax)"}
+                ] 
+            },
+            { 
+                id: 'J1fY6H1cj3A', 
+                title: "החלפת שלטים - כביש", 
+                brand: "VFX / Tracking", 
+                concept: "החלפת פריטים", 
+                objects: ["Planar Tracking", "Mocha", "Corner Pin", "הסרת אובייקטים"], 
+                duration: 30, 
+                highlights: [
+                    {start:0, desc:"עקיבת משטח (Surface)"},
+                    {start:2, desc:"החלפת תוכן השלט"}
+                ] 
+            },
+            { 
+                id: 'aydTo0aZRtA', 
+                title: "טראקינג רחפן - HUD", 
+                brand: "3D Tracking", 
+                concept: "ממשק עתידני (UI)", 
+                objects: ["3D Camera Tracker", "Null Objects", "טקסט צף", "HUD Elements"], 
+                duration: 70, 
+                highlights: [
+                    {start:21, desc:"הצמדת טקסט לקרקע"}
+                ] 
+            },
+            { 
+                id: 'p02kAntlIyY', 
+                title: "קליפ מילים - נועם", 
+                brand: "Kinetic Typography", 
+                concept: "טיפוגרפיה", 
+                objects: ["Text Animators", "סינכרון אודיו", "מצלמה וירטואלית", "Easin"], 
+                duration: 180, 
+                highlights: [
+                    {start:33, desc:"הנפשת טקסט לפי קצב"}
+                ] 
+            },
+            { 
+                id: 'NT_4d8sSdls', 
+                title: "הנפשת עטיפה - אסף", 
+                brand: "Atmosphere Loop", 
+                concept: "Cinemagraph", 
+                objects: ["Masking", "Saber Effect", "עשן/ערפל", "Color Grading"], 
+                duration: 40, 
+                highlights: [
+                    {start:5, desc:"לופ תנועה עדין"}
+                ] 
+            },
+            { 
+                id: 'jCVjX_K0swc', 
+                title: "הדמיית מוצר - ReLife", 
+                brand: "3D Integration", 
+                concept: "הדמייה טכנית", 
+                objects: ["מודל תלת-ממד", "Callouts", "Alpha Channel", "קומפוזיציה"], 
+                duration: 60, 
+                highlights: [
+                    {start:0, desc:"סיבוב מוצר וטקסט צף"}
+                ] 
+            }
         ];
 
         class LoopApp {
@@ -212,7 +316,7 @@
             }
 
             loadPlaylist() {
-                const saved = localStorage.getItem('orionMixV12');
+                const saved = localStorage.getItem('orionMixV13');
                 return saved ? JSON.parse(saved) : this.createAutoPlaylist();
             }
 
@@ -220,10 +324,7 @@
                 let list = [];
                 VIDEO_DATABASE.forEach(v => {
                     const safeTotalDur = (v.duration || 30);
-                    
-                    // -- Logic for Short Videos --
                     if (safeTotalDur <= 15) {
-                        // If video is short (<= 15s), take almost the whole thing, but stop 0.5s before end
                         list.push({
                             uuid: crypto.randomUUID(),
                             videoId: v.id,
@@ -234,10 +335,6 @@
                             totalDuration: safeTotalDur
                         });
                     } else {
-                        // -- Logic for Long Videos --
-                        // Step every 25s, take 5s chunks.
-                        // CRITICAL: Ensure we don't start too close to end.
-                        // We stop loop if t > total - 6 (so we have 5s clip + 1s buffer)
                         for (let t = 0; t < safeTotalDur - 6; t += 25) {
                             list.push({ 
                                 uuid: crypto.randomUUID(), 
@@ -254,7 +351,7 @@
                 return list.sort(() => Math.random() - 0.5);
             }
 
-            save() { localStorage.setItem('orionMixV12', JSON.stringify(this.playlist)); }
+            save() { localStorage.setItem('orionMixV13', JSON.stringify(this.playlist)); }
 
             autoStart() {
                 this.isPlaying = true;
@@ -282,7 +379,6 @@
                 const activeW = this.activePlayer === 1 ? document.getElementById('player1-wrapper') : document.getElementById('player2-wrapper');
                 const nextW = this.activePlayer === 1 ? document.getElementById('player2-wrapper') : document.getElementById('player1-wrapper');
 
-                // Load Current
                 if (activeW.style.opacity != '1') {
                     activeP.loadVideoById({videoId: clip.videoId, startSeconds: clip.start});
                     activeP.playVideo();
@@ -297,18 +393,10 @@
                 this.monitorInterval = setInterval(() => {
                     if(editor.isOpen) { activeP.pauseVideo(); return; }
                     
-                    // 1. Force Play
                     if(activeP.getPlayerState() === 2) activeP.playVideo();
-                    
-                    // 2. Explicit End Check
-                    if(activeP.getPlayerState() === YT.PlayerState.ENDED) {
-                        this.forceNext(); return;
-                    }
+                    if(activeP.getPlayerState() === YT.PlayerState.ENDED) { this.forceNext(); return; }
 
-                    // 3. Current Time Check
                     const t = activeP.getCurrentTime();
-                    
-                    // Stuck Detection
                     if (t === this.lastTime) {
                         this.stuckCounter++;
                         if (this.stuckCounter > 8) { this.forceNext(); return; }
@@ -318,15 +406,9 @@
 
                     if(typeof t !== 'number') return;
 
-                    // 4. Absolute End of Video Safety Check
-                    // If we are within 1 second of the ACTUAL video end, skip immediately.
-                    // This prevents getting stuck on the last frame/suggestion screen.
                     const realTotal = clip.totalDuration || 1000;
-                    if (t >= realTotal - 1.0) {
-                        this.forceNext(); return;
-                    }
+                    if (t >= realTotal - 1.0) { this.forceNext(); return; }
 
-                    // 5. Logical Cut
                     const played = t - clip.start;
                     const remaining = clip.duration - played;
 
@@ -365,28 +447,19 @@
             }
             
             forceNext() { 
-                console.log("Forcing Next Clip (Stuck/Ended)");
                 clearInterval(this.monitorInterval);
-                
-                // Visual Swap Immediately (in case crossfade fails)
                 const activeW = this.activePlayer === 1 ? document.getElementById('player1-wrapper') : document.getElementById('player2-wrapper');
                 const nextW = this.activePlayer === 1 ? document.getElementById('player2-wrapper') : document.getElementById('player1-wrapper');
-                
-                activeW.style.opacity = 0;
-                nextW.style.opacity = 1;
-                
-                // Swap Players Logic
+                activeW.style.opacity = 0; nextW.style.opacity = 1;
                 this.activePlayer = this.activePlayer === 1 ? 2 : 1;
                 this.playSequence(this.currentIndex + 1); 
             }
 
-            // --- UI Methods ---
             toggleUI() { document.getElementById('ui-layer').classList.toggle('hidden-ui'); this.renderUI(); }
             switchTab(t) { 
                 this.currentTab = t; 
                 document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
                 document.querySelectorAll('.view-section').forEach(v => v.classList.remove('active'));
-                
                 const map = {sequence:0, sources:1, details:2};
                 document.querySelectorAll('.tab-btn')[map[t]].classList.add('active');
                 document.getElementById('view-'+t).classList.add('active');
@@ -405,7 +478,6 @@
             }
             handleSearch(v) { this.searchQuery = v.toLowerCase(); if(this.currentTab === 'sources') this.renderSources(); }
             
-            // --- Renders ---
             renderUI() {
                 if(this.currentTab==='sequence') this.renderSequence();
                 if(this.currentTab==='sources') this.renderSources();
@@ -527,12 +599,7 @@
                          const currentEnd = this.clip.start + this.clip.duration;
                          if (t < currentEnd - 0.5) {
                              let newDur = currentEnd - t;
-                             if(newDur > MAX_DUR) {
-                                // Clamp duration, but since we are dragging IN, we can't just change duration arbitrarily without moving end.
-                                // Simplest UX: Allow drag, but cap duration by moving start? 
-                                // Actually, standard behavior: if newDur > 10, don't allow Start to move further left.
-                                // Current code just allows it. Let's strictly cap it.
-                             } else {
+                             if(newDur <= MAX_DUR) {
                                  this.clip.start = t;
                                  this.clip.duration = newDur;
                              }
