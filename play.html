@@ -3,15 +3,15 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Orion Infinity V9 - Pro Data</title>
+    <title>Infinity V9 - Stable</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;700;900&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;700&display=swap');
 
         body {
             font-family: 'Heebo', sans-serif;
-            background-color: #050505;
-            color: #e5e5e5;
+            background-color: #000;
+            color: #fff;
             overflow: hidden;
             margin: 0; padding: 0;
             touch-action: manipulation;
@@ -27,464 +27,205 @@
             opacity: 0; transition: opacity 0.5s ease-in-out; 
         }
         .video-foreground { position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; }
+        
+        /* Zoom Fix */
         @media (min-aspect-ratio: 16/9) { .video-foreground iframe { width: 100%; height: 140%; top: -20%; } }
         @media (max-aspect-ratio: 16/9) { .video-foreground iframe { width: 140%; height: 100%; left: -20%; } }
         .player-wrapper iframe { width: 100%; height: 100%; pointer-events: none; }
 
-        /* --- FLOATING INFO CARD --- */
-        #floating-info {
-            position: fixed; top: 20px; left: 20px; z-index: 10;
-            background: rgba(10, 10, 10, 0.85); backdrop-filter: blur(12px);
-            border-right: 3px solid #4ade80;
-            border-radius: 4px;
-            padding: 12px 16px;
-            max-width: 240px; cursor: pointer;
-            transition: all 0.3s cubic-bezier(0.2, 0.8, 0.2, 1);
-            transform: translateY(0); opacity: 1;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+        /* --- START SCREEN (Stability Fix) --- */
+        #start-screen {
+            position: fixed; inset: 0; z-index: 100;
+            background: #000;
+            display: flex; flex-direction: column;
+            align-items: center; justify-content: center;
+            transition: opacity 0.5s;
         }
-        #floating-info:hover { background: rgba(20, 20, 20, 0.95); transform: translateY(2px); }
-        #floating-info.hidden-card { transform: translateY(-100px); opacity: 0; pointer-events: none; }
+        .loader {
+            border: 4px solid #333; border-top: 4px solid #4ade80;
+            border-radius: 50%; width: 40px; height: 40px;
+            animation: spin 1s linear infinite; margin-bottom: 20px;
+        }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
         
-        .float-label { font-size: 0.6rem; text-transform: uppercase; letter-spacing: 1px; color: #666; margin-bottom: 2px; }
-        .float-title { font-size: 0.9rem; font-weight: 900; color: white; line-height: 1.1; margin-bottom: 4px; }
-        .float-tech { font-size: 0.75rem; color: #4ade80; font-family: monospace; border-top: 1px solid #333; padding-top: 4px; margin-top: 4px; }
-        .float-hint { font-size: 0.65rem; color: #888; margin-top: 6px; display: flex; align-items: center; gap: 4px; }
+        #start-btn {
+            display: none; /* Hidden until ready */
+            padding: 15px 40px; background: #4ade80; color: black;
+            font-weight: bold; font-size: 1.2rem; border-radius: 50px;
+            cursor: pointer; box-shadow: 0 0 20px rgba(74, 222, 128, 0.4);
+            animation: pulse 2s infinite;
+        }
+        @keyframes pulse { 0% { transform: scale(1); } 50% { transform: scale(1.05); } 100% { transform: scale(1); } }
 
         /* --- UI Overlay --- */
         #ui-layer {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 20;
-            background: rgba(5, 5, 5, 0.96); backdrop-filter: blur(10px);
+            background: rgba(0, 0, 0, 0.95); backdrop-filter: blur(10px);
             transition: opacity 0.4s ease, transform 0.4s ease;
             display: flex; flex-direction: column;
         }
-        #ui-layer.hidden-ui { opacity: 0; pointer-events: none; transform: scale(1.02); }
+        #ui-layer.hidden-ui { opacity: 0; pointer-events: none; transform: scale(1.05); }
 
-        /* --- Search Bar --- */
-        .search-container { padding: 0 15px 10px 15px; background: #0a0a0a; border-bottom: 1px solid #222; }
-        .search-input {
-            width: 100%; background: #151515; border: 1px solid #333; color: white;
-            padding: 10px 14px; border-radius: 6px; font-size: 0.9rem;
-            transition: border-color 0.2s;
+        /* --- Floating Info --- */
+        #floating-info {
+            position: fixed; top: 20px; left: 20px; z-index: 10;
+            background: rgba(0, 0, 0, 0.6); backdrop-filter: blur(8px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            padding: 10px 15px; border-radius: 12px;
+            max-width: 200px; cursor: pointer;
+            transition: all 0.3s ease;
         }
-        .search-input:focus { outline: none; border-color: #4ade80; background: #1a1a1a; }
+        #floating-info.hidden-card { transform: translateY(-100px); opacity: 0; pointer-events: none; }
+        .float-title { font-size: 0.8rem; font-weight: bold; color: white; line-height: 1.2; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+        .float-brand { font-size: 0.7rem; color: #4ade80; margin-top: 2px; }
 
         /* --- Tabs --- */
-        .tab-bar { display: flex; background: #0a0a0a; border-bottom: 1px solid #222; flex-shrink: 0; }
-        .tab-btn {
-            flex: 1; padding: 14px; text-align: center; color: #666; font-weight: bold; font-size: 0.85rem;
-            border-bottom: 2px solid transparent; transition: all 0.2s; cursor: pointer;
-        }
-        .tab-btn.active { color: #fff; border-bottom-color: #4ade80; background: #111; }
+        .tab-bar { display: flex; background: #111; border-bottom: 1px solid #333; flex-shrink: 0; }
+        .tab-btn { flex: 1; padding: 12px; text-align: center; color: #888; font-weight: bold; border-bottom: 2px solid transparent; }
+        .tab-btn.active { color: #fff; border-bottom-color: #4ade80; background: #1a1a1a; }
+        #tab-content-area { flex: 1; overflow-y: auto; padding: 15px; }
+        .view-section { display: none; } .view-section.active { display: block; }
 
-        #tab-content-area { flex: 1; overflow-y: auto; padding: 15px; position: relative; }
-        .view-section { display: none; animation: fadeIn 0.3s ease-out; }
-        .view-section.active { display: block; }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-
-        /* --- DETAILS VIEW --- */
-        .details-header { margin-bottom: 20px; }
-        .details-title { font-size: 1.5rem; font-weight: 900; line-height: 1.1; margin-bottom: 5px; color: white; }
-        .details-subtitle { font-size: 0.9rem; color: #888; font-weight: 300; }
+        /* --- Items --- */
+        .clip-card { background: #1a1a1a; border: 1px solid #333; border-radius: 12px; margin-bottom: 8px; padding: 10px; display: flex; align-items: center; gap: 12px; }
+        .clip-card.playing { border-color: #4ade80; background: #152515; }
+        .clip-info { flex: 1; overflow: hidden; cursor: pointer; }
+        .clip-title { font-weight: bold; font-size: 0.85rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .mini-timeline { height: 3px; background: #333; border-radius: 2px; margin-top: 6px; position: relative; width: 100%; }
+        .mini-range { position: absolute; height: 100%; background: #4ade80; border-radius: 2px; }
         
-        .tech-box { background: #111; border: 1px solid #333; border-radius: 8px; padding: 15px; margin-bottom: 20px; }
-        .tech-label { font-size: 0.7rem; color: #4ade80; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 5px; }
-        .tech-content { font-size: 0.95rem; color: #ddd; line-height: 1.4; }
+        /* --- Source Group --- */
+        .source-group { margin-bottom: 20px; border: 1px solid #333; border-radius: 8px; overflow: hidden; }
+        .source-header { background: #222; padding: 10px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #333; }
+        .source-title { font-weight: bold; font-size: 0.9rem; color: #ddd; }
+        .source-clips { padding: 5px; background: #111; }
+        .source-clip-item { display: flex; justify-content: space-between; align-items: center; padding: 8px; border-bottom: 1px solid #222; font-size: 0.8rem; color: #aaa; }
 
-        .tag-cloud { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 20px; }
-        .tag { background: #1a1a1a; border: 1px solid #333; padding: 6px 10px; border-radius: 4px; font-size: 0.8rem; color: #ccc; }
-        .tag.brand { border-color: #4ade80; color: #4ade80; background: rgba(74, 222, 128, 0.05); }
-
-        .highlight-item {
-            padding: 12px; border-bottom: 1px solid #222; display: flex; gap: 12px; align-items: center;
-            cursor: pointer; transition: background 0.2s;
-        }
-        .highlight-item:hover { background: #151515; }
-        .highlight-item:last-child { border-bottom: none; }
-        .time-badge { background: #222; padding: 4px 8px; border-radius: 4px; font-family: monospace; font-size: 0.8rem; color: #4ade80; border: 1px solid #333; }
-
-        /* --- Sequence List --- */
-        .clip-card {
-            background: #111; border: 1px solid #222; border-radius: 8px;
-            margin-bottom: 8px; padding: 10px; display: flex; align-items: center; gap: 12px;
-            transition: all 0.2s; position: relative; overflow: hidden;
-        }
-        .clip-card.playing { border-color: #4ade80; background: #0f1f15; }
-        .clip-info { flex: 1; overflow: hidden; cursor: pointer; z-index: 2; }
-        .clip-title { font-weight: bold; font-size: 0.9rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: #e5e5e5; }
-        .clip-tech { font-size: 0.75rem; color: #666; margin-top: 2px; font-family: monospace; }
-        
-        .mini-timeline-bg { height: 3px; background: #222; border-radius: 2px; margin-top: 8px; position: relative; width: 100%; overflow: hidden; }
-        .mini-timeline-fill { position: absolute; height: 100%; background: #333; width: 100%; }
-        .mini-range { position: absolute; height: 100%; background: #4ade80; border-radius: 2px; z-index: 2; }
-
-        .btn-icon { width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; border-radius: 4px; color: #666; transition: 0.2s; z-index: 2; }
-        .btn-icon:hover { background: #222; color: white; }
-
-        /* --- Source List --- */
-        .source-group { margin-bottom: 15px; border: 1px solid #222; border-radius: 8px; overflow: hidden; background: #0a0a0a; }
-        .source-header { padding: 12px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #222; }
-        .source-title { font-weight: bold; font-size: 0.95rem; color: #fff; }
-        .source-sub { font-size: 0.75rem; color: #666; margin-top: 2px; }
-        .source-actions button { background: #1a1a1a; border: 1px solid #333; color: #ccc; font-size: 0.75rem; padding: 4px 10px; border-radius: 4px; transition: 0.2s; }
-        .source-actions button:hover { border-color: #4ade80; color: #4ade80; }
-
-        /* --- EDITOR MODAL --- */
-        #editor-modal {
-            position: fixed; inset: 0; z-index: 50; background: #000;
-            display: flex; flex-direction: column; transform: translateY(100%);
-            transition: transform 0.3s cubic-bezier(0.2, 0.8, 0.2, 1);
-        }
+        /* --- Editor --- */
+        #editor-modal { position: fixed; inset: 0; z-index: 50; background: #111; display: flex; flex-direction: column; transform: translateY(100%); transition: transform 0.3s; }
         #editor-modal.open { transform: translateY(0); }
         #editor-player-container { width: 100%; aspect-ratio: 16/9; background: #000; flex-shrink: 0; position: relative; }
-        .editor-controls { padding: 20px; flex: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 20px; }
-        
+        .editor-controls { padding: 20px; flex: 1; overflow-y: auto; }
         .timeline-wrapper { position: relative; height: 60px; display: flex; align-items: center; touch-action: none; margin: 0 10px; }
-        .timeline-track { position: absolute; left: 0; right: 0; height: 24px; background: #111; border-radius: 4px; border: 1px solid #333; overflow: hidden; }
-        /* Simulated waveform */
-        .waveform-pattern { width: 100%; height: 100%; opacity: 0.2; background-image: linear-gradient(90deg, transparent 50%, #444 50%); background-size: 4px 100%; }
-        
-        .timeline-range { position: absolute; height: 24px; background: rgba(74, 222, 128, 0.2); border: 1px solid #4ade80; box-sizing: border-box; }
-        .timeline-handle { position: absolute; top: 50%; transform: translate(-50%, -50%); width: 40px; height: 60px; z-index: 10; cursor: col-resize; display: flex; justify-content: center; align-items: center; }
-        .timeline-handle::after { content: ''; display: block; width: 4px; height: 40px; border-radius: 2px; background: #fff; box-shadow: 0 0 5px rgba(0,0,0,0.8); }
+        .timeline-track { position: absolute; left: 0; right: 0; height: 12px; background: #222; border-radius: 6px; border: 1px solid #333; }
+        .timeline-range { position: absolute; height: 12px; background: rgba(74, 222, 128, 0.3); border-radius: 2px; border-top: 1px solid #4ade80; border-bottom: 1px solid #4ade80; }
+        .timeline-handle { position: absolute; top: 50%; transform: translate(-50%, -50%); width: 30px; height: 50px; z-index: 10; cursor: col-resize; display: flex; justify-content: center; align-items: center; }
+        .timeline-handle::after { content: ''; display: block; width: 4px; height: 40px; border-radius: 2px; box-shadow: 0 0 5px rgba(0,0,0,0.5); }
         .handle-l::after { background: #4ade80; } .handle-r::after { background: #ef4444; }
+        .playhead { position: absolute; top: 10px; bottom: 10px; width: 2px; background: #fff; pointer-events: none; z-index: 5; opacity: 0.8; }
 
-        /* General Controls */
-        #settings-toggle { position: fixed; top: 20px; right: 20px; z-index: 30; background: rgba(0,0,0,0.6); border: 1px solid rgba(255,255,255,0.2); width: 44px; height: 44px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 1.5rem; backdrop-filter: blur(4px); cursor: pointer; transition: 0.2s; }
-        #settings-toggle:hover { background: white; color: black; }
-        #unmute-overlay { position: fixed; bottom: 40px; left: 50%; transform: translateX(-50%); z-index: 25; background: #4ade80; color: black; padding: 12px 24px; border-radius: 50px; display: flex; align-items: center; gap: 10px; animation: fadeIn 1s ease-out; cursor: pointer; font-weight: bold; box-shadow: 0 0 20px rgba(74,222,128,0.4); }
+        /* Controls */
+        #settings-toggle { position: fixed; top: 20px; right: 20px; z-index: 30; background: rgba(0,0,0,0.4); border: 1px solid rgba(255,255,255,0.2); width: 44px; height: 44px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 1.5rem; backdrop-filter: blur(4px); cursor: pointer; }
+        #unmute-overlay { position: fixed; bottom: 40px; left: 50%; transform: translateX(-50%); z-index: 25; background: rgba(0,0,0,0.6); padding: 10px 20px; border-radius: 30px; display: flex; align-items: center; gap: 10px; animation: fadeIn 1s ease-out; cursor: pointer;}
         #unmute-overlay.hidden { display: none; }
+        
+        /* Details View */
+        .tag { display: inline-block; background: #222; border: 1px solid #333; padding: 4px 8px; border-radius: 4px; font-size: 0.75rem; color: #ccc; margin: 2px; }
+        .tag.brand { border-color: #4ade80; color: #4ade80; }
+        .highlight-item { padding: 10px; border-bottom: 1px solid #222; display: flex; gap: 10px; align-items: center; cursor: pointer; }
 
     </style>
 </head>
 <body>
 
-    <!-- Background Mixers -->
-    <div id="video-stage" onclick="app.unmuteAll()">
+    <div id="start-screen">
+        <div id="loading-spinner" class="loader"></div>
+        <div id="status-text" class="text-gray-400 text-sm mb-4">טוען נגני וידאו...</div>
+        <button id="start-btn" onclick="app.manualStart()">נגן את המיקס ▶</button>
+    </div>
+
+    <div id="video-stage">
         <div id="player1-wrapper" class="player-wrapper video-foreground"><div id="player1"></div></div>
         <div id="player2-wrapper" class="player-wrapper video-foreground"><div id="player2"></div></div>
     </div>
 
-    <!-- Floating Info Card -->
     <div id="floating-info" class="hidden-card" onclick="app.openDetailsTab()">
-        <div class="float-label">NOW PLAYING</div>
-        <div class="float-title" id="float-title">כותרת</div>
-        <div class="float-tech" id="float-tech">TECH SPECS</div>
-        <div class="float-hint"><span>ℹ️</span> לחץ לפרטים מלאים</div>
+        <div class="float-title" id="float-title">Title</div>
+        <div class="float-brand" id="float-brand">Brand</div>
+        <div class="text-[10px] text-gray-400 mt-1">לחץ לפרטים</div>
     </div>
 
-    <!-- Controls -->
     <div id="settings-toggle" onclick="app.toggleUI()">⚙️</div>
-    <div id="unmute-overlay" onclick="app.unmuteAll()">
-        <span>🔇</span><span>לחץ להפעלת סאונד</span>
+    <div id="unmute-overlay" class="hidden" onclick="app.unmuteAll()">
+        <span>🔇</span><span class="text-sm font-bold">הפעל סאונד</span>
     </div>
 
-    <!-- Main UI -->
     <div id="ui-layer" class="hidden-ui">
-        <div class="p-4 bg-black/80 border-b border-white/10 flex justify-between items-center shrink-0">
-            <div>
-                <h1 class="text-xl font-black tracking-tight text-white">ORION <span class="text-green-400">INFINITY</span></h1>
-                <div class="text-[10px] text-gray-500 uppercase tracking-widest">Post-Production Portfolio</div>
-            </div>
-            <div class="flex gap-2">
-                <button onclick="app.downloadJSON()" class="text-xs bg-gray-800 border border-gray-600 px-3 py-1 rounded hover:bg-gray-700">Backup</button>
-                <input type="file" id="file-input" accept=".json" style="display: none" onchange="app.uploadJSON(this)">
-                <button onclick="document.getElementById('file-input').click()" class="text-xs bg-gray-800 border border-gray-600 px-3 py-1 rounded hover:bg-gray-700">Load</button>
-                <button onclick="app.toggleUI()" class="text-2xl ml-4 text-gray-400 hover:text-white">✕</button>
-            </div>
+        <div class="p-3 bg-black/50 border-b border-white/10 flex justify-between items-center shrink-0">
+            <h1 class="text-lg font-bold text-green-400">Mixer V9</h1>
+            <button onclick="app.toggleUI()" class="text-xl text-gray-400">✕</button>
         </div>
 
-        <div class="search-container">
-            <input type="text" id="search-input" class="search-input" placeholder="חפש לפי טכניקה, מותג או שם פרויקט..." oninput="app.handleSearch(this.value)">
+        <div class="p-2 bg-black">
+            <input type="text" placeholder="חפש..." class="w-full bg-gray-900 border border-gray-700 rounded p-2 text-sm" oninput="app.handleSearch(this.value)">
         </div>
 
         <div class="tab-bar">
-            <div class="tab-btn active" onclick="app.switchTab('sequence')">SEQUENCE</div>
-            <div class="tab-btn" onclick="app.switchTab('sources')">SOURCES (MEDIA POOL)</div>
-            <div class="tab-btn" onclick="app.switchTab('details')">METADATA</div>
+            <div class="tab-btn active" onclick="app.switchTab('sequence')">סיקוונס</div>
+            <div class="tab-btn" onclick="app.switchTab('sources')">מקורות</div>
+            <div class="tab-btn" onclick="app.switchTab('details')">פרטים</div>
         </div>
 
         <div id="tab-content-area">
-            <!-- VIEW 1: SEQUENCE -->
             <div id="view-sequence" class="view-section active">
                 <div id="playlist-container"></div>
-                <div class="mt-8 text-center pb-12">
-                    <button onclick="app.regeneratePlaylist()" class="bg-red-600 hover:bg-red-500 text-white px-8 py-3 rounded-full text-sm font-bold shadow-lg transition transform hover:scale-105">
-                        🎲 RE-SHUFFLE MIX
-                    </button>
-                </div>
+                <div class="text-center p-4"><button onclick="app.regeneratePlaylist()" class="text-red-400 text-sm">ערבוב מחדש</button></div>
             </div>
-
-            <!-- VIEW 2: SOURCES -->
-            <div id="view-sources" class="view-section">
-                <div id="sources-container"></div>
-            </div>
-
-            <!-- VIEW 3: DETAILS -->
-            <div id="view-details" class="view-section">
-                <div id="details-content" class="p-2">
-                    <div class="flex flex-col items-center justify-center h-64 text-gray-500">
-                        <div class="text-4xl mb-2">🎬</div>
-                        <div>Select a clip to view metadata</div>
-                    </div>
-                </div>
-            </div>
+            <div id="view-sources" class="view-section"><div id="sources-container"></div></div>
+            <div id="view-details" class="view-section"><div id="details-content" class="p-4 text-center text-gray-500">נגן סרטון לפרטים</div></div>
         </div>
     </div>
 
-    <!-- Editor Modal -->
     <div id="editor-modal">
         <div class="flex justify-between items-center p-4 bg-black border-b border-white/10">
-            <h2 class="text-sm font-bold text-gray-300 uppercase tracking-wider">Clip Editor</h2>
-            <button onclick="editor.close()" class="text-white px-4 py-2 bg-green-600 hover:bg-green-500 rounded text-xs font-bold">DONE</button>
+            <h2 class="text-sm font-bold">עריכה</h2>
+            <button onclick="editor.close()" class="bg-gray-800 px-3 py-1 rounded text-xs">סגור</button>
         </div>
         <div id="editor-player-container"><div id="editor-player"></div></div>
         <div class="editor-controls">
-            <div class="flex justify-between items-end px-2">
-                <div>
-                    <div class="text-[10px] text-gray-500 uppercase">Current Time</div>
-                    <div id="editor-time-display" class="font-mono text-2xl text-blue-400 font-bold">00:00</div>
-                </div>
-                <button onclick="editor.togglePlay()" class="w-12 h-12 bg-white text-black rounded-full flex items-center justify-center text-xl font-bold hover:scale-110 transition">▶</button>
+            <div class="flex justify-center gap-4 items-center mb-4">
+                <button onclick="editor.togglePlay()" class="text-2xl">▶/⏸</button>
+                <div id="editor-time-display" class="font-mono text-blue-400">00:00</div>
             </div>
-            
-            <div class="mt-4 px-2">
-                <div class="flex justify-between text-xs text-gray-400 mb-2 font-mono">
-                    <span id="label-in">IN: 0.0s</span><span id="label-out">OUT: 5.0s</span>
+            <div class="px-2 mb-6">
+                <div class="flex justify-between text-xs text-gray-500 mb-6">
+                    <span id="label-in">IN</span><span id="label-out">OUT</span>
                 </div>
                 <div class="timeline-wrapper" id="timeline-track-area">
-                    <div class="timeline-track"><div class="waveform-pattern"></div></div>
-                    <div class="timeline-range" id="timeline-fill"></div>
+                    <div class="timeline-track"></div><div class="timeline-range" id="timeline-fill"></div>
                     <div class="playhead" id="editor-playhead"></div>
                     <div class="timeline-handle handle-l" id="handle-in"></div>
                     <div class="timeline-handle handle-r" id="handle-out"></div>
                 </div>
-                <div class="flex justify-between text-[10px] text-gray-600 mt-2 px-1 font-mono">
-                    <span>00:00</span><span id="total-duration-label">00:00</span>
-                </div>
             </div>
-
-            <div class="grid grid-cols-2 gap-4 mt-4 px-2">
-                <button onclick="editor.duplicateClip()" class="bg-blue-900/30 text-blue-200 py-3 rounded border border-blue-500/30 hover:bg-blue-900/50 transition font-bold text-xs uppercase">📄 Duplicate Segment</button>
-                <button onclick="editor.deleteClip()" class="bg-red-900/30 text-red-200 py-3 rounded border border-red-500/30 hover:bg-red-900/50 transition font-bold text-xs uppercase">🗑 Remove Segment</button>
+            <div class="grid grid-cols-2 gap-3">
+                <button onclick="editor.duplicateClip()" class="bg-blue-900/30 p-2 rounded text-sm">שכפל</button>
+                <button onclick="editor.deleteClip()" class="bg-red-900/30 p-2 rounded text-sm">מחק</button>
             </div>
-            <div class="h-20"></div>
         </div>
     </div>
 
     <script>
-        // --- 1. FULL DATA INTEGRATION (20+ LINKS) ---
+        // --- DATA ---
         const VIDEO_DATABASE = [
-            {
-                id: '1bA6cTw1DJ4',
-                title: "סרטון יום הולדת: מוטי ליבנה",
-                brand: "Private / Birthday",
-                concept: "Character Animation / Storytelling",
-                editing_style: "After Effects Animation",
-                tech_desc: "דמויות ווקטוריות, ריג (Rigging) בסיסי, אנימציית טקסט, מעברים גרפיים.",
-                objects: ["דמויות מצוירות", "עוגה", "בלונים", "טקסט קינטי"],
-                duration: 40
-            },
-            {
-                id: 'T9vEvAcai_I',
-                title: "חיתוך ירוק (Green Screen) רחפן",
-                brand: "VFX Demo",
-                concept: "Compositing / Keying",
-                editing_style: "Chroma Key / Tracking",
-                tech_desc: "הסרת רקע ירוק משוט רחפן בתנועה, התאמת צבעים (Color Match), הוספת השתקפויות על המים.",
-                objects: ["ים", "רחפן", "מסך ירוק", "בניינים"],
-                duration: 30
-            },
-            {
-                id: 'p02kAntlIyY',
-                title: "קליפ מילים: נועם מיכאל",
-                brand: "Noam Michael",
-                concept: "Lyric Video / Performance",
-                editing_style: "Kinetic Typography",
-                tech_desc: "סנכרון טקסט למוזיקה, שימוש במצלמה וירטואלית ב-AE, שילוב טקסט בחלל (3D Text Integration).",
-                objects: ["זמר", "גיטרה", "טקסט רץ", "רקע שחור"],
-                duration: 180
-            },
-            {
-                id: 'zUmTkhqFhgw',
-                title: "סרטון הד-סטארט: גרינטי",
-                brand: "GreenTea",
-                concept: "Crowdfunding / Promo",
-                editing_style: "Motion Graphics / Explainer",
-                tech_desc: "שילוב אלמנטים גרפיים על וידאו (HUD), אנימציית לוגו, מעברי שקופיות, תיקוני צבע.",
-                objects: ["תה", "צנצנת", "כיתובים צפים", "ראיונות"],
-                duration: 120
-            },
-            {
-                id: 'kjBkgAY7S2A',
-                title: "קליפ אישי: טמירה",
-                brand: "Private",
-                concept: "Family / Tribute",
-                editing_style: "Montage / Slow Motion",
-                tech_desc: "עריכת מונטאז' רגשית, שימוש ב-Speed Ramps, ייצוב שוטים (Stabilization).",
-                objects: ["משפחה", "אירוע", "ריקודים"],
-                duration: 180
-            },
-            {
-                id: 'HFvaEpiMwJU',
-                title: "קליפ אישי: אביב ואידה",
-                brand: "Wedding / Private",
-                concept: "Wedding Highlight",
-                editing_style: "Cinematic / Color Grading",
-                tech_desc: "תיקוני צבע (Grading), אפקטים של אור (Light Leaks), מעברים חלקים.",
-                objects: ["חתן וכלה", "חופה", "ריקודים"],
-                duration: 180
-            },
-            {
-                id: 'jCVjX_K0swc',
-                title: "הנפשת מודל: ReLife",
-                brand: "ReLife",
-                concept: "3D Rendering / Product",
-                editing_style: "3D Animation / Compositing",
-                tech_desc: "רינדור מודל תלת-ממדי, הצגת מוצר ב-360, כיתובי הסבר (Callouts) עוקבים.",
-                objects: ["מודל רפואי", "סביבה נקייה", "טקסט צף"],
-                duration: 60
-            },
-            {
-                id: 'Bw3X4phfpmI',
-                title: "נועם מיכאל: הופעה חיה",
-                brand: "Noam Michael",
-                concept: "Live Performance",
-                editing_style: "Multicam Editing",
-                tech_desc: "עריכת מולטי-קאם (4 מצלמות), סנכרון סאונד חיצוני, תיקוני צבע לתאורת במה.",
-                objects: ["במה", "תאורה כחולה", "קהל", "להקה"],
-                duration: 240
-            },
-            {
-                id: 'Y76qS937PvU',
-                title: "קרקס החיוכים: רחשי לב",
-                brand: "Rachashei Lev",
-                concept: "Event / Charity",
-                editing_style: "Documentary / Fast Paced",
-                tech_desc: "עריכה קצבית למוזיקה, שילוב ראיונות עם B-Roll, גרפיקה תחתונה (Lower Thirds).",
-                objects: ["ליצנים", "ילדים", "בית חולים", "בלונים"],
-                duration: 150
-            },
-            {
-                id: 'daumEVQ1yms',
-                title: "צ'ארלי צ'אפלין בשיב\"א",
-                brand: "Sheba Hospital",
-                concept: "Silent Film Style / Comedy",
-                editing_style: "Old Film Look",
-                tech_desc: "אפקט סרט ישן (Old Film Grain), שינוי פריימרייט (Posterize Time), כרטיסיות טקסט שחור-לבן.",
-                objects: ["צ'ארלי צ'אפלין", "רופאים", "מסדרון בית חולים"],
-                duration: 120
-            },
-            {
-                id: 'WQya6tnGBQk',
-                title: "זוהר עילם: מפעיל אירועים",
-                brand: "Zohar Eilam",
-                concept: "Promo / Showreel",
-                editing_style: "Dynamic / Sizzle",
-                tech_desc: "חיתוכים מהירים (Jump Cuts), סנכרון לביטים, אפקטים של סאונד (SFX).",
-                objects: ["מסיבה", "מיקרופון", "ילדים רוקדים"],
-                duration: 90
-            },
-            {
-                id: '_rv2sMdyCpg',
-                title: "RedBull Remake (מקום ראשון)",
-                brand: "RedBull Contest",
-                concept: "Stop Motion / Creative",
-                editing_style: "VFX / Stop Motion",
-                tech_desc: "שילוב אנימציית סטופ-מושן עם וידאו חי, אפקטים מצוירים (Scribble Effect), קומפוזיטינג.",
-                objects: ["פחית רדבול", "דמויות", "רקע מצויר"],
-                duration: 60
-            },
-            {
-                id: 'mBKxCEEzdn4',
-                title: "הזמנה ליום הולדת: נטי גיא",
-                brand: "Private",
-                concept: "Invitation / Fun",
-                editing_style: "Green Screen / Compositing",
-                tech_desc: "השתלת הדמות ברקעים שונים, אנימציית טקסט בסיסית.",
-                objects: ["דמות", "רקעים מתחלפים", "טקסט הזמנה"],
-                duration: 60
-            },
-            {
-                id: 'Ra7ntt3M61E',
-                title: "ילדים בסיכוי: אירוע שנתי",
-                brand: "Yeladim BeSikuy",
-                concept: "Event Coverage",
-                editing_style: "Corporate / Highlight",
-                tech_desc: "סיכום אירוע, שילוב נאומים עם מוזיקת רקע, עריכה ליניארית.",
-                objects: ["נאומים", "קהל", "כיבוד", "לוגו העמותה"],
-                duration: 180
-            },
-            {
-                id: 'fL0Ww1tt8EI',
-                title: "שואוריל 2014",
-                brand: "Portfolio",
-                concept: "Showreel",
-                editing_style: "Fast Cut / Montage",
-                tech_desc: "סיכום עבודות, התאמת קצב (Pacing), מעברים יצירתיים.",
-                objects: ["אוסף קטעים", "לוגו פתיחה", "לוגו סיום"],
-                duration: 90
-            },
-            {
-                id: 'aydTo0aZRtA',
-                title: "צילום רחפן + תנועה בפוסט",
-                brand: "VFX Test",
-                concept: "Camera Tracking",
-                editing_style: "3D Tracking",
-                tech_desc: "ביצוע 3D Camera Tracker ב-AE, שתילת טקסט תלת-ממדי בחלל האווירי, הצמדה לקרקע.",
-                objects: ["רחפן", "נוף אורבני", "טקסט צף"],
-                duration: 30
-            },
-            {
-                id: 'J1fY6H1cj3A',
-                title: "החלפת שילוט דרך ראשית",
-                brand: "VFX Test",
-                concept: "Planar Tracking / Mocha",
-                editing_style: "Compositing / Rotoscoping",
-                tech_desc: "שימוש ב-Mocha למעקב משטחי (Planar Track), החלפת תוכן של שלט, התאמת טשטוש תנועה (Motion Blur).",
-                objects: ["כביש מהיר", "שלט חוצות", "מכוניות"],
-                duration: 15
-            },
-            {
-                id: 'WSL1iYAyj4I',
-                title: "הנפשת עטיפה: גבריאל",
-                brand: "Gabriel",
-                concept: "Album Art Animation",
-                editing_style: "Parallax Effect",
-                tech_desc: "חיתוך שכבות בפוטושופ, יצירת עומק (Parallax) ב-AE, הוספת חלקיקים (Particles).",
-                objects: ["עטיפת אלבום", "דמות", "עשן/ערפל"],
-                duration: 20
-            },
-            {
-                id: 'NT_4d8sSdls',
-                title: "הנפשת עטיפה: אסף אור",
-                brand: "Asaf Or",
-                concept: "Album Art Animation",
-                editing_style: "Puppet Tool",
-                tech_desc: "שימוש ב-Puppet Tool להזזת דמויות סטטיות, אנימציית לופ.",
-                objects: ["ציור", "דמות מנגנת", "רקע זז"],
-                duration: 20
-            },
-            {
-                id: 'LvdGbCkZAiY',
-                title: "אני בל לי - קליפ רשמי",
-                brand: "Bal Li",
-                concept: "Music Video / AI Art",
-                editing_style: "AI Animation / Hybrid",
-                tech_desc: "שילוב וידאו עם אנימציות AI (Stable Diffusion/Kaiber), מעברים הזייתיים, אפקטים של זוהר.",
-                objects: ["זמרת", "אנימציה צבעונית", "דמויות מתחלפות"],
-                duration: 190
-            }
+            { id: 'LvdGbCkZAiY', title: "ניסוי סטודיו וירטואלי", brand: "טכנולוגיית שידור", concept: "BTS", objects: ["אולפן", "מסך"], duration: 180, highlights: [{start:0, desc:"Intro"}, {start:19, desc:"Single Shot"}] },
+            { id: 'zUmTkhqFhgw', title: "מידות ומשקל", brand: "גלריה", concept: "Art", objects: ["סרטי מדידה", "רצפת פרקט"], duration: 120, highlights: [{start:3, desc:"Measuring"}, {start:10, desc:"Close up"}] },
+            { id: '1bA6cTw1DJ4', title: "מאחורי הקלעים: שחר חסון", brand: "שחר חסון", concept: "BTS", objects: ["בום", "מצלמה"], duration: 60, highlights: [{start:0, desc:"Rehearsal"}] },
+            { id: 'T9vEvAcai_I', title: "סיכום מופע ענק", brand: "מופעי קיץ", concept: "Showreel", objects: ["במה", "לד"], duration: 60, highlights: [{start:0, desc:"Intro"}] },
+            { id: 'WSL1iYAyj4I', title: "מחול גרפיטי", brand: "אמנותי", concept: "Clip", objects: ["גרפיטי", "צבע"], duration: 180, highlights: [{start:9, desc:"Red Hood"}] },
+            { id: 'J1fY6H1cj3A', title: "ממשק קיוסק", brand: "בורסת המותגים", concept: "UI/UX", objects: ["מסך"], duration: 30, highlights: [{start:0, desc:"GAP"}] },
+            { id: 'aydTo0aZRtA', title: "סרט פרישה", brand: "שיבא", concept: "Tribute", objects: ["קורקינט"], duration: 70, highlights: [{start:21, desc:"Scooter"}] },
+            { id: 'p02kAntlIyY', title: "להקת ג'מעא", brand: "ג'מעא", concept: "Show", objects: ["גיטרה"], duration: 180, highlights: [{start:33, desc:"Circle"}] },
+            { id: 'NT_4d8sSdls', title: "סנובורד אקסטרים", brand: "JBL", concept: "Extreme", objects: ["שלג"], duration: 40, highlights: [{start:5, desc:"POV"}] },
+            { id: 'jCVjX_K0swc', title: "תיעוד עבודה", brand: "פנימי", concept: "Screencast", objects: ["אקסל"], duration: 60, highlights: [{start:0, desc:"Excel"}] }
         ];
 
-        // --- APP LOGIC ---
         class LoopApp {
             constructor() {
                 this.playlist = this.loadPlaylist();
                 this.currentIndex = 0;
                 this.isPlaying = false;
                 this.activePlayer = 1;
-                this.isMuted = true;
                 this.monitorInterval = null;
                 this.fadeInterval = null;
                 this.nextLoaded = false;
@@ -494,215 +235,290 @@
 
             loadPlaylist() {
                 const saved = localStorage.getItem('orionMixV9');
-                if (saved) { try { return JSON.parse(saved); } catch(e) {} }
-                return this.createAutoPlaylist();
+                return saved ? JSON.parse(saved) : this.createAutoPlaylist();
             }
 
             createAutoPlaylist() {
                 let list = [];
-                // 3. FULL COVERAGE ALGORITHM:
-                // Loop through EVERY video in the DB, slicing it into chunks so we see everything.
-                VIDEO_DATABASE.forEach(video => {
-                    const step = 6; // 6 seconds per clip
-                    const overlap = 0.5; // slight overlap logic if needed, here simple steps
-                    
-                    // Create segments covering the full duration
-                    for (let t = 0; t < (video.duration - 2); t += step) {
-                        list.push({
-                            uuid: crypto.randomUUID(),
-                            videoId: video.id,
-                            title: video.title,
-                            brand: video.brand,
-                            tech_desc: video.tech_desc,
-                            start: t,
-                            duration: 5, // 5s play time
-                            totalDuration: video.duration
-                        });
+                VIDEO_DATABASE.forEach(v => {
+                    for (let t = 0; t < (v.duration||30)-5; t += 25) {
+                        list.push({ uuid: crypto.randomUUID(), videoId: v.id, title: v.title, brand: v.brand, start: t, duration: 5, totalDuration: v.duration });
                     }
                 });
-                // 4. SHUFFLE ON INIT
                 return list.sort(() => Math.random() - 0.5);
             }
 
             save() { localStorage.setItem('orionMixV9', JSON.stringify(this.playlist)); }
 
-            toggleUI() {
-                document.getElementById('ui-layer').classList.toggle('hidden-ui');
-                this.renderUI();
-            }
-
-            handleSearch(val) {
-                this.searchQuery = val.toLowerCase();
-                if(this.currentTab === 'sources') this.renderSources();
-            }
-
-            switchTab(tab) {
-                this.currentTab = tab;
-                document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-                document.querySelectorAll('.view-section').forEach(v => v.classList.remove('active'));
-                
-                const idx = tab === 'sequence' ? 0 : tab === 'sources' ? 1 : 2;
-                document.querySelectorAll('.tab-btn')[idx].classList.add('active');
-                document.getElementById(`view-${tab}`).classList.add('active');
-                
-                this.renderUI();
-            }
-
-            openDetailsTab() {
-                if(!this.isPlaying) return;
-                const clip = this.playlist[this.currentIndex];
-                const data = VIDEO_DATABASE.find(v => v.id === clip.videoId);
-                
-                // Open UI if closed
-                const ui = document.getElementById('ui-layer');
-                if(ui.classList.contains('hidden-ui')) ui.classList.remove('hidden-ui');
-                
-                this.switchTab('details');
-                this.renderDetails(data, clip);
-            }
-
-            renderUI() {
-                if (this.currentTab === 'sequence') this.renderSequence();
-                else if (this.currentTab === 'sources') this.renderSources();
-                else if (this.currentTab === 'details') {
-                    const clip = this.playlist[this.currentIndex];
-                    if(clip) {
-                        const data = VIDEO_DATABASE.find(v => v.id === clip.videoId);
-                        this.renderDetails(data, clip);
-                    }
-                }
-            }
-
-            renderDetails(data, clip) {
-                if(!data) return;
-                const container = document.getElementById('details-content');
-                
-                let tagsHtml = `<div class="tag brand">${data.brand}</div>`;
-                data.objects.forEach(o => tagsHtml += `<div class="tag">${o}</div>`);
-                if(data.editing_style) tagsHtml += `<div class="tag" style="border-color:#3b82f6; color:#60a5fa">${data.editing_style}</div>`;
-
-                container.innerHTML = `
-                    <div class="details-header">
-                        <div class="details-title">${data.title}</div>
-                        <div class="details-subtitle">${data.concept}</div>
-                    </div>
-
-                    <div class="tech-box">
-                        <div class="tech-label">Technical Breakdown (After Effects / Editing)</div>
-                        <div class="tech-content">${data.tech_desc}</div>
-                    </div>
-
-                    <div class="mb-6">
-                        <div class="tech-label mb-2">Metadata Tags</div>
-                        <div class="tag-cloud">${tagsHtml}</div>
-                    </div>
-                    
-                    <div style="margin-top:40px; text-align:center; opacity:0.3; font-size:0.8rem;">
-                        ID: ${data.id} • DUR: ${data.duration}s
-                    </div>
-                `;
-            }
-
-            renderSequence() {
-                const container = document.getElementById('playlist-container');
-                container.innerHTML = '';
-                // Limit rendering for performance if list is huge (it is now)
-                // We render a window around current index
-                const windowSize = 50;
-                let startIdx = Math.max(0, this.currentIndex - 10);
-                let endIdx = Math.min(this.playlist.length, startIdx + windowSize);
-                
-                // Add spacer if needed
-                if(startIdx > 0) container.innerHTML += `<div style="height:20px; text-align:center; color:#333;">... ${startIdx} previous clips ...</div>`;
-
-                for (let i = startIdx; i < endIdx; i++) {
-                    const clip = this.playlist[i];
-                    const isActive = i === this.currentIndex;
-                    const total = clip.totalDuration || 100;
-                    const leftP = (clip.start / total) * 100;
-                    const widthP = (clip.duration / total) * 100;
-                    
-                    const el = document.createElement('div');
-                    el.className = `clip-card ${isActive ? 'playing' : ''}`;
-                    el.onclick = (e) => { if(!e.target.closest('.btn-icon')) editor.open(i); };
-                    el.innerHTML = `
-                        <div class="text-gray-600 text-[10px] font-mono w-6 text-center">#${i+1}</div>
-                        <div class="clip-info">
-                            <div class="clip-title">${clip.title}</div>
-                            <div class="clip-tech">${clip.tech_desc ? clip.tech_desc.substring(0, 50) + '...' : ''}</div>
-                            <div class="mini-timeline-bg"><div class="mini-timeline-fill"></div><div class="mini-range" style="left:${leftP}%; width:${widthP}%"></div></div>
-                        </div>
-                        <button class="btn-icon" onclick="editor.open(${i})">✏️</button>
-                    `;
-                    container.appendChild(el);
-                }
-                
-                if(endIdx < this.playlist.length) container.innerHTML += `<div style="height:20px; text-align:center; color:#333;">... ${this.playlist.length - endIdx} more ...</div>`;
-            }
-
-            renderSources() {
-                const container = document.getElementById('sources-container');
-                container.innerHTML = '';
-                
-                const filteredDB = VIDEO_DATABASE.filter(v => {
-                    const q = this.searchQuery;
-                    if(!q) return true;
-                    const text = (v.title + v.brand + v.concept + v.tech_desc + v.objects.join(' ')).toLowerCase();
-                    return text.includes(q);
-                });
-
-                filteredDB.forEach(data => {
-                    const groupEl = document.createElement('div');
-                    groupEl.className = 'source-group';
-                    const clipsInPlaylist = this.playlist.filter(p => p.videoId === data.id);
-                    
-                    groupEl.innerHTML = `
-                        <div class="source-header">
-                            <div>
-                                <div class="source-title">${data.title}</div>
-                                <div class="source-sub">${data.editing_style}</div>
-                            </div>
-                            <div class="source-actions">
-                                <button onclick="app.addClipToSource('${data.id}')">+ ADD SEGMENT</button>
-                            </div>
-                        </div>
-                        <div class="p-2 text-xs text-gray-500 bg-black/40 border-t border-white/5">
-                            ${clipsInPlaylist.length} instances in sequence • ${data.duration}s total source
-                        </div>
-                    `;
-                    container.appendChild(groupEl);
-                });
-            }
-
-            addClipToSource(vidId) {
-                const data = VIDEO_DATABASE.find(v => v.id === vidId);
-                const newClip = {
-                    uuid: crypto.randomUUID(), videoId: vidId, title: data.title, brand: data.brand,
-                    tech_desc: data.tech_desc, start: 0, duration: 5, totalDuration: data.duration
-                };
-                this.playlist.push(newClip);
-                this.save();
-                alert("Clip added to end of sequence");
-            }
-
-            regeneratePlaylist() {
-                if(confirm('לערבב מחדש את כל הקטעים? (פעולה זו תאפס את הרשימה)')) {
-                    this.playlist = this.createAutoPlaylist();
-                    this.currentIndex = 0;
-                    this.save();
-                    this.renderUI();
-                }
-            }
-
-            // --- Playback Engine ---
-            startEngine() {
+            manualStart() {
+                document.getElementById('start-screen').style.opacity = '0';
+                setTimeout(() => document.getElementById('start-screen').style.display = 'none', 500);
                 this.isPlaying = true;
                 this.playSequence(this.currentIndex);
                 this.renderUI();
             }
 
+            // --- Playback ---
             playSequence(index) {
                 if (!this.isPlaying) return;
-                if (index >= this.playlist.length) index
+                if (index >= this.playlist.length) index = 0;
+                this.currentIndex = index;
+                this.updateFloatingCard(this.playlist[index]);
 
+                if(!editor.isOpen) {
+                    if(this.currentTab === 'sequence') this.renderSequence();
+                    if(this.currentTab === 'details') this.renderUI(); // refresh details if open
+                    this._playInternal(index);
+                }
+            }
 
+            _playInternal(index) {
+                const clip = this.playlist[index];
+                const activeP = this.activePlayer === 1 ? player1 : player2;
+                const nextP = this.activePlayer === 1 ? player2 : player1;
+                const activeW = this.activePlayer === 1 ? document.getElementById('player1-wrapper') : document.getElementById('player2-wrapper');
+                const nextW = this.activePlayer === 1 ? document.getElementById('player2-wrapper') : document.getElementById('player1-wrapper');
+
+                if (activeW.style.opacity != '1') {
+                    activeP.unMute(); // Try unmuting since user interacted
+                    activeP.loadVideoById({videoId: clip.videoId, startSeconds: clip.start});
+                    activeP.playVideo();
+                    activeW.style.opacity = 1; nextW.style.opacity = 0;
+                }
+
+                this.nextLoaded = false;
+                clearInterval(this.monitorInterval);
+                this.monitorInterval = setInterval(() => {
+                    if(editor.isOpen) { activeP.pauseVideo(); return; }
+                    if(activeP.getPlayerState() === 2) activeP.playVideo(); // Force play
+
+                    const t = activeP.getCurrentTime();
+                    if(typeof t !== 'number') return; // Strict check
+
+                    const remaining = clip.duration - (t - clip.start);
+
+                    if(remaining < -1) { this.playSequence(this.currentIndex + 1); return; } // End safe guard
+
+                    if(remaining <= 3 && !this.nextLoaded) {
+                        this.nextLoaded = true;
+                        let nextClip = this.playlist[this.currentIndex + 1] || this.playlist[0];
+                        nextP.mute();
+                        nextP.loadVideoById({videoId: nextClip.videoId, startSeconds: nextClip.start});
+                        nextP.playVideo();
+                    }
+
+                    if(remaining <= 1.5) {
+                        clearInterval(this.monitorInterval);
+                        this.doCrossfade(activeP, activeW, nextP, nextW);
+                    }
+                }, 250);
+            }
+
+            doCrossfade(pOut, wOut, pIn, wIn) {
+                let step = 0; pIn.playVideo();
+                clearInterval(this.fadeInterval);
+                this.fadeInterval = setInterval(() => {
+                    step++;
+                    const p = step / 10;
+                    wOut.style.opacity = 1 - p; wIn.style.opacity = p;
+                    pOut.setVolume((1-p)*100); pIn.setVolume(p*100);
+                    if(p>0.1) pIn.unMute();
+                    if(step >= 10) {
+                        clearInterval(this.fadeInterval);
+                        wOut.style.opacity = 0; pOut.pauseVideo();
+                        wIn.style.opacity = 1; pIn.setVolume(100);
+                        this.activePlayer = this.activePlayer === 1 ? 2 : 1;
+                        this.playSequence(this.currentIndex + 1);
+                    }
+                }, 150);
+            }
+            
+            forceNext() { this.playSequence(this.currentIndex + 1); }
+
+            // --- UI Methods ---
+            toggleUI() { document.getElementById('ui-layer').classList.toggle('hidden-ui'); this.renderUI(); }
+            switchTab(t) { 
+                this.currentTab = t; 
+                document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+                document.querySelectorAll('.view-section').forEach(v => v.classList.remove('active'));
+                
+                const map = {sequence:0, sources:1, details:2};
+                document.querySelectorAll('.tab-btn')[map[t]].classList.add('active');
+                document.getElementById('view-'+t).classList.add('active');
+                this.renderUI();
+            }
+            openDetailsTab() {
+                document.getElementById('ui-layer').classList.remove('hidden-ui');
+                this.switchTab('details');
+            }
+            updateFloatingCard(clip) {
+                const el = document.getElementById('floating-info');
+                el.classList.remove('hidden-card');
+                document.getElementById('float-title').innerText = clip.title;
+                document.getElementById('float-brand').innerText = clip.brand || '';
+            }
+            handleSearch(v) { this.searchQuery = v.toLowerCase(); if(this.currentTab === 'sources') this.renderSources(); }
+            
+            // --- Renders ---
+            renderUI() {
+                if(this.currentTab==='sequence') this.renderSequence();
+                if(this.currentTab==='sources') this.renderSources();
+                if(this.currentTab==='details') this.renderDetails();
+            }
+
+            renderSequence() {
+                const c = document.getElementById('playlist-container'); c.innerHTML = '';
+                this.playlist.forEach((clip, i) => {
+                    const el = document.createElement('div');
+                    el.className = `clip-card ${i===this.currentIndex ? 'playing' : ''}`;
+                    const p = (clip.start / (clip.totalDuration||100))*100;
+                    const w = (clip.duration / (clip.totalDuration||100))*100;
+                    el.innerHTML = `
+                        <div class="text-xs text-gray-500 w-6">#${i+1}</div>
+                        <div class="clip-info" onclick="editor.open(${i})">
+                            <div class="clip-title">${clip.title}</div>
+                            <div class="mini-timeline"><div class="mini-range" style="left:${p}%;width:${w}%"></div></div>
+                        </div>
+                        <button onclick="editor.open(${i})" class="bg-gray-800 rounded-full w-8 h-8 flex items-center justify-center">✎</button>
+                    `;
+                    c.appendChild(el);
+                });
+            }
+
+            renderSources() {
+                const c = document.getElementById('sources-container'); c.innerHTML = '';
+                const filtered = VIDEO_DATABASE.filter(v => !this.searchQuery || (v.title+v.brand+v.objects.join()).toLowerCase().includes(this.searchQuery));
+                filtered.forEach(d => {
+                    const cnt = this.playlist.filter(p=>p.videoId===d.id).length;
+                    const el = document.createElement('div'); el.className = 'source-group';
+                    el.innerHTML = `
+                        <div class="source-header">
+                            <div><div class="source-title">${d.title}</div><div class="text-xs text-gray-500">${d.brand}</div></div>
+                            <button onclick="app.addClip('${d.id}')" class="bg-blue-900 px-2 py-1 rounded text-xs text-blue-200">+ הוסף</button>
+                        </div>
+                        <div class="bg-black/20 p-2 text-xs text-gray-500">${cnt} קטעים במיקס</div>
+                    `;
+                    c.appendChild(el);
+                });
+            }
+
+            renderDetails() {
+                const clip = this.playlist[this.currentIndex];
+                if(!clip) return;
+                const data = VIDEO_DATABASE.find(v=>v.id===clip.videoId);
+                const c = document.getElementById('details-content');
+                let hHtml = '';
+                if(data.highlights) data.highlights.forEach(h => hHtml += `<div class="highlight-item" onclick="app.jump(${h.start})"><span class="text-green-400 font-mono bg-gray-800 px-1 rounded">${app.formatTime(h.start)}</span> <span>${h.desc}</span></div>`);
+                
+                c.innerHTML = `
+                    <h2 class="text-xl font-bold">${data.title}</h2>
+                    <div class="text-gray-400 text-sm mb-4">${data.concept}</div>
+                    <div class="mb-4">
+                        ${data.objects.map(o=>`<span class="tag">${o}</span>`).join('')}
+                    </div>
+                    <div class="bg-gray-900 rounded border border-white/10 overflow-hidden">${hHtml}</div>
+                `;
+            }
+
+            addClip(vidId) {
+                const d = VIDEO_DATABASE.find(v=>v.id===vidId);
+                this.playlist.push({uuid:crypto.randomUUID(), videoId:vidId, title:d.title, brand:d.brand, start:0, duration:5, totalDuration:d.duration});
+                this.save(); alert('נוסף');
+            }
+            regeneratePlaylist() { if(confirm('לערבב?')) { this.playlist = this.createAutoPlaylist(); this.currentIndex=0; this.save(); this.renderUI(); } }
+            jump(t) { if(this.activePlayer===1) player1.seekTo(t); else player2.seekTo(t); }
+            formatTime(s) { const m=Math.floor(s/60), sc=Math.floor(s%60); return `${m}:${sc<10?'0'+sc:sc}`; }
+        }
+
+        class Editor {
+            constructor() { this.isOpen = false; this.clip = null; }
+            open(idx) {
+                this.isOpen = true; this.clip = app.playlist[idx];
+                document.getElementById('editor-modal').classList.add('open');
+                document.getElementById('floating-info').classList.add('hidden-card');
+                if(player1) player1.pauseVideo(); if(player2) player2.pauseVideo();
+                editorPlayer.loadVideoById({videoId:this.clip.videoId, startSeconds:this.clip.start});
+                this.updateUI(); this.startMon();
+            }
+            close() {
+                this.isOpen = false; clearInterval(this.monInt);
+                document.getElementById('editor-modal').classList.remove('open');
+                editorPlayer.pauseVideo();
+                app.save(); app.playSequence(app.currentIndex);
+            }
+            updateUI() {
+                const tot = this.clip.totalDuration||100;
+                document.getElementById('label-in').innerText = 'IN: '+this.clip.start.toFixed(1);
+                document.getElementById('label-out').innerText = 'OUT: '+(this.clip.start+this.clip.duration).toFixed(1);
+                const sP=(this.clip.start/tot)*100, eP=((this.clip.start+this.clip.duration)/tot)*100;
+                document.getElementById('handle-in').style.left=sP+'%'; document.getElementById('handle-out').style.left=eP+'%';
+                document.getElementById('timeline-fill').style.left=sP+'%'; document.getElementById('timeline-fill').style.width=(eP-sP)+'%';
+            }
+            startMon() {
+                clearInterval(this.monInt);
+                this.monInt = setInterval(() => {
+                    if(!this.isOpen) return;
+                    const t = editorPlayer.getCurrentTime(); if(!t) return;
+                    const tot = this.clip.totalDuration||100;
+                    document.getElementById('editor-playhead').style.left=(t/tot)*100+'%';
+                    document.getElementById('editor-time-display').innerText=app.formatTime(t);
+                    if(t > this.clip.start+this.clip.duration) editorPlayer.seekTo(this.clip.start);
+                }, 100);
+            }
+            setupDrag() {
+                const trk=document.getElementById('timeline-track-area');
+                const move=(e)=>{
+                    if(!this.drag) return;
+                    const x = e.touches?e.touches[0].clientX:e.clientX;
+                    const rect=trk.getBoundingClientRect();
+                    let p=(x-rect.left)/rect.width; if(p<0)p=0; if(p>1)p=1;
+                    const t=p*(this.clip.totalDuration||100);
+                    if(this.drag==='in' && t < this.clip.start+this.clip.duration-0.5) { this.clip.duration+=(this.clip.start-t); this.clip.start=t; }
+                    else if(this.drag==='out' && t > this.clip.start+0.5) { this.clip.duration=t-this.clip.start; }
+                    this.updateUI();
+                };
+                ['mousedown','touchstart'].forEach(e=>document.getElementById('handle-in').addEventListener(e,(ev)=>{ev.preventDefault();this.drag='in'}));
+                ['mousedown','touchstart'].forEach(e=>document.getElementById('handle-out').addEventListener(e,(ev)=>{ev.preventDefault();this.drag='out'}));
+                ['mousemove','touchmove'].forEach(e=>window.addEventListener(e,move,{passive:false}));
+                ['mouseup','touchend'].forEach(e=>window.addEventListener(e,()=>{this.drag=null}));
+            }
+            togglePlay() { editorPlayer.getPlayerState()===1 ? editorPlayer.pauseVideo() : editorPlayer.playVideo(); }
+            duplicateClip() { 
+                const cp = JSON.parse(JSON.stringify(this.clip)); cp.uuid=crypto.randomUUID(); cp.title+=' (copy)';
+                app.playlist.splice(app.playlist.indexOf(this.clip)+1, 0, cp); app.save(); this.close();
+            }
+            deleteClip() { if(confirm('Delete?')) { app.playlist.splice(app.playlist.indexOf(this.clip), 1); this.close(); } }
+        }
+
+        const app = new LoopApp();
+        const editor = new Editor();
+        let player1, player2, editorPlayer;
+        
+        // Load API
+        var tag = document.createElement('script'); tag.src = "https://www.youtube.com/iframe_api";
+        document.body.appendChild(tag);
+
+        function onYouTubeIframeAPIReady() {
+            const vars = { controls:0, showinfo:0, rel:0, modestbranding:1, playsinline:1, disablekb:1 };
+            const onState = (e) => { if(e.data === YT.PlayerState.ENDED && app.isPlaying && !editor.isOpen) app.forceNext(); };
+            const onErr = () => app.forceNext(); // Skip broken vids
+            
+            player1 = new YT.Player('player1', { height:'100%', width:'100%', playerVars:vars, events:{'onReady':onR, 'onStateChange':onState, 'onError':onErr}});
+            player2 = new YT.Player('player2', { height:'100%', width:'100%', playerVars:vars, events:{'onReady':onR, 'onStateChange':onState, 'onError':onErr}});
+            editorPlayer = new YT.Player('editor-player', { height:'100%', width:'100%', playerVars:vars, events:{'onReady':e=>{editor.init(e.target)}}});
+        }
+        
+        let rCnt=0;
+        function onR(e) { 
+            e.target.mute(); rCnt++; 
+            if(rCnt===2) {
+                document.getElementById('loading-spinner').style.display='none';
+                document.getElementById('status-text').innerText = "המערכת מוכנה!";
+                document.getElementById('start-btn').style.display='block';
+            }
+        }
+        editor.init = (p) => { editor.player=p; editor.setupDrag(); }
+
+    </script>
+</body>
+</html>
