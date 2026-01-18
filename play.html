@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Infinity V14 - Varied</title>
+    <title>Infinity V15 - No Skip</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;700&display=swap');
@@ -32,6 +32,19 @@
         @media (min-aspect-ratio: 16/9) { .video-foreground iframe { width: 100%; height: 140%; top: -20%; } }
         @media (max-aspect-ratio: 16/9) { .video-foreground iframe { width: 140%; height: 100%; left: -20%; } }
         .player-wrapper iframe { width: 100%; height: 100%; pointer-events: none; }
+
+        /* --- Loading Spinner (On Video) --- */
+        #video-loader {
+            position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%);
+            z-index: 5; pointer-events: none; opacity: 0; transition: opacity 0.3s;
+        }
+        #video-loader.visible { opacity: 1; }
+        .spinner {
+            width: 50px; height: 50px; border: 5px solid rgba(255,255,255,0.3);
+            border-top: 5px solid #4ade80; border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
 
         /* --- UI Overlay --- */
         #ui-layer {
@@ -105,6 +118,9 @@
 </head>
 <body>
 
+    <!-- Video Loader -->
+    <div id="video-loader"><div class="spinner"></div></div>
+
     <!-- Background Mixers -->
     <div id="video-stage">
         <div id="player1-wrapper" class="player-wrapper video-foreground"><div id="player1"></div></div>
@@ -127,7 +143,7 @@
     <!-- Main UI -->
     <div id="ui-layer" class="hidden-ui">
         <div class="p-3 bg-black/50 border-b border-white/10 flex justify-between items-center shrink-0">
-            <h1 class="text-lg font-bold text-green-400">Mixer V14</h1>
+            <h1 class="text-lg font-bold text-green-400">Mixer V15</h1>
             <button onclick="app.toggleUI()" class="text-xl text-gray-400">✕</button>
         </div>
 
@@ -182,122 +198,18 @@
     </div>
 
     <script>
-        // --- DATA UPDATED FOR VFX/AFTER EFFECTS CONTEXT ---
+        // --- DATA ---
         const VIDEO_DATABASE = [
-            { 
-                id: 'LvdGbCkZAiY', 
-                title: "קליפ מוזיקלי - שילוב AI", 
-                brand: "AI Generation", 
-                concept: "יצירת תוכן גנרטיבי", 
-                objects: ["דמויות AI", "רקעים משתנים", "Interpolation", "Glitch"], 
-                duration: 180, 
-                highlights: [
-                    {start:0, desc:"Intro: יצירת דמויות ב-AI"}, 
-                    {start:19, desc:"Morphing בין סגנונות"}
-                ] 
-            },
-            { 
-                id: 'zUmTkhqFhgw', 
-                title: "סרטון הסברה - GreenTea", 
-                brand: "Motion Graphics", 
-                concept: "אינפוגרפיקה והנפשה", 
-                objects: ["Shape Layers", "אייקונים", "טקסט קינטי", "Transitions"], 
-                duration: 120, 
-                highlights: [
-                    {start:3, desc:"הנפשת לוגו וכותרת"}, 
-                    {start:10, desc:"תרשים זרימה מונפש"}
-                ] 
-            },
-            { 
-                id: '1bA6cTw1DJ4', 
-                title: "ברכה מונפשת - מוטי", 
-                brand: "Character Animation", 
-                concept: "Cut-out / Duik", 
-                objects: ["ריג דמות", "Puppet Tool", "רקע וקטורי", "בלוני דיבור"], 
-                duration: 60, 
-                highlights: [
-                    {start:0, desc:"כניסת דמות (Walk Cycle)"}
-                ] 
-            },
-            { 
-                id: 'T9vEvAcai_I', 
-                title: "קומפוזיציה - רחפן ים", 
-                brand: "VFX / Compositing", 
-                concept: "הטמעה (Embedding)", 
-                objects: ["Chroma Key", "השתקפויות", "שכבת ים", "Color Match"], 
-                duration: 60, 
-                highlights: [
-                    {start:0, desc:"לפני/אחרי Keying"},
-                    {start:5, desc:"שילוב רקע מלאכותי"}
-                ] 
-            },
-            { 
-                id: 'WSL1iYAyj4I', 
-                title: "הנפשת עטיפה - גבריאל", 
-                brand: "2.5D Parallax", 
-                concept: "הינדוס ויזואלי", 
-                objects: ["הפרדת שכבות", "Camera 3D", "חלקיקים (Particles)", "אווירה"], 
-                duration: 180, 
-                highlights: [
-                    {start:9, desc:"תנועת מצלמה (Parallax)"}
-                ] 
-            },
-            { 
-                id: 'J1fY6H1cj3A', 
-                title: "החלפת שלטים - כביש", 
-                brand: "VFX / Tracking", 
-                concept: "החלפת פריטים", 
-                objects: ["Planar Tracking", "Mocha", "Corner Pin", "הסרת אובייקטים"], 
-                duration: 30, 
-                highlights: [
-                    {start:0, desc:"עקיבת משטח (Surface)"},
-                    {start:2, desc:"החלפת תוכן השלט"}
-                ] 
-            },
-            { 
-                id: 'aydTo0aZRtA', 
-                title: "טראקינג רחפן - HUD", 
-                brand: "3D Tracking", 
-                concept: "ממשק עתידני (UI)", 
-                objects: ["3D Camera Tracker", "Null Objects", "טקסט צף", "HUD Elements"], 
-                duration: 70, 
-                highlights: [
-                    {start:21, desc:"הצמדת טקסט לקרקע"}
-                ] 
-            },
-            { 
-                id: 'p02kAntlIyY', 
-                title: "קליפ מילים - נועם", 
-                brand: "Kinetic Typography", 
-                concept: "טיפוגרפיה", 
-                objects: ["Text Animators", "סינכרון אודיו", "מצלמה וירטואלית", "Easin"], 
-                duration: 180, 
-                highlights: [
-                    {start:33, desc:"הנפשת טקסט לפי קצב"}
-                ] 
-            },
-            { 
-                id: 'NT_4d8sSdls', 
-                title: "הנפשת עטיפה - אסף", 
-                brand: "Atmosphere Loop", 
-                concept: "Cinemagraph", 
-                objects: ["Masking", "Saber Effect", "עשן/ערפל", "Color Grading"], 
-                duration: 40, 
-                highlights: [
-                    {start:5, desc:"לופ תנועה עדין"}
-                ] 
-            },
-            { 
-                id: 'jCVjX_K0swc', 
-                title: "הדמיית מוצר - ReLife", 
-                brand: "3D Integration", 
-                concept: "הדמייה טכנית", 
-                objects: ["מודל תלת-ממד", "Callouts", "Alpha Channel", "קומפוזיציה"], 
-                duration: 60, 
-                highlights: [
-                    {start:0, desc:"סיבוב מוצר וטקסט צף"}
-                ] 
-            }
+            { id: 'LvdGbCkZAiY', title: "קליפ מוזיקלי - שילוב AI", brand: "AI Generation", concept: "יצירת תוכן גנרטיבי", objects: ["דמויות AI", "רקעים משתנים", "Interpolation", "Glitch"], duration: 180, highlights: [{start:0, desc:"Intro"}] },
+            { id: 'zUmTkhqFhgw', title: "סרטון הסברה - GreenTea", brand: "Motion Graphics", concept: "אינפוגרפיקה והנפשה", objects: ["Shape Layers", "אייקונים", "טקסט קינטי", "Transitions"], duration: 120, highlights: [{start:3, desc:"Logo"}] },
+            { id: '1bA6cTw1DJ4', title: "ברכה מונפשת - מוטי", brand: "Character Animation", concept: "Cut-out / Duik", objects: ["ריג דמות", "Puppet Tool", "רקע וקטורי", "בלוני דיבור"], duration: 60, highlights: [{start:0, desc:"Walk Cycle"}] },
+            { id: 'T9vEvAcai_I', title: "קומפוזיציה - רחפן ים", brand: "VFX / Compositing", concept: "הטמעה (Embedding)", objects: ["Chroma Key", "השתקפויות", "שכבת ים", "Color Match"], duration: 60, highlights: [{start:0, desc:"Keying"}] },
+            { id: 'WSL1iYAyj4I', title: "הנפשת עטיפה - גבריאל", brand: "2.5D Parallax", concept: "הינדוס ויזואלי", objects: ["הפרדת שכבות", "Camera 3D", "חלקיקים", "אווירה"], duration: 180, highlights: [{start:9, desc:"Parallax"}] },
+            { id: 'J1fY6H1cj3A', title: "החלפת שלטים - כביש", brand: "VFX / Tracking", concept: "החלפת פריטים", objects: ["Planar Tracking", "Mocha", "Corner Pin", "הסרת אובייקטים"], duration: 30, highlights: [{start:0, desc:"Tracking"}] },
+            { id: 'aydTo0aZRtA', title: "טראקינג רחפן - HUD", brand: "3D Tracking", concept: "ממשק עתידני (UI)", objects: ["3D Camera Tracker", "Null Objects", "טקסט צף", "HUD Elements"], duration: 70, highlights: [{start:21, desc:"Text Lock"}] },
+            { id: 'p02kAntlIyY', title: "קליפ מילים - נועם", brand: "Kinetic Typography", concept: "טיפוגרפיה", objects: ["Text Animators", "סינכרון אודיו", "מצלמה וירטואלית", "Easin"], duration: 180, highlights: [{start:33, desc:"Kinetic"}] },
+            { id: 'NT_4d8sSdls', title: "הנפשת עטיפה - אסף", brand: "Atmosphere Loop", concept: "Cinemagraph", objects: ["Masking", "Saber Effect", "עשן/ערפל", "Color Grading"], duration: 40, highlights: [{start:5, desc:"Loop"}] },
+            { id: 'jCVjX_K0swc', title: "הדמיית מוצר - ReLife", brand: "3D Integration", concept: "הדמייה טכנית", objects: ["מודל תלת-ממד", "Callouts", "Alpha Channel", "קומפוזיציה"], duration: 60, highlights: [{start:0, desc:"3D Model"}] }
         ];
 
         class LoopApp {
@@ -316,7 +228,7 @@
             }
 
             loadPlaylist() {
-                const saved = localStorage.getItem('orionMixV14');
+                const saved = localStorage.getItem('orionMixV15');
                 return saved ? JSON.parse(saved) : this.createAutoPlaylist();
             }
 
@@ -324,41 +236,23 @@
                 let list = [];
                 VIDEO_DATABASE.forEach(v => {
                     const safeTotalDur = (v.duration || 30);
+                    // Ensure we don't start too close to end (leave 3s buffer)
                     if (safeTotalDur <= 15) {
                         list.push({
-                            uuid: crypto.randomUUID(),
-                            videoId: v.id,
-                            title: v.title,
-                            brand: v.brand,
-                            start: 0,
-                            duration: Math.max(3, safeTotalDur - 1.5), 
-                            totalDuration: safeTotalDur
+                            uuid: crypto.randomUUID(), videoId: v.id, title: v.title, brand: v.brand,
+                            start: 0, duration: Math.max(3, safeTotalDur - 2), totalDuration: safeTotalDur
                         });
                     } else {
-                        // Dynamic segmentation
                         let t = 0;
-                        while(t < safeTotalDur - 10) {
-                            // Random duration 6-12s
-                            let dur = Math.floor(Math.random() * 7) + 6; 
-                            
-                            // Check boundary
-                            if (t + dur > safeTotalDur - 1) {
-                                dur = safeTotalDur - 1 - t;
-                            }
-
+                        while(t < safeTotalDur - 8) {
+                            let dur = Math.floor(Math.random() * 7) + 6; // 6-12s
+                            if (t + dur > safeTotalDur - 2) dur = safeTotalDur - 2 - t; // Safety cap
                             if (dur >= 4) {
                                 list.push({ 
-                                    uuid: crypto.randomUUID(), 
-                                    videoId: v.id, 
-                                    title: v.title, 
-                                    brand: v.brand, 
-                                    start: t, 
-                                    duration: dur, 
-                                    totalDuration: safeTotalDur 
+                                    uuid: crypto.randomUUID(), videoId: v.id, title: v.title, brand: v.brand,
+                                    start: t, duration: dur, totalDuration: safeTotalDur 
                                 });
                             }
-                            
-                            // Varied Jump: 15-35s
                             t += dur + Math.floor(Math.random() * 20) + 15;
                         }
                     }
@@ -366,7 +260,7 @@
                 return list.sort(() => Math.random() - 0.5);
             }
 
-            save() { localStorage.setItem('orionMixV14', JSON.stringify(this.playlist)); }
+            save() { localStorage.setItem('orionMixV15', JSON.stringify(this.playlist)); }
 
             autoStart() {
                 this.isPlaying = true;
@@ -395,6 +289,8 @@
                 const nextW = this.activePlayer === 1 ? document.getElementById('player2-wrapper') : document.getElementById('player1-wrapper');
 
                 if (activeW.style.opacity != '1') {
+                    // Show loader initially
+                    document.getElementById('video-loader').classList.add('visible');
                     activeP.loadVideoById({videoId: clip.videoId, startSeconds: clip.start});
                     activeP.playVideo();
                     activeW.style.opacity = 1; nextW.style.opacity = 0;
@@ -408,21 +304,42 @@
                 this.monitorInterval = setInterval(() => {
                     if(editor.isOpen) { activeP.pauseVideo(); return; }
                     
-                    if(activeP.getPlayerState() === 2) activeP.playVideo();
-                    if(activeP.getPlayerState() === YT.PlayerState.ENDED) { this.forceNext(); return; }
+                    const pState = activeP.getPlayerState();
+                    
+                    // Show/Hide Loader based on buffering
+                    if (pState === YT.PlayerState.BUFFERING) {
+                        document.getElementById('video-loader').classList.add('visible');
+                        this.stuckCounter = 0; // Reset stuck counter if buffering
+                        return; // Wait for buffer
+                    } else if (pState === YT.PlayerState.PLAYING) {
+                        document.getElementById('video-loader').classList.remove('visible');
+                    } else if (pState === YT.PlayerState.ENDED) {
+                        this.forceNext(); return;
+                    }
+
+                    // Force play if paused unintentionally
+                    if(pState === YT.PlayerState.PAUSED) activeP.playVideo();
 
                     const t = activeP.getCurrentTime();
-                    if (t === this.lastTime) {
+                    
+                    // Robust Stuck Detection
+                    if (t === this.lastTime && pState === YT.PlayerState.PLAYING) {
                         this.stuckCounter++;
-                        if (this.stuckCounter > 8) { this.forceNext(); return; }
+                        // Wait ~8 seconds before declaring stuck (approx 32 ticks)
+                        if (this.stuckCounter > 32) { 
+                            console.warn("Stuck detected, skipping");
+                            this.forceNext(); return; 
+                        }
                     } else {
-                        this.stuckCounter = 0; this.lastTime = t;
+                        this.stuckCounter = 0;
+                        this.lastTime = t;
                     }
 
                     if(typeof t !== 'number') return;
 
+                    // End of video safety
                     const realTotal = clip.totalDuration || 1000;
-                    if (t >= realTotal - 1.0) { this.forceNext(); return; }
+                    if (t >= realTotal - 1.5) { this.forceNext(); return; }
 
                     const played = t - clip.start;
                     const remaining = clip.duration - played;
@@ -446,6 +363,9 @@
 
             doCrossfade(pOut, wOut, pIn, wIn) {
                 let step = 0; pIn.playVideo();
+                // Ensure loader is hidden during crossfade
+                document.getElementById('video-loader').classList.remove('visible');
+                
                 clearInterval(this.fadeInterval);
                 this.fadeInterval = setInterval(() => {
                     step++;
@@ -463,6 +383,7 @@
             
             forceNext() { 
                 clearInterval(this.monitorInterval);
+                document.getElementById('video-loader').classList.remove('visible');
                 const activeW = this.activePlayer === 1 ? document.getElementById('player1-wrapper') : document.getElementById('player2-wrapper');
                 const nextW = this.activePlayer === 1 ? document.getElementById('player2-wrapper') : document.getElementById('player1-wrapper');
                 activeW.style.opacity = 0; nextW.style.opacity = 1;
