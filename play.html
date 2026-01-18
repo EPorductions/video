@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Orion Infinity Editor V6</title>
+    <title>Orion Infinity Editor V7</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;700&display=swap');
@@ -45,133 +45,86 @@
 
         #ui-layer.hidden-ui { opacity: 0; pointer-events: none; transform: scale(1.05); }
 
-        /* --- Playlist Items --- */
-        #playlist-container { flex: 1; overflow-y: auto; padding: 15px; padding-bottom: 20px; }
+        /* --- Tabs & Content --- */
+        .tab-bar {
+            display: flex; background: #111; border-bottom: 1px solid #333;
+            flex-shrink: 0;
+        }
+        .tab-btn {
+            flex: 1; padding: 12px; text-align: center; color: #888; font-weight: bold;
+            border-bottom: 2px solid transparent; transition: all 0.2s;
+        }
+        .tab-btn.active { color: #fff; border-bottom-color: #4ade80; background: #1a1a1a; }
 
+        #tab-content-area { flex: 1; overflow-y: auto; padding: 15px; position: relative; }
+        .view-section { display: none; }
+        .view-section.active { display: block; }
+
+        /* --- Sequence List Styling --- */
         .clip-card {
             background: #1a1a1a;
             border: 1px solid #333;
             border-radius: 12px;
-            margin-bottom: 12px;
-            padding: 12px;
-            display: flex;
-            align-items: center;
-            gap: 12px;
+            margin-bottom: 8px;
+            padding: 10px;
+            display: flex; align-items: center; gap: 12px;
             transition: all 0.2s;
         }
-        
-        .clip-card.active { border-color: #4ade80; background: #152515; }
-
+        .clip-card.playing { border-color: #4ade80; background: #152515; }
         .clip-info { flex: 1; overflow: hidden; }
-        .clip-title { font-weight: bold; font-size: 0.9rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-        .clip-meta { font-size: 0.75rem; color: #888; display: flex; gap: 8px; margin-top: 4px; }
-        
-        .mini-timeline { height: 4px; background: #333; border-radius: 2px; margin-top: 8px; position: relative; width: 100%; }
+        .clip-title { font-weight: bold; font-size: 0.85rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .clip-meta { font-size: 0.7rem; color: #888; display: flex; gap: 8px; margin-top: 2px; }
+        .mini-timeline { height: 3px; background: #333; border-radius: 2px; margin-top: 6px; position: relative; width: 100%; }
         .mini-range { position: absolute; height: 100%; background: #4ade80; border-radius: 2px; }
 
-        .btn-edit {
-            background: #333; color: white; border-radius: 50%; width: 36px; height: 36px;
-            display: flex; align-items: center; justify-content: center; font-size: 1.2rem;
-            cursor: pointer; flex-shrink: 0;
+        /* --- Source List Styling --- */
+        .source-group { margin-bottom: 20px; border: 1px solid #333; border-radius: 8px; overflow: hidden; }
+        .source-header {
+            background: #222; padding: 10px; display: flex; justify-content: space-between; align-items: center;
+            border-bottom: 1px solid #333;
         }
+        .source-title { font-weight: bold; font-size: 0.9rem; color: #ddd; }
+        .source-actions button { padding: 4px 8px; font-size: 0.7rem; border-radius: 4px; margin-left: 4px; }
+        
+        .source-clips { padding: 5px; background: #111; }
+        .source-clip-item {
+            display: flex; justify-content: space-between; align-items: center;
+            padding: 8px; border-bottom: 1px solid #222; font-size: 0.8rem; color: #aaa;
+        }
+        .source-clip-item:last-child { border-bottom: none; }
+
+        .btn-edit { background: #333; color: white; border-radius: 50%; width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; }
 
         /* --- EDITOR MODAL --- */
         #editor-modal {
-            position: fixed; inset: 0; z-index: 50;
-            background: #111;
-            display: flex; flex-direction: column;
-            transform: translateY(100%);
+            position: fixed; inset: 0; z-index: 50; background: #111;
+            display: flex; flex-direction: column; transform: translateY(100%);
             transition: transform 0.3s cubic-bezier(0.2, 0.8, 0.2, 1);
         }
-        
         #editor-modal.open { transform: translateY(0); }
-
-        #editor-player-container {
-            width: 100%; aspect-ratio: 16/9; background: #000;
-            flex-shrink: 0; position: relative;
-        }
-        
+        #editor-player-container { width: 100%; aspect-ratio: 16/9; background: #000; flex-shrink: 0; position: relative; }
         .editor-controls { padding: 20px; flex: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 20px; }
 
-        /* --- NEW TIMELINE STYLES --- */
-        .timeline-wrapper {
-            position: relative; height: 60px; display: flex; align-items: center;
-            touch-action: none; margin: 0 10px;
-        }
-        
-        .timeline-track {
-            position: absolute; left: 0; right: 0; height: 12px; background: #222; border-radius: 6px;
-            border: 1px solid #333;
-        }
-        
-        .timeline-range {
-            position: absolute; height: 12px; background: rgba(74, 222, 128, 0.3); border-radius: 2px;
-            border-top: 1px solid #4ade80; border-bottom: 1px solid #4ade80;
-        }
-
-        /* The Draggable Handles (Invisible touch area) */
+        /* Timeline */
+        .timeline-wrapper { position: relative; height: 60px; display: flex; align-items: center; touch-action: none; margin: 0 10px; }
+        .timeline-track { position: absolute; left: 0; right: 0; height: 12px; background: #222; border-radius: 6px; border: 1px solid #333; }
+        .timeline-range { position: absolute; height: 12px; background: rgba(74, 222, 128, 0.3); border-radius: 2px; border-top: 1px solid #4ade80; border-bottom: 1px solid #4ade80; }
         .timeline-handle {
-            position: absolute; top: 50%; 
-            transform: translate(-50%, -50%); /* Center exactly on the point */
-            width: 30px; /* Wide touch area */
-            height: 50px; /* Tall touch area */
-            z-index: 10; cursor: col-resize;
-            display: flex; justify-content: center; align-items: center;
+            position: absolute; top: 50%; transform: translate(-50%, -50%);
+            width: 30px; height: 50px; z-index: 10; cursor: col-resize; display: flex; justify-content: center; align-items: center;
         }
-        
-        /* The Visible Line */
-        .timeline-handle::after {
-            content: ''; display: block;
-            width: 4px; height: 40px; border-radius: 2px;
-            box-shadow: 0 0 5px rgba(0,0,0,0.5);
-        }
-
-        /* Specific Colors */
-        .handle-l { z-index: 12; }
-        .handle-l::after { background: #4ade80; } /* Green IN */
-        
-        .handle-r { z-index: 12; }
-        .handle-r::after { background: #ef4444; } /* Red OUT */
-
-        /* Labels above handles */
-        .handle-label {
-            position: absolute; top: -25px; 
-            font-size: 10px; font-weight: bold; 
-            padding: 2px 4px; border-radius: 3px;
-            pointer-events: none; white-space: nowrap;
-        }
+        .timeline-handle::after { content: ''; display: block; width: 4px; height: 40px; border-radius: 2px; box-shadow: 0 0 5px rgba(0,0,0,0.5); }
+        .handle-l { z-index: 12; } .handle-l::after { background: #4ade80; }
+        .handle-r { z-index: 12; } .handle-r::after { background: #ef4444; }
+        .handle-label { position: absolute; top: -25px; font-size: 10px; font-weight: bold; padding: 2px 4px; border-radius: 3px; pointer-events: none; white-space: nowrap; }
         .handle-l .handle-label { color: #4ade80; background: rgba(0,0,0,0.7); }
         .handle-r .handle-label { color: #ef4444; background: rgba(0,0,0,0.7); }
+        .playhead { position: absolute; top: 10px; bottom: 10px; width: 2px; background: #fff; pointer-events: none; z-index: 5; opacity: 0.8; box-shadow: 0 0 4px white; }
 
-        .playhead {
-            position: absolute; top: 10px; bottom: 10px; width: 2px; background: #fff;
-            pointer-events: none; z-index: 5; opacity: 0.8;
-            box-shadow: 0 0 4px white;
-        }
-
-        /* Related Clips */
-        .related-clips { margin-top: 20px; border-top: 1px solid #333; padding-top: 15px; }
-        .related-item {
-            padding: 10px; background: #222; border-radius: 6px; margin-bottom: 6px;
-            display: flex; justify-content: space-between; align-items: center;
-        }
-
-        /* Controls */
-        #settings-toggle {
-            position: fixed; top: 20px; left: 20px; z-index: 30;
-            background: rgba(0,0,0,0.4); border: 1px solid rgba(255,255,255,0.2);
-            width: 44px; height: 44px; border-radius: 50%;
-            display: flex; align-items: center; justify-content: center; font-size: 1.5rem;
-            backdrop-filter: blur(4px); cursor: pointer;
-        }
-
-        #unmute-overlay {
-            position: fixed; bottom: 40px; left: 50%; transform: translateX(-50%);
-            z-index: 25; background: rgba(0,0,0,0.6); padding: 10px 20px; border-radius: 30px;
-            display: flex; align-items: center; gap: 10px; animation: fadeIn 1s ease-out;
-        }
+        /* General UI */
+        #settings-toggle { position: fixed; top: 20px; left: 20px; z-index: 30; background: rgba(0,0,0,0.4); border: 1px solid rgba(255,255,255,0.2); width: 44px; height: 44px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 1.5rem; backdrop-filter: blur(4px); cursor: pointer; }
+        #unmute-overlay { position: fixed; bottom: 40px; left: 50%; transform: translateX(-50%); z-index: 25; background: rgba(0,0,0,0.6); padding: 10px 20px; border-radius: 30px; display: flex; align-items: center; gap: 10px; animation: fadeIn 1s ease-out; }
         #unmute-overlay.hidden { display: none; }
-        
         @keyframes fadeIn { from { opacity: 0; transform: translateX(-50%) translateY(20px); } to { opacity: 1; transform: translateX(-50%) translateY(0); } }
 
     </style>
@@ -184,30 +137,47 @@
         <div id="player2-wrapper" class="player-wrapper video-foreground"><div id="player2"></div></div>
     </div>
 
-    <!-- UI Elements -->
+    <!-- Toggle & Overlay -->
     <div id="settings-toggle" onclick="app.toggleUI()">⚙️</div>
-
     <div id="unmute-overlay" onclick="app.unmuteAll()">
         <span>🔇</span><span class="text-sm font-bold">לחץ להפעלת סאונד</span>
     </div>
 
-    <!-- Playlist UI -->
+    <!-- Main UI -->
     <div id="ui-layer" class="hidden-ui">
-        <div class="p-4 bg-black/50 border-b border-white/10 flex justify-between items-center shrink-0">
-            <h1 class="text-lg font-bold text-transparent bg-clip-text bg-gradient-to-l from-green-400 to-blue-500">Orion Mixer V6</h1>
+        <div class="p-3 bg-black/50 border-b border-white/10 flex justify-between items-center shrink-0">
+            <h1 class="text-lg font-bold text-transparent bg-clip-text bg-gradient-to-l from-green-400 to-blue-500">Mixer V7</h1>
             <div class="flex gap-2">
-                <button onclick="app.downloadJSON()" class="text-xs bg-gray-800 border border-gray-600 px-3 py-1 rounded">שמור</button>
-                <button onclick="document.getElementById('file-input').click()" class="text-xs bg-gray-800 border border-gray-600 px-3 py-1 rounded">טען</button>
+                <button onclick="app.downloadJSON()" class="text-xs bg-gray-800 border border-gray-600 px-2 py-1 rounded">שמור</button>
+                <button onclick="document.getElementById('file-input').click()" class="text-xs bg-gray-800 border border-gray-600 px-2 py-1 rounded">טען</button>
                 <input type="file" id="file-input" accept=".json" style="display: none" onchange="app.uploadJSON(this)">
-                <button onclick="app.toggleUI()" class="text-2xl ml-2">✕</button>
+                <button onclick="app.toggleUI()" class="text-xl ml-2 text-gray-400">✕</button>
             </div>
         </div>
 
-        <div id="playlist-container"></div>
+        <!-- TABS -->
+        <div class="tab-bar">
+            <div class="tab-btn active" onclick="app.switchTab('sequence')">סיקוונס (Sequence)</div>
+            <div class="tab-btn" onclick="app.switchTab('sources')">מקורות (Sources)</div>
+        </div>
 
-        <div class="p-4 bg-black border-t border-white/10 shrink-0 flex gap-3 justify-center">
-            <button onclick="app.regeneratePlaylist()" class="bg-red-900/30 text-red-300 px-4 py-3 rounded w-1/2 border border-red-500/20 text-sm">ערבוב מחדש</button>
-            <button onclick="app.addVideoPrompt()" class="bg-green-600 text-white px-4 py-3 rounded w-1/2 text-sm font-bold">+ הוסף וידאו</button>
+        <div id="tab-content-area">
+            <!-- VIEW 1: SEQUENCE -->
+            <div id="view-sequence" class="view-section active">
+                <div id="playlist-container"></div>
+                
+                <div class="mt-8 text-center">
+                    <button onclick="app.regeneratePlaylist()" class="bg-red-900/30 text-red-300 px-6 py-3 rounded-full border border-red-500/20 text-sm font-bold">🎲 ערבוב מחדש (Shuffle)</button>
+                </div>
+            </div>
+
+            <!-- VIEW 2: SOURCES -->
+            <div id="view-sources" class="view-section">
+                <div class="mb-4 flex justify-end">
+                    <button onclick="app.addVideoPrompt()" class="bg-green-600 text-white px-4 py-2 rounded text-sm font-bold">+ הוסף לינק חדש</button>
+                </div>
+                <div id="sources-container"></div>
+            </div>
         </div>
     </div>
 
@@ -223,11 +193,10 @@
         </div>
 
         <div class="editor-controls">
-            
             <div class="flex justify-center gap-6 items-center">
-                <button onclick="editor.togglePlay()" id="editor-play-btn" class="w-12 h-12 bg-white text-black rounded-full flex items-center justify-center text-xl font-bold">▶</button>
+                <button onclick="editor.togglePlay()" class="w-12 h-12 bg-white text-black rounded-full flex items-center justify-center text-xl font-bold">▶</button>
                 <div class="text-center">
-                    <div class="text-xs text-gray-500">מיקום נוכחי</div>
+                    <div class="text-xs text-gray-500">זמן</div>
                     <div id="editor-time-display" class="font-mono text-xl text-blue-400">00:00</div>
                 </div>
             </div>
@@ -243,14 +212,8 @@
                     <div class="timeline-track"></div>
                     <div class="timeline-range" id="timeline-fill"></div>
                     <div class="playhead" id="editor-playhead"></div>
-                    
-                    <!-- Line Handles -->
-                    <div class="timeline-handle handle-l" id="handle-in">
-                        <span class="handle-label">IN</span>
-                    </div>
-                    <div class="timeline-handle handle-r" id="handle-out">
-                        <span class="handle-label">OUT</span>
-                    </div>
+                    <div class="timeline-handle handle-l" id="handle-in"><span class="handle-label">IN</span></div>
+                    <div class="timeline-handle handle-r" id="handle-out"><span class="handle-label">OUT</span></div>
                 </div>
                 
                 <div class="flex justify-between text-[10px] text-gray-600 mt-2 px-1">
@@ -262,11 +225,6 @@
             <div class="grid grid-cols-2 gap-3 mt-2">
                 <button onclick="editor.duplicateClip()" class="bg-blue-900/40 text-blue-200 py-3 rounded border border-blue-500/30">📄 שכפל קטע</button>
                 <button onclick="editor.deleteClip()" class="bg-red-900/40 text-red-200 py-3 rounded border border-red-500/30">🗑 מחק קטע</button>
-            </div>
-
-            <div class="related-clips">
-                <h3 class="text-xs font-bold text-gray-400 mb-3 uppercase tracking-wider">עוד קטעים מהסרטון הזה</h3>
-                <div id="related-clips-list"></div>
             </div>
             
             <div class="h-10"></div>
@@ -300,10 +258,11 @@
                 this.monitorInterval = null;
                 this.fadeInterval = null;
                 this.nextLoaded = false;
+                this.currentTab = 'sequence';
             }
 
             loadPlaylist() {
-                const saved = localStorage.getItem('orionMixV6');
+                const saved = localStorage.getItem('orionMixV7');
                 if (saved) { try { return JSON.parse(saved); } catch(e) {} }
                 return this.createAutoPlaylist();
             }
@@ -311,7 +270,7 @@
             createAutoPlaylist() {
                 let list = [];
                 SOURCE_VIDEOS.forEach(video => {
-                    const step = 20; 
+                    const step = 25; 
                     for (let t = 0; t < (video.duration || 30) - 5; t += step) {
                         list.push({
                             uuid: crypto.randomUUID(),
@@ -326,14 +285,36 @@
                 return list.sort(() => Math.random() - 0.5);
             }
 
-            save() { localStorage.setItem('orionMixV6', JSON.stringify(this.playlist)); }
+            save() { localStorage.setItem('orionMixV7', JSON.stringify(this.playlist)); }
 
             toggleUI() {
                 document.getElementById('ui-layer').classList.toggle('hidden-ui');
-                this.renderList();
+                this.renderUI();
             }
 
-            renderList() {
+            switchTab(tab) {
+                this.currentTab = tab;
+                document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+                document.querySelectorAll('.view-section').forEach(v => v.classList.remove('active'));
+                
+                // Index check: sequence=0, sources=1
+                const idx = tab === 'sequence' ? 0 : 1;
+                document.querySelectorAll('.tab-btn')[idx].classList.add('active');
+                document.getElementById(`view-${tab}`).classList.add('active');
+                
+                this.renderUI();
+            }
+
+            renderUI() {
+                if (this.currentTab === 'sequence') {
+                    this.renderSequence();
+                } else {
+                    this.renderSources();
+                }
+            }
+
+            // --- Render Sequence (Draggable List) ---
+            renderSequence() {
                 const container = document.getElementById('playlist-container');
                 container.innerHTML = '';
                 
@@ -344,23 +325,27 @@
                     const widthP = (clip.duration / total) * 100;
 
                     const el = document.createElement('div');
-                    el.className = `clip-card ${isActive ? 'active' : ''}`;
-                    el.onclick = (e) => {
-                        if(e.target.closest('.btn-edit')) return;
-                        editor.open(idx);
-                    };
+                    el.className = `clip-card ${isActive ? 'playing' : ''}`;
+                    el.draggable = true; // Drag logic simplified for brevity (can enable full sort if needed)
+                    
+                    // Allow Dragging
+                    el.addEventListener('dragstart', e => { e.dataTransfer.setData('text/plain', idx); });
+                    el.addEventListener('dragover', e => { e.preventDefault(); });
+                    el.addEventListener('drop', e => {
+                        e.preventDefault();
+                        const fromIdx = parseInt(e.dataTransfer.getData('text/plain'));
+                        const item = this.playlist.splice(fromIdx, 1)[0];
+                        this.playlist.splice(idx, 0, item);
+                        this.save();
+                        this.renderSequence();
+                    });
 
                     el.innerHTML = `
-                        <div class="btn-edit text-gray-400 text-xs">${idx+1}</div>
-                        <div class="clip-info">
+                        <div class="text-gray-500 text-xs font-mono w-6 text-center cursor-grab">☰ ${idx+1}</div>
+                        <div class="clip-info" onclick="editor.open(${idx})">
                             <div class="clip-title">${clip.title}</div>
-                            <div class="mini-timeline">
-                                <div class="mini-range" style="left:${leftP}%; width:${widthP}%"></div>
-                            </div>
-                            <div class="clip-meta">
-                                <span>IN: ${clip.start.toFixed(1)}</span>
-                                <span>DUR: ${clip.duration.toFixed(1)}s</span>
-                            </div>
+                            <div class="mini-timeline"><div class="mini-range" style="left:${leftP}%; width:${widthP}%"></div></div>
+                            <div class="clip-meta"><span>IN: ${clip.start.toFixed(1)}</span><span>DUR: ${clip.duration.toFixed(1)}s</span></div>
                         </div>
                         <button class="btn-edit" onclick="editor.open(${idx})">✏️</button>
                     `;
@@ -368,10 +353,104 @@
                 });
             }
 
+            // --- Render Sources (Grouped View) ---
+            renderSources() {
+                const container = document.getElementById('sources-container');
+                container.innerHTML = '';
+                
+                // Group by Video ID
+                const groups = {};
+                this.playlist.forEach((clip, idx) => {
+                    if(!groups[clip.videoId]) groups[clip.videoId] = { title: clip.title, clips: [] };
+                    groups[clip.videoId].clips.push({ ...clip, originalIdx: idx });
+                });
+
+                Object.keys(groups).forEach(vidId => {
+                    const g = groups[vidId];
+                    
+                    const groupEl = document.createElement('div');
+                    groupEl.className = 'source-group';
+                    
+                    let clipsHtml = '';
+                    g.clips.forEach(c => {
+                        clipsHtml += `
+                            <div class="source-clip-item">
+                                <span>${c.start.toFixed(1)}s - ${(c.start+c.duration).toFixed(1)}s</span>
+                                <div class="flex gap-2">
+                                    <button class="text-blue-400" onclick="editor.open(${c.originalIdx})">ערוך</button>
+                                </div>
+                            </div>
+                        `;
+                    });
+
+                    groupEl.innerHTML = `
+                        <div class="source-header">
+                            <div class="source-title">${g.title}</div>
+                            <div class="source-actions">
+                                <button class="bg-blue-900 text-blue-200" onclick="app.addClipToSource('${vidId}', '${g.title}')">+ קטע</button>
+                                <button class="bg-red-900 text-red-200" onclick="app.deleteSource('${vidId}')">מחק הכל</button>
+                            </div>
+                        </div>
+                        <div class="source-clips">${clipsHtml}</div>
+                    `;
+                    container.appendChild(groupEl);
+                });
+            }
+
+            // --- Actions ---
+            addClipToSource(vidId, title) {
+                // Find existing meta for this video if possible
+                const existing = this.playlist.find(p => p.videoId === vidId);
+                const totalDur = existing ? existing.totalDuration : 180;
+                
+                const newClip = {
+                    uuid: crypto.randomUUID(),
+                    videoId: vidId,
+                    title: title,
+                    start: 0,
+                    duration: 5,
+                    totalDuration: totalDur
+                };
+                this.playlist.push(newClip);
+                this.save();
+                this.renderUI();
+            }
+
+            deleteSource(vidId) {
+                if(confirm('למחוק את כל הקטעים של הלינק הזה?')) {
+                    this.playlist = this.playlist.filter(p => p.videoId !== vidId);
+                    this.save();
+                    this.renderUI();
+                }
+            }
+
+            addVideoPrompt() {
+                const url = prompt("Link:");
+                if(url) {
+                    let id = url.includes('v=') ? url.split('v=')[1].split('&')[0] : url.split('/').pop();
+                    this.playlist.push({
+                        uuid: crypto.randomUUID(), videoId: id, title: 'New Source', 
+                        start: 0, duration: 5, totalDuration: 180 
+                    });
+                    this.save();
+                    this.renderUI();
+                }
+            }
+            
+            regeneratePlaylist() {
+                if(confirm('למחוק וליצור רשימה חדשה?')) {
+                    this.playlist = this.createAutoPlaylist();
+                    this.currentIndex = 0;
+                    this.save();
+                    this.renderUI();
+                }
+            }
+
+            // --- Playback Engine ---
             startEngine() {
                 this.isPlaying = true;
                 this.playSequence(this.currentIndex);
-                this.renderList();
+                this.renderUI();
             }
 
             playSequence(index) {
@@ -379,7 +458,10 @@
                 if (index >= this.playlist.length) index = 0;
                 this.currentIndex = index;
 
-                if(!editor.isOpen) this._playInternal(index);
+                if(!editor.isOpen) {
+                    this.renderSequence(); // Highlight active
+                    this._playInternal(index);
+                }
             }
 
             _playInternal(index) {
@@ -402,6 +484,8 @@
                 
                 this.monitorInterval = setInterval(() => {
                     if(editor.isOpen) { currentP.pauseVideo(); return; } 
+                    
+                    // Ensure playing
                     if(currentP.getPlayerState() === 2) currentP.playVideo();
 
                     const currTime = currentP.getCurrentTime();
@@ -409,6 +493,12 @@
 
                     const played = currTime - clip.start;
                     const remaining = clip.duration - played;
+
+                    // Safety: if video accidentally ended or is invalid
+                    if (remaining < -1) {
+                         this.playSequence(this.currentIndex + 1);
+                         return;
+                    }
 
                     if (remaining <= 2.5 && !this.nextLoaded) {
                         this.nextLoaded = true;
@@ -450,31 +540,16 @@
                     }
                 }, 150);
             }
+            
+            forceNext() {
+                this.playSequence(this.currentIndex + 1);
+            }
 
             unmuteAll() {
                 this.isMuted = false;
                 if(player1) player1.unMute();
                 if(player2) player2.unMute();
                 document.getElementById('unmute-overlay').classList.add('hidden');
-            }
-            
-            regeneratePlaylist() {
-                if(confirm('למחוק וליצור רשימה חדשה?')) {
-                    this.playlist = this.createAutoPlaylist();
-                    this.currentIndex = 0;
-                    this.save();
-                    this.renderList();
-                }
-            }
-            
-            addVideoPrompt() {
-                const url = prompt("Link:");
-                if(url) {
-                    let id = url.includes('v=') ? url.split('v=')[1].split('&')[0] : url.split('/').pop();
-                    this.playlist.push({uuid:crypto.randomUUID(), videoId:id, title:'New', start:0, duration:5, totalDuration:180});
-                    this.save();
-                    this.renderList();
-                }
             }
             
             downloadJSON() {
@@ -486,11 +561,7 @@
                 const f = input.files[0];
                 if(!f) return;
                 const r = new FileReader();
-                r.onload = e => {
-                    this.playlist = JSON.parse(e.target.result);
-                    this.save();
-                    this.renderList();
-                };
+                r.onload = e => { this.playlist = JSON.parse(e.target.result); this.save(); this.renderUI(); };
                 r.readAsText(f);
             }
         }
@@ -498,44 +569,28 @@
         // --- EDITOR LOGIC ---
         class Editor {
             constructor() {
-                this.isOpen = false;
-                this.clipIndex = null;
-                this.clip = null;
-                this.player = null;
-                this.monitorTimer = null;
-                this.dragging = null; 
-                this.trackWidth = 0;
+                this.isOpen = false; this.clipIndex = null; this.clip = null;
+                this.player = null; this.monitorTimer = null;
+                this.dragging = null; this.trackWidth = 0;
             }
 
-            init(ytPlayer) {
-                this.player = ytPlayer;
-                this.setupDragEvents();
-            }
+            init(ytPlayer) { this.player = ytPlayer; this.setupDragEvents(); }
 
             open(index) {
-                this.isOpen = true;
-                this.clipIndex = index;
-                this.clip = app.playlist[index];
-                
+                this.isOpen = true; this.clipIndex = index; this.clip = app.playlist[index];
                 if(player1 && player1.pauseVideo) player1.pauseVideo();
                 if(player2 && player2.pauseVideo) player2.pauseVideo();
-
                 document.getElementById('editor-modal').classList.add('open');
-                
                 this.player.loadVideoById({ videoId: this.clip.videoId, startSeconds: this.clip.start });
-                this.updateUI();
-                this.renderRelated();
-                this.startMonitor();
+                this.updateUI(); this.startMonitor();
             }
 
             close() {
-                this.isOpen = false;
-                this.player.pauseVideo();
+                this.isOpen = false; this.player.pauseVideo();
                 clearInterval(this.monitorTimer);
                 document.getElementById('editor-modal').classList.remove('open');
-                app.save();
-                app.renderList();
-                app.playSequence(app.currentIndex);
+                app.save(); app.renderUI();
+                app.playSequence(app.currentIndex); // Resume
             }
 
             updateUI() {
@@ -552,13 +607,10 @@
                 const startP = (this.clip.start / total) * 100;
                 const endP = ((this.clip.start + this.clip.duration) / total) * 100;
 
-                // Center logic: Translate -50% centers it perfectly on the % point
                 document.getElementById('handle-in').style.left = startP + '%';
                 document.getElementById('handle-out').style.left = endP + '%';
-                
                 const fill = document.getElementById('timeline-fill');
-                fill.style.left = startP + '%';
-                fill.style.width = (endP - startP) + '%';
+                fill.style.left = startP + '%'; fill.style.width = (endP - startP) + '%';
             }
             
             updateLabels() {
@@ -577,12 +629,10 @@
                     if(!this.isOpen) return;
                     const t = this.player.getCurrentTime();
                     if(!t) return;
-
                     const total = this.clip.totalDuration || 100;
                     const p = (t / total) * 100;
                     document.getElementById('editor-playhead').style.left = p + '%';
                     document.getElementById('editor-time-display').innerText = this.formatTime(t);
-                    
                     const end = this.clip.start + this.clip.duration;
                     if (t >= end) this.player.seekTo(this.clip.start);
                 }, 100);
@@ -593,27 +643,20 @@
                 const hIn = document.getElementById('handle-in');
                 const hOut = document.getElementById('handle-out');
 
-                const startDrag = (e, type) => {
-                    e.preventDefault();
-                    this.dragging = type;
-                    this.trackWidth = track.clientWidth;
-                };
+                const startDrag = (e, type) => { e.preventDefault(); this.dragging = type; this.trackWidth = track.clientWidth; };
+                const eventOpts = { passive: false };
 
-                hIn.addEventListener('touchstart', (e) => startDrag(e, 'in'));
+                hIn.addEventListener('touchstart', (e) => startDrag(e, 'in'), eventOpts);
                 hIn.addEventListener('mousedown', (e) => startDrag(e, 'in'));
-                
-                hOut.addEventListener('touchstart', (e) => startDrag(e, 'out'));
+                hOut.addEventListener('touchstart', (e) => startDrag(e, 'out'), eventOpts);
                 hOut.addEventListener('mousedown', (e) => startDrag(e, 'out'));
 
                 const moveDrag = (e) => {
                     if (!this.dragging) return;
-                    
                     const clientX = e.touches ? e.touches[0].clientX : e.clientX;
                     const rect = track.getBoundingClientRect();
                     let offsetX = clientX - rect.left;
-                    
-                    if (offsetX < 0) offsetX = 0;
-                    if (offsetX > this.trackWidth) offsetX = this.trackWidth;
+                    if (offsetX < 0) offsetX = 0; if (offsetX > this.trackWidth) offsetX = this.trackWidth;
                     
                     const percent = offsetX / this.trackWidth;
                     const total = this.clip.totalDuration || 100;
@@ -621,19 +664,11 @@
 
                     if (this.dragging === 'in') {
                         const currentEnd = this.clip.start + this.clip.duration;
-                        if (time < currentEnd - 0.5) { 
-                            this.clip.start = time;
-                            this.clip.duration = currentEnd - time;
-                        }
+                        if (time < currentEnd - 0.5) { this.clip.start = time; this.clip.duration = currentEnd - time; }
                     } else if (this.dragging === 'out') {
-                        if (time > this.clip.start + 0.5) {
-                            this.clip.duration = time - this.clip.start;
-                        }
+                        if (time > this.clip.start + 0.5) { this.clip.duration = time - this.clip.start; }
                     }
-
-                    this.drawTimeline();
-                    this.updateLabels();
-                    this.player.seekTo(time, true); 
+                    this.drawTimeline(); this.updateLabels(); this.player.seekTo(time, true); 
                 };
 
                 const endDrag = () => {
@@ -645,7 +680,7 @@
                     this.dragging = null;
                 };
 
-                window.addEventListener('touchmove', moveDrag);
+                window.addEventListener('touchmove', moveDrag, eventOpts);
                 window.addEventListener('mousemove', moveDrag);
                 window.addEventListener('touchend', endDrag);
                 window.addEventListener('mouseup', endDrag);
@@ -653,46 +688,19 @@
 
             duplicateClip() {
                 const copy = JSON.parse(JSON.stringify(this.clip));
-                copy.uuid = crypto.randomUUID();
-                copy.title += ' (copy)';
-                copy.start += 5;
-                if(copy.start > copy.totalDuration) copy.start = 0;
-                
+                copy.uuid = crypto.randomUUID(); copy.title += ' (copy)';
+                copy.start += 5; if(copy.start > copy.totalDuration) copy.start = 0;
                 app.playlist.splice(this.clipIndex + 1, 0, copy);
-                app.save();
-                this.renderRelated();
-                alert('שוכפל!');
+                app.save(); alert('שוכפל!');
+                // Close modal to see result
+                this.close();
             }
             
             deleteClip() {
-                if(confirm('למחוק את הקטע?')) {
-                    app.playlist.splice(this.clipIndex, 1);
-                    this.close();
-                }
+                if(confirm('למחוק את הקטע?')) { app.playlist.splice(this.clipIndex, 1); this.close(); }
             }
 
-            renderRelated() {
-                const list = document.getElementById('related-clips-list');
-                list.innerHTML = '';
-                app.playlist.forEach((item, idx) => {
-                    if (item.videoId === this.clip.videoId && idx !== this.clipIndex) {
-                        const div = document.createElement('div');
-                        div.className = 'related-item';
-                        div.innerHTML = `
-                            <span class="text-xs text-gray-300 w-8">#${idx+1}</span>
-                            <span class="text-xs font-bold text-gray-400 truncate flex-1">${item.start.toFixed(0)}s - ${(item.start+item.duration).toFixed(0)}s</span>
-                            <button class="bg-gray-700 px-2 rounded text-xs" onclick="editor.open(${idx})">ערוך</button>
-                        `;
-                        list.appendChild(div);
-                    }
-                });
-            }
-
-            formatTime(s) {
-                const m = Math.floor(s / 60);
-                const sec = Math.floor(s % 60);
-                return `${m}:${sec < 10 ? '0'+sec : sec}`;
-            }
+            formatTime(s) { const m = Math.floor(s / 60); const sec = Math.floor(s % 60); return `${m}:${sec < 10 ? '0'+sec : sec}`; }
         }
 
         // --- SETUP ---
@@ -709,15 +717,24 @@
         function onYouTubeIframeAPIReady() {
             const vars = { controls: 0, showinfo: 0, rel: 0, modestbranding: 1, iv_load_policy: 3, fs: 0, playsinline: 1, disablekb: 1, origin: window.location.origin };
             
-            player1 = new YT.Player('player1', { height:'100%', width:'100%', playerVars: vars, events: { 'onReady': onReady } });
-            player2 = new YT.Player('player2', { height:'100%', width:'100%', playerVars: vars, events: { 'onReady': onReady } });
+            const onState = (e) => {
+                // Auto-skip ended videos (fail-safe)
+                if (e.data === YT.PlayerState.ENDED) {
+                    // Only if app is supposed to be playing
+                    if(app.isPlaying && !editor.isOpen) {
+                        app.forceNext();
+                    }
+                }
+            };
+
+            player1 = new YT.Player('player1', { height:'100%', width:'100%', playerVars: vars, events: { 'onReady': onReady, 'onStateChange': onState } });
+            player2 = new YT.Player('player2', { height:'100%', width:'100%', playerVars: vars, events: { 'onReady': onReady, 'onStateChange': onState } });
             editorPlayer = new YT.Player('editor-player', { height:'100%', width:'100%', playerVars: vars, events: { 'onReady': onEditorReady } });
         }
 
         let readyCount = 0;
         function onReady(e) {
-            e.target.mute();
-            readyCount++;
+            e.target.mute(); readyCount++;
             if(readyCount === 2) setTimeout(() => app.startEngine(), 500);
         }
         
