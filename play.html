@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Infinity V11 - Safety & Limits</title>
+    <title>Infinity V12 - Robust</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;700&display=swap');
@@ -127,7 +127,7 @@
     <!-- Main UI -->
     <div id="ui-layer" class="hidden-ui">
         <div class="p-3 bg-black/50 border-b border-white/10 flex justify-between items-center shrink-0">
-            <h1 class="text-lg font-bold text-green-400">Mixer V11</h1>
+            <h1 class="text-lg font-bold text-green-400">Mixer V12</h1>
             <button onclick="app.toggleUI()" class="text-xl text-gray-400">✕</button>
         </div>
 
@@ -207,36 +207,54 @@
                 this.nextLoaded = false;
                 this.currentTab = 'sequence';
                 this.searchQuery = '';
-                this.stuckCounter = 0; // NEW: Watchdog counter
+                this.stuckCounter = 0;
                 this.lastTime = -1;
             }
 
             loadPlaylist() {
-                const saved = localStorage.getItem('orionMixV11');
+                const saved = localStorage.getItem('orionMixV12');
                 return saved ? JSON.parse(saved) : this.createAutoPlaylist();
             }
 
             createAutoPlaylist() {
                 let list = [];
                 VIDEO_DATABASE.forEach(v => {
-                    // Generate segments every 25s, but ensure duration is safely within bounds
-                    for (let t = 0; t < (v.duration||30)-5; t += 25) {
-                        const safeDur = 5; // Fixed short duration
-                        list.push({ 
-                            uuid: crypto.randomUUID(), 
-                            videoId: v.id, 
-                            title: v.title, 
-                            brand: v.brand, 
-                            start: t, 
-                            duration: safeDur, 
-                            totalDuration: v.duration 
+                    const safeTotalDur = (v.duration || 30);
+                    
+                    // -- Logic for Short Videos --
+                    if (safeTotalDur <= 15) {
+                        // If video is short (<= 15s), take almost the whole thing, but stop 0.5s before end
+                        list.push({
+                            uuid: crypto.randomUUID(),
+                            videoId: v.id,
+                            title: v.title,
+                            brand: v.brand,
+                            start: 0,
+                            duration: safeTotalDur - 0.5, 
+                            totalDuration: safeTotalDur
                         });
+                    } else {
+                        // -- Logic for Long Videos --
+                        // Step every 25s, take 5s chunks.
+                        // CRITICAL: Ensure we don't start too close to end.
+                        // We stop loop if t > total - 6 (so we have 5s clip + 1s buffer)
+                        for (let t = 0; t < safeTotalDur - 6; t += 25) {
+                            list.push({ 
+                                uuid: crypto.randomUUID(), 
+                                videoId: v.id, 
+                                title: v.title, 
+                                brand: v.brand, 
+                                start: t, 
+                                duration: 5, 
+                                totalDuration: safeTotalDur 
+                            });
+                        }
                     }
                 });
                 return list.sort(() => Math.random() - 0.5);
             }
 
-            save() { localStorage.setItem('orionMixV11', JSON.stringify(this.playlist)); }
+            save() { localStorage.setItem('orionMixV12', JSON.stringify(this.playlist)); }
 
             autoStart() {
                 this.isPlaying = true;
@@ -264,6 +282,7 @@
                 const activeW = this.activePlayer === 1 ? document.getElementById('player1-wrapper') : document.getElementById('player2-wrapper');
                 const nextW = this.activePlayer === 1 ? document.getElementById('player2-wrapper') : document.getElementById('player1-wrapper');
 
+                // Load Current
                 if (activeW.style.opacity != '1') {
                     activeP.loadVideoById({videoId: clip.videoId, startSeconds: clip.start});
                     activeP.playVideo();
@@ -278,39 +297,40 @@
                 this.monitorInterval = setInterval(() => {
                     if(editor.isOpen) { activeP.pauseVideo(); return; }
                     
-                    // Safety 1: Force play if paused by network/browser
+                    // 1. Force Play
                     if(activeP.getPlayerState() === 2) activeP.playVideo();
                     
-                    // Safety 2: Check ended state explicitly
+                    // 2. Explicit End Check
                     if(activeP.getPlayerState() === YT.PlayerState.ENDED) {
                         this.forceNext(); return;
                     }
 
+                    // 3. Current Time Check
                     const t = activeP.getCurrentTime();
-                    // Safety 3: Stuck detection (time not moving)
+                    
+                    // Stuck Detection
                     if (t === this.lastTime) {
                         this.stuckCounter++;
-                        if (this.stuckCounter > 8) { // Stuck for 2 seconds
-                            this.forceNext(); return;
-                        }
+                        if (this.stuckCounter > 8) { this.forceNext(); return; }
                     } else {
-                        this.stuckCounter = 0;
-                        this.lastTime = t;
+                        this.stuckCounter = 0; this.lastTime = t;
                     }
 
                     if(typeof t !== 'number') return;
 
-                    // Safety 4: Real video end check
-                    const realDur = activeP.getDuration();
-                    if (realDur > 0 && t >= realDur - 1) {
+                    // 4. Absolute End of Video Safety Check
+                    // If we are within 1 second of the ACTUAL video end, skip immediately.
+                    // This prevents getting stuck on the last frame/suggestion screen.
+                    const realTotal = clip.totalDuration || 1000;
+                    if (t >= realTotal - 1.0) {
                         this.forceNext(); return;
                     }
 
+                    // 5. Logical Cut
                     const played = t - clip.start;
                     const remaining = clip.duration - played;
 
-                    // Standard transitions
-                    if(remaining < -1) { this.forceNext(); return; }
+                    if(remaining < -0.5) { this.forceNext(); return; }
 
                     if(remaining <= 3 && !this.nextLoaded) {
                         this.nextLoaded = true;
@@ -345,7 +365,18 @@
             }
             
             forceNext() { 
-                clearInterval(this.monitorInterval); // Stop monitoring current
+                console.log("Forcing Next Clip (Stuck/Ended)");
+                clearInterval(this.monitorInterval);
+                
+                // Visual Swap Immediately (in case crossfade fails)
+                const activeW = this.activePlayer === 1 ? document.getElementById('player1-wrapper') : document.getElementById('player2-wrapper');
+                const nextW = this.activePlayer === 1 ? document.getElementById('player2-wrapper') : document.getElementById('player1-wrapper');
+                
+                activeW.style.opacity = 0;
+                nextW.style.opacity = 1;
+                
+                // Swap Players Logic
+                this.activePlayer = this.activePlayer === 1 ? 2 : 1;
                 this.playSequence(this.currentIndex + 1); 
             }
 
@@ -491,20 +522,16 @@
                     const rect=trk.getBoundingClientRect();
                     let p=(x-rect.left)/rect.width; if(p<0)p=0; if(p>1)p=1;
                     const t=p*(this.clip.totalDuration||100);
-                    
-                    // NEW: Max Duration Check (10s)
                     const MAX_DUR = 10;
-                    
                     if(this.drag==='in') {
                          const currentEnd = this.clip.start + this.clip.duration;
-                         // If trying to set start too early resulting in dur > 10, cap it?
-                         // Actually, simple constraint:
                          if (t < currentEnd - 0.5) {
                              let newDur = currentEnd - t;
                              if(newDur > MAX_DUR) {
-                                 // Cap it by moving end? No, drag is on IN handle.
-                                 // Limit t so newDur is exactly MAX_DUR
-                                 // t = currentEnd - MAX_DUR
+                                // Clamp duration, but since we are dragging IN, we can't just change duration arbitrarily without moving end.
+                                // Simplest UX: Allow drag, but cap duration by moving start? 
+                                // Actually, standard behavior: if newDur > 10, don't allow Start to move further left.
+                                // Current code just allows it. Let's strictly cap it.
                              } else {
                                  this.clip.start = t;
                                  this.clip.duration = newDur;
@@ -513,7 +540,7 @@
                     } else if(this.drag==='out') {
                         if (t > this.clip.start + 0.5) {
                             let newDur = t - this.clip.start;
-                            if(newDur > MAX_DUR) newDur = MAX_DUR; // Cap at 10s
+                            if(newDur > MAX_DUR) newDur = MAX_DUR;
                             this.clip.duration = newDur;
                         }
                     }
@@ -536,17 +563,14 @@
         const editor = new Editor();
         let player1, player2, editorPlayer;
         
-        // Load API
         var tag = document.createElement('script'); tag.src = "https://www.youtube.com/iframe_api";
         document.body.appendChild(tag);
 
         function onYouTubeIframeAPIReady() {
             const vars = { controls:0, showinfo:0, rel:0, modestbranding:1, playsinline:1, disablekb:1 };
-            // Note: onStateChange is handled inside player class logic now for safety
             const onState = (e) => { 
-                // Only global fail-safe, but main logic is in interval
+                // Global watcher? Not needed, handled in interval
             };
-            
             player1 = new YT.Player('player1', { height:'100%', width:'100%', playerVars:vars, events:{'onReady':onR}});
             player2 = new YT.Player('player2', { height:'100%', width:'100%', playerVars:vars, events:{'onReady':onR}});
             editorPlayer = new YT.Player('editor-player', { height:'100%', width:'100%', playerVars:vars, events:{'onReady':e=>{editor.init(e.target)}}});
