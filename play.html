@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Orion Infinity Editor V5</title>
+    <title>Orion Infinity Editor V6</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;700&display=swap');
@@ -15,13 +15,12 @@
             overflow: hidden;
             margin: 0;
             padding: 0;
-            touch-action: manipulation; /* מונע זום כפול במובייל */
+            touch-action: manipulation;
         }
 
         /* --- Background Video Mixers --- */
         #video-stage {
-            position: fixed;
-            top: 0; left: 0; width: 100vw; height: 100vh;
+            position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
             z-index: 0; background: #000; pointer-events: none;
         }
 
@@ -30,7 +29,6 @@
             opacity: 0; transition: opacity 0.5s ease-in-out; 
         }
         
-        /* Zoom fix for fullscreen background */
         .video-foreground { position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; }
         @media (min-aspect-ratio: 16/9) { .video-foreground iframe { width: 100%; height: 140%; top: -20%; } }
         @media (max-aspect-ratio: 16/9) { .video-foreground iframe { width: 140%; height: 100%; left: -20%; } }
@@ -68,7 +66,6 @@
         .clip-title { font-weight: bold; font-size: 0.9rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
         .clip-meta { font-size: 0.75rem; color: #888; display: flex; gap: 8px; margin-top: 4px; }
         
-        /* Visual Mini Bar in List */
         .mini-timeline { height: 4px; background: #333; border-radius: 2px; margin-top: 8px; position: relative; width: 100%; }
         .mini-range { position: absolute; height: 100%; background: #4ade80; border-radius: 2px; }
 
@@ -78,7 +75,7 @@
             cursor: pointer; flex-shrink: 0;
         }
 
-        /* --- EDITOR MODAL (The new stuff) --- */
+        /* --- EDITOR MODAL --- */
         #editor-modal {
             position: fixed; inset: 0; z-index: 50;
             background: #111;
@@ -91,54 +88,75 @@
 
         #editor-player-container {
             width: 100%; aspect-ratio: 16/9; background: #000;
-            flex-shrink: 0;
-            position: relative;
+            flex-shrink: 0; position: relative;
         }
         
-        /* Timeline Area */
         .editor-controls { padding: 20px; flex: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 20px; }
 
-        /* Timeline Slider CSS */
+        /* --- NEW TIMELINE STYLES --- */
         .timeline-wrapper {
             position: relative; height: 60px; display: flex; align-items: center;
-            touch-action: none; /* Critical for dragging */
+            touch-action: none; margin: 0 10px;
         }
         
         .timeline-track {
-            position: absolute; left: 0; right: 0; height: 8px; background: #333; border-radius: 4px;
+            position: absolute; left: 0; right: 0; height: 12px; background: #222; border-radius: 6px;
+            border: 1px solid #333;
         }
         
         .timeline-range {
-            position: absolute; height: 8px; background: #4ade80; border-radius: 4px;
-            /* left & width set by JS */
+            position: absolute; height: 12px; background: rgba(74, 222, 128, 0.3); border-radius: 2px;
+            border-top: 1px solid #4ade80; border-bottom: 1px solid #4ade80;
         }
 
+        /* The Draggable Handles (Invisible touch area) */
         .timeline-handle {
-            position: absolute; top: 50%; transform: translate(50%, -50%); /* Center on point */
-            width: 28px; height: 28px; background: white; border-radius: 50%;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.5);
-            z-index: 10; cursor: grab;
-            display: flex; align-items: center; justify-content: center;
-            font-size: 10px; color: #000; font-weight: bold;
+            position: absolute; top: 50%; 
+            transform: translate(-50%, -50%); /* Center exactly on the point */
+            width: 30px; /* Wide touch area */
+            height: 50px; /* Tall touch area */
+            z-index: 10; cursor: col-resize;
+            display: flex; justify-content: center; align-items: center;
         }
         
-        .handle-l { z-index: 11; }
-        .handle-r { z-index: 11; transform: translate(-50%, -50%); }
-
-        .playhead {
-            position: absolute; top: 0; bottom: 0; width: 2px; background: #ef4444;
-            pointer-events: none; z-index: 5;
-            transition: left 0.1s linear;
+        /* The Visible Line */
+        .timeline-handle::after {
+            content: ''; display: block;
+            width: 4px; height: 40px; border-radius: 2px;
+            box-shadow: 0 0 5px rgba(0,0,0,0.5);
         }
 
-        /* Related Clips in Editor */
+        /* Specific Colors */
+        .handle-l { z-index: 12; }
+        .handle-l::after { background: #4ade80; } /* Green IN */
+        
+        .handle-r { z-index: 12; }
+        .handle-r::after { background: #ef4444; } /* Red OUT */
+
+        /* Labels above handles */
+        .handle-label {
+            position: absolute; top: -25px; 
+            font-size: 10px; font-weight: bold; 
+            padding: 2px 4px; border-radius: 3px;
+            pointer-events: none; white-space: nowrap;
+        }
+        .handle-l .handle-label { color: #4ade80; background: rgba(0,0,0,0.7); }
+        .handle-r .handle-label { color: #ef4444; background: rgba(0,0,0,0.7); }
+
+        .playhead {
+            position: absolute; top: 10px; bottom: 10px; width: 2px; background: #fff;
+            pointer-events: none; z-index: 5; opacity: 0.8;
+            box-shadow: 0 0 4px white;
+        }
+
+        /* Related Clips */
         .related-clips { margin-top: 20px; border-top: 1px solid #333; padding-top: 15px; }
         .related-item {
             padding: 10px; background: #222; border-radius: 6px; margin-bottom: 6px;
             display: flex; justify-content: space-between; align-items: center;
         }
 
-        /* --- General Controls --- */
+        /* Controls */
         #settings-toggle {
             position: fixed; top: 20px; left: 20px; z-index: 30;
             background: rgba(0,0,0,0.4); border: 1px solid rgba(255,255,255,0.2);
@@ -160,23 +178,23 @@
 </head>
 <body>
 
-    <!-- Background Mixers (Hidden from touch) -->
+    <!-- Background Mixers -->
     <div id="video-stage" onclick="app.unmuteAll()">
         <div id="player1-wrapper" class="player-wrapper video-foreground"><div id="player1"></div></div>
         <div id="player2-wrapper" class="player-wrapper video-foreground"><div id="player2"></div></div>
     </div>
 
-    <!-- Main UI -->
+    <!-- UI Elements -->
     <div id="settings-toggle" onclick="app.toggleUI()">⚙️</div>
 
     <div id="unmute-overlay" onclick="app.unmuteAll()">
         <span>🔇</span><span class="text-sm font-bold">לחץ להפעלת סאונד</span>
     </div>
 
-    <!-- List View -->
+    <!-- Playlist UI -->
     <div id="ui-layer" class="hidden-ui">
         <div class="p-4 bg-black/50 border-b border-white/10 flex justify-between items-center shrink-0">
-            <h1 class="text-lg font-bold text-transparent bg-clip-text bg-gradient-to-l from-green-400 to-blue-500">Orion Mixer V5</h1>
+            <h1 class="text-lg font-bold text-transparent bg-clip-text bg-gradient-to-l from-green-400 to-blue-500">Orion Mixer V6</h1>
             <div class="flex gap-2">
                 <button onclick="app.downloadJSON()" class="text-xs bg-gray-800 border border-gray-600 px-3 py-1 rounded">שמור</button>
                 <button onclick="document.getElementById('file-input').click()" class="text-xs bg-gray-800 border border-gray-600 px-3 py-1 rounded">טען</button>
@@ -193,23 +211,19 @@
         </div>
     </div>
 
-    <!-- EDITOR MODAL (Overlay) -->
+    <!-- Editor Modal -->
     <div id="editor-modal">
-        <!-- Editor Header -->
         <div class="flex justify-between items-center p-4 bg-black border-b border-white/10">
             <h2 class="text-sm font-bold text-gray-300">עריכת מקטע</h2>
             <button onclick="editor.close()" class="text-white px-3 py-1 bg-gray-800 rounded">סגור ושמור</button>
         </div>
 
-        <!-- Preview Player -->
         <div id="editor-player-container">
             <div id="editor-player"></div>
         </div>
 
-        <!-- Editor Controls -->
         <div class="editor-controls">
             
-            <!-- Playback Controls -->
             <div class="flex justify-center gap-6 items-center">
                 <button onclick="editor.togglePlay()" id="editor-play-btn" class="w-12 h-12 bg-white text-black rounded-full flex items-center justify-center text-xl font-bold">▶</button>
                 <div class="text-center">
@@ -218,9 +232,9 @@
                 </div>
             </div>
 
-            <!-- The Timeline -->
+            <!-- Timeline -->
             <div class="px-2">
-                <div class="flex justify-between text-xs text-gray-500 mb-1">
+                <div class="flex justify-between text-xs text-gray-500 mb-6 px-1">
                     <span id="label-in">IN: 0.0s</span>
                     <span id="label-out">OUT: 5.0s</span>
                 </div>
@@ -230,41 +244,37 @@
                     <div class="timeline-range" id="timeline-fill"></div>
                     <div class="playhead" id="editor-playhead"></div>
                     
-                    <!-- Handles -->
-                    <div class="timeline-handle handle-l" id="handle-in">IN</div>
-                    <div class="timeline-handle handle-r" id="handle-out">OUT</div>
+                    <!-- Line Handles -->
+                    <div class="timeline-handle handle-l" id="handle-in">
+                        <span class="handle-label">IN</span>
+                    </div>
+                    <div class="timeline-handle handle-r" id="handle-out">
+                        <span class="handle-label">OUT</span>
+                    </div>
                 </div>
                 
-                <div class="flex justify-between text-[10px] text-gray-600 mt-1">
+                <div class="flex justify-between text-[10px] text-gray-600 mt-2 px-1">
                     <span>0:00</span>
                     <span id="total-duration-label">03:00</span>
                 </div>
             </div>
 
-            <!-- Actions -->
             <div class="grid grid-cols-2 gap-3 mt-2">
-                <button onclick="editor.duplicateClip()" class="bg-blue-900/40 text-blue-200 py-3 rounded border border-blue-500/30">
-                    📄 שכפל קטע
-                </button>
-                <button onclick="editor.deleteClip()" class="bg-red-900/40 text-red-200 py-3 rounded border border-red-500/30">
-                    🗑 מחק קטע
-                </button>
+                <button onclick="editor.duplicateClip()" class="bg-blue-900/40 text-blue-200 py-3 rounded border border-blue-500/30">📄 שכפל קטע</button>
+                <button onclick="editor.deleteClip()" class="bg-red-900/40 text-red-200 py-3 rounded border border-red-500/30">🗑 מחק קטע</button>
             </div>
 
-            <!-- Related Clips Group -->
             <div class="related-clips">
                 <h3 class="text-xs font-bold text-gray-400 mb-3 uppercase tracking-wider">עוד קטעים מהסרטון הזה</h3>
-                <div id="related-clips-list">
-                    <!-- Injected JS -->
-                </div>
+                <div id="related-clips-list"></div>
             </div>
             
-            <div class="h-10"></div> <!-- Spacer -->
+            <div class="h-10"></div>
         </div>
     </div>
 
     <script>
-        // --- DATA & CONFIG ---
+        // --- DATA ---
         const SOURCE_VIDEOS = [
             { id: 'LvdGbCkZAiY', title: 'אני בל לי', duration: 180 }, 
             { id: 'zUmTkhqFhgw', title: 'גרינטי הדסטארט', duration: 120 },
@@ -279,7 +289,7 @@
             { id: '_rv2sMdyCpg', title: 'RedBull', duration: 60 }
         ];
 
-        // --- CORE APP (Background Mixer) ---
+        // --- APP LOGIC ---
         class LoopApp {
             constructor() {
                 this.playlist = this.loadPlaylist();
@@ -293,17 +303,14 @@
             }
 
             loadPlaylist() {
-                const saved = localStorage.getItem('orionMixV5');
-                if (saved) {
-                    try { return JSON.parse(saved); } catch(e) {}
-                }
+                const saved = localStorage.getItem('orionMixV6');
+                if (saved) { try { return JSON.parse(saved); } catch(e) {} }
                 return this.createAutoPlaylist();
             }
 
             createAutoPlaylist() {
                 let list = [];
                 SOURCE_VIDEOS.forEach(video => {
-                    // Create fewer segments for cleaner start
                     const step = 20; 
                     for (let t = 0; t < (video.duration || 30) - 5; t += step) {
                         list.push({
@@ -312,30 +319,26 @@
                             title: video.title,
                             start: t,
                             duration: 5,
-                            totalDuration: video.duration || 180 // Important for timeline
+                            totalDuration: video.duration || 180
                         });
                     }
                 });
                 return list.sort(() => Math.random() - 0.5);
             }
 
-            save() { localStorage.setItem('orionMixV5', JSON.stringify(this.playlist)); }
+            save() { localStorage.setItem('orionMixV6', JSON.stringify(this.playlist)); }
 
             toggleUI() {
                 document.getElementById('ui-layer').classList.toggle('hidden-ui');
-                // Refresh list visuals
                 this.renderList();
             }
 
-            // --- List Rendering ---
             renderList() {
                 const container = document.getElementById('playlist-container');
                 container.innerHTML = '';
                 
                 this.playlist.forEach((clip, idx) => {
                     const isActive = idx === this.currentIndex;
-                    
-                    // Calc percentages for mini visual bar
                     const total = clip.totalDuration || 100;
                     const leftP = (clip.start / total) * 100;
                     const widthP = (clip.duration / total) * 100;
@@ -343,9 +346,7 @@
                     const el = document.createElement('div');
                     el.className = `clip-card ${isActive ? 'active' : ''}`;
                     el.onclick = (e) => {
-                        // If clicking edit button, don't trigger row click logic if needed
                         if(e.target.closest('.btn-edit')) return;
-                        // For now clicking anywhere opens editor
                         editor.open(idx);
                     };
 
@@ -367,7 +368,6 @@
                 });
             }
 
-            // --- Engine Controls ---
             startEngine() {
                 this.isPlaying = true;
                 this.playSequence(this.currentIndex);
@@ -379,12 +379,7 @@
                 if (index >= this.playlist.length) index = 0;
                 this.currentIndex = index;
 
-                // Resume background playback if it was paused by editor
-                if(editor.isOpen) {
-                    // Do nothing in background if editor is open
-                } else {
-                    this._playInternal(index);
-                }
+                if(!editor.isOpen) this._playInternal(index);
             }
 
             _playInternal(index) {
@@ -406,12 +401,7 @@
                 clearInterval(this.monitorInterval);
                 
                 this.monitorInterval = setInterval(() => {
-                    // If editor is open, pause background logic
-                    if(editor.isOpen) {
-                         currentP.pauseVideo();
-                         return;
-                    } 
-                    // If editor closed, ensure playing
+                    if(editor.isOpen) { currentP.pauseVideo(); return; } 
                     if(currentP.getPlayerState() === 2) currentP.playVideo();
 
                     const currTime = currentP.getCurrentTime();
@@ -489,8 +479,7 @@
             
             downloadJSON() {
                 const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(this.playlist));
-                const a = document.createElement('a');
-                a.href = dataStr; a.download = "mix.json"; a.click();
+                const a = document.createElement('a'); a.href = dataStr; a.download = "mix.json"; a.click();
             }
             
             uploadJSON(input) {
@@ -514,9 +503,7 @@
                 this.clip = null;
                 this.player = null;
                 this.monitorTimer = null;
-                
-                // Timeline Dragging state
-                this.dragging = null; // 'in' or 'out'
+                this.dragging = null; 
                 this.trackWidth = 0;
             }
 
@@ -530,19 +517,12 @@
                 this.clipIndex = index;
                 this.clip = app.playlist[index];
                 
-                // Pause background mixing
                 if(player1 && player1.pauseVideo) player1.pauseVideo();
                 if(player2 && player2.pauseVideo) player2.pauseVideo();
 
                 document.getElementById('editor-modal').classList.add('open');
                 
-                // Load video
-                this.player.loadVideoById({
-                    videoId: this.clip.videoId,
-                    startSeconds: this.clip.start
-                    // endSeconds not supported well for looping manually
-                });
-                
+                this.player.loadVideoById({ videoId: this.clip.videoId, startSeconds: this.clip.start });
                 this.updateUI();
                 this.renderRelated();
                 this.startMonitor();
@@ -555,15 +535,12 @@
                 document.getElementById('editor-modal').classList.remove('open');
                 app.save();
                 app.renderList();
-                // Resume mix
                 app.playSequence(app.currentIndex);
             }
 
             updateUI() {
-                // Update Timeline handles
                 const total = this.clip.totalDuration || 100;
                 document.getElementById('total-duration-label').innerText = this.formatTime(total);
-                
                 this.drawTimeline();
                 this.updateLabels();
             }
@@ -571,11 +548,11 @@
             drawTimeline() {
                 const track = document.getElementById('timeline-track-area');
                 this.trackWidth = track.clientWidth;
-                
                 const total = this.clip.totalDuration || 100;
                 const startP = (this.clip.start / total) * 100;
                 const endP = ((this.clip.start + this.clip.duration) / total) * 100;
 
+                // Center logic: Translate -50% centers it perfectly on the % point
                 document.getElementById('handle-in').style.left = startP + '%';
                 document.getElementById('handle-out').style.left = endP + '%';
                 
@@ -591,35 +568,26 @@
 
             togglePlay() {
                 const state = this.player.getPlayerState();
-                if (state === 1) this.player.pauseVideo();
-                else this.player.playVideo();
+                if (state === 1) this.player.pauseVideo(); else this.player.playVideo();
             }
 
             startMonitor() {
                 clearInterval(this.monitorTimer);
                 this.monitorTimer = setInterval(() => {
                     if(!this.isOpen) return;
-                    
                     const t = this.player.getCurrentTime();
                     if(!t) return;
 
-                    // Update Playhead
                     const total = this.clip.totalDuration || 100;
                     const p = (t / total) * 100;
                     document.getElementById('editor-playhead').style.left = p + '%';
-                    
-                    // Time Display
                     document.getElementById('editor-time-display').innerText = this.formatTime(t);
                     
-                    // Loop Logic
                     const end = this.clip.start + this.clip.duration;
-                    if (t >= end) {
-                        this.player.seekTo(this.clip.start);
-                    }
+                    if (t >= end) this.player.seekTo(this.clip.start);
                 }, 100);
             }
 
-            // --- DRAG LOGIC ---
             setupDragEvents() {
                 const track = document.getElementById('timeline-track-area');
                 const hIn = document.getElementById('handle-in');
@@ -644,7 +612,6 @@
                     const rect = track.getBoundingClientRect();
                     let offsetX = clientX - rect.left;
                     
-                    // Constrain
                     if (offsetX < 0) offsetX = 0;
                     if (offsetX > this.trackWidth) offsetX = this.trackWidth;
                     
@@ -653,14 +620,12 @@
                     const time = percent * total;
 
                     if (this.dragging === 'in') {
-                        // Validate: In must be before Out
                         const currentEnd = this.clip.start + this.clip.duration;
-                        if (time < currentEnd - 0.5) { // Min 0.5s duration
+                        if (time < currentEnd - 0.5) { 
                             this.clip.start = time;
                             this.clip.duration = currentEnd - time;
                         }
                     } else if (this.dragging === 'out') {
-                        // Validate: Out must be after In
                         if (time > this.clip.start + 0.5) {
                             this.clip.duration = time - this.clip.start;
                         }
@@ -668,19 +633,13 @@
 
                     this.drawTimeline();
                     this.updateLabels();
-                    
-                    // Live Scrubbing (Throttled ideally, but direct for now)
-                    // Only seek if dragging In (or Out user wants to see end frame)
                     this.player.seekTo(time, true); 
                 };
 
                 const endDrag = () => {
                     if(this.dragging) {
-                        // If we finished dragging, play from IN
                         if(this.dragging === 'in') this.player.seekTo(this.clip.start);
-                        // If dragged out, maybe play last 2 seconds?
                         else this.player.seekTo(this.clip.start + this.clip.duration - 1);
-                        
                         this.player.playVideo();
                     }
                     this.dragging = null;
@@ -692,19 +651,17 @@
                 window.addEventListener('mouseup', endDrag);
             }
 
-            // --- Editor Actions ---
             duplicateClip() {
                 const copy = JSON.parse(JSON.stringify(this.clip));
                 copy.uuid = crypto.randomUUID();
                 copy.title += ' (copy)';
-                // Shift time slightly
                 copy.start += 5;
                 if(copy.start > copy.totalDuration) copy.start = 0;
                 
                 app.playlist.splice(this.clipIndex + 1, 0, copy);
                 app.save();
-                this.renderRelated(); // Refresh group view
-                alert('שוכפל! חפש אותו ברשימה למטה');
+                this.renderRelated();
+                alert('שוכפל!');
             }
             
             deleteClip() {
@@ -717,9 +674,7 @@
             renderRelated() {
                 const list = document.getElementById('related-clips-list');
                 list.innerHTML = '';
-                
                 app.playlist.forEach((item, idx) => {
-                    // Same video ID but not current item
                     if (item.videoId === this.clip.videoId && idx !== this.clipIndex) {
                         const div = document.createElement('div');
                         div.className = 'related-item';
@@ -740,7 +695,7 @@
             }
         }
 
-        // --- INIT ---
+        // --- SETUP ---
         const app = new LoopApp();
         const editor = new Editor();
 
@@ -756,8 +711,6 @@
             
             player1 = new YT.Player('player1', { height:'100%', width:'100%', playerVars: vars, events: { 'onReady': onReady } });
             player2 = new YT.Player('player2', { height:'100%', width:'100%', playerVars: vars, events: { 'onReady': onReady } });
-            
-            // Editor player needs UI sometimes, but we control it custom
             editorPlayer = new YT.Player('editor-player', { height:'100%', width:'100%', playerVars: vars, events: { 'onReady': onEditorReady } });
         }
 
@@ -768,9 +721,7 @@
             if(readyCount === 2) setTimeout(() => app.startEngine(), 500);
         }
         
-        function onEditorReady(e) {
-            editor.init(e.target);
-        }
+        function onEditorReady(e) { editor.init(e.target); }
 
     </script>
 </body>
