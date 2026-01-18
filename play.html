@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Infinity V13 - VFX Content</title>
+    <title>Infinity V14 - Varied</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;700&display=swap');
@@ -127,7 +127,7 @@
     <!-- Main UI -->
     <div id="ui-layer" class="hidden-ui">
         <div class="p-3 bg-black/50 border-b border-white/10 flex justify-between items-center shrink-0">
-            <h1 class="text-lg font-bold text-green-400">Mixer V13</h1>
+            <h1 class="text-lg font-bold text-green-400">Mixer V14</h1>
             <button onclick="app.toggleUI()" class="text-xl text-gray-400">✕</button>
         </div>
 
@@ -154,7 +154,7 @@
     <!-- Editor -->
     <div id="editor-modal">
         <div class="flex justify-between items-center p-4 bg-black border-b border-white/10">
-            <h2 class="text-sm font-bold">עריכה (מקס' 10 שניות)</h2>
+            <h2 class="text-sm font-bold">עריכה (מקס' 15 שניות)</h2>
             <button onclick="editor.close()" class="bg-gray-800 px-3 py-1 rounded text-xs">סגור</button>
         </div>
         <div id="editor-player-container"><div id="editor-player"></div></div>
@@ -316,7 +316,7 @@
             }
 
             loadPlaylist() {
-                const saved = localStorage.getItem('orionMixV13');
+                const saved = localStorage.getItem('orionMixV14');
                 return saved ? JSON.parse(saved) : this.createAutoPlaylist();
             }
 
@@ -331,27 +331,42 @@
                             title: v.title,
                             brand: v.brand,
                             start: 0,
-                            duration: safeTotalDur - 0.5, 
+                            duration: Math.max(3, safeTotalDur - 1.5), 
                             totalDuration: safeTotalDur
                         });
                     } else {
-                        for (let t = 0; t < safeTotalDur - 6; t += 25) {
-                            list.push({ 
-                                uuid: crypto.randomUUID(), 
-                                videoId: v.id, 
-                                title: v.title, 
-                                brand: v.brand, 
-                                start: t, 
-                                duration: 5, 
-                                totalDuration: safeTotalDur 
-                            });
+                        // Dynamic segmentation
+                        let t = 0;
+                        while(t < safeTotalDur - 10) {
+                            // Random duration 6-12s
+                            let dur = Math.floor(Math.random() * 7) + 6; 
+                            
+                            // Check boundary
+                            if (t + dur > safeTotalDur - 1) {
+                                dur = safeTotalDur - 1 - t;
+                            }
+
+                            if (dur >= 4) {
+                                list.push({ 
+                                    uuid: crypto.randomUUID(), 
+                                    videoId: v.id, 
+                                    title: v.title, 
+                                    brand: v.brand, 
+                                    start: t, 
+                                    duration: dur, 
+                                    totalDuration: safeTotalDur 
+                                });
+                            }
+                            
+                            // Varied Jump: 15-35s
+                            t += dur + Math.floor(Math.random() * 20) + 15;
                         }
                     }
                 });
                 return list.sort(() => Math.random() - 0.5);
             }
 
-            save() { localStorage.setItem('orionMixV13', JSON.stringify(this.playlist)); }
+            save() { localStorage.setItem('orionMixV14', JSON.stringify(this.playlist)); }
 
             autoStart() {
                 this.isPlaying = true;
@@ -594,7 +609,7 @@
                     const rect=trk.getBoundingClientRect();
                     let p=(x-rect.left)/rect.width; if(p<0)p=0; if(p>1)p=1;
                     const t=p*(this.clip.totalDuration||100);
-                    const MAX_DUR = 10;
+                    const MAX_DUR = 15;
                     if(this.drag==='in') {
                          const currentEnd = this.clip.start + this.clip.duration;
                          if (t < currentEnd - 0.5) {
