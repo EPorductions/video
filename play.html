@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Infinity V10 - Instant Play</title>
+    <title>Infinity V11 - Safety & Limits</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;700&display=swap');
@@ -50,7 +50,6 @@
             padding: 10px 15px; border-radius: 12px;
             max-width: 200px; cursor: pointer;
             transition: all 0.3s ease;
-            /* Initially hidden, shown by JS */
             transform: translateY(-100px); opacity: 0;
         }
         #floating-info.visible { transform: translateY(0); opacity: 1; }
@@ -128,7 +127,7 @@
     <!-- Main UI -->
     <div id="ui-layer" class="hidden-ui">
         <div class="p-3 bg-black/50 border-b border-white/10 flex justify-between items-center shrink-0">
-            <h1 class="text-lg font-bold text-green-400">Mixer V10</h1>
+            <h1 class="text-lg font-bold text-green-400">Mixer V11</h1>
             <button onclick="app.toggleUI()" class="text-xl text-gray-400">✕</button>
         </div>
 
@@ -155,7 +154,7 @@
     <!-- Editor -->
     <div id="editor-modal">
         <div class="flex justify-between items-center p-4 bg-black border-b border-white/10">
-            <h2 class="text-sm font-bold">עריכה</h2>
+            <h2 class="text-sm font-bold">עריכה (מקס' 10 שניות)</h2>
             <button onclick="editor.close()" class="bg-gray-800 px-3 py-1 rounded text-xs">סגור</button>
         </div>
         <div id="editor-player-container"><div id="editor-player"></div></div>
@@ -208,24 +207,36 @@
                 this.nextLoaded = false;
                 this.currentTab = 'sequence';
                 this.searchQuery = '';
+                this.stuckCounter = 0; // NEW: Watchdog counter
+                this.lastTime = -1;
             }
 
             loadPlaylist() {
-                const saved = localStorage.getItem('orionMixV10');
+                const saved = localStorage.getItem('orionMixV11');
                 return saved ? JSON.parse(saved) : this.createAutoPlaylist();
             }
 
             createAutoPlaylist() {
                 let list = [];
                 VIDEO_DATABASE.forEach(v => {
+                    // Generate segments every 25s, but ensure duration is safely within bounds
                     for (let t = 0; t < (v.duration||30)-5; t += 25) {
-                        list.push({ uuid: crypto.randomUUID(), videoId: v.id, title: v.title, brand: v.brand, start: t, duration: 5, totalDuration: v.duration });
+                        const safeDur = 5; // Fixed short duration
+                        list.push({ 
+                            uuid: crypto.randomUUID(), 
+                            videoId: v.id, 
+                            title: v.title, 
+                            brand: v.brand, 
+                            start: t, 
+                            duration: safeDur, 
+                            totalDuration: v.duration 
+                        });
                     }
                 });
                 return list.sort(() => Math.random() - 0.5);
             }
 
-            save() { localStorage.setItem('orionMixV10', JSON.stringify(this.playlist)); }
+            save() { localStorage.setItem('orionMixV11', JSON.stringify(this.playlist)); }
 
             autoStart() {
                 this.isPlaying = true;
@@ -233,7 +244,6 @@
                 this.renderUI();
             }
 
-            // --- Playback ---
             playSequence(index) {
                 if (!this.isPlaying) return;
                 if (index >= this.playlist.length) index = 0;
@@ -255,25 +265,52 @@
                 const nextW = this.activePlayer === 1 ? document.getElementById('player2-wrapper') : document.getElementById('player1-wrapper');
 
                 if (activeW.style.opacity != '1') {
-                    // Critical: DO NOT call unMute here for auto-start. 
-                    // Unmuting is handled only by user interaction (unmuteAll)
                     activeP.loadVideoById({videoId: clip.videoId, startSeconds: clip.start});
                     activeP.playVideo();
                     activeW.style.opacity = 1; nextW.style.opacity = 0;
                 }
 
                 this.nextLoaded = false;
+                this.stuckCounter = 0;
+                this.lastTime = -1;
+
                 clearInterval(this.monitorInterval);
                 this.monitorInterval = setInterval(() => {
                     if(editor.isOpen) { activeP.pauseVideo(); return; }
+                    
+                    // Safety 1: Force play if paused by network/browser
                     if(activeP.getPlayerState() === 2) activeP.playVideo();
+                    
+                    // Safety 2: Check ended state explicitly
+                    if(activeP.getPlayerState() === YT.PlayerState.ENDED) {
+                        this.forceNext(); return;
+                    }
 
                     const t = activeP.getCurrentTime();
+                    // Safety 3: Stuck detection (time not moving)
+                    if (t === this.lastTime) {
+                        this.stuckCounter++;
+                        if (this.stuckCounter > 8) { // Stuck for 2 seconds
+                            this.forceNext(); return;
+                        }
+                    } else {
+                        this.stuckCounter = 0;
+                        this.lastTime = t;
+                    }
+
                     if(typeof t !== 'number') return;
 
-                    const remaining = clip.duration - (t - clip.start);
+                    // Safety 4: Real video end check
+                    const realDur = activeP.getDuration();
+                    if (realDur > 0 && t >= realDur - 1) {
+                        this.forceNext(); return;
+                    }
 
-                    if(remaining < -1) { this.playSequence(this.currentIndex + 1); return; }
+                    const played = t - clip.start;
+                    const remaining = clip.duration - played;
+
+                    // Standard transitions
+                    if(remaining < -1) { this.forceNext(); return; }
 
                     if(remaining <= 3 && !this.nextLoaded) {
                         this.nextLoaded = true;
@@ -297,9 +334,6 @@
                     step++;
                     const p = step / 10;
                     wOut.style.opacity = 1 - p; wIn.style.opacity = p;
-                    // Volume fade only if sound is active
-                    // pOut.setVolume((1-p)*100); pIn.setVolume(p*100); 
-                    // No unMute here, user must enable sound globally
                     if(step >= 10) {
                         clearInterval(this.fadeInterval);
                         wOut.style.opacity = 0; pOut.pauseVideo();
@@ -310,7 +344,10 @@
                 }, 150);
             }
             
-            forceNext() { this.playSequence(this.currentIndex + 1); }
+            forceNext() { 
+                clearInterval(this.monitorInterval); // Stop monitoring current
+                this.playSequence(this.currentIndex + 1); 
+            }
 
             // --- UI Methods ---
             toggleUI() { document.getElementById('ui-layer').classList.toggle('hidden-ui'); this.renderUI(); }
@@ -454,8 +491,32 @@
                     const rect=trk.getBoundingClientRect();
                     let p=(x-rect.left)/rect.width; if(p<0)p=0; if(p>1)p=1;
                     const t=p*(this.clip.totalDuration||100);
-                    if(this.drag==='in' && t < this.clip.start+this.clip.duration-0.5) { this.clip.duration+=(this.clip.start-t); this.clip.start=t; }
-                    else if(this.drag==='out' && t > this.clip.start+0.5) { this.clip.duration=t-this.clip.start; }
+                    
+                    // NEW: Max Duration Check (10s)
+                    const MAX_DUR = 10;
+                    
+                    if(this.drag==='in') {
+                         const currentEnd = this.clip.start + this.clip.duration;
+                         // If trying to set start too early resulting in dur > 10, cap it?
+                         // Actually, simple constraint:
+                         if (t < currentEnd - 0.5) {
+                             let newDur = currentEnd - t;
+                             if(newDur > MAX_DUR) {
+                                 // Cap it by moving end? No, drag is on IN handle.
+                                 // Limit t so newDur is exactly MAX_DUR
+                                 // t = currentEnd - MAX_DUR
+                             } else {
+                                 this.clip.start = t;
+                                 this.clip.duration = newDur;
+                             }
+                         }
+                    } else if(this.drag==='out') {
+                        if (t > this.clip.start + 0.5) {
+                            let newDur = t - this.clip.start;
+                            if(newDur > MAX_DUR) newDur = MAX_DUR; // Cap at 10s
+                            this.clip.duration = newDur;
+                        }
+                    }
                     this.updateUI();
                 };
                 ['mousedown','touchstart'].forEach(e=>document.getElementById('handle-in').addEventListener(e,(ev)=>{ev.preventDefault();this.drag='in'}));
@@ -481,11 +542,13 @@
 
         function onYouTubeIframeAPIReady() {
             const vars = { controls:0, showinfo:0, rel:0, modestbranding:1, playsinline:1, disablekb:1 };
-            const onState = (e) => { if(e.data === YT.PlayerState.ENDED && app.isPlaying && !editor.isOpen) app.forceNext(); };
-            const onErr = () => app.forceNext();
+            // Note: onStateChange is handled inside player class logic now for safety
+            const onState = (e) => { 
+                // Only global fail-safe, but main logic is in interval
+            };
             
-            player1 = new YT.Player('player1', { height:'100%', width:'100%', playerVars:vars, events:{'onReady':onR, 'onStateChange':onState, 'onError':onErr}});
-            player2 = new YT.Player('player2', { height:'100%', width:'100%', playerVars:vars, events:{'onReady':onR, 'onStateChange':onState, 'onError':onErr}});
+            player1 = new YT.Player('player1', { height:'100%', width:'100%', playerVars:vars, events:{'onReady':onR}});
+            player2 = new YT.Player('player2', { height:'100%', width:'100%', playerVars:vars, events:{'onReady':onR}});
             editorPlayer = new YT.Player('editor-player', { height:'100%', width:'100%', playerVars:vars, events:{'onReady':e=>{editor.init(e.target)}}});
         }
         
@@ -494,9 +557,7 @@
             e.target.mute(); 
             rCnt++; 
             if(rCnt===2) {
-                // AUTO START immediately when both players are ready
                 app.autoStart();
-                // Show unmute button
                 document.getElementById('unmute-overlay').classList.remove('hidden');
             }
         }
