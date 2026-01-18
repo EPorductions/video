@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Infinity V9 - Stable</title>
+    <title>Infinity V10 - Instant Play</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;700&display=swap');
@@ -33,30 +33,6 @@
         @media (max-aspect-ratio: 16/9) { .video-foreground iframe { width: 140%; height: 100%; left: -20%; } }
         .player-wrapper iframe { width: 100%; height: 100%; pointer-events: none; }
 
-        /* --- START SCREEN (Stability Fix) --- */
-        #start-screen {
-            position: fixed; inset: 0; z-index: 100;
-            background: #000;
-            display: flex; flex-direction: column;
-            align-items: center; justify-content: center;
-            transition: opacity 0.5s;
-        }
-        .loader {
-            border: 4px solid #333; border-top: 4px solid #4ade80;
-            border-radius: 50%; width: 40px; height: 40px;
-            animation: spin 1s linear infinite; margin-bottom: 20px;
-        }
-        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
-        
-        #start-btn {
-            display: none; /* Hidden until ready */
-            padding: 15px 40px; background: #4ade80; color: black;
-            font-weight: bold; font-size: 1.2rem; border-radius: 50px;
-            cursor: pointer; box-shadow: 0 0 20px rgba(74, 222, 128, 0.4);
-            animation: pulse 2s infinite;
-        }
-        @keyframes pulse { 0% { transform: scale(1); } 50% { transform: scale(1.05); } 100% { transform: scale(1); } }
-
         /* --- UI Overlay --- */
         #ui-layer {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 20;
@@ -74,8 +50,10 @@
             padding: 10px 15px; border-radius: 12px;
             max-width: 200px; cursor: pointer;
             transition: all 0.3s ease;
+            /* Initially hidden, shown by JS */
+            transform: translateY(-100px); opacity: 0;
         }
-        #floating-info.hidden-card { transform: translateY(-100px); opacity: 0; pointer-events: none; }
+        #floating-info.visible { transform: translateY(0); opacity: 1; }
         .float-title { font-size: 0.8rem; font-weight: bold; color: white; line-height: 1.2; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
         .float-brand { font-size: 0.7rem; color: #4ade80; margin-top: 2px; }
 
@@ -128,31 +106,29 @@
 </head>
 <body>
 
-    <div id="start-screen">
-        <div id="loading-spinner" class="loader"></div>
-        <div id="status-text" class="text-gray-400 text-sm mb-4">טוען נגני וידאו...</div>
-        <button id="start-btn" onclick="app.manualStart()">נגן את המיקס ▶</button>
-    </div>
-
+    <!-- Background Mixers -->
     <div id="video-stage">
         <div id="player1-wrapper" class="player-wrapper video-foreground"><div id="player1"></div></div>
         <div id="player2-wrapper" class="player-wrapper video-foreground"><div id="player2"></div></div>
     </div>
 
-    <div id="floating-info" class="hidden-card" onclick="app.openDetailsTab()">
+    <!-- Floating Info -->
+    <div id="floating-info" onclick="app.openDetailsTab()">
         <div class="float-title" id="float-title">Title</div>
         <div class="float-brand" id="float-brand">Brand</div>
         <div class="text-[10px] text-gray-400 mt-1">לחץ לפרטים</div>
     </div>
 
+    <!-- Controls -->
     <div id="settings-toggle" onclick="app.toggleUI()">⚙️</div>
-    <div id="unmute-overlay" class="hidden" onclick="app.unmuteAll()">
+    <div id="unmute-overlay" onclick="app.unmuteAll()">
         <span>🔇</span><span class="text-sm font-bold">הפעל סאונד</span>
     </div>
 
+    <!-- Main UI -->
     <div id="ui-layer" class="hidden-ui">
         <div class="p-3 bg-black/50 border-b border-white/10 flex justify-between items-center shrink-0">
-            <h1 class="text-lg font-bold text-green-400">Mixer V9</h1>
+            <h1 class="text-lg font-bold text-green-400">Mixer V10</h1>
             <button onclick="app.toggleUI()" class="text-xl text-gray-400">✕</button>
         </div>
 
@@ -176,6 +152,7 @@
         </div>
     </div>
 
+    <!-- Editor -->
     <div id="editor-modal">
         <div class="flex justify-between items-center p-4 bg-black border-b border-white/10">
             <h2 class="text-sm font-bold">עריכה</h2>
@@ -234,7 +211,7 @@
             }
 
             loadPlaylist() {
-                const saved = localStorage.getItem('orionMixV9');
+                const saved = localStorage.getItem('orionMixV10');
                 return saved ? JSON.parse(saved) : this.createAutoPlaylist();
             }
 
@@ -248,11 +225,9 @@
                 return list.sort(() => Math.random() - 0.5);
             }
 
-            save() { localStorage.setItem('orionMixV9', JSON.stringify(this.playlist)); }
+            save() { localStorage.setItem('orionMixV10', JSON.stringify(this.playlist)); }
 
-            manualStart() {
-                document.getElementById('start-screen').style.opacity = '0';
-                setTimeout(() => document.getElementById('start-screen').style.display = 'none', 500);
+            autoStart() {
                 this.isPlaying = true;
                 this.playSequence(this.currentIndex);
                 this.renderUI();
@@ -267,7 +242,7 @@
 
                 if(!editor.isOpen) {
                     if(this.currentTab === 'sequence') this.renderSequence();
-                    if(this.currentTab === 'details') this.renderUI(); // refresh details if open
+                    if(this.currentTab === 'details') this.renderUI();
                     this._playInternal(index);
                 }
             }
@@ -280,7 +255,8 @@
                 const nextW = this.activePlayer === 1 ? document.getElementById('player2-wrapper') : document.getElementById('player1-wrapper');
 
                 if (activeW.style.opacity != '1') {
-                    activeP.unMute(); // Try unmuting since user interacted
+                    // Critical: DO NOT call unMute here for auto-start. 
+                    // Unmuting is handled only by user interaction (unmuteAll)
                     activeP.loadVideoById({videoId: clip.videoId, startSeconds: clip.start});
                     activeP.playVideo();
                     activeW.style.opacity = 1; nextW.style.opacity = 0;
@@ -290,14 +266,14 @@
                 clearInterval(this.monitorInterval);
                 this.monitorInterval = setInterval(() => {
                     if(editor.isOpen) { activeP.pauseVideo(); return; }
-                    if(activeP.getPlayerState() === 2) activeP.playVideo(); // Force play
+                    if(activeP.getPlayerState() === 2) activeP.playVideo();
 
                     const t = activeP.getCurrentTime();
-                    if(typeof t !== 'number') return; // Strict check
+                    if(typeof t !== 'number') return;
 
                     const remaining = clip.duration - (t - clip.start);
 
-                    if(remaining < -1) { this.playSequence(this.currentIndex + 1); return; } // End safe guard
+                    if(remaining < -1) { this.playSequence(this.currentIndex + 1); return; }
 
                     if(remaining <= 3 && !this.nextLoaded) {
                         this.nextLoaded = true;
@@ -321,8 +297,9 @@
                     step++;
                     const p = step / 10;
                     wOut.style.opacity = 1 - p; wIn.style.opacity = p;
-                    pOut.setVolume((1-p)*100); pIn.setVolume(p*100);
-                    if(p>0.1) pIn.unMute();
+                    // Volume fade only if sound is active
+                    // pOut.setVolume((1-p)*100); pIn.setVolume(p*100); 
+                    // No unMute here, user must enable sound globally
                     if(step >= 10) {
                         clearInterval(this.fadeInterval);
                         wOut.style.opacity = 0; pOut.pauseVideo();
@@ -353,7 +330,8 @@
             }
             updateFloatingCard(clip) {
                 const el = document.getElementById('floating-info');
-                el.classList.remove('hidden-card');
+                if(editor.isOpen) el.classList.remove('visible');
+                else el.classList.add('visible');
                 document.getElementById('float-title').innerText = clip.title;
                 document.getElementById('float-brand').innerText = clip.brand || '';
             }
@@ -428,6 +406,10 @@
             regeneratePlaylist() { if(confirm('לערבב?')) { this.playlist = this.createAutoPlaylist(); this.currentIndex=0; this.save(); this.renderUI(); } }
             jump(t) { if(this.activePlayer===1) player1.seekTo(t); else player2.seekTo(t); }
             formatTime(s) { const m=Math.floor(s/60), sc=Math.floor(s%60); return `${m}:${sc<10?'0'+sc:sc}`; }
+            unmuteAll() {
+                player1.unMute(); player2.unMute();
+                document.getElementById('unmute-overlay').classList.add('hidden');
+            }
         }
 
         class Editor {
@@ -435,7 +417,6 @@
             open(idx) {
                 this.isOpen = true; this.clip = app.playlist[idx];
                 document.getElementById('editor-modal').classList.add('open');
-                document.getElementById('floating-info').classList.add('hidden-card');
                 if(player1) player1.pauseVideo(); if(player2) player2.pauseVideo();
                 editorPlayer.loadVideoById({videoId:this.clip.videoId, startSeconds:this.clip.start});
                 this.updateUI(); this.startMon();
@@ -501,7 +482,7 @@
         function onYouTubeIframeAPIReady() {
             const vars = { controls:0, showinfo:0, rel:0, modestbranding:1, playsinline:1, disablekb:1 };
             const onState = (e) => { if(e.data === YT.PlayerState.ENDED && app.isPlaying && !editor.isOpen) app.forceNext(); };
-            const onErr = () => app.forceNext(); // Skip broken vids
+            const onErr = () => app.forceNext();
             
             player1 = new YT.Player('player1', { height:'100%', width:'100%', playerVars:vars, events:{'onReady':onR, 'onStateChange':onState, 'onError':onErr}});
             player2 = new YT.Player('player2', { height:'100%', width:'100%', playerVars:vars, events:{'onReady':onR, 'onStateChange':onState, 'onError':onErr}});
@@ -510,11 +491,13 @@
         
         let rCnt=0;
         function onR(e) { 
-            e.target.mute(); rCnt++; 
+            e.target.mute(); 
+            rCnt++; 
             if(rCnt===2) {
-                document.getElementById('loading-spinner').style.display='none';
-                document.getElementById('status-text').innerText = "המערכת מוכנה!";
-                document.getElementById('start-btn').style.display='block';
+                // AUTO START immediately when both players are ready
+                app.autoStart();
+                // Show unmute button
+                document.getElementById('unmute-overlay').classList.remove('hidden');
             }
         }
         editor.init = (p) => { editor.player=p; editor.setupDrag(); }
@@ -522,3 +505,5 @@
     </script>
 </body>
 </html>
+
+
