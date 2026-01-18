@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Orion Infinity Loop V4</title>
+    <title>Orion Infinity Editor V5</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;700&display=swap');
@@ -15,236 +15,256 @@
             overflow: hidden;
             margin: 0;
             padding: 0;
-            touch-action: manipulation;
+            touch-action: manipulation; /* מונע זום כפול במובייל */
         }
 
-        /* --- Video Layer --- */
+        /* --- Background Video Mixers --- */
         #video-stage {
             position: fixed;
-            top: 0;
-            left: 0;
-            width: 100vw;
-            height: 100vh;
-            z-index: 0;
-            background: #000;
-            pointer-events: none;
+            top: 0; left: 0; width: 100vw; height: 100vh;
+            z-index: 0; background: #000; pointer-events: none;
         }
 
         .player-wrapper {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            opacity: 0;
-            transition: opacity 0.5s ease-in-out; 
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            opacity: 0; transition: opacity 0.5s ease-in-out; 
         }
         
-        .player-wrapper iframe {
-            width: 100%;
-            height: 100%;
-            pointer-events: none;
-        }
+        /* Zoom fix for fullscreen background */
+        .video-foreground { position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; }
+        @media (min-aspect-ratio: 16/9) { .video-foreground iframe { width: 100%; height: 140%; top: -20%; } }
+        @media (max-aspect-ratio: 16/9) { .video-foreground iframe { width: 140%; height: 100%; left: -20%; } }
 
-        .video-foreground {
-          position: absolute;
-          top: 0;
-          left: 0;
-          width: 100%;
-          height: 100%;
-          pointer-events: none;
-        }
-        
-        @media (min-aspect-ratio: 16/9) {
-            .video-foreground iframe { width: 100%; height: 140%; top: -20%; }
-        }
-        @media (max-aspect-ratio: 16/9) {
-            .video-foreground iframe { width: 140%; height: 100%; left: -20%; }
-        }
+        .player-wrapper iframe { width: 100%; height: 100%; pointer-events: none; }
 
-        /* --- UI Layer --- */
+        /* --- UI Overlay --- */
         #ui-layer {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            z-index: 20;
-            background: rgba(0, 0, 0, 0.95);
-            backdrop-filter: blur(10px);
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 20;
+            background: rgba(0, 0, 0, 0.95); backdrop-filter: blur(10px);
             transition: opacity 0.4s ease, transform 0.4s ease;
-            display: flex;
-            flex-direction: column;
+            display: flex; flex-direction: column;
         }
 
-        #ui-layer.hidden-ui {
-            opacity: 0;
-            pointer-events: none;
-            transform: scale(1.05);
-        }
+        #ui-layer.hidden-ui { opacity: 0; pointer-events: none; transform: scale(1.05); }
 
-        /* Toggle Button */
-        #settings-toggle {
-            position: fixed;
-            top: 20px;
-            left: 20px;
-            z-index: 30;
-            background: rgba(0,0,0,0.4);
-            color: white;
-            border: 1px solid rgba(255,255,255,0.2);
-            border-radius: 50%;
-            width: 44px;
-            height: 44px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 1.5rem;
-            cursor: pointer;
-            backdrop-filter: blur(4px);
-            transition: all 0.3s;
-        }
-        
-        /* Unmute Overlay */
-        #unmute-overlay {
-            position: fixed;
-            bottom: 40px;
-            left: 50%;
-            transform: translateX(-50%);
-            z-index: 25;
-            background: rgba(0,0,0,0.6);
-            padding: 10px 20px;
-            border-radius: 30px;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            cursor: pointer;
-            animation: fadeIn 1s ease-out;
-            pointer-events: auto;
-        }
-        
-        #unmute-overlay.hidden { display: none; }
+        /* --- Playlist Items --- */
+        #playlist-container { flex: 1; overflow-y: auto; padding: 15px; padding-bottom: 20px; }
 
-        @keyframes fadeIn { from { opacity: 0; transform: translateX(-50%) translateY(20px); } to { opacity: 1; transform: translateX(-50%) translateY(0); } }
-
-        /* Playlist */
-        #playlist-container {
-            flex: 1;
-            overflow-y: auto;
-            padding: 15px;
-            padding-bottom: 20px; 
-        }
-
-        .clip-item {
-            background: rgba(255, 255, 255, 0.05);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            border-radius: 8px;
+        .clip-card {
+            background: #1a1a1a;
+            border: 1px solid #333;
+            border-radius: 12px;
             margin-bottom: 12px;
             padding: 12px;
             display: flex;
-            flex-direction: column;
-            gap: 10px;
-        }
-
-        .clip-item.active {
-            border-color: #4ade80;
-            background: rgba(74, 222, 128, 0.15);
-        }
-
-        .clip-row { display: flex; justify-content: space-between; align-items: center; }
-
-        .time-input-group {
-            display: flex;
             align-items: center;
-            gap: 5px;
-            background: #222;
-            padding: 2px 6px;
-            border-radius: 4px;
-            border: 1px solid #444;
+            gap: 12px;
+            transition: all 0.2s;
         }
         
-        .time-input-group label { font-size: 0.7rem; color: #aaa; }
+        .clip-card.active { border-color: #4ade80; background: #152515; }
+
+        .clip-info { flex: 1; overflow: hidden; }
+        .clip-title { font-weight: bold; font-size: 0.9rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .clip-meta { font-size: 0.75rem; color: #888; display: flex; gap: 8px; margin-top: 4px; }
         
-        input[type="number"] {
-            background: transparent;
-            border: none;
-            color: white;
-            width: 50px;
-            text-align: center;
-            outline: none;
-            font-weight: bold;
+        /* Visual Mini Bar in List */
+        .mini-timeline { height: 4px; background: #333; border-radius: 2px; margin-top: 8px; position: relative; width: 100%; }
+        .mini-range { position: absolute; height: 100%; background: #4ade80; border-radius: 2px; }
+
+        .btn-edit {
+            background: #333; color: white; border-radius: 50%; width: 36px; height: 36px;
+            display: flex; align-items: center; justify-content: center; font-size: 1.2rem;
+            cursor: pointer; flex-shrink: 0;
         }
 
-        /* Buttons */
-        .btn-icon { padding: 5px; border-radius: 4px; transition: background 0.2s; }
-        .btn-icon:hover { background: rgba(255,255,255,0.1); }
-        
-        .btn-action {
-            flex: 1;
-            padding: 8px;
-            border-radius: 6px;
-            font-size: 0.85rem;
-            font-weight: 500;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 6px;
-            transition: transform 0.1s;
+        /* --- EDITOR MODAL (The new stuff) --- */
+        #editor-modal {
+            position: fixed; inset: 0; z-index: 50;
+            background: #111;
+            display: flex; flex-direction: column;
+            transform: translateY(100%);
+            transition: transform 0.3s cubic-bezier(0.2, 0.8, 0.2, 1);
         }
-        .btn-action:active { transform: scale(0.98); }
+        
+        #editor-modal.open { transform: translateY(0); }
+
+        #editor-player-container {
+            width: 100%; aspect-ratio: 16/9; background: #000;
+            flex-shrink: 0;
+            position: relative;
+        }
+        
+        /* Timeline Area */
+        .editor-controls { padding: 20px; flex: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 20px; }
+
+        /* Timeline Slider CSS */
+        .timeline-wrapper {
+            position: relative; height: 60px; display: flex; align-items: center;
+            touch-action: none; /* Critical for dragging */
+        }
+        
+        .timeline-track {
+            position: absolute; left: 0; right: 0; height: 8px; background: #333; border-radius: 4px;
+        }
+        
+        .timeline-range {
+            position: absolute; height: 8px; background: #4ade80; border-radius: 4px;
+            /* left & width set by JS */
+        }
+
+        .timeline-handle {
+            position: absolute; top: 50%; transform: translate(50%, -50%); /* Center on point */
+            width: 28px; height: 28px; background: white; border-radius: 50%;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.5);
+            z-index: 10; cursor: grab;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 10px; color: #000; font-weight: bold;
+        }
+        
+        .handle-l { z-index: 11; }
+        .handle-r { z-index: 11; transform: translate(-50%, -50%); }
+
+        .playhead {
+            position: absolute; top: 0; bottom: 0; width: 2px; background: #ef4444;
+            pointer-events: none; z-index: 5;
+            transition: left 0.1s linear;
+        }
+
+        /* Related Clips in Editor */
+        .related-clips { margin-top: 20px; border-top: 1px solid #333; padding-top: 15px; }
+        .related-item {
+            padding: 10px; background: #222; border-radius: 6px; margin-bottom: 6px;
+            display: flex; justify-content: space-between; align-items: center;
+        }
+
+        /* --- General Controls --- */
+        #settings-toggle {
+            position: fixed; top: 20px; left: 20px; z-index: 30;
+            background: rgba(0,0,0,0.4); border: 1px solid rgba(255,255,255,0.2);
+            width: 44px; height: 44px; border-radius: 50%;
+            display: flex; align-items: center; justify-content: center; font-size: 1.5rem;
+            backdrop-filter: blur(4px); cursor: pointer;
+        }
+
+        #unmute-overlay {
+            position: fixed; bottom: 40px; left: 50%; transform: translateX(-50%);
+            z-index: 25; background: rgba(0,0,0,0.6); padding: 10px 20px; border-radius: 30px;
+            display: flex; align-items: center; gap: 10px; animation: fadeIn 1s ease-out;
+        }
+        #unmute-overlay.hidden { display: none; }
+        
+        @keyframes fadeIn { from { opacity: 0; transform: translateX(-50%) translateY(20px); } to { opacity: 1; transform: translateX(-50%) translateY(0); } }
 
     </style>
 </head>
 <body>
 
-    <!-- Video Stage -->
+    <!-- Background Mixers (Hidden from touch) -->
     <div id="video-stage" onclick="app.unmuteAll()">
-        <div id="player1-wrapper" class="player-wrapper video-foreground">
-            <div id="player1"></div>
-        </div>
-        <div id="player2-wrapper" class="player-wrapper video-foreground">
-            <div id="player2"></div>
-        </div>
+        <div id="player1-wrapper" class="player-wrapper video-foreground"><div id="player1"></div></div>
+        <div id="player2-wrapper" class="player-wrapper video-foreground"><div id="player2"></div></div>
     </div>
 
-    <!-- Floating Controls -->
+    <!-- Main UI -->
     <div id="settings-toggle" onclick="app.toggleUI()">⚙️</div>
 
     <div id="unmute-overlay" onclick="app.unmuteAll()">
-        <span>🔇</span>
-        <span class="text-sm font-bold">לחץ להפעלת סאונד</span>
+        <span>🔇</span><span class="text-sm font-bold">לחץ להפעלת סאונד</span>
     </div>
 
-    <!-- Editor UI -->
+    <!-- List View -->
     <div id="ui-layer" class="hidden-ui">
         <div class="p-4 bg-black/50 border-b border-white/10 flex justify-between items-center shrink-0">
-            <h1 class="text-lg font-bold text-green-400">עורך המיקס</h1>
+            <h1 class="text-lg font-bold text-transparent bg-clip-text bg-gradient-to-l from-green-400 to-blue-500">Orion Mixer V5</h1>
             <div class="flex gap-2">
-                <button onclick="app.downloadJSON()" class="text-xs bg-blue-900/50 border border-blue-500/50 px-2 py-1 rounded hover:bg-blue-800">⬇ שמור JSON</button>
-                <button onclick="document.getElementById('file-input').click()" class="text-xs bg-purple-900/50 border border-purple-500/50 px-2 py-1 rounded hover:bg-purple-800">⬆ טען JSON</button>
+                <button onclick="app.downloadJSON()" class="text-xs bg-gray-800 border border-gray-600 px-3 py-1 rounded">שמור</button>
+                <button onclick="document.getElementById('file-input').click()" class="text-xs bg-gray-800 border border-gray-600 px-3 py-1 rounded">טען</button>
                 <input type="file" id="file-input" accept=".json" style="display: none" onchange="app.uploadJSON(this)">
-                <button onclick="app.toggleUI()" class="text-xl ml-2 text-gray-400">✕</button>
+                <button onclick="app.toggleUI()" class="text-2xl ml-2">✕</button>
             </div>
         </div>
 
         <div id="playlist-container"></div>
 
-        <div class="p-4 bg-black border-t border-white/10 shrink-0 space-y-3">
-            <div class="flex gap-3">
-                <button onclick="app.regeneratePlaylist()" class="btn-action bg-red-900/40 text-red-200 border border-red-500/30">
-                    🎲 ערבוב מחדש (מחיקה)
+        <div class="p-4 bg-black border-t border-white/10 shrink-0 flex gap-3 justify-center">
+            <button onclick="app.regeneratePlaylist()" class="bg-red-900/30 text-red-300 px-4 py-3 rounded w-1/2 border border-red-500/20 text-sm">ערבוב מחדש</button>
+            <button onclick="app.addVideoPrompt()" class="bg-green-600 text-white px-4 py-3 rounded w-1/2 text-sm font-bold">+ הוסף וידאו</button>
+        </div>
+    </div>
+
+    <!-- EDITOR MODAL (Overlay) -->
+    <div id="editor-modal">
+        <!-- Editor Header -->
+        <div class="flex justify-between items-center p-4 bg-black border-b border-white/10">
+            <h2 class="text-sm font-bold text-gray-300">עריכת מקטע</h2>
+            <button onclick="editor.close()" class="text-white px-3 py-1 bg-gray-800 rounded">סגור ושמור</button>
+        </div>
+
+        <!-- Preview Player -->
+        <div id="editor-player-container">
+            <div id="editor-player"></div>
+        </div>
+
+        <!-- Editor Controls -->
+        <div class="editor-controls">
+            
+            <!-- Playback Controls -->
+            <div class="flex justify-center gap-6 items-center">
+                <button onclick="editor.togglePlay()" id="editor-play-btn" class="w-12 h-12 bg-white text-black rounded-full flex items-center justify-center text-xl font-bold">▶</button>
+                <div class="text-center">
+                    <div class="text-xs text-gray-500">מיקום נוכחי</div>
+                    <div id="editor-time-display" class="font-mono text-xl text-blue-400">00:00</div>
+                </div>
+            </div>
+
+            <!-- The Timeline -->
+            <div class="px-2">
+                <div class="flex justify-between text-xs text-gray-500 mb-1">
+                    <span id="label-in">IN: 0.0s</span>
+                    <span id="label-out">OUT: 5.0s</span>
+                </div>
+                
+                <div class="timeline-wrapper" id="timeline-track-area">
+                    <div class="timeline-track"></div>
+                    <div class="timeline-range" id="timeline-fill"></div>
+                    <div class="playhead" id="editor-playhead"></div>
+                    
+                    <!-- Handles -->
+                    <div class="timeline-handle handle-l" id="handle-in">IN</div>
+                    <div class="timeline-handle handle-r" id="handle-out">OUT</div>
+                </div>
+                
+                <div class="flex justify-between text-[10px] text-gray-600 mt-1">
+                    <span>0:00</span>
+                    <span id="total-duration-label">03:00</span>
+                </div>
+            </div>
+
+            <!-- Actions -->
+            <div class="grid grid-cols-2 gap-3 mt-2">
+                <button onclick="editor.duplicateClip()" class="bg-blue-900/40 text-blue-200 py-3 rounded border border-blue-500/30">
+                    📄 שכפל קטע
                 </button>
-                <button onclick="app.addVideoPrompt()" class="btn-action bg-gray-700 text-white hover:bg-gray-600">
-                    + הוסף לינק
+                <button onclick="editor.deleteClip()" class="bg-red-900/40 text-red-200 py-3 rounded border border-red-500/30">
+                    🗑 מחק קטע
                 </button>
             </div>
-            <div class="text-[10px] text-gray-500 text-center">
-                השינויים נשמרים אוטומטית במכשיר זה. הורד JSON לגיבוי חיצוני.
+
+            <!-- Related Clips Group -->
+            <div class="related-clips">
+                <h3 class="text-xs font-bold text-gray-400 mb-3 uppercase tracking-wider">עוד קטעים מהסרטון הזה</h3>
+                <div id="related-clips-list">
+                    <!-- Injected JS -->
+                </div>
             </div>
+            
+            <div class="h-10"></div> <!-- Spacer -->
         </div>
     </div>
 
     <script>
-        // --- Data ---
+        // --- DATA & CONFIG ---
         const SOURCE_VIDEOS = [
             { id: 'LvdGbCkZAiY', title: 'אני בל לי', duration: 180 }, 
             { id: 'zUmTkhqFhgw', title: 'גרינטי הדסטארט', duration: 120 },
@@ -259,223 +279,95 @@
             { id: '_rv2sMdyCpg', title: 'RedBull', duration: 60 }
         ];
 
-        const CROSSFADE_TIME = 1.5;
-        
+        // --- CORE APP (Background Mixer) ---
         class LoopApp {
             constructor() {
-                // בדיקת זיכרון מקומי
-                const saved = localStorage.getItem('orionMixV4');
-                
-                if (saved) {
-                    try {
-                        this.playlist = JSON.parse(saved);
-                        console.log("Loaded saved playlist");
-                    } catch(e) {
-                        console.error("Save file corrupted, creating new");
-                        this.playlist = this.createAutoPlaylist();
-                    }
-                } else {
-                    console.log("No save found, generating random");
-                    this.playlist = this.createAutoPlaylist();
-                }
-
+                this.playlist = this.loadPlaylist();
                 this.currentIndex = 0;
                 this.isPlaying = false;
-                this.activePlayer = 1; 
+                this.activePlayer = 1;
                 this.isMuted = true;
                 this.monitorInterval = null;
                 this.fadeInterval = null;
                 this.nextLoaded = false;
             }
 
+            loadPlaylist() {
+                const saved = localStorage.getItem('orionMixV5');
+                if (saved) {
+                    try { return JSON.parse(saved); } catch(e) {}
+                }
+                return this.createAutoPlaylist();
+            }
+
             createAutoPlaylist() {
                 let list = [];
                 SOURCE_VIDEOS.forEach(video => {
-                    const step = 15; 
-                    const clipDuration = 5; 
-                    for (let t = 0; t < (video.duration || 30) - clipDuration; t += step) {
+                    // Create fewer segments for cleaner start
+                    const step = 20; 
+                    for (let t = 0; t < (video.duration || 30) - 5; t += step) {
                         list.push({
                             uuid: crypto.randomUUID(),
                             videoId: video.id,
                             title: video.title,
                             start: t,
-                            duration: clipDuration
+                            duration: 5,
+                            totalDuration: video.duration || 180 // Important for timeline
                         });
                     }
                 });
-                for (let i = list.length - 1; i > 0; i--) {
-                    const j = Math.floor(Math.random() * (i + 1));
-                    [list[i], list[j]] = [list[j], list[i]];
-                }
-                return list.length > 0 ? list : this.backupList();
-            }
-            
-            backupList() {
-                return [{ uuid: '1', videoId: 'LvdGbCkZAiY', title: 'Backup', start: 10, duration: 5 }];
+                return list.sort(() => Math.random() - 0.5);
             }
 
-            regeneratePlaylist() {
-                if(confirm("זה ימחק את הרשימה הנוכחית וייצור רשימה אקראית חדשה. להמשיך?")) {
-                    this.playlist = this.createAutoPlaylist();
-                    this.currentIndex = 0;
-                    this.save();
-                    this.renderList();
-                }
-            }
-
-            // --- Persistence & JSON ---
-
-            save() { 
-                localStorage.setItem('orionMixV4', JSON.stringify(this.playlist)); 
-            }
-
-            downloadJSON() {
-                const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(this.playlist, null, 2));
-                const downloadAnchorNode = document.createElement('a');
-                downloadAnchorNode.setAttribute("href", dataStr);
-                const date = new Date().toISOString().slice(0,10);
-                downloadAnchorNode.setAttribute("download", `orion_mix_${date}.json`);
-                document.body.appendChild(downloadAnchorNode);
-                downloadAnchorNode.click();
-                downloadAnchorNode.remove();
-            }
-
-            uploadJSON(input) {
-                const file = input.files[0];
-                if (!file) return;
-                const reader = new FileReader();
-                reader.onload = (e) => {
-                    try {
-                        const json = JSON.parse(e.target.result);
-                        if (Array.isArray(json)) {
-                            this.playlist = json;
-                            this.save();
-                            this.renderList();
-                            alert("הרשימה נטענה בהצלחה!");
-                        } else {
-                            alert("מבנה קובץ לא תקין");
-                        }
-                    } catch (err) {
-                        alert("שגיאה בקריאת הקובץ");
-                    }
-                };
-                reader.readAsText(file);
-                // Reset input
-                input.value = '';
-            }
-
-            // --- UI Interaction ---
+            save() { localStorage.setItem('orionMixV5', JSON.stringify(this.playlist)); }
 
             toggleUI() {
                 document.getElementById('ui-layer').classList.toggle('hidden-ui');
-            }
-
-            unmuteAll() {
-                if (!this.isMuted) return;
-                this.isMuted = false;
-                if(player1 && player1.unMute) player1.unMute();
-                if(player2 && player2.unMute) player2.unMute();
-                document.getElementById('unmute-overlay').classList.add('hidden');
-            }
-
-            // --- Actions ---
-
-            duplicateClip(idx) {
-                const original = this.playlist[idx];
-                const copy = {
-                    ...original,
-                    uuid: crypto.randomUUID(),
-                    title: original.title + ' (העתק)'
-                };
-                // Insert after current
-                this.playlist.splice(idx + 1, 0, copy);
-                this.save();
+                // Refresh list visuals
                 this.renderList();
             }
 
-            updateTimes(idx, type, val) {
-                const clip = this.playlist[idx];
-                const value = parseFloat(val);
-                
-                if (type === 'start') {
-                    // Changing start time, preserve duration logic for UI (Start + Duration = End)
-                    // If user changes Start from 10 to 12, Duration remains 5, so End becomes 17.
-                    clip.start = value;
-                } else if (type === 'end') {
-                    // Changing end time updates duration
-                    // Start 10, End 15 -> Duration 5.
-                    // If User sets End 20 -> Duration 10.
-                    if (value > clip.start) {
-                        clip.duration = value - clip.start;
-                    }
-                }
-                this.save();
-            }
-
-            removeClip(idx) {
-                if(this.playlist.length <= 1) return;
-                this.playlist.splice(idx, 1);
-                this.save();
-                this.renderList();
-            }
-
-            addVideoPrompt() {
-                const url = prompt("Link:");
-                if(url) {
-                    let id = url.includes('v=') ? url.split('v=')[1].split('&')[0] : url.split('/').pop();
-                    this.playlist.push({uuid:crypto.randomUUID(), videoId:id, title:'New Clip', start:0, duration:5});
-                    this.save();
-                    this.renderList();
-                }
-            }
-
-            // --- Render ---
-
+            // --- List Rendering ---
             renderList() {
                 const container = document.getElementById('playlist-container');
-                container.innerHTML = ''; 
-
+                container.innerHTML = '';
+                
                 this.playlist.forEach((clip, idx) => {
                     const isActive = idx === this.currentIndex;
-                    const endTime = clip.start + clip.duration;
                     
+                    // Calc percentages for mini visual bar
+                    const total = clip.totalDuration || 100;
+                    const leftP = (clip.start / total) * 100;
+                    const widthP = (clip.duration / total) * 100;
+
                     const el = document.createElement('div');
-                    el.className = `clip-item ${isActive ? 'active' : ''}`;
+                    el.className = `clip-card ${isActive ? 'active' : ''}`;
+                    el.onclick = (e) => {
+                        // If clicking edit button, don't trigger row click logic if needed
+                        if(e.target.closest('.btn-edit')) return;
+                        // For now clicking anywhere opens editor
+                        editor.open(idx);
+                    };
+
                     el.innerHTML = `
-                        <div class="clip-row">
-                            <div class="flex items-center gap-2 overflow-hidden">
-                                <span class="text-xs font-mono text-gray-500 w-5">${idx+1}</span>
-                                <span class="truncate text-sm font-bold max-w-[150px] ${isActive ? 'text-green-300' : 'text-gray-300'}">${clip.title}</span>
+                        <div class="btn-edit text-gray-400 text-xs">${idx+1}</div>
+                        <div class="clip-info">
+                            <div class="clip-title">${clip.title}</div>
+                            <div class="mini-timeline">
+                                <div class="mini-range" style="left:${leftP}%; width:${widthP}%"></div>
                             </div>
-                            <div class="flex gap-1">
-                                <button onclick="app.duplicateClip(${idx})" class="btn-icon text-blue-400" title="שכפל">📄</button>
-                                <button onclick="app.removeClip(${idx})" class="btn-icon text-red-500" title="מחק">✕</button>
+                            <div class="clip-meta">
+                                <span>IN: ${clip.start.toFixed(1)}</span>
+                                <span>DUR: ${clip.duration.toFixed(1)}s</span>
                             </div>
                         </div>
-                        
-                        <div class="clip-row mt-2">
-                             <div class="time-input-group">
-                                <label>IN</label>
-                                <input type="number" step="0.1" value="${clip.start.toFixed(1)}" onchange="app.updateTimes(${idx}, 'start', this.value)">
-                            </div>
-                            <div class="h-[1px] bg-gray-600 w-4"></div>
-                            <div class="time-input-group">
-                                <label>OUT</label>
-                                <input type="number" step="0.1" value="${endTime.toFixed(1)}" onchange="app.updateTimes(${idx}, 'end', this.value)">
-                            </div>
-                            <span class="text-[10px] text-gray-500 ml-2">(${clip.duration.toFixed(1)}s)</span>
-                        </div>
+                        <button class="btn-edit" onclick="editor.open(${idx})">✏️</button>
                     `;
                     container.appendChild(el);
-                    
-                    if(isActive && !document.getElementById('ui-layer').classList.contains('hidden-ui')) {
-                        el.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                    }
                 });
             }
 
-            // --- Engine ---
-
+            // --- Engine Controls ---
             startEngine() {
                 this.isPlaying = true;
                 this.playSequence(this.currentIndex);
@@ -487,61 +379,58 @@
                 if (index >= this.playlist.length) index = 0;
                 this.currentIndex = index;
 
-                // UI update (only if visible logic handled in render)
-                if(!document.getElementById('ui-layer').classList.contains('hidden-ui')) {
-                    this.renderList();
+                // Resume background playback if it was paused by editor
+                if(editor.isOpen) {
+                    // Do nothing in background if editor is open
+                } else {
+                    this._playInternal(index);
                 }
+            }
 
+            _playInternal(index) {
                 const clip = this.playlist[index];
                 const currentP = this.activePlayer === 1 ? player1 : player2;
                 const nextP = this.activePlayer === 1 ? player2 : player1;
-                
                 const currentWrapper = this.activePlayer === 1 ? document.getElementById('player1-wrapper') : document.getElementById('player2-wrapper');
                 const nextWrapper = this.activePlayer === 1 ? document.getElementById('player2-wrapper') : document.getElementById('player1-wrapper');
 
                 if (currentWrapper.style.opacity != '1') {
-                    if(this.isMuted) currentP.mute();
-                    else currentP.unMute();
+                    if(this.isMuted) currentP.mute(); else currentP.unMute();
                     currentP.loadVideoById({videoId: clip.videoId, startSeconds: clip.start});
-                    currentP.playVideo(); 
+                    currentP.playVideo();
                     currentWrapper.style.opacity = 1;
                     nextWrapper.style.opacity = 0;
                 }
 
                 this.nextLoaded = false;
-                
                 clearInterval(this.monitorInterval);
+                
                 this.monitorInterval = setInterval(() => {
-                    if (!this.isPlaying) return;
-
-                    const state = currentP.getPlayerState();
-                    if(state === 0) { 
-                        this.playSequence(this.currentIndex + 1);
-                        return;
-                    }
+                    // If editor is open, pause background logic
+                    if(editor.isOpen) {
+                         currentP.pauseVideo();
+                         return;
+                    } 
+                    // If editor closed, ensure playing
+                    if(currentP.getPlayerState() === 2) currentP.playVideo();
 
                     const currTime = currentP.getCurrentTime();
-                    if (!currTime && currTime !== 0) return; 
+                    if (!currTime) return;
 
                     const played = currTime - clip.start;
-                    if (played < -2) {} // Seek correction placeholder
-
                     const remaining = clip.duration - played;
 
-                    // Preload
                     if (remaining <= 2.5 && !this.nextLoaded) {
                         this.nextLoaded = true;
-                        let nextIdx = index + 1;
+                        let nextIdx = this.currentIndex + 1;
                         if (nextIdx >= this.playlist.length) nextIdx = 0;
                         const nextClip = this.playlist[nextIdx];
-                        
-                        nextP.mute(); 
+                        nextP.mute();
                         nextP.loadVideoById({ videoId: nextClip.videoId, startSeconds: nextClip.start });
-                        nextP.playVideo(); 
+                        nextP.playVideo();
                     }
 
-                    // Crossfade
-                    if (remaining <= CROSSFADE_TIME) {
+                    if (remaining <= 1.5) {
                         clearInterval(this.monitorInterval);
                         this.doCrossfade(currentP, currentWrapper, nextP, nextWrapper);
                     }
@@ -549,70 +438,338 @@
             }
 
             doCrossfade(pOut, wOut, pIn, wIn) {
-                const steps = 10;
-                const stepTime = (CROSSFADE_TIME * 1000) / steps;
                 let step = 0;
                 pIn.playVideo();
-
                 clearInterval(this.fadeInterval);
                 this.fadeInterval = setInterval(() => {
                     step++;
-                    const progress = step / steps; 
-
+                    const progress = step / 10;
                     wOut.style.opacity = 1 - progress;
                     wIn.style.opacity = progress;
-
                     if (!this.isMuted) {
                         pOut.setVolume((1 - progress) * 100);
                         pIn.setVolume(progress * 100);
                         if (progress > 0.1) pIn.unMute();
                     }
-
-                    if (step >= steps) {
+                    if (step >= 10) {
                         clearInterval(this.fadeInterval);
-                        wOut.style.opacity = 0;
-                        pOut.pauseVideo();
-                        
-                        wIn.style.opacity = 1;
-                        if(!this.isMuted) pIn.setVolume(100);
-
+                        wOut.style.opacity = 0; pOut.pauseVideo();
+                        wIn.style.opacity = 1; if(!this.isMuted) pIn.setVolume(100);
                         this.activePlayer = this.activePlayer === 1 ? 2 : 1;
                         this.playSequence(this.currentIndex + 1);
                     }
-                }, stepTime);
+                }, 150);
+            }
+
+            unmuteAll() {
+                this.isMuted = false;
+                if(player1) player1.unMute();
+                if(player2) player2.unMute();
+                document.getElementById('unmute-overlay').classList.add('hidden');
+            }
+            
+            regeneratePlaylist() {
+                if(confirm('למחוק וליצור רשימה חדשה?')) {
+                    this.playlist = this.createAutoPlaylist();
+                    this.currentIndex = 0;
+                    this.save();
+                    this.renderList();
+                }
+            }
+            
+            addVideoPrompt() {
+                const url = prompt("Link:");
+                if(url) {
+                    let id = url.includes('v=') ? url.split('v=')[1].split('&')[0] : url.split('/').pop();
+                    this.playlist.push({uuid:crypto.randomUUID(), videoId:id, title:'New', start:0, duration:5, totalDuration:180});
+                    this.save();
+                    this.renderList();
+                }
+            }
+            
+            downloadJSON() {
+                const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(this.playlist));
+                const a = document.createElement('a');
+                a.href = dataStr; a.download = "mix.json"; a.click();
+            }
+            
+            uploadJSON(input) {
+                const f = input.files[0];
+                if(!f) return;
+                const r = new FileReader();
+                r.onload = e => {
+                    this.playlist = JSON.parse(e.target.result);
+                    this.save();
+                    this.renderList();
+                };
+                r.readAsText(f);
             }
         }
 
-        const app = new LoopApp();
+        // --- EDITOR LOGIC ---
+        class Editor {
+            constructor() {
+                this.isOpen = false;
+                this.clipIndex = null;
+                this.clip = null;
+                this.player = null;
+                this.monitorTimer = null;
+                
+                // Timeline Dragging state
+                this.dragging = null; // 'in' or 'out'
+                this.trackWidth = 0;
+            }
 
-        let player1, player2;
+            init(ytPlayer) {
+                this.player = ytPlayer;
+                this.setupDragEvents();
+            }
+
+            open(index) {
+                this.isOpen = true;
+                this.clipIndex = index;
+                this.clip = app.playlist[index];
+                
+                // Pause background mixing
+                if(player1 && player1.pauseVideo) player1.pauseVideo();
+                if(player2 && player2.pauseVideo) player2.pauseVideo();
+
+                document.getElementById('editor-modal').classList.add('open');
+                
+                // Load video
+                this.player.loadVideoById({
+                    videoId: this.clip.videoId,
+                    startSeconds: this.clip.start
+                    // endSeconds not supported well for looping manually
+                });
+                
+                this.updateUI();
+                this.renderRelated();
+                this.startMonitor();
+            }
+
+            close() {
+                this.isOpen = false;
+                this.player.pauseVideo();
+                clearInterval(this.monitorTimer);
+                document.getElementById('editor-modal').classList.remove('open');
+                app.save();
+                app.renderList();
+                // Resume mix
+                app.playSequence(app.currentIndex);
+            }
+
+            updateUI() {
+                // Update Timeline handles
+                const total = this.clip.totalDuration || 100;
+                document.getElementById('total-duration-label').innerText = this.formatTime(total);
+                
+                this.drawTimeline();
+                this.updateLabels();
+            }
+            
+            drawTimeline() {
+                const track = document.getElementById('timeline-track-area');
+                this.trackWidth = track.clientWidth;
+                
+                const total = this.clip.totalDuration || 100;
+                const startP = (this.clip.start / total) * 100;
+                const endP = ((this.clip.start + this.clip.duration) / total) * 100;
+
+                document.getElementById('handle-in').style.left = startP + '%';
+                document.getElementById('handle-out').style.left = endP + '%';
+                
+                const fill = document.getElementById('timeline-fill');
+                fill.style.left = startP + '%';
+                fill.style.width = (endP - startP) + '%';
+            }
+            
+            updateLabels() {
+                document.getElementById('label-in').innerText = `IN: ${this.clip.start.toFixed(1)}s`;
+                document.getElementById('label-out').innerText = `OUT: ${(this.clip.start + this.clip.duration).toFixed(1)}s`;
+            }
+
+            togglePlay() {
+                const state = this.player.getPlayerState();
+                if (state === 1) this.player.pauseVideo();
+                else this.player.playVideo();
+            }
+
+            startMonitor() {
+                clearInterval(this.monitorTimer);
+                this.monitorTimer = setInterval(() => {
+                    if(!this.isOpen) return;
+                    
+                    const t = this.player.getCurrentTime();
+                    if(!t) return;
+
+                    // Update Playhead
+                    const total = this.clip.totalDuration || 100;
+                    const p = (t / total) * 100;
+                    document.getElementById('editor-playhead').style.left = p + '%';
+                    
+                    // Time Display
+                    document.getElementById('editor-time-display').innerText = this.formatTime(t);
+                    
+                    // Loop Logic
+                    const end = this.clip.start + this.clip.duration;
+                    if (t >= end) {
+                        this.player.seekTo(this.clip.start);
+                    }
+                }, 100);
+            }
+
+            // --- DRAG LOGIC ---
+            setupDragEvents() {
+                const track = document.getElementById('timeline-track-area');
+                const hIn = document.getElementById('handle-in');
+                const hOut = document.getElementById('handle-out');
+
+                const startDrag = (e, type) => {
+                    e.preventDefault();
+                    this.dragging = type;
+                    this.trackWidth = track.clientWidth;
+                };
+
+                hIn.addEventListener('touchstart', (e) => startDrag(e, 'in'));
+                hIn.addEventListener('mousedown', (e) => startDrag(e, 'in'));
+                
+                hOut.addEventListener('touchstart', (e) => startDrag(e, 'out'));
+                hOut.addEventListener('mousedown', (e) => startDrag(e, 'out'));
+
+                const moveDrag = (e) => {
+                    if (!this.dragging) return;
+                    
+                    const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+                    const rect = track.getBoundingClientRect();
+                    let offsetX = clientX - rect.left;
+                    
+                    // Constrain
+                    if (offsetX < 0) offsetX = 0;
+                    if (offsetX > this.trackWidth) offsetX = this.trackWidth;
+                    
+                    const percent = offsetX / this.trackWidth;
+                    const total = this.clip.totalDuration || 100;
+                    const time = percent * total;
+
+                    if (this.dragging === 'in') {
+                        // Validate: In must be before Out
+                        const currentEnd = this.clip.start + this.clip.duration;
+                        if (time < currentEnd - 0.5) { // Min 0.5s duration
+                            this.clip.start = time;
+                            this.clip.duration = currentEnd - time;
+                        }
+                    } else if (this.dragging === 'out') {
+                        // Validate: Out must be after In
+                        if (time > this.clip.start + 0.5) {
+                            this.clip.duration = time - this.clip.start;
+                        }
+                    }
+
+                    this.drawTimeline();
+                    this.updateLabels();
+                    
+                    // Live Scrubbing (Throttled ideally, but direct for now)
+                    // Only seek if dragging In (or Out user wants to see end frame)
+                    this.player.seekTo(time, true); 
+                };
+
+                const endDrag = () => {
+                    if(this.dragging) {
+                        // If we finished dragging, play from IN
+                        if(this.dragging === 'in') this.player.seekTo(this.clip.start);
+                        // If dragged out, maybe play last 2 seconds?
+                        else this.player.seekTo(this.clip.start + this.clip.duration - 1);
+                        
+                        this.player.playVideo();
+                    }
+                    this.dragging = null;
+                };
+
+                window.addEventListener('touchmove', moveDrag);
+                window.addEventListener('mousemove', moveDrag);
+                window.addEventListener('touchend', endDrag);
+                window.addEventListener('mouseup', endDrag);
+            }
+
+            // --- Editor Actions ---
+            duplicateClip() {
+                const copy = JSON.parse(JSON.stringify(this.clip));
+                copy.uuid = crypto.randomUUID();
+                copy.title += ' (copy)';
+                // Shift time slightly
+                copy.start += 5;
+                if(copy.start > copy.totalDuration) copy.start = 0;
+                
+                app.playlist.splice(this.clipIndex + 1, 0, copy);
+                app.save();
+                this.renderRelated(); // Refresh group view
+                alert('שוכפל! חפש אותו ברשימה למטה');
+            }
+            
+            deleteClip() {
+                if(confirm('למחוק את הקטע?')) {
+                    app.playlist.splice(this.clipIndex, 1);
+                    this.close();
+                }
+            }
+
+            renderRelated() {
+                const list = document.getElementById('related-clips-list');
+                list.innerHTML = '';
+                
+                app.playlist.forEach((item, idx) => {
+                    // Same video ID but not current item
+                    if (item.videoId === this.clip.videoId && idx !== this.clipIndex) {
+                        const div = document.createElement('div');
+                        div.className = 'related-item';
+                        div.innerHTML = `
+                            <span class="text-xs text-gray-300 w-8">#${idx+1}</span>
+                            <span class="text-xs font-bold text-gray-400 truncate flex-1">${item.start.toFixed(0)}s - ${(item.start+item.duration).toFixed(0)}s</span>
+                            <button class="bg-gray-700 px-2 rounded text-xs" onclick="editor.open(${idx})">ערוך</button>
+                        `;
+                        list.appendChild(div);
+                    }
+                });
+            }
+
+            formatTime(s) {
+                const m = Math.floor(s / 60);
+                const sec = Math.floor(s % 60);
+                return `${m}:${sec < 10 ? '0'+sec : sec}`;
+            }
+        }
+
+        // --- INIT ---
+        const app = new LoopApp();
+        const editor = new Editor();
+
+        let player1, player2, editorPlayer;
+        
         var tag = document.createElement('script');
         tag.src = "https://www.youtube.com/iframe_api";
         var firstScriptTag = document.getElementsByTagName('script')[0];
         firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
 
         function onYouTubeIframeAPIReady() {
-            const pVars = { 
-                controls: 0, showinfo: 0, rel: 0, modestbranding: 1, 
-                iv_load_policy: 3, fs: 0, playsinline: 1, disablekb: 1,
-                origin: window.location.origin
-            };
-            player1 = new YT.Player('player1', { height:'100%', width:'100%', playerVars: pVars, events: { 'onReady': onPlayerReady, 'onError': onPlayerError } });
-            player2 = new YT.Player('player2', { height:'100%', width:'100%', playerVars: pVars, events: { 'onReady': onPlayerReady, 'onError': onPlayerError } });
+            const vars = { controls: 0, showinfo: 0, rel: 0, modestbranding: 1, iv_load_policy: 3, fs: 0, playsinline: 1, disablekb: 1, origin: window.location.origin };
+            
+            player1 = new YT.Player('player1', { height:'100%', width:'100%', playerVars: vars, events: { 'onReady': onReady } });
+            player2 = new YT.Player('player2', { height:'100%', width:'100%', playerVars: vars, events: { 'onReady': onReady } });
+            
+            // Editor player needs UI sometimes, but we control it custom
+            editorPlayer = new YT.Player('editor-player', { height:'100%', width:'100%', playerVars: vars, events: { 'onReady': onEditorReady } });
         }
 
         let readyCount = 0;
-        function onPlayerReady(e) {
-            e.target.mute(); 
+        function onReady(e) {
+            e.target.mute();
             readyCount++;
-            if(readyCount === 2) {
-                setTimeout(() => app.startEngine(), 500);
-            }
+            if(readyCount === 2) setTimeout(() => app.startEngine(), 500);
         }
-
-        function onPlayerError(e) {
-            console.warn("Video Error:", e.data);
-            app.playSequence(app.currentIndex + 1);
+        
+        function onEditorReady(e) {
+            editor.init(e.target);
         }
 
     </script>
