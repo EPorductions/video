@@ -55,7 +55,8 @@
 
         .input-box { margin-bottom: 12px; }
         .input-box label { display: block; font-size: 13px; font-weight: 700; margin-bottom: 5px; color: #bbb; }
-        .input-box input[type="text"], .input-box textarea { width: 100%; padding: 10px; border: 1px solid #555; border-radius: 4px; box-sizing: border-box; font-family: 'Assistant'; background: #1e1e24; color: #fff; }
+        .input-box input[type="text"], .input-box textarea, .input-box input[type="range"] { width: 100%; padding: 10px; border: 1px solid #555; border-radius: 4px; box-sizing: border-box; font-family: 'Assistant'; background: #1e1e24; color: #fff; }
+        .input-box input[type="range"] { padding: 0; height: 30px; background: transparent; border: none; }
 
         .counter-ctrl { display: flex; align-items: center; justify-content: space-between; background: #353542; padding: 8px 10px; border-radius: 6px; margin-bottom: 8px; border: 1px solid #4d4d5d; }
         .counter-ctrl span { font-weight: 700; font-size: 14px; width: 85px; display: flex; align-items: center; gap: 8px; }
@@ -94,7 +95,6 @@
 
         /* כיווניות */
         .ui-hebrew .side-actions { left: 15px; }
-        /* תיקון: יישור לימין במצב עברי */
         .ui-hebrew .bottom-info { right: 15px; text-align: right; align-items: flex-start; } 
         .ui-hebrew .profile-row { flex-direction: row-reverse; }
         .ui-hebrew .sound-row { flex-direction: row-reverse; }
@@ -189,11 +189,42 @@
             </div>
         </div>
 
+        <!-- מדור חדש: סטטוס מכשיר -->
+        <div class="section">
+            <h3><i class="fas fa-mobile-alt"></i> סטטוס מכשיר</h3>
+            
+            <div class="input-box">
+                <label>סוללה (%) <span id="lbl-battery">100</span>%</label>
+                <input type="range" id="rng-battery" min="0" max="100" value="100" oninput="setBattery(this.value)">
+                <div class="toggle-row" style="margin-top:5px; background:none; padding:0;">
+                    <span>סימולציה אוטומטית</span>
+                    <label class="switch"><input type="checkbox" id="auto-battery" checked onchange="toggleBatterySim()"><span class="slider"></span></label>
+                </div>
+            </div>
+
+            <div class="input-box">
+                <label>עוצמת קליטה (0-4)</label>
+                <input type="range" id="rng-signal" min="0" max="4" value="4" oninput="setSignal(this.value)">
+                <div class="toggle-row" style="margin-top:5px; background:none; padding:0;">
+                    <span>גליצ'ים בקליטה (הבהוב)</span>
+                    <label class="switch"><input type="checkbox" id="glitch-signal"><span class="slider"></span></label>
+                </div>
+            </div>
+
+            <div class="input-box">
+                <label>עוצמת WIFI (0-4)</label>
+                <input type="range" id="rng-wifi" min="0" max="4" value="4" oninput="setWifi(this.value)">
+                <div class="toggle-row" style="margin-top:5px; background:none; padding:0;">
+                    <span>גליצ'ים ב-WIFI (הבהוב)</span>
+                    <label class="switch"><input type="checkbox" id="glitch-wifi"><span class="slider"></span></label>
+                </div>
+            </div>
+        </div>
+
         <div class="section">
             <h3><i class="fas fa-robot"></i> אוטומציה וחיים</h3>
             <div class="toggle-row">
                 <span>טייס אוטומטי (מונים עולים)</span>
-                <!-- השינוי כאן: הורדתי את ה-checked כדי שלא יפעל אוטומטית -->
                 <label class="switch"><input type="checkbox" id="auto-counters" onchange="toggleAuto()"><span class="slider"></span></label>
             </div>
             <div class="toggle-row">
@@ -311,7 +342,6 @@
             </div>
             <div class="toggle-row">
                 <span>טקסט מרכזי ענק</span>
-                <!-- שינוי: טקסט מרכזי כבוי כברירת מחדל -->
                 <label class="switch"><input type="checkbox" onchange="toggleVis('out-center', this.checked)"><span class="slider"></span></label>
             </div>
             <div class="toggle-row">
@@ -408,17 +438,17 @@
             'likes': 'fa-thumbs-up',
             'shares': 'fa-share-nodes',
             'comments': 'fa-comment-dots',
-            'forwards': 'fa-share', // יתהפך ב-CSS אם צריך, או ידנית בקוד
+            'forwards': 'fa-share', 
             'saves': 'fa-bookmark'
         };
 
-        // מיפוי צבעים לכל סוג אינטראקציה
-        const iconColors = {
-            'likes': '#2196F3', // כחול לייק
-            'shares': '#25D366', // ירוק וואטסאפ/שיתוף
-            'comments': '#E040FB', // סגול/ורוד בולט
-            'forwards': '#00E676', // ירוק בהיר
-            'saves': '#FFD700' // זהב/צהוב
+        // פלטות צבעים רנדומליות לפי סוג
+        const colorPalettes = {
+            'shares': ['#E91E63', '#9C27B0', '#FF4081', '#E040FB', '#F48FB1'], // ורודים סגולים
+            'comments': ['#FFFFFF', '#F5F5F5', '#D7CCC8', '#BCAAA4', '#EFEBE9'], // לבן עד חום בהיר
+            'forwards': ['#FF5722', '#FF9800', '#FF3D00', '#F44336', '#FF6E40'], // חמה אדומה כתומה
+            'saves': ['#FFEB3B', '#FFC107', '#FFD700', '#FDD835', '#FFCA28'], // צהובים זהובים
+            'likes': ['#2196F3', '#1976D2', '#448AFF', '#2962FF', '#0288D1'] // כחולים (עם סטרוק לבן ב-CSS)
         };
 
         function formatNumber(num) {
@@ -442,9 +472,7 @@
             if (stats[key] < 0) stats[key] = 0;
             refreshUI();
             
-            // טריגר לאנימציה בהתאם לסוג הפעולה
             if(amount > 0) {
-                // שיגור אייקון מתאים לפעולה (לדוגמה: אייקון שיתוף לשיתוף, לייק ללייק)
                 spawnSpecificIcon(key, 1);
             }
         }
@@ -522,12 +550,11 @@
             }
         }
 
-        // פונקציה חדשה לשיגור אייקונים (לא לבבות)
         function spawnSpecificIcon(key, amount) {
             const layer = document.getElementById('hearts-layer');
             const isHebrew = document.getElementById('hud').classList.contains('ui-hebrew');
             const iconClass = iconTypes[key];
-            const color = iconColors[key];
+            const palette = colorPalettes[key];
 
             if(!iconClass) return;
 
@@ -536,29 +563,31 @@
                     const div = document.createElement('div');
                     div.className = 'floating-icon';
                     
-                    // יצירת אלמנט האייקון
                     const icon = document.createElement('i');
                     icon.className = `fas ${iconClass}`;
                     
-                    // צבע ספציפי לכל סוג
-                    div.style.color = color || '#fff';
+                    // בחירת צבע רנדומלי מהפלטה
+                    const color = palette ? palette[Math.floor(Math.random() * palette.length)] : '#fff';
+                    div.style.color = color;
                     
-                    // טיפול מיוחד באייקון 'forwards' שצריך להיות הפוך
+                    // טיפול בלייקים: כחול עם פס לבן
+                    if (key === 'likes') {
+                        div.style.webkitTextStroke = "1.5px white"; 
+                        div.style.filter = "drop-shadow(0 0 2px rgba(0,0,0,0.3))";
+                    }
+
                     if(key === 'forwards') {
                         icon.style.transform = 'scaleX(-1)';
                     }
 
                     div.appendChild(icon);
                     
-                    // גודל
-                    const size = Math.random() * 10 + 20; // 20px-30px
+                    const size = Math.random() * 10 + 20; 
                     div.style.fontSize = size + 'px';
 
-                    // מיקום
                     let baseX = isHebrew ? 10 : 85;
                     div.style.left = (baseX + (Math.random() * 15 - 7.5)) + '%';
                     
-                    // אנימציה
                     const duration = Math.random() * 2.5 + 2.5;
                     div.style.animationDuration = duration + 's';
                     
@@ -589,57 +618,121 @@
         }
 
         // ==========================================
-        // לוגיקה לסוללה וקליטה (אוטומטי)
+        // ניהול סוללה וקליטה (ידני + אוטומטי)
         // ==========================================
-        function initSystemStatus() {
-            setInterval(() => {
-                const wifi = document.getElementById('icon-wifi');
-                const signal = document.getElementById('icon-signal');
-                
-                if(wifi) wifi.style.opacity = Math.random() > 0.7 ? (Math.random() * 0.5 + 0.5) : 1;
-                if(signal) signal.style.opacity = Math.random() > 0.8 ? (Math.random() * 0.5 + 0.5) : 1;
-            }, 2500);
+        
+        let batteryLevel = 100;
+        let isCharging = false;
+        let wifiLevel = 4;
+        let signalLevel = 4;
 
-            let batteryLevel = 100;
-            let isCharging = false;
+        function setBattery(val) {
+            batteryLevel = parseInt(val);
+            document.getElementById('lbl-battery').innerText = batteryLevel;
+            updateBatteryIcon();
+        }
+
+        function toggleBatterySim() {
+            // הופעל/כובה בצ'קבוקס
+        }
+
+        function setSignal(val) {
+            signalLevel = parseInt(val);
+            updateSignalIcon();
+        }
+
+        function setWifi(val) {
+            wifiLevel = parseInt(val);
+            updateWifiIcon();
+        }
+
+        function updateBatteryIcon() {
             let batteryElem = document.getElementById('icon-battery');
+            batteryElem.className = 'fas';
             
-            setTimeout(() => {
-                setInterval(() => {
-                    if(isCharging) {
-                        batteryLevel += 1.5;
-                        if(batteryLevel >= 100) {
-                            batteryLevel = 100;
-                            isCharging = false;
-                        }
-                    } else {
-                        batteryLevel -= 0.12; 
-                        let chargeThreshold = Math.random() * 5 + 10;
-                        if(batteryLevel <= chargeThreshold) {
-                            isCharging = true;
-                        }
-                    }
+            // צבע: אדום אם נמוך מ-15, אחרת לבן
+            batteryElem.style.color = (batteryLevel <= 15 && !isCharging) ? 'red' : 'white';
 
-                    batteryElem.className = 'fas';
-                    if(isCharging) {
-                        batteryElem.classList.add('fa-bolt');
-                    } else if(batteryLevel > 75) {
-                        batteryElem.classList.add('fa-battery-full');
-                    } else if(batteryLevel > 50) {
-                        batteryElem.classList.add('fa-battery-three-quarters');
-                    } else if(batteryLevel > 25) {
-                        batteryElem.classList.add('fa-battery-half');
-                    } else if(batteryLevel > 10) {
-                        batteryElem.classList.add('fa-battery-quarter');
-                    } else {
-                        batteryElem.classList.add('fa-battery-empty');
-                        batteryElem.style.color = 'red';
-                    }
-                    
-                    if(!isCharging && batteryLevel > 10) batteryElem.style.color = 'white';
+            if(isCharging) {
+                batteryElem.classList.add('fa-bolt');
+            } else if(batteryLevel > 75) {
+                batteryElem.classList.add('fa-battery-full');
+            } else if(batteryLevel > 50) {
+                batteryElem.classList.add('fa-battery-three-quarters');
+            } else if(batteryLevel > 25) {
+                batteryElem.classList.add('fa-battery-half');
+            } else if(batteryLevel > 10) {
+                batteryElem.classList.add('fa-battery-quarter');
+            } else {
+                batteryElem.classList.add('fa-battery-empty');
+            }
+            
+            // עדכון הסליידר אם השתנה אוטומטית
+            document.getElementById('rng-battery').value = Math.floor(batteryLevel);
+            document.getElementById('lbl-battery').innerText = Math.floor(batteryLevel);
+        }
 
-                }, 1000);
-            }, 5000);
+        function updateSignalIcon() {
+            const signalElem = document.getElementById('icon-signal');
+            // סימולציה ויזואלית לעוצמה בעזרת שקיפות
+            // 4 = 100%, 0 = 20%
+            let opacity = 0.2 + (signalLevel * 0.2); 
+            signalElem.style.opacity = opacity;
+        }
+
+        function updateWifiIcon() {
+            const wifiElem = document.getElementById('icon-wifi');
+            let opacity = 0.2 + (wifiLevel * 0.2);
+            wifiElem.style.opacity = opacity;
+        }
+
+        function initSystemStatus() {
+            // לולאת גליצ'ים וסוללה אוטומטית
+            setInterval(() => {
+                // גליצ'ים בקליטה
+                const glitchSignal = document.getElementById('glitch-signal').checked;
+                const signalElem = document.getElementById('icon-signal');
+                if(glitchSignal) {
+                    // הבהוב אקראי
+                    signalElem.style.opacity = Math.random() > 0.7 ? 0.3 : (0.2 + signalLevel * 0.2);
+                } else {
+                    // שחזור למצב הרגיל של הסליידר
+                    signalElem.style.opacity = 0.2 + (signalLevel * 0.2);
+                }
+
+                // גליצ'ים ב-WIFI
+                const glitchWifi = document.getElementById('glitch-wifi').checked;
+                const wifiElem = document.getElementById('icon-wifi');
+                if(glitchWifi) {
+                    wifiElem.style.opacity = Math.random() > 0.7 ? 0.3 : (0.2 + wifiLevel * 0.2);
+                } else {
+                    wifiElem.style.opacity = 0.2 + (wifiLevel * 0.2);
+                }
+
+            }, 500); // בדיקת גליצ'ים מהירה
+
+            // לולאת סוללה (איטית יותר)
+            setInterval(() => {
+                if(!document.getElementById('auto-battery').checked) return;
+
+                if(isCharging) {
+                    batteryLevel += 1.5;
+                    if(batteryLevel >= 100) {
+                        batteryLevel = 100;
+                        isCharging = false;
+                    }
+                } else {
+                    batteryLevel -= 0.12; 
+                    let chargeThreshold = Math.random() * 5 + 10;
+                    if(batteryLevel <= chargeThreshold) {
+                        isCharging = true;
+                    }
+                }
+                if(batteryLevel < 0) batteryLevel = 0;
+                
+                updateBatteryIcon();
+
+            }, 1000);
         }
 
         // ==========================================
@@ -722,7 +815,7 @@
         // הפעלה ראשונית
         refreshUI();
         toggleAuto();
-        initSystemStatus(); // הפעלת מערכת סוללה וקליטה
+        initSystemStatus(); 
     </script>
 </body>
 </html>
