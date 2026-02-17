@@ -106,7 +106,39 @@
 
         /* סטטוס עליון */
         .top-status { position: absolute; top: 15px; left: 15px; right: 15px; display: flex; justify-content: space-between; font-size: 16px; font-weight: 600; text-shadow: var(--text-shadow); z-index: 50; }
-        .status-icons { display: flex; align-items: center; gap: 6px; font-size: 14px; direction: ltr;}
+        .status-icons { display: flex; align-items: center; gap: 8px; font-size: 14px; direction: ltr;}
+
+        /* עיצוב אייקוני סטטוס מותאמים אישית (קיוקווים) */
+        .signal-container {
+            display: flex;
+            align-items: flex-end;
+            gap: 2px;
+            height: 14px;
+            width: 18px;
+        }
+        .signal-bar {
+            width: 3px;
+            background-color: rgba(255,255,255,0.3); /* כבוי */
+            border-radius: 1px;
+        }
+        .signal-bar.active {
+            background-color: #fff; /* דלוק */
+        }
+        /* גבהים שונים לקליטה סלולרית */
+        .signal-bar:nth-child(1) { height: 25%; }
+        .signal-bar:nth-child(2) { height: 50%; }
+        .signal-bar:nth-child(3) { height: 75%; }
+        .signal-bar:nth-child(4) { height: 100%; }
+
+        /* עיצוב WIFI SVG */
+        .wifi-svg {
+            width: 18px;
+            height: 14px;
+            fill: rgba(255,255,255,0.3);
+        }
+        .wifi-path.active {
+            fill: #fff;
+        }
 
         /* טקסט מרכזי */
         .center-text-overlay { position: absolute; top: 40%; left: 5%; right: 5%; text-align: center; font-size: 34px; font-weight: 800; text-shadow: var(--text-shadow); line-height: 1.15; z-index: 45; pointer-events: none; transition: opacity 0.3s;}
@@ -377,8 +409,19 @@
 
             <div class="top-status" id="el-topbar">
                 <div class="status-icons">
-                    <i class="fas fa-signal" id="icon-signal"></i>
-                    <i class="fas fa-wifi" id="icon-wifi"></i>
+                    <!-- קליטה סלולרית - עמודות -->
+                    <div class="signal-container" id="icon-signal-container">
+                        <div class="signal-bar active"></div>
+                        <div class="signal-bar active"></div>
+                        <div class="signal-bar active"></div>
+                        <div class="signal-bar active"></div>
+                    </div>
+                    <!-- WIFI - קשתות -->
+                    <svg class="wifi-svg" id="icon-wifi-svg" viewBox="0 0 24 24">
+                        <path class="wifi-path active" id="wifi-1" d="M12 21.5C13.5 21.5 14.7 20.5 14.7 19C14.7 17.5 13.5 16.5 12 16.5C10.5 16.5 9.3 17.5 9.3 19C9.3 20.5 10.5 21.5 12 21.5Z" />
+                        <path class="wifi-path active" id="wifi-2" d="M18.5 14C16.8 12.3 14.5 11.3 12 11.3C9.5 11.3 7.2 12.3 5.5 14L6.9 15.4C8.2 14.1 10 13.3 12 13.3C14 13.3 15.8 14.1 17.1 15.4L18.5 14Z" />
+                        <path class="wifi-path active" id="wifi-3" d="M22 10.5C19.3 7.8 15.8 6.3 12 6.3C8.2 6.3 4.7 7.8 2 10.5L3.4 11.9C5.7 9.6 8.7 8.3 12 8.3C15.3 8.3 18.3 9.6 20.6 11.9L22 10.5Z" />
+                    </svg>
                     <i class="fas fa-battery-full" id="icon-battery"></i>
                 </div>
                 <i class="fas fa-arrow-left" style="font-size: 22px;"></i>
@@ -673,17 +716,47 @@
         }
 
         function updateSignalIcon() {
-            const signalElem = document.getElementById('icon-signal');
-            // סימולציה ויזואלית לעוצמה בעזרת שקיפות
-            // 4 = 100%, 0 = 20%
-            let opacity = 0.2 + (signalLevel * 0.2); 
-            signalElem.style.opacity = opacity;
+            const bars = document.querySelectorAll('#icon-signal-container .signal-bar');
+            bars.forEach((bar, index) => {
+                // index 0..3. signalLevel 0..4
+                // אם signalLevel=3, אז 0,1,2 דולקים.
+                if (index < signalLevel) {
+                    bar.classList.add('active');
+                } else {
+                    bar.classList.remove('active');
+                }
+            });
         }
 
         function updateWifiIcon() {
-            const wifiElem = document.getElementById('icon-wifi');
-            let opacity = 0.2 + (wifiLevel * 0.2);
-            wifiElem.style.opacity = opacity;
+            const paths = document.querySelectorAll('#icon-wifi-svg .wifi-path');
+            // path ids: wifi-1 (dot), wifi-2, wifi-3. Total 3 paths + dot maybe?
+            // בקוד ה-SVG יש 3 paths. wifi-1 זה הפנימי, wifi-3 החיצוני?
+            // בוא נבדוק ב-SVG: 
+            // wifi-1: d="... 12 21.5 ..." (תחתון/נקודה)
+            // wifi-2: אמצעי
+            // wifi-3: עליון (גדול)
+            
+            // לוגיקה: 
+            // 0 = הכל כבוי
+            // 1 = רק 1 דולק
+            // 2 = 1+2
+            // 3/4 = 1+2+3
+            
+            // מיפוי רמות לקשתות
+            let activeCount = 0;
+            if (wifiLevel >= 1) activeCount = 1;
+            if (wifiLevel >= 2) activeCount = 2;
+            if (wifiLevel >= 3) activeCount = 3;
+
+            paths.forEach((path, index) => {
+                // index 0 is wifi-1 (inner), index 2 is wifi-3 (outer)
+                if (index < activeCount) {
+                    path.classList.add('active');
+                } else {
+                    path.classList.remove('active');
+                }
+            });
         }
 
         function initSystemStatus() {
@@ -691,22 +764,35 @@
             setInterval(() => {
                 // גליצ'ים בקליטה
                 const glitchSignal = document.getElementById('glitch-signal').checked;
-                const signalElem = document.getElementById('icon-signal');
                 if(glitchSignal) {
-                    // הבהוב אקראי
-                    signalElem.style.opacity = Math.random() > 0.7 ? 0.3 : (0.2 + signalLevel * 0.2);
+                    // מדי פעם "נפילה" בקליטה
+                    const tempLevel = Math.random() > 0.7 ? Math.floor(Math.random() * 2) : signalLevel; 
+                    // מעדכן ויזואלית זמנית (בלי לשנות את הסליידר)
+                    const bars = document.querySelectorAll('#icon-signal-container .signal-bar');
+                    bars.forEach((bar, index) => {
+                        if (index < tempLevel) bar.classList.add('active');
+                        else bar.classList.remove('active');
+                    });
                 } else {
-                    // שחזור למצב הרגיל של הסליידר
-                    signalElem.style.opacity = 0.2 + (signalLevel * 0.2);
+                    updateSignalIcon(); // וידוא מצב תקין
                 }
 
                 // גליצ'ים ב-WIFI
                 const glitchWifi = document.getElementById('glitch-wifi').checked;
-                const wifiElem = document.getElementById('icon-wifi');
                 if(glitchWifi) {
-                    wifiElem.style.opacity = Math.random() > 0.7 ? 0.3 : (0.2 + wifiLevel * 0.2);
+                    const tempLevel = Math.random() > 0.7 ? Math.floor(Math.random() * 2) : wifiLevel;
+                    let activeCount = 0;
+                    if (tempLevel >= 1) activeCount = 1;
+                    if (tempLevel >= 2) activeCount = 2;
+                    if (tempLevel >= 3) activeCount = 3;
+                    
+                    const paths = document.querySelectorAll('#icon-wifi-svg .wifi-path');
+                    paths.forEach((path, index) => {
+                        if (index < activeCount) path.classList.add('active');
+                        else path.classList.remove('active');
+                    });
                 } else {
-                    wifiElem.style.opacity = 0.2 + (wifiLevel * 0.2);
+                    updateWifiIcon();
                 }
 
             }, 500); // בדיקת גליצ'ים מהירה
