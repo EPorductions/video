@@ -1,0 +1,728 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>מערכת אולפן HUD - שידור חי</title>
+    
+    <link href="https://fonts.googleapis.com/css2?family=Assistant:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <style>
+        :root {
+            --green-screen: #00FF00;
+            --text-shadow: 0px 1px 2px rgba(0,0,0,0.8), 0px 2px 8px rgba(0,0,0,0.6);
+            --icon-shadow: drop-shadow(0px 2px 4px rgba(0,0,0,0.7));
+            --brand-color: #ff0050;
+        }
+
+        body {
+            margin: 0; padding: 0; font-family: 'Assistant', sans-serif;
+            display: flex; height: 100vh; overflow: hidden; background: #1a1a1a;
+        }
+
+        /* =========================================
+           פאנל שליטה (מוסתר בשידור)
+           ========================================= */
+        #control-panel {
+            width: 460px; background: #2b2b36; height: 100vh;
+            overflow-y: auto; box-shadow: -5px 0 20px rgba(0,0,0,0.5); z-index: 100;
+            display: flex; flex-direction: column; color: #fff;
+        }
+
+        .panel-header { background: #111; padding: 20px; text-align: center; border-bottom: 2px solid var(--brand-color); }
+        .panel-header h2 { margin: 0; font-size: 22px; font-weight: 800; }
+        .panel-header p { margin: 5px 0 0 0; color: #aaa; font-size: 14px; }
+        
+        .section { padding: 15px 20px; border-bottom: 1px solid #3d3d4d; }
+        .section h3 { margin: 0 0 15px 0; font-size: 16px; color: #fff; display: flex; align-items: center; gap: 8px; }
+
+        .btn-group { display: flex; gap: 8px; margin-bottom: 10px; }
+        .btn-group button {
+            flex: 1; padding: 10px; border: 1px solid #555; background: #444; color: #fff;
+            border-radius: 4px; cursor: pointer; font-weight: bold; transition: 0.2s; font-family: 'Assistant';
+        }
+        .btn-group button.active { background: var(--brand-color); border-color: var(--brand-color); }
+        .btn-group button:hover:not(.active) { background: #555; }
+
+        .toggle-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; font-weight: 600; font-size: 14px; background: #353542; padding: 10px; border-radius: 6px; }
+        .switch { position: relative; display: inline-block; width: 40px; height: 22px; }
+        .switch input { opacity: 0; width: 0; height: 0; }
+        .slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: #555; transition: .4s; border-radius: 22px; }
+        .slider:before { position: absolute; content: ""; height: 16px; width: 16px; left: 3px; bottom: 3px; background-color: white; transition: .4s; border-radius: 50%; }
+        input:checked + .slider { background-color: #00e676; }
+        input:checked + .slider:before { transform: translateX(18px); }
+
+        .input-box { margin-bottom: 12px; }
+        .input-box label { display: block; font-size: 13px; font-weight: 700; margin-bottom: 5px; color: #bbb; }
+        .input-box input[type="text"], .input-box textarea { width: 100%; padding: 10px; border: 1px solid #555; border-radius: 4px; box-sizing: border-box; font-family: 'Assistant'; background: #1e1e24; color: #fff; }
+
+        .counter-ctrl { display: flex; align-items: center; justify-content: space-between; background: #353542; padding: 8px 10px; border-radius: 6px; margin-bottom: 8px; border: 1px solid #4d4d5d; }
+        .counter-ctrl span { font-weight: 700; font-size: 14px; width: 85px; display: flex; align-items: center; gap: 8px; }
+        .counter-actions { display: flex; gap: 4px; align-items: center;}
+        .counter-actions input { width: 65px; text-align: center; border: 1px solid #555; padding: 6px; border-radius: 4px; font-weight: bold; background: #1e1e24; color: #fff; font-family: 'Assistant';}
+        .btn-math { padding: 6px 8px; border: none; border-radius: 4px; cursor: pointer; font-weight: bold; background: #555; color: #fff; transition: 0.1s;}
+        .btn-math:hover { background: #777; }
+        .btn-math:active { transform: scale(0.95); }
+
+        .btn-action { width: 100%; padding: 12px; background: #2196F3; color: white; border: none; border-radius: 6px; font-weight: bold; cursor: pointer; margin-bottom: 10px; transition: 0.2s; font-size: 15px; display: flex; justify-content: center; align-items: center; gap: 8px; font-family: 'Assistant';}
+        .btn-action:hover { background: #1976D2; }
+        .btn-action.heart-btn { background: linear-gradient(45deg, #ff0050, #ff4081); }
+        .btn-action.heart-btn:hover { filter: brightness(1.2); }
+
+        .hotkeys { background: #1e1e24; padding: 15px; border-radius: 8px; font-size: 13px; line-height: 1.8; border: 1px solid #333; color: #aaa; }
+        .hotkeys kbd { background: #333; padding: 2px 6px; border-radius: 4px; border: 1px solid #555; font-family: monospace; font-weight: bold; color: #fff;}
+
+        /* =========================================
+           מסך ירוק (Preview)
+           ========================================= */
+        #preview-area {
+            flex: 1; display: flex; justify-content: center; align-items: center;
+            background-image: radial-gradient(#333 1px, transparent 1px); background-size: 20px 20px; overflow: auto;
+        }
+
+        #hud {
+            background-color: var(--green-screen); position: relative; overflow: hidden;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.8); color: white;
+            transition: width 0.3s, height 0.3s;
+        }
+
+        /* פורמטים */
+        .fmt-9-16 { width: 420px; height: 746px; }
+        .fmt-16-9 { width: 1280px; height: 720px; }
+        .fmt-1-1 { width: 720px; height: 720px; }
+
+        /* כיווניות */
+        .ui-hebrew .side-actions { left: 15px; }
+        /* תיקון: יישור לימין במצב עברי */
+        .ui-hebrew .bottom-info { right: 15px; text-align: right; align-items: flex-start; } 
+        .ui-hebrew .profile-row { flex-direction: row-reverse; }
+        .ui-hebrew .sound-row { flex-direction: row-reverse; }
+        
+        .ui-english .side-actions { right: 15px; }
+        .ui-english .bottom-info { left: 15px; text-align: left; align-items: flex-start; }
+        .ui-english .profile-row { flex-direction: row; }
+        .ui-english .sound-row { flex-direction: row; }
+
+        /* סטטוס עליון */
+        .top-status { position: absolute; top: 15px; left: 15px; right: 15px; display: flex; justify-content: space-between; font-size: 16px; font-weight: 600; text-shadow: var(--text-shadow); z-index: 50; }
+        .status-icons { display: flex; align-items: center; gap: 6px; font-size: 14px; direction: ltr;}
+
+        /* טקסט מרכזי */
+        .center-text-overlay { position: absolute; top: 40%; left: 5%; right: 5%; text-align: center; font-size: 34px; font-weight: 800; text-shadow: var(--text-shadow); line-height: 1.15; z-index: 45; pointer-events: none; transition: opacity 0.3s;}
+
+        /* אייקונים בצד */
+        .side-actions { position: absolute; bottom: 130px; display: flex; flex-direction: column; gap: 24px; align-items: center; z-index: 50; width: 50px; transition: 0.3s;}
+        .action-item { display: flex; flex-direction: column; align-items: center; gap: 4px; }
+        .action-item i { font-size: 34px; filter: var(--icon-shadow); transition: transform 0.1s; }
+        .action-item span { font-size: 14px; font-weight: 700; text-shadow: var(--text-shadow); }
+        .pop-anim { animation: popIcon 0.25s ease-out; }
+
+        /* מידע למטה */
+        .bottom-info { position: absolute; bottom: 25px; width: calc(100% - 90px); display: flex; flex-direction: column; gap: 6px; z-index: 50; transition: 0.3s;}
+        .profile-row { display: flex; align-items: center; gap: 8px; margin-bottom: 5px;}
+        .profile-img { width: 40px; height: 40px; border-radius: 50%; object-fit: cover; border: 1.5px solid white; box-shadow: 0 2px 5px rgba(0,0,0,0.5); }
+        .profile-name { font-size: 18px; font-weight: 800; text-shadow: var(--text-shadow); display: flex; align-items: center; gap: 6px;}
+        .verified-badge { background: #4CAF50; color: white; width: 14px; height: 14px; border-radius: 50%; display: flex; justify-content: center; align-items: center; font-size: 9px; }
+        
+        .desc-text { font-size: 16px; font-weight: 600; text-shadow: var(--text-shadow); line-height: 1.2; margin: 0; }
+        .tags-text { font-size: 15px; font-weight: 700; text-shadow: var(--text-shadow); margin: 0; }
+        
+        .sound-row { display: flex; align-items: center; gap: 8px; font-size: 14px; text-shadow: var(--text-shadow); margin-top: 5px; }
+        .sound-icon { 
+            background: #111; color: white; width: 20px; height: 20px; border-radius: 50%; 
+            display: flex; justify-content: center; align-items: center; font-size: 10px; 
+            border: 1.5px solid #fff; box-shadow: 0 2px 4px rgba(0,0,0,0.5);
+            animation: spin 4s linear infinite; /* אנימציית סיבוב */
+        }
+
+        /* אינפוגרפיקה קופצת */
+        .toast-container { position: absolute; top: -80px; left: 50%; transform: translateX(-50%); z-index: 100; transition: all 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
+        #popup-toast { background: rgba(0,0,0,0.75); backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,0.2); padding: 10px 24px; border-radius: 40px; font-size: 15px; font-weight: 700; display: flex; align-items: center; gap: 10px; box-shadow: 0 10px 20px rgba(0,0,0,0.5); white-space: nowrap;}
+        .toast-container.show { top: 70px; }
+
+        /* מערכת לבבות/אייקונים אורגנית */
+        #hearts-layer { position: absolute; bottom: 0; left: 0; width: 100%; height: 75%; pointer-events: none; z-index: 40; overflow: hidden; }
+        
+        .floating-heart, .floating-icon { 
+            position: absolute; 
+            bottom: -50px; 
+            animation: floatUp linear forwards; 
+        }
+        
+        .floating-heart { object-fit: contain; }
+        .floating-icon {
+            display: flex; justify-content: center; align-items: center;
+            font-size: 24px;
+            filter: drop-shadow(0 2px 4px rgba(0,0,0,0.5));
+        }
+
+        /* אנימציות */
+        @keyframes popIcon { 0% { transform: scale(1); } 50% { transform: scale(1.35); color: var(--brand-color); } 100% { transform: scale(1); } }
+        @keyframes floatUp {
+            0% { transform: translateY(0) scale(0.6) rotate(0deg); opacity: 0; }
+            10% { opacity: 0.95; }
+            50% { transform: translateY(-250px) scale(1.1) rotate(12deg); opacity: 0.8; }
+            100% { transform: translateY(-600px) scale(1.3) rotate(-15deg); opacity: 0; }
+        }
+        @keyframes spin { 100% { transform: rotate(360deg); } }
+    </style>
+</head>
+<body>
+
+    <div id="control-panel">
+        <div class="panel-header">
+            <h2>ניהול מתקדם לשידור לייב</h2>
+            <p>חותכים את החלק הזה ב-OBS</p>
+        </div>
+
+        <div class="section">
+            <h3><i class="fas fa-desktop"></i> פורמט ועיצוב</h3>
+            <div class="btn-group">
+                <button class="active" onclick="setFormat('fmt-9-16', this)">9:16 (אנכי)</button>
+                <button onclick="setFormat('fmt-16-9', this)">16:9 (רוחבי)</button>
+                <button onclick="setFormat('fmt-1-1', this)">1:1 (ריבוע)</button>
+            </div>
+            <div class="btn-group">
+                <button class="active" onclick="setLayout('ui-hebrew', this)">עיצוב עברי (אייקונים שמאל)</button>
+                <button onclick="setLayout('ui-english', this)">עיצוב אנגלית (אייקונים ימין)</button>
+            </div>
+        </div>
+
+        <div class="section">
+            <h3><i class="fas fa-robot"></i> אוטומציה וחיים</h3>
+            <div class="toggle-row">
+                <span>טייס אוטומטי (מונים עולים)</span>
+                <!-- השינוי כאן: הורדתי את ה-checked כדי שלא יפעל אוטומטית -->
+                <label class="switch"><input type="checkbox" id="auto-counters" onchange="toggleAuto()"><span class="slider"></span></label>
+            </div>
+            <div class="toggle-row">
+                <span>זריקת לבבות רנדומלית (עדין)</span>
+                <label class="switch"><input type="checkbox" id="auto-hearts" checked><span class="slider"></span></label>
+            </div>
+            <div class="toggle-row">
+                <span>פופ-אפים אקראיים (אינפוגרפיקה)</span>
+                <label class="switch"><input type="checkbox" id="auto-popups"><span class="slider"></span></label>
+            </div>
+        </div>
+
+        <div class="section">
+            <h3><i class="fas fa-sliders-h"></i> שליטה מספרית בזמן אמת</h3>
+            
+            <div class="counter-ctrl">
+                <span><i class="fas fa-thumbs-up"></i> לייקים</span>
+                <div class="counter-actions">
+                    <button class="btn-math" onclick="updateStat('likes', -100)">-100</button>
+                    <button class="btn-math" onclick="updateStat('likes', -1)">-</button>
+                    <input type="number" id="inp-likes" value="186000" onchange="syncStat('likes', this.value)">
+                    <button class="btn-math" onclick="updateStat('likes', 1)">+</button>
+                    <button class="btn-math" onclick="updateStat('likes', 100)">+100</button>
+                </div>
+            </div>
+            
+            <div class="counter-ctrl">
+                <span><i class="fas fa-share-nodes"></i> שיתופים</span>
+                <div class="counter-actions">
+                    <button class="btn-math" onclick="updateStat('shares', -10)">-10</button>
+                    <button class="btn-math" onclick="updateStat('shares', -1)">-</button>
+                    <input type="number" id="inp-shares" value="14000" onchange="syncStat('shares', this.value)">
+                    <button class="btn-math" onclick="updateStat('shares', 1)">+</button>
+                    <button class="btn-math" onclick="updateStat('shares', 10)">+10</button>
+                </div>
+            </div>
+
+            <div class="counter-ctrl">
+                <span><i class="fas fa-comment-dots"></i> תגובות</span>
+                <div class="counter-actions">
+                    <button class="btn-math" onclick="updateStat('comments', -5)">-5</button>
+                    <button class="btn-math" onclick="updateStat('comments', -1)">-</button>
+                    <input type="number" id="inp-comments" value="895" onchange="syncStat('comments', this.value)">
+                    <button class="btn-math" onclick="updateStat('comments', 1)">+</button>
+                    <button class="btn-math" onclick="updateStat('comments', 5)">+5</button>
+                </div>
+            </div>
+
+            <div class="counter-ctrl">
+                <span><i class="fas fa-share"></i> הפניות</span>
+                <div class="counter-actions">
+                    <button class="btn-math" onclick="updateStat('forwards', -5)">-5</button>
+                    <button class="btn-math" onclick="updateStat('forwards', -1)">-</button>
+                    <input type="number" id="inp-forwards" value="421" onchange="syncStat('forwards', this.value)">
+                    <button class="btn-math" onclick="updateStat('forwards', 1)">+</button>
+                    <button class="btn-math" onclick="updateStat('forwards', 5)">+5</button>
+                </div>
+            </div>
+
+            <div class="counter-ctrl">
+                <span><i class="fas fa-bookmark"></i> שמירות</span>
+                <div class="counter-actions">
+                    <button class="btn-math" onclick="updateStat('saves', -10)">-10</button>
+                    <button class="btn-math" onclick="updateStat('saves', -1)">-</button>
+                    <input type="number" id="inp-saves" value="16000" onchange="syncStat('saves', this.value)">
+                    <button class="btn-math" onclick="updateStat('saves', 1)">+</button>
+                    <button class="btn-math" onclick="updateStat('saves', 10)">+10</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="section">
+            <h3><i class="fas fa-bolt"></i> פעולות ואינפוגרפיקה</h3>
+            <button class="btn-action heart-btn" onclick="spawnHearts(15)"><i class="fas fa-heart"></i> שחרר מטח לבבות אדיר (Space)</button>
+            <div class="input-box" style="margin-top: 15px;">
+                <label>הודעה לאינפוגרפיקה (פופ-אפ)</label>
+                <input type="text" id="inp-toast" value="✨ איזה כיף שאתם כאן בלייב!">
+            </div>
+            <button class="btn-action" onclick="triggerToast()"><i class="fas fa-bell"></i> הקפץ אינפוגרפיקה כעת (P)</button>
+        </div>
+
+        <div class="section">
+            <h3><i class="fas fa-edit"></i> עריכת טקסטים ותוכן</h3>
+            <div class="input-box">
+                <label>העלאת תמונת פרופיל:</label>
+                <input type="file" accept="image/*" onchange="uploadImage(event)">
+            </div>
+            <div class="input-box">
+                <label>שם פרופיל:</label>
+                <input type="text" value="המשקיענית" oninput="updateHtml('out-name', this.value)">
+            </div>
+            <div class="input-box">
+                <label>טקסט ענק מרכזי (ניתן למחוק כדי להעלים):</label>
+                <textarea rows="3" oninput="updateHtml('out-center', this.value.replace(/\n/g, '<br>'))">המילה 'משפיענית'&#10;הרגיזה אותי עד שקרה&#10;מה שקרה אתמול</textarea>
+            </div>
+            <div class="input-box">
+                <label>תיאור הסרטון (שורה 1):</label>
+                <input type="text" value="השקעות בלי לשקוע! לייק שייר פולאו!" oninput="updateHtml('out-desc', this.value)">
+            </div>
+            <div class="input-box">
+                <label>האשטאגים (שורה 2):</label>
+                <input type="text" value="#כסף #קסם #השקעהבטוחהההה" oninput="updateHtml('out-tags', this.value)">
+            </div>
+            <div class="input-box">
+                <label>שם הסאונד המקורי:</label>
+                <input type="text" value="צליל מקורי - המשקיענית" oninput="updateHtml('out-sound', this.value)">
+            </div>
+        </div>
+        
+        <div class="section">
+            <h3><i class="fas fa-eye-slash"></i> כיבוי והדלקת שכבות</h3>
+            <div class="toggle-row">
+                <span>שורת סטטוס עליונה (קליטה וכו')</span>
+                <label class="switch"><input type="checkbox" checked onchange="toggleVis('el-topbar', this.checked)"><span class="slider"></span></label>
+            </div>
+            <div class="toggle-row">
+                <span>טקסט מרכזי ענק</span>
+                <!-- שינוי: טקסט מרכזי כבוי כברירת מחדל -->
+                <label class="switch"><input type="checkbox" onchange="toggleVis('out-center', this.checked)"><span class="slider"></span></label>
+            </div>
+            <div class="toggle-row">
+                <span>סרגל אייקונים בצד</span>
+                <label class="switch"><input type="checkbox" checked onchange="toggleVis('el-sidebar', this.checked)"><span class="slider"></span></label>
+            </div>
+            <div class="toggle-row">
+                <span>פרטי פרופיל למטה</span>
+                <label class="switch"><input type="checkbox" checked onchange="toggleVis('el-bottom', this.checked)"><span class="slider"></span></label>
+            </div>
+        </div>
+
+        <div class="section" style="border:none;">
+            <div class="hotkeys">
+                <div style="font-weight: bold; margin-bottom: 5px; color:#fff;"><i class="fas fa-keyboard"></i> קיצורי מקלדת בלייב (ללחוץ מחוץ לתיבות):</div>
+                <kbd>L</kbd> או <kbd>⬆</kbd> הוספת לייק + זריקת לב<br>
+                <kbd>C</kbd> הוספת תגובה<br>
+                <kbd>S</kbd> הוספת שיתוף<br>
+                <kbd>רווח</kbd> מטח לבבות ענק (עושה שמח)<br>
+                <kbd>P</kbd> הקפצת הודעת אינפוגרפיקה כעת
+            </div>
+        </div>
+    </div>
+
+    <div id="preview-area">
+        <div id="hud" class="fmt-9-16 ui-hebrew">
+            
+            <div class="toast-container" id="toast-wrapper">
+                <div id="popup-toast">
+                    <i class="fas fa-star" style="color:#ffeb3b; font-size:16px;"></i> <span id="out-toast">✨ איזה כיף שאתם כאן בלייב!</span>
+                </div>
+            </div>
+
+            <div class="top-status" id="el-topbar">
+                <div class="status-icons">
+                    <i class="fas fa-signal" id="icon-signal"></i>
+                    <i class="fas fa-wifi" id="icon-wifi"></i>
+                    <i class="fas fa-battery-full" id="icon-battery"></i>
+                </div>
+                <i class="fas fa-arrow-left" style="font-size: 22px;"></i>
+            </div>
+
+            <div class="center-text-overlay" id="out-center" style="opacity: 0;">המילה 'משפיענית'<br>הרגיזה אותי עד שקרה<br>מה שקרה אתמול</div>
+
+            <div class="side-actions" id="el-sidebar">
+                <div class="action-item" id="icon-likes">
+                    <i class="fas fa-thumbs-up"></i>
+                    <span id="out-likes">186K</span>
+                </div>
+                <div class="action-item" id="icon-shares">
+                    <i class="fas fa-share-nodes"></i>
+                    <span id="out-shares">14K</span>
+                </div>
+                <div class="action-item" id="icon-comments">
+                    <i class="fas fa-comment-dots"></i>
+                    <span id="out-comments">895</span>
+                </div>
+                <div class="action-item" id="icon-forwards">
+                    <i class="fas fa-share" style="transform: scaleX(-1);"></i>
+                    <span id="out-forwards">421</span>
+                </div>
+                <div class="action-item" id="icon-saves">
+                    <i class="fas fa-bookmark"></i>
+                    <span id="out-saves">16K</span>
+                </div>
+            </div>
+
+            <div id="hearts-layer"></div>
+
+            <div class="bottom-info" id="el-bottom">
+                <div class="profile-row">
+                    <span class="profile-name"><span id="out-name">המשקיענית</span></span>
+                    <img id="out-img" class="profile-img" src="PIC.jpg" alt="Profile">
+                </div>
+                <p class="desc-text" id="out-desc">השקעות בלי לשקוע! לייק שייר פולאו!</p>
+                <p class="tags-text" id="out-tags">#כסף #קסם #השקעהבטוחהההה</p>
+                <div class="sound-row">
+                    <span id="out-sound">צליל מקורי - המשקיענית</span>
+                    <div class="sound-icon"><i class="fas fa-music"></i></div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <script>
+        // ==========================================
+        // מונים והדפסה חכמה (למשל 186K)
+        // ==========================================
+        const stats = { likes: 186000, shares: 14000, comments: 895, forwards: 421, saves: 16000 };
+        
+        // מיפוי אייקונים לכל סוג אינטראקציה
+        const iconTypes = {
+            'likes': 'fa-thumbs-up',
+            'shares': 'fa-share-nodes',
+            'comments': 'fa-comment-dots',
+            'forwards': 'fa-share', // יתהפך ב-CSS אם צריך, או ידנית בקוד
+            'saves': 'fa-bookmark'
+        };
+
+        // מיפוי צבעים לכל סוג אינטראקציה
+        const iconColors = {
+            'likes': '#2196F3', // כחול לייק
+            'shares': '#25D366', // ירוק וואטסאפ/שיתוף
+            'comments': '#E040FB', // סגול/ורוד בולט
+            'forwards': '#00E676', // ירוק בהיר
+            'saves': '#FFD700' // זהב/צהוב
+        };
+
+        function formatNumber(num) {
+            if (num >= 1000000) return (num / 1000000).toFixed(1).replace(/\.0$/, '') + 'M';
+            if (num >= 1000) {
+                let k = num / 1000;
+                return (k % 1 === 0 ? k : k.toFixed(1)) + 'K';
+            }
+            return num.toString();
+        }
+
+        function refreshUI() {
+            for(let key in stats) {
+                document.getElementById('out-' + key).innerText = formatNumber(stats[key]);
+                document.getElementById('inp-' + key).value = stats[key];
+            }
+        }
+
+        function updateStat(key, amount) {
+            stats[key] += amount;
+            if (stats[key] < 0) stats[key] = 0;
+            refreshUI();
+            
+            // טריגר לאנימציה בהתאם לסוג הפעולה
+            if(amount > 0) {
+                // שיגור אייקון מתאים לפעולה (לדוגמה: אייקון שיתוף לשיתוף, לייק ללייק)
+                spawnSpecificIcon(key, 1);
+            }
+        }
+
+        function syncStat(key, value) {
+            stats[key] = parseInt(value) || 0;
+            refreshUI();
+        }
+
+        // ==========================================
+        // ניהול טקסטים, תמונות ותצוגה
+        // ==========================================
+        function updateHtml(id, val) { document.getElementById(id).innerHTML = val; }
+
+        function setFormat(fmt, btn) {
+            let hud = document.getElementById('hud');
+            hud.classList.remove('fmt-9-16', 'fmt-16-9', 'fmt-1-1');
+            hud.classList.add(fmt);
+            btn.parentElement.querySelectorAll('button').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+        }
+
+        function setLayout(layout, btn) {
+            let hud = document.getElementById('hud');
+            hud.classList.remove('ui-hebrew', 'ui-english');
+            hud.classList.add(layout);
+            btn.parentElement.querySelectorAll('button').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+        }
+
+        function toggleVis(id, show) {
+            const el = document.getElementById(id);
+            if (el) el.style.opacity = show ? '1' : '0';
+        }
+
+        function uploadImage(event) {
+            const file = event.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = e => document.getElementById('out-img').src = e.target.result;
+                reader.readAsDataURL(file);
+            }
+        }
+
+        // ==========================================
+        // מערכת לבבות ואייקונים צפים
+        // ==========================================
+        
+        function spawnHearts(amount) {
+            const layer = document.getElementById('hearts-layer');
+            const isHebrew = document.getElementById('hud').classList.contains('ui-hebrew');
+            
+            for(let i=0; i<amount; i++) {
+                setTimeout(() => {
+                    const h = document.createElement('img');
+                    h.src = 'heart.png';
+                    h.className = 'floating-heart';
+                    
+                    const size = Math.random() * 30 + 15;
+                    h.style.width = size + 'px';
+                    h.style.height = size + 'px';
+                    
+                    const hue = Math.floor(Math.random() * 80) - 40;
+                    h.style.filter = `hue-rotate(${hue}deg) brightness(1.1)`;
+
+                    let baseX = isHebrew ? 10 : 85;
+                    h.style.left = (baseX + (Math.random() * 15 - 7.5)) + '%';
+                    
+                    const duration = Math.random() * 2.5 + 2.5;
+                    h.style.animationDuration = duration + 's';
+                    
+                    layer.appendChild(h);
+                    setTimeout(() => h.remove(), duration * 1000);
+                }, i * 150 + Math.random() * 50);
+            }
+        }
+
+        // פונקציה חדשה לשיגור אייקונים (לא לבבות)
+        function spawnSpecificIcon(key, amount) {
+            const layer = document.getElementById('hearts-layer');
+            const isHebrew = document.getElementById('hud').classList.contains('ui-hebrew');
+            const iconClass = iconTypes[key];
+            const color = iconColors[key];
+
+            if(!iconClass) return;
+
+            for(let i=0; i<amount; i++) {
+                setTimeout(() => {
+                    const div = document.createElement('div');
+                    div.className = 'floating-icon';
+                    
+                    // יצירת אלמנט האייקון
+                    const icon = document.createElement('i');
+                    icon.className = `fas ${iconClass}`;
+                    
+                    // צבע ספציפי לכל סוג
+                    div.style.color = color || '#fff';
+                    
+                    // טיפול מיוחד באייקון 'forwards' שצריך להיות הפוך
+                    if(key === 'forwards') {
+                        icon.style.transform = 'scaleX(-1)';
+                    }
+
+                    div.appendChild(icon);
+                    
+                    // גודל
+                    const size = Math.random() * 10 + 20; // 20px-30px
+                    div.style.fontSize = size + 'px';
+
+                    // מיקום
+                    let baseX = isHebrew ? 10 : 85;
+                    div.style.left = (baseX + (Math.random() * 15 - 7.5)) + '%';
+                    
+                    // אנימציה
+                    const duration = Math.random() * 2.5 + 2.5;
+                    div.style.animationDuration = duration + 's';
+                    
+                    layer.appendChild(div);
+                    setTimeout(() => div.remove(), duration * 1000);
+                }, i * 200);
+            }
+        }
+
+        // ==========================================
+        // פופ-אפים (אינפוגרפיקה)
+        // ==========================================
+        let toastTimer;
+        const randomMessages = [
+            "👍 תודה רבה על הלייקים!",
+            "🔥 השידור זינק בפור-יו!",
+            "👋 עוקב חדש הרגע הצטרף",
+            "💬 ספרו לי בתגובות מה דעתכם"
+        ];
+
+        function triggerToast(autoText = null) {
+            const toastWrapper = document.getElementById('toast-wrapper');
+            document.getElementById('out-toast').innerText = autoText ? autoText : document.getElementById('inp-toast').value;
+            
+            toastWrapper.classList.add('show');
+            clearTimeout(toastTimer);
+            toastTimer = setTimeout(() => { toastWrapper.classList.remove('show'); }, 4500);
+        }
+
+        // ==========================================
+        // לוגיקה לסוללה וקליטה (אוטומטי)
+        // ==========================================
+        function initSystemStatus() {
+            setInterval(() => {
+                const wifi = document.getElementById('icon-wifi');
+                const signal = document.getElementById('icon-signal');
+                
+                if(wifi) wifi.style.opacity = Math.random() > 0.7 ? (Math.random() * 0.5 + 0.5) : 1;
+                if(signal) signal.style.opacity = Math.random() > 0.8 ? (Math.random() * 0.5 + 0.5) : 1;
+            }, 2500);
+
+            let batteryLevel = 100;
+            let isCharging = false;
+            let batteryElem = document.getElementById('icon-battery');
+            
+            setTimeout(() => {
+                setInterval(() => {
+                    if(isCharging) {
+                        batteryLevel += 1.5;
+                        if(batteryLevel >= 100) {
+                            batteryLevel = 100;
+                            isCharging = false;
+                        }
+                    } else {
+                        batteryLevel -= 0.12; 
+                        let chargeThreshold = Math.random() * 5 + 10;
+                        if(batteryLevel <= chargeThreshold) {
+                            isCharging = true;
+                        }
+                    }
+
+                    batteryElem.className = 'fas';
+                    if(isCharging) {
+                        batteryElem.classList.add('fa-bolt');
+                    } else if(batteryLevel > 75) {
+                        batteryElem.classList.add('fa-battery-full');
+                    } else if(batteryLevel > 50) {
+                        batteryElem.classList.add('fa-battery-three-quarters');
+                    } else if(batteryLevel > 25) {
+                        batteryElem.classList.add('fa-battery-half');
+                    } else if(batteryLevel > 10) {
+                        batteryElem.classList.add('fa-battery-quarter');
+                    } else {
+                        batteryElem.classList.add('fa-battery-empty');
+                        batteryElem.style.color = 'red';
+                    }
+                    
+                    if(!isCharging && batteryLevel > 10) batteryElem.style.color = 'white';
+
+                }, 1000);
+            }, 5000);
+        }
+
+        // ==========================================
+        // אוטומציות (Auto-Pilot)
+        // ==========================================
+        let autoTimers = []; 
+
+        function toggleAuto() {
+            autoTimers.forEach(clearTimeout);
+            autoTimers = [];
+            
+            if(!document.getElementById('auto-counters').checked && !document.getElementById('auto-hearts').checked) return;
+
+            const scheduleNext = (type, minTime, maxTime, action) => {
+                const delay = Math.random() * (maxTime - minTime) + minTime;
+                const timer = setTimeout(() => {
+                    action();
+                    if(document.getElementById('auto-counters').checked) {
+                        scheduleNext(type, minTime, maxTime, action);
+                    }
+                }, delay);
+                autoTimers.push(timer);
+            };
+
+            if(document.getElementById('auto-counters').checked) {
+                scheduleNext('likes', 500, 2500, () => updateStat('likes', Math.floor(Math.random() * 10) + 1));
+                scheduleNext('comments', 3000, 12000, () => updateStat('comments', 1));
+                scheduleNext('shares', 5000, 15000, () => updateStat('shares', 1));
+            }
+            
+             if(document.getElementById('auto-hearts').checked) {
+                const scheduleHearts = () => {
+                    const delay = Math.random() * 2000 + 1500; 
+                    const timer = setTimeout(() => {
+                        if(document.getElementById('auto-hearts').checked) {
+                             spawnHearts(1); 
+                             scheduleHearts();
+                        }
+                    }, delay);
+                    autoTimers.push(timer);
+                };
+                scheduleHearts();
+            }
+
+             if(document.getElementById('auto-popups').checked) {
+                const schedulePopup = () => {
+                     const delay = Math.random() * 40000 + 20000; 
+                     const timer = setTimeout(() => {
+                        if(document.getElementById('auto-popups').checked) {
+                             triggerToast(randomMessages[Math.floor(Math.random() * randomMessages.length)]);
+                             schedulePopup();
+                        }
+                     }, delay);
+                     autoTimers.push(timer);
+                };
+                schedulePopup();
+            }
+        }
+
+        // ==========================================
+        // קיצורי מקלדת
+        // ==========================================
+        document.addEventListener('keydown', (e) => {
+            if(e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
+
+            switch(e.code) {
+                case 'KeyL': 
+                case 'ArrowUp': updateStat('likes', Math.floor(Math.random() * 15) + 5); break;
+                case 'KeyC': updateStat('comments', 1); break;
+                case 'KeyS': updateStat('shares', 1); break;
+                case 'KeyP': triggerToast(); break;
+                case 'Space': 
+                    e.preventDefault(); 
+                    spawnHearts(15); 
+                    updateStat('likes', 100);
+                    break;
+            }
+        });
+
+        // הפעלה ראשונית
+        refreshUI();
+        toggleAuto();
+        initSystemStatus(); // הפעלת מערכת סוללה וקליטה
+    </script>
+</body>
+</html>
